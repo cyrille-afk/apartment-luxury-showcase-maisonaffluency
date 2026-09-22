@@ -17,8 +17,9 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
 } from "lucide-react";
+import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +45,6 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
@@ -1360,6 +1360,14 @@ const TradeProductPage: React.FC = () => {
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const curatorNotes = buildProductCuratorNotes({
+    title: product.title,
+    brandName: designerDisplay,
+    description: product.description,
+    dimensions: product.dimensions,
+    category: product.category,
+    subcategory: product.subcategory,
+  });
 
   const compareItem: CompareItem = {
     pick: {
@@ -1677,12 +1685,19 @@ const TradeProductPage: React.FC = () => {
     { sizeVariants: variantsList, isDualAxis },
   );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
+  // Catalogue rate on the product itself. Many pieces carry finish options that
+  // do not change the price (every variant is price_cents = 0) — those must
+  // still show the catalogue rate rather than "Price upon Request".
+  const catalogueRrpCents = (pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null) || null;
+  const variantsCarryNoPrice = hasVariants && minVariantCents == null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant
-      ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
-      : (dualSelectionUnpriced ? null : (partialDualMinCents ?? minVariantCents)))
-    : pricing?.rrp_price_cents ?? null;
-  const isFromPrice = hasVariants && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
+    ? (variantsCarryNoPrice
+      ? catalogueRrpCents
+      : (activeVariant
+        ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : catalogueRrpCents)
+        : (dualSelectionUnpriced ? catalogueRrpCents : (partialDualMinCents ?? minVariantCents))))
+    : catalogueRrpCents;
+  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
@@ -1920,11 +1935,8 @@ const TradeProductPage: React.FC = () => {
               }
               overlay={
                 <div className="flex items-center gap-2">
-                  {product.description && (
-                    <div className="hidden md:block">
-                      <LightboxDescriptionDropdown description={product.description} />
-                    </div>
-                  )}
+                  {/* Description now reads as Curator Notes below the gallery,
+                      matching the public product page. */}
                   <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
                     <AddToProjectPopover
                       productId={favoriteId}
@@ -2046,6 +2058,27 @@ const TradeProductPage: React.FC = () => {
                 </details>
               );
             })()}
+
+            <section aria-label="Curator notes" className="hidden md:block mt-10 border-t border-border/50 pt-8">
+              <h2 className="mb-6 font-display text-2xl italic text-foreground">Curator Notes</h2>
+              <div className="flex flex-col space-y-6">
+                {[
+                  { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                ].map(({ label, text, Icon }) => (
+                  <article key={label} className="group flex w-full flex-col gap-3 pb-6 last:pb-0">
+                    <div className="flex items-center justify-start gap-2">
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
+                      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">{label}</h3>
+                    </div>
+                    <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
+                      {text}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </section>
           </div>
 
           <div className="relative flex flex-col gap-4">
