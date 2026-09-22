@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
-import ContactNameInput from "@/components/trade/ContactNameInput";
+import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -379,10 +379,17 @@ const TradeAdminAcquisitions = () => {
     );
   };
 
-  // Editable principal contact name: reflect the write in the cached rows.
-  const applyContact = (id: string, next: string | null) => {
+  // Editable recipients: reflect name/email writes in the cached rows.
+  const applyContact = (
+    id: string,
+    next: { founderName: string | null; executiveEmails: string[] },
+  ) => {
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
-      (prev ?? []).map((r) => (r.id === id ? { ...r, founder_name: next } : r)),
+      (prev ?? []).map((r) =>
+        r.id === id
+          ? { ...r, founder_name: next.founderName, executive_emails: next.executiveEmails }
+          : r,
+      ),
     );
   };
 
@@ -774,26 +781,21 @@ const TradeAdminAcquisitions = () => {
                     )}
                   </td>
                   <td className="px-5 py-6">
-                    <ContactNameInput
+                    <LeadContactsEditor
                       leadId={lead.id}
                       studioName={lead.studio_name}
-                      value={lead.founder_name}
+                      founderName={lead.founder_name}
+                      executiveEmails={lead.executive_emails}
                       onChange={(next) => applyContact(lead.id, next)}
                     />
-                    {(lead.executive_emails ?? []).length > 0 ? (
-                      <div className="mt-0.5 space-y-0.5">
-                        {(lead.executive_emails ?? []).map((email) => (
-                          <div key={email} className="text-[12px] text-foreground">
-                            {email}
-                          </div>
-                        ))}
-                        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                          Executive-vetted
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-[12px] text-muted-foreground">{lead.business_email}</div>
-                    )}
+                    <div className="mt-1 text-[11px] text-muted-foreground">
+                      {(lead.executive_emails ?? []).length > 0
+                        ? "Studio line: "
+                        : "Sends to: "}
+                      {lead.business_email}
+                      {(lead.executive_emails ?? []).length > 0 &&
+                        " (used only when no recipients above)"}
+                    </div>
                   </td>
                   <td className="px-5 py-6">
                     {vector === "instagram" ? (
