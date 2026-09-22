@@ -363,44 +363,27 @@ export default function ProductCommerceCta({
     window.dispatchEvent(new CustomEvent("ma:open-finishes"));
     const el = document.getElementById("finish-selectors");
     if (el) {
-      // On mobile the gallery is pinned (sticky) above the scrolling content,
-      // so the anchor can land hidden beneath it. Re-probe after the scroll
-      // and expansion settle, nudging the container until the anchor's top is
-      // genuinely visible (or we run out of attempts).
-      const settle = (attemptsLeft: number) => {
-        const r = el.getBoundingClientRect();
-        if (r.height === 0 || r.top < 0) return;
-        const probe = document.elementFromPoint(
-          r.left + r.width / 2,
-          Math.min(r.top + 6, window.innerHeight - 1),
-        );
-        if (!probe || el.contains(probe)) return; // already visible
-        // Climb to the outermost pinned (sticky/fixed) overlay — the probe
-        // may be an inner image whose box is smaller than its container.
-        let cover: Element = probe;
-        let node: Element | null = probe;
-        while (node) {
-          const pos = window.getComputedStyle(node).position;
-          if (pos === "sticky" || pos === "fixed") cover = node;
-          node = node.parentElement;
+      const scrollTargetIntoView = () => {
+        const scroller = el.closest<HTMLElement>(".product-page-scroll");
+        if (scroller && window.getComputedStyle(scroller).overflowY !== "visible") {
+          const targetTop =
+            scroller.scrollTop +
+            el.getBoundingClientRect().top -
+            scroller.getBoundingClientRect().top -
+            16;
+          scroller.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+          return;
         }
-        const coverBottom = cover.getBoundingClientRect().bottom;
-        if (coverBottom <= r.top || attemptsLeft <= 0) return;
-        const scroller =
-          el.closest<HTMLElement>(".product-page-scroll") ??
-          document.scrollingElement;
-        // The anchor must move DOWN in the viewport (below the pinned
-        // gallery), i.e. scroll the container back up by the overlap.
-        scroller?.scrollBy({
-          top: -(coverBottom - r.top + 12),
-          behavior: "smooth",
-        });
-        window.setTimeout(() => settle(attemptsLeft - 1), 450);
-      };
-      window.setTimeout(() => {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
-        window.setTimeout(() => settle(3), 650);
-      }, 60);
+      };
+
+      // Opening the selector changes its height. Scroll the actual mobile
+      // product container after that layout change, then correct once more
+      // after the transition settles.
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(scrollTargetIntoView);
+      });
+      window.setTimeout(scrollTargetIntoView, 380);
       return;
     }
     // Fallback: first swatch control anywhere on the page.
