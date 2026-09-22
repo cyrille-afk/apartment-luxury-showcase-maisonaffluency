@@ -68,11 +68,11 @@ export async function verifySvixSignature(args: {
   if (Math.abs(nowSec - ts) > TOLERANCE_SECONDS) return { ok: false, reason: "timestamp_out_of_tolerance" };
 
   const secretBody = secret.startsWith("whsec_") ? secret.slice("whsec_".length) : secret;
-  let keyBytes: Uint8Array;
+  let keyBytes: ArrayBuffer;
   try {
     keyBytes = base64ToBytes(secretBody);
   } catch {
-    keyBytes = new TextEncoder().encode(secretBody);
+    keyBytes = utf8(secretBody);
   }
 
   const key = await crypto.subtle.importKey(
@@ -82,11 +82,7 @@ export async function verifySvixSignature(args: {
     false,
     ["sign"],
   );
-  const signed = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(`${id}.${timestamp}.${rawBody}`),
-  );
+  const signed = await crypto.subtle.sign("HMAC", key, utf8(`${id}.${timestamp}.${rawBody}`));
   const expected = bytesToBase64(signed);
 
   const provided = signature
