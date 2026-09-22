@@ -820,7 +820,7 @@ const DesignersHoverHero = () => {
     if (amount < 5) return;
 
     let timer: number | null = null;
-    let controls: { stop: () => void } | null = null;
+    let controls: ReturnType<typeof animate> | null = null;
     const cancel = () => {
       if (timer) window.clearTimeout(timer);
       controls?.stop();
