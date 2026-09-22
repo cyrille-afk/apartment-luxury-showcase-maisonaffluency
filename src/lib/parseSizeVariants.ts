@@ -265,8 +265,12 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
       )
     : [];
 
+  // Base-only products already carry an explicit finish axis (`base`), so the
+  // label is a pure size ("L 210 cm x l 90 cm x H 75 cm"). Splitting it would
+  // invent a bogus "Select Your Finish" dropdown filled with dimension
+  // remainders, so single-axis parsing is reserved for label-only products.
   const singleAxisParsed: ParsedSingleAxis[] =
-    !isDualAxis && hasVariants
+    !isDualAxis && !isBaseOnly && hasVariants
       ? variants.map((v) => ({ ...parseSingleAxisLabel(v.label || ""), variant: v }))
       : [];
   const minPriceForSingle = (field: "size" | "material") => (val: string) => {
