@@ -804,13 +804,18 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (!isMobileOrPwa || typeof window === "undefined") return;
 
+    // Only skip when the hint has actually completed once. Marking it played
+    // up-front made React's double-invoked effects (dev/preview StrictMode)
+    // swallow the animation entirely: the first pass set the flag, the cleanup
+    // cancelled the timer, and the second pass bailed out.
     if (entryHintPlayedRef.current) return;
-    entryHintPlayedRef.current = true;
 
+    let cancelled = false;
     let timer: number | null = null;
     let controls: ReturnType<typeof animate> | null = null;
     let attempts = 0;
     const cancel = () => {
+      cancelled = true;
       if (timer) window.clearTimeout(timer);
       controls?.stop();
       if (navRef.current) navRef.current.style.transform = "";
@@ -822,6 +827,7 @@ const DesignersHoverHero = () => {
     window.addEventListener("pointerdown", cancel, { passive: true });
 
     const start = () => {
+      if (cancelled) return;
       const list = navRef.current;
       if (!list) {
         attempts += 1;
@@ -833,6 +839,10 @@ const DesignersHoverHero = () => {
         duration: 1,
         times: [0, 0.35, 0.55, 1],
         ease: ["easeOut", "linear", "backOut"],
+        onComplete: () => {
+          entryHintPlayedRef.current = true;
+          if (navRef.current) navRef.current.style.transform = "";
+        },
       });
     };
 
@@ -840,6 +850,7 @@ const DesignersHoverHero = () => {
 
     return () => cancel();
   }, [isMobileOrPwa]);
+
 
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
