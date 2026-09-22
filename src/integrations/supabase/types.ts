@@ -68,6 +68,59 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_inbound_events: {
+        Row: {
+          action: string | null
+          created_at: string
+          error: string | null
+          event_type: string
+          from_email: string | null
+          id: string
+          intent: string | null
+          lead_id: string | null
+          provider_event_id: string
+          provider_message_id: string | null
+          subject: string | null
+          to_email: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string
+          error?: string | null
+          event_type: string
+          from_email?: string | null
+          id?: string
+          intent?: string | null
+          lead_id?: string | null
+          provider_event_id: string
+          provider_message_id?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string
+          error?: string | null
+          event_type?: string
+          from_email?: string | null
+          id?: string
+          intent?: string | null
+          lead_id?: string | null
+          provider_event_id?: string
+          provider_message_id?: string | null
+          subject?: string | null
+          to_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_inbound_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_leads: {
         Row: {
           aesthetic_profile: string | null
@@ -88,7 +141,14 @@ export type Database = {
           instagram_handle: string | null
           last_ingested_at: string | null
           linkedin_url: string | null
+          outbound_recipients: string[]
+          portal_activated_at: string | null
+          portal_key_sent_at: string | null
           predicted_designer_matches: string[]
+          reply_intent: string | null
+          reply_received_at: string | null
+          reply_sender_email: string | null
+          reply_thread_message_id: string | null
           source_index: string | null
           studio_name: string
           tagged_designer: string | null
@@ -114,7 +174,14 @@ export type Database = {
           instagram_handle?: string | null
           last_ingested_at?: string | null
           linkedin_url?: string | null
+          outbound_recipients?: string[]
+          portal_activated_at?: string | null
+          portal_key_sent_at?: string | null
           predicted_designer_matches?: string[]
+          reply_intent?: string | null
+          reply_received_at?: string | null
+          reply_sender_email?: string | null
+          reply_thread_message_id?: string | null
           source_index?: string | null
           studio_name: string
           tagged_designer?: string | null
@@ -140,7 +207,14 @@ export type Database = {
           instagram_handle?: string | null
           last_ingested_at?: string | null
           linkedin_url?: string | null
+          outbound_recipients?: string[]
+          portal_activated_at?: string | null
+          portal_key_sent_at?: string | null
           predicted_designer_matches?: string[]
+          reply_intent?: string | null
+          reply_received_at?: string | null
+          reply_sender_email?: string | null
+          reply_thread_message_id?: string | null
           source_index?: string | null
           studio_name?: string
           tagged_designer?: string | null
@@ -10360,6 +10434,10 @@ export type Database = {
       }
       can_view_studio: {
         Args: { _studio_id: string; _user_id: string }
+        Returns: boolean
+      }
+      claim_acquisition_reply: {
+        Args: { _lead_id: string; _sender: string; _thread_message_id: string }
         Returns: boolean
       }
       claim_prospect_enrichment: {

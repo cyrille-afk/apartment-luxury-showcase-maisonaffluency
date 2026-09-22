@@ -291,6 +291,10 @@ serve(async (req) => {
             campaign_status: "outbound_sent",
             email_sent_at: new Date().toISOString(),
             email_error: null,
+            // Recorded so an inbound reply can be attributed to this studio.
+            outbound_recipients: Array.from(
+              new Set(outcome.queued.map((e) => e.trim().toLowerCase()).filter(Boolean)),
+            ),
           })
           .eq("id", row.id);
       }

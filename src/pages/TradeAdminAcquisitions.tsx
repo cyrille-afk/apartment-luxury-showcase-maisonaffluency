@@ -5,13 +5,14 @@
  * tailored outbound sequence. Admin-only — RLS is the real control, the
  * guard below is convenience.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,6 +39,9 @@ type Lead = {
   city: string | null;
   instagram_handle: string | null;
   executive_emails: string[] | null;
+  reply_received_at: string | null;
+  reply_intent: string | null;
+  portal_key_sent_at: string | null;
 };
 
 const DEFAULT_COUNTRY = "Singapore";
@@ -52,6 +56,20 @@ const statusBadge = (lead: Lead) => {
   const status = lead.campaign_status;
   const error = lead.email_error;
 
+  if (status === "portal_activated") {
+    return {
+      label: "Portal Activated",
+      className:
+        "rounded-none border-emerald-500/50 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/15",
+    };
+  }
+  if (status === "replied_interested") {
+    return {
+      label: "Replied · Interested",
+      className:
+        "rounded-none border-sky-500/50 bg-sky-500/15 text-sky-600 hover:bg-sky-500/15",
+    };
+  }
   if (status === "activated") {
     return {
       label: "Activated",
@@ -209,6 +227,9 @@ const TradeAdminAcquisitions = () => {
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
+  // Rows whose automated portal key just landed — briefly pulsed in the grid.
+  const [justActivated, setJustActivated] = useState<Set<string>>(new Set());
+  const statusRef = useRef<Map<string, string>>(new Map());
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["acquisition-leads", "enriched"],
@@ -218,15 +239,67 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at",
         )
-        .in("campaign_status", ["unprocessed", "enriched", "activated", "sent", "outbound_sent"])
+        .in("campaign_status", [
+          "unprocessed",
+          "enriched",
+          "activated",
+          "sent",
+          "outbound_sent",
+          "replied_interested",
+          "portal_activated",
+        ])
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
       return (data ?? []) as unknown as Lead[];
     },
   });
+
+  // Live reply handling: the inbound webhook writes straight to the table, so
+  // the grid reflects a reply and its automated key delivery without polling.
+  useRealtimeTables(
+    "acquisition_leads",
+    (event) => {
+      if (event.eventType === "DELETE") return;
+      const row = event.new as Lead | null;
+      if (!row?.id) return;
+      queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) => {
+        if (!prev) return prev;
+        const exists = prev.some((r) => r.id === row.id);
+        return exists ? prev.map((r) => (r.id === row.id ? { ...r, ...row } : r)) : [row, ...prev];
+      });
+
+      const previous = statusRef.current.get(row.id);
+      statusRef.current.set(row.id, row.campaign_status);
+      if (previous && previous !== row.campaign_status) {
+        if (row.campaign_status === "replied_interested") {
+          toast.success(`${row.studio_name} replied — interested.`);
+        }
+        if (row.campaign_status === "portal_activated") {
+          toast.success(`${row.studio_name} activated — portal key delivered.`);
+          setJustActivated((prev) => new Set(prev).add(row.id));
+          setTimeout(
+            () =>
+              setJustActivated((prev) => {
+                const next = new Set(prev);
+                next.delete(row.id);
+                return next;
+              }),
+            20_000,
+          );
+        }
+      }
+    },
+    enabled,
+  );
+
+  useEffect(() => {
+    for (const row of rows) {
+      if (!statusRef.current.has(row.id)) statusRef.current.set(row.id, row.campaign_status);
+    }
+  }, [rows]);
 
   // Geographic model: country → cities, derived from live rows. Rows without
   // geography are grouped under "Unassigned" so nothing is hidden silently.
@@ -755,13 +828,24 @@ const TradeAdminAcquisitions = () => {
                   <td className="px-5 py-6">
                     {(() => {
                       const badge = statusBadge(lead);
+                      const pulsing = justActivated.has(lead.id);
                       return (
-                        <Badge
-                          variant="outline"
-                          className={`${badge.className} text-[10px] uppercase tracking-[0.18em]`}
-                        >
-                          {badge.label}
-                        </Badge>
+                        <span className="inline-flex items-center gap-2">
+                          {pulsing && (
+                            <span
+                              className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <Badge
+                            variant="outline"
+                            className={`${badge.className} text-[10px] uppercase tracking-[0.18em] ${
+                              pulsing ? "animate-pulse" : ""
+                            }`}
+                          >
+                            {badge.label}
+                          </Badge>
+                        </span>
                       );
                     })()}
                     <div className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
@@ -769,6 +853,14 @@ const TradeAdminAcquisitions = () => {
                       <div>Added {fmtDate(lead.created_at)}</div>
                       {lead.verified_at && <div>Verified {fmtDate(lead.verified_at)}</div>}
                       {lead.email_sent_at && <div>Sent {fmtDate(lead.email_sent_at)}</div>}
+                      {lead.reply_received_at && (
+                        <div className="text-sky-600">Replied {fmtDate(lead.reply_received_at)}</div>
+                      )}
+                      {lead.portal_key_sent_at && (
+                        <div className="text-emerald-600">
+                          Portal key sent {fmtDate(lead.portal_key_sent_at)}
+                        </div>
+                      )}
                       {lead.email_error && (
                         <div className="text-destructive">Last error: {lead.email_error}</div>
                       )}

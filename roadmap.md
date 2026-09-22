@@ -105,3 +105,4 @@
 ## FF&E view presets (done)
 - TradeFFESchedule.tsx: View Presets dropdown next to Columns — Standard/Financial/Logistics defaults, per-custom-preset delete, "+ Save Current Layout as Preset" name input, presets persisted in localStorage (ffe-schedule-view-presets-v1), applying a preset writes the same hidden-columns key so reloads keep the layout. Verified live: preset switching, save, reload persistence, no overflow.
 - GitHub sync needed.
+- [x] Automated inbound reply handling: Resend inbound webhook, deterministic "yes" detection, one-time portal key email, live Acquisitions status badges (pending Resend inbound webhook secret + provider setup)
