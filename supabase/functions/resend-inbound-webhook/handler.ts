@@ -317,7 +317,7 @@ export function createInboundHandler(deps: InboundDeps) {
     const outcome = await deps.sendEmail(
       {
         to: recipient,
-        subject,
+        subject: keySubject,
         html: renderKeyEmail(lead, portalUrl),
         label: "acquisition-portal-key",
         idempotencyKey: testActive
