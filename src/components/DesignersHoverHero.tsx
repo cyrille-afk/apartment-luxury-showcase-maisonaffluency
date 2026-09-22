@@ -796,61 +796,47 @@ const DesignersHoverHero = () => {
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
 
-  // Mobile entry hint: once per session, nudge the scrollable list down then
-  // bounce back so users discover the directory is scrollable. Cancels on touch.
+  // Mobile entry hint: visually lift the actual list, then bounce it home.
+  // The mobile-browser hero has no scroll range, so scrollTop cannot provide
+  // this cue there. A temporary transform works in both browser and PWA modes
+  // without changing the list's real scroll position or touch behavior.
   useEffect(() => {
-    if (!isMobileOrPwa || !contentScrollRef.current || typeof window === "undefined") return;
+    if (!isMobileOrPwa || typeof window === "undefined") return;
 
     const HINT_KEY = "ma:designers-hero-entry-hint";
     if (sessionStorage.getItem(HINT_KEY) === "done") return;
 
-    const el = contentScrollRef.current;
-    const elOverflowY = getComputedStyle(el).overflowY;
-    const elScrollable =
-      (elOverflowY === "auto" || elOverflowY === "scroll") &&
-      el.scrollHeight > el.clientHeight;
-    const isWindow = !elScrollable;
-    const maxScroll = isWindow
-      ? document.documentElement.scrollHeight - window.innerHeight
-      : el.scrollHeight - el.clientHeight;
-    const get = () => (isWindow ? window.scrollY : el.scrollTop);
-    const set = (v: number) => {
-      if (isWindow) window.scrollTo({ top: v, behavior: "instant" });
-      else el.scrollTop = v;
-    };
-
-    const current = get();
-    const amount = Math.min(40, Math.max(0, maxScroll - current));
-    if (amount < 5) return;
-
     let timer: number | null = null;
     let controls: ReturnType<typeof animate> | null = null;
+    let attempts = 0;
     const cancel = () => {
       if (timer) window.clearTimeout(timer);
       controls?.stop();
+      if (navRef.current) navRef.current.style.transform = "";
       window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("pointerdown", cancel);
     };
 
     window.addEventListener("touchstart", cancel, { passive: true });
+    window.addEventListener("pointerdown", cancel, { passive: true });
 
-    timer = window.setTimeout(() => {
+    const start = () => {
+      const list = navRef.current;
+      if (!list) {
+        attempts += 1;
+        if (attempts < 30) timer = window.setTimeout(start, 100);
+        return;
+      }
+
       sessionStorage.setItem(HINT_KEY, "done");
-      const peak = current + amount;
-      controls = animate(current, peak, {
-        duration: 0.35,
-        ease: "easeOut",
-        onUpdate: set,
+      controls = animate(list, { y: [0, -40, -40, 0] }, {
+        duration: 1,
+        times: [0, 0.35, 0.55, 1],
+        ease: ["easeOut", "linear", "backOut"],
       });
-      controls.then(() => {
-        timer = window.setTimeout(() => {
-          controls = animate(peak, current, {
-            duration: 0.45,
-            ease: "backOut",
-            onUpdate: set,
-          });
-        }, 200);
-      });
-    }, 500);
+    };
+
+    timer = window.setTimeout(start, 500);
 
     return () => cancel();
   }, [isMobileOrPwa]);
