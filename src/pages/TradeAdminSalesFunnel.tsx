@@ -289,7 +289,7 @@ const TradeAdminSalesFunnel = () => {
                         <Mail className="h-3 w-3" aria-hidden="true" /> Emails Sent: {acquisitionMetrics.totalEmailsSent}
                       </span>
                       <span className="inline-flex items-center gap-1.5 border border-border bg-card px-2 py-1 font-body text-[10px] text-muted-foreground">
-                        <Instagram className="h-3 w-3 text-pink-500/70" aria-hidden="true" /> DMs Copied: {acquisitionMetrics.totalDMsSent}
+                        <Instagram className="h-3 w-3 instagram-gradient-text" aria-hidden="true" /> DMs Copied: {acquisitionMetrics.totalDMsSent}
                       </span>
                     </div>
                     <p className="whitespace-nowrap font-body text-[9px] font-normal text-muted-foreground">
