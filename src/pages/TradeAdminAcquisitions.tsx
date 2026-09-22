@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
+import ContactNameInput from "@/components/trade/ContactNameInput";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -375,6 +376,13 @@ const TradeAdminAcquisitions = () => {
   const applyAesthetic = (id: string, next: string | null) => {
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
       (prev ?? []).map((r) => (r.id === id ? { ...r, aesthetic_profile: next } : r)),
+    );
+  };
+
+  // Editable principal contact name: reflect the write in the cached rows.
+  const applyContact = (id: string, next: string | null) => {
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      (prev ?? []).map((r) => (r.id === id ? { ...r, founder_name: next } : r)),
     );
   };
 
@@ -766,7 +774,12 @@ const TradeAdminAcquisitions = () => {
                     )}
                   </td>
                   <td className="px-5 py-6">
-                    <div className="text-sm text-foreground">{lead.founder_name ?? "—"}</div>
+                    <ContactNameInput
+                      leadId={lead.id}
+                      studioName={lead.studio_name}
+                      value={lead.founder_name}
+                      onChange={(next) => applyContact(lead.id, next)}
+                    />
                     {(lead.executive_emails ?? []).length > 0 ? (
                       <div className="mt-0.5 space-y-0.5">
                         {(lead.executive_emails ?? []).map((email) => (
