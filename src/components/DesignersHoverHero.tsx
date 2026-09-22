@@ -797,10 +797,10 @@ const DesignersHoverHero = () => {
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
 
-  // Mobile entry hint: visually lift the actual list, then bounce it home.
+  // Mobile entry hint: lift the visible directory panel, then bounce it home.
   // The mobile-browser hero has no scroll range, so scrollTop cannot provide
-  // this cue there. A temporary transform works in both browser and PWA modes
-  // without changing the list's real scroll position or touch behavior.
+  // this cue there. Moving the full panel makes the hint visible in both the
+  // browser and PWA layouts without changing its real scroll position.
   useEffect(() => {
     if (!isMobileOrPwa || typeof window === "undefined") return;
 
@@ -818,30 +818,25 @@ const DesignersHoverHero = () => {
       cancelled = true;
       if (timer) window.clearTimeout(timer);
       controls?.stop();
-      if (navRef.current) navRef.current.style.transform = "";
-      window.removeEventListener("touchstart", cancel);
-      window.removeEventListener("pointerdown", cancel);
+      if (contentScrollRef.current) contentScrollRef.current.style.transform = "";
     };
-
-    window.addEventListener("touchstart", cancel, { passive: true });
-    window.addEventListener("pointerdown", cancel, { passive: true });
 
     const start = () => {
       if (cancelled) return;
-      const list = navRef.current;
-      if (!list) {
+      const panel = contentScrollRef.current;
+      if (!panel) {
         attempts += 1;
         if (attempts < 30) timer = window.setTimeout(start, 100);
         return;
       }
 
-      controls = animate(list, { y: [0, -40, -40, 0] }, {
-        duration: 1,
-        times: [0, 0.35, 0.55, 1],
+      controls = animate(panel, { y: [0, -40, -40, 0] }, {
+        duration: 1.15,
+        times: [0, 0.35, 0.52, 1],
         ease: ["easeOut", "linear", "backOut"],
         onComplete: () => {
           entryHintPlayedRef.current = true;
-          if (navRef.current) navRef.current.style.transform = "";
+          if (contentScrollRef.current) contentScrollRef.current.style.transform = "";
         },
       });
     };
