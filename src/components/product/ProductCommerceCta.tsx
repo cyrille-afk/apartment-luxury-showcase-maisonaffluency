@@ -365,6 +365,29 @@ export default function ProductCommerceCta({
     if (el) {
       window.setTimeout(() => {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
+        // On mobile the gallery is pinned above the scrolling content, so the
+        // anchor can land hidden beneath it. Once the smooth scroll settles,
+        // check the anchor's visibility and nudge past whatever covers it.
+        window.setTimeout(() => {
+          const r = el.getBoundingClientRect();
+          if (r.height === 0) return;
+          const probe = document.elementFromPoint(
+            r.left + r.width / 2,
+            Math.min(Math.max(r.top + 6, 0), window.innerHeight - 1),
+          );
+          if (probe && !el.contains(probe)) {
+            const coverBottom = probe.getBoundingClientRect().bottom;
+            if (coverBottom > r.top) {
+              const scroller =
+                el.closest<HTMLElement>(".product-page-scroll") ??
+                document.scrollingElement;
+              scroller?.scrollBy({
+                top: coverBottom - r.top + 12,
+                behavior: "smooth",
+              });
+            }
+          }
+        }, 650);
       }, 60);
       return;
     }
