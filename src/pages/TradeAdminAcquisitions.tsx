@@ -23,8 +23,6 @@ import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
-const DM_SENT_KEY = "ma_acquisitions_dm_sent_v1";
-
 type Lead = {
   id: string;
   studio_name: string;
@@ -46,6 +44,8 @@ type Lead = {
   reply_received_at: string | null;
   reply_intent: string | null;
   portal_key_sent_at: string | null;
+  instagram_outreach_status: string;
+  instagram_dm_sent_at: string | null;
 };
 
 const DEFAULT_COUNTRY = "Singapore";
@@ -232,26 +232,23 @@ const TradeAdminAcquisitions = () => {
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
-  const [dmSent, setDmSent] = useState<Set<string>>(() => {
-    try {
-      const raw = localStorage.getItem(DM_SENT_KEY);
-      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
-    } catch {
-      return new Set<string>();
+  const markDmSent = async (id: string) => {
+    const sentAt = new Date().toISOString();
+    queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
+      prev?.map((lead) =>
+        lead.id === id
+          ? { ...lead, instagram_outreach_status: "dm_sent", instagram_dm_sent_at: sentAt }
+          : lead,
+      ),
+    );
+    const { error } = await supabase
+      .from("acquisition_leads")
+      .update({ instagram_outreach_status: "dm_sent", instagram_dm_sent_at: sentAt })
+      .eq("id", id);
+    if (error) {
+      await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
+      toast.error("Instagram outreach status could not be saved.");
     }
-  });
-
-  const markDmSent = (id: string) => {
-    setDmSent((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      try {
-        localStorage.setItem(DM_SENT_KEY, JSON.stringify([...next]));
-      } catch {
-        /* storage full — badge stays for this session only */
-      }
-      return next;
-    });
   };
   // Rows whose automated portal key just landed — briefly pulsed in the grid.
   const [justActivated, setJustActivated] = useState<Set<string>>(new Set());
@@ -265,7 +262,7 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at",
+          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at, instagram_outreach_status, instagram_dm_sent_at",
         )
         .in("campaign_status", [
           "unprocessed",
@@ -873,12 +870,12 @@ const TradeAdminAcquisitions = () => {
                           <Badge
                             variant="outline"
                             className={`text-[10px] uppercase tracking-[0.18em] ${
-                              dmSent.has(lead.id)
+                              lead.instagram_outreach_status === "dm_sent"
                                 ? "border-purple-500/50 bg-purple-500/10 text-purple-600"
                                 : "border-border text-muted-foreground"
                             }`}
                           >
-                            {dmSent.has(lead.id) ? "DM_Sent" : "Untouched"}
+                            {lead.instagram_outreach_status === "dm_sent" ? "DM_Sent" : "Untouched"}
                           </Badge>
                         </div>
                       </>

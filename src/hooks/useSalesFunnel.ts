@@ -31,6 +31,12 @@ export interface FunnelStage {
 export interface SalesFunnelData {
   stages: FunnelStage[];
   converted: number;
+  acquisitionMetrics: {
+    totalEmailsSent: number;
+    totalDMsSent: number;
+    emailReplyRate: number;
+    dmHookRate: number;
+  };
   reminders: {
     id: string;
     stage: string;
@@ -53,7 +59,7 @@ export function useSalesFunnel(days: number) {
   const queryClient = useQueryClient();
 
   // Live pipeline: a Stripe webhook writing a settled card refreshes the board.
-  useRealtimeTables(["funnel_card_payments", "trade_quotes"], () => {
+  useRealtimeTables(["funnel_card_payments", "trade_quotes", "acquisition_leads"], () => {
     queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
   });
 
@@ -74,6 +80,7 @@ export function useSalesFunnel(days: number) {
         ordersRes,
         remindersRes,
         cardPaymentsRes,
+        acquisitionsRes,
       ] = await Promise.all([
           supabase
             .from("inquiries")
@@ -111,6 +118,10 @@ export function useSalesFunnel(days: number) {
             .select("card_id, card_stage, status, amount_cents, currency, paid_at, label, payer_email")
             .in("status", ["paid", "settled"])
             .order("paid_at", { ascending: false }),
+          supabase
+            .from("acquisition_leads")
+            .select("id, studio_name, founder_name, business_email, campaign_status, email_sent_at, reply_received_at, portal_key_sent_at, portal_activated_at, instagram_outreach_status, instagram_dm_sent_at")
+            .order("created_at", { ascending: false }),
         ]);
 
       const inquiries = inquiriesRes.data ?? [];
@@ -119,6 +130,22 @@ export function useSalesFunnel(days: number) {
       const quoteItems = quoteItemsRes.data ?? [];
       const carts = cartsRes.data ?? [];
       const orders = ordersRes.data ?? [];
+      const acquisitions = acquisitionsRes.data ?? [];
+
+      const emailSentStatuses = new Set(["sent", "outbound_sent", "replied_interested", "portal_activated"]);
+      const emailResponseStatuses = new Set(["replied_interested", "portal_activated"]);
+      const sentEmails = acquisitions.filter((lead) => emailSentStatuses.has(lead.campaign_status));
+      const sentDMs = acquisitions.filter((lead) => lead.instagram_outreach_status === "dm_sent");
+      const emailResponses = sentEmails.filter((lead) => emailResponseStatuses.has(lead.campaign_status));
+      const dmResponses = sentDMs.filter((lead) => emailResponseStatuses.has(lead.campaign_status));
+      const percentage = (numerator: number, denominator: number) =>
+        denominator === 0 ? 0 : Math.round((numerator / denominator) * 100);
+      const acquisitionMetrics = {
+        totalEmailsSent: sentEmails.length,
+        totalDMsSent: sentDMs.length,
+        emailReplyRate: percentage(emailResponses.length, sentEmails.length),
+        dmHookRate: percentage(dmResponses.length, sentDMs.length),
+      };
 
       const paidQuoteIds = new Set(
         links.filter((l) => l.status === "paid").map((l) => l.quote_id as string),
@@ -259,6 +286,28 @@ export function useSalesFunnel(days: number) {
             imageUrl: null,
           })),
         },
+        {
+          key: "acquisition_activated",
+          title: "Portal-activated studios",
+          description: "Acquisition studios whose portal key was delivered",
+          entries: acquisitions
+            .filter((lead) => lead.campaign_status === "portal_activated")
+            .map((lead) => ({
+              id: lead.id,
+              label: lead.studio_name,
+              sublabel: lead.founder_name || "Trade studio",
+              createdAt:
+                lead.portal_activated_at ||
+                lead.portal_key_sent_at ||
+                lead.reply_received_at ||
+                lead.email_sent_at ||
+                new Date().toISOString(),
+              amountLabel: null,
+              href: "/trade/admin/acquisitions",
+              email: lead.business_email,
+              imageUrl: null,
+            })),
+        },
       ];
 
       let converted =
@@ -307,7 +356,7 @@ export function useSalesFunnel(days: number) {
         entries: movedToSettlement,
       });
 
-      return { stages, converted, reminders: remindersRes.data ?? [] };
+      return { stages, converted, acquisitionMetrics, reminders: remindersRes.data ?? [] };
     },
   });
 }
