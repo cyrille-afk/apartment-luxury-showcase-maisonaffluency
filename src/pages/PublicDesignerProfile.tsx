@@ -1904,7 +1904,7 @@ const PublicDesignerProfile = () => {
                   // the attributed designer inline (e.g. "Firefly Chandelier by
                   // Damien Langlois-Meurinne"), parse the "by X" tail and use it
                   // as the attribution label — even for cross-brand names not in
-                  // the parent's sub-designer set (DLM under Sé Collections, etc.).
+                  // the parent's sub-designer set.
                   const parsed = parseByAttribution(pick.title);
                   const parsedLabel =
                     !rawDesignerLabel &&
@@ -1938,7 +1938,7 @@ const PublicDesignerProfile = () => {
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
                   // Parent brand attribution: always name the editing house on a
                   // child designer's card, matching the trade portal. The house
-                  // page may be trade-only (e.g. Sé Collections) — in that case we
+                  // page may be trade-only — in that case we
                   // still print the brand name, just without a public link.
                   const showParentBrand =
                     !designerLabel &&
@@ -1957,7 +1957,7 @@ const PublicDesignerProfile = () => {
                     /^clam (chair|stool)(?:,|\s|$)/i.test(pick.title);
                   const isArnoldClamStool =
                     isArnoldClamChair && /^clam stool/i.test(pick.title);
-                  // Parent-brand pages (Ozone, Sé, …) aggregate their child
+                  // Parent-brand pages aggregate their child
                   // designers' picks — route to the owning designer's slug,
                   // otherwise the product page looks it up under the parent
                   // (which owns no picks) and renders "Product not found".
