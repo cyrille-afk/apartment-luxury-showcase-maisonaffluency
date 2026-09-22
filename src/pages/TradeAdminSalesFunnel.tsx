@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Instagram, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useSalesFunnel, type FunnelEntry } from "@/hooks/useSalesFunnel";
@@ -129,29 +129,34 @@ const PipelineColumn = ({
   children,
   className,
   urgent = false,
+  headerDetails,
 }: {
   title: string;
   count: number;
   children: ReactNode;
   className?: string;
   urgent?: boolean;
+  headerDetails?: ReactNode;
 }) => (
   <section className={cn("min-w-[250px] border-t-2 border-border pt-4", urgent && "border-accent", className)}>
-    <div className="mb-4 flex items-center justify-between gap-3 px-1">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className={cn("h-2 w-2 shrink-0 rounded-full bg-primary", urgent && "bg-accent")} />
-        <h2 className="truncate font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
-          {title}
-        </h2>
+    <div className="mb-4 px-1">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={cn("h-2 w-2 shrink-0 rounded-full bg-primary", urgent && "bg-accent")} />
+          <h2 className="truncate font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
+            {title}
+          </h2>
+        </div>
+        <span
+          className={cn(
+            "flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-muted px-2 font-body text-xs font-semibold text-foreground",
+            urgent && "bg-accent text-accent-foreground motion-safe:animate-pulse",
+          )}
+        >
+          {count}
+        </span>
       </div>
-      <span
-        className={cn(
-          "flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-muted px-2 font-body text-xs font-semibold text-foreground",
-          urgent && "bg-accent text-accent-foreground motion-safe:animate-pulse",
-        )}
-      >
-        {count}
-      </span>
+      {headerDetails}
     </div>
     <div className={cn("min-h-[420px] space-y-3 border border-border bg-muted/30 p-3", urgent && "bg-accent/5")}>{children}</div>
   </section>
@@ -168,6 +173,28 @@ const EmptyState = ({ label }: { label: string }) => (
   <div className="flex min-h-20 items-center justify-center border border-dashed border-border bg-background/60 px-4 text-center">
     <p className="font-body text-xs text-muted-foreground">{label}</p>
   </div>
+);
+
+const AcquisitionEntryCard = ({ entry }: { entry: FunnelEntry }) => (
+  <article className="border border-border bg-card p-3 transition-colors hover:border-primary/40">
+    <div className="flex items-start gap-3">
+      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 font-display text-[15px] leading-tight text-foreground">{entry.label}</h3>
+          <span className="shrink-0 font-body text-[10px] text-muted-foreground">{relative(entry.createdAt)}</span>
+        </div>
+        <p className="mt-1 truncate font-body text-[11px] text-muted-foreground">{entry.sublabel}</p>
+        <p className="mt-0.5 truncate font-body text-[10px] text-muted-foreground/80">{entry.email}</p>
+      </div>
+    </div>
+    <div className="mt-3 flex items-center justify-between border-t border-border/70 pt-2.5">
+      <span className="font-body text-[10px] uppercase tracking-[0.14em] text-emerald-600">Portal activated</span>
+      <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-[10px] uppercase tracking-[0.12em]">
+        <Link to={entry.href || "/trade/admin/acquisitions"}>Open <ArrowRight className="h-3 w-3" /></Link>
+      </Button>
+    </div>
+  </article>
 );
 
 const TradeAdminSalesFunnel = () => {
@@ -192,8 +219,15 @@ const TradeAdminSalesFunnel = () => {
   const sent = stage("sent_unpaid");
   const orders = stage("orders_pending");
   const stripePaid = stage("webhook_settled");
-  const leadCount = bags.length + requests.length;
+  const activatedAcquisitions = stage("acquisition_activated");
+  const leadCount = bags.length + requests.length + activatedAcquisitions.length;
   const settlementCount = sent.length + orders.length + stripePaid.length;
+  const acquisitionMetrics = data?.acquisitionMetrics ?? {
+    totalEmailsSent: 0,
+    totalDMsSent: 0,
+    emailReplyRate: 0,
+    dmHookRate: 0,
+  };
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-5 py-10 md:px-8">
@@ -245,11 +279,31 @@ const TradeAdminSalesFunnel = () => {
         <>
           <div className="mb-10 overflow-x-auto pb-3">
             <div className="grid min-w-[960px] grid-cols-[0.88fr_1.45fr_1fr_0.8fr] gap-3 xl:gap-5">
-              <PipelineColumn title="Lead Capture" count={leadCount}>
+              <PipelineColumn
+                title="Leads Captured"
+                count={leadCount}
+                headerDetails={
+                  <div className="mt-3 space-y-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 border border-border bg-card px-2 py-1 font-body text-[10px] text-muted-foreground">
+                        <Mail className="h-3 w-3" aria-hidden="true" /> Emails Sent: {acquisitionMetrics.totalEmailsSent}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 border border-border bg-card px-2 py-1 font-body text-[10px] text-muted-foreground">
+                        <Instagram className="h-3 w-3 instagram-gradient-text" aria-hidden="true" /> DMs Copied: {acquisitionMetrics.totalDMsSent}
+                      </span>
+                    </div>
+                    <p className="whitespace-nowrap font-body text-[9px] font-normal text-muted-foreground">
+                      Email Response: {acquisitionMetrics.emailReplyRate}% | DM Hook Rate: {acquisitionMetrics.dmHookRate}%
+                    </p>
+                  </div>
+                }
+              >
                 <GroupLabel count={bags.length}>Shopping bags abandoned</GroupLabel>
                 {bags.length ? bags.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No abandoned bags" />}
                 <GroupLabel count={requests.length}>Requests without a quote</GroupLabel>
                 {requests.length ? requests.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="All requests are quoted" />}
+                <GroupLabel count={activatedAcquisitions.length}>Portal-activated studios</GroupLabel>
+                {activatedAcquisitions.length ? activatedAcquisitions.map((entry) => <AcquisitionEntryCard key={entry.id} entry={entry} />) : <EmptyState label="No activated studios yet" />}
               </PipelineColumn>
 
               <PipelineColumn title="Action Required" count={drafts.length} urgent>

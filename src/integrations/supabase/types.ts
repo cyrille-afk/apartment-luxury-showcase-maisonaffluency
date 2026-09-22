@@ -138,7 +138,9 @@ export type Database = {
           founder_name: string | null
           founder_title: string | null
           id: string
+          instagram_dm_sent_at: string | null
           instagram_handle: string | null
+          instagram_outreach_status: string
           last_ingested_at: string | null
           linkedin_url: string | null
           outbound_recipients: string[]
@@ -171,7 +173,9 @@ export type Database = {
           founder_name?: string | null
           founder_title?: string | null
           id?: string
+          instagram_dm_sent_at?: string | null
           instagram_handle?: string | null
+          instagram_outreach_status?: string
           last_ingested_at?: string | null
           linkedin_url?: string | null
           outbound_recipients?: string[]
@@ -204,7 +208,9 @@ export type Database = {
           founder_name?: string | null
           founder_title?: string | null
           id?: string
+          instagram_dm_sent_at?: string | null
           instagram_handle?: string | null
+          instagram_outreach_status?: string
           last_ingested_at?: string | null
           linkedin_url?: string | null
           outbound_recipients?: string[]
