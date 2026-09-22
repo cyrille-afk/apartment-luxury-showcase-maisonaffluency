@@ -20,7 +20,10 @@ import { Input } from "@/components/ui/input";
 import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
+import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+
+const DM_SENT_KEY = "ma_acquisitions_dm_sent_v1";
 
 type Lead = {
   id: string;
@@ -228,6 +231,28 @@ const TradeAdminAcquisitions = () => {
   const [activeCountry, setActiveCountry] = useState<string>(DEFAULT_COUNTRY);
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
+  const [igLeadId, setIgLeadId] = useState<string | null>(null);
+  const [dmSent, setDmSent] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(DM_SENT_KEY);
+      return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  const markDmSent = (id: string) => {
+    setDmSent((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        localStorage.setItem(DM_SENT_KEY, JSON.stringify([...next]));
+      } catch {
+        /* storage full — badge stays for this session only */
+      }
+      return next;
+    });
+  };
   // Rows whose automated portal key just landed — briefly pulsed in the grid.
   const [justActivated, setJustActivated] = useState<Set<string>>(new Set());
   const statusRef = useRef<Map<string, string>>(new Map());
@@ -798,17 +823,7 @@ const TradeAdminAcquisitions = () => {
                     </div>
                   </td>
                   <td className="px-5 py-6">
-                    {vector === "instagram" ? (
-                      <a
-                        href={`https://instagram.com/${(lead.instagram_handle ?? "").replace(/^@+/, "")}`}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className="inline-flex h-9 items-center gap-2 whitespace-nowrap border border-destructive/40 px-4 text-[10px] uppercase tracking-[0.18em] text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
-                      >
-                        <Instagram className="h-3.5 w-3.5" />
-                        Route via Instagram DM
-                      </a>
-                    ) : (
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         disabled={dispatching}
@@ -822,21 +837,51 @@ const TradeAdminAcquisitions = () => {
                         )}
                         Deploy via Resend Email
                       </button>
+                      {lead.instagram_handle && (
+                        <button
+                          type="button"
+                          onClick={() => setIgLeadId(lead.id)}
+                          title={`Instagram outreach workspace · @${lead.instagram_handle.replace(/^@+/, "")}`}
+                          aria-label={`Open Instagram outreach workspace for ${lead.studio_name}`}
+                          className="inline-flex h-9 w-9 items-center justify-center border border-[#C13584]/50 text-[#C13584] transition-colors hover:bg-gradient-to-tr hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF] hover:text-white"
+                        >
+                          <Instagram className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    {vector === "instagram" && (
+                      <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-destructive">
+                        Instagram-first target
+                      </div>
                     )}
                   </td>
                   <td className="px-5 py-6">
                     {lead.instagram_handle ? (
-                      <a
-                        href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className={`inline-flex items-center gap-1.5 text-[12px] underline-offset-4 hover:underline ${
-                          vector === "instagram" ? "font-medium text-foreground" : "text-muted-foreground"
-                        }`}
-                      >
-                        <Instagram className="h-3.5 w-3.5" />
-                        {`@${lead.instagram_handle.replace(/^@+/, "")}`}
-                      </a>
+                      <>
+                        <a
+                          href={`https://instagram.com/${lead.instagram_handle.replace(/^@+/, "")}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className={`inline-flex items-center gap-1.5 text-[12px] underline-offset-4 hover:underline ${
+                            vector === "instagram" ? "font-medium text-foreground" : "text-muted-foreground"
+                          }`}
+                        >
+                          <Instagram className="h-3.5 w-3.5" />
+                          {`@${lead.instagram_handle.replace(/^@+/, "")}`}
+                        </a>
+                        <div className="mt-2">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] uppercase tracking-[0.18em] ${
+                              dmSent.has(lead.id)
+                                ? "border-purple-500/50 bg-purple-500/10 text-purple-600"
+                                : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {dmSent.has(lead.id) ? "DM_Sent" : "Untouched"}
+                          </Badge>
+                        </div>
+                      </>
                     ) : (
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
@@ -904,6 +949,22 @@ const TradeAdminAcquisitions = () => {
           </table>
         </div>
       </div>
+
+      {(() => {
+        const igLead = filtered.find((l) => l.id === igLeadId);
+        if (!igLead || !igLead.instagram_handle) return null;
+        return (
+          <InstagramOutreachModal
+            open
+            onOpenChange={(o) => !o && setIgLeadId(null)}
+            studioName={igLead.studio_name}
+            founderName={igLead.founder_name}
+            instagramHandle={igLead.instagram_handle}
+            designerMatches={igLead.predicted_designer_matches ?? []}
+            onLaunched={() => markDmSent(igLead.id)}
+          />
+        );
+      })()}
     </div>
   );
 };
