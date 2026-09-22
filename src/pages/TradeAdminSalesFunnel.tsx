@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Instagram, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useSalesFunnel, type FunnelEntry } from "@/hooks/useSalesFunnel";
@@ -282,22 +282,39 @@ const TradeAdminSalesFunnel = () => {
               <PipelineColumn
                 title="Leads Captured"
                 count={leadCount}
-                headerDetails={
-                  <div className="mt-3 space-y-2">
-                    <div className="flex flex-wrap gap-1.5">
-                      <span className="inline-flex items-center gap-1.5 border border-border bg-card px-2 py-1 font-body text-[10px] text-muted-foreground">
-                        <Mail className="h-3 w-3" aria-hidden="true" /> Emails Sent: {acquisitionMetrics.totalEmailsSent}
+              >
+                <article className="border border-border bg-card">
+                  <div className="border-b border-border px-3 py-2.5">
+                    <h3 className="font-display text-sm text-foreground">Outbound Acquisition</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-px bg-border">
+                    <div className="bg-card px-3 py-3 text-center">
+                      <span className="block font-display text-2xl leading-none text-foreground">
+                        {acquisitionMetrics.totalEmailsSent}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 border border-border bg-card px-2 py-1 font-body text-[10px] text-muted-foreground">
-                        <Instagram className="h-3 w-3 instagram-gradient-text" aria-hidden="true" /> DMs Copied: {acquisitionMetrics.totalDMsSent}
+                      <span className="mt-1.5 block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+                        Emails Sent
                       </span>
                     </div>
-                    <p className="whitespace-nowrap font-body text-[9px] font-normal text-muted-foreground">
-                      Email Response: {acquisitionMetrics.emailReplyRate}% | DM Hook Rate: {acquisitionMetrics.dmHookRate}%
-                    </p>
+                    <div className="bg-card px-3 py-3 text-center">
+                      <span className="block font-display text-2xl leading-none text-foreground">
+                        {acquisitionMetrics.totalDMsSent}
+                      </span>
+                      <span className="mt-1.5 block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+                        DMs Copied
+                      </span>
+                    </div>
                   </div>
-                }
-              >
+                  <div className="flex items-center justify-center gap-2 border-t border-border px-2 py-2 font-body text-[9px] text-muted-foreground">
+                    <span>
+                      Email Response: <strong className="font-semibold text-emerald-600">{acquisitionMetrics.emailReplyRate}%</strong>
+                    </span>
+                    <span aria-hidden="true">|</span>
+                    <span>
+                      DM Resp. Rate: <strong className="font-semibold text-foreground">{acquisitionMetrics.dmHookRate}%</strong>
+                    </span>
+                  </div>
+                </article>
                 <GroupLabel count={bags.length}>Shopping bags abandoned</GroupLabel>
                 {bags.length ? bags.map((entry) => <EntryCard key={entry.id} entry={entry} />) : <EmptyState label="No abandoned bags" />}
                 <GroupLabel count={requests.length}>Requests without a quote</GroupLabel>
