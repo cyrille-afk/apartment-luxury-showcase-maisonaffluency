@@ -1492,14 +1492,18 @@ const PublicProductPageContent: React.FC = () => {
       window.requestAnimationFrame(measure);
     };
     measure();
-    const scrollTarget = productScrollRef.current ?? window;
-    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    // The inner product scroller (.product-page-scroll) mounts after this
+    // effect's first run on some routes, so binding to productScrollRef here
+    // would silently listen to `window` forever and the image would never
+    // compact. Capture-phase listening on `document` catches scroll from the
+    // window AND from any inner scroller, whenever it appears.
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
     window.addEventListener("wheel", armExpansion, { passive: true });
     window.addEventListener("keydown", armExpansion);
     return () => {
-      scrollTarget.removeEventListener("scroll", onScroll);
+      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
       window.removeEventListener("touchstart", armExpansion);
       window.removeEventListener("touchmove", armExpansion);
       window.removeEventListener("wheel", armExpansion);
