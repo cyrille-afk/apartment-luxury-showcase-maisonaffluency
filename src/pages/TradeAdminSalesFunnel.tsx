@@ -283,35 +283,27 @@ const TradeAdminSalesFunnel = () => {
                 title="Leads Captured"
                 count={leadCount}
               >
-                <article className="border border-border bg-card">
-                  <div className="border-b border-border px-3 py-2.5">
-                    <h3 className="font-display text-sm text-foreground">Outbound Acquisition</h3>
+                <article className="outbound-metrics-card">
+                  <div className="card-header">
+                    <h3>Outbound Acquisition</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-px bg-border">
-                    <div className="bg-card px-3 py-3 text-center">
-                      <span className="block font-display text-2xl leading-none text-foreground">
-                        {acquisitionMetrics.totalEmailsSent}
-                      </span>
-                      <span className="mt-1.5 block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
-                        Emails Sent
-                      </span>
+                  <div className="metrics-grid">
+                    <div className="metric-badge">
+                      <span className="metric-value">{acquisitionMetrics.totalEmailsSent}</span>
+                      <span className="metric-label">Emails Sent</span>
                     </div>
-                    <div className="bg-card px-3 py-3 text-center">
-                      <span className="block font-display text-2xl leading-none text-foreground">
-                        {acquisitionMetrics.totalDMsSent}
-                      </span>
-                      <span className="mt-1.5 block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
-                        DMs Copied
-                      </span>
+                    <div className="metric-badge">
+                      <span className="metric-value">{acquisitionMetrics.totalDMsSent}</span>
+                      <span className="metric-label">DMs Copied</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-2 border-t border-border px-2 py-2 font-body text-[9px] text-muted-foreground">
-                    <span>
-                      Email Response: <strong className="font-semibold text-emerald-600">{acquisitionMetrics.emailReplyRate}%</strong>
+                  <div className="card-footer-stats">
+                    <span className="stat-text">
+                      Email Response: <strong className="text-success">{acquisitionMetrics.emailReplyRate}%</strong>
                     </span>
-                    <span aria-hidden="true">|</span>
-                    <span>
-                      DM Resp. Rate: <strong className="font-semibold text-foreground">{acquisitionMetrics.dmHookRate}%</strong>
+                    <span className="stat-divider">|</span>
+                    <span className="stat-text">
+                      DM Resp. Rate: <strong>{acquisitionMetrics.dmHookRate}%</strong>
                     </span>
                   </div>
                 </article>
