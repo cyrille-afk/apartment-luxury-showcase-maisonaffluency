@@ -1686,12 +1686,19 @@ const TradeProductPage: React.FC = () => {
     { sizeVariants: variantsList, isDualAxis },
   );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
+  // Catalogue rate on the product itself. Many pieces carry finish options that
+  // do not change the price (every variant is price_cents = 0) — those must
+  // still show the catalogue rate rather than "Price upon Request".
+  const catalogueRrpCents = (pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null) || null;
+  const variantsCarryNoPrice = hasVariants && minVariantCents == null;
   const effectiveRrpCents = hasVariants
-    ? (activeVariant
-      ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
-      : (dualSelectionUnpriced ? null : (partialDualMinCents ?? minVariantCents)))
-    : pricing?.rrp_price_cents ?? null;
-  const isFromPrice = hasVariants && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
+    ? (variantsCarryNoPrice
+      ? catalogueRrpCents
+      : (activeVariant
+        ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : catalogueRrpCents)
+        : (dualSelectionUnpriced ? catalogueRrpCents : (partialDualMinCents ?? minVariantCents))))
+    : catalogueRrpCents;
+  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
