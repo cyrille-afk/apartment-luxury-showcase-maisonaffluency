@@ -949,6 +949,22 @@ const TradeAdminAcquisitions = () => {
           </table>
         </div>
       </div>
+
+      {(() => {
+        const igLead = filtered.find((l) => l.id === igLeadId);
+        if (!igLead || !igLead.instagram_handle) return null;
+        return (
+          <InstagramOutreachModal
+            open
+            onOpenChange={(o) => !o && setIgLeadId(null)}
+            studioName={igLead.studio_name}
+            founderName={igLead.founder_name}
+            instagramHandle={igLead.instagram_handle}
+            designerMatches={igLead.predicted_designer_matches ?? []}
+            onLaunched={() => markDmSent(igLead.id)}
+          />
+        );
+      })()}
     </div>
   );
 };
