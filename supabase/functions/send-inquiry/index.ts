@@ -481,15 +481,18 @@ const handler = async (req: Request): Promise<Response> => {
       if (notifyErr) console.error(`Notification enqueue failed for ${adminEmail}:`, notifyErr);
     }
 
-    // 2. Confirmation → visitor
+    // 2. Confirmation → visitor. Trade applications receive the dedicated
+    // Trade Program receipt; product and contact inquiries keep the standard reply.
     const { error: confirmErr } = await supabase.functions.invoke(
       "send-transactional-email",
       {
         body: {
-          templateName: "inquiry-confirmation",
+          templateName: isTradeApplication ? "trade-program-invitation" : "inquiry-confirmation",
           recipientEmail: email,
-          idempotencyKey: `inquiry-confirm-${idStem}`,
-          templateData: { name, message: resolvedMessage },
+          idempotencyKey: `${isTradeApplication ? "trade-program-application" : "inquiry-confirm"}-${idStem}`,
+          templateData: isTradeApplication
+            ? { firstName: name.trim().split(/\s+/)[0], name, email, companyName }
+            : { name, message: resolvedMessage },
         },
       }
     );
