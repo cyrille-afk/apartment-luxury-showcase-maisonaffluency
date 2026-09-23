@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import BulkUrlPaste from "@/components/admin/BulkUrlPaste";
 
@@ -27,6 +27,10 @@ export default function GalleryThumbnailsEditor({
 
   // Local items can include trailing empty slots that we don't persist.
   const [items, setItems] = useState<string[]>(() => padToMin(value, minSlots));
+  const changeTimerRef = useRef<number | null>(null);
+  const latestItemsRef = useRef(items);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   // Re-sync when parent value changes (e.g. after server reload), but only if
   // it differs from the trimmed local view to avoid clobbering in-flight edits.
@@ -41,10 +45,37 @@ export default function GalleryThumbnailsEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(value)]);
 
+  const flushChange = useCallback((next: string[]) => {
+    if (changeTimerRef.current !== null) {
+      window.clearTimeout(changeTimerRef.current);
+      changeTimerRef.current = null;
+    }
+    onChangeRef.current(trimTrailingEmpty(next));
+  }, []);
+
   const commit = (next: string[]) => {
+    latestItemsRef.current = next;
     setItems(next);
-    onChange(trimTrailingEmpty(next));
+    flushChange(next);
   };
+
+  const updateUrl = (index: number, nextUrl: string) => {
+    const next = [...latestItemsRef.current];
+    next[index] = nextUrl;
+    latestItemsRef.current = next;
+    setItems(next);
+    if (changeTimerRef.current !== null) window.clearTimeout(changeTimerRef.current);
+    changeTimerRef.current = window.setTimeout(() => flushChange(next), 450);
+  };
+
+  useEffect(() => {
+    const flushLatest = () => flushChange(latestItemsRef.current);
+    window.addEventListener("pagehide", flushLatest);
+    return () => {
+      window.removeEventListener("pagehide", flushLatest);
+      if (changeTimerRef.current !== null) window.clearTimeout(changeTimerRef.current);
+    };
+  }, [flushChange]);
 
   return (
     <div className="space-y-1.5 mt-1">
@@ -52,17 +83,19 @@ export default function GalleryThumbnailsEditor({
         <div key={i} className="flex items-center gap-1.5">
           <span className="text-[10px] text-muted-foreground w-5 tabular-nums">{i + 1}.</span>
           {url ? (
-            <img src={url} alt="" className="w-10 h-10 object-cover rounded border border-border shrink-0" />
+            <img
+              src={adminThumbnailUrl(url)}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-10 h-10 object-cover rounded border border-border shrink-0"
+            />
           ) : (
             <div className="w-10 h-10 rounded border border-dashed border-border shrink-0" />
           )}
           <Input
             value={url}
-            onChange={(e) => {
-              const next = [...items];
-              next[i] = e.target.value.trim();
-              commit(next);
-            }}
+            onChange={(e) => updateUrl(i, e.target.value)}
             placeholder="https://…"
             className="text-xs font-mono flex-1"
           />
@@ -141,4 +174,17 @@ function trimTrailingEmpty(arr: string[]): string[] {
 function padToMin(arr: string[], minSlots: number): string[] {
   if (arr.length >= minSlots) return [...arr];
   return [...arr, ...Array(minSlots - arr.length).fill("")];
+}
+
+/** Never decode multi-megabyte originals merely to render a 40px admin preview. */
+function adminThumbnailUrl(url: string): string {
+  if (!url.includes("res.cloudinary.com/") || !url.includes("/image/upload/")) return url;
+  const transform = "w_80,h_80,c_fill,q_auto:eco,f_auto";
+  const [prefix, suffix] = url.split("/image/upload/", 2);
+  if (!suffix) return url;
+  const withoutExistingTransform = suffix.replace(
+    /^(?=[^/]*(?:w_|h_|c_|q_|f_|g_|dpr_|e_))[^/]+\//,
+    "",
+  );
+  return `${prefix}/image/upload/${transform}/${withoutExistingTransform}`;
 }
