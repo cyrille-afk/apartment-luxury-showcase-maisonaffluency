@@ -281,7 +281,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
                 />
                 {formatCuratorialEditionLine(pick) && (
-                  <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+                  <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
                     {formatCuratorialEditionLine(pick)}
                   </p>
                 )}
@@ -309,7 +309,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex w-full items-baseline justify-between gap-3 pt-2">
+              <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
                 <div className="flex flex-col text-left space-y-0.5">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
@@ -360,19 +360,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block h-5 font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="block h-5 font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
                           </Link>
                          ) : brandLine ? (
-                          <span className="block h-5 font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-tight line-clamp-1">
+                          <span className="block h-5 font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1">
                             {brandLine}
                           </span>
                          ) : (
                            <span aria-hidden="true" className="block h-5" />
                          )}
                       {/* Product name — secondary, elegant italic */}
-                      <h3 className="font-body italic text-[13px] md:text-[15px] font-normal text-foreground/80 leading-snug line-clamp-2">
+                      <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
                         {productLine}
                       </h3>
                     </>
@@ -381,7 +381,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               </div>
               {/* Price — bottom right, aligned to product title baseline */}
               <div className="min-w-fit shrink-0 self-end whitespace-nowrap">
-                <p className="whitespace-nowrap font-body text-xs font-light tracking-wide text-muted-foreground">
+                <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600">
                   {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                 </p>
               </div>

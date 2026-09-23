@@ -2063,7 +2063,7 @@ const PublicDesignerProfile = () => {
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+                          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
@@ -2127,25 +2127,25 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
+                      <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
                         <div className="flex flex-col text-left space-y-0.5">
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
                               to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
+                              className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
                             >
                               {cardBrandLabel || parentBrandName}
                             </Link>
                           ) : (
-                            <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1">
+                            <span className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1">
                               {cardBrandLabel || parentBrandName || designer.name}
                             </span>
                           )}
 
                           {/* Product name — secondary, elegant */}
-                          <h3 className="font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
+                          <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
                             <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                               {displayTitle}
                             </Link>
@@ -2166,7 +2166,7 @@ const PublicDesignerProfile = () => {
 
                         {/* Price slot — bottom right, aligned to product title baseline */}
                         <div className="min-w-fit shrink-0 self-end whitespace-nowrap">
-                          <p className="whitespace-nowrap font-body text-xs font-light tracking-wide text-muted-foreground">
+                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
                         </div>
