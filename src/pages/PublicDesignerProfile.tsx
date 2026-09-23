@@ -1411,8 +1411,8 @@ const PublicDesignerProfile = () => {
         <div className={cn(
           "mx-auto pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] md:pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
-            ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
-            : "w-full max-w-6xl px-4 md:px-12 lg:px-12"
+            ? "w-full max-w-[1380px] px-6 bg-transparent"
+            : "w-full max-w-[1380px] px-4 md:px-6"
         )}>
           <div className={cn("flex items-center justify-between")}>
             {fromProduct ? (

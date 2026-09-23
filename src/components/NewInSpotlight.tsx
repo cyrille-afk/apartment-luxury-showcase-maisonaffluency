@@ -625,7 +625,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       {/* Separator */}
       <div className={cn(
-        "max-w-6xl mx-auto px-6 md:px-12",
+        "max-w-[1380px] mx-auto px-6",
         isUnderlaid && "md:hidden"
       )}>
         <div className="border-t border-border/40" />
@@ -633,7 +633,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       {/* Curators' Picks */}
       <section className={cn(
-        "max-w-6xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
+        "max-w-[1380px] mx-auto px-6 pt-4 md:pt-6 pb-6 md:pb-24",
         isUnderlaid && "md:hidden"
       )}>
         {renderCuratorsPicksSection()}
