@@ -695,7 +695,7 @@ const TradeAtelierProfile = () => {
                       className="group cursor-pointer flex flex-col"
                       onClick={() => navigate(productPath)}
                     >
-                       <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))]">
+                       <div className="relative aspect-square w-full overflow-visible bg-[hsl(var(--product-canvas))]">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
