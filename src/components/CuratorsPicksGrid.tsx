@@ -128,13 +128,13 @@ const Card = memo(function Card({
       className="group flex h-full w-full flex-col justify-between text-left touch-manipulation select-none"
       aria-label={`${item.name} — ${item.price}`}
     >
-      <div className="relative !aspect-square h-auto w-full bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
+      <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--collection-card-canvas))] [transform:translateZ(0)]">
         <img
           src={item.studioImage}
           alt={item.name}
           loading={index < 2 ? "eager" : "lazy"}
           decoding="async"
-          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply !p-6 will-change-[opacity]"
+          className="absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply will-change-[opacity]"
         />
         <motion.img
           src={item.ambientImage}
@@ -146,7 +146,7 @@ const Card = memo(function Card({
           animate={CROSSFADE}
           style={{ animationDelay: `${index * 220}ms` }}
           transition={{ delay: index * 0.22 }}
-          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply !p-6 will-change-[opacity] [transform:translateZ(0)]"
+          className="absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
         />
         {item.edition && (
           <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">

@@ -57,6 +57,7 @@ All colors MUST be HSL.
     --cream: 32 20% 97%;
     --canvas: 0 0% 97.6%;
     --product-canvas: 42 33% 94%;
+    --collection-card-canvas: 60 20% 98%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 40 20% 97.1%;
     --product-canvas-dark: 0 0% 10.2%;
@@ -143,6 +144,7 @@ All colors MUST be HSL.
     --cream: 32 15% 90%;
     --warm-gray: 32 8% 60%;
     --product-canvas: 34 18% 18%;
+    --collection-card-canvas: 34 18% 18%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 168 12% 14%;
     --spec-dimension-icon: 207 24% 68%;

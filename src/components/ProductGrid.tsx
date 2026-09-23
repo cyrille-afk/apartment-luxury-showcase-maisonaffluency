@@ -561,14 +561,14 @@ function singularizeSub(s: string): string {
               onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title))}
             >
-              <div className="relative aspect-square w-full bg-[hsl(var(--product-canvas))] flex items-center justify-center">
+              <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
                     sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                   })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`w-full h-full object-contain object-center mix-blend-multiply p-6 transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                  className={`absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   decoding="async"
                 />
@@ -580,7 +580,7 @@ function singularizeSub(s: string): string {
                       sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                     })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                    className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                    className="absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
                     decoding="async"
                   />
