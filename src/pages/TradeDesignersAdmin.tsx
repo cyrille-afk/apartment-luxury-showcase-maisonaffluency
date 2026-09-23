@@ -460,7 +460,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       window.clearTimeout(existing.timer);
       pendingWritesRef.current.delete(key);
     }
-    if (field === "gallery_images" || IMMEDIATE_PICK_AUTOSAVE_FIELDS.has(field)) {
+    if (IMMEDIATE_PICK_AUTOSAVE_FIELDS.has(field)) {
       void persistPickField(id, field, value);
       return;
     }
