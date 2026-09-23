@@ -381,13 +381,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     </>
                   );
                 })()}
-                {/* Price — muted, bottom */}
-                <div className="flex items-start">
-                  <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
-                    {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
-                  </p>
-                </div>
               </div>
+              {/* Price — bottom right, aligned to product title baseline */}
+              <div className="self-end">
+                <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
+                  {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
+                </p>
+              </div>
+            </div>
             </div>
           );
         })}
