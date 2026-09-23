@@ -496,7 +496,36 @@ const handler = async (req: Request): Promise<Response> => {
         },
       }
     );
-    if (confirmErr) console.error("Confirmation enqueue failed:", confirmErr);
+    if (confirmErr) {
+      const errorMessage = String(confirmErr.message || confirmErr).slice(0, 2000);
+      console.error("Trade/application confirmation enqueue failed", {
+        inquiryId: idStem,
+        templateName: isTradeApplication ? "trade-program-invitation" : "inquiry-confirmation",
+        recipientEmail: email,
+        error: errorMessage,
+      });
+      if (isTradeApplication) {
+        const { error: alertError } = await supabase.from("admin_alert_log").insert({
+          channel: "email",
+          event: "trade_program_application_email_failed",
+          status: "failed",
+          application_id: null,
+          payload: {
+            inquiry_id: idStem,
+            recipient_email: email,
+            template_name: "trade-program-invitation",
+            stage: "enqueue",
+          },
+          error: errorMessage,
+        });
+        if (alertError) {
+          console.error("Trade Program email admin alert insert failed", {
+            inquiryId: idStem,
+            error: alertError.message,
+          });
+        }
+      }
+    }
 
 
     return new Response(JSON.stringify({ success: true }), {

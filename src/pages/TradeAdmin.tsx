@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Link } from "react-router-dom";
 import { Inbox, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 
 /**
@@ -269,6 +270,28 @@ const TradeAdmin = () => {
   const [adminProfile, setAdminProfile] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
   const [renderedHtml, setRenderedHtml] = useState<string | null>(null);
   const [renderingHtml, setRenderingHtml] = useState(false);
+  const [applicationEmailPreviewOpen, setApplicationEmailPreviewOpen] = useState(false);
+  const [applicationEmailPreview, setApplicationEmailPreview] = useState<{ html: string; subject: string } | null>(null);
+  const [applicationEmailPreviewLoading, setApplicationEmailPreviewLoading] = useState(false);
+
+  const openApplicationEmailPreview = async () => {
+    setApplicationEmailPreviewOpen(true);
+    setApplicationEmailPreview(null);
+    setApplicationEmailPreviewLoading(true);
+    const { data, error } = await supabase.functions.invoke("render-email-preview", {
+      body: { templateName: "trade-program-invitation" },
+    });
+    setApplicationEmailPreviewLoading(false);
+    if (error || !(data as { html?: string })?.html) {
+      toast({
+        title: "Preview unavailable",
+        description: error?.message || "The application email could not be rendered.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setApplicationEmailPreview(data as { html: string; subject: string });
+  };
 
   // Render the actual React Email HTML (with the styled CTA button) whenever the
   // preview dialog opens. Uses a sample edit URL — the real token is minted on Send.
@@ -457,7 +480,13 @@ const TradeAdmin = () => {
 
 
 
-      <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
+        <Button variant="outline" size="sm" className="gap-2" onClick={openApplicationEmailPreview}>
+          <Mail className="h-4 w-4" />
+          Preview application email
+        </Button>
+      </div>
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
@@ -852,6 +881,39 @@ const TradeAdmin = () => {
             >
               {sendingChecklist ? "Sending…" : checklistPreview?.app.verification_checklist_sent_at ? "Resend checklist" : "Send now"}
             </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={applicationEmailPreviewOpen} onOpenChange={setApplicationEmailPreviewOpen}>
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Trade Program application email</AlertDialogTitle>
+            <AlertDialogDescription className="font-body text-xs">
+              This is the registered production email with safe sample details. Previewing does not send it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {applicationEmailPreviewLoading && (
+            <div className="flex h-48 items-center justify-center text-xs text-muted-foreground">Rendering email…</div>
+          )}
+          {!applicationEmailPreviewLoading && applicationEmailPreview && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-[64px_1fr] gap-3 font-body text-xs">
+                <span className="text-[10px] uppercase text-muted-foreground">Subject</span>
+                <span className="text-foreground">{applicationEmailPreview.subject}</span>
+              </div>
+              <div className="overflow-hidden rounded border border-border bg-background">
+                <iframe
+                  title="Trade Program application email preview"
+                  srcDoc={applicationEmailPreview.html}
+                  className="h-[62vh] w-full border-0 bg-background"
+                  sandbox=""
+                />
+              </div>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
