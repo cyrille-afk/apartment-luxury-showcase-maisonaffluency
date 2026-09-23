@@ -723,7 +723,7 @@ const TradeAtelierProfile = () => {
                           );
                         })()}
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+                          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
@@ -771,28 +771,28 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
+                      <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
                         <div className="flex flex-col text-left space-y-0.5">
-                          <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
-                            {pick.title}
-                          </h3>
                           {designerLabel && designerSlug ? (
                             <Link
                               to={`/trade/designers/${designerSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight"
+                              className="block font-display text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 leading-tight"
                             >
                               {designerLabel}
                             </Link>
                           ) : designerLabel ? (
-                            <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight">
+                            <span className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
                               {designerLabel}
                             </span>
                           ) : null}
+                          <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
+                            {pick.title}
+                          </h3>
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
                         <div className="min-w-fit shrink-0 self-end whitespace-nowrap text-right">
-                          <p className="whitespace-nowrap font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide md:inline-flex md:items-center md:justify-end md:gap-1.5 md:w-full">
+                          <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice

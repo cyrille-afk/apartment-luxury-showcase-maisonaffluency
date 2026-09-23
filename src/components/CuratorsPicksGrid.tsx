@@ -149,24 +149,24 @@ const Card = memo(function Card({
           className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
         />
         {item.edition && (
-          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
             {item.edition}
           </p>
         )}
       </div>
 
-      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
+      <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
         <div className="flex flex-col text-left space-y-0.5">
           {item.designer && (
-            <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--picks-muted))]">
+            <p className="font-sans text-xs font-normal uppercase tracking-wider text-[hsl(var(--picks-fg))]">
               {item.designer}
             </p>
           )}
-          <h3 className="font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
+          <h3 className="font-display text-xs font-normal leading-snug text-[hsl(var(--picks-muted))]">
             {item.name}
           </h3>
         </div>
-        <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
+        <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-sans text-xs font-normal text-[hsl(var(--picks-muted))]">
           {item.price}
         </p>
       </div>

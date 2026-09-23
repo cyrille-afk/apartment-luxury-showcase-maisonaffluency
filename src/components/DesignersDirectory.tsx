@@ -1416,7 +1416,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           </div>
         )}
         {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
-          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
             {formatCuratorialEditionLine(pick)}
           </p>
         )}
@@ -1450,7 +1450,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="px-3 py-3">
+      <div className="px-3 pb-3 pt-2.5">
         <div className="flex w-full items-baseline justify-between gap-3">
           <div className="flex flex-col text-left space-y-0.5">
             {pick.is_trade_only ? (
@@ -1477,10 +1477,10 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
               return (
                 <>
-                  <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
+                  <p className="font-body text-xs font-normal uppercase tracking-wider text-foreground">
                     {brandLine}
                   </p>
-                  <p className="font-display text-sm tracking-wide leading-tight">
+                  <p className="font-display text-xs font-normal leading-tight text-neutral-600">
                     {composed.title}{isYear ? ` (${sub})` : ''}
                   </p>
                   {showSubtitleBelow && (
@@ -1490,7 +1490,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-display text-sm text-foreground/70">
+          <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-body text-xs font-normal text-neutral-600">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
         </div>
