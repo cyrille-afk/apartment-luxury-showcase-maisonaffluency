@@ -1942,26 +1942,7 @@ const TradeProductPage: React.FC = () => {
               caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
               compact={galleryCompact}
 
-              firstImageBadge={
-                (() => {
-                  const editionLabel = formatEditionLabel(product);
-                  if (!editionLabel && !isEcartProduct) return null;
-                  return (
-                    <span className="flex flex-col items-start gap-1">
-                      {isEcartProduct && (
-                        <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
-                          {ECART_REEDITION_LABEL}
-                        </span>
-                      )}
-                      {editionLabel && (
-                        <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
-                          {editionLabel}
-                        </span>
-                      )}
-                    </span>
-                  );
-                })()
-              }
+              firstImageBadge={null}
               overlay={
                 <div className="flex items-center gap-2">
                   {/* Description now reads as Curator Notes below the gallery,
@@ -2122,14 +2103,26 @@ const TradeProductPage: React.FC = () => {
                 >
                   {designerDisplay}
                 </Link>
-                <h1 className="font-display text-[1.5rem] md:text-[1.85rem] mt-1 leading-tight">
-                  {product.title}
-                  {formatProductSubtitleLine(product.title, product.subtitle) && (
-                    <span className="block mt-1 text-[0.8em] text-muted-foreground">
-                      {formatProductSubtitleLine(product.title, product.subtitle)}
-                    </span>
-                  )}
-                </h1>
+                <div className="flex items-baseline justify-between gap-4 mt-1">
+                  <h1 className="font-display text-[1.5rem] md:text-[1.85rem] leading-tight">
+                    {product.title}
+                    {formatProductSubtitleLine(product.title, product.subtitle) && (
+                      <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                        {formatProductSubtitleLine(product.title, product.subtitle)}
+                      </span>
+                    )}
+                  </h1>
+                  {(() => {
+                    const editionLabel = formatEditionLabel(product);
+                    if (!editionLabel && !isEcartProduct) return null;
+                    return (
+                      <span className="flex flex-col items-end gap-1 shrink-0 pb-0.5 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
+                        {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
+                        {editionLabel && <span>{editionLabel}</span>}
+                      </span>
+                    );
+                  })()}
+                </div>
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
                 <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
