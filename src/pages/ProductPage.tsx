@@ -181,7 +181,7 @@ const ProductPage = () => {
       <div className="min-h-screen bg-background">
         {/* Branded header */}
         <header className="border-b border-border bg-background sticky top-0 z-10 pt-[env(safe-area-inset-top)]">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <span className="font-display text-sm text-foreground tracking-wide">Maison Affluency</span>
             </Link>
@@ -191,7 +191,7 @@ const ProductPage = () => {
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-4 py-6 md:py-10">
+        <main className="max-w-7xl mx-auto px-4 py-6 md:py-10">
           {fromPath && (
             <button
               type="button"
