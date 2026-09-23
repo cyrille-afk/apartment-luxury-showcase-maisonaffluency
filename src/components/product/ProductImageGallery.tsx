@@ -449,11 +449,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       )}
 
       {/* Main image + (mobile) thumb strip below */}
-      <div className="flex-1 flex flex-col gap-3 min-w-0">
+      <div className="flex-1 flex w-full flex-col items-center gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
         <div
           ref={frameRef}
-          className={cn("product-image-frame aspect-square h-auto bg-[hsl(var(--canvas))] rounded-luxury-sharp overflow-hidden relative transition-[height,width,aspect-ratio] duration-300 ease-out", compact && "product-image-frame--compact")}
+          className={cn("product-image-frame relative h-0 w-full overflow-hidden rounded-luxury-sharp bg-[hsl(var(--canvas))] pb-[100%] transition-[width] duration-300 ease-out", compact && "product-image-frame--compact")}
           style={{ touchAction: "pan-x pan-y" }}
           onDoubleClick={() => setPresentOpen(true)}
           onTouchEnd={handleTouchEndForDoubleTap}
