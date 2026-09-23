@@ -1954,7 +1954,7 @@ const TradeProductPage: React.FC = () => {
                         </span>
                       )}
                       {editionLabel && (
-                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                        <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
                           {editionLabel}
                         </span>
                       )}
@@ -2124,14 +2124,6 @@ const TradeProductPage: React.FC = () => {
                 </Link>
                 <h1 className="font-display text-[1.5rem] md:text-[1.85rem] mt-1 leading-tight">
                   {product.title}
-                  {(() => {
-                    const editionLabel = formatEditionLabel(product as any);
-                    return editionLabel ? (
-                      <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-300 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.22em] text-foreground/60">
-                        {editionLabel}
-                      </span>
-                    ) : null;
-                  })()}
                   {formatProductSubtitleLine(product.title, product.subtitle) && (
                     <span className="block mt-1 text-[0.8em] text-muted-foreground">
                       {formatProductSubtitleLine(product.title, product.subtitle)}

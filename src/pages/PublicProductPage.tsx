@@ -2340,11 +2340,16 @@ const PublicProductPageContent: React.FC = () => {
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
                 pickId={product.id}
-                firstImageBadge={isEcartProduct ? (
-                  <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
-                    {ECART_REEDITION_LABEL}
-                  </span>
-                ) : null}
+                firstImageBadge={(() => {
+                  const editionLabel = formatEditionLabel(product as any);
+                  if (!editionLabel && !isEcartProduct) return null;
+                  return (
+                    <span className="flex flex-col items-start gap-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
+                      {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
+                      {editionLabel && <span>{editionLabel}</span>}
+                    </span>
+                  );
+                })()}
 
 
                 overlay={
@@ -2486,14 +2491,6 @@ const PublicProductPageContent: React.FC = () => {
                       </div>
                       <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
-                        {(() => {
-                          const editionLabel = formatEditionLabel(product as any);
-                          return editionLabel ? (
-                            <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-300 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.22em] text-foreground/60">
-                              {editionLabel}
-                            </span>
-                          ) : null;
-                        })()}
                         {formatProductSubtitleLine(product.title, product.subtitle) && (
                           <span className="block mt-1 text-[0.8em] text-muted-foreground">
                             {formatProductSubtitleLine(product.title, product.subtitle)}
@@ -2584,14 +2581,6 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
                     <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
                       {product.title}
-                      {(() => {
-                        const editionLabel = formatEditionLabel(product as any);
-                        return editionLabel ? (
-                          <span className="ml-3 inline-block whitespace-nowrap rounded-none border border-neutral-300 bg-background px-2 py-0.5 align-baseline font-body text-[9px] font-medium uppercase tracking-[0.22em] text-foreground/60">
-                            {editionLabel}
-                          </span>
-                        ) : null;
-                      })()}
                       {formatProductSubtitleLine(product.title, product.subtitle) && (
                         <span className="block mt-1 text-[0.8em] text-muted-foreground">
                           {formatProductSubtitleLine(product.title, product.subtitle)}
