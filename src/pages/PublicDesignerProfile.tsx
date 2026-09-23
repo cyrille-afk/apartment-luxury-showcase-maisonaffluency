@@ -2057,8 +2057,8 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
-                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
+                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
+                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {/* Inventory badges — lower-left of the frame */}
@@ -2138,7 +2138,7 @@ const PublicDesignerProfile = () => {
                         )}
 
                         {/* Product name — secondary, elegant */}
-                        <h3 className="mt-1 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
+                        <h3 className="mt-0.5 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                             {displayTitle}
                           </Link>
@@ -2157,7 +2157,7 @@ const PublicDesignerProfile = () => {
                           )}
 
                         {/* Price slot — bottom */}
-                        <div className="mt-1">
+                        <div className="mt-0.5">
                           <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>

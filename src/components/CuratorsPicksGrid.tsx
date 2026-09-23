@@ -133,7 +133,7 @@ const Card = memo(function Card({
           alt={item.name}
           loading={index < 2 ? "eager" : "lazy"}
           decoding="async"
-          className="absolute inset-0 !h-full !w-full !object-cover object-center will-change-[opacity]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center will-change-[opacity]"
         />
         <motion.img
           src={item.ambientImage}
@@ -145,7 +145,7 @@ const Card = memo(function Card({
           animate={CROSSFADE}
           style={{ animationDelay: `${index * 220}ms` }}
           transition={{ delay: index * 0.22 }}
-          className="absolute inset-0 !h-full !w-full !object-cover object-center will-change-[opacity] [transform:translateZ(0)]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center will-change-[opacity] [transform:translateZ(0)]"
         />
       </div>
 
@@ -155,10 +155,10 @@ const Card = memo(function Card({
             {item.designer}
           </p>
         )}
-        <h3 className="mt-1 font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
+        <h3 className="mt-0.5 font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
           {item.name}
         </h3>
-        <p className="mt-1 font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
+        <p className="mt-0.5 font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
           {item.price}
         </p>
       </div>
