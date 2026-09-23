@@ -1447,46 +1447,50 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="px-3 py-3 text-center">
-        {pick.is_trade_only ? (
-          <>
-            <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
-              Reserved for the Trade
-            </p>
-            <p className="font-display text-sm tracking-wide leading-tight">
-              {pick.title}
-            </p>
-            <p className="font-body text-[11px] text-muted-foreground mt-1">
-              Brand details available to verified trade members.
-            </p>
-          </>
-        ) : (() => {
-          const sub = pick.subtitle?.trim() || "";
-          const isForPattern = / for /i.test(sub);
-          const isYear = /^\d{4}$/.test(sub);
-          const isReEdition = /re-?edition$/i.test(sub);
-          const brandLine = isForPattern ? sub : cleanBrandLine(pick.designer_name);
-          const composed = (!isYear && !isForPattern && !isReEdition)
-            ? composeTitle(pick.title, sub)
-            : { title: pick.title, remainingSubtitle: undefined as string | undefined };
-          const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
-          return (
-            <>
-              <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
-                {brandLine}
-              </p>
-              <p className="font-display text-sm tracking-wide leading-tight">
-                {composed.title}{isYear ? ` (${sub})` : ''}
-              </p>
-              {showSubtitleBelow && (
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5">{composed.remainingSubtitle}</p>
-              )}
-            </>
-          );
-        })()}
-        <p className="font-display text-sm mt-1 text-foreground/70">
-          {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
-        </p>
+      <div className="px-3 py-3">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full">
+          <div className="flex flex-col text-left space-y-0.5">
+            {pick.is_trade_only ? (
+              <>
+                <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
+                  Reserved for the Trade
+                </p>
+                <p className="font-display text-sm tracking-wide leading-tight">
+                  {pick.title}
+                </p>
+                <p className="font-body text-[11px] text-muted-foreground">
+                  Brand details available to verified trade members.
+                </p>
+              </>
+            ) : (() => {
+              const sub = pick.subtitle?.trim() || "";
+              const isForPattern = / for /i.test(sub);
+              const isYear = /^\d{4}$/.test(sub);
+              const isReEdition = /re-?edition$/i.test(sub);
+              const brandLine = isForPattern ? sub : cleanBrandLine(pick.designer_name);
+              const composed = (!isYear && !isForPattern && !isReEdition)
+                ? composeTitle(pick.title, sub)
+                : { title: pick.title, remainingSubtitle: undefined as string | undefined };
+              const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
+              return (
+                <>
+                  <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
+                    {brandLine}
+                  </p>
+                  <p className="font-display text-sm tracking-wide leading-tight">
+                    {composed.title}{isYear ? ` (${sub})` : ''}
+                  </p>
+                  {showSubtitleBelow && (
+                    <p className="font-body text-[11px] text-muted-foreground">{composed.remainingSubtitle}</p>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+          <p className="self-end font-display text-sm text-foreground/70">
+            {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
+          </p>
+        </div>
       </div>
 
     </button>

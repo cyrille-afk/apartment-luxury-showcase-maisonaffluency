@@ -766,31 +766,33 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 space-y-1 px-0.5 md:px-0 text-center md:text-left">
-                        {formatCuratorialEditionLine(pick) && (
-                          <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                            {formatCuratorialEditionLine(pick)}
-                          </p>
-                        )}
-                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
-                          {pick.title}
-                        </h3>
-                        {designerLabel && designerSlug ? (
-                          <Link
-                            to={`/trade/designers/${designerSlug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight mt-0.5"
-                          >
-                            {designerLabel}
-                          </Link>
-                        ) : designerLabel ? (
-                          <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight mt-0.5">
-                            {designerLabel}
-                          </span>
-                        ) : null}
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-2">
+                        <div className="flex flex-col text-center md:text-left space-y-0.5">
+                          {formatCuratorialEditionLine(pick) && (
+                            <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                              {formatCuratorialEditionLine(pick)}
+                            </p>
+                          )}
+                          <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
+                            {pick.title}
+                          </h3>
+                          {designerLabel && designerSlug ? (
+                            <Link
+                              to={`/trade/designers/${designerSlug}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="block font-body text-[10px] md:text-[11px] text-primary/70 hover:text-primary underline underline-offset-2 leading-tight"
+                            >
+                              {designerLabel}
+                            </Link>
+                          ) : designerLabel ? (
+                            <span className="block font-body text-[10px] md:text-[11px] text-muted-foreground leading-tight">
+                              {designerLabel}
+                            </span>
+                          ) : null}
+                        </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                        <div className="mt-1 md:mt-auto md:pt-1">
-                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide text-center md:inline-flex md:items-center md:justify-center md:gap-1.5 md:flex-wrap md:w-full">
+                        <div className="self-end md:text-right">
+                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide text-center md:inline-flex md:items-center md:justify-end md:gap-1.5 md:flex-wrap md:w-full">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice

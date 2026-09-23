@@ -304,7 +304,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-2.5 flex w-full flex-col items-start space-y-1 text-left leading-relaxed">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-3">
+                <div className="flex flex-col text-left space-y-0.5">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -380,13 +381,14 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     </>
                   );
                 })()}
-                {/* Price — muted, bottom */}
-                <div className="flex items-start">
-                  <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
-                    {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
-                  </p>
-                </div>
               </div>
+              {/* Price — bottom right, aligned to product title baseline */}
+              <div className="self-end">
+                <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
+                  {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
+                </p>
+              </div>
+            </div>
             </div>
           );
         })}

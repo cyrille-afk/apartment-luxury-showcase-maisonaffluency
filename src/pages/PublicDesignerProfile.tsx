@@ -2122,51 +2122,53 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex flex-col flex-1 items-start space-y-1 text-left leading-relaxed">
-                        {(() => {
-                          const editionLine = formatCuratorialEditionLine(pick);
-                          return editionLine ? (
-                            <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                              {editionLine}
-                            </p>
-                          ) : null;
-                        })()}
-                        {/* Designer / brand label — top, prominent */}
-                        {cardBrandSlug || parentBrandSlug ? (
-                          <Link
-                            to={`/designers/${cardBrandSlug || parentBrandSlug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
-                          >
-                            {cardBrandLabel || parentBrandName}
-                          </Link>
-                        ) : (
-                          <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1">
-                            {cardBrandLabel || parentBrandName || designer.name}
-                          </span>
-                        )}
-
-                        {/* Product name — secondary, elegant */}
-                        <h3 className="font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
-                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
-                            {displayTitle}
-                          </Link>
-                        </h3>
-
-                        {/* Variant/finish subtitle */}
-                        {cardSubtitle &&
-                          cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
-                          !subtitleDesignerLabel && (
-                            <p className={cn(
-                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
-                              !isArnoldClamChair && "uppercase"
-                            )}>
-                              {cardSubtitle}
-                            </p>
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-3">
+                        <div className="flex flex-col text-left space-y-0.5">
+                          {(() => {
+                            const editionLine = formatCuratorialEditionLine(pick);
+                            return editionLine ? (
+                              <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                                {editionLine}
+                              </p>
+                            ) : null;
+                          })()}
+                          {/* Designer / brand label — top, prominent */}
+                          {cardBrandSlug || parentBrandSlug ? (
+                            <Link
+                              to={`/designers/${cardBrandSlug || parentBrandSlug}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
+                            >
+                              {cardBrandLabel || parentBrandName}
+                            </Link>
+                          ) : (
+                            <span className="block font-display text-[11px] md:text-sm font-medium uppercase tracking-widest md:tracking-[0.18em] text-muted-foreground md:text-foreground leading-relaxed md:leading-tight line-clamp-1">
+                              {cardBrandLabel || parentBrandName || designer.name}
+                            </span>
                           )}
 
-                        {/* Price slot — bottom */}
-                        <div>
+                          {/* Product name — secondary, elegant */}
+                          <h3 className="font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
+                            <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
+                              {displayTitle}
+                            </Link>
+                          </h3>
+
+                          {/* Variant/finish subtitle */}
+                          {cardSubtitle &&
+                            cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
+                            !subtitleDesignerLabel && (
+                              <p className={cn(
+                                "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
+                                !isArnoldClamChair && "uppercase"
+                              )}>
+                                {cardSubtitle}
+                              </p>
+                            )}
+                        </div>
+
+                        {/* Price slot — bottom right, aligned to product title baseline */}
+                        <div className="self-end">
                           <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
