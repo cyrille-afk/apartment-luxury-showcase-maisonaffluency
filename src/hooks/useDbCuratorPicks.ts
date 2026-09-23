@@ -28,14 +28,17 @@ export function useDbCuratorPicks() {
       let picksRaw: any[] | null;
 
       if (cachedCatalog) {
-        designers = cachedCatalog.designers as any[];
+        designers = cachedCatalog.designers.filter(
+          (designer) => designer.is_published && !designer.trade_only,
+        ) as any[];
         picksRaw = cachedCatalog.picks as any[];
       } else {
-        // Fetch published designers (incl. founder to resolve parent hierarchy)
+        // Public browsing grids must contain only published, non-trade-only designers.
         const { data: designerRows } = await supabase
           .from("designers")
           .select("id, name, slug, display_name, source, founder")
-          .eq("is_published", true);
+          .eq("is_published", true)
+          .eq("trade_only", false);
         designers = (designerRows || []) as any[];
 
         // Fetch all picks via public view
