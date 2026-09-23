@@ -1380,7 +1380,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
       className="group flex flex-col w-full text-left rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
 
-      <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
+      <div className="aspect-square bg-muted/20 overflow-hidden relative">
         {pick.is_trade_only ? (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/85 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
@@ -2259,7 +2259,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                   </div>
                 ) : (
-                  <div className={`grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
+                  <div className={`grid gap-6 md:gap-8 lg:gap-8 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
                       <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} hideFavorite={hideCuratorPickFavorite} />
                     ))}
@@ -2315,7 +2315,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                 </div>
               ) : (
-                  <div data-category-results className="grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 scroll-header-offset">
+                  <div data-category-results className="grid gap-6 md:gap-8 lg:gap-8 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
                     <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} rrp={publicRrpMap?.[pick.id]} hideFavorite={hideCuratorPickFavorite} />
                   ))}
