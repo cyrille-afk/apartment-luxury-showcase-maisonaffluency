@@ -128,7 +128,7 @@ const Card = memo(function Card({
       className="group block text-left touch-manipulation select-none"
       aria-label={`${item.name} — ${item.price}`}
     >
-      <div className="relative !aspect-square h-auto w-full overflow-hidden bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
+      <div className="relative !aspect-square h-auto w-full bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
         <img
           src={item.studioImage}
           alt={item.name}
@@ -149,7 +149,7 @@ const Card = memo(function Card({
           className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply !p-6 will-change-[opacity] [transform:translateZ(0)]"
         />
         {item.edition && (
-          <p className="pointer-events-none absolute left-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+          <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
             {item.edition}
           </p>
         )}

@@ -1381,10 +1381,10 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           });
         }
       }}
-      className="group flex w-full flex-col overflow-hidden rounded-none bg-background text-left"
+      className="group flex w-full flex-col overflow-visible rounded-none bg-background text-left"
     >
 
-      <div className="relative aspect-square overflow-hidden bg-[hsl(var(--product-canvas))]">
+      <div className="relative aspect-square overflow-visible bg-[hsl(var(--product-canvas))]">
         {pick.is_trade_only ? (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/85 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
@@ -1416,7 +1416,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           </div>
         )}
         {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
-          <p className="pointer-events-none absolute left-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+          <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
             {formatCuratorialEditionLine(pick)}
           </p>
         )}
