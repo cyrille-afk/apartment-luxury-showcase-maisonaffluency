@@ -919,12 +919,12 @@ input, select, textarea {
 }
 
 
-/* Product image frame — percentage-padding square fallback. */
+/* Product image frame — width is explicit so the gallery and thumbnail rail
+   cannot collapse inside their flex column. */
 .product-image-frame {
   width: 100%;
   margin-inline: auto;
-  height: 0;
-  padding-bottom: 100%;
+  aspect-ratio: 1 / 1;
   transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
   contain: layout paint;
   will-change: transform;
