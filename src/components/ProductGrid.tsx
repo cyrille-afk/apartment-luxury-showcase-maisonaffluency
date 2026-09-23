@@ -606,7 +606,7 @@ function singularizeSub(s: string): string {
                     sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                   })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`w-full h-full object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                  className={`w-full h-full object-contain object-center mix-blend-multiply p-6 transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   decoding="async"
                 />
@@ -618,7 +618,7 @@ function singularizeSub(s: string): string {
                       sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                     })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                    className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply p-6 opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
                     decoding="async"
                   />
@@ -650,7 +650,7 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
+              <div className="flex w-full items-baseline justify-between gap-3 pt-3">
                 <div className="flex flex-col space-y-0.5 text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}

@@ -134,7 +134,7 @@ const Card = memo(function Card({
           alt={item.name}
           loading={index < 2 ? "eager" : "lazy"}
           decoding="async"
-          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply !p-6 will-change-[opacity]"
         />
         <motion.img
           src={item.ambientImage}
@@ -146,7 +146,7 @@ const Card = memo(function Card({
           animate={CROSSFADE}
           style={{ animationDelay: `${index * 220}ms` }}
           transition={{ delay: index * 0.22 }}
-          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply !p-6 will-change-[opacity] [transform:translateZ(0)]"
         />
         {item.edition && (
           <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
@@ -155,7 +155,7 @@ const Card = memo(function Card({
         )}
       </div>
 
-      <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
+      <div className="flex w-full items-baseline justify-between gap-3 pt-3">
         <div className="flex flex-col text-left space-y-0.5">
           {item.designer && (
             <p className="font-sans text-xs font-normal uppercase tracking-wider text-[hsl(var(--picks-fg))]">
@@ -188,7 +188,7 @@ export default function CuratorsPicksGrid({
       style={
         {
           "--picks-bg": "0 0% 0%",
-          "--picks-plate": "34 30% 91%",
+          "--picks-plate": "42 33% 94%",
           "--picks-fg": "0 0% 98%",
           "--picks-muted": "0 0% 62%",
         } as React.CSSProperties

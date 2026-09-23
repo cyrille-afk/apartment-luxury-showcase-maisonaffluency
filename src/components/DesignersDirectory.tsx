@@ -1399,7 +1399,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               src={pick.image_url}
               alt={pick.title}
               className={cn(
-                "h-full w-full object-contain object-center mix-blend-multiply transition-all duration-700 group-hover:scale-[1.03]",
+                "h-full w-full object-contain object-center mix-blend-multiply p-6 transition-all duration-700 group-hover:scale-[1.03]",
                 pick.hover_image_url && "group-hover:opacity-0"
               )} />
             {pick.hover_image_url && (
@@ -1407,7 +1407,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
                 src={pick.hover_image_url}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply p-6 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             )}
           </>
         ) : (
@@ -1450,7 +1450,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="pt-2.5">
+      <div className="pt-3">
         <div className="flex w-full items-baseline justify-between gap-3">
           <div className="flex flex-col text-left space-y-0.5">
             {pick.is_trade_only ? (
