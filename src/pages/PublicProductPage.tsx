@@ -31,7 +31,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
-import { formatEditionLabel } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatEditionLabel, isEcartReedition } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
@@ -1605,6 +1605,10 @@ const PublicProductPageContent: React.FC = () => {
   const favorited = favIds.has(product.id);
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const isEcartProduct = isEcartReedition({
+    designerName: designer.name,
+    founder: designer.founder,
+  });
   const curatorNotes = buildProductCuratorNotes({
     title: product.title,
     brandName: designerDisplay,
@@ -2336,6 +2340,11 @@ const PublicProductPageContent: React.FC = () => {
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
                 pickId={product.id}
+                firstImageBadge={isEcartProduct ? (
+                  <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
+                    {ECART_REEDITION_LABEL}
+                  </span>
+                ) : null}
 
 
                 overlay={

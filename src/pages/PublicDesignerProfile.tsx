@@ -60,7 +60,7 @@ import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import NotFound from "@/pages/NotFound";
-import { formatCuratorialEditionLine } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -1947,6 +1947,11 @@ const PublicDesignerProfile = () => {
                     !!designer.founder;
                   const parentBrandName = showParentBrand ? designer.founder! : undefined;
                   const parentBrandSlug = showParentBrand ? parentDesigner?.slug : undefined;
+                  const showReedition = isEcartReedition({
+                    designerName: designerLabel || designer.name,
+                    founder: designer.founder,
+                    parentBrand: parentBrandName || (isParentBrandDesigner(designer) ? designer.name : null),
+                  });
 
                   // Arnold Madsen's three Clam Chair cards are finish-specific
                   // editorial entries, not separate products. Keep all three
@@ -2065,6 +2070,11 @@ const PublicDesignerProfile = () => {
                         {formatCuratorialEditionLine(pick) && (
                           <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                             {formatCuratorialEditionLine(pick)}
+                          </p>
+                        )}
+                        {showReedition && (
+                          <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                            {ECART_REEDITION_LABEL}
                           </p>
                         )}
                         {/* Inventory badges — lower-left of the frame */}

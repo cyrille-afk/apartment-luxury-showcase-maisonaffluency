@@ -42,3 +42,24 @@ export function formatCuratorialEditionLine(input: {
   const editionTag = (input.tags ?? []).find((tag) => /\b(?:limited|curator(?:'s)?|numbered)\s+edition\b|\bedition\s+of\s+\d+/i.test(tag));
   return editionTag?.trim() || null;
 }
+
+const normalizeHouseName = (value?: string | null) =>
+  (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+/** True when a product is edited by Ecart, including Ecart's designer family. */
+export function isEcartReedition(input: {
+  designerName?: string | null;
+  founder?: string | null;
+  parentBrand?: string | null;
+  reeditionBy?: string | null;
+}): boolean {
+  return [input.designerName, input.founder, input.parentBrand, input.reeditionBy]
+    .map(normalizeHouseName)
+    .some((value) => value === "ecart" || value === "ecart paris" || value.startsWith("ecart - "));
+}
+
+export const ECART_REEDITION_LABEL = "Reedition";

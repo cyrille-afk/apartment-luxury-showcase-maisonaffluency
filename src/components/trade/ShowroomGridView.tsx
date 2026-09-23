@@ -29,6 +29,7 @@ import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPic
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { ECART_REEDITION_LABEL, isEcartReedition } from "@/lib/editionLabel";
 
 /** Local slugify — must match the one used by TradeProductPage / PublicProductPage */
 const slugifyForUrl = (s: string) =>
@@ -53,6 +54,7 @@ interface ShowroomProduct {
   currency?: string;
   price_unit?: string;
   price_prefix?: string | null;
+  reedition_by?: string | null;
 }
 
 interface ShowroomGridViewProps {
@@ -257,11 +259,11 @@ const ShowroomGridView = ({
       if (data) {
         const tradeProducts = getAllTradeProducts();
         const pdfLookup = new Map<string, string>();
-        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; description?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string }>();
+        const metadataLookup = new Map<string, { materials?: string; dimensions?: string; description?: string; brand?: string; image_url?: string | null; category?: string; subcategory?: string; reedition_by?: string }>();
         const tradeProductIdLookup = new Map<string, string>();
         for (const tp of tradeProducts) {
           const tpKey = tp.product_name.trim().toLowerCase();
-          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, description: tp.description, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory };
+          const metaEntry = { materials: tp.materials, dimensions: tp.dimensions, description: tp.description, brand: tp.brand_name, image_url: tp.image_url, category: tp.category, subcategory: tp.subcategory, reedition_by: tp.reedition_by };
           if (tp.pdf_url) pdfLookup.set(tpKey, tp.pdf_url);
           metadataLookup.set(tpKey, metaEntry);
           tradeProductIdLookup.set(tpKey, tp.id);
@@ -431,6 +433,7 @@ const ShowroomGridView = ({
               dimensions: meta?.dimensions || item.dimensions,
               description: findDescription(item.product_name) || meta?.description || null,
               designer_name: meta?.brand || item.designer_name,
+              reedition_by: meta?.reedition_by || null,
               product_image_url: meta?.image_url || item.product_image_url || null,
               hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || null,
               category: meta?.category || inferCategory(item.product_name),
@@ -780,6 +783,11 @@ const ShowroomGridView = ({
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
+                  {isEcartReedition({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
+                    <p className="pointer-events-none absolute top-3 left-3 z-10 text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
+                      {ECART_REEDITION_LABEL}
+                    </p>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); togglePin(toCompareItem(product)); }}
                     className={cn(
