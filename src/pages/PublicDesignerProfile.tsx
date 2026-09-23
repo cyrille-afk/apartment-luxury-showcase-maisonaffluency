@@ -2127,25 +2127,25 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex w-full items-baseline justify-between gap-3 pt-3">
-                        <div className="flex flex-col text-left space-y-0.5">
+                      <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+                        <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
                               to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1 hover:text-foreground/70 transition-colors"
+                              className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight hover:text-foreground/70 transition-colors"
                             >
                               {cardBrandLabel || parentBrandName}
                             </Link>
                           ) : (
-                            <span className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1">
+                            <span className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
                               {cardBrandLabel || parentBrandName || designer.name}
                             </span>
                           )}
 
                           {/* Product name — secondary, elegant */}
-                          <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
+                          <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
                             <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                               {displayTitle}
                             </Link>
@@ -2165,8 +2165,8 @@ const PublicDesignerProfile = () => {
                         </div>
 
                         {/* Price slot — bottom right, aligned to product title baseline */}
-                        <div className="min-w-fit shrink-0 self-end whitespace-nowrap">
-                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600">
+                        <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap md:mt-0 md:self-baseline">
+                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:text-sm">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
                         </div>

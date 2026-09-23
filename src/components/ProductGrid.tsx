@@ -650,16 +650,16 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="flex w-full items-baseline justify-between gap-3 pt-3">
-                <div className="flex flex-col space-y-0.5 text-left">
+              <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+                <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground hover:text-foreground/70 transition-colors"
+                    className="block w-full truncate whitespace-nowrap font-body text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 transition-colors"
                   >
                     {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                   </Link>
-                  <h3 className="font-body text-xs font-normal leading-snug text-neutral-600">
+                  <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
                       : item.pick.title}

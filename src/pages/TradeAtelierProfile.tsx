@@ -771,28 +771,28 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                       <div className="flex w-full items-baseline justify-between gap-3 pt-3">
-                        <div className="flex flex-col text-left space-y-0.5">
+                       <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+                         <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
                           {designerLabel && designerSlug ? (
                             <Link
                               to={`/trade/designers/${designerSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block font-display text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 leading-tight"
+                               className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 leading-tight"
                             >
                               {designerLabel}
                             </Link>
                           ) : designerLabel ? (
-                            <span className="block font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
+                             <span className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
                               {designerLabel}
                             </span>
                           ) : null}
-                          <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
+                           <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
                             {pick.title}
                           </h3>
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                        <div className="min-w-fit shrink-0 self-end whitespace-nowrap text-right">
-                          <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
+                         <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap text-left md:mt-0 md:self-baseline md:text-right">
+                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5 md:text-sm">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice

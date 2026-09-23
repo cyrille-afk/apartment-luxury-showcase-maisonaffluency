@@ -1450,9 +1450,9 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="pt-3">
-        <div className="flex w-full items-baseline justify-between gap-3">
-          <div className="flex flex-col text-left space-y-0.5">
+      <div>
+        <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+          <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
             {pick.is_trade_only ? (
               <>
                 <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
@@ -1477,10 +1477,10 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
               return (
                 <>
-                  <p className="font-body text-xs font-normal uppercase tracking-wider text-foreground">
+                  <p className="block w-full truncate whitespace-nowrap font-body text-xs font-normal uppercase tracking-wider text-foreground">
                     {brandLine}
                   </p>
-                  <p className="font-display text-xs font-normal leading-tight text-neutral-600">
+                  <p className="line-clamp-2 font-display text-sm font-normal leading-tight text-neutral-600">
                     {composed.title}{isYear ? ` (${sub})` : ''}
                   </p>
                   {showSubtitleBelow && (
@@ -1490,7 +1490,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-body text-xs font-normal text-neutral-600">
+          <p className="mt-1 min-w-fit shrink-0 whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:mt-0 md:self-baseline md:text-sm">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
         </div>

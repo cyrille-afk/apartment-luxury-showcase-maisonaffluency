@@ -155,18 +155,18 @@ const Card = memo(function Card({
         )}
       </div>
 
-      <div className="flex w-full items-baseline justify-between gap-3 pt-3">
-        <div className="flex flex-col text-left space-y-0.5">
+      <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+        <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
           {item.designer && (
-            <p className="font-sans text-xs font-normal uppercase tracking-wider text-[hsl(var(--picks-fg))]">
+            <p className="block w-full truncate whitespace-nowrap font-sans text-xs font-normal uppercase tracking-wider text-[hsl(var(--picks-fg))]">
               {item.designer}
             </p>
           )}
-          <h3 className="font-display text-xs font-normal leading-snug text-[hsl(var(--picks-muted))]">
+          <h3 className="line-clamp-2 font-display text-sm font-normal leading-snug text-[hsl(var(--picks-muted))]">
             {item.name}
           </h3>
         </div>
-        <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-sans text-xs font-normal text-[hsl(var(--picks-muted))]">
+        <p className="mt-1 min-w-fit shrink-0 whitespace-nowrap font-sans text-xs font-normal text-[hsl(var(--picks-muted))] md:mt-0 md:self-baseline md:text-sm">
           {item.price}
         </p>
       </div>
