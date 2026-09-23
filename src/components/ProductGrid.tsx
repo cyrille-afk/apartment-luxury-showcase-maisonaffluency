@@ -258,6 +258,8 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
       ...existing,
       pick: {
         ...existing.pick,
+        id: existing.pick.id || item.pick.id,
+        slug: existing.pick.slug || item.pick.slug,
         image: existing.pick.image || item.pick.image,
         hoverImage: existing.pick.hoverImage || item.pick.hoverImage,
         subtitle: existing.pick.subtitle || item.pick.subtitle,
