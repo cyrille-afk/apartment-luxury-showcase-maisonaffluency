@@ -599,14 +599,14 @@ function singularizeSub(s: string): string {
               onFocus={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
-              <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
+              <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] flex items-center justify-center">
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
                     sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                   })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                  className={`w-full h-full object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   decoding="async"
                 />
@@ -618,10 +618,15 @@ function singularizeSub(s: string): string {
                       sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                     })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
                     loading="lazy"
                     decoding="async"
                   />
+                )}
+                {formatCuratorialEditionLine(item.pick) && (
+                  <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                    {formatCuratorialEditionLine(item.pick)}
+                  </p>
                 )}
                 {/* Compare pin button */}
                 <button
@@ -645,27 +650,21 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="mt-1 space-y-1 text-center">
-                {(() => {
-                  const editionLine = formatCuratorialEditionLine(item.pick);
-                  return editionLine ? (
-                    <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                      {editionLine}
-                    </p>
-                  ) : null;
-                })()}
-                <Link
-                  to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold hover:text-foreground hover:underline underline-offset-4 transition-colors"
-                >
-                  {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
-                </Link>
-                <h3 className="font-body text-sm md:text-base text-foreground leading-tight font-medium">
-                  {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
-                    ? `${item.pick.title} Table`
-                    : item.pick.title}
-                </h3>
+              <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
+                <div className="flex flex-col space-y-0.5 text-left">
+                  <Link
+                    to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground hover:text-foreground/70 transition-colors"
+                  >
+                    {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
+                  </Link>
+                  <h3 className="font-body text-xs font-normal leading-snug text-neutral-600">
+                    {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
+                      ? `${item.pick.title} Table`
+                      : item.pick.title}
+                  </h3>
+                </div>
               </div>
             </motion.div>
           ))}
