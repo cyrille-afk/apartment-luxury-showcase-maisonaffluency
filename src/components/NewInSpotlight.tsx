@@ -268,13 +268,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           return (
             <div
               key={pick.id}
-              className="group flex h-full min-w-0 flex-col cursor-pointer"
+              className="group flex h-full min-w-0 flex-col justify-between cursor-pointer"
               onClick={() => {
                 const item = lightboxItems.find((li) => li.id === pick.id);
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative !aspect-square h-auto w-full flex-none rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className="relative aspect-square w-full flex-none overflow-hidden bg-[hsl(var(--product-canvas))]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -282,16 +282,16 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
-                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
+                  primaryClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
+                  alternateClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
                 />
                 {formatCuratorialEditionLine(pick) && (
-                  <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                     {formatCuratorialEditionLine(pick)}
                   </p>
                 )}
                 {showReedition && (
-                  <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                     {ECART_REEDITION_LABEL}
                   </p>
                 )}
@@ -319,8 +319,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-                <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+              <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
+                <div className="flex min-w-0 max-w-[70%] flex-col text-left">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -370,19 +370,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block h-5 w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
                           </Link>
                          ) : brandLine ? (
-                          <span className="block h-5 w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
+                          <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
                             {brandLine}
                           </span>
                          ) : (
                            <span aria-hidden="true" className="block h-5" />
                          )}
                       {/* Product name — secondary, elegant italic */}
-                      <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
+                      <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
                         {productLine}
                       </h3>
                     </>
@@ -390,8 +390,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 })()}
               </div>
               {/* Price — bottom right, aligned to product title baseline */}
-              <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap md:mt-0 md:self-baseline">
-                <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:text-sm">
+              <div className="min-w-fit shrink-0 whitespace-nowrap">
+                <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
                   {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                 </p>
               </div>

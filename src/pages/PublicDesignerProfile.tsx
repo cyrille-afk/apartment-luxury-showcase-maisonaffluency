@@ -2033,7 +2033,7 @@ const PublicDesignerProfile = () => {
                         }
                       }}
                       className={cn(
-                        "w-full break-inside-avoid inline-block mb-4 sm:flex sm:flex-col group transition-all duration-700",
+                        "group flex h-full w-full break-inside-avoid flex-col justify-between mb-4 transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
@@ -2054,7 +2054,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="relative !aspect-square h-auto w-full max-w-full cursor-pointer rounded-sm bg-[hsl(var(--product-canvas))]"
+                        className="relative aspect-square w-full max-w-full flex-none cursor-pointer overflow-hidden bg-[hsl(var(--product-canvas))]"
                       >
                         <SwipeAlternateProductImage
                           primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -2063,17 +2063,17 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
-                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
+                          primaryClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
+                          alternateClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
                         {showReedition && (
-                          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                             {ECART_REEDITION_LABEL}
                           </p>
                         )}
@@ -2137,25 +2137,25 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-                        <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+                      <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
+                        <div className="flex min-w-0 max-w-[70%] flex-col text-left">
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
                               to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight hover:text-foreground/70 transition-colors"
+                              className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70"
                             >
                               {cardBrandLabel || parentBrandName}
                             </Link>
                           ) : (
-                            <span className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
+                            <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
                               {cardBrandLabel || parentBrandName || designer.name}
                             </span>
                           )}
 
                           {/* Product name — secondary, elegant */}
-                          <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
+                          <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
                             <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                               {displayTitle}
                             </Link>
@@ -2175,8 +2175,8 @@ const PublicDesignerProfile = () => {
                         </div>
 
                         {/* Price slot — bottom right, aligned to product title baseline */}
-                        <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap md:mt-0 md:self-baseline">
-                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:text-sm">
+                        <div className="min-w-fit shrink-0 whitespace-nowrap">
+                           <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
                         </div>

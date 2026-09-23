@@ -592,7 +592,7 @@ function singularizeSub(s: string): string {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
-              className="group cursor-pointer"
+              className="group flex h-full cursor-pointer flex-col justify-between"
               tabIndex={0}
               onClick={() => handleCardClick(item, idx)}
               onMouseEnter={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
@@ -625,12 +625,12 @@ function singularizeSub(s: string): string {
                   />
                 )}
                 {formatCuratorialEditionLine(item.pick) && (
-                  <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                     {formatCuratorialEditionLine(item.pick)}
                   </p>
                 )}
                 {isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) && (
-                  <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                     {ECART_REEDITION_LABEL}
                   </p>
                 )}
@@ -656,16 +656,16 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-                <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+              <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
+                <div className="flex min-w-0 max-w-[70%] flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="block w-full truncate whitespace-nowrap font-body text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 transition-colors"
+                    className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased hover:text-foreground/70 transition-colors"
                   >
                     {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                   </Link>
-                  <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
+                  <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
                       : item.pick.title}
