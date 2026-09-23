@@ -102,15 +102,25 @@ const LeadContactsEditor = ({
       .eq("id", leadId);
     setSaving(false);
     if (error) {
+      dirty.current = false;
       setRows(buildRows());
       onChange(previous);
       toast.error(`Could not update ${studioName} contacts.`);
       return;
     }
+    dirty.current = false;
     flash();
   };
 
+  // Saves only when something actually changed, so tabbing between fields
+  // doesn't fire a round trip per blur.
+  const persistIfDirty = () => {
+    if (!dirty.current) return;
+    void persist(rows);
+  };
+
   const setRow = (i: number, patch: Partial<Contact>) => {
+    dirty.current = true;
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   };
 
