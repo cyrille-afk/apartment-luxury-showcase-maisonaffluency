@@ -150,21 +150,23 @@ const Card = memo(function Card({
         />
       </div>
 
-      <div className="space-y-1 pt-3 sm:pt-4">
-        {item.edition && (
-          <p className="font-sans text-xs italic tracking-wider text-neutral-500">
-            {item.edition}
-          </p>
-        )}
-        {item.designer && (
-          <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--picks-muted))]">
-            {item.designer}
-          </p>
-        )}
-        <h3 className="font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
-          {item.name}
-        </h3>
-        <p className="font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-3 sm:pt-4">
+        <div className="flex flex-col text-left space-y-0.5">
+          {item.edition && (
+            <p className="font-sans text-xs italic tracking-wider text-neutral-500">
+              {item.edition}
+            </p>
+          )}
+          {item.designer && (
+            <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--picks-muted))]">
+              {item.designer}
+            </p>
+          )}
+          <h3 className="font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
+            {item.name}
+          </h3>
+        </div>
+        <p className="self-end font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
           {item.price}
         </p>
       </div>
