@@ -60,6 +60,7 @@ import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import NotFound from "@/pages/NotFound";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -2121,7 +2122,15 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex flex-col flex-1 items-start text-left leading-relaxed">
+                      <div className="flex flex-col flex-1 items-start space-y-1 text-left leading-relaxed">
+                        {(() => {
+                          const editionLine = formatCuratorialEditionLine(pick);
+                          return editionLine ? (
+                            <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                              {editionLine}
+                            </p>
+                          ) : null;
+                        })()}
                         {/* Designer / brand label — top, prominent */}
                         {cardBrandSlug || parentBrandSlug ? (
                           <Link
@@ -2138,7 +2147,7 @@ const PublicDesignerProfile = () => {
                         )}
 
                         {/* Product name — secondary, elegant */}
-                        <h3 className="mt-0.5 font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
+                        <h3 className="font-body text-[13px] md:text-[15px] italic font-normal text-foreground/80 leading-relaxed md:leading-snug line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                             {displayTitle}
                           </Link>
@@ -2149,7 +2158,7 @@ const PublicDesignerProfile = () => {
                           cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                           !subtitleDesignerLabel && (
                             <p className={cn(
-                              "mt-0.5 font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
+                              "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
                               !isArnoldClamChair && "uppercase"
                             )}>
                               {cardSubtitle}
@@ -2157,7 +2166,7 @@ const PublicDesignerProfile = () => {
                           )}
 
                         {/* Price slot — bottom */}
-                        <div className="mt-0.5">
+                        <div>
                           <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>

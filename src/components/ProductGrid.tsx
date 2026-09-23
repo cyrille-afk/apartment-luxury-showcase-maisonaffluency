@@ -25,6 +25,7 @@ import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/ca
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link } from "react-router-dom";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -601,11 +602,7 @@ function singularizeSub(s: string): string {
               <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
-                   const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                  // Also include the edition field if present and not already covered
-                  if (item.pick.edition && !specialTags.some(t => t.toLowerCase() === item.pick.edition!.toLowerCase())) {
-                    specialTags.unshift(item.pick.edition);
-                  }
+                   const specialTags = tags.filter(t => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
                   return specialTags.length > 0 ? (
                     <div className="absolute top-3 left-3 bg-white/90 border border-neutral-100 px-2 py-0.5 rounded-none backdrop-blur-sm z-10 flex flex-wrap gap-1">
                       {specialTags.map((tag, i) => (
@@ -661,7 +658,15 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="text-center mt-1">
+              <div className="mt-1 space-y-1 text-center">
+                {(() => {
+                  const editionLine = formatCuratorialEditionLine(item.pick);
+                  return editionLine ? (
+                    <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                      {editionLine}
+                    </p>
+                  ) : null;
+                })()}
                 <Link
                   to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                   onClick={(e) => e.stopPropagation()}
@@ -669,7 +674,7 @@ function singularizeSub(s: string): string {
                 >
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                 </Link>
-                <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-1.5 font-medium">
+                <h3 className="font-body text-sm md:text-base text-foreground leading-tight font-medium">
                   {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                     ? `${item.pick.title} Table`
                     : item.pick.title}
@@ -717,10 +722,7 @@ function singularizeSub(s: string): string {
                   {/* Special tags */}
                   {(() => {
                     const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                    if (currentItem.pick.edition && !specialTags.some(t => t.toLowerCase() === currentItem.pick.edition!.toLowerCase())) {
-                      specialTags.unshift(currentItem.pick.edition);
-                    }
+                    const specialTags = tags.filter(t => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
                     return specialTags.length > 0 && !isZoomed ? (
                       <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
                         {specialTags.map((tag, i) => (

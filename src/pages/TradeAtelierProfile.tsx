@@ -698,13 +698,7 @@ const TradeAtelierProfile = () => {
                         {/* Tag badges — upper-left */}
                         {(() => {
                           const tags: string[] = pick.tags || [];
-                          const filtered = pick.edition
-                            ? tags.filter(t => !/^limited-edition$/i.test(t))
-                            : tags;
-                          const specialTags = filtered.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
-                            specialTags.unshift(pick.edition);
-                          }
+                          const specialTags = tags.filter(t => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
                           return specialTags.length > 0 ? (
                             <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
                               {specialTags.map((tag, i) => (
@@ -785,7 +779,12 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center md:text-left">
+                      <div className="flex flex-col flex-1 space-y-1 px-0.5 md:px-0 text-center md:text-left">
+                        {pick.edition && (
+                          <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                            {pick.edition}
+                          </p>
+                        )}
                         <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
                           {pick.title}
                         </h3>

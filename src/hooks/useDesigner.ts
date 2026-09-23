@@ -123,6 +123,8 @@ export interface DesignerCuratorPick {
   origin: string | null;
   description: string | null;
   edition: string | null;
+  edition_number?: string | null;
+  edition_signing?: string | null;
   photo_credit: string | null;
   pdf_url: string | null;
   pdf_filename: string | null;

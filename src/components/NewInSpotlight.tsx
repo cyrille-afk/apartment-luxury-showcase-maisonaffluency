@@ -23,6 +23,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -303,7 +304,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-2.5 flex w-full flex-col items-start gap-0.5 text-left leading-relaxed">
+              <div className="mt-2.5 flex w-full flex-col items-start space-y-1 text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -346,10 +347,16 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? `${attribution.title} ${editorSuffix}`
                     : attribution.title;
                   const brandSlug = resolveSlug(brandLine);
+                  const editionLine = formatCuratorialEditionLine(pick);
 
 
                   return (
                     <>
+                      {editionLine && (
+                        <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                          {editionLine}
+                        </p>
+                      )}
                       {/* Designer / brand — top, prominent */}
                        {brandSlug ? (
                           <Link
