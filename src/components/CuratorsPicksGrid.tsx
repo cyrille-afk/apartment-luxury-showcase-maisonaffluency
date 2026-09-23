@@ -148,15 +148,15 @@ const Card = memo(function Card({
           transition={{ delay: index * 0.22 }}
           className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
         />
+        {item.edition && (
+          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+            {item.edition}
+          </p>
+        )}
       </div>
 
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-3 sm:pt-4">
+      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
         <div className="flex flex-col text-left space-y-0.5">
-          {item.edition && (
-            <p className="font-sans text-xs italic tracking-wider text-neutral-500">
-              {item.edition}
-            </p>
-          )}
           {item.designer && (
             <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--picks-muted))]">
               {item.designer}
@@ -166,7 +166,7 @@ const Card = memo(function Card({
             {item.name}
           </h3>
         </div>
-        <p className="self-end font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
+        <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
           {item.price}
         </p>
       </div>
