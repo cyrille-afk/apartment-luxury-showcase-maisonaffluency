@@ -1,36 +1,32 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { CldPicture } from "@/components/ui/CldPicture";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search, Scale } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
-import PinchZoomImage from "./PinchZoomImage";
-import QuoteRequestDialog from "./QuoteRequestDialog";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
-import { useCompare, type CompareItem } from "@/contexts/CompareContext";
-import { useAuthGate } from "@/hooks/useAuthGate";
-import AuthGateDialog from "@/components/AuthGateDialog";
+import { useCompare } from "@/contexts/CompareContext";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/queryKeys";
-import { supabase } from "@/integrations/supabase/client";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
-import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
+import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
+import { useShippingDestination } from "@/lib/shippingDestination";
+import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const productHref = (pick: CuratorPick) =>
+  `/products/${pick.slug || designerSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""))}`;
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -243,14 +239,16 @@ const _sharedProductList = buildProductList(atelierOnlyPicks);
 /** Merge hardcoded + DB picks, deduplicating by designerId + title */
 function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): ProductItem[] {
   const merged = new Map<string, ProductItem>();
+  const mergeKey = (item: ProductItem) =>
+    `${item.designerId}::${normalizeSearchText(`${item.pick.title} ${item.pick.subtitle || ""}`)}`;
 
   for (const item of hardcoded) {
-    const key = `${item.designerId}::${item.pick.title}`;
+    const key = mergeKey(item);
     merged.set(key, item);
   }
 
   for (const item of dbPicks) {
-    const key = `${item.designerId}::${item.pick.title}`;
+    const key = mergeKey(item);
     const existing = merged.get(key);
 
     if (!existing) {
@@ -262,6 +260,9 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
       ...existing,
       pick: {
         ...existing.pick,
+        // Database identity is authoritative for public pricing and canonical routing.
+        id: item.pick.id || existing.pick.id,
+        slug: item.pick.slug || existing.pick.slug,
         image: existing.pick.image || item.pick.image,
         hoverImage: existing.pick.hoverImage || item.pick.hoverImage,
         subtitle: existing.pick.subtitle || item.pick.subtitle,
@@ -285,27 +286,11 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 
 const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
-  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const destination = useShippingDestination();
 
-  /** Warm the curator-pick detail cache so opening the card feels instant. */
-  const prefetchPickDetail = useCallback((pickId?: string) => {
-    if (!pickId) return;
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.curatorPickDetail(pickId),
-      staleTime: 10 * 60_000,
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("designer_curator_picks_public" as any)
-          .select("id, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
-          .eq("id", pickId)
-          .maybeSingle();
-        if (error) throw error;
-        return data as any;
-      },
-    });
-  }, [queryClient]);
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -314,18 +299,8 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
     () => mergeWithDbPicks(_sharedProductList, dbPicks || []),
     [dbPicks]
   );
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [navigatedToProfile, setNavigatedToProfile] = useState(false);
-  const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
-  const [lightboxHovered, setLightboxHovered] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
-  const [quoteProduct, setQuoteProduct] = useState<{ name?: string; designer?: string }>({});
   const gridRef = useRef<HTMLElement>(null);
-  const touchStartRef = useRef<number | null>(null);
-  const touchEndRef = useRef<number | null>(null);
 
 /** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
 function singularizeSub(s: string): string {
@@ -433,61 +408,11 @@ function singularizeSub(s: string): string {
     });
   }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug]);
 
+  const { data: publicRrpMap = {} } = usePublicRrpMap(filtered.map((item) => item.pick.id));
   const isActive = Boolean(category || subcategory || textQuery || roomSlug);
 
-  // Reset image-loaded state on lightbox slide changes
-  useEffect(() => {
-    if (lightboxOpen) setIsLightboxImageLoaded(false);
-  }, [lightboxOpen, lightboxIndex]);
-
-  // Track whether user has scrolled away from the grid AND navigated to a profile
-  const showBackToGrid = navigatedToProfile && isActive;
-
-  // Reset navigatedToProfile when filter changes
-  useEffect(() => {
-    setNavigatedToProfile(false);
-  }, [category, subcategory]);
-
-  const scrollBackToGrid = useCallback(() => {
-    setNavigatedToProfile(false);
-    const el = document.getElementById("product-grid");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
-  const handleNavigateToDesigner = useCallback((item: ProductItem) => {
-    const sectionMap: Record<string, { scrollId: string; deeplinkSection: string }> = {
-      designers: { scrollId: "designers", deeplinkSection: "designer" },
-      collectibles: { scrollId: "collectibles", deeplinkSection: "collectible" },
-      ateliers: { scrollId: "brands", deeplinkSection: "atelier" },
-    };
-    const mapped = sectionMap[item.section];
-    if (!mapped) return;
-
-    window.dispatchEvent(new CustomEvent("deeplink-open-profile", {
-      detail: { section: mapped.deeplinkSection, id: item.designerId }
-    }));
-
-    setNavigatedToProfile(true);
-    setTimeout(() => {
-      const el = document.getElementById(mapped.scrollId);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
-  }, []);
-
-  // Mobile/PWA: first tap reveals a "Discover the Product" pill; second tap opens the lightbox.
-  const [mobileRevealedIdx, setMobileRevealedIdx] = useState<number | null>(null);
-  // Tracks the hovered card so hover (lifestyle) images are only fetched on intent.
+  // Hover images are fetched only when the shopper shows intent.
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const handleCardClick = useCallback((_item: ProductItem, index: number) => {
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && mobileRevealedIdx !== index) {
-      setMobileRevealedIdx(index);
-      return;
-    }
-    setLightboxIndex(index);
-    setIsLightboxImageLoaded(false);
-    setLightboxOpen(true);
-    setIsZoomed(false);
-  }, [mobileRevealedIdx]);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
@@ -497,15 +422,6 @@ function singularizeSub(s: string): string {
     window.dispatchEvent(new CustomEvent('syncProductSearch', { detail: { query: null, source: filterSource } }));
   }, [filterSource]);
 
-  const navigateLightbox = useCallback((dir: 1 | -1) => {
-    const newIdx = lightboxIndex + dir;
-    if (newIdx >= 0 && newIdx < filtered.length) {
-      setLightboxIndex(newIdx);
-      setIsLightboxImageLoaded(false);
-      setIsZoomed(false);
-      setLightboxHovered(false);
-    }
-  }, [lightboxIndex, filtered]);
 
   // If scoped, only render when the filter source matches this instance
   const activeScope = filterSource ? (SOURCE_TO_SCOPE[filterSource] || "designers") : null;
@@ -634,11 +550,16 @@ function singularizeSub(s: string): string {
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
               className="group flex h-full cursor-pointer flex-col justify-between"
               tabIndex={0}
-              onClick={() => handleCardClick(item, idx)}
-              onMouseEnter={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
+              role="link"
+              aria-label={`View ${item.pick.title} product details`}
+              onClick={() => navigate(productHref(item.pick))}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") navigate(productHref(item.pick));
+              }}
+              onMouseEnter={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
               onMouseLeave={() => setHoveredIdx((cur) => (cur === idx ? null : cur))}
-              onFocus={() => { prefetchPickDetail(item.pick.id); setHoveredIdx(idx); }}
-              onTouchStart={() => prefetchPickDetail(item.pick.id)}
+              onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
+              onTouchStart={() => prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title))}
             >
               <div className="relative aspect-square w-full bg-[hsl(var(--product-canvas))] flex items-center justify-center">
                 <img
@@ -691,10 +612,6 @@ function singularizeSub(s: string): string {
                 >
                   <Scale size={14} />
                 </button>
-                {/* "Discover the Product" pill — mobile/PWA only, shown once tap reveals the card */}
-                <div className={`md:hidden pointer-events-none absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300 bg-black/25 ${mobileRevealedIdx === idx ? 'opacity-100' : 'opacity-0'}`}>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
-                </div>
               </div>
               <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
                 <div className="flex min-w-0 flex-1 flex-col text-left">
@@ -711,6 +628,11 @@ function singularizeSub(s: string): string {
                       : item.pick.title}
                   </h3>
                 </div>
+                <div className="shrink-0 whitespace-nowrap text-right">
+                  <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
+                    {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon request"}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -722,324 +644,8 @@ function singularizeSub(s: string): string {
         )}
       </div>
 
-      {/* ─── Lightbox ─────────────────────────────────────────────────── */}
-      <Dialog modal={false} open={lightboxOpen} onOpenChange={() => { setLightboxOpen(false); setIsZoomed(false); setIsLightboxImageLoaded(false); }}>
-        <DialogContent
-          hideClose
-          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
-          aria-describedby={undefined}
-          onKeyDown={(e) => {
-            if (!filtered.length) return;
-            if (e.key === "ArrowLeft") navigateLightbox(-1);
-            if (e.key === "ArrowRight") navigateLightbox(1);
-          }}
-        >
-          <VisuallyHidden><DialogTitle>Product Detail</DialogTitle></VisuallyHidden>
-          {lightboxOpen && filtered[lightboxIndex] && (() => {
-            const currentItem = filtered[lightboxIndex];
-            return (
-            <div className="relative w-full h-full flex items-start justify-start md:items-center md:justify-center touch-pan-y select-none" style={{ WebkitUserSelect: 'none' }}>
-              <div
-                onTouchStart={(e) => { if (isZoomed) return; touchStartRef.current = e.targetTouches[0].clientX; touchEndRef.current = null; }}
-                onTouchMove={(e) => { if (isZoomed) return; touchEndRef.current = e.targetTouches[0].clientX; }}
-                onTouchEnd={() => {
-                  if (isZoomed || touchStartRef.current === null) return;
-                  if (touchEndRef.current !== null) {
-                    const distance = touchStartRef.current - touchEndRef.current;
-                    if (distance > 50) navigateLightbox(1);
-                    else if (distance < -50) navigateLightbox(-1);
-                  }
-                  touchStartRef.current = null;
-                  touchEndRef.current = null;
-                }}
-                className={`flex h-full w-full flex-col items-center justify-start md:h-auto md:w-auto md:justify-center px-4 md:px-16 transition-all duration-300 overflow-y-auto md:overflow-visible select-none touch-pan-y ${isZoomed ? 'max-h-full md:max-h-[95vh] pb-4 pt-4' : 'max-h-full md:max-h-[85vh] pb-4 pt-4'}`}
-                style={{ WebkitUserSelect: 'none' }}
-              >
-                <div className="relative inline-flex flex-col items-center">
-
-                  <div className="relative inline-block overflow-visible"
-                    onMouseEnter={() => { if (currentItem.pick.hoverImage) setLightboxHovered(true); }}
-                    onMouseLeave={() => setLightboxHovered(false)}
-                  >
-                    <PinchZoomImage
-                      key={currentItem.pick.image || `${currentItem.designerId}-${lightboxIndex}`}
-                      src={currentItem.pick.image || ""}
-                      alt={currentItem.pick.title}
-                      className={cn(
-                        "object-contain select-none transition-opacity duration-500",
-                        isZoomed
-                          ? "max-h-[88vh] max-w-[90vw]"
-                          : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
-                        isZoomed ? "cursor-zoom-out" : "cursor-zoom-in",
-                        lightboxHovered && currentItem.pick.hoverImage ? "opacity-0" : "opacity-100"
-                      )}
-                      draggable={false}
-                      decoding="sync"
-                      loading="eager"
-                      fetchPriority="high"
-                      onLoad={() => setIsLightboxImageLoaded(true)}
-                      onZoomChange={setIsZoomed}
-                    />
-                    {currentItem.pick.hoverImage && (
-                      <CldPicture
-                        src={currentItem.pick.hoverImage}
-                        alt={`${currentItem.pick.title} - alternate view`}
-                        className={cn(
-                          "absolute inset-0 w-full h-full object-contain select-none transition-opacity duration-500 pointer-events-none",
-                          isZoomed ? "max-h-[88vh] max-w-[90vw]" : "max-w-[85vw] max-h-[55vh] md:max-w-[70vw] md:max-h-[60vh]",
-                          lightboxHovered ? "opacity-100" : "opacity-0"
-                        )}
-                        draggable={false} />
-                    )}
-
-                    {/* Desktop hover overlay — click to enlarge/minimize */}
-                    <div
-                      className={`hidden md:flex absolute inset-0 items-center justify-center transition-all duration-500 ease-out z-[5] group ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
-                      onClick={() => setIsZoomed(!isZoomed)}
-                    >
-                      {!isZoomed && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                          <Search size={24} className="text-foreground drop-shadow-lg" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Desktop close button — bottom-right outside */}
-                    <button
-                      onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                      className="hidden md:flex absolute bottom-2 -right-12 lg:-right-14 p-2.5 rounded-full bg-white/15 text-white/85 hover:text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300 z-20 border border-white/20"
-                      aria-label="Close lightbox"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-
-                    {/* PDF download — inside image, bottom-right */}
-                    {currentItem.pick.pdfUrl && (
-                      <button
-                        className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2.5 py-1.5 md:px-3 md:py-2 bg-[#d32f2f]/80 backdrop-blur-sm rounded-full hover:bg-[#d32f2f] transition-colors cursor-pointer"
-                        aria-label="Download PDF"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          requireAuth(async () => {
-                            const url = currentItem.pick.pdfUrl as string;
-                            const filename = currentItem.pick.pdfFilename || `${currentItem.pick.title.replace(/[^a-zA-Z0-9]+/g, '_')}.pdf`;
-                            try {
-                              const res = await fetch(url);
-                              const blob = await res.blob();
-                              const blobUrl = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = blobUrl;
-                              a.download = filename;
-                              document.body.appendChild(a);
-                              a.click();
-                              a.remove();
-                              URL.revokeObjectURL(blobUrl);
-                            } catch {
-                              window.open(url, '_blank');
-                            }
-                          }, "download this spec sheet");
-                        }}
-                      >
-                        <FileDown size={14} className="md:hidden text-white" />
-                        <FileDown size={16} className="hidden md:block text-white" />
-                        <span className="text-[10px] md:text-xs font-medium leading-none text-white">PDF</span>
-                      </button>
-                    )}
-
-                    {/* Mobile expand/minimize button — bottom-left */}
-                    <button
-                      onClick={() => setIsZoomed(!isZoomed)}
-                      className="md:hidden absolute bottom-2 left-2 z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors cursor-pointer"
-                      aria-label={isZoomed ? "Minimize image" : "Maximize image"}
-                    >
-                      {isZoomed ? <Minimize2 size={16} className="text-white" /> : <Maximize2 size={16} className="text-white" />}
-                    </button>
-
-                    {/* Desktop Quote + Pin — stacked vertically under PDF, anchored to image right */}
-                    {!isZoomed && (
-                      <div className="hidden md:flex absolute top-full -right-20 mt-2 flex-col items-end gap-2 z-20">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
-                            setQuoteOpen(true);
-                          }}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer whitespace-nowrap"
-                          aria-label="Request a Quote"
-                        >
-                          <MessageSquareQuote size={14} className="shrink-0" />
-                          <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">Request a Quote</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            togglePin({ pick: currentItem.pick, designerName: currentItem.designerName, designerId: currentItem.designerId, section: currentItem.section });
-                          }}
-                          className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer whitespace-nowrap",
-                            isPinned(currentItem.pick.title, currentItem.designerId)
-                              ? "bg-[hsl(var(--gold)/0.2)] border-[hsl(var(--gold)/0.4)] text-white/80"
-                              : "bg-white/5 border-white/15 text-white/60 hover:text-white hover:bg-white/10",
-                            compareItems.length >= 3 && !isPinned(currentItem.pick.title, currentItem.designerId) && "opacity-40 pointer-events-none"
-                          )}
-                          aria-label={isPinned(currentItem.pick.title, currentItem.designerId) ? "Remove from selection" : "Pin your selection of 3"}
-                        >
-                          <Scale size={14} className="shrink-0" />
-                          <span className="text-[10px] font-display uppercase tracking-[0.08em] leading-none">
-                            {isPinned(currentItem.pick.title, currentItem.designerId) ? "Pinned" : "Pin your selection of 3"}
-                          </span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {!isZoomed && <div className="hidden md:block h-12" aria-hidden="true" />}
-
-                {/* Outside image: mobile close (left) + quote button (right) */}
-                {!isZoomed && (
-                  <div className="md:hidden flex justify-between items-center w-full mt-2">
-                    <div>
-                      <button
-                        onClick={() => { setLightboxOpen(false); setIsZoomed(false); }}
-                        className="p-2 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-all duration-300 border border-white/20"
-                        aria-label="Close"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2 ml-auto">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePin({ pick: currentItem.pick, designerName: currentItem.designerName, designerId: currentItem.designerId, section: currentItem.section });
-                        }}
-                        className={cn(
-                          "p-1.5 rounded-full backdrop-blur-sm border transition-all duration-300",
-                          isPinned(currentItem.pick.title, currentItem.designerId)
-                            ? "bg-[hsl(var(--gold)/0.3)] border-[hsl(var(--gold)/0.6)] text-white"
-                            : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20",
-                          compareItems.length >= 3 && !isPinned(currentItem.pick.title, currentItem.designerId) && "opacity-40 pointer-events-none"
-                        )}
-                        aria-label="Compare"
-                      >
-                        <Scale size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuoteProduct({ name: currentItem.pick.title, designer: currentItem.designerName });
-                          setQuoteOpen(true);
-                        }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all duration-300 cursor-pointer"
-                        aria-label="Request a Quote"
-                      >
-                        <MessageSquareQuote size={14} />
-                        <span className="text-[10px] font-display font-bold uppercase tracking-[0.08em] leading-none">Quote</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Scroll dots — mobile and desktop */}
-                {filtered.length > 1 && !isZoomed && (
-                  <div className="flex items-center gap-2 mt-3">
-                    {filtered.map((_, idx) => (
-                      <button
-                        key={idx}
-                        aria-label={`Go to image ${idx + 1}`}
-                        onClick={() => { setLightboxIndex(idx); setIsZoomed(false); setIsLightboxImageLoaded(false); }}
-                        className={`rounded-full transition-all duration-300 ${lightboxIndex === idx ? 'w-4 h-2 bg-white' : 'w-2 h-2 bg-white/30 hover:bg-white/60'}`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Metadata */}
-                {!isZoomed && (
-                  <div className="w-full space-y-1 px-4 text-center md:px-12 mt-4">
-                    {(() => {
-                      const editionLine = formatCuratorialEditionLine(currentItem.pick);
-                      return editionLine ? (
-                        <p className="font-body text-xs italic tracking-wider text-white/45">
-                          {editionLine}
-                        </p>
-                      ) : null;
-                    })()}
-                    <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
-                      {(() => {
-                        const baseTitle = currentItem.pick.title;
-                        const isYear = currentItem.pick.subtitle && /^\d{4}/.test(currentItem.pick.subtitle.trim());
-                        return isYear ? `${baseTitle} ${currentItem.pick.subtitle}` : baseTitle;
-                      })()}
-                    </h3>
-                    {currentItem.pick.subtitle && !/^\d{4}/.test(currentItem.pick.subtitle.trim()) && (() => {
-                      const sub = currentItem.pick.subtitle.trim().toLowerCase();
-                      const filterType = subcategory ? singularizeSub(subcategory).toLowerCase() : '';
-                      if (filterType && sub === filterType) return null;
-                      return <p className="font-body text-sm text-white/60 mt-0.5">{currentItem.pick.subtitle}</p>;
-                    })()}
-                    {currentItem.pick.materials && (
-                      <p className="font-body text-xs text-white/50 mt-2 leading-relaxed">
-                        {currentItem.pick.materials.replace(/\n/g, " · ")}
-                      </p>
-                    )}
-                    {currentItem.pick.dimensions && (
-                      <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
-                        {withImperialPerLine(currentItem.pick.dimensions)}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              {/* Desktop navigation arrows — at screen edges */}
-              {lightboxIndex > 0 && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); navigateLightbox(-1); }}
-                  className="hidden md:flex absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft size={32} />
-                </button>
-              )}
-              {lightboxIndex < filtered.length - 1 && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); navigateLightbox(1); }}
-                  className="hidden md:flex absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 text-white/50 hover:text-white transition-colors"
-                  aria-label="Next image"
-                >
-                  <ChevronRight size={32} />
-                </button>
-              )}
-            </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
     </section>
 
-    {/* Floating "Back to Grid" button */}
-    <AnimatePresence>
-      {showBackToGrid && (
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-          onClick={scrollBackToGrid}
-          className="fixed bottom-20 left-4 md:bottom-auto md:left-auto md:top-1/2 md:-translate-y-1/2 md:right-10 z-50 flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background shadow-lg hover:shadow-xl font-body text-[11px] uppercase tracking-[0.15em] transition-all duration-300 hover:scale-105"
-        >
-          <ArrowUp className="h-3.5 w-3.5" />
-          Back to Grid
-        </motion.button>
-      )}
-    </AnimatePresence>
-    <QuoteRequestDialog
-      open={quoteOpen}
-      onOpenChange={setQuoteOpen}
-      productName={quoteProduct.name}
-      designerName={quoteProduct.designer}
-    />
-    <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };

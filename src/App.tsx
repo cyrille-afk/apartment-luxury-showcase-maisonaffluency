@@ -706,6 +706,7 @@ const App = () => {
                   <Route path="/trade/apply/complete/:token" element={<Suspense fallback={null}><TradeApplicationEdit /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>} />
+                  <Route path="/products/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal={false} /></Suspense>} />
                   <Route path="/designer/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerProfile /></Suspense>} />
                   {/* Public designers directory — hidden from nav until all data is populated */}
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
@@ -899,7 +900,7 @@ const App = () => {
                   {/* Legacy / test route aliases Google has already crawled.
                       Each performs a permanent (301-signalled) redirect to the
                       live production catalogue instead of serving a dead page. */}
-                  {["/products", "/products/*", "/shop", "/shop/*", "/catalog", "/catalog/*",
+                  {["/products", "/shop", "/shop/*", "/catalog", "/catalog/*",
                     "/catalogue", "/catalogue/*", "/collection", "/collection/*",
                     "/home", "/index.html", "/index.php",
                     "/test", "/test/*", "/preview", "/preview/*", "/staging", "/staging/*"].map((legacyPath) => (
