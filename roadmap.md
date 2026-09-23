@@ -107,3 +107,4 @@
 - GitHub sync needed.
 - [x] Automated inbound reply handling: Resend inbound webhook, deterministic "yes" detection, one-time portal key email, live Acquisitions status badges (pending Resend inbound webhook secret + provider setup)
 - [x] Add live acquisition email/Instagram metrics and portal-activated studio cards to Sales Funnel
+- [x] Default room collection pages to three columns and restore visible product favourite controls
