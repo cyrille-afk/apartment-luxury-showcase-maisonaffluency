@@ -135,7 +135,32 @@ Deno.serve(async (req) => {
       },
     })
     if (mailError) {
-      console.error('invitation email failed', mailError)
+      const errorMessage = String(mailError.message || mailError).slice(0, 2000)
+      console.error('Trade Program invitation enqueue failed', {
+        signupId,
+        recipientEmail: email,
+        templateName: 'trade-program-invitation',
+        error: errorMessage,
+      })
+      const { error: alertError } = await supabase.from('admin_alert_log').insert({
+        channel: 'email',
+        event: 'trade_program_application_email_failed',
+        status: 'failed',
+        application_id: null,
+        payload: {
+          signup_id: signupId,
+          recipient_email: email,
+          template_name: 'trade-program-invitation',
+          stage: 'enqueue',
+        },
+        error: errorMessage,
+      })
+      if (alertError) {
+        console.error('Trade Program email admin alert insert failed', {
+          signupId,
+          error: alertError.message,
+        })
+      }
     } else {
       emailSent = true
       await supabase
