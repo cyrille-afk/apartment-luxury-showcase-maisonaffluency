@@ -127,7 +127,11 @@ Deno.serve(async (req) => {
         templateName: 'trade-program-invitation',
         recipientEmail: email,
         idempotencyKey: `trade-program-invitation-${signupId}`,
-        templateData: { email, companyName },
+        templateData: {
+          firstName: body.firstName ? String(body.firstName).trim().slice(0, 100) : undefined,
+          email,
+          companyName,
+        },
       },
     })
     if (mailError) {
