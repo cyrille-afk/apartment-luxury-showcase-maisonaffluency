@@ -2048,7 +2048,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className="relative !aspect-square h-auto w-full max-w-full cursor-pointer overflow-hidden rounded-sm bg-[hsl(var(--canvas))]"
+                        className="relative !aspect-square h-auto w-full max-w-full cursor-pointer overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]"
                       >
                         <SwipeAlternateProductImage
                           primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -2057,8 +2057,8 @@ const PublicDesignerProfile = () => {
                           alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
-                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
+                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
+                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {/* Inventory badges — lower-left of the frame */}

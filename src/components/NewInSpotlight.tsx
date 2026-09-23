@@ -276,8 +276,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
-                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
+                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
+                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack

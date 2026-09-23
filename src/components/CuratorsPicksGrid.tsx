@@ -133,7 +133,7 @@ const Card = memo(function Card({
           alt={item.name}
           loading={index < 2 ? "eager" : "lazy"}
           decoding="async"
-          className="absolute inset-0 !h-full !w-full !object-contain object-center will-change-[opacity]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity]"
         />
         <motion.img
           src={item.ambientImage}
@@ -145,7 +145,7 @@ const Card = memo(function Card({
           animate={CROSSFADE}
           style={{ animationDelay: `${index * 220}ms` }}
           transition={{ delay: index * 0.22 }}
-          className="absolute inset-0 !h-full !w-full !object-contain object-center will-change-[opacity] [transform:translateZ(0)]"
+          className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
         />
       </div>
 
@@ -180,7 +180,7 @@ export default function CuratorsPicksGrid({
       style={
         {
           "--picks-bg": "0 0% 0%",
-          "--picks-plate": "0 0% 6%",
+          "--picks-plate": "34 30% 91%",
           "--picks-fg": "0 0% 98%",
           "--picks-muted": "0 0% 62%",
         } as React.CSSProperties
