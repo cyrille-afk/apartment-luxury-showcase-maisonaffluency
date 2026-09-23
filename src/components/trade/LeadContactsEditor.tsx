@@ -128,6 +128,7 @@ const LeadContactsEditor = ({
 
   const removeRow = (i: number) => {
     const next = rows.filter((_, idx) => idx !== i);
+    dirty.current = true;
     setRows(next);
     void persist(next);
   };
@@ -165,23 +166,21 @@ const LeadContactsEditor = ({
             type="text"
             value={row.name}
             onChange={(e) => setRow(i, { name: e.target.value })}
-            onBlur={() => void persist(rows)}
+            onBlur={persistIfDirty}
             onKeyDown={handleKeyDown}
-            disabled={saving}
             placeholder="Name"
             aria-label={`Contact ${i + 1} name for ${studioName}`}
-            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-60"
+            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
           />
           <input
             type="email"
             value={row.email}
             onChange={(e) => setRow(i, { email: e.target.value })}
-            onBlur={() => void persist(rows)}
+            onBlur={persistIfDirty}
             onKeyDown={handleKeyDown}
-            disabled={saving}
             placeholder="email@studio.com"
             aria-label={`Contact ${i + 1} email for ${studioName}`}
-            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-60"
+            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
           />
           <button
             type="button"
