@@ -414,7 +414,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             {/* Right Column — compact biography stack + From the Studio */}
             <div className="flex flex-col justify-start pt-0 pb-3">
               <div className="flex items-center gap-3 w-full">
-                <h1 className="text-2xl font-serif font-normal tracking-wide text-neutral-900">
+                <h1 className="text-2xl font-serif font-semibold tracking-wide text-black antialiased">
                   {displayName}
                 </h1>
                 <ShareMenu
