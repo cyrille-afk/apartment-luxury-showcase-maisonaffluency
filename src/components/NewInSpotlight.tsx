@@ -253,7 +253,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         </div>
       </div>
 
-      <div className={cn("grid items-stretch gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", fullWidthDesktop ? "md:grid-cols-3" : gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", fullWidthDesktop ? "md:grid-cols-3" : gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -268,7 +268,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative aspect-[320/393] w-full flex-none overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className="relative !aspect-square h-auto w-full flex-none overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -276,8 +276,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="h-full w-full object-cover p-0 md:object-cover md:p-0"
-                  alternateClassName="h-full w-full object-cover p-0 md:object-cover md:p-0"
+                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
+                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -625,7 +625,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       {/* Separator */}
       <div className={cn(
-        "max-w-7xl mx-auto px-6 md:px-12",
+        "max-w-6xl mx-auto px-6 md:px-12",
         isUnderlaid && "md:hidden"
       )}>
         <div className="border-t border-border/40" />
@@ -633,7 +633,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       {/* Curators' Picks */}
       <section className={cn(
-        "max-w-7xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
+        "max-w-6xl mx-auto px-6 md:px-12 pt-4 md:pt-6 pb-6 md:pb-24",
         isUnderlaid && "md:hidden"
       )}>
         {renderCuratorsPicksSection()}
