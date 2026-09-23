@@ -1383,10 +1383,10 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           });
         }
       }}
-      className="group flex w-full flex-col overflow-visible rounded-none bg-background text-left"
+      className="group flex h-full w-full flex-col justify-between overflow-visible rounded-none bg-background text-left"
     >
 
-      <div className="relative aspect-square overflow-visible bg-[hsl(var(--product-canvas))]">
+      <div className="relative aspect-square w-full flex-none overflow-hidden bg-[hsl(var(--product-canvas))]">
         {pick.is_trade_only ? (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/85 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
@@ -1418,12 +1418,12 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           </div>
         )}
         {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
-          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
             {formatCuratorialEditionLine(pick)}
           </p>
         )}
         {!pick.is_trade_only && isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder }) && (
-          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
             {ECART_REEDITION_LABEL}
           </p>
         )}
@@ -1457,9 +1457,8 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div>
-        <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-          <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+      <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
+          <div className="flex min-w-0 max-w-[70%] flex-col text-left">
             {pick.is_trade_only ? (
               <>
                 <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
@@ -1484,10 +1483,10 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               const showSubtitleBelow = !!composed.remainingSubtitle && !isYear && !isForPattern && !isReEdition;
               return (
                 <>
-                  <p className="block w-full truncate whitespace-nowrap font-body text-xs font-normal uppercase tracking-wider text-foreground">
+                  <p className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
                     {brandLine}
                   </p>
-                  <p className="line-clamp-2 font-display text-sm font-normal leading-tight text-neutral-600">
+                  <p className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
                     {composed.title}{isYear ? ` (${sub})` : ''}
                   </p>
                   {showSubtitleBelow && (
@@ -1497,10 +1496,9 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="mt-1 min-w-fit shrink-0 whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:mt-0 md:self-baseline md:text-sm">
+          <p className="min-w-fit shrink-0 whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
-        </div>
       </div>
 
     </button>
