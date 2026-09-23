@@ -33,6 +33,7 @@ import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -780,12 +781,12 @@ const TradeAtelierProfile = () => {
                         </div>
                       </div>
                       <div className="flex flex-col flex-1 space-y-1 px-0.5 md:px-0 text-center md:text-left">
-                        {pick.edition && (
+                        {formatCuratorialEditionLine(pick) && (
                           <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                            {pick.edition}
+                            {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
-                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
+                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
                           {pick.title}
                         </h3>
                         {designerLabel && designerSlug ? (

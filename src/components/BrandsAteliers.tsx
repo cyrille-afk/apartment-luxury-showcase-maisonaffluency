@@ -3359,20 +3359,14 @@ const BrandsAteliers = () => {
                       {(() => {
                         const pick = picksDesigner.curatorPicks[picksIndex] as any;
                         const tags: string[] = pick?.tags?.length > 0 ? pick.tags : pick?.category ? [pick.category] : [];
-                        const specialTags = tags.filter((t: string) => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                        const hasEdition = !!pick?.edition;
-                        return (specialTags.length > 0 || hasEdition) && !picksZoomed ? (
+                        const specialTags = tags.filter((t: string) => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
+                        return specialTags.length > 0 && !picksZoomed ? (
                           <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
                             {specialTags.map((tag: string, i: number) => (
                               <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                                 {tag}
                               </span>
                             ))}
-                            {pick?.edition && (
-                              <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                                {pick.edition}
-                              </span>
-                            )}
                           </div>
                         ) : null;
                       })()}

@@ -1,6 +1,7 @@
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import { withImperialPerLine } from "@/lib/formatDimensions";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 /** Replace the last two spaces in each line with non-breaking spaces to prevent orphans (keeps last 3 words together) */
 const preventOrphans = (text: string): string =>
@@ -23,9 +24,15 @@ interface CuratorPicksLegendProps {
  */
 const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, className = "" }: CuratorPicksLegendProps) => {
   const p = pick as any; // access optional extended fields
+  const editionLine = formatCuratorialEditionLine(p);
 
   return (
-    <div className={`text-center w-full px-4 md:px-12 mt-4 ${className}`}>
+    <div className={`w-full space-y-1 px-4 text-center md:px-12 mt-4 ${className}`}>
+      {editionLine && (
+        <p className="font-body text-xs italic tracking-wider text-white/45">
+          {editionLine}
+        </p>
+      )}
       {/* Title — always merge subtitle into title for consistency with ProductGrid */}
       <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
         {p.subtitle ? `${pick.title} ${p.subtitle}` : pick.title}
@@ -49,13 +56,6 @@ const CuratorPicksLegend = ({ pick, designerId, designerName, onInquiry, classNa
       {p.dimensions && (
         <p className="font-body text-sm md:text-base text-white font-medium mt-1.5 whitespace-pre-line">
           {preventOrphans(withImperialPerLine(p.dimensions))}
-        </p>
-      )}
-
-      {/* Edition info */}
-      {pick.edition && (
-        <p className="text-[10px] md:text-[11px] text-white/40 font-body mt-1 uppercase tracking-widest">
-          {pick.edition}
         </p>
       )}
 

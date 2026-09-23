@@ -933,7 +933,15 @@ function singularizeSub(s: string): string {
 
                 {/* Metadata */}
                 {!isZoomed && (
-                  <div className="text-center w-full px-4 md:px-12 mt-4">
+                  <div className="w-full space-y-1 px-4 text-center md:px-12 mt-4">
+                    {(() => {
+                      const editionLine = formatCuratorialEditionLine(currentItem.pick);
+                      return editionLine ? (
+                        <p className="font-body text-xs italic tracking-wider text-white/45">
+                          {editionLine}
+                        </p>
+                      ) : null;
+                    })()}
                     <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                       {(() => {
                         const baseTitle = currentItem.pick.title;
