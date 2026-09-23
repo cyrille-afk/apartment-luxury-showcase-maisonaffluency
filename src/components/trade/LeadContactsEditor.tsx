@@ -56,8 +56,13 @@ const LeadContactsEditor = ({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const timer = useRef<number | null>(null);
+  // Set while the admin is typing in this editor. Prevents the props-sync
+  // effect (which fires after our own optimistic save) from clobbering text
+  // that has not been persisted yet.
+  const dirty = useRef(false);
 
   useEffect(() => {
+    if (dirty.current) return;
     setRows(buildRows());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [founderName, executiveEmails]);
