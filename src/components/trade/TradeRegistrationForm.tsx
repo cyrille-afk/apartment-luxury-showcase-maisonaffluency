@@ -342,6 +342,9 @@ const TradeRegistrationForm = ({
           phone: form.phone,
           message: emailBody,
           subject: `New Trade Application: ${fullName} — ${form.companyName}`,
+          // Unified payload flag: tells the inquiry route to fire the same
+          // Twilio WhatsApp alert used by quote requests.
+          source: "trade_application",
         },
       }).catch((err) => console.error("Email notification failed:", err));
 
