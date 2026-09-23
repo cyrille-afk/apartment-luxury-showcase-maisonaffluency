@@ -319,8 +319,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
-                <div className="flex min-w-0 max-w-[70%] flex-col text-left">
+              <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                <div className="flex min-w-0 flex-1 flex-col text-left">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -382,7 +382,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                            <span aria-hidden="true" className="block h-5" />
                          )}
                       {/* Product name — secondary, elegant italic */}
-                      <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
+                      <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
                         {productLine}
                       </h3>
                     </>
@@ -390,7 +390,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 })()}
               </div>
               {/* Price — bottom right, aligned to product title baseline */}
-              <div className="min-w-fit shrink-0 whitespace-nowrap">
+              <div className="shrink-0 whitespace-nowrap text-right">
                 <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
                   {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                 </p>

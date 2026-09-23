@@ -781,8 +781,8 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
-                         <div className="flex min-w-0 max-w-[70%] flex-col text-left">
+                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                         <div className="flex min-w-0 flex-1 flex-col text-left">
                           {designerLabel && designerSlug ? (
                             <Link
                               to={`/trade/designers/${designerSlug}`}
@@ -796,12 +796,12 @@ const TradeAtelierProfile = () => {
                               {designerLabel}
                             </span>
                           ) : null}
-                            <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
+                            <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
                             {pick.title}
                           </h3>
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                          <div className="min-w-fit shrink-0 whitespace-nowrap text-right">
+                          <div className="shrink-0 whitespace-nowrap text-right">
                             <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
