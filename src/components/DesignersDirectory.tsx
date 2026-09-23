@@ -1423,7 +1423,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           </p>
         )}
         {!pick.is_trade_only && isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder }) && (
-          <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
             {ECART_REEDITION_LABEL}
           </p>
         )}
