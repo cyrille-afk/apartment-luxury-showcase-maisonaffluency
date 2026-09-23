@@ -429,6 +429,19 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     </div>
   );
 
+  const navigateFromMegaMenu = (category: string, subcategory: string | null = null) => {
+    setActiveMegaCat(category);
+    setActiveMegaSub(subcategory);
+    setMegaMenuOpen(false);
+    navigate(categoryUrl(category, subcategory));
+  };
+
+  const megaMenuLinkClass =
+    "block w-full text-left text-xs leading-relaxed text-muted-foreground antialiased transition-colors hover:text-foreground";
+
+  const megaMenuHeadingClass =
+    "mb-4 border-b border-foreground pb-2 text-xs font-semibold uppercase tracking-widest text-foreground";
+
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
@@ -962,7 +975,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-[68vw] max-w-5xl mx-auto border-t border-border/20 bg-background/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.12)] py-10 px-8 lg:px-12"
+            className="w-full border-t border-border bg-background px-12 py-12"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -971,25 +984,69 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="w-full grid grid-cols-4 gap-x-12 items-start">
-              {/* Column 1 */}
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-3 items-start gap-16">
               <div className="min-w-0">
-                {renderCategoryBlock("Seating")}
-                <div className="mt-6">{renderCategoryBlock("Lighting")}</div>
+                <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
+                <ul className="space-y-3">
+                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Seating")}>Living Room</button></li>
+                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", "Dining Tables")}>Dining Room</button></li>
+                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Bedroom")}>Bedroom</button></li>
+                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", "Desks")}>Office</button></li>
+                </ul>
               </div>
-              {/* Column 2 */}
+
               <div className="min-w-0">
-                {renderCategoryBlock("Tables")}
-                <div className="mt-6">{renderCategoryBlock("Bedroom")}</div>
+                <h3 className={megaMenuHeadingClass}>Furniture</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { heading: "Seating", category: "Seating" },
+                    { heading: "Tables", category: "Tables" },
+                    { heading: "Storage", category: "Storage" },
+                  ].map(({ heading, category }) => (
+                    <div key={category} className="min-w-0">
+                      <button
+                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+                        onClick={() => navigateFromMegaMenu(category)}
+                      >
+                        {heading}
+                      </button>
+                      <ul className="space-y-2">
+                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                          <li key={subcategory}>
+                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
+                              {subcategory}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
-              {/* Column 3 */}
+
               <div className="min-w-0">
-                {renderCategoryBlock("Storage")}
-              </div>
-              {/* Column 4 */}
-              <div className="min-w-0">
-                {renderCategoryBlock("Rugs")}
-                <div className="mt-6">{renderCategoryBlock("Décor")}</div>
+                <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {["Lighting", "Rugs", "Décor"].map((category) => (
+                    <div key={category} className="min-w-0">
+                      <button
+                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+                        onClick={() => navigateFromMegaMenu(category)}
+                      >
+                        {category}
+                      </button>
+                      <ul className="space-y-2">
+                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                          <li key={subcategory}>
+                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
+                              {subcategory}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
