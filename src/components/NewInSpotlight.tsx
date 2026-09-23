@@ -277,8 +277,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
-                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
+                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
+                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
                 />
                 {formatCuratorialEditionLine(pick) && (
                   <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
@@ -309,7 +309,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
+              <div className="flex w-full items-baseline justify-between gap-3 pt-3">
                 <div className="flex flex-col text-left space-y-0.5">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);

@@ -702,7 +702,7 @@ const TradeAtelierProfile = () => {
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply transition-all duration-700",
+                            "absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply p-6 transition-all duration-700",
                             pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
                           )}
                           loading="lazy"
@@ -716,7 +716,7 @@ const TradeAtelierProfile = () => {
                               srcSet={pickSrcSet(pick.hover_image_url)}
                               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} hover view`}
-                              className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply opacity-0 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
+                              className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply p-6 opacity-0 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                               style={hoverPos ? { objectPosition: hoverPos } : undefined}
                               loading="lazy"
                             />
@@ -771,7 +771,7 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex w-full items-baseline justify-between gap-3 pt-2.5">
+                       <div className="flex w-full items-baseline justify-between gap-3 pt-3">
                         <div className="flex flex-col text-left space-y-0.5">
                           {designerLabel && designerSlug ? (
                             <Link
