@@ -149,7 +149,7 @@ const Card = memo(function Card({
           className="absolute inset-0 !h-full !w-full !object-contain object-center mix-blend-multiply will-change-[opacity] [transform:translateZ(0)]"
         />
         {item.edition && (
-          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
+          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
             {item.edition}
           </p>
         )}

@@ -695,14 +695,14 @@ const TradeAtelierProfile = () => {
                       className="group cursor-pointer flex flex-col"
                       onClick={() => navigate(productPath)}
                     >
-                      <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
+                       <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))]">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl object-cover",
+                            "absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply transition-all duration-700",
                             pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
                           )}
                           loading="lazy"
@@ -716,14 +716,14 @@ const TradeAtelierProfile = () => {
                               srcSet={pickSrcSet(pick.hover_image_url)}
                               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} hover view`}
-                              className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                              className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply opacity-0 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                               style={hoverPos ? { objectPosition: hoverPos } : undefined}
                               loading="lazy"
                             />
                           );
                         })()}
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-neutral-500">
+                          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
