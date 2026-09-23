@@ -127,13 +127,13 @@ const Card = memo(function Card({
       className="group block text-left touch-manipulation select-none"
       aria-label={`${item.name} — ${item.price}`}
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
+      <div className="relative !aspect-square h-auto w-full overflow-hidden bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
         <img
           src={item.studioImage}
           alt={item.name}
           loading={index < 2 ? "eager" : "lazy"}
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover will-change-[opacity]"
+          className="absolute inset-0 !h-full !w-full !object-cover object-center will-change-[opacity]"
         />
         <motion.img
           src={item.ambientImage}
@@ -145,7 +145,7 @@ const Card = memo(function Card({
           animate={CROSSFADE}
           style={{ animationDelay: `${index * 220}ms` }}
           transition={{ delay: index * 0.22 }}
-          className="absolute inset-0 h-full w-full object-cover will-change-[opacity] [transform:translateZ(0)]"
+          className="absolute inset-0 !h-full !w-full !object-cover object-center will-change-[opacity] [transform:translateZ(0)]"
         />
       </div>
 
@@ -187,19 +187,21 @@ export default function CuratorsPicksGrid({
       }
       className="bg-[hsl(var(--picks-bg))] px-4 py-12 sm:px-8 sm:py-20"
     >
-      <header className="mb-8 sm:mb-12">
-        <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--picks-muted))]">
-          Maison Affluency
-        </p>
-        <h2 className="mt-2 font-display text-2xl text-[hsl(var(--picks-fg))] sm:text-4xl">
-          {title}
-        </h2>
-      </header>
+      <div className="mx-auto w-full max-w-6xl">
+        <header className="mb-8 sm:mb-12">
+          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--picks-muted))]">
+            Maison Affluency
+          </p>
+          <h2 className="mt-2 font-display text-2xl text-[hsl(var(--picks-fg))] sm:text-4xl">
+            {title}
+          </h2>
+        </header>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-14">
-        {items.map((item, i) => (
-          <Card key={item.id} item={item} index={i} onOpen={(href) => navigate(href)} />
-        ))}
+        <div className="grid grid-cols-2 gap-6 lg:grid-cols-3 lg:gap-8">
+          {items.map((item, i) => (
+            <Card key={item.id} item={item} index={i} onOpen={(href) => navigate(href)} />
+          ))}
+        </div>
       </div>
     </section>
   );
