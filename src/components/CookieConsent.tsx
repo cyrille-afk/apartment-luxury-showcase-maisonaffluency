@@ -192,7 +192,7 @@ const CookieConsent = () => {
           role="dialog"
           aria-modal="false"
           aria-label="Cookie preferences"
-          className={`fixed bottom-4 left-4 right-4 sm:right-auto z-50 sm:max-w-[420px] transition-opacity duration-300 ease-in-out ${
+          className={`fixed bottom-[calc(1rem+var(--mobile-commerce-dock-height,0px))] left-4 right-4 sm:bottom-4 sm:right-auto z-[60] sm:max-w-[420px] transition-[opacity,bottom] duration-300 ease-in-out ${
             fading ? "opacity-0" : "opacity-100"
           }`}
         >
@@ -290,7 +290,7 @@ const CookieConsent = () => {
         <button
           onClick={reopen}
           aria-label="Cookie preferences"
-          className="fixed bottom-6 left-6 z-50 p-2 text-neutral-500 hover:text-white transition-colors duration-300"
+          className="fixed bottom-[calc(1.5rem+var(--mobile-commerce-dock-height,0px))] left-6 z-[60] p-2 text-neutral-500 hover:text-white transition-[color,bottom] duration-300 sm:bottom-6"
         >
           <Shield className="w-3 h-3" />
         </button>

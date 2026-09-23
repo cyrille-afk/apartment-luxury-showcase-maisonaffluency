@@ -18,6 +18,9 @@ export function setStickyCommerceDockHeight(next: number) {
   const rounded = Math.max(0, Math.round(next));
   if (height === rounded) return;
   height = rounded;
+  if (typeof document !== "undefined") {
+    document.documentElement.style.setProperty("--mobile-commerce-dock-height", `${rounded}px`);
+  }
   listeners.forEach((l) => l());
 }
 
