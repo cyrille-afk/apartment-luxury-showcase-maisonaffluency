@@ -99,17 +99,31 @@ async function isTemplateApproved(lovableKey: string, twilioKey: string) {
   }
 }
 
-// Fire-and-forget WhatsApp alert for product quote requests. Uses the same
-// Twilio connector gateway as the trade-application alerts; delivery failures
-// are logged to admin_alert_log so no lead is ever silently lost.
+// Fire-and-forget WhatsApp alert for every inbound inquiry — product quote
+// requests and trade account requests alike. Both paths use the same Twilio
+// connector gateway; delivery failures are logged to admin_alert_log so no
+// lead is ever silently lost.
 
 async function sendQuoteWhatsAppAlert(
   supabase: any,
-  inquiry: { id: string; name: string; email: string; phone: string; company?: string; productName?: string; selectedFinish?: string },
+  inquiry: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    company?: string;
+    productName?: string;
+    selectedFinish?: string;
+    kind?: "quote" | "trade_application";
+    subject?: string;
+  },
 ) {
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const twilioKey = Deno.env.get("TWILIO_API_KEY");
   if (!lovableKey || !twilioKey) return;
+
+  const kind = inquiry.kind ?? "quote";
+  const eventName = kind === "trade_application" ? "trade_application_request" : "quote_request";
 
   // Every variable is trimmed and collapsed so the WhatsApp layout never shows
   // ragged spacing, stray line breaks or an empty row.
@@ -122,25 +136,39 @@ async function sendQuoteWhatsAppAlert(
     "5": clean(inquiry.phone) || "—",
   };
 
-  const body = [
-    "🚨 *New Quote Request on Maison Affluency*",
-    "",
-    `• *Company:* ${vars["1"]}`,
-    `• *Product:* ${vars["2"]}`,
-    `• *Finish:* ${vars["3"]}`,
-    `• *Client Email:* ${vars["4"]}`,
-    `• *Client Phone:* ${vars["5"]}`,
-    "",
-    "Open the internal Admin Dashboard panel at /trade/admin/trade-review to review and reply.",
-  ].join("\n");
+  const body = kind === "trade_application"
+    ? [
+      "🚨 *New Trade Account Request on Maison Affluency*",
+      "",
+      `• *Studio:* ${clean(inquiry.company) || "(not provided)"}`,
+      `• *Applicant:* ${clean(inquiry.name) || "(unknown)"}`,
+      `• *Email:* ${clean(inquiry.email)}`,
+      `• *Phone:* ${clean(inquiry.phone) || "—"}`,
+      "",
+      "Open the internal Admin Dashboard panel at /trade/admin/trade-review to review and approve.",
+    ].join("\n")
+    : [
+      "🚨 *New Quote Request on Maison Affluency*",
+      "",
+      `• *Company:* ${vars["1"]}`,
+      `• *Product:* ${vars["2"]}`,
+      `• *Finish:* ${vars["3"]}`,
+      `• *Client Email:* ${vars["4"]}`,
+      `• *Client Phone:* ${vars["5"]}`,
+      "",
+      "Open the internal Admin Dashboard panel at /trade/admin/trade-review to review and reply.",
+    ].join("\n");
 
   const statusCallback = getWhatsAppStatusCallback();
 
   try {
     // Only use the template once Meta/WhatsApp has approved it; otherwise the
     // template send is rejected and wastes a request. Freeform stays the path
-    // until approval flips to "approved".
-    const approval = await isTemplateApproved(lovableKey, twilioKey);
+    // until approval flips to "approved". The approved template is quote-shaped,
+    // so trade applications always go out freeform.
+    const approval = kind === "trade_application"
+      ? { approved: false, status: "not_applicable_trade_application" }
+      : await isTemplateApproved(lovableKey, twilioKey);
     let usedTemplate = approval.approved;
     let firstError: string | null = approval.approved ? null : `template not used (status: ${approval.status})`;
 
