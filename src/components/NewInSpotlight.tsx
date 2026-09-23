@@ -487,7 +487,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
 
       {/* Portrait + Biography — side by side */}
       <section className={cn(
-        "max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-10 md:pt-16 pb-4 md:pb-6",
+        "max-w-[1380px] mx-auto px-6 pt-10 md:pt-16 pb-4 md:pb-6",
         isUnderlaid && "md:hidden"
       )}>
         <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start">
