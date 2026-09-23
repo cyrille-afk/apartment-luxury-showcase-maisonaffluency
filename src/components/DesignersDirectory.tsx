@@ -32,7 +32,7 @@ import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type P
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
-import { formatCuratorialEditionLine } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 
 import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -331,6 +331,7 @@ type PickItem = {
   origin?: string | null;
   designer_name?: string;
   designer_slug?: string;
+  designer_founder?: string | null;
   is_trade_only?: boolean;
   edition?: string | null;
   edition_number?: string | null;
@@ -344,7 +345,7 @@ function useFullCuratorPicks(enabled: boolean) {
     queryFn: async () => {
       const cached = await getCachedCatalog();
       let picks: any[] | null;
-      let designers: Array<{ id: string; name: string; slug: string }> | null;
+      let designers: Array<{ id: string; name: string; slug: string; founder?: string | null }> | null;
       if (cached) {
         picks = cached.picks as any[];
         designers = cached.designers as any[];
@@ -357,13 +358,13 @@ function useFullCuratorPicks(enabled: boolean) {
           ),
           supabase
             .from("designers")
-            .select("id, name, slug"),
+            .select("id, name, slug, founder"),
         ]);
         picks = picksRes.data as any[] | null;
         designers = designersRes.data as any[] | null;
       }
       if (!picks) return [];
-      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
+      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug, founder: d.founder }]));
       // Picks whose designer isn't in the public list belong to trade-only/unpublished
       // designers. We keep them in the grid but mark them so the UI can render a
       // "Trade Only" placeholder instead of broken brand info.
@@ -379,6 +380,7 @@ function useFullCuratorPicks(enabled: boolean) {
           ...p,
           designer_name: d?.name || "Trade Only",
           designer_slug: d?.slug || "",
+          designer_founder: d?.founder || null,
           is_trade_only: !d,
         };
       });
@@ -1418,6 +1420,11 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
         {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
           <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
             {formatCuratorialEditionLine(pick)}
+          </p>
+        )}
+        {!pick.is_trade_only && isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder }) && (
+          <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+            {ECART_REEDITION_LABEL}
           </p>
         )}
         {/* Description overlay on hover — hidden on touch devices so the

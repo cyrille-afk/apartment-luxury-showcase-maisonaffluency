@@ -52,7 +52,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
-import { formatEditionLabel } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatEditionLabel, isEcartReedition } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
@@ -203,6 +203,7 @@ type TradeProductResult = {
     name: string;
     slug: string | null;
     biography: string;
+    founder?: string | null;
   };
   pricing: TradePricing | null;
   relatedPicks: ProductRow[];
@@ -247,7 +248,7 @@ function useTradeProductBySlug(
         const brandBase = brand.includes(" - ") ? brand.split(" - ")[0].trim() : brand;
         const { data: designers } = await supabase
           .from("designers")
-          .select("id, name, slug, display_name, biography")
+          .select("id, name, slug, display_name, biography, founder")
           .eq("is_published", true)
         const designer = (designers || []).find((d: any) =>
           [d.name, d.display_name].some((name) => {
@@ -347,6 +348,7 @@ function useTradeProductBySlug(
             name: (designer as any)?.name || brand,
             slug: (designer as any)?.slug || null,
             biography: (designer as any)?.biography || "",
+            founder: (designer as any)?.founder || null,
           },
           // Keep the pricing block whenever ANY pricing signal exists — including
           // 0, which renders as "Price upon Request". A truthy check here would
@@ -366,7 +368,7 @@ function useTradeProductBySlug(
 
       const { data: designer } = await supabase
         .from("designers")
-        .select("id, name, slug, display_name, biography")
+        .select("id, name, slug, display_name, biography, founder")
         .eq("slug", designerSlug)
         .eq("is_published", true)
         .maybeSingle();
@@ -499,6 +501,7 @@ function useTradeProductBySlug(
           name: designer.name,
           slug: designer.slug,
           biography: (designer as any).biography || "",
+          founder: (designer as any).founder || null,
         },
         pricing,
         relatedPicks: (picks as unknown as ProductRow[]).filter((p) => p.id !== (product as any).id),
@@ -1360,6 +1363,10 @@ const TradeProductPage: React.FC = () => {
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
   const designerDisplay = formatDesignerDisplayName(designer.name);
+  const isEcartProduct = isEcartReedition({
+    designerName: designer.name,
+    founder: designer.founder,
+  });
   const curatorNotes = buildProductCuratorNotes({
     title: product.title,
     brandName: designerDisplay,
@@ -1938,11 +1945,21 @@ const TradeProductPage: React.FC = () => {
               firstImageBadge={
                 (() => {
                   const editionLabel = formatEditionLabel(product);
-                  return editionLabel ? (
-                    <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                      {editionLabel}
+                  if (!editionLabel && !isEcartProduct) return null;
+                  return (
+                    <span className="flex flex-col items-start gap-1">
+                      {isEcartProduct && (
+                        <span className="font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
+                          {ECART_REEDITION_LABEL}
+                        </span>
+                      )}
+                      {editionLabel && (
+                        <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                          {editionLabel}
+                        </span>
+                      )}
                     </span>
-                  ) : null;
+                  );
                 })()
               }
               overlay={

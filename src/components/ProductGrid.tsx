@@ -25,7 +25,7 @@ import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/ca
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link } from "react-router-dom";
-import { formatCuratorialEditionLine } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -52,6 +52,7 @@ type ProductItem = {
   designerName: string;
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
+  reeditionBy?: string;
 };
 
 // Import atelierOnlyPicks directly (it's now exported)
@@ -64,7 +65,7 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
   for (const d of featuredDesigners) {
     for (const pick of d.curatorPicks) {
       if (pick.image) {
-        items.push({ pick, designerName: d.name, designerId: d.id || d.name, section: "designers" });
+        items.push({ pick, designerName: d.name, designerId: d.id || d.name, section: "designers", reeditionBy: (d as any).founder || undefined });
       }
     }
   }
@@ -73,7 +74,7 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
   for (const d of collectibleDesigners) {
     for (const pick of d.curatorPicks) {
       if (pick.image) {
-        items.push({ pick, designerName: d.name, designerId: d.id || d.name, section: "collectibles" });
+        items.push({ pick, designerName: d.name, designerId: d.id || d.name, section: "collectibles", reeditionBy: (d as any).founder || undefined });
       }
     }
   }
@@ -91,7 +92,7 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
             displayName = byMatch[1].trim();
           }
         }
-        items.push({ pick, designerName: displayName, designerId: id, section: "ateliers" });
+        items.push({ pick, designerName: displayName, designerId: id, section: "ateliers", reeditionBy: data.name });
       }
     }
   }
@@ -626,6 +627,11 @@ function singularizeSub(s: string): string {
                 {formatCuratorialEditionLine(item.pick) && (
                   <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                     {formatCuratorialEditionLine(item.pick)}
+                  </p>
+                )}
+                {isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) && (
+                  <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                    {ECART_REEDITION_LABEL}
                   </p>
                 )}
                 {/* Compare pin button */}

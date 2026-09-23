@@ -33,7 +33,7 @@ import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
-import { formatCuratorialEditionLine } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -688,6 +688,11 @@ const TradeAtelierProfile = () => {
                     const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
                       ? ap.designer_name : undefined;
                     const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
+                    const showReedition = isEcartReedition({
+                      designerName: designerLabel || designer.name,
+                      founder: designer.founder,
+                      parentBrand: isParentBrand ? designer.name : null,
+                    });
                     const productPath = tradeProductPathForPick(pick, designerSlug || slug, designerLabel || designer.name);
                     return (
                     <div
@@ -725,6 +730,11 @@ const TradeAtelierProfile = () => {
                         {formatCuratorialEditionLine(pick) && (
                           <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                             {formatCuratorialEditionLine(pick)}
+                          </p>
+                        )}
+                        {showReedition && (
+                          <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                            {ECART_REEDITION_LABEL}
                           </p>
                         )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">

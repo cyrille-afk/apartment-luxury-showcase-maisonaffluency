@@ -213,7 +213,7 @@ export async function fetchPublicProductPage(
   if (!designer.id && (product as any).designer_id) {
     const { data: owner } = await supabase
       .from("designers")
-      .select("id, name, slug, display_name, biography")
+      .select("id, name, slug, display_name, biography, founder")
       .eq("id", (product as any).designer_id)
       .maybeSingle();
     if (owner) designer = owner as any;
@@ -239,6 +239,7 @@ export async function fetchPublicProductPage(
       name: designer.name,
       slug: designer.slug,
       biography: designer.biography || "",
+      founder: designer.founder || null,
     },
     relatedPicks: (picks as any[]).filter((p) => p.id !== (product as any).id),
   };

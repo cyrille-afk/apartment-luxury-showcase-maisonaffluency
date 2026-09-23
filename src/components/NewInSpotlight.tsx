@@ -23,7 +23,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
-import { formatCuratorialEditionLine } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -259,6 +259,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
+          const showReedition = isEcartReedition({
+            designerName: designer.name,
+            founder: designer.founder,
+            parentBrand: brandLabelOverride,
+          });
 
           return (
             <div
@@ -283,6 +288,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 {formatCuratorialEditionLine(pick) && (
                   <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                     {formatCuratorialEditionLine(pick)}
+                  </p>
+                )}
+                {showReedition && (
+                  <p className="pointer-events-none absolute -top-2 right-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                    {ECART_REEDITION_LABEL}
                   </p>
                 )}
                 {/* Inventory badges — lower-left of the frame */}
