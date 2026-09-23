@@ -94,7 +94,6 @@ Deno.serve(async (req) => {
           .from("designer_curator_picks_public")
           .select(PICK_COLUMNS)
           .not("image_url", "is", null)
-          .order("sort_order", { ascending: true })
           .range(0, 4999)
       ),
       withRetry(() =>
