@@ -258,8 +258,9 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
       ...existing,
       pick: {
         ...existing.pick,
-        id: existing.pick.id || item.pick.id,
-        slug: existing.pick.slug || item.pick.slug,
+        // Database identity is authoritative for public pricing and canonical routing.
+        id: item.pick.id || existing.pick.id,
+        slug: item.pick.slug || existing.pick.slug,
         image: existing.pick.image || item.pick.image,
         hoverImage: existing.pick.hoverImage || item.pick.hoverImage,
         subtitle: existing.pick.subtitle || item.pick.subtitle,
@@ -627,7 +628,7 @@ function singularizeSub(s: string): string {
                 </div>
                 <div className="shrink-0 whitespace-nowrap text-right">
                   <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
-                    {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon Request"}
+                    {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon request"}
                   </p>
                 </div>
               </div>
