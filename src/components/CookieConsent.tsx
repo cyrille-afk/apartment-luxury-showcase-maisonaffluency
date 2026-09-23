@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { Shield } from "lucide-react";
 import {
   ALLOW_ALL,
   DENY_ALL,
@@ -286,15 +285,6 @@ const CookieConsent = () => {
         </div>
       )}
 
-      {!visible && (
-        <button
-          onClick={reopen}
-          aria-label="Cookie preferences"
-          className="fixed bottom-[calc(1.5rem+var(--mobile-commerce-dock-height,0px))] left-6 z-[60] p-2 text-neutral-500 hover:text-white transition-[color,bottom] duration-300 sm:bottom-6"
-        >
-          <Shield className="w-3 h-3" />
-        </button>
-      )}
     </>
   );
 };
