@@ -2198,7 +2198,7 @@ const FeaturedDesigners = () => {
     <section ref={ref} id="curators-picks" className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-header-offset">
       {/* Gradient accent band */}
       <div className="absolute top-0 left-0 right-0 h-1 md:h-1.5 bg-gradient-to-r from-jade via-jade-light to-accent opacity-80" />
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1240px]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -2483,7 +2483,7 @@ const FeaturedDesigners = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
           <div className={cn(
-            "grid gap-4 md:gap-6 grid-cols-2",
+            "grid gap-6 md:gap-8 grid-cols-2",
             sidebarOpen
               ? (filteredPicks
                   ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
@@ -2512,7 +2512,7 @@ const FeaturedDesigners = () => {
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-square bg-muted/20 overflow-hidden relative">
                       {pick.image ? (
                         <CldPicture
                           src={pick.image}
@@ -2560,7 +2560,7 @@ const FeaturedDesigners = () => {
                 })
                 .map((designer) => {
                   const cardContent = (
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-square bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
                         <CldPicture
                           src={designer.image}
@@ -2671,7 +2671,7 @@ const FeaturedDesigners = () => {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid gap-6 grid-cols-2">
               {filteredPicks ? (
                 filteredPicks.map(({ pick, designer, pickIndex, isDbPick, designerSlug }, i) => (
                   <button
@@ -2692,7 +2692,7 @@ const FeaturedDesigners = () => {
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                   >
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-square bg-muted/20 overflow-hidden relative">
                       {pick.image ? (
                         <CldPicture
                           src={pick.image}
@@ -2729,7 +2729,7 @@ const FeaturedDesigners = () => {
                 })
                 .map((designer) => {
                   const cardContent = (
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-square bg-muted/20 overflow-hidden relative">
                       {designer.image ? (
                         <CldPicture
                           src={designer.image}

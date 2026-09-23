@@ -743,7 +743,7 @@ const Collectibles = () => {
     <>
       <section id="collectibles" ref={ref} className="relative py-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-header-offset">
 
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-[1240px]">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -989,7 +989,7 @@ const Collectibles = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <div className={cn(
-                "grid gap-4 md:gap-6 grid-cols-2",
+                "grid gap-6 md:gap-8 grid-cols-2",
                 sidebarOpen
                   ? (filteredPicks
                       ? (productGridCols === 3 ? "md:grid-cols-3" : "md:grid-cols-4")
@@ -1011,7 +1011,7 @@ const Collectibles = () => {
                       }}
                       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                     >
-                      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                      <div className="aspect-square bg-muted/20 overflow-hidden relative">
                         {pick.image ? (
                           <CldPicture src={pick.image} alt={pick.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" />
                         ) : (
@@ -1050,7 +1050,7 @@ const Collectibles = () => {
                           }}
                           className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
                         >
-                          <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                          <div className="aspect-square bg-muted/20 overflow-hidden relative">
                             {heroProduct?.image ? (
                               <CldPicture src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" />
                             ) : (
@@ -1133,7 +1133,7 @@ const Collectibles = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="grid gap-4 grid-cols-2">
+            <div className="grid gap-6 grid-cols-2">
               {filteredPicks ? (
                 filteredPicks.map(({ pick, designer, pickIndex }) => (
                   <button
@@ -1146,7 +1146,7 @@ const Collectibles = () => {
                     }}
                     className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
                   >
-                    <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                    <div className="aspect-square bg-muted/20 overflow-hidden relative">
                       {pick.image && <CldPicture src={pick.image} alt={pick.title} className="w-full h-full object-cover" />}
                       <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                         <p className="font-display text-xs text-white tracking-wide leading-tight drop-shadow-sm">{pick.title}</p>
@@ -1174,7 +1174,7 @@ const Collectibles = () => {
                         }}
                         className="group block w-full text-left rounded-xl overflow-hidden border border-border bg-background"
                       >
-                        <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+                        <div className="aspect-square bg-muted/20 overflow-hidden relative">
                           {heroProduct?.image ? (
                             <CldPicture src={heroProduct.image} alt={heroProduct.title} className="w-full h-full object-cover" />
                           ) : (
