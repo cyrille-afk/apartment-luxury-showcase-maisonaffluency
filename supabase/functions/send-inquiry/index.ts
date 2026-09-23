@@ -50,7 +50,13 @@ const InquirySchema = z.object({
   productName: z.string().trim().max(200).optional(),
   designerName: z.string().trim().max(200).optional(),
   selectedFinish: z.string().trim().max(500).optional(),
-  source: z.enum(["public_product", "concierge_lead", "contact_form", "bespoke_configuration"]).optional(),
+  source: z.enum([
+    "public_product",
+    "concierge_lead",
+    "contact_form",
+    "bespoke_configuration",
+    "trade_application",
+  ]).optional(),
   attachmentPath: z.string().trim().max(500).optional(),
 });
 
