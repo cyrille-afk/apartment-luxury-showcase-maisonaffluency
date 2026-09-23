@@ -206,7 +206,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
     queryKey: queryKeys.publicProductPage(designerSlug, productSlug),
     queryFn: () => fetchPublicProductPage(designerSlug, productSlug) as Promise<{
       product: ProductRow;
-      designer: { id: string; name: string; slug: string; biography: string };
+      designer: { id: string; name: string; slug: string; biography: string; founder?: string | null };
       relatedPicks: ProductRow[];
     } | null>,
     enabled: !!designerSlug && !!productSlug,
