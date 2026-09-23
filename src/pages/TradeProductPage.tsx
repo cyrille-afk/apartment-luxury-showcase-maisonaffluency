@@ -1688,7 +1688,19 @@ const TradeProductPage: React.FC = () => {
   // Catalogue rate on the product itself. Many pieces carry finish options that
   // do not change the price (every variant is price_cents = 0) — those must
   // still show the catalogue rate rather than "Price upon Request".
-  const catalogueRrpCents = (pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null) || null;
+  // NOTE: when the catalogue only stores a NET trade price (no RRP), gross it
+  // back up to the retail base — priceLabels applies the tier discount once on
+  // top of this value, so feeding it a net figure would discount it twice.
+  const catalogueRrpCents = (() => {
+    const rrp = pricing?.rrp_price_cents ?? null;
+    if (rrp && rrp > 0) return rrp;
+    const net = pricing?.trade_price_cents ?? null;
+    if (net && net > 0) {
+      const factor = 1 - (TRADE_DISCOUNT ?? 0);
+      return factor > 0 ? Math.round(net / factor) : net;
+    }
+    return null;
+  })();
   const variantsCarryNoPrice = hasVariants && minVariantCents == null;
   const effectiveRrpCents = hasVariants
     ? (variantsCarryNoPrice

@@ -56,8 +56,13 @@ const LeadContactsEditor = ({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const timer = useRef<number | null>(null);
+  // Set while the admin is typing in this editor. Prevents the props-sync
+  // effect (which fires after our own optimistic save) from clobbering text
+  // that has not been persisted yet.
+  const dirty = useRef(false);
 
   useEffect(() => {
+    if (dirty.current) return;
     setRows(buildRows());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [founderName, executiveEmails]);
@@ -97,15 +102,25 @@ const LeadContactsEditor = ({
       .eq("id", leadId);
     setSaving(false);
     if (error) {
+      dirty.current = false;
       setRows(buildRows());
       onChange(previous);
       toast.error(`Could not update ${studioName} contacts.`);
       return;
     }
+    dirty.current = false;
     flash();
   };
 
+  // Saves only when something actually changed, so tabbing between fields
+  // doesn't fire a round trip per blur.
+  const persistIfDirty = () => {
+    if (!dirty.current) return;
+    void persist(rows);
+  };
+
   const setRow = (i: number, patch: Partial<Contact>) => {
+    dirty.current = true;
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   };
 
@@ -113,6 +128,7 @@ const LeadContactsEditor = ({
 
   const removeRow = (i: number) => {
     const next = rows.filter((_, idx) => idx !== i);
+    dirty.current = true;
     setRows(next);
     void persist(next);
   };
@@ -150,23 +166,21 @@ const LeadContactsEditor = ({
             type="text"
             value={row.name}
             onChange={(e) => setRow(i, { name: e.target.value })}
-            onBlur={() => void persist(rows)}
+            onBlur={persistIfDirty}
             onKeyDown={handleKeyDown}
-            disabled={saving}
             placeholder="Name"
             aria-label={`Contact ${i + 1} name for ${studioName}`}
-            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-60"
+            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
           />
           <input
             type="email"
             value={row.email}
             onChange={(e) => setRow(i, { email: e.target.value })}
-            onBlur={() => void persist(rows)}
+            onBlur={persistIfDirty}
             onKeyDown={handleKeyDown}
-            disabled={saving}
             placeholder="email@studio.com"
             aria-label={`Contact ${i + 1} email for ${studioName}`}
-            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-60"
+            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
           />
           <button
             type="button"
