@@ -2340,16 +2340,7 @@ const PublicProductPageContent: React.FC = () => {
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
                 pickId={product.id}
-                firstImageBadge={(() => {
-                  const editionLabel = formatEditionLabel(product as any);
-                  if (!editionLabel && !isEcartProduct) return null;
-                  return (
-                    <span className="flex flex-col items-start gap-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
-                      {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
-                      {editionLabel && <span>{editionLabel}</span>}
-                    </span>
-                  );
-                })()}
+                firstImageBadge={null}
 
 
                 overlay={
@@ -2489,14 +2480,26 @@ const PublicProductPageContent: React.FC = () => {
                         </Link>
                         <div className="mt-1 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                       </div>
-                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
-                        {product.title}
-                        {formatProductSubtitleLine(product.title, product.subtitle) && (
-                          <span className="block mt-1 text-[0.8em] text-muted-foreground">
-                            {formatProductSubtitleLine(product.title, product.subtitle)}
-                          </span>
-                        )}
-                      </h1>
+                      <div className="flex items-baseline justify-between gap-4 mt-2">
+                        <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] leading-[1.15] tracking-[-0.01em]">
+                          {product.title}
+                          {formatProductSubtitleLine(product.title, product.subtitle) && (
+                            <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                              {formatProductSubtitleLine(product.title, product.subtitle)}
+                            </span>
+                          )}
+                        </h1>
+                        {(() => {
+                          const editionLabel = formatEditionLabel(product as any);
+                          if (!editionLabel && !isEcartProduct) return null;
+                          return (
+                            <span className="flex flex-col items-end gap-1 shrink-0 pb-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
+                              {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
+                              {editionLabel && <span>{editionLabel}</span>}
+                            </span>
+                          );
+                        })()}
+                      </div>
 
                       {isTradeVerifiedView && (
                         <div className="mt-4 flex justify-start">
@@ -2579,14 +2582,26 @@ const PublicProductPageContent: React.FC = () => {
                       </Link>
                       <div className="mt-2.5 w-10 md:w-12 h-px bg-foreground/20" aria-hidden="true" />
                     </div>
-                    <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-5 leading-[1.15] tracking-[-0.01em]">
-                      {product.title}
-                      {formatProductSubtitleLine(product.title, product.subtitle) && (
-                        <span className="block mt-1 text-[0.8em] text-muted-foreground">
-                          {formatProductSubtitleLine(product.title, product.subtitle)}
-                        </span>
-                      )}
-                    </h1>
+                    <div className="flex items-baseline justify-between gap-4 mt-5">
+                      <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] leading-[1.15] tracking-[-0.01em]">
+                        {product.title}
+                        {formatProductSubtitleLine(product.title, product.subtitle) && (
+                          <span className="block mt-1 text-[0.8em] text-muted-foreground">
+                            {formatProductSubtitleLine(product.title, product.subtitle)}
+                          </span>
+                        )}
+                      </h1>
+                      {(() => {
+                        const editionLabel = formatEditionLabel(product as any);
+                        if (!editionLabel && !isEcartProduct) return null;
+                        return (
+                          <span className="flex flex-col items-end gap-1 shrink-0 pb-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
+                            {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
+                            {editionLabel && <span>{editionLabel}</span>}
+                          </span>
+                        );
+                      })()}
+                    </div>
 
                     {isTradeVerifiedView && (
                       <div className="mt-4 flex justify-end">
