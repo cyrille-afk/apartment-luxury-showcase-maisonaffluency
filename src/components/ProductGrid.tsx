@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { X, Scale } from "lucide-react";
+import { Heart, X, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
@@ -20,6 +20,9 @@ import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
 import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useAuthGate } from "@/hooks/useAuthGate";
+import AuthGateDialog from "@/components/AuthGateDialog";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -290,6 +293,8 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const destination = useShippingDestination();
+  const { isFavorited, toggleWishlist } = useWishlist();
+  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
@@ -299,7 +304,7 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
     () => mergeWithDbPicks(_sharedProductList, dbPicks || []),
     [dbPicks]
   );
-  const [gridCols, setGridCols] = useState<3 | 4>(4);
+  const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
   const gridRef = useRef<HTMLElement>(null);
 
 /** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
@@ -595,6 +600,34 @@ function singularizeSub(s: string): string {
                     {ECART_REEDITION_LABEL}
                   </p>
                 )}
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    const favoriteId = item.pick.id;
+                    if (!favoriteId) return;
+                    requireAuth(() => {
+                      toggleWishlist(favoriteId, {
+                        title: item.pick.title,
+                        designer: item.designerName,
+                        imageUrl: item.pick.image,
+                      });
+                    }, "save pieces to your favorites");
+                  }}
+                  className={cn(
+                    "absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background/90 shadow-sm backdrop-blur-sm transition-colors hover:bg-background",
+                    item.pick.id && isFavorited(item.pick.id)
+                      ? "text-destructive"
+                      : "text-foreground/75 hover:text-foreground",
+                  )}
+                  aria-label={item.pick.id && isFavorited(item.pick.id) ? `Remove ${item.pick.title} from favorites` : `Add ${item.pick.title} to favorites`}
+                  title={item.pick.id && isFavorited(item.pick.id) ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart
+                    className={cn("h-4 w-4", item.pick.id && isFavorited(item.pick.id) && "fill-current")}
+                    strokeWidth={1.5}
+                  />
+                </button>
                 {/* Compare pin button */}
                 <button
                   onClick={(e) => {
@@ -645,7 +678,7 @@ function singularizeSub(s: string): string {
       </div>
 
     </section>
-
+    <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
   );
 };
