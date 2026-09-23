@@ -580,7 +580,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </div>
           )}
           {firstImageBadge && activeIndex === 0 && (
-            <div className="absolute top-3 left-3 z-20 pointer-events-none">
+            <div
+              className={cn(
+                "absolute left-3 z-20 pointer-events-none",
+                bottomRightOverlay ? "top-[calc(var(--gallery-control-offset,1rem)+3.25rem)]" : "top-3"
+              )}
+            >
               <div className="pointer-events-auto">{firstImageBadge}</div>
             </div>
           )}
