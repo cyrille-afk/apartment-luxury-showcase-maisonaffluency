@@ -187,7 +187,7 @@ export default function CuratorsPicksGrid({
       }
       className="bg-[hsl(var(--picks-bg))] px-4 py-12 sm:px-8 sm:py-20"
     >
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-[1380px]">
         <header className="mb-8 sm:mb-12">
           <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--picks-muted))]">
             Maison Affluency

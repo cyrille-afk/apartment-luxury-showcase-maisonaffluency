@@ -439,7 +439,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         : "bg-[#FAFAFA] border-b border-border/30 md:bg-white md:border-b md:border-zinc-100"
     )}>
 
-      <div className="mx-auto max-w-7xl px-6 md:px-12">
+      <div className="mx-auto w-full max-w-[1380px] px-6">
         {/* Mobile: single row */}
         <div className="relative flex h-20 xsp:h-24 items-center justify-between md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
