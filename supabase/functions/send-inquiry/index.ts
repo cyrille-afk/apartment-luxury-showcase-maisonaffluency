@@ -198,7 +198,7 @@ async function sendQuoteWhatsAppAlert(
       console.error(`Quote WhatsApp alert failed: ${result.error}`);
       await supabase.from("admin_alert_log").insert({
         channel: "twilio_whatsapp",
-        event: "quote_request",
+        event: eventName,
         status: "failed",
         payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email, used_template: usedTemplate },
         error: [firstError, result.error].filter(Boolean).join(" | "),
@@ -210,7 +210,7 @@ async function sendQuoteWhatsAppAlert(
     // it, so record the queued status and any immediate error code.
     await supabase.from("admin_alert_log").insert({
       channel: "twilio_whatsapp",
-      event: "quote_request",
+      event: eventName,
       status: "sent",
       provider_message_id: result.sid,
       payload: {
@@ -226,7 +226,7 @@ async function sendQuoteWhatsAppAlert(
     try {
       await supabase.from("admin_alert_log").insert({
         channel: "twilio_whatsapp",
-        event: "quote_request",
+        event: eventName,
         status: "failed",
         payload: { inquiry_id: inquiry.id, product: inquiry.productName, email: inquiry.email },
         error: String(err instanceof Error ? err.message : err).slice(0, 2000),
