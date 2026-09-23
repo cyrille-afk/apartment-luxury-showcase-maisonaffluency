@@ -16,7 +16,7 @@ import { normalizeFinishOption, normalizeFinishToken } from "./finishNormalizati
 const norm = (s: string) => (s || "").trim().toLowerCase();
 
 export const isFinishAxisLabel = (label: string) =>
-  /\b(frame|wood|finish|feet|foot|leg|base|legs)\b/i.test(label || "");
+  /\b(frame|wood|finish|feet|foot|leg|base|legs|plinth|socle)\b/i.test(label || "");
 
 /**
  * Build a swatch-name filter for one variant axis (Base or Top).
