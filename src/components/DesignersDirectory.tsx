@@ -659,7 +659,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
     >
 
 
-      <div className="relative overflow-hidden aspect-[4/5] md:aspect-auto md:h-[400px] group bg-muted/20">
+      <div className="relative overflow-hidden aspect-square group bg-muted/20">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
