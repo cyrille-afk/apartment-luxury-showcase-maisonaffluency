@@ -179,6 +179,22 @@ export async function fetchPublicProductPage(
     }
   }
 
+  // The static manifest can remain stale for up to the CDN cache window after
+  // an editor corrects a product slug. If the cached snapshot has no match,
+  // read that one canonical product live instead of returning a false 404.
+  if (!product && cachedCatalog) {
+    const { data: livePicks } = await supabase
+      .from("designer_curator_picks_public" as any)
+      .select(publicPickFields)
+      .eq("slug", productSlug)
+      .limit(1);
+    const found = matchPick(livePicks as any[] | null);
+    if (found) {
+      picks = livePicks as any[];
+      product = found;
+    }
+  }
+
   if (!product) return null;
 
   // The manifest carries only listing fields — hydrate the matched product with
