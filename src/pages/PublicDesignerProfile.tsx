@@ -1412,7 +1412,7 @@ const PublicDesignerProfile = () => {
           "mx-auto pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] md:pb-20 space-y-1 md:space-y-1.5",
           useNewInSpotlightFormat
             ? "w-full max-w-7xl px-6 md:px-12 bg-transparent"
-            : "px-4 max-w-6xl md:max-w-7xl md:px-12 lg:px-12"
+            : "w-full max-w-6xl px-4 md:px-12 lg:px-12"
         )}>
           <div className={cn("flex items-center justify-between")}>
             {fromProduct ? (
@@ -1889,9 +1889,9 @@ const PublicDesignerProfile = () => {
 
 
                     <div className={cn(
-                      "w-full columns-2 gap-4 sm:grid sm:columns-auto",
+                      "w-full columns-2 gap-6 sm:grid sm:columns-auto",
                       gridClass,
-                      "md:gap-x-8 md:gap-y-12"
+                      "md:gap-8"
                     )}>
                 {visiblePicks.map((pick, pickIndex) => {
                   // Editorial mobile rhythm: on two-column mobile grids every
@@ -1973,7 +1973,6 @@ const PublicDesignerProfile = () => {
                   // We're already on Madsen's own portrait — no "by Arnold Madsen" needed.
                   const cardSubtitle = isArnoldClamChair ? undefined : pick.subtitle;
                   const isFavorite = isFavoritedPick(pick.id);
-                  const preserveFullProductImage = designer.id === "b8c3578b-31f7-4b89-835e-10e70ade9c21";
                   const alternateImage = pick.hover_image_url
                     || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
                     || null;
@@ -2049,47 +2048,19 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${cardBrandLabel ? `${cardBrandLabel} — ` : ""}${displayTitle}${cardSubtitle ? ` — ${cardSubtitle}` : ""}`}
-                        className={cn(
-                          "w-full bg-[hsl(var(--canvas))] rounded-sm overflow-hidden relative flex items-center justify-center cursor-pointer max-h-full max-w-full p-6 md:p-8",
-                          preserveFullProductImage ? "md:aspect-[3/4]" : "md:aspect-[4/3]"
-                        )}
+                        className="relative !aspect-square h-auto w-full max-w-full cursor-pointer overflow-hidden rounded-sm bg-[hsl(var(--canvas))]"
                       >
-                        {/* Mobile masonry: natural aspect ratio image */}
-                        <img
-                          src={responsiveCloudinaryUrl(pick.image_url, 480)}
-                          srcSet={pickSrcSet(pick.image_url)}
-                          sizes="(max-width: 640px) 45vw, 100vw"
+                        <SwipeAlternateProductImage
+                          primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
+                          primarySrcSet={pickSrcSet(pick.image_url)}
+                          alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
+                          alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
-                          className="md:hidden w-full h-auto object-contain"
-                          loading="lazy"
+                          primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
+                          alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
+                          alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
-                        {/* Desktop: Amélie's portrait product photography must remain fully visible. */}
-                        {preserveFullProductImage ? (
-                          <img
-                            src={responsiveCloudinaryUrl(pick.image_url, 600)}
-                            srcSet={pickSrcSet(pick.image_url)}
-                            sizes="(max-width: 1024px) 30vw, 25vw"
-                            alt={pick.title}
-                            className="hidden md:block absolute inset-0 h-full w-full object-contain object-top"
-                            loading="lazy"
-                            draggable={false}
-                          />
-                        ) : (
-                          <div className="hidden md:block absolute inset-0">
-                            <SwipeAlternateProductImage
-                              primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
-                              primarySrcSet={pickSrcSet(pick.image_url)}
-                              alternateSrc={alternateImage ? responsiveCloudinaryUrl(alternateImage, 600) : null}
-                              alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
-                              sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
-                              alt={pick.title}
-                              contain
-                              primaryClassName="max-h-full max-w-full object-contain p-0"
-                              alternateClassName="max-h-full max-w-full object-contain p-0"
-                              alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
-                            />
-                          </div>
-                        )}
                         {/* Inventory badges — lower-left of the frame */}
                         <InventoryBadgeStack
                           badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
