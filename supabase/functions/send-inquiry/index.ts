@@ -429,7 +429,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     // WhatsApp alert for product quote requests — intentionally not awaited so
     // the visitor sees the thank-you state instantly.
-    if (resolvedSource === "public_product" || productId || productName) {
+    const isTradeApplication =
+      resolvedSource === "trade_application" ||
+      /^new trade application/i.test(subject || "");
+    if (
+      isTradeApplication ||
+      resolvedSource === "public_product" ||
+      productId ||
+      productName
+    ) {
       sendQuoteWhatsAppAlert(supabase, {
         id: idStem,
         name,
@@ -438,7 +446,9 @@ const handler = async (req: Request): Promise<Response> => {
         company: companyName,
         productName,
         selectedFinish: resolvedFinish,
-      }).catch((err) => console.error("Quote WhatsApp alert unhandled:", err));
+        subject,
+        kind: isTradeApplication ? "trade_application" : "quote",
+      }).catch((err) => console.error("Inquiry WhatsApp alert unhandled:", err));
     }
 
 
