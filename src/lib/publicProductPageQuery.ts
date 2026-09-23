@@ -25,20 +25,21 @@ export async function fetchPublicProductPage(
   designerSlug: string | undefined,
   productSlug: string | undefined,
 ) {
-  if (!designerSlug || !productSlug) return null;
+  if (!productSlug) return null;
 
-  const { data: designerRow } = await supabase
-    .from("designers")
-    .select("id, name, slug, display_name, biography, founder")
-
-    .eq("slug", designerSlug)
-    .maybeSingle();
+  const { data: designerRow } = designerSlug
+    ? await supabase
+        .from("designers")
+        .select("id, name, slug, display_name, biography, founder")
+        .eq("slug", designerSlug)
+        .maybeSingle()
+    : { data: null };
   // Parent houses are sometimes flagged trade_only / unpublished while still
   // being linked from public lightboxes — keep resolving their product URLs.
   let designer = designerRow as any;
   if (!designer) {
     // Unknown designer slug: resolve the product globally below.
-    designer = { id: "", name: "", slug: designerSlug, display_name: null, biography: "" };
+    designer = { id: "", name: "", slug: designerSlug || "", display_name: null, biography: "" };
   }
 
 
@@ -251,7 +252,7 @@ export function prefetchPublicProductPage(
   designerSlug: string | undefined,
   productSlug: string | undefined,
 ) {
-  if (!designerSlug || !productSlug) return;
+  if (!productSlug) return;
   // Warm the lazily-loaded route chunk too — the network round-trip for the
   // JS bundle is often the larger part of perceived navigation latency.
   void import("@/pages/PublicProductPage").catch(() => {});

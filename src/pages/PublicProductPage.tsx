@@ -209,7 +209,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       designer: { id: string; name: string; slug: string; biography: string; founder?: string | null };
       relatedPicks: ProductRow[];
     } | null>,
-    enabled: !!designerSlug && !!productSlug,
+    enabled: !!productSlug,
     staleTime: PUBLIC_PRODUCT_PAGE_STALE_TIME,
   });
 }
@@ -1133,7 +1133,7 @@ const VariantSelectors: React.FC<{
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
 const PublicProductPageContent: React.FC = () => {
-  const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
+  const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -1199,7 +1199,9 @@ const PublicProductPageContent: React.FC = () => {
   useEffect(() => {
     if (isLegacyArnoldClamChairRoute) return;
     if (!definitiveDesignerSlug || !definitiveProductSlug) return;
-    const definitivePath = `/designers/${definitiveDesignerSlug}/${definitiveProductSlug}`;
+    const definitivePath = location.pathname.startsWith("/products/")
+      ? `/products/${definitiveProductSlug}`
+      : `/designers/${definitiveDesignerSlug}/${definitiveProductSlug}`;
     const currentPath = location.pathname.replace(/\/+$/, "") || "/";
     if (currentPath !== definitivePath) {
       navigate(`${definitivePath}${location.search}`, { replace: true, state: location.state });
