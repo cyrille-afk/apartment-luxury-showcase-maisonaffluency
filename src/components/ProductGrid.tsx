@@ -239,14 +239,16 @@ const _sharedProductList = buildProductList(atelierOnlyPicks);
 /** Merge hardcoded + DB picks, deduplicating by designerId + title */
 function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): ProductItem[] {
   const merged = new Map<string, ProductItem>();
+  const mergeKey = (item: ProductItem) =>
+    `${item.designerId}::${normalizeSearchText(`${item.pick.title} ${item.pick.subtitle || ""}`)}`;
 
   for (const item of hardcoded) {
-    const key = `${item.designerId}::${item.pick.title}`;
+    const key = mergeKey(item);
     merged.set(key, item);
   }
 
   for (const item of dbPicks) {
-    const key = `${item.designerId}::${item.pick.title}`;
+    const key = mergeKey(item);
     const existing = merged.get(key);
 
     if (!existing) {
