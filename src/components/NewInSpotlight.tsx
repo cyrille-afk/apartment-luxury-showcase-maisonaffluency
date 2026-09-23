@@ -276,8 +276,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateSrcSet={alternateImage ? pickSrcSet(alternateImage) : undefined}
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                   alt={pick.title}
-                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
-                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-cover object-center !p-0"
+                  primaryClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
+                  alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center !p-0"
                 />
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
@@ -303,7 +303,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="mt-2.5 grid w-full grid-rows-[1.25rem_2.75rem_1.25rem] items-start text-left leading-relaxed">
+              <div className="mt-2.5 flex w-full flex-col items-start gap-0.5 text-left leading-relaxed">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -374,7 +374,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   );
                 })()}
                 {/* Price — muted, bottom */}
-                <div className="flex h-5 items-start">
+                <div className="flex items-start">
                   <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
                     {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                   </p>
