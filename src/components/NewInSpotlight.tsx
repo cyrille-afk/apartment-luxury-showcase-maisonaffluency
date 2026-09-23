@@ -309,8 +309,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 )}
               </div>
 
-              <div className="flex w-full items-baseline justify-between gap-3 pt-3">
-                <div className="flex flex-col text-left space-y-0.5">
+              <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
+                <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
                 {(() => {
                   const composed = composeTitle(pick.title, pick.subtitle);
                   // Editor brands (e.g. De La Espada) embed the author in the title:
@@ -360,19 +360,19 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block h-5 font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1 hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="block h-5 w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
                           >
                             {brandLine}
                           </Link>
                          ) : brandLine ? (
-                          <span className="block h-5 font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight line-clamp-1">
+                          <span className="block h-5 w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
                             {brandLine}
                           </span>
                          ) : (
                            <span aria-hidden="true" className="block h-5" />
                          )}
                       {/* Product name — secondary, elegant italic */}
-                      <h3 className="font-body text-xs font-normal text-neutral-600 leading-snug line-clamp-2">
+                      <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
                         {productLine}
                       </h3>
                     </>
@@ -380,8 +380,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 })()}
               </div>
               {/* Price — bottom right, aligned to product title baseline */}
-              <div className="min-w-fit shrink-0 self-end whitespace-nowrap">
-                <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600">
+              <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap md:mt-0 md:self-baseline">
+                <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:text-sm">
                   {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                 </p>
               </div>
