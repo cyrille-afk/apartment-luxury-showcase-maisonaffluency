@@ -1457,8 +1457,8 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
-          <div className="flex min-w-0 max-w-[70%] flex-col text-left">
+      <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+          <div className="flex min-w-0 flex-1 flex-col text-left">
             {pick.is_trade_only ? (
               <>
                 <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em]">
@@ -1486,7 +1486,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
                   <p className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
                     {brandLine}
                   </p>
-                  <p className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
+                  <p className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
                     {composed.title}{isYear ? ` (${sub})` : ''}
                   </p>
                   {showSubtitleBelow && (
@@ -1496,7 +1496,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="min-w-fit shrink-0 whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
+          <p className="shrink-0 whitespace-nowrap text-right font-body text-xs font-semibold text-foreground antialiased">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
       </div>

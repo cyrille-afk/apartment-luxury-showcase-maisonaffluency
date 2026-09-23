@@ -125,7 +125,7 @@ const Card = memo(function Card({
         onOpen(item.href);
       }}
       onClick={(e) => e.preventDefault()}
-      className="group block text-left touch-manipulation select-none"
+      className="group flex h-full w-full flex-col justify-between text-left touch-manipulation select-none"
       aria-label={`${item.name} — ${item.price}`}
     >
       <div className="relative !aspect-square h-auto w-full bg-[hsl(var(--picks-plate))] [transform:translateZ(0)]">
@@ -155,18 +155,18 @@ const Card = memo(function Card({
         )}
       </div>
 
-      <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-        <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+      <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+        <div className="flex min-w-0 flex-1 flex-col text-left">
           {item.designer && (
-            <p className="block w-full truncate whitespace-nowrap font-sans text-xs font-normal uppercase tracking-wider text-[hsl(var(--picks-fg))]">
+            <p className="block w-full truncate whitespace-nowrap font-sans text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--picks-fg))] antialiased">
               {item.designer}
             </p>
           )}
-          <h3 className="line-clamp-2 font-display text-sm font-normal leading-snug text-[hsl(var(--picks-muted))]">
+          <h3 className="mt-0.5 line-clamp-1 font-sans text-xs font-medium leading-snug text-[hsl(var(--picks-muted))] antialiased">
             {item.name}
           </h3>
         </div>
-        <p className="mt-1 min-w-fit shrink-0 whitespace-nowrap font-sans text-xs font-normal text-[hsl(var(--picks-muted))] md:mt-0 md:self-baseline md:text-sm">
+        <p className="shrink-0 whitespace-nowrap text-right font-sans text-xs font-semibold text-[hsl(var(--picks-fg))] antialiased">
           {item.price}
         </p>
       </div>

@@ -696,8 +696,8 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
-                <div className="flex min-w-0 max-w-[70%] flex-col text-left">
+              <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
@@ -705,7 +705,7 @@ function singularizeSub(s: string): string {
                   >
                     {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                   </Link>
-                  <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
+                  <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
                       : item.pick.title}
