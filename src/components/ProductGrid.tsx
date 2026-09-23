@@ -302,7 +302,7 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
   const [textQuery, setTextQuery] = useState<string | null>(null);
   // The database-backed public catalogue is authoritative. Never merge the
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
-  const allProducts = useMemo(() => dbPicks || [], [dbPicks]);
+  const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
   const gridRef = useRef<HTMLElement>(null);
 
