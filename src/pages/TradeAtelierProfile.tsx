@@ -697,10 +697,10 @@ const TradeAtelierProfile = () => {
                     return (
                     <div
                       key={pick.id}
-                      className="group cursor-pointer flex flex-col"
+                      className="group flex h-full cursor-pointer flex-col justify-between"
                       onClick={() => navigate(productPath)}
                     >
-                       <div className="relative aspect-square w-full overflow-visible bg-[hsl(var(--product-canvas))]">
+                       <div className="relative aspect-square w-full flex-none overflow-hidden bg-[hsl(var(--product-canvas))]">
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
@@ -728,12 +728,12 @@ const TradeAtelierProfile = () => {
                           );
                         })()}
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
                         {showReedition && (
-                          <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                             {ECART_REEDITION_LABEL}
                           </p>
                         )}
@@ -781,28 +781,28 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                       <div className="flex w-full flex-col items-start pt-2.5 md:flex-row md:items-baseline md:justify-between md:gap-3">
-                         <div className="flex w-full min-w-0 flex-col space-y-0.5 text-left md:flex-1">
+                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-3">
+                         <div className="flex min-w-0 max-w-[70%] flex-col text-left">
                           {designerLabel && designerSlug ? (
                             <Link
                               to={`/trade/designers/${designerSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                               className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground hover:text-foreground/70 leading-tight"
+                                className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased hover:text-foreground/70"
                             >
                               {designerLabel}
                             </Link>
                           ) : designerLabel ? (
-                             <span className="block w-full truncate whitespace-nowrap font-display text-xs font-normal uppercase tracking-wider text-foreground leading-tight">
+                             <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
                               {designerLabel}
                             </span>
                           ) : null}
-                           <h3 className="line-clamp-2 font-body text-sm font-normal leading-snug text-neutral-600">
+                            <h3 className="mt-0.5 line-clamp-2 font-body text-xs font-medium leading-snug text-foreground antialiased">
                             {pick.title}
                           </h3>
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                         <div className="mt-1 min-w-fit shrink-0 whitespace-nowrap text-left md:mt-0 md:self-baseline md:text-right">
-                           <p className="whitespace-nowrap font-body text-xs font-normal text-neutral-600 md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5 md:text-sm">
+                          <div className="min-w-fit shrink-0 whitespace-nowrap text-right">
+                            <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
