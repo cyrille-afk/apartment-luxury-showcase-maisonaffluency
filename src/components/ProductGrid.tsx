@@ -1,36 +1,32 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { CldPicture } from "@/components/ui/CldPicture";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, FileDown, ChevronLeft, ChevronRight, ArrowUp, Maximize2, Minimize2, MessageSquareQuote, Search, Scale } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Scale } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
-import PinchZoomImage from "./PinchZoomImage";
-import QuoteRequestDialog from "./QuoteRequestDialog";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
-import { useCompare, type CompareItem } from "@/contexts/CompareContext";
-import { useAuthGate } from "@/hooks/useAuthGate";
-import AuthGateDialog from "@/components/AuthGateDialog";
+import { useCompare } from "@/contexts/CompareContext";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/queryKeys";
-import { supabase } from "@/integrations/supabase/client";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
-import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
 import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
+import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
+import { useShippingDestination } from "@/lib/shippingDestination";
+import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+const productHref = (pick: CuratorPick) =>
+  `/products/${pick.slug || designerSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""))}`;
 
 // ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
 const SUB_TAGS: Record<string, string[]> = {
@@ -285,27 +281,11 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 
 const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
-  const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const destination = useShippingDestination();
 
-  /** Warm the curator-pick detail cache so opening the card feels instant. */
-  const prefetchPickDetail = useCallback((pickId?: string) => {
-    if (!pickId) return;
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.curatorPickDetail(pickId),
-      staleTime: 10 * 60_000,
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("designer_curator_picks_public" as any)
-          .select("id, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
-          .eq("id", pickId)
-          .maybeSingle();
-        if (error) throw error;
-        return data as any;
-      },
-    });
-  }, [queryClient]);
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -314,18 +294,8 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
     () => mergeWithDbPicks(_sharedProductList, dbPicks || []),
     [dbPicks]
   );
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
-  const [navigatedToProfile, setNavigatedToProfile] = useState(false);
-  const [isLightboxImageLoaded, setIsLightboxImageLoaded] = useState(false);
-  const [lightboxHovered, setLightboxHovered] = useState(false);
-  const [quoteOpen, setQuoteOpen] = useState(false);
-  const [quoteProduct, setQuoteProduct] = useState<{ name?: string; designer?: string }>({});
   const gridRef = useRef<HTMLElement>(null);
-  const touchStartRef = useRef<number | null>(null);
-  const touchEndRef = useRef<number | null>(null);
 
 /** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
 function singularizeSub(s: string): string {
