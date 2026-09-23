@@ -723,7 +723,7 @@ const TradeAtelierProfile = () => {
                           );
                         })()}
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute left-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}

@@ -269,7 +269,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                 if (item) setLightboxItem(item);
               }}
             >
-              <div className="relative !aspect-square h-auto w-full flex-none overflow-hidden rounded-sm bg-[hsl(var(--product-canvas))]">
+              <div className="relative !aspect-square h-auto w-full flex-none rounded-sm bg-[hsl(var(--product-canvas))]">
                 <SwipeAlternateProductImage
                   primarySrc={responsiveCloudinaryUrl(pick.image_url, 600)}
                   primarySrcSet={pickSrcSet(pick.image_url)}
@@ -281,7 +281,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-6"
                 />
                 {formatCuratorialEditionLine(pick) && (
-                  <p className="pointer-events-none absolute left-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                  <p className="pointer-events-none absolute -top-2 left-6 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                     {formatCuratorialEditionLine(pick)}
                   </p>
                 )}
