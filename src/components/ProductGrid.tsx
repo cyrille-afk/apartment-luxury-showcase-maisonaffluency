@@ -26,6 +26,7 @@ import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDime
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link } from "react-router-dom";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -180,6 +181,42 @@ function pickMatchesFilter(pick: CuratorPick, category: string | null, subcatego
   return categoryMatch(pick.category, category || undefined) || false;
 }
 
+const ROOM_CATEGORY_ALIASES: Record<string, string[]> = {
+  sofas: ["Sofas"],
+  armchairs: ["Armchairs"],
+  daybeds: ["Daybeds & Benches", "Daybed"],
+  benches: ["Daybeds & Benches", "Bench"],
+  "coffee-tables": ["Coffee Tables"],
+  "side-tables": ["Side Tables"],
+  credenzas: ["Buffets, Cabinets And Sideboards", "Credenza", "Sideboard"],
+  rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs", "Rug"],
+  "floor-lights": ["Floor Lights"],
+  "dining-tables": ["Dining Tables"],
+  chairs: ["Chairs"],
+  "bar-stools": ["Ottomans & Stools", "Bar Stool"],
+  "ceiling-lights": ["Ceiling Lights"],
+  beds: ["Beds"],
+  nightstands: ["Bedside Tables", "Nightstand"],
+  dressers: ["Dresser"],
+  wardrobes: ["Wardrobe"],
+  "table-lights": ["Table Lights"],
+  desks: ["Desks"],
+  "office-chairs": ["Office Chair", "Desk Chair"],
+  bookcases: ["Bookcases"],
+};
+
+function pickMatchesRoom(pick: CuratorPick, room: RoomSlug): boolean {
+  const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
+  const effectiveSub = inferSubcategory(pick.category, pick.subcategory, inferenceText);
+  const values = [pick.category, pick.subcategory, effectiveSub, pick.title, ...(pick.tags || [])];
+
+  return ROOM_MAP[room].some((roomCategory) =>
+    (ROOM_CATEGORY_ALIASES[roomCategory] || [roomCategory]).some((alias) =>
+      values.some((value) => categoryMatch(value, alias)),
+    ),
+  );
+}
+
 const SECTION_LABELS: Record<string, string> = {
   designers: "Designers & Makers",
   collectibles: "Collectible Design",
@@ -246,7 +283,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectibles" | "ateliers" }) => {
+const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
@@ -359,7 +396,7 @@ function singularizeSub(s: string): string {
   }, []);
 
   const filtered = useMemo(() => {
-    if (!category && !subcategory && !textQuery) return [];
+    if (!category && !subcategory && !textQuery && !roomSlug) return [];
 
     // Scope results based on which section triggered the filter
     const sectionFilter = filterSource === 'collectibles' ? 'collectibles'
@@ -370,6 +407,7 @@ function singularizeSub(s: string): string {
     const normalizedQuery = normalizeSearchText(textQuery || undefined);
 
     const matched = pool.filter(item => {
+      if (roomSlug && !pickMatchesRoom(item.pick, roomSlug)) return false;
       if (!pickMatchesFilter(item.pick, category, subcategory)) return false;
       if (!normalizedQuery) return true;
 
@@ -393,9 +431,9 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory, filterSource, textQuery]);
+  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug]);
 
-  const isActive = (category || subcategory || textQuery) && filtered.length > 0;
+  const isActive = Boolean(category || subcategory || textQuery || roomSlug);
 
   // Reset image-loaded state on lightbox slide changes
   useEffect(() => {
@@ -471,15 +509,15 @@ function singularizeSub(s: string): string {
 
   // If scoped, only render when the filter source matches this instance
   const activeScope = filterSource ? (SOURCE_TO_SCOPE[filterSource] || "designers") : null;
-  if (sectionScope && activeScope !== sectionScope) return null;
+  if (!roomSlug && sectionScope && activeScope !== sectionScope) return null;
 
   // Suppress the standalone designers ProductGrid — DesignersDirectory renders
   // its own filtered grid inline, so showing both creates a duplicate.
-  if (sectionScope === "designers" && activeScope === "designers") return null;
+  if (!roomSlug && sectionScope === "designers" && activeScope === "designers") return null;
 
   if (!isActive) return null;
 
-  const filterLabel = subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
+  const filterLabel = roomSlug ? ROOM_LABELS[roomSlug] : subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
   // Build breadcrumbs (Home → Category → Subcategory) when a category filter is active.
   const crumbs: Crumb[] = (() => {
@@ -525,6 +563,8 @@ function singularizeSub(s: string): string {
             ) : (
               <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
                 {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
+                  roomSlug ? 'the collection'
+                  :
                   filterSource === 'collectibles' ? 'Collectible Design'
                   : filterSource === 'brands' ? 'all Ateliers'
                   : filterSource === 'designers' ? 'all Designers'
@@ -570,11 +610,11 @@ function singularizeSub(s: string): string {
               </TooltipProvider>
             </div>
             <button
-              onClick={handleClearFilter}
+              onClick={roomSlug ? () => { window.location.href = "/designers"; } : handleClearFilter}
               className="flex items-center gap-1.5 px-5 py-2 rounded-full border border-[hsl(var(--gold))] bg-white shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.15em] text-foreground transition-all duration-300"
             >
               <X className="h-3.5 w-3.5" />
-              Clear Filter
+              {roomSlug ? "All Designers" : "Clear Filter"}
             </button>
           </div>
         </div>
@@ -675,6 +715,11 @@ function singularizeSub(s: string): string {
             </motion.div>
           ))}
         </motion.div>
+        {!dbPicksLoading && filtered.length === 0 && (
+          <p className="py-20 text-center font-body text-sm text-muted-foreground">
+            No pieces are currently available for this room.
+          </p>
+        )}
       </div>
 
       {/* ─── Lightbox ─────────────────────────────────────────────────── */}

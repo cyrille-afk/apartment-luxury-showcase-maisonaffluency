@@ -188,6 +188,7 @@ const ProductPage = lazy(() => import("./pages/ProductPage"));
 const DesignerProfile = lazy(() => import("./pages/DesignerProfile"));
 const PublicDesigners = lazy(() => import("./pages/PublicDesigners"));
 const PublicDesignerProfile = lazy(() => import("./pages/PublicDesignerProfile"));
+const RoomSearch = lazy(() => import("./pages/RoomSearch"));
 const PublicDesignerBiography = lazy(() => import("./pages/PublicDesignerBiography"));
 const PublicFavorites = lazy(() => import("./pages/PublicFavorites"));
 const TradeSpecSheet = lazy(() => import("./pages/TradeSpecSheet"));
@@ -688,6 +689,7 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
                   <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
+                  <Route path="/search" element={<Suspense fallback={<PageLoadingSkeleton />}><RoomSearch /></Suspense>} />
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />

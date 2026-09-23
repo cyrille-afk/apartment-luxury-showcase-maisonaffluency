@@ -990,8 +990,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 <ul className="space-y-3">
                   <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
                   <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
-                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Bedroom")}>Bedroom</button></li>
-                  <li><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", "Desks")}>Office</button></li>
+                  <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
+                  <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
                 </ul>
               </div>
 
