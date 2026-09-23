@@ -600,19 +600,6 @@ function singularizeSub(s: string): string {
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
-                {(() => {
-                  const tags: string[] = item.pick.tags || [];
-                   const specialTags = tags.filter(t => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
-                  return specialTags.length > 0 ? (
-                    <div className="absolute top-3 left-3 bg-white/90 border border-neutral-100 px-2 py-0.5 rounded-none backdrop-blur-sm z-10 flex flex-wrap gap-1">
-                      {specialTags.map((tag, i) => (
-                        <span key={i} className="text-[9px] font-sans font-medium uppercase tracking-widest text-neutral-500">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null;
-                })()}
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
@@ -719,20 +706,6 @@ function singularizeSub(s: string): string {
                 style={{ WebkitUserSelect: 'none' }}
               >
                 <div className="relative inline-flex flex-col items-center">
-                  {/* Special tags */}
-                  {(() => {
-                    const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t) && !/limited[ -]?edition|edition of/i.test(t));
-                    return specialTags.length > 0 && !isZoomed ? (
-                      <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
-                        {specialTags.map((tag, i) => (
-                          <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null;
-                  })()}
 
                   <div className="relative inline-block overflow-visible"
                     onMouseEnter={() => { if (currentItem.pick.hoverImage) setLightboxHovered(true); }}
