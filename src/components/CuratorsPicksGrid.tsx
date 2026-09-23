@@ -23,6 +23,7 @@ export interface CuratorPickCard {
   ambientImage: string;
   href: string;
   designer?: string;
+  edition?: string;
 }
 
 export const curatorsPicksMock: CuratorPickCard[] = [
@@ -149,16 +150,21 @@ const Card = memo(function Card({
         />
       </div>
 
-      <div className="pt-3 sm:pt-4">
+      <div className="space-y-1 pt-3 sm:pt-4">
+        {item.edition && (
+          <p className="font-sans text-xs italic tracking-wider text-neutral-500">
+            {item.edition}
+          </p>
+        )}
         {item.designer && (
           <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--picks-muted))]">
             {item.designer}
           </p>
         )}
-        <h3 className="mt-0.5 font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
+        <h3 className="font-display text-[15px] leading-snug text-[hsl(var(--picks-fg))] sm:text-lg">
           {item.name}
         </h3>
-        <p className="mt-0.5 font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
+        <p className="font-sans text-[11px] tracking-[0.14em] text-[hsl(var(--picks-muted))]">
           {item.price}
         </p>
       </div>

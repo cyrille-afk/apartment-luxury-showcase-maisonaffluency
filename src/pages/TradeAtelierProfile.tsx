@@ -33,6 +33,7 @@ import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -695,26 +696,6 @@ const TradeAtelierProfile = () => {
                       onClick={() => navigate(productPath)}
                     >
                       <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
-                        {/* Tag badges — upper-left */}
-                        {(() => {
-                          const tags: string[] = pick.tags || [];
-                          const filtered = pick.edition
-                            ? tags.filter(t => !/^limited-edition$/i.test(t))
-                            : tags;
-                          const specialTags = filtered.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
-                            specialTags.unshift(pick.edition);
-                          }
-                          return specialTags.length > 0 ? (
-                            <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
-                              {specialTags.map((tag, i) => (
-                                <span key={i} className="inline-block px-2 py-0.5 text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          ) : null;
-                        })()}
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
@@ -785,8 +766,13 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center md:text-left">
-                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
+                      <div className="flex flex-col flex-1 space-y-1 px-0.5 md:px-0 text-center md:text-left">
+                        {formatCuratorialEditionLine(pick) && (
+                          <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                            {formatCuratorialEditionLine(pick)}
+                          </p>
+                        )}
+                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
                           {pick.title}
                         </h3>
                         {designerLabel && designerSlug ? (

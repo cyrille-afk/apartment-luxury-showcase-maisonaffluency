@@ -25,6 +25,7 @@ import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/ca
 import { formatDimensionsMultiline, withImperialPerLine } from "@/lib/formatDimensions";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link } from "react-router-dom";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -599,23 +600,6 @@ function singularizeSub(s: string): string {
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
-                {(() => {
-                  const tags: string[] = item.pick.tags || [];
-                   const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                  // Also include the edition field if present and not already covered
-                  if (item.pick.edition && !specialTags.some(t => t.toLowerCase() === item.pick.edition!.toLowerCase())) {
-                    specialTags.unshift(item.pick.edition);
-                  }
-                  return specialTags.length > 0 ? (
-                    <div className="absolute top-3 left-3 bg-white/90 border border-neutral-100 px-2 py-0.5 rounded-none backdrop-blur-sm z-10 flex flex-wrap gap-1">
-                      {specialTags.map((tag, i) => (
-                        <span key={i} className="text-[9px] font-sans font-medium uppercase tracking-widest text-neutral-500">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null;
-                })()}
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
@@ -661,7 +645,15 @@ function singularizeSub(s: string): string {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
                 </div>
               </div>
-              <div className="text-center mt-1">
+              <div className="mt-1 space-y-1 text-center">
+                {(() => {
+                  const editionLine = formatCuratorialEditionLine(item.pick);
+                  return editionLine ? (
+                    <p className="font-body text-xs italic tracking-wider text-neutral-500">
+                      {editionLine}
+                    </p>
+                  ) : null;
+                })()}
                 <Link
                   to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                   onClick={(e) => e.stopPropagation()}
@@ -669,7 +661,7 @@ function singularizeSub(s: string): string {
                 >
                   {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                 </Link>
-                <h3 className="font-body text-sm md:text-base text-foreground leading-tight mt-1.5 font-medium">
+                <h3 className="font-body text-sm md:text-base text-foreground leading-tight font-medium">
                   {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                     ? `${item.pick.title} Table`
                     : item.pick.title}
@@ -714,23 +706,6 @@ function singularizeSub(s: string): string {
                 style={{ WebkitUserSelect: 'none' }}
               >
                 <div className="relative inline-flex flex-col items-center">
-                  {/* Special tags */}
-                  {(() => {
-                    const tags: string[] = currentItem.pick.tags || [];
-                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
-                    if (currentItem.pick.edition && !specialTags.some(t => t.toLowerCase() === currentItem.pick.edition!.toLowerCase())) {
-                      specialTags.unshift(currentItem.pick.edition);
-                    }
-                    return specialTags.length > 0 && !isZoomed ? (
-                      <div className="absolute top-2 left-2 z-20 flex flex-wrap gap-1.5">
-                        {specialTags.map((tag, i) => (
-                          <span key={i} className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null;
-                  })()}
 
                   <div className="relative inline-block overflow-visible"
                     onMouseEnter={() => { if (currentItem.pick.hoverImage) setLightboxHovered(true); }}
@@ -931,7 +906,15 @@ function singularizeSub(s: string): string {
 
                 {/* Metadata */}
                 {!isZoomed && (
-                  <div className="text-center w-full px-4 md:px-12 mt-4">
+                  <div className="w-full space-y-1 px-4 text-center md:px-12 mt-4">
+                    {(() => {
+                      const editionLine = formatCuratorialEditionLine(currentItem.pick);
+                      return editionLine ? (
+                        <p className="font-body text-xs italic tracking-wider text-white/45">
+                          {editionLine}
+                        </p>
+                      ) : null;
+                    })()}
                     <h3 className="font-display text-lg md:text-xl text-white whitespace-nowrap">
                       {(() => {
                         const baseTitle = currentItem.pick.title;

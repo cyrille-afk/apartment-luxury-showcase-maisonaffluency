@@ -28,3 +28,17 @@ export function formatEditionLabel(input: {
   if (parts.length === 0) return null;
   return parts.join(" — ");
 }
+
+/** Editorial edition line for product-card metadata. */
+export function formatCuratorialEditionLine(input: {
+  edition?: string | null;
+  edition_number?: string | null;
+  edition_signing?: string | null;
+  tags?: string[] | null;
+}): string | null {
+  const structured = formatEditionLabel(input);
+  if (structured) return structured;
+
+  const editionTag = (input.tags ?? []).find((tag) => /\b(?:limited|curator(?:'s)?|numbered)\s+edition\b|\bedition\s+of\s+\d+/i.test(tag));
+  return editionTag?.trim() || null;
+}
