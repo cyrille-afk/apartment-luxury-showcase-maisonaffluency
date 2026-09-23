@@ -32,6 +32,7 @@ import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type P
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import { formatCuratorialEditionLine } from "@/lib/editionLabel";
 
 import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -331,6 +332,9 @@ type PickItem = {
   designer_name?: string;
   designer_slug?: string;
   is_trade_only?: boolean;
+  edition?: string | null;
+  edition_number?: string | null;
+  edition_signing?: string | null;
 
 };
 
@@ -349,7 +353,7 @@ function useFullCuratorPicks(enabled: boolean) {
           applyCuratorPickOrder(
             supabase
               .from("designer_curator_picks_public")
-              .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin")
+              .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin, edition, edition_number, edition_signing")
           ),
           supabase
             .from("designers")
@@ -1387,13 +1391,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               Trade Only
             </span>
           </div>
-        ) : pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
-          <div className="absolute top-3 left-3 z-20 pointer-events-none">
-            <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/75 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
-              {pick.subtitle}
-            </span>
-          </div>
-        )}
+        ) : null}
 
         {pick.image_url ? (
           <>
@@ -1416,6 +1414,11 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
           </div>
+        )}
+        {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
+          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+            {formatCuratorialEditionLine(pick)}
+          </p>
         )}
         {/* Description overlay on hover — hidden on touch devices so the
             grid stays clean on mobile (mirrors PublicDesignerProfile).
@@ -1448,7 +1451,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
       </div>
       {/* Info below the card */}
       <div className="px-3 py-3">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full">
+        <div className="flex w-full items-baseline justify-between gap-3">
           <div className="flex flex-col text-left space-y-0.5">
             {pick.is_trade_only ? (
               <>
@@ -1487,7 +1490,7 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
               );
             })()}
           </div>
-          <p className="self-end font-display text-sm text-foreground/70">
+          <p className="min-w-fit shrink-0 self-end whitespace-nowrap font-display text-sm text-foreground/70">
             {formatPublicRrpForDestination(rrp, destinationCurrency) || "Price upon Request"}
           </p>
         </div>

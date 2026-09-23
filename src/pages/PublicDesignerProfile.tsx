@@ -2062,6 +2062,11 @@ const PublicDesignerProfile = () => {
                           alternateClassName="!h-full !w-full !max-h-none !max-w-none !object-contain object-center mix-blend-multiply !p-0"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
+                        {formatCuratorialEditionLine(pick) && (
+                          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+                            {formatCuratorialEditionLine(pick)}
+                          </p>
+                        )}
                         {/* Inventory badges — lower-left of the frame */}
                         <InventoryBadgeStack
                           badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
@@ -2122,16 +2127,8 @@ const PublicDesignerProfile = () => {
 
 
                       {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-3">
+                      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
                         <div className="flex flex-col text-left space-y-0.5">
-                          {(() => {
-                            const editionLine = formatCuratorialEditionLine(pick);
-                            return editionLine ? (
-                              <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                                {editionLine}
-                              </p>
-                            ) : null;
-                          })()}
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
@@ -2168,8 +2165,8 @@ const PublicDesignerProfile = () => {
                         </div>
 
                         {/* Price slot — bottom right, aligned to product title baseline */}
-                        <div className="self-end">
-                          <p className="font-body text-xs font-light tracking-wide text-muted-foreground">
+                        <div className="min-w-fit shrink-0 self-end whitespace-nowrap">
+                          <p className="whitespace-nowrap font-body text-xs font-light tracking-wide text-muted-foreground">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
                         </div>

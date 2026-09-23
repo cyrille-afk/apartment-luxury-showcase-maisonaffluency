@@ -722,6 +722,11 @@ const TradeAtelierProfile = () => {
                             />
                           );
                         })()}
+                        {formatCuratorialEditionLine(pick) && (
+                          <p className="pointer-events-none absolute bottom-3 right-3 z-10 bg-transparent font-mono text-[10px] tracking-[0.2em] text-neutral-600">
+                            {formatCuratorialEditionLine(pick)}
+                          </p>
+                        )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             type="button"
@@ -766,13 +771,8 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-start w-full pt-2">
-                        <div className="flex flex-col text-center md:text-left space-y-0.5">
-                          {formatCuratorialEditionLine(pick) && (
-                            <p className="font-body text-xs italic tracking-wider text-neutral-500">
-                              {formatCuratorialEditionLine(pick)}
-                            </p>
-                          )}
+                      <div className="flex w-full items-baseline justify-between gap-3 pt-2">
+                        <div className="flex flex-col text-left space-y-0.5">
                           <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug line-clamp-2 min-h-[2.4em]">
                             {pick.title}
                           </h3>
@@ -791,8 +791,8 @@ const TradeAtelierProfile = () => {
                           ) : null}
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
-                        <div className="self-end md:text-right">
-                          <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide text-center md:inline-flex md:items-center md:justify-end md:gap-1.5 md:flex-wrap md:w-full">
+                        <div className="min-w-fit shrink-0 self-end whitespace-nowrap text-right">
+                          <p className="whitespace-nowrap font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide md:inline-flex md:items-center md:justify-end md:gap-1.5 md:w-full">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
