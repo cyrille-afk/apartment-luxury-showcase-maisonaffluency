@@ -2063,7 +2063,7 @@ const PublicDesignerProfile = () => {
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
                         {formatCuratorialEditionLine(pick) && (
-                          <p className="pointer-events-none absolute right-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
+                          <p className="pointer-events-none absolute left-4 top-4 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
                             {formatCuratorialEditionLine(pick)}
                           </p>
                         )}
