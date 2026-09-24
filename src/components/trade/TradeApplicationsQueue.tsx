@@ -196,7 +196,10 @@ export default function TradeApplicationsQueue() {
                     <Loader2 className="h-4 w-4 animate-spin" /> Analysing portfolio…
                   </div>
                 ) : dna.status === "failed" ? (
-                  <div className="border-t border-border px-6 py-6 text-sm text-destructive">{dna.error ?? "Analysis failed"}</div>
+                  <>
+                    <div className="border-t border-border px-6 pt-5 text-xs text-destructive">{dna.error ?? "Analysis failed"} — use “Re-run analysis” to retry.</div>
+                    <VisualThemeAnalysis dna={dna} />
+                  </>
                 ) : (
                   <VisualThemeAnalysis dna={dna} />
                 )}
