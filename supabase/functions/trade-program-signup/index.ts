@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { getWhatsAppStatusCallback, sendAdminWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
+import { sendTradeRequestWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
 
 const ADMIN_EMAILS = ['concierge@myaffluency.com', 'cyrille@maisonaffluency.com']
 
@@ -184,13 +184,13 @@ Deno.serve(async (req) => {
     ].join('\n')
 
     try {
-      const result = await sendAdminWhatsApp({ body: waBody, statusCallback: getWhatsAppStatusCallback() })
+      const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: '' })
       await supabase.from('admin_alert_log').insert({
         channel: 'twilio_whatsapp',
         event: 'trade_application_request',
         status: result.ok ? 'sent' : 'failed',
         provider_message_id: result.ok ? result.sid : null,
-        payload: { signup_id: signupId, email, source: 'trade-program-hero', twilio_status: result.status ?? null },
+        payload: { signup_id: signupId, email, source: 'trade-program-hero', twilio_status: result.status ?? null, used_template: result.usedTemplate, template_status: result.templateStatus },
         error: result.ok ? null : String(result.error ?? 'unknown').slice(0, 2000),
       })
       if (!result.ok) console.error('Trade signup WhatsApp failed', result.error)

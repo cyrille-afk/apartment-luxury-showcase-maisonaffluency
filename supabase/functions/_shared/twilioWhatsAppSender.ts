@@ -165,3 +165,68 @@ export async function sendAdminWhatsApp(
     recipients: results.map((r) => ({ to: r.to, ok: r.ok, sid: r.sid, error: r.error })),
   };
 }
+
+// ---------------------------------------------------------------------------
+// "New Trade Account Request" template (maison_affluency_trade_account_request_alert).
+// Body: Studio {{1}}, Applicant {{2}}, Email {{3}}, Phone {{4}}.
+// Used by both trade application forms. Until Meta approves it, alerts fall
+// back to freeform (only delivered inside the 24h window).
+export const TRADE_REQUEST_TEMPLATE_SID =
+  Deno.env.get("TWILIO_WHATSAPP_TRADE_TEMPLATE_SID") ?? "HX27548c8d04234dfce8c0812a1fc106eb";
+
+let tradeApproval: { status: string; checkedAt: number } | null = null;
+
+export async function getTemplateApprovalStatus(contentSid: string): Promise<string> {
+  if (contentSid === TRADE_REQUEST_TEMPLATE_SID && tradeApproval && Date.now() - tradeApproval.checkedAt < 10 * 60 * 1000) {
+    return tradeApproval.status;
+  }
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY")?.trim();
+  const twilioKey = Deno.env.get("TWILIO_API_KEY")?.trim();
+  if (!lovableKey || !twilioKey) return "missing_credentials";
+  try {
+    const res = await fetch(`${TWILIO_GATEWAY_URL}/content/v1/Content/${contentSid}/ApprovalRequests`, {
+      headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": twilioKey },
+    });
+    if (!res.ok) {
+      console.error(`Template approval lookup failed [${res.status}]: ${(await res.text()).slice(0, 300)}`);
+      return `lookup_${res.status}`;
+    }
+    const json = await res.json();
+    const status = String(json?.whatsapp?.status ?? "unknown").toLowerCase();
+    if (contentSid === TRADE_REQUEST_TEMPLATE_SID) tradeApproval = { status, checkedAt: Date.now() };
+    return status;
+  } catch (e) {
+    console.error("Template approval lookup error:", e);
+    return "lookup_error";
+  }
+}
+
+export async function sendTradeRequestWhatsApp(opts: {
+  body: string;
+  studio: string;
+  applicant: string;
+  email: string;
+  phone: string;
+}): Promise<WhatsAppSendResult & { usedTemplate: boolean; templateStatus: string }> {
+  const clean = (v?: string | null) => (v ?? "").replace(/\s+/g, " ").trim();
+  const statusCallback = getWhatsAppStatusCallback();
+  const templateStatus = await getTemplateApprovalStatus(TRADE_REQUEST_TEMPLATE_SID);
+  if (templateStatus === "approved") {
+    const r = await sendAdminWhatsApp({
+      body: opts.body,
+      contentSid: TRADE_REQUEST_TEMPLATE_SID,
+      contentVariables: {
+        "1": clean(opts.studio) || "Not provided",
+        "2": clean(opts.applicant) || "Not provided",
+        "3": clean(opts.email) || "Not provided",
+        "4": clean(opts.phone) || "Not provided",
+      },
+      statusCallback,
+    });
+    if (r.ok) return { ...r, usedTemplate: true, templateStatus };
+    const fb = await sendAdminWhatsApp({ body: opts.body, statusCallback });
+    return { ...fb, error: [r.error, fb.error].filter(Boolean).join(" | ") || null, usedTemplate: false, templateStatus };
+  }
+  const r = await sendAdminWhatsApp({ body: opts.body, statusCallback });
+  return { ...r, usedTemplate: false, templateStatus };
+}

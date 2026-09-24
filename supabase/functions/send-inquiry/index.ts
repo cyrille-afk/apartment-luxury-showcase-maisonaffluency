@@ -4,6 +4,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 import {
   getWhatsAppStatusCallback,
   sendAdminWhatsApp,
+  sendTradeRequestWhatsApp,
 } from "../_shared/twilioWhatsAppSender.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -172,32 +173,33 @@ async function sendQuoteWhatsAppAlert(
     // template send is rejected and wastes a request. Freeform stays the path
     // until approval flips to "approved". The approved template is quote-shaped,
     // so trade applications always go out freeform.
-    const approval = kind === "trade_application"
-      ? { approved: false, status: "not_applicable_trade_application" }
-      : await isTemplateApproved(lovableKey, twilioKey);
-    let usedTemplate = approval.approved;
-    let firstError: string | null = approval.approved ? null : `template not used (status: ${approval.status})`;
-
-    const send = async () => {
-      if (usedTemplate) {
-        const result = await sendAdminWhatsApp({
-          body,
-          contentSid: QUOTE_TEMPLATE_SID,
-          contentVariables: vars,
-          statusCallback,
-        });
-        return result;
+    let approval: { approved: boolean; status: string };
+    let usedTemplate: boolean;
+    let firstError: string | null = null;
+    let result: any;
+    if (kind === "trade_application") {
+      const r = await sendTradeRequestWhatsApp({
+        body,
+        studio: inquiry.company ?? "",
+        applicant: inquiry.name,
+        email: inquiry.email,
+        phone: inquiry.phone,
+      });
+      approval = { approved: r.templateStatus === "approved", status: r.templateStatus };
+      usedTemplate = r.usedTemplate;
+      result = r;
+    } else {
+      approval = await isTemplateApproved(lovableKey, twilioKey);
+      usedTemplate = approval.approved;
+      firstError = approval.approved ? null : `template not used (status: ${approval.status})`;
+      result = usedTemplate
+        ? await sendAdminWhatsApp({ body, contentSid: QUOTE_TEMPLATE_SID, contentVariables: vars, statusCallback })
+        : await sendAdminWhatsApp({ body, statusCallback });
+      if (!result.ok && usedTemplate) {
+        firstError = result.error ?? "template send failed";
+        usedTemplate = false;
+        result = await sendAdminWhatsApp({ body, statusCallback });
       }
-      return await sendAdminWhatsApp({ body, statusCallback });
-    };
-
-    let result = await send();
-
-    // Template send rejected despite approval → fall back to freeform.
-    if (!result.ok && usedTemplate) {
-      firstError = result.error ?? "template send failed";
-      usedTemplate = false;
-      result = await sendAdminWhatsApp({ body, statusCallback });
     }
 
     if (!result.ok) {
