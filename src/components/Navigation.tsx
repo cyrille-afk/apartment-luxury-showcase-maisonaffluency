@@ -40,6 +40,13 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
+const megaMenuRooms = [
+  { label: "Living Room", slug: "living-room", image: cloudinaryUrl("living-room-hero_zxfcxl", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
+  { label: "Dining Room", slug: "dining-room", image: cloudinaryUrl("dining-room_ey0bu5", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
+  { label: "Bedroom", slug: "bedroom", image: cloudinaryUrl("bedroom-second_cyfmdj", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
+  { label: "Office", slug: "office", image: cloudinaryUrl("home-office-desk_g0ywv2", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
+] as const;
+
 const leftNavItems = [{
   label: "Designers",
   mobileLabel: "Designers & Makers",
@@ -150,6 +157,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
+  const [activeMegaRoom, setActiveMegaRoom] = useState<(typeof megaMenuRooms)[number]>(megaMenuRooms[0]);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -444,10 +452,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "block w-full text-left text-xs leading-relaxed text-muted-foreground antialiased transition-colors hover:text-foreground";
+    "block w-full text-left text-[12px] leading-[1.65] text-muted-foreground antialiased transition-all duration-300 hover:translate-x-1 hover:text-foreground";
 
   const megaMenuHeadingClass =
-    "mb-4 border-b border-foreground pb-2 text-xs font-semibold uppercase tracking-widest text-foreground";
+    "mb-6 flex items-center gap-3 border-b border-border pb-3 font-body text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
 
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
@@ -982,7 +990,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-full border-t border-border bg-background px-12 py-12"
+            className="w-full border-t border-border bg-background shadow-[0_24px_60px_hsl(var(--foreground)/0.08)]"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -991,70 +999,100 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="mx-auto grid w-full max-w-7xl grid-cols-3 items-start gap-16">
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
-                <ul className="space-y-3">
-                  <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
-                  <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
-                  <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
-                  <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
-                </ul>
-              </div>
-
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Furniture</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { heading: "Seating", category: "Seating" },
-                    { heading: "Tables", category: "Tables" },
-                    { heading: "Storage", category: "Storage" },
-                  ].map(({ heading, category }) => (
-                    <div key={category} className="min-w-0">
-                      <button
-                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={() => navigateFromMegaMenu(category)}
-                      >
-                        {heading}
-                      </button>
-                      <ul className="space-y-2">
-                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                          <li key={subcategory}>
-                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
-                              {subcategory}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+            <div className="mx-auto flex min-h-[440px] w-full max-w-7xl overflow-hidden border-x border-border bg-background">
+              <div className="flex w-[70%] flex-col justify-between px-12 py-10 xl:px-16 xl:py-12">
+                <div className="grid grid-cols-[1.05fr_1.35fr_0.8fr] gap-10 xl:gap-14">
+                  <section className="min-w-0">
+                    <h3 className={megaMenuHeadingClass}><span className="text-accent">01</span>Furniture</h3>
+                    <div className="grid grid-cols-2 gap-7">
+                      {["Seating", "Tables"].map((category) => (
+                        <div key={category} className="min-w-0">
+                          <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu(category)}>
+                            {category}
+                          </button>
+                          <ul className="space-y-1">
+                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                              <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>{subcategory}</button></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </section>
+
+                  <section className="min-w-0">
+                    <h3 className={megaMenuHeadingClass}><span className="text-accent">02</span>Lighting &amp; Accents</h3>
+                    <div className="grid grid-cols-3 gap-6">
+                      {["Lighting", "Rugs", "Décor"].map((category) => (
+                        <div key={category} className="min-w-0">
+                          <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu(category)}>
+                            {category}
+                          </button>
+                          <ul className="space-y-1">
+                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                              <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>{subcategory}</button></li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="min-w-0">
+                    <h3 className={megaMenuHeadingClass}><span className="text-accent">03</span>Storage</h3>
+                    <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu("Storage")}>
+                      View Storage
+                    </button>
+                    <ul className="space-y-1">
+                      {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
+                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
+                      ))}
+                    </ul>
+                  </section>
+                </div>
+
+                <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
+                  <button onClick={() => { setMegaMenuOpen(false); navigate("/new-in"); }} className="group flex items-center font-body text-[9px] uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground">
+                    Explore full collection
+                    <span className="ml-4 h-px w-10 bg-border transition-all duration-500 group-hover:w-16 group-hover:bg-foreground" />
+                  </button>
+                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency · Est. 2017</span>
                 </div>
               </div>
 
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {["Lighting", "Rugs", "Décor"].map((category) => (
-                    <div key={category} className="min-w-0">
-                      <button
-                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={() => navigateFromMegaMenu(category)}
-                      >
-                        {category}
-                      </button>
-                      <ul className="space-y-2">
-                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                          <li key={subcategory}>
-                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
-                              {subcategory}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+              <aside className="w-[30%] border-l border-border bg-muted/30 p-5">
+                <div className="relative h-[320px] overflow-hidden border border-border bg-muted">
+                  <img
+                    key={activeMegaRoom.slug}
+                    src={activeMegaRoom.image}
+                    alt={`${activeMegaRoom.label} interior`}
+                    className="h-full w-full animate-fade-in object-cover"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/70 to-transparent px-6 pb-5 pt-16">
+                    <p className="font-display text-2xl text-background">{activeMegaRoom.label}</p>
+                  </div>
                 </div>
-              </div>
+                <div className="pt-5">
+                  <p className="mb-3 font-body text-[9px] uppercase tracking-[0.3em] text-accent">Shop by room</p>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    {megaMenuRooms.map((room) => (
+                      <a
+                        key={room.slug}
+                        href={`/search?room=${room.slug}`}
+                        onMouseEnter={() => setActiveMegaRoom(room)}
+                        onFocus={() => setActiveMegaRoom(room)}
+                        onClick={() => setMegaMenuOpen(false)}
+                        className={cn(
+                          "border-b py-2 font-display text-[17px] transition-colors duration-300",
+                          activeMegaRoom.slug === room.slug ? "border-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {room.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </aside>
             </div>
 
           </div>
