@@ -9,6 +9,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
+import { scoreTradeApplication } from "../_shared/tradeRadar.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -149,17 +150,29 @@ serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey, { auth: { persistSession: false } });
 
   const { data: account } = await supabase
-    .from("trade_accounts").select("id, studio_name, website_or_ig").eq("id", id).maybeSingle();
+    .from("trade_accounts").select("id, studio_name, website_or_ig, email, business_reg_number, radar_status").eq("id", id).maybeSingle();
   if (!account) return json({ error: "Trade account not found" }, 404);
+
+  // Admin re-run also re-scores the AI Critical Radar if it never finished.
+  if (!isInternal && account.radar_status !== "scored") {
+    const radar = await scoreTradeApplication({
+      studio: account.studio_name ?? "", email: account.email ?? "", websiteOrIg: account.website_or_ig ?? "",
+      regNumber: account.business_reg_number ?? "", hasDocument: false, returning: false,
+    });
+    await supabase.from("trade_accounts").update(radar.ok
+      ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: "scored", radar_scored_at: new Date().toISOString() }
+      : { radar_status: "failed", radar_flag: radar.error.slice(0, 300), radar_scored_at: new Date().toISOString() },
+    ).eq("id", id);
+  }
 
   const { data: dna } = await supabase
     .from("studio_aesthetic_dna").select("status, attempts").eq("trade_account_id", id).maybeSingle();
   if (dna?.status === "processing") return json({ ok: true, skipped: "already processing" });
   if (isInternal && (dna?.attempts ?? 0) >= MAX_ATTEMPTS) return json({ ok: false, skipped: "attempt cap" });
 
-  const sourceUrl = resolveSourceUrl(account.website_or_ig);
+  const initialUrl = resolveSourceUrl(account.website_or_ig);
   await supabase.from("studio_aesthetic_dna").upsert({
-    trade_account_id: id, status: "processing", source_url: sourceUrl,
+    trade_account_id: id, status: "processing", source_url: initialUrl,
     attempts: (dna?.attempts ?? 0) + 1, error: null,
   }, { onConflict: "trade_account_id" });
 
@@ -168,10 +181,14 @@ serve(async (req) => {
     return json({ ok: false, error }, status);
   };
 
-  if (!sourceUrl) return fail("No website or Instagram handle supplied");
+  if (!initialUrl && !account.email) return fail("No website or Instagram handle supplied");
 
-  const { text, images } = await scrape(sourceUrl);
-  if (!text && images.length === 0) return fail("Could not read the website / Instagram profile");
+  const { text, images, notes, source } = await gather(account.website_or_ig, account.email);
+  const sourceUrl = source ?? initialUrl ?? "";
+  if (sourceUrl !== initialUrl) await supabase.from("studio_aesthetic_dna").update({ source_url: sourceUrl }).eq("trade_account_id", id);
+  if (!text && images.length === 0) {
+    return fail(`Could not read the website / Instagram profile${notes.length ? ` — ${[...new Set(notes)].join("; ")}` : ""}`);
+  }
 
   const { data: roster } = await supabase
     .from("designers").select("slug, name, specialty").eq("is_published", true).limit(150);
