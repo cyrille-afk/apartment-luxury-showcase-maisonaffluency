@@ -24,8 +24,18 @@ type Account = {
   business_reg_number: string | null;
   status: "pending_review" | "on_hold" | "approved" | "rejected";
   created_at: string;
+  radar_score: number | null;
+  radar_flag: string | null;
+  radar_status: string | null;
   studio_aesthetic_dna: Dna | Dna[] | null;
 };
+
+function priorityFor(score: number | null): { label: "High" | "Medium" | "Low"; variant: "default" | "secondary" | "destructive" } {
+  if (score === null) return { label: "Low", variant: "secondary" };
+  if (score >= 80) return { label: "High", variant: "default" };
+  if (score >= 50) return { label: "Medium", variant: "secondary" };
+  return { label: "Low", variant: "destructive" };
+}
 
 const STATUS_LABEL: Record<Account["status"], string> = {
   pending_review: "Pending Review",
@@ -51,7 +61,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, website_or_ig, business_reg_number, status, created_at, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, error)",
+          "id, email, studio_name, contact_name, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);
@@ -113,7 +123,7 @@ export default function TradeApplicationsQueue() {
           {accounts.map((a) => {
             const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
             return (
-              <li key={a.id} className="grid gap-4 px-6 py-5 md:grid-cols-[1.2fr_2fr_auto]">
+              <li key={a.id} className="grid gap-4 px-6 py-5 md:grid-cols-[1.1fr_1fr_1.6fr_auto]">
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{a.studio_name ?? "(studio not provided)"}</span>
@@ -130,6 +140,27 @@ export default function TradeApplicationsQueue() {
                   )}
                   {a.business_reg_number && <div className="text-xs text-muted-foreground">Reg. {a.business_reg_number}</div>}
                   <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</div>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI Critical Radar</p>
+                  {a.radar_status === "scored" && a.radar_score !== null ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif text-lg text-foreground">{a.radar_score}/100</span>
+                        <Badge variant={priorityFor(a.radar_score).variant} className="rounded-none text-[10px] uppercase tracking-wider">
+                          {priorityFor(a.radar_score).label} priority
+                        </Badge>
+                      </div>
+                      {a.radar_flag && <p className="text-muted-foreground">{a.radar_flag}</p>}
+                    </>
+                  ) : a.radar_status === "failed" ? (
+                    <p className="text-destructive">Scoring failed{a.radar_flag ? `: ${a.radar_flag}` : ""}</p>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Scoring…
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2 text-sm">
