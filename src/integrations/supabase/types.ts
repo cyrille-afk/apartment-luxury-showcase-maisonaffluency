@@ -8262,6 +8262,10 @@ export type Database = {
           credential_document_path: string | null
           email: string
           id: string
+          radar_flag: string | null
+          radar_score: number | null
+          radar_scored_at: string | null
+          radar_status: string
           reviewed_at: string | null
           reviewed_by: string | null
           signup_id: string | null
@@ -8278,6 +8282,10 @@ export type Database = {
           credential_document_path?: string | null
           email: string
           id?: string
+          radar_flag?: string | null
+          radar_score?: number | null
+          radar_scored_at?: string | null
+          radar_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           signup_id?: string | null
@@ -8294,6 +8302,10 @@ export type Database = {
           credential_document_path?: string | null
           email?: string
           id?: string
+          radar_flag?: string | null
+          radar_score?: number | null
+          radar_scored_at?: string | null
+          radar_status?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           signup_id?: string | null
