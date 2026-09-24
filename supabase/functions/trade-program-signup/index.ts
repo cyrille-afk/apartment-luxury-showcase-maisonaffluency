@@ -1,4 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { getWhatsAppStatusCallback, sendAdminWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
+
+const ADMIN_EMAILS = ['concierge@myaffluency.com', 'cyrille@maisonaffluency.com']
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -119,14 +122,18 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Fire the invitation email once, on the first submission.
-  let emailSent = Boolean(existing?.invite_email_sent_at)
+  // Applicant receipt: on first submission AND on every completed application
+  // (step 3), so returning applicants still get a confirmation.
+  const submissionStamp = Date.now()
+  let emailSent = Boolean(existing?.invite_email_sent_at) && step !== 3
   if (!emailSent) {
     const { error: mailError } = await supabase.functions.invoke('send-transactional-email', {
       body: {
         templateName: 'trade-program-invitation',
         recipientEmail: email,
-        idempotencyKey: `trade-program-invitation-${signupId}`,
+        idempotencyKey: step === 3
+          ? `trade-program-invitation-${signupId}-s3-${submissionStamp}`
+          : `trade-program-invitation-${signupId}`,
         templateData: {
           firstName: body.firstName ? String(body.firstName).trim().slice(0, 100) : undefined,
           email,
@@ -136,37 +143,82 @@ Deno.serve(async (req) => {
     })
     if (mailError) {
       const errorMessage = String(mailError.message || mailError).slice(0, 2000)
-      console.error('Trade Program invitation enqueue failed', {
-        signupId,
-        recipientEmail: email,
-        templateName: 'trade-program-invitation',
-        error: errorMessage,
-      })
-      const { error: alertError } = await supabase.from('admin_alert_log').insert({
+      console.error('Trade Program invitation enqueue failed', { signupId, error: errorMessage })
+      await supabase.from('admin_alert_log').insert({
         channel: 'email',
         event: 'trade_program_application_email_failed',
         status: 'failed',
         application_id: null,
-        payload: {
-          signup_id: signupId,
-          recipient_email: email,
-          template_name: 'trade-program-invitation',
-          stage: 'enqueue',
-        },
+        payload: { signup_id: signupId, recipient_email: email, template_name: 'trade-program-invitation', stage: 'enqueue' },
         error: errorMessage,
       })
-      if (alertError) {
-        console.error('Trade Program email admin alert insert failed', {
-          signupId,
-          error: alertError.message,
-        })
-      }
     } else {
       emailSent = true
       await supabase
         .from('trade_program_signups')
         .update({ invite_email_sent_at: new Date().toISOString() })
         .eq('id', signupId!)
+    }
+  }
+
+  // Admin alerts on completed application: WhatsApp + email to concierge/owner.
+  if (step === 3 && signupId) {
+    const { data: row } = await supabase
+      .from('trade_program_signups')
+      .select('company_name, website_url, business_reg_number, credential_document_path')
+      .eq('id', signupId)
+      .maybeSingle()
+    const clean = (v?: string | null) => (v ?? '').replace(/\s+/g, ' ').trim()
+    const studio = clean(row?.company_name) || '(not provided)'
+    const waBody = [
+      '🚨 *New Trade Account Request on Maison Affluency*',
+      '',
+      `• *Studio:* ${studio}`,
+      `• *Email:* ${email}`,
+      `• *Website:* ${clean(row?.website_url) || '—'}`,
+      `• *Reg. No:* ${clean(row?.business_reg_number) || '—'}`,
+      `• *Document:* ${row?.credential_document_path ? 'uploaded' : 'none'}`,
+      ...(existing ? ['• *Returning applicant*'] : []),
+      '',
+      'Review in the Admin Dashboard.',
+    ].join('\n')
+
+    try {
+      const result = await sendAdminWhatsApp({ body: waBody, statusCallback: getWhatsAppStatusCallback() })
+      await supabase.from('admin_alert_log').insert({
+        channel: 'twilio_whatsapp',
+        event: 'trade_application_request',
+        status: result.ok ? 'sent' : 'failed',
+        provider_message_id: result.ok ? result.sid : null,
+        payload: { signup_id: signupId, email, source: 'trade-program-hero', twilio_status: result.status ?? null },
+        error: result.ok ? null : String(result.error ?? 'unknown').slice(0, 2000),
+      })
+      if (!result.ok) console.error('Trade signup WhatsApp failed', result.error)
+    } catch (e) {
+      console.error('Trade signup WhatsApp error', e)
+      await supabase.from('admin_alert_log').insert({
+        channel: 'twilio_whatsapp', event: 'trade_application_request', status: 'failed',
+        payload: { signup_id: signupId, email }, error: String(e instanceof Error ? e.message : e).slice(0, 2000),
+      })
+    }
+
+    for (const adminEmail of ADMIN_EMAILS) {
+      const { error: notifyErr } = await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'inquiry-notification',
+          recipientEmail: adminEmail,
+          idempotencyKey: `trade-signup-notify-${signupId}-${submissionStamp}-${adminEmail}`,
+          templateData: {
+            name: studio,
+            company: studio,
+            email,
+            phone: '',
+            subject: 'New Trade Account Request',
+            message: `Trade Program application completed.\nStudio: ${studio}\nWebsite: ${clean(row?.website_url) || '—'}\nRegistration No: ${clean(row?.business_reg_number) || '—'}\nCredential document: ${row?.credential_document_path ? 'uploaded' : 'none'}`,
+          },
+        },
+      })
+      if (notifyErr) console.error(`Admin notification failed for ${adminEmail}`, notifyErr)
     }
   }
 
