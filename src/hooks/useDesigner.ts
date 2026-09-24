@@ -269,12 +269,14 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
       const uniqueFounderNames = [...new Set(founderNames)];
       const { data: subDesigners, error: subDesignersError } = await supabase
         .from("designers")
-        .select("id, name, slug")
+        .select("id, name, slug, is_independent")
         .in("founder", uniqueFounderNames)
         .neq("id", designer.id);
       if (subDesignersError) throw subDesignersError;
 
-      const subOnly = (subDesigners || []).filter((d) => d.id !== designer.id && !HIDDEN_DESIGNER_SLUGS.has(d.slug));
+      const subOnly = (subDesigners || []).filter(
+        (d) => d.id !== designer.id && d.is_independent !== true && !HIDDEN_DESIGNER_SLUGS.has(d.slug),
+      );
 
       // Deduplicate: current parent + children
       const seen = new Set<string>();
