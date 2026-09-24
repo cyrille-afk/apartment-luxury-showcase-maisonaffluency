@@ -75,6 +75,18 @@ Deno.serve(async (req) => {
 
   let bridged = 0, lowIntent = 0, failed = 0;
   for (const row of latest.values()) {
+    const siblingIds = superseded.filter((id) => (pending || []).find((p) => p.id === id)?.guest_key === row.guest_key);
+    // One brief per guest per 24h: later snapshots attach to the existing brief.
+    const { data: prior } = await admin.from("guest_inquiries")
+      .select("bridged_brief_id").eq("guest_key", row.guest_key).eq("status", "bridged")
+      .gte("processed_at", new Date(Date.now() - 864e5).toISOString())
+      .not("bridged_brief_id", "is", null).limit(1);
+    if (prior?.length) {
+      await admin.from("guest_inquiries")
+        .update({ status: "bridged", bridged_brief_id: prior[0].bridged_brief_id, processed_at: new Date().toISOString() })
+        .in("id", [row.id, ...siblingIds]);
+      continue;
+    }
     const msgs = cleanMessages(row.messages);
     if (msgs.filter((m) => m.role === "user").length < 1) {
       await admin.from("guest_inquiries").update({ status: "rejected", processed_at: new Date().toISOString() }).eq("id", row.id);
