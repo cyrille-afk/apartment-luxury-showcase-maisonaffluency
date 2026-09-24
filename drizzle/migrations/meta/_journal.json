@@ -617,6 +617,13 @@
       "when": 1790219066457,
       "tag": "0087_studio_aesthetic_dna_admin_update",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1790219927190,
+      "tag": "0088_catalog_material_terms",
+      "breakpoints": true
     }
   ]
 }
