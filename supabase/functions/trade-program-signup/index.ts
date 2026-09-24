@@ -1,3 +1,4 @@
+import { detectFileType } from '../_shared/fileSignature.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTradeRequestWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
 
@@ -109,10 +110,14 @@ Deno.serve(async (req) => {
       if (base64.length <= 21 * 1024 * 1024) {
         try {
           const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-          const path = `hero-signups/${signupId}/${Date.now()}-${safeName}`
+          const detected = detectFileType(bytes)
+          if (!detected) throw new Error('credential rejected: not a PDF/PNG/JPEG')
+          void contentType
+          const ext = detected === 'application/pdf' ? 'pdf' : detected === 'image/png' ? 'png' : 'jpg'
+          const path = `hero-signups/${signupId}/${Date.now()}-${safeName.replace(/\.[^.]*$/, '')}.${ext}`
           const { error: upErr } = await supabase.storage
             .from('trade-credentials')
-            .upload(path, bytes, { contentType })
+            .upload(path, bytes, { contentType: detected })
           if (upErr) {
             console.error('credential upload failed', upErr)
           } else {

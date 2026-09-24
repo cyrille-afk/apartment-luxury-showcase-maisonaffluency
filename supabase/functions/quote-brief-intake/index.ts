@@ -43,6 +43,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MAX_FILES = 5;
 const MAX_BYTES = 12 * 1024 * 1024; // per file, decoded
 
+import { detectFileType } from "../_shared/fileSignature.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -114,12 +115,21 @@ Deno.serve(async (req) => {
         links.push(`${name} — skipped (over 12 MB)`);
         continue;
       }
-      const path = `quote-briefs/${inquiryId}/${name}`;
+      // Content-signature check: only real PDF / PNG / JPEG bytes are stored,
+      // with the server-detected type (never the caller-declared one).
+      const detected = detectFileType(bin);
+      if (!detected) {
+        links.push(`${name} — skipped (only PDF, PNG or JPEG accepted)`);
+        continue;
+      }
+      const ext = detected === "application/pdf" ? "pdf" : detected === "image/png" ? "png" : "jpg";
+      const safeName = name.replace(/\.[^.]*$/, "") + "." + ext;
+      const path = `quote-briefs/${inquiryId}/${safeName}`;
       const { error: upErr } = await supabase.storage
         .from("floor-plans")
         .upload(path, bin, {
-          contentType: String(f?.type || "application/octet-stream"),
-          upsert: true,
+          contentType: detected,
+          upsert: false,
         });
       if (upErr) {
         console.error("brief upload failed", upErr);
