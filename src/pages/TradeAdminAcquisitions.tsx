@@ -331,20 +331,20 @@ const TradeAdminAcquisitions = () => {
   }, [rows]);
 
   // Geographic model: country → cities, derived from live rows. Rows without
-  // geography are grouped under "Unassigned" so nothing is hidden silently.
+  // geography are excluded — unassigned leads belong in Inbound Applications,
+  // not in the outbound pipeline.
   const geo = useMemo(() => {
     const map = new Map<string, Set<string>>();
     for (const r of rows) {
-      const country = r.country?.trim() || "Unassigned";
-      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      const country = r.country?.trim();
+      if (!country) continue;
+      const city = r.city?.trim() || country;
       if (!map.has(country)) map.set(country, new Set());
       map.get(country)!.add(city);
     }
     const countries = Array.from(map.keys()).sort((a, b) => {
       if (a === DEFAULT_COUNTRY) return -1;
       if (b === DEFAULT_COUNTRY) return 1;
-      if (a === "Unassigned") return 1;
-      if (b === "Unassigned") return -1;
       return a.localeCompare(b);
     });
     return { map, countries };
@@ -380,8 +380,9 @@ const TradeAdminAcquisitions = () => {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
-      const country = r.country?.trim() || "Unassigned";
-      const city = r.city?.trim() || r.country?.trim() || "Unassigned";
+      const country = r.country?.trim();
+      if (!country) return false;
+      const city = r.city?.trim() || r.country!.trim();
       if (country !== activeCountry || city !== activeCity) return false;
       if (igFirstOnly && outreachVector(r) !== "instagram") return false;
       if (!q) return true;
