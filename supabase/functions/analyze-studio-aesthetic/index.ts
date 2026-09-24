@@ -128,7 +128,6 @@ async function scrape(url: string): Promise<ScrapeResult> {
         onlyMainContent: false,
         timeout: 30000,
         maxAge: 86_400_000,
-        headers: BROWSER_HEADERS,
       }),
     });
     if (res.ok) {
@@ -332,11 +331,19 @@ serve(async (req) => {
     if (evidenceError) console.error("portfolio evidence persistence failed", evidenceError.message);
   }
 
-  const aiRes = await fetch(GATEWAY, {
+  const callAi = (parts: unknown[]) => fetch(GATEWAY, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: MODEL, messages: [{ role: "user", content }], response_format: { type: "json_object" } }),
+    body: JSON.stringify({ model: MODEL, messages: [{ role: "user", content: parts }], response_format: { type: "json_object" } }),
   });
+  let aiRes = await callAi(content);
+  // A remote image the model provider cannot fetch rejects the whole request;
+  // retry once with only our own cached evidence.
+  if (aiRes.status === 400) {
+    await aiRes.text();
+    const own = content.filter((c: any) => c.type !== "image_url" || isCachedEvidenceUrl(c.image_url.url));
+    aiRes = await callAi(own);
+  }
   if (!aiRes.ok) {
     const t = (await aiRes.text()).slice(0, 500);
     console.error("gateway error", aiRes.status, t);
