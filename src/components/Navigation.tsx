@@ -81,6 +81,11 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
   ],
 };
 
+const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
+  dining: [{ label: "Dining", slug: "dining" }],
+  bedroom: [{ label: "Bedroom", slug: "bedroom" }],
+};
+
 const leftNavItems = [{
   label: "Designers",
   mobileLabel: "Designers & Makers",
@@ -493,7 +498,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     setMegaMenuOpen(true);
   };
 
-  const navigateToRoom = (room: "living-room" | "office") => {
+  const navigateToRoom = (room: string) => {
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
     navigate(`/search?room=${room}`);
@@ -1122,25 +1127,54 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
                             </Button>
                           ))}
+                          {roomFlyouts[room] && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onMouseEnter={() => setActiveRoomCategory(-1)}
+                              onFocus={() => setActiveRoomCategory(-1)}
+                              className={cn(
+                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
+                              )}
+                            >
+                              Shop By Room
+                              <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
+                            </Button>
+                          )}
                         </div>
 
                         <div className="w-1/2 shrink-0 px-9 py-8">
                           {activeRoomCategory !== null && (
                             <div>
                               <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
-                                {roomNavigation[room][activeRoomCategory]?.label} Collections
+                                {activeRoomCategory === -1
+                                  ? "Shop By Room"
+                                  : `${roomNavigation[room][activeRoomCategory]?.label} Collections`}
                               </div>
-                              {roomNavigation[room][activeRoomCategory]?.subcategories.map((subcategory) => (
-                                <Button
-                                  key={subcategory}
-                                  type="button"
-                                  variant="ghost"
-                                  onClick={() => navigateFromMegaMenu(roomNavigation[room][activeRoomCategory].category, subcategory)}
-                                  className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                >
-                                  {subcategory}
-                                </Button>
-                              ))}
+                              {activeRoomCategory === -1
+                                ? roomFlyouts[room]?.map((roomLink) => (
+                                    <Button
+                                      key={roomLink.slug}
+                                      type="button"
+                                      variant="ghost"
+                                      onClick={() => navigateToRoom(roomLink.slug)}
+                                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                    >
+                                      {roomLink.label}
+                                    </Button>
+                                  ))
+                                : roomNavigation[room][activeRoomCategory]?.subcategories.map((subcategory) => (
+                                    <Button
+                                      key={subcategory}
+                                      type="button"
+                                      variant="ghost"
+                                      onClick={() => navigateFromMegaMenu(roomNavigation[room][activeRoomCategory].category, subcategory)}
+                                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                    >
+                                      {subcategory}
+                                    </Button>
+                                  ))}
                             </div>
                           )}
                         </div>
