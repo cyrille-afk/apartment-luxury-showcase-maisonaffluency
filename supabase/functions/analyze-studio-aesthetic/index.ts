@@ -76,7 +76,7 @@ function isCachedEvidenceUrl(url: string): boolean {
   }
 }
 
-type ScrapeResult = { text: string; images: string[]; notes: string[] };
+type ScrapeResult = { text: string; images: string[]; notes: string[]; screenshots?: string[] };
 
 // Instagram blocks generic scrapers, so handles are read through the Meta
 // Graph API's business_discovery (works for public Business/Creator accounts).
@@ -116,6 +116,7 @@ async function scrape(url: string): Promise<ScrapeResult> {
   const images = new Set<string>();
   const notes: string[] = [];
   let text = "";
+  const screenshots: string[] = [];
   if (!key) return { text, images: [], notes: ["Web reader not configured"] };
   try {
     const res = await fetchWithRetry("https://api.firecrawl.dev/v1/scrape", {
@@ -123,15 +124,16 @@ async function scrape(url: string): Promise<ScrapeResult> {
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         url,
-        formats: ["markdown", "html"],
+        formats: ["markdown", "html", "screenshot"],
         onlyMainContent: false,
         timeout: 30000,
         maxAge: 86_400_000,
-        headers: BROWSER_HEADERS,
       }),
     });
     if (res.ok) {
-      const d = (await res.json())?.data ?? {};
+      const d = (await res.json().catch(() => null))?.data ?? null;
+      if (!d) { notes.push(`${new URL(url).hostname} returned a malformed reader response`); return { text, images: [], notes }; }
+      if (typeof d.screenshot === "string" && d.screenshot.startsWith("https://")) screenshots.push(d.screenshot);
       text = String(d.markdown ?? "").slice(0, 4000);
       const og = d.metadata?.ogImage ?? d.metadata?.["og:image"];
       if (typeof og === "string") images.add(og);
@@ -150,7 +152,10 @@ async function scrape(url: string): Promise<ScrapeResult> {
     console.error("firecrawl error", e);
     notes.push(`${url} unreachable`);
   }
-  return { text, images: [...images].slice(0, MAX_IMAGES), notes };
+  if (!text && images.size === 0 && screenshots.length === 0 && notes.length === 0) {
+    notes.push(`${new URL(url).hostname} returned an empty capture`);
+  }
+  return { text, images: [...images].slice(0, MAX_IMAGES), notes, screenshots };
 }
 
 const PERSONAL = /^(gmail|googlemail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|qq|163|126|gmx|yandex|mail)\./i;
@@ -160,10 +165,11 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
   const v = (ref ?? "").trim();
   const handle = v.startsWith("@") ? v.slice(1)
     : (v.match(/instagram\.com\/([A-Za-z0-9._]+)/i)?.[1] ?? null);
-  let text = "", images: string[] = [], source: string | null = resolveSourceUrl(ref);
+  let text = "", images: string[] = [], screenshots: string[] = [], source: string | null = resolveSourceUrl(ref);
   const merge = (r: ScrapeResult) => {
     if (r.text) text = [text, r.text].filter(Boolean).join("\n\n").slice(0, 6000);
     images = [...new Set([...images, ...r.images])].slice(0, MAX_IMAGES);
+    screenshots = [...new Set([...screenshots, ...(r.screenshots ?? [])])].slice(0, 2);
   };
   let website: string | null = handle ? null : source;
   if (handle) {
@@ -187,7 +193,7 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
     merge(r); notes.push(...r.notes);
     if (r.text || r.images.length) source = `https://${domain}`;
   }
-  return { text, images, notes, source };
+  return { text, images, notes, source, screenshots };
 }
 
 serve(async (req) => {
@@ -261,16 +267,18 @@ serve(async (req) => {
 
   if (!initialUrl && !account.email) return fail("No website or Instagram handle supplied");
 
-  const { text, images, notes, source } = await gather(account.website_or_ig, account.email);
+  const { text, images, notes, source, screenshots = [] } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
   run.found = images.length;
-  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429/i.test(n));
+  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
   run.rl += notes.filter((n) => /\(429\)/.test(n)).length;
   const priorImages = Array.isArray(dna?.image_urls)
     ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
     : [];
   if (sourceUrl !== initialUrl) await supabase.from("studio_aesthetic_dna").update({ source_url: sourceUrl }).eq("trade_account_id", id);
-  if (!text && images.length === 0 && priorImages.length === 0) {
+  // A crawl that captured nothing new must never re-profile from old evidence
+  // alone: keep prior images and manual tags, mark it retryable.
+  if (!text && images.length === 0 && screenshots.length === 0) {
     return fail(`Could not read the website / Instagram profile${notes.length ? ` — ${[...new Set(notes)].join("; ")}` : ""}`);
   }
 
@@ -291,60 +299,28 @@ serve(async (req) => {
   ].join("\n");
 
   const content: unknown[] = [{ type: "text", text: prompt }];
-  // Fetch images ourselves and inline them as data URLs: many CDNs block the
-  // model provider's fetcher, which rejects the whole request.
-  const candidates = [...new Set([...priorImages, ...images])].slice(0, MAX_IMAGES);
+  // No direct origin downloads. Evidence comes from (1) previously cached
+  // evidence, (2) the managed reader's own hosted screenshot, re-hosted from
+  // the reader's storage into ours, and (3) image URLs the reader discovered,
+  // handed to the vision model by reference.
   const usable: string[] = [];
-  for (let index = 0; index < candidates.length; index += 1) {
-    const url = candidates[index];
-    if (isCachedEvidenceUrl(url)) {
-      usable.push(url);
-      run.reused += 1;
-      continue;
-    }
+  for (const url of priorImages) { if (usable.length < MAX_IMAGES) { usable.push(url); run.reused += 1; } }
+  for (let index = 0; index < screenshots.length && usable.length < MAX_IMAGES; index += 1) {
+    const shot = screenshots[index];
     try {
-      const ctl = new AbortController();
-      const t = setTimeout(() => ctl.abort(), 30_000);
-      const r = await fetchWithRetry(url, {
-        signal: ctl.signal,
-        headers: {
-          ...BROWSER_HEADERS,
-          Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-          "Sec-Fetch-Dest": "image",
-          "Sec-Fetch-Mode": "no-cors",
-          "Sec-Fetch-Site": "cross-site",
-          Referer: /(?:instagram\.com|fbcdn\.net)/i.test(url) ? "https://www.instagram.com/" : sourceUrl,
-        },
-      });
-      clearTimeout(t);
-      const type = r.headers.get("content-type") ?? "";
-      if (!r.ok || !/^image\/(jpeg|png|webp|gif)/.test(type)) {
-        if (r.status === 429) { run.rl += 1; console.warn("portfolio image rate limited after bounded retry", new URL(url).hostname); }
-        run.skipped.push({ url, reason: r.ok ? `unsupported type ${type || "unknown"}` : `HTTP ${r.status}` });
-        continue;
-      }
+      const r = await fetchWithRetry(shot, { signal: AbortSignal.timeout(20_000) });
+      const type = (r.headers.get("content-type") ?? "image/png").split(";")[0];
+      if (!r.ok || !type.startsWith("image/")) { run.skipped.push({ url: shot, reason: `reader screenshot HTTP ${r.status}` }); continue; }
       const buf = new Uint8Array(await r.arrayBuffer());
-      if (buf.length < 5_000 || buf.length > 4_000_000) { run.skipped.push({ url, reason: buf.length < 5_000 ? "too small (<5KB)" : "too large (>4MB)" }); continue; }
-      let bin = "";
-      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-      content.push({ type: "image_url", image_url: { url: `data:${type.split(";")[0]};base64,${btoa(bin)}` } });
-      const extension = type.includes("png") ? "png" : type.includes("webp") ? "webp" : type.includes("gif") ? "gif" : "jpg";
-      const path = `studio-aesthetic/${id}/evidence-${index + 1}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from("assets").upload(path, buf, {
-        contentType: type.split(";")[0],
-        cacheControl: "31536000",
-        upsert: true,
-      });
-      if (uploadError) {
-        console.warn("portfolio image cache failed", path, uploadError.message);
-        usable.push(url);
-      } else {
-        const { data: publicAsset } = supabase.storage.from("assets").getPublicUrl(path);
-        usable.push(publicAsset.publicUrl);
-        run.cached += 1;
-      }
-    } catch (e) { run.skipped.push({ url, reason: (e as Error)?.name === "AbortError" ? "timeout" : "unreachable" }); }
+      const path = `studio-aesthetic/${id}/reader-capture-${index + 1}.${type.includes("jpeg") ? "jpg" : "png"}`;
+      const { error: upErr } = await supabase.storage.from("assets").upload(path, buf, { contentType: type, cacheControl: "31536000", upsert: true });
+      if (upErr) { run.skipped.push({ url: shot, reason: "cache upload failed" }); continue; }
+      usable.push(supabase.storage.from("assets").getPublicUrl(path).data.publicUrl);
+      run.cached += 1;
+    } catch (e) { run.skipped.push({ url: shot, reason: (e as Error)?.name === "TimeoutError" ? "timeout" : "unreachable" }); }
   }
+  for (const url of images) { if (usable.length < MAX_IMAGES && !usable.includes(url)) usable.push(url); }
+  for (const url of usable) content.push({ type: "image_url", image_url: { url } });
 
   // Persist evidence before invoking AI. A later gateway rejection or rate
   // limit must not leave the Visual Evidence Matrix blank or force a rescrape.
@@ -357,11 +333,19 @@ serve(async (req) => {
     if (evidenceError) console.error("portfolio evidence persistence failed", evidenceError.message);
   }
 
-  const aiRes = await fetch(GATEWAY, {
+  const callAi = (parts: unknown[]) => fetch(GATEWAY, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: MODEL, messages: [{ role: "user", content }], response_format: { type: "json_object" } }),
+    body: JSON.stringify({ model: MODEL, messages: [{ role: "user", content: parts }], response_format: { type: "json_object" } }),
   });
+  let aiRes = await callAi(content);
+  // A remote image the model provider cannot fetch rejects the whole request;
+  // retry once with only our own cached evidence.
+  if (aiRes.status === 400) {
+    await aiRes.text();
+    const own = content.filter((c: any) => c.type !== "image_url" || isCachedEvidenceUrl(c.image_url.url));
+    aiRes = await callAi(own);
+  }
   if (!aiRes.ok) {
     const t = (await aiRes.text()).slice(0, 500);
     console.error("gateway error", aiRes.status, t);
