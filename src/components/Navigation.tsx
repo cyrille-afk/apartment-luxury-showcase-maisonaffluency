@@ -546,7 +546,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "mb-3 block w-full whitespace-nowrap text-left font-['Work_Sans'] text-[14px] leading-[1.35] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
+    "mb-3 block w-full whitespace-nowrap text-left font-['Work_Sans'] text-[16px] leading-[1.35] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
 
   const megaMenuHeadingClass =
     "mb-8 border-b border-border pb-4 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
@@ -1107,9 +1107,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
-            <div className="relative mx-auto h-[680px] w-full max-w-[1560px] overflow-hidden border-x border-border bg-background">
-              <div className="grid h-full w-[66%] grid-cols-[1.2fr_4fr] gap-10 p-10">
-                  <section className="min-w-0 border-r border-border pr-10">
+            <div className="relative h-[680px] w-full overflow-hidden bg-background">
+              <div className="grid h-full w-[66%] grid-cols-[1.2fr_4fr] gap-12 p-12">
+                  <section className="min-w-0 border-r border-border pr-12">
                     <h3 className={megaMenuHeadingClass}>Shop by room</h3>
                     <nav className="flex flex-col items-start gap-5" aria-label="Shop by room">
                       {megaMenuRooms.map((room) => (
@@ -1120,7 +1120,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           onFocus={() => activateMegaRoom(room)}
                           onClick={() => setMegaMenuOpen(false)}
                           className={cn(
-                            "relative py-1 font-['Work_Sans'] text-[21px] font-light leading-[1.5] tracking-[0.06em] antialiased transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
+                            "relative py-1 font-['Work_Sans'] text-[21px] font-light not-italic leading-[1.5] tracking-[0.06em] antialiased transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
                             activeMegaRoom.slug === room.slug
                               ? "text-foreground after:w-8"
                               : "text-muted-foreground after:w-0 hover:text-foreground"
@@ -1133,7 +1133,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </section>
 
                   <div className="flex min-w-0 flex-col">
-                    <div className="grid w-full grid-cols-4 gap-12">
+                    <div className="grid w-full grid-cols-4 justify-between gap-10">
                       <section className="min-w-0">
                         <h3 className={megaMenuHeadingClass}>Furniture</h3>
                         <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
