@@ -281,7 +281,7 @@ const HeroJoinForm = ({
     ghost ? "text-white/85" : "text-muted-foreground"
   );
   const inputCls = cn(
-    "h-12 w-full border border-border bg-transparent px-4 font-body text-[10px] uppercase tracking-widest text-foreground outline-none transition-colors duration-300 placeholder:text-[10px] placeholder:uppercase placeholder:tracking-widest placeholder:text-muted-foreground/60 focus:border-foreground",
+    "h-10 md:h-12 w-full border border-border bg-transparent px-4 font-body text-[10px] uppercase tracking-widest text-foreground outline-none transition-colors duration-300 placeholder:text-[10px] placeholder:uppercase placeholder:tracking-widest placeholder:text-muted-foreground/60 focus:border-foreground",
     ghost
       ? "border-background/60 bg-background/90 backdrop-blur-sm focus:border-background"
       : ""
@@ -352,7 +352,7 @@ const HeroJoinForm = ({
           type="button"
           onClick={() => credentialFileRef.current?.click()}
           className={cn(
-            "flex h-12 w-full items-center justify-between border border-dashed bg-transparent px-4 font-body text-[10px] uppercase tracking-widest transition-colors duration-300",
+            "flex h-10 md:h-12 w-full items-center justify-between border border-dashed bg-transparent px-4 font-body text-[10px] uppercase tracking-widest transition-colors duration-300",
             ghost
               ? "border-background/60 text-background backdrop-blur-sm hover:border-background"
               : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
@@ -375,7 +375,7 @@ const HeroJoinForm = ({
         disabled={isLoading || joinLoading || !turnstileToken}
         aria-label={isLoading ? "Submitting application" : undefined}
         aria-busy={isLoading}
-        className="flex h-12 w-full items-center justify-center bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:bg-chip-affinity disabled:text-chip-affinity-foreground disabled:opacity-100"
+        className="flex h-10 md:h-12 w-full items-center justify-center bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:bg-chip-affinity disabled:text-chip-affinity-foreground disabled:opacity-100"
       >
         {isLoading || joinLoading ? (
           <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -558,8 +558,8 @@ const TradeLanding = () => {
         })}</script>
       </Helmet>
 
-      <div className="min-h-[100dvh] w-screen overflow-x-hidden scroll-smooth bg-background">
-        <div className="relative z-10 flex w-full min-h-[100dvh] flex-col overflow-x-hidden bg-transparent">
+      <div className="min-h-[100dvh] w-screen overflow-x-hidden scroll-smooth bg-background pb-[env(safe-area-inset-bottom)]">
+        <div className="relative z-10 flex w-full min-h-[100dvh] flex-col justify-between overflow-x-hidden bg-transparent">
 
         {/* Full official site header (fixed) */}
         <Navigation />
@@ -608,7 +608,7 @@ const TradeLanding = () => {
           </div>
 
           {/* Right Side: hero photograph (inline on mobile and desktop) */}
-          <div className="relative h-[70svh] min-h-[520px] w-full bg-background md:col-start-7 md:col-span-5 md:h-full md:min-h-0">
+          <div className="relative aspect-[4/3] w-full bg-background md:aspect-auto md:col-start-7 md:col-span-5 md:h-full md:min-h-0">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
@@ -641,7 +641,7 @@ const TradeLanding = () => {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="flex min-h-[72px] flex-col items-center justify-center px-2 py-2 md:min-h-0 md:py-5"
               >
-                <span className="font-display text-xl md:text-3xl text-foreground/80 tracking-wide">
+                <span className="font-display text-xl md:text-3xl text-foreground tracking-wide">
                   {stat.value}
                 </span>
                 <span className="mt-1 text-center font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground md:text-xs md:tracking-[0.15em]">
