@@ -3991,6 +3991,9 @@ export type Database = {
       guest_inquiries: {
         Row: {
           bridged_brief_id: string | null
+          contact_captured_at: string | null
+          contact_email: string | null
+          contact_whatsapp: string | null
           created_at: string
           guest_key: string
           id: string
@@ -4003,6 +4006,9 @@ export type Database = {
         }
         Insert: {
           bridged_brief_id?: string | null
+          contact_captured_at?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
           guest_key: string
           id?: string
@@ -4015,6 +4021,9 @@ export type Database = {
         }
         Update: {
           bridged_brief_id?: string | null
+          contact_captured_at?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
           guest_key?: string
           id?: string
@@ -10975,6 +10984,14 @@ export type Database = {
       }
       get_trade_only_collectible_slugs: { Args: never; Returns: string[] }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
+      guest_inquiry_add_contact: {
+        Args: { _email: string; _guest_key: string; _whatsapp: string }
+        Returns: boolean
+      }
+      guest_inquiry_is_serious: {
+        Args: { _guest_key: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
