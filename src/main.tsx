@@ -17,8 +17,8 @@ function syncWhatsAppWidgetVisibility() {
   const widget = document.getElementById(WHATSAPP_WIDGET_ID);
   if (!widget) return;
 
-  const pathname = window.location.pathname;
-  const shouldHide = pathname.includes("/trade") || pathname.includes("/join-trade");
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  const shouldHide = pathname === "/trade-program";
   if (shouldHide) {
     widget.style.setProperty("display", "none", "important");
   } else {
