@@ -203,7 +203,7 @@ Deno.test("a signed 'Yes' reply activates the matching studio record", async () 
   assertEquals(sent[0].to, "hello@wecraft.sg");
   assertEquals(sent[0].idempotencyKey, `acquisition-portal-key-${LEAD_ID}`);
   assertEquals(
-    String(sent[0].html).includes(`/trade/activate?token=${LEAD_ID}`),
+    /\/trade\/activate\?token=[0-9a-f]{64}/.test(String(sent[0].html)),
     true,
   );
 
