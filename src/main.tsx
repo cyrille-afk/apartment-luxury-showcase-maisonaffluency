@@ -9,6 +9,9 @@ import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
 import { bootIossRouting } from "./config/iossConfig";
 import { ensureStorageHeadroom, installStorageQuotaGuard } from "./lib/storageReclaim";
 
+const isTradeRoute = window.location.pathname.includes("/trade");
+document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
+
 // Keep room for the login session: a full browser store makes sign-in fail.
 installStorageQuotaGuard();
 ensureStorageHeadroom();

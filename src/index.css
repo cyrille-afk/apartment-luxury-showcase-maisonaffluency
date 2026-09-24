@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Trade routes never mount or expose the third-party floating WhatsApp launcher.
+   The data attribute is also applied to launchers injected after React mounts. */
+html.hide-whatsapp-widget #whatsapp-floating-widget,
+html.hide-whatsapp-widget [id*="whatsapp-widget" i],
+html.hide-whatsapp-widget [class*="whatsapp-widget" i],
+html.hide-whatsapp-widget [data-widget*="whatsapp" i],
+html.hide-whatsapp-widget [data-trade-floating-whatsapp="hidden"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
