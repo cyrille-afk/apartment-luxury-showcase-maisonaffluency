@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
   const { data: pending, error } = await admin
     .from("guest_inquiries")
-    .select("id, guest_key, invited_name, messages, created_at")
+    .select("id, guest_key, invited_name, messages, created_at, contact_email, contact_whatsapp")
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(200);
@@ -119,6 +119,8 @@ Deno.serve(async (req) => {
         budget_band: String(s.budget_band || "").slice(0, 40) || null,
         sentiment: String(s.sentiment || "").slice(0, 40) || null,
         pieces_of_interest: pieces,
+        contact_email: row.contact_email || null,
+        contact_phone: row.contact_whatsapp || null,
         status: "new",
       })
       .select("id")
@@ -147,6 +149,8 @@ Deno.serve(async (req) => {
             budgetBand: s.budget_band,
             sentiment: s.sentiment,
             piecesOfInterest: pieces,
+            contactEmail: row.contact_email,
+            contactPhone: row.contact_whatsapp,
             briefId: brief.id,
           },
         },
