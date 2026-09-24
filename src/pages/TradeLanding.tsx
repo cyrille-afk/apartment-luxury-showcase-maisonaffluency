@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -345,12 +345,6 @@ const TradeLanding = () => {
   // Featured Issue (AD) free-download removed from the trade area.
 
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroScrollProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const mobileFormRise = useTransform(heroScrollProgress, [0, 0.75], [18, -46]);
   const [searchParams] = useSearchParams();
   const regionParam = (searchParams.get("region") || "").toLowerCase();
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
@@ -516,7 +510,7 @@ const TradeLanding = () => {
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
+        <div className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
           {/* Debug 12-column overlay (desktop only) — add ?debug-grid to the URL to show */}
           {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-grid") && (
             <div aria-hidden className="pointer-events-none absolute inset-0 z-[80] hidden md:grid md:grid-cols-12">
@@ -540,10 +534,7 @@ const TradeLanding = () => {
                 <span className="hidden md:block md:whitespace-nowrap">Our <span className="text-accent">Trade Program</span></span>
                 <span className="md:hidden">Welcome to Our <span className="text-accent">Trade Program</span></span>
               </h1>
-              <motion.div
-                style={{ y: mobileFormRise }}
-                className="relative z-30 mx-auto mt-4 w-full bg-background py-3 md:mx-0 md:bg-transparent md:p-0 md:!transform-none"
-              >
+              <div className="relative z-30 mx-auto mt-4 w-full bg-background py-3 md:mx-0 md:bg-transparent md:p-0">
                 <HeroJoinForm
                   ghost={false}
                   submitted={applicationSubmitted}
@@ -555,7 +546,7 @@ const TradeLanding = () => {
                   turnstileToken={turnstileToken}
                   setTurnstileToken={setTurnstileToken}
                 />
-              </motion.div>
+              </div>
             </motion.div>
           </div>
 
