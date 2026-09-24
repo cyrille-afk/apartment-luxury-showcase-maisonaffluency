@@ -21,6 +21,7 @@ import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
+import TradeApplicationsQueue from "@/components/trade/TradeApplicationsQueue";
 import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -582,6 +583,10 @@ const TradeAdminAcquisitions = () => {
         <title>Acquisitions | Maison Affluency</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
+
+      <div className="w-full px-8 pt-12 md:px-10 md:pt-16">
+        <TradeApplicationsQueue />
+      </div>
 
       <div className="w-full px-8 py-12 md:px-10 md:py-16">
         <header className="flex flex-col gap-6 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
