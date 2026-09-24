@@ -756,9 +756,9 @@ const App = () => {
                   <Route path="/admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                   <Route path="/admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
                   <Route path="/admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
-                  <Route path="/admin/acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
-                  <Route path="/admin/client-acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
-                  <Route path="/admin/trade-applications" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminApplications /></Suspense>} />
+                  <Route path="/admin/acquisitions" element={<Navigate to="/trade/admin/client-acquisitions" replace />} />
+                  <Route path="/admin/client-acquisitions" element={<Navigate to="/trade/admin/client-acquisitions" replace />} />
+                  <Route path="/admin/trade-applications" element={<Navigate to="/trade/admin/trade-applications" replace />} />
                   <Route path="/compliance/dpa-template" element={<Suspense fallback={<PageLoadingSkeleton />}><DpaTemplate /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
