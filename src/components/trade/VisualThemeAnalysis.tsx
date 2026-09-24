@@ -29,14 +29,32 @@ function toneClass(tone: string, index: number) {
   return paletteClasses[index % paletteClasses.length];
 }
 
-function InsightBlock({ title, values }: { title: string; values: string[] }) {
+export type ChipKind = "affinity" | "material" | "neutral";
+
+const chipStyles: Record<ChipKind, string> = {
+  affinity: "border-chip-affinity bg-chip-affinity text-chip-affinity-foreground",
+  material: "border-chip-material-border bg-chip-material text-chip-material-foreground",
+  neutral: "border-border bg-background text-foreground",
+};
+
+function chipClass(kind: ChipKind, editable: boolean) {
+  return editable
+    ? `inline-flex items-center gap-1.5 border py-1 pl-2.5 pr-1.5 font-body text-[11px] antialiased ${chipStyles[kind]}`
+    : `border px-2.5 py-1 font-body text-[11px] antialiased ${chipStyles[kind]}`;
+}
+
+function chipCloseClass(kind: ChipKind) {
+  return kind === "neutral" ? "text-muted-foreground hover:text-destructive" : "text-current opacity-70 hover:opacity-100";
+}
+
+function InsightBlock({ title, values, kind = "neutral" }: { title: string; values: string[]; kind?: ChipKind }) {
   return (
     <div className="border-t border-border pt-4 first:border-t-0 first:pt-0">
       <h4 className="font-body text-[10px] font-semibold uppercase tracking-[0.24em] text-foreground">{title}</h4>
       {values.length ? (
         <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1.5">
           {values.map((value, index) => (
-            <span key={`${value}-${index}`} className="border border-border bg-background px-2.5 py-1 font-body text-[11px] text-foreground">
+            <span key={`${value}-${index}`} className={chipClass(kind, false)}>
               {value}
             </span>
           ))}
@@ -101,7 +119,7 @@ function loadCatalogMaterials() {
   return catalogMaterialsCache;
 }
 
-function EditableBlock({ title, values, onChange, placeholder, suggestions, onPick }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string; suggestions?: string[]; onPick?: (next: string[]) => void }) {
+function EditableBlock({ title, values, onChange, placeholder, suggestions, onPick, kind = "neutral" }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string; suggestions?: string[]; onPick?: (next: string[]) => void; kind?: ChipKind }) {
   const [draft, setDraft] = useState("");
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
