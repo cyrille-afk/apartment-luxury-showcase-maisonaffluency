@@ -879,7 +879,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => navigate("/trade-program#apply")}
+                        onClick={() => handleNavClick("/trade-program")}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
