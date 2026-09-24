@@ -255,6 +255,58 @@ export interface AttributedCuratorPick extends DesignerCuratorPick {
   designer_slug: string;
 }
 
+/**
+ * Fetch products owned by another atelier whose title or subtitle explicitly
+ * credits this designer. This keeps designer and producer attribution separate:
+ * the product remains in the producing atelier's catalogue while also appearing
+ * in the credited designer's portfolio.
+ */
+export function useAttributedDesignerPicks(
+  designer: Designer | null | undefined,
+  { publicOnly = false }: { publicOnly?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: ["designer-attributed-picks", designer?.id, designer?.name, publicOnly],
+    enabled: !!designer?.id && !!designer?.name,
+    queryFn: async () => {
+      if (!designer) return [];
+      const table = publicOnly ? "designer_curator_picks_public" : "designer_curator_picks";
+      const columns = publicOnly ? CURATOR_PICK_GRID_COLUMNS : CURATOR_PICK_GRID_COLUMNS_TRADE;
+      const escapedName = designer.name.replaceAll(",", "\\,");
+      let query = supabase
+        .from(table)
+        .select(columns)
+        .neq("designer_id", designer.id)
+        .or(`title.ilike.% by ${escapedName},subtitle.ilike.by ${escapedName}`);
+      if (!publicOnly) query = query.eq("is_hidden", false);
+
+      const { data, error } = await query.returns<PickRow[]>();
+      if (error) throw error;
+      const rows = data || [];
+      if (rows.length === 0) return [];
+
+      const ownerIds = [...new Set(rows.map((row) => row.designer_id).filter(Boolean))];
+      const { data: owners, error: ownersError } = await supabase
+        .from("designers")
+        .select("id, name, slug")
+        .in("id", ownerIds);
+      if (ownersError) throw ownersError;
+      const ownerMap = Object.fromEntries((owners || []).map((owner) => [owner.id, owner]));
+
+      return sortCuratorPicks(dedupePicks(rows.map((row) => ({
+        ...row,
+        description: resolveCuratorPickDescription({ description: row.description }),
+        edition: formatEditionLabel(row as any),
+        trade_price_cents: publicOnly ? null : row.trade_price_cents,
+        pdf_urls: row.pdf_urls as DesignerCuratorPick["pdf_urls"],
+        size_variants: row.size_variants as DesignerCuratorPick["size_variants"],
+        designer_name: ownerMap[row.designer_id]?.name || "",
+        designer_slug: ownerMap[row.designer_id]?.slug || "",
+      })) as unknown as AttributedCuratorPick[]));
+    },
+  });
+}
+
 /** Fetch curator picks for a parent brand and its sub-designers, with attribution */
 export function useGroupedDesignerPicks(designer: Designer | null | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
