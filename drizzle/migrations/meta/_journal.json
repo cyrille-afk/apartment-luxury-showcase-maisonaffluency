@@ -638,6 +638,13 @@
       "when": 1790227689513,
       "tag": "0090_admin_delete_trade_applications",
       "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1790228317132,
+      "tag": "0091_studio_evidence_runs",
+      "breakpoints": true
     }
   ]
 }

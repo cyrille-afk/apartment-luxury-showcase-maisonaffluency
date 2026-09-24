@@ -7629,6 +7629,54 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_evidence_runs: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          id: string
+          images_cached: number
+          images_found: number
+          images_reused: number
+          outcome: string
+          rate_limited_count: number
+          reader_failures: Json
+          skipped: Json
+          started_at: string
+          studio_name: string | null
+          trade_account_id: string
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          images_cached?: number
+          images_found?: number
+          images_reused?: number
+          outcome?: string
+          rate_limited_count?: number
+          reader_failures?: Json
+          skipped?: Json
+          started_at?: string
+          studio_name?: string | null
+          trade_account_id: string
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          images_cached?: number
+          images_found?: number
+          images_reused?: number
+          outcome?: string
+          rate_limited_count?: number
+          reader_failures?: Json
+          skipped?: Json
+          started_at?: string
+          studio_name?: string | null
+          trade_account_id?: string
+        }
+        Relationships: []
+      }
       studio_invites: {
         Row: {
           accepted_at: string | null

@@ -241,8 +241,21 @@ serve(async (req) => {
     attempts: (dna?.attempts ?? 0) + 1, error: null,
   }, { onConflict: "trade_account_id" });
 
+  const { data: runRow } = await supabase.from("studio_evidence_runs")
+    .insert({ trade_account_id: id, studio_name: account.studio_name }).select("id").maybeSingle();
+  const run = { found: 0, cached: 0, reused: 0, skipped: [] as { url: string; reason: string }[], rl: 0, reader: [] as string[] };
+  const logRun = async (outcome: string, error: string | null = null) => {
+    if (!runRow?.id) return;
+    await supabase.from("studio_evidence_runs").update({
+      outcome, error: error?.slice(0, 1000) ?? null, images_found: run.found, images_cached: run.cached,
+      images_reused: run.reused, skipped: run.skipped.slice(0, 20), rate_limited_count: run.rl,
+      reader_failures: [...new Set(run.reader)].slice(0, 20), finished_at: new Date().toISOString(),
+    }).eq("id", runRow.id);
+  };
+
   const fail = async (error: string, status = 200) => {
     await supabase.from("studio_aesthetic_dna").update({ status: "failed", error: error.slice(0, 1000) }).eq("trade_account_id", id);
+    await logRun("failed", error);
     return json({ ok: false, error }, status);
   };
 
@@ -250,6 +263,9 @@ serve(async (req) => {
 
   const { text, images, notes, source } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
+  run.found = images.length;
+  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429/i.test(n));
+  run.rl += notes.filter((n) => /\(429\)/.test(n)).length;
   const priorImages = Array.isArray(dna?.image_urls)
     ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
     : [];
@@ -283,6 +299,7 @@ serve(async (req) => {
     const url = candidates[index];
     if (isCachedEvidenceUrl(url)) {
       usable.push(url);
+      run.reused += 1;
       continue;
     }
     try {
@@ -302,11 +319,12 @@ serve(async (req) => {
       clearTimeout(t);
       const type = r.headers.get("content-type") ?? "";
       if (!r.ok || !/^image\/(jpeg|png|webp|gif)/.test(type)) {
-        if (r.status === 429) console.warn("portfolio image rate limited after bounded retry", new URL(url).hostname);
+        if (r.status === 429) { run.rl += 1; console.warn("portfolio image rate limited after bounded retry", new URL(url).hostname); }
+        run.skipped.push({ url, reason: r.ok ? `unsupported type ${type || "unknown"}` : `HTTP ${r.status}` });
         continue;
       }
       const buf = new Uint8Array(await r.arrayBuffer());
-      if (buf.length < 5_000 || buf.length > 4_000_000) continue;
+      if (buf.length < 5_000 || buf.length > 4_000_000) { run.skipped.push({ url, reason: buf.length < 5_000 ? "too small (<5KB)" : "too large (>4MB)" }); continue; }
       let bin = "";
       for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
       content.push({ type: "image_url", image_url: { url: `data:${type.split(";")[0]};base64,${btoa(bin)}` } });
@@ -323,8 +341,9 @@ serve(async (req) => {
       } else {
         const { data: publicAsset } = supabase.storage.from("assets").getPublicUrl(path);
         usable.push(publicAsset.publicUrl);
+        run.cached += 1;
       }
-    } catch { /* skip unreachable image */ }
+    } catch (e) { run.skipped.push({ url, reason: (e as Error)?.name === "AbortError" ? "timeout" : "unreachable" }); }
   }
 
   // Persist evidence before invoking AI. A later gateway rejection or rate
@@ -371,6 +390,7 @@ serve(async (req) => {
     error: null,
     analyzed_at: new Date().toISOString(),
   }).eq("trade_account_id", id);
+  await logRun("complete");
 
   return json({ ok: true });
 });
