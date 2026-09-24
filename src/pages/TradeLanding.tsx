@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -212,28 +212,24 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
 /* ─── Hero Join Form ─── */
 interface HeroJoinFormProps {
   ghost?: boolean;
-  joinStep: 1 | 2 | 3 | 4;
+  submitted: boolean;
   joinLoading: boolean;
   joinError: string | null;
   joinCredentialFile: File | null;
   setJoinCredentialFile: (f: File | null) => void;
-  handleJoinSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  handleStudioSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  handleCredentialsSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleApplicationSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   turnstileToken: string;
   setTurnstileToken: (t: string) => void;
 }
 
 const HeroJoinForm = ({
   ghost = false,
-  joinStep,
+  submitted,
   joinLoading,
   joinError,
   joinCredentialFile,
   setJoinCredentialFile,
-  handleJoinSubmit,
-  handleStudioSubmit,
-  handleCredentialsSubmit,
+  handleApplicationSubmit,
   turnstileToken,
   setTurnstileToken,
 }: HeroJoinFormProps) => {
@@ -243,169 +239,24 @@ const HeroJoinForm = ({
     ghost ? "text-white/85" : "text-muted-foreground"
   );
   const inputCls = cn(
-    "w-full px-5 py-3 font-body text-xs uppercase tracking-[0.15em] text-foreground outline-none transition-colors duration-300 placeholder:text-muted-foreground/60 focus:border-accent focus:ring-1 focus:ring-accent/30",
+    "h-12 w-full border border-border bg-transparent px-4 font-body text-[10px] uppercase tracking-widest text-foreground outline-none transition-colors duration-300 placeholder:text-[10px] placeholder:uppercase placeholder:tracking-widest placeholder:text-muted-foreground/60 focus:border-foreground",
     ghost
-      ? "border border-white/50 bg-white/90 backdrop-blur-sm"
-      : "border border-border/60 bg-card"
+      ? "border-background/60 bg-background/90 backdrop-blur-sm focus:border-background"
+      : ""
   );
-  const goldBtn =
-    "w-full border border-gold bg-gold px-6 py-3 text-center font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground transition-colors duration-300 hover:bg-gold/90 disabled:opacity-60";
 
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      {joinStep === 1 ? (
+  return submitted ? (
         <motion.div
-          key="join-step-1"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
-        >
-          <form
-            onSubmit={handleJoinSubmit}
-            className={cn(
-              "mx-auto flex w-full flex-col items-stretch gap-2.5",
-              ghost ? "max-w-md" : "max-w-lg md:mx-0 md:flex-row md:items-center"
-            )}
-          >
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Your work email"
-              className={cn(inputCls, !ghost && "md:flex-1")}
-            />
-            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "min-w-[120px] md:w-auto")}>
-              {joinLoading ? "Sending…" : "Join Now"}
-            </button>
-          </form>
-          {joinError && (
-            <p className={cn("mt-2 text-center font-body text-[11px] md:text-left", ghost ? "text-white" : "text-destructive")}>
-              {joinError}
-            </p>
-          )}
-          <p className={cn("mt-2 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-white/95 drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]" : "text-muted-foreground")}>
-            Already registered?{" "}
-            <Link
-              to="/trade/login"
-              className={cn("underline underline-offset-2 transition-colors", ghost ? "text-white hover:text-white/80" : "text-foreground hover:text-foreground/80")}
-            >
-              Sign in
-            </Link>
-          </p>
-        </motion.div>
-      ) : joinStep === 2 ? (
-        <motion.div
-          key="join-step-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
-        >
-          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
-            Step 2 of 3 · Studio Details
-          </p>
-          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
-            <div className="h-px w-2/3 bg-gold" />
-          </div>
-
-          <form onSubmit={handleStudioSubmit} className="flex w-full flex-col gap-3">
-            <div>
-              <label htmlFor="company" className={labelCls}>Company / Firm Name</label>
-              <input id="company" name="company" required placeholder="Studio name" className={inputCls} />
-            </div>
-            <div>
-              <label htmlFor="website" className={labelCls}>Website or Instagram Handle</label>
-              <input id="website" name="website" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
-            </div>
-            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
-              {joinLoading ? "Saving…" : "Continue"}
-            </button>
-          </form>
-          {joinError && (
-            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
-              {joinError}
-            </p>
-          )}
-        </motion.div>
-      ) : joinStep === 3 ? (
-        <motion.div
-          key="join-step-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className={cn("mx-auto w-full", ghost ? "max-w-md" : "max-w-lg md:mx-0")}
-        >
-          <p className={cn("font-display text-sm italic sm:text-base", ghost ? "text-white" : "text-foreground")}>
-            Step 3 of 3 · Professional Verification
-          </p>
-          <div className={cn("mt-2 mb-4 h-px w-full", ghost ? "bg-white/30" : "bg-border")}>
-            <div className="h-px w-full bg-gold" />
-          </div>
-
-          <form onSubmit={handleCredentialsSubmit} className="flex w-full flex-col gap-3">
-            <div>
-              <label htmlFor="regNumber" className={labelCls}>Business Registration Number / Tax ID</label>
-              <input id="regNumber" name="regNumber" placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
-            </div>
-            <div>
-              <span className={labelCls}>Professional Certification or Portfolio</span>
-              <input
-                ref={credentialFileRef}
-                type="file"
-                accept="application/pdf,image/*"
-                className="hidden"
-                onChange={(e) => {
-                  setJoinCredentialFile(e.target.files?.[0] ?? null);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => credentialFileRef.current?.click()}
-                className={cn(
-                  "flex w-full items-center justify-between px-5 py-3 font-body text-xs uppercase tracking-[0.15em] transition-colors duration-300",
-                  ghost
-                    ? "border border-dashed border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
-                    : "border border-dashed border-border/60 bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground"
-                )}
-              >
-                <span className="truncate">
-                  {joinCredentialFile ? joinCredentialFile.name : "Upload certification or portfolio PDF"}
-                </span>
-                <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
-              </button>
-            </div>
-            <Turnstile
-              theme={ghost ? "dark" : "light"}
-              className="flex min-h-[65px] justify-center md:justify-start"
-              onVerify={setTurnstileToken}
-              onExpire={() => setTurnstileToken("")}
-            />
-            <button type="submit" disabled={joinLoading || !turnstileToken} className={cn(goldBtn, "mt-1")}>
-              {joinLoading ? "Submitting…" : "Submit Application"}
-            </button>
-          </form>
-          {joinError && (
-            <p className={cn("mt-2 text-center font-body text-[11px]", ghost ? "text-white" : "text-destructive")}>
-              {joinError}
-            </p>
-          )}
-        </motion.div>
-      ) : (
-        <motion.div
-          key="join-success"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut", delay: 0.15 }}
           className={cn(
             "flex flex-col items-center justify-center py-2 text-center md:items-start md:text-left",
-            ghost && "drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
+            ghost && "drop-shadow-[0_1px_3px_hsl(var(--foreground)/0.45)]"
           )}
         >
           <svg
-            className={cn("mb-3 h-6 w-6", ghost ? "text-white" : "text-accent")}
+            className={cn("mb-3 h-6 w-6", ghost ? "text-background" : "text-accent")}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -416,15 +267,72 @@ const HeroJoinForm = ({
           >
             <path d="M4.5 12.5l5 5L19.5 6" />
           </svg>
-          <p className={cn("font-display text-lg sm:text-2xl", ghost ? "text-white" : "text-foreground")}>
+          <p className={cn("font-display text-lg sm:text-2xl", ghost ? "text-background" : "text-foreground")}>
             Thank You for Your Interest.
           </p>
-          <p className={cn("mt-1.5 max-w-xs font-body text-[11px] leading-relaxed sm:text-xs md:max-w-sm", ghost ? "text-white/90" : "text-muted-foreground")}>
+          <p className={cn("mt-1.5 max-w-xs font-body text-[11px] leading-relaxed sm:text-xs md:max-w-sm", ghost ? "text-background/90" : "text-muted-foreground")}>
             An invitation link has been sent to your work email. Our team will review your credentials shortly.
           </p>
         </motion.div>
-      )}
-    </AnimatePresence>
+  ) : (
+    <form onSubmit={handleApplicationSubmit} className={cn("mx-auto flex w-full max-w-lg flex-col gap-3 md:mx-0", ghost && "max-w-md")}>
+      <div>
+        <label htmlFor={ghost ? "mobile-email" : "email"} className={labelCls}>Work Email</label>
+        <input id={ghost ? "mobile-email" : "email"} type="email" name="email" required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={ghost ? "mobile-company" : "company"} className={labelCls}>Company / Firm Name</label>
+        <input id={ghost ? "mobile-company" : "company"} name="company" required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={ghost ? "mobile-website" : "website"} className={labelCls}>Website or Instagram Handle</label>
+        <input id={ghost ? "mobile-website" : "website"} name="website" maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={ghost ? "mobile-regNumber" : "regNumber"} className={labelCls}>Business Registration / Tax ID (Optional)</label>
+        <input id={ghost ? "mobile-regNumber" : "regNumber"} name="regNumber" maxLength={120} placeholder="e.g. UEN, VAT, EIN" className={inputCls} />
+      </div>
+      <div>
+        <span className={labelCls}>Professional Certification or Portfolio File Upload (Optional)</span>
+        <input
+          ref={credentialFileRef}
+          type="file"
+          accept="application/pdf,image/png,image/jpeg"
+          className="hidden"
+          onChange={(e) => setJoinCredentialFile(e.target.files?.[0] ?? null)}
+        />
+        <button
+          type="button"
+          onClick={() => credentialFileRef.current?.click()}
+          className={cn(
+            "flex h-12 w-full items-center justify-between border border-dashed bg-transparent px-4 font-body text-[10px] uppercase tracking-widest transition-colors duration-300",
+            ghost
+              ? "border-background/60 text-background backdrop-blur-sm hover:border-background"
+              : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+          )}
+        >
+          <span className="truncate">{joinCredentialFile ? joinCredentialFile.name : "Upload certification or portfolio file"}</span>
+          <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
+        </button>
+      </div>
+      <Turnstile
+        theme={ghost ? "dark" : "light"}
+        className="flex min-h-[65px] justify-center md:justify-start"
+        onVerify={setTurnstileToken}
+        onExpire={() => setTurnstileToken("")}
+      />
+      <button
+        type="submit"
+        disabled={joinLoading || !turnstileToken}
+        className="h-12 w-full bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {joinLoading ? "Submitting…" : "Submit Application"}
+      </button>
+      {joinError && <p className={cn("text-center font-body text-[11px] md:text-left", ghost ? "text-background" : "text-destructive")}>{joinError}</p>}
+      <p className={cn("text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-background/95" : "text-muted-foreground")}>
+        Already registered? <Link to="/trade/login" className={cn("underline underline-offset-2 transition-colors", ghost ? "text-background hover:text-background/80" : "text-foreground hover:text-foreground/80")}>Sign in</Link>
+      </p>
+    </form>
   );
 };
 
@@ -448,10 +356,9 @@ const TradeLanding = () => {
   const [isUKVariant, setIsUKVariant] = useState<boolean>(
     regionParam === "uk" || regionParam === "gb",
   );
-  const [joinStep, setJoinStep] = useState<1 | 2 | 3 | 4>(1);
+  const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
-  const [joinEmail, setJoinEmail] = useState("");
   const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
 
@@ -462,70 +369,24 @@ const TradeLanding = () => {
     const resetSignal = (location.state as { resetApplication?: number } | null)?.resetApplication;
     if (!resetSignal) return;
     localStorage.removeItem("tradeProgramApplication");
-    setJoinStep(1);
+    setApplicationSubmitted(false);
     setJoinLoading(false);
     setJoinError(null);
-    setJoinEmail("");
     setJoinCredentialFile(null);
     setTurnstileToken("");
   }, [location.state]);
 
-  const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleApplicationSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = ((formData.get("email") as string) || "").trim();
-    if (!email) return;
-    setJoinLoading(true);
-    setJoinError(null);
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, step: 1 },
-    });
-    setJoinLoading(false);
-    if (error) {
-      setJoinError("We couldn't register that email. Please try again.");
-      return;
-    }
-    setJoinEmail(email);
-    setJoinStep(2);
-  };
-
-  const handleStudioSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     const companyName = ((formData.get("company") as string) || "").trim();
     const websiteUrl = ((formData.get("website") as string) || "").trim();
-    // Accept a domain/URL (e.g. yourwebsite.com, https://www.site.co/page) or an @handle.
-    const IG_RE = /^@[A-Za-z0-9._]{1,30}$/;
-    const DOMAIN_RE = /^(https?:\/\/)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(\/\S*)?$/;
-    if (websiteUrl && !IG_RE.test(websiteUrl) && !DOMAIN_RE.test(websiteUrl)) {
-      setJoinError("Enter a website (e.g., yourwebsite.com) or an Instagram handle starting with @.");
-      return;
-    }
-    setJoinLoading(true);
-    setJoinError(null);
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email: joinEmail, step: 2, companyName, websiteUrl },
-    });
-    setJoinLoading(false);
-    if (error) {
-      setJoinError("We couldn't save your studio details. Please try again.");
-      return;
-    }
-    setJoinStep(3);
-  };
-
-  const fileToDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-
-  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    if (!email || !companyName) {
+      setJoinError("Please enter your work email and company name.");
+      return;
+    }
     if (!turnstileToken) {
       setJoinError("Please complete the security check.");
       return;
@@ -539,7 +400,12 @@ const TradeLanding = () => {
         setJoinError("The document is too large (max 15 MB).");
         return;
       }
-      const dataUrl = await fileToDataUrl(joinCredentialFile);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result ?? ""));
+        reader.onerror = reject;
+        reader.readAsDataURL(joinCredentialFile);
+      });
       document = {
         name: joinCredentialFile.name,
         contentType: joinCredentialFile.type || "application/octet-stream",
@@ -547,7 +413,7 @@ const TradeLanding = () => {
       };
     }
     const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email: joinEmail, step: 3, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
+      body: { email, step: 3, companyName, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
     });
     setJoinLoading(false);
     setTurnstileToken("");
@@ -555,7 +421,7 @@ const TradeLanding = () => {
       setJoinError("We couldn't submit your application. Please try again.");
       return;
     }
-    setJoinStep(4);
+    setApplicationSubmitted(true);
   };
 
 
@@ -680,14 +546,12 @@ const TradeLanding = () => {
               >
                 <HeroJoinForm
                   ghost={false}
-                  joinStep={joinStep}
+                  submitted={applicationSubmitted}
                   joinLoading={joinLoading}
                   joinError={joinError}
                   joinCredentialFile={joinCredentialFile}
                   setJoinCredentialFile={setJoinCredentialFile}
-                  handleJoinSubmit={handleJoinSubmit}
-                  handleStudioSubmit={handleStudioSubmit}
-                  handleCredentialsSubmit={handleCredentialsSubmit}
+                  handleApplicationSubmit={handleApplicationSubmit}
                   turnstileToken={turnstileToken}
                   setTurnstileToken={setTurnstileToken}
                 />
@@ -714,14 +578,12 @@ const TradeLanding = () => {
               <div className="relative mx-auto w-[85%] max-w-md">
                 <HeroJoinForm
                   ghost
-                  joinStep={joinStep}
+                  submitted={applicationSubmitted}
                   joinLoading={joinLoading}
                   joinError={joinError}
                   joinCredentialFile={joinCredentialFile}
                   setJoinCredentialFile={setJoinCredentialFile}
-                  handleJoinSubmit={handleJoinSubmit}
-                  handleStudioSubmit={handleStudioSubmit}
-                  handleCredentialsSubmit={handleCredentialsSubmit}
+                  handleApplicationSubmit={handleApplicationSubmit}
                   turnstileToken={turnstileToken}
                   setTurnstileToken={setTurnstileToken}
                 />

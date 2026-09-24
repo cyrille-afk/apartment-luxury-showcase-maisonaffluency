@@ -44,12 +44,8 @@ Deno.serve(async (req) => {
     return json({ error: 'A valid work email is required' }, 400)
   }
   if (step !== 1 && step !== 2 && step !== 3) return json({ error: 'Invalid step' }, 400)
-  if (
-    step === 2 && websiteUrl &&
-    !/^@[A-Za-z0-9._]{1,30}$/.test(websiteUrl) &&
-    !/^(https?:\/\/)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(\/\S*)?$/.test(websiteUrl)
-  ) {
-    return json({ error: 'Enter a website or an Instagram handle starting with @' }, 400)
+  if (step === 3 && (!companyName || companyName.length > 200)) {
+    return json({ error: 'A company or firm name is required' }, 400)
   }
 
   // Bot protection: the final submission (account creation + alerts) requires
@@ -84,7 +80,7 @@ Deno.serve(async (req) => {
     .maybeSingle()
 
   const payload: Record<string, unknown> = { email, step }
-  if (step === 2) {
+  if (step === 2 || step === 3) {
     payload.company_name = companyName
     payload.website_url = websiteUrl
     payload.portfolio_reference = websiteUrl
