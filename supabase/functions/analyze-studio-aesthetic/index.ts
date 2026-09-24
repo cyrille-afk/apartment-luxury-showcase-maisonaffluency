@@ -230,8 +230,11 @@ serve(async (req) => {
 
   const { text, images, notes, source } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
+  const priorImages = Array.isArray(dna?.image_urls)
+    ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
+    : [];
   if (sourceUrl !== initialUrl) await supabase.from("studio_aesthetic_dna").update({ source_url: sourceUrl }).eq("trade_account_id", id);
-  if (!text && images.length === 0) {
+  if (!text && images.length === 0 && priorImages.length === 0) {
     return fail(`Could not read the website / Instagram profile${notes.length ? ` — ${[...new Set(notes)].join("; ")}` : ""}`);
   }
 
@@ -254,16 +257,13 @@ serve(async (req) => {
   const content: unknown[] = [{ type: "text", text: prompt }];
   // Fetch images ourselves and inline them as data URLs: many CDNs block the
   // model provider's fetcher, which rejects the whole request.
-  const priorImages = Array.isArray(dna?.image_urls)
-    ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
-    : [];
   const candidates = [...new Set([...priorImages, ...images])].slice(0, MAX_IMAGES);
   const usable: string[] = [];
   for (let index = 0; index < candidates.length; index += 1) {
     const url = candidates[index];
     try {
       const ctl = new AbortController();
-      const t = setTimeout(() => ctl.abort(), 8000);
+      const t = setTimeout(() => ctl.abort(), 30_000);
       const r = await fetchWithRetry(url, {
         signal: ctl.signal,
         headers: {
