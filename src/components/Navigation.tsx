@@ -996,7 +996,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="mega-menu-shop-by-room w-screen bg-background px-[60px] py-10"
+            className="mega-menu-shop-by-room relative w-screen ml-[calc(50%-50vw)] bg-white px-[60px] py-10 [&_*]:!bg-transparent"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
