@@ -17,6 +17,7 @@ const json = (body: unknown, status = 200) =>
   })
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const PHONE_RE = /^\+?[0-9 ()-]+$/
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
@@ -37,6 +38,7 @@ Deno.serve(async (req) => {
   // for older cached clients during rollout.
   const step = body.completeApplication === true ? 3 : Number(body.step ?? 1)
   const companyName = body.companyName ? String(body.companyName).trim().slice(0, 200) : null
+  const phoneNumber = body.phoneNumber ? String(body.phoneNumber).trim().slice(0, 30) : null
   const websiteUrl = body.websiteUrl ? String(body.websiteUrl).trim().slice(0, 300) : null
   const businessRegNumber = body.businessRegNumber
     ? String(body.businessRegNumber).trim().slice(0, 120)
@@ -48,6 +50,12 @@ Deno.serve(async (req) => {
   if (step !== 1 && step !== 2 && step !== 3) return json({ error: 'Invalid step' }, 400)
   if (step === 3 && (!companyName || companyName.length > 200)) {
     return json({ error: 'A company or firm name is required' }, 400)
+  }
+  if (step === 3 && (!phoneNumber || phoneNumber.length < 7 || !PHONE_RE.test(phoneNumber))) {
+    return json({ error: 'A valid phone number is required' }, 400)
+  }
+  if (step === 3 && (!websiteUrl || websiteUrl.length < 3)) {
+    return json({ error: 'Please provide either your website or Instagram handle to expedite review' }, 400)
   }
 
   // Bot protection: the final submission (account creation + alerts) requires
@@ -84,6 +92,7 @@ Deno.serve(async (req) => {
   const payload: Record<string, unknown> = { email, step }
   if (step === 2 || step === 3) {
     payload.company_name = companyName
+    payload.phone_number = phoneNumber
     payload.website_url = websiteUrl
     payload.portfolio_reference = websiteUrl
   }
@@ -200,7 +209,7 @@ Deno.serve(async (req) => {
   if (step === 3 && signupId) {
     const { data: row } = await supabase
       .from('trade_program_signups')
-      .select('company_name, website_url, portfolio_reference, business_reg_number, credential_document_path')
+      .select('company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path')
       .eq('id', signupId)
       .maybeSingle()
     const clean = (v?: string | null) => (v ?? '').replace(/\s+/g, ' ').trim()
@@ -215,6 +224,7 @@ Deno.serve(async (req) => {
         email,
         studio_name: clean(row?.company_name) || null,
         contact_name: body.firstName ? String(body.firstName).trim().slice(0, 100) : null,
+        phone_number: phoneNumber,
         website_or_ig: clean(row?.portfolio_reference ?? row?.website_url) || null,
         business_reg_number: row?.business_reg_number ?? null,
         credential_document_path: row?.credential_document_path ?? null,
@@ -260,6 +270,7 @@ Deno.serve(async (req) => {
         '',
         `• *Studio:* ${studio}`,
         `• *Email:* ${email}`,
+        `• *Phone:* ${clean(row?.phone_number) || '—'}`,
         `• *Website / IG:* ${clean(row?.portfolio_reference ?? row?.website_url) || '—'}`,
         `• *Reg. No:* ${clean(row?.business_reg_number) || '—'}`,
         `• *Document:* ${row?.credential_document_path ? 'uploaded' : 'none'}`,
@@ -270,7 +281,7 @@ Deno.serve(async (req) => {
       ].join('\n')
 
       try {
-        const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: '' })
+        const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: clean(row?.phone_number) })
         await supabase.from('admin_alert_log').insert({
           channel: 'twilio_whatsapp',
           event: 'trade_application_request',

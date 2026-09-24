@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { LoaderCircle, Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,15 @@ import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeS
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
 const TRADE_PROGRAM_SHARE_URL = getTradeProgramShareUrl();
 const TRADE_PROGRAM_HERO_IMAGE = cloudinaryUrl("dining-room_ey0bu5", { width: 1200, quality: "auto:good" });
+
+const tradeApplicationSchema = z.object({
+  email: z.string().trim().email().max(254),
+  companyName: z.string().trim().min(1).max(200),
+  phoneNumber: z.string().trim().min(7).max(30).regex(/^\+?[0-9 ()-]+$/),
+  websiteUrl: z.string().trim().min(3).max(300),
+});
+
+const PORTFOLIO_REQUIRED_MESSAGE = "PLEASE PROVIDE EITHER YOUR WEBSITE OR INSTAGRAM HANDLE TO EXPEDITE REVIEW.";
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
 // directly by TradeRegistrationForm and QuoteRequestDialog as their default value.
@@ -235,7 +245,20 @@ const HeroJoinForm = ({
 }: HeroJoinFormProps) => {
   const credentialFileRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [portfolioError, setPortfolioError] = useState<string | null>(null);
   const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
+    const website = String(new FormData(e.currentTarget).get("website") ?? "").trim();
+    if (!website) {
+      e.preventDefault();
+      setPortfolioError(PORTFOLIO_REQUIRED_MESSAGE);
+      return;
+    }
+    if (website.length < 3) {
+      e.preventDefault();
+      setPortfolioError("PLEASE ENTER A VALID WEBSITE OR INSTAGRAM HANDLE.");
+      return;
+    }
+    setPortfolioError(null);
     if (!e.currentTarget.checkValidity() || !turnstileToken) {
       await handleApplicationSubmit(e);
       return;
@@ -299,8 +322,13 @@ const HeroJoinForm = ({
         <input id={ghost ? "mobile-company" : "company"} name="company" required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
       </div>
       <div>
+        <label htmlFor={ghost ? "mobile-phone" : "phone"} className={labelCls}>Phone Number</label>
+        <input id={ghost ? "mobile-phone" : "phone"} type="tel" name="phone" required minLength={7} maxLength={30} autoComplete="tel" placeholder="E.G., +1 212 555 0199" className={inputCls} />
+      </div>
+      <div>
         <label htmlFor={ghost ? "mobile-website" : "website"} className={labelCls}>Website or Instagram Handle</label>
-        <input id={ghost ? "mobile-website" : "website"} name="website" maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
+        <input id={ghost ? "mobile-website" : "website"} name="website" minLength={3} maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-required="true" aria-invalid={Boolean(portfolioError)} aria-describedby={portfolioError ? (ghost ? "mobile-website-error" : "website-error") : undefined} onChange={() => portfolioError && setPortfolioError(null)} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
+        {portfolioError && <p id={ghost ? "mobile-website-error" : "website-error"} role="alert" className="mt-1.5 text-left font-body text-[10px] uppercase tracking-wide text-destructive">{portfolioError}</p>}
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-regNumber" : "regNumber"} className={labelCls}>Business Registration / Tax ID (Optional)</label>
@@ -397,10 +425,12 @@ const TradeLanding = () => {
     const formData = new FormData(e.currentTarget);
     const email = ((formData.get("email") as string) || "").trim();
     const companyName = ((formData.get("company") as string) || "").trim();
+    const phoneNumber = ((formData.get("phone") as string) || "").trim();
     const websiteUrl = ((formData.get("website") as string) || "").trim();
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
-    if (!email || !companyName) {
-      setJoinError("Please enter your work email and company name.");
+    const validation = tradeApplicationSchema.safeParse({ email, companyName, phoneNumber, websiteUrl });
+    if (!validation.success) {
+      setJoinError("Please complete all required fields with valid details.");
       return;
     }
     if (!turnstileToken) {
@@ -429,7 +459,7 @@ const TradeLanding = () => {
       };
     }
     const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, completeApplication: true, companyName, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
+      body: { email, completeApplication: true, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
     });
     setJoinLoading(false);
     setTurnstileToken("");

@@ -645,6 +645,13 @@
       "when": 1790228317132,
       "tag": "0091_studio_evidence_runs",
       "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "7",
+      "when": 1790229310155,
+      "tag": "0092_add_trade_application_phone",
+      "breakpoints": true
     }
   ]
 }
