@@ -148,3 +148,30 @@ export function clientIp(req: Request): string {
     "unknown"
   );
 }
+
+/**
+ * Privileged caller gate for scheduled / internal endpoints.
+ * Accepts: `x-cron-secret` matching CRON_SECRET, a service-role bearer, or an
+ * authenticated admin / super_admin. Everyone else is rejected.
+ */
+export async function requireCronOrAdmin(
+  req: Request,
+  source = "unknown",
+): Promise<{ ok: true; via: "cron" | "service" | "admin"; userId?: string } | AuthErr> {
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const hdr = req.headers.get("x-cron-secret");
+  if (cronSecret && hdr && hdr === cronSecret) return { ok: true, via: "cron" };
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (serviceKey && req.headers.get("Authorization") === `Bearer ${serviceKey}`) {
+    return { ok: true, via: "service" };
+  }
+  const admin = await requireAdmin(req, source);
+  if (!admin.ok) return admin;
+  return { ok: true, via: "admin", userId: admin.userId };
+}
+
+/** True when the request carries the service-role key (internal fn-to-fn call). */
+export function isServiceCall(req: Request): boolean {
+  const k = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  return !!k && req.headers.get("Authorization") === `Bearer ${k}`;
+}
