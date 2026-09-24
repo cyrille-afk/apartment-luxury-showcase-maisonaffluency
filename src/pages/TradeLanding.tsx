@@ -315,10 +315,10 @@ const HeroJoinForm = ({
           <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
         </button>
       </div>
-      <div className="my-4 flex w-full justify-start">
+      <div className="my-4 w-full p-0">
         <Turnstile
           theme={ghost ? "dark" : "light"}
-          className="flex min-h-[65px] justify-start"
+          className="m-0 min-h-[65px] p-0"
           onVerify={setTurnstileToken}
           onExpire={() => setTurnstileToken("")}
         />
@@ -326,7 +326,7 @@ const HeroJoinForm = ({
       <button
         type="submit"
         disabled={joinLoading || !turnstileToken}
-        className="h-12 w-full bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-12 w-full bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:bg-chip-affinity disabled:text-chip-affinity-foreground disabled:opacity-100"
       >
         {joinLoading ? "Submitting…" : "Submit Application"}
       </button>
