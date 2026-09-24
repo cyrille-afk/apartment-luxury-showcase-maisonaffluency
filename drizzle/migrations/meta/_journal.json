@@ -589,6 +589,13 @@
       "when": 1790213136628,
       "tag": "0083_guest_inquiries",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1790213207331,
+      "tag": "0084_guest_inquiries_wake_bridge",
+      "breakpoints": true
     }
   ]
 }
