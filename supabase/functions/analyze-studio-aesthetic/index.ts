@@ -110,7 +110,7 @@ serve(async (req) => {
   if (!text && images.length === 0) return fail("Could not read the website / Instagram profile");
 
   const { data: roster } = await supabase
-    .from("designers").select("slug, name, specialty").eq("status", "published").limit(150);
+    .from("designers").select("slug, name, specialty").eq("is_published", true).limit(150);
   const rosterLines = (roster ?? []).map((d: any) => `- ${d.slug} | ${d.name}${d.specialty ? ` | ${d.specialty}` : ""}`).join("\n");
 
   const prompt = [
