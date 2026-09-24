@@ -347,6 +347,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         sessionStorage.removeItem('galleryOpenIntentAt');
       }
       closeMobileMenu();
+      // Trade Program: force the 3-step application form back to a clean step 1,
+      // even when already on the page after a "Thank You" submission.
+      if (href.startsWith("/trade-program")) {
+        localStorage.removeItem("tradeProgramApplication");
+        navigate(href, { state: { smoothScroll: true, resetApplication: Date.now() } });
+        return;
+      }
       // Soften top-level menu transitions with an opt-in smooth scroll-to-top.
       navigate(href, { state: { smoothScroll: true } });
       return;
