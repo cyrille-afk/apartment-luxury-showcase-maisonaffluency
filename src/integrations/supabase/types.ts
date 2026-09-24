@@ -10716,6 +10716,12 @@ export type Database = {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
+      catalog_material_terms: {
+        Args: never
+        Returns: {
+          term: string
+        }[]
+      }
       claim_acquisition_reply: {
         Args: { _lead_id: string; _sender: string; _thread_message_id: string }
         Returns: boolean

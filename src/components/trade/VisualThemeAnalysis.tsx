@@ -89,6 +89,18 @@ function loadCatalogDesigners() {
   return catalogDesignersCache;
 }
 
+let catalogMaterialsCache: Promise<string[]> | null = null;
+function loadCatalogMaterials() {
+  if (!catalogMaterialsCache) {
+    catalogMaterialsCache = (async () => {
+      const { data, error } = await (supabase.rpc as any)("catalog_material_terms");
+      if (error) throw error;
+      return ((data ?? []) as { term: string }[]).map((r) => r.term).filter(Boolean);
+    })().catch(() => { catalogMaterialsCache = null; return []; });
+  }
+  return catalogMaterialsCache;
+}
+
 function EditableBlock({ title, values, onChange, placeholder, suggestions, onPick }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string; suggestions?: string[]; onPick?: (next: string[]) => void }) {
   const [draft, setDraft] = useState("");
   const [open, setOpen] = useState(false);
@@ -177,16 +189,21 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
   const [catalog, setCatalog] = useState<string[]>([]);
   useEffect(() => { if (editing && !catalog.length) loadCatalogDesigners().then(setCatalog); }, [editing, catalog.length]);
 
-  const persistAffinities = async (next: string[]) => {
+  const [materialCatalog, setMaterialCatalog] = useState<string[]>([]);
+  useEffect(() => { if (editing && !materialCatalog.length) loadCatalogMaterials().then(setMaterialCatalog); }, [editing, materialCatalog.length]);
+
+  const persistField = (field: "historical_affinities" | "materials", label: string) => async (next: string[]) => {
     if (!accountId) return;
     const { data, error } = await supabase
       .from("studio_aesthetic_dna")
-      .update({ historical_affinities: next, status: "complete", error: null })
+      .update({ [field]: next, status: "complete", error: null } as any)
       .eq("trade_account_id", accountId)
       .select("trade_account_id");
-    if (error || !data?.length) toast.error(error?.message ?? "Could not save designer.");
-    else toast.success("Designer added to profile.");
+    if (error || !data?.length) toast.error(error?.message ?? `Could not save ${label}.`);
+    else toast.success(`${label[0].toUpperCase()}${label.slice(1)} added to profile.`);
   };
+  const persistAffinities = persistField("historical_affinities", "designer");
+  const persistMaterials = persistField("materials", "material");
 
   const toggle = async () => {
     if (!editing) {
@@ -248,7 +265,7 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
             <>
               <EditableBlock title="Design Dialect" placeholder="Tag" values={draft.tones} onChange={(tones) => setDraft((d) => ({ ...d, tones }))} />
               <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} suggestions={catalog} onPick={persistAffinities} />
-              <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} />
+              <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} suggestions={materialCatalog} onPick={persistMaterials} />
             </>
           ) : (
             <>
