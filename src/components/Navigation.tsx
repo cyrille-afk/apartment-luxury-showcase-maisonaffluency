@@ -40,7 +40,7 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-type RoomNavKey = "living" | "dining" | "bedroom" | "office";
+type RoomNavKey = "living" | "dining" | "bedroom" | "lighting";
 
 interface RoomNavCategory {
   label: string;
@@ -73,13 +73,11 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Wall Lights", "Floor Lights"] },
     { label: "Textiles & Décor", category: "Décor", subcategories: ["Cushions & Throws", "Mirrors", "Decorative Objects"] },
   ],
-  office: [
-    { label: "Desks", category: "Tables", subcategories: ["Desks", "Consoles"] },
-    { label: "Office Seating", category: "Seating", subcategories: ["Chairs", "Armchairs", "Ottomans & Stools"] },
-    { label: "Bookcases", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
-    { label: "Task Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights", "Wall Lights"] },
-    { label: "Desk Objects", category: "Décor", subcategories: ["Desk Accessories", "Boxes", "Decorative Objects"] },
-    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
+  lighting: [
+    { label: "Ceiling Lights", category: "Lighting", subcategories: ["Ceiling Lights"] },
+    { label: "Floor Lights", category: "Lighting", subcategories: ["Floor Lights"] },
+    { label: "Table Lights", category: "Lighting", subcategories: ["Table Lights"] },
+    { label: "Wall Lights", category: "Lighting", subcategories: ["Wall Lights"] },
   ],
 };
 
@@ -973,7 +971,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   isRouteActive("/new-in") && "text-foreground"
                 )}
               >
-                <span className="link-underline-grow">New In</span>
+                <span className="link-underline-grow">New Arrivals</span>
               </button>
 
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
@@ -1114,17 +1112,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 <span className="link-underline-grow">Trade Program</span>
               </button>
 
-              {isTradeUser && (
-                <button
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/collectibles"); }}
-                  className={cn(
-                    "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                    (activeSection === "/collectibles" || isRouteActive("/collectibles")) && "text-foreground"
-                  )}
-                >
-                  <span className="link-underline-grow">Collectibles</span>
-                </button>
-              )}
             </nav>
         </div>
 
