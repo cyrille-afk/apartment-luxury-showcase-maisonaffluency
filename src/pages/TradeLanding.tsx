@@ -616,7 +616,6 @@ const TradeLanding = () => {
               data-pin-nopin="true"
             />
 
-            {/* WhatsApp share — direct deep link */}
           </div>
         </div>
 
