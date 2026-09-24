@@ -14,7 +14,6 @@ import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductL
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import SliderDots from "@/components/ui/SliderDots";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl, cloudinarySrcSet, cldResponsiveImg } from "@/lib/cloudinary";
@@ -259,126 +258,6 @@ const ExpandedScrollContainer = ({ isExpanded, children }: { isExpanded: boolean
   );
 };
 
-type GalleryGridCols = 1 | 3 | 4;
-
-const GalleryGridIcon = ({ columns }: { columns: GalleryGridCols }) => {
-  const bars = columns === 1 ? [{ x: 9, width: 6 }] : columns === 3
-    ? [{ x: 2, width: 5.5 }, { x: 9.25, width: 5.5 }, { x: 16.5, width: 5.5 }]
-    : [{ x: 1.5, width: 4 }, { x: 7, width: 4 }, { x: 12.5, width: 4 }, { x: 18, width: 4 }];
-
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      {bars.map((bar) => (
-        <rect key={bar.x} x={bar.x} y="3" width={bar.width} height="18" rx="1" fill="currentColor" />
-      ))}
-    </svg>
-  );
-};
-
-/** Desktop single-column carousel strip (mirrors mobile swipe UX) */
-const DesktopCarouselStrip = ({
-  section,
-  originalSectionIndex,
-  isInView,
-  hotspotCounts,
-  openLightbox,
-}: {
-  section: typeof galleryExperiences[number];
-  originalSectionIndex: number;
-  isInView: boolean;
-  hotspotCounts: Record<string, number>;
-  openLightbox: (sectionIndex: number, itemIndex: number) => void;
-}) => {
-  const stripRef = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  const handleScroll = useCallback(() => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    const cardWidth = strip.scrollWidth / section.items.length;
-    const index = Math.round(strip.scrollLeft / cardWidth);
-    setActiveIdx(index);
-  }, [section.items.length]);
-
-  const scrollToIdx = (idx: number) => {
-    const strip = stripRef.current;
-    if (!strip) return;
-    const cardWidth = strip.scrollWidth / section.items.length;
-    strip.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 }}
-      className="hidden md:block"
-    >
-      <div
-        ref={stripRef}
-        onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-      >
-        {section.items.map((item, index) => (
-          <div
-            key={`${item.title}-${index}-desktop-strip`}
-            className="group relative flex-none w-full snap-center cursor-pointer aspect-[16/10] max-h-[calc(100vh-280px)] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] rounded-sm overflow-hidden"
-            onClick={() => openLightbox(originalSectionIndex, activeIdx)}
-          >
-            <img
-              {...galleryImg(item.image, "(max-width: 1024px) 100vw, 1200px")}
-              alt={`${item.title} — ${section.experience}`}
-              className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92] rounded-sm"
-              loading="lazy"
-              decoding="async"
-              width={1600}
-              height={1000}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
-            {/* Pulsating hotspot — first card */}
-            {index === 0 && (
-              <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 shadow-[0_0_8px_hsl(var(--primary)/0.4)]">
-                  <Plus className="w-2.5 h-2.5 text-white" />
-                  <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
-                </span>
-              </div>
-            )}
-            {/* +N more bubble — shows remaining photos, clicks to next slide */}
-            {index < section.items.length - 1 && (
-              <button
-                onClick={(e) => { e.stopPropagation(); scrollToIdx(index + 1); }}
-                className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
-              >
-                +{section.items.length - 1 - index} more
-              </button>
-            )}
-            {/* Expand icon */}
-            <button
-              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, activeIdx); }}
-              className="absolute bottom-4 right-4 flex opacity-100 transition-opacity duration-300"
-              aria-label="View full image"
-            >
-              <span className="bg-black/60 text-white p-2 rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300">
-                <Maximize2 className="w-4 h-4" />
-              </span>
-            </button>
-          </div>
-        ))}
-      </div>
-      {/* Dot indicators */}
-      <SliderDots
-        count={section.items.length}
-        activeIndex={activeIdx}
-        onSelect={scrollToIdx}
-        variant="dark"
-        className="mt-3"
-        ariaPrefix="Go to photo"
-      />
-    </motion.div>
-  );
-};
-
 interface GalleryProps {
   /** Trade mode: pass to GalleryHotspots as onAddToQuote */
   onHotspotAddToQuote?: (product: { product_name: string; designer_name: string | null; product_image_url: string | null; materials: string | null; dimensions: string | null }) => void;
@@ -539,7 +418,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<GalleryGridCols>(3);
   const [activeMobilePill, setActiveMobilePill] = useState(-1);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -1147,32 +1025,10 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {section.experience}
                         </h3>
                       </div>
-                      {/* Subtitle centred, grid icons right-aligned on same row */}
-                      <div className="flex items-center w-full mt-1">
-                        <div className="flex-1" />
+                      <div className="mt-1">
                         <p className="text-sm md:text-base text-muted-foreground font-body italic">
                           {section.subtitle}
                         </p>
-                        <div className="flex-1 flex justify-end">
-                          <div className="flex items-center gap-2 relative z-30">
-                            <button
-                              type="button"
-                              onClick={() => setGridCols(gridCols === 1 ? 3 : 1)}
-                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
-                              aria-label={gridCols === 1 ? "Switch to 3 columns" : "Switch to 1 column"}
-                            >
-                              <GalleryGridIcon columns={gridCols === 1 ? 3 : 1} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setGridCols(gridCols === 4 ? 3 : 4)}
-                              className="flex h-9 w-9 items-center justify-center rounded-md border-2 border-foreground bg-background text-foreground transition-colors hover:bg-muted"
-                              aria-label={gridCols === 4 ? "Switch to 3 columns" : "Switch to 4 columns"}
-                            >
-                              <GalleryGridIcon columns={gridCols === 4 ? 3 : 4} />
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </>
@@ -1296,39 +1152,29 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                 );
               })()}
 
-              {/* Desktop: single-column = horizontal carousel with dots; multi-column = grid.
-                  Mounted only on non-mobile viewports — `hidden md:*` containers
+              {/* Desktop: permanent four-column grid. Mounted only on non-mobile viewports — `hidden md:*` containers
                   still trigger image downloads on phones (display:none disables
                   native lazy-loading). */}
-              {!isMobile && (gridCols === 1 ? (
-                <DesktopCarouselStrip
-                  section={section}
-                  originalSectionIndex={originalSectionIndex}
-                  isInView={isInView}
-                  hotspotCounts={hotspotCounts}
-                  openLightbox={openLightbox}
-                />
-              ) : (
-                <div className={`hidden md:grid transition-all duration-300 ${gridCols === 3 ? 'md:grid-cols-2 lg:grid-cols-3 md:gap-8' : 'md:grid-cols-2 lg:grid-cols-4 md:gap-8'}`}>
+              {!isMobile && (
+                <div className="hidden md:grid md:grid-cols-2 md:gap-8 lg:grid-cols-4">
                 {section.items.map((item, index) => {
                   const itemKey = `${originalSectionIndex}-${index}`;
                   const isExpanded = expandedItem === itemKey;
-                  const hiddenIn3Col = gridCols === 3 && index >= 3;
 
                   return (
                     <motion.div
                       key={`${item.title}-${index}`}
                       id={`gallery-item-${itemKey}`}
                       initial={{ opacity: 0, y: 40 }}
-                      animate={isInView ? { opacity: hiddenIn3Col ? 0 : 1, y: hiddenIn3Col ? 20 : 0 } : {}}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.6, delay: originalSectionIndex * 0.2 + index * 0.15 }}
-                      className={`group cursor-pointer ${hiddenIn3Col ? 'hidden' : ''}`}
+                      className="group cursor-pointer"
                     >
                       <div
                         className={`relative mb-2 overflow-hidden rounded-sm shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] transition-all duration-500 group-hover:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.5)] aspect-[4/5]`}
                         onClick={() => openLightbox(originalSectionIndex, index)}
                       >
-                        <img {...galleryImg(item.image, gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw", [240, 320, 480, 640, 800])} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" decoding="async" width={800} height={1000} />
+                        <img {...galleryImg(item.image, "(max-width: 1024px) 50vw, 25vw", [240, 320, 480, 640, 800])} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" decoding="async" width={800} height={1000} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                         {/* Pulsating hotspot hint — first card of every section */}
                         {index === 0 && (
@@ -1339,19 +1185,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             </span>
                           </div>
                         )}
-                        {/* +1 more indicator on last visible card in 3-col mode — top right */}
-                        {gridCols === 3 && index === 2 && section.items.length > 3 && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setGridCols(4);
-                            }}
-                            className="absolute top-2 right-2 md:top-4 md:right-4 z-10 bg-black/50 backdrop-blur-sm text-white font-body text-xs tracking-wide px-3 py-1.5 rounded-full hover:bg-black/70 transition-all duration-300"
-                            aria-label="Show 1 more photo"
-                          >
-                            +1 more
-                          </button>
-                        )}
                         {/* Expand icon — bottom right */}
                         <button
                           onClick={(e) => {
@@ -1361,8 +1194,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex opacity-100 transition-opacity duration-300"
                           aria-label="View full image"
                         >
-                          <span className={`bg-black/60 text-white rounded-full shadow-lg backdrop-blur-sm hover:bg-black/80 transition-all duration-300 ${gridCols >= 3 ? 'p-1' : 'p-2'}`}>
-                            <Maximize2 className={`${gridCols >= 3 ? 'w-2.5 h-2.5' : 'w-4 h-4'}`} />
+                          <span className="rounded-full bg-black/60 p-1 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:bg-black/80">
+                            <Maximize2 className="h-2.5 w-2.5" />
                           </span>
                         </button>
                       </div>
@@ -1370,7 +1203,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   );
                 })}
               </div>
-              ))}
+              )}
             </div>
             </React.Fragment>;
           });
