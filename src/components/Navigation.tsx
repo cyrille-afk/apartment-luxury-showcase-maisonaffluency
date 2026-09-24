@@ -963,15 +963,25 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="flex items-center justify-center gap-7 lg:gap-10 xl:gap-12 pt-2 pb-2 mb-5">
+          <nav className="mx-auto flex w-fit items-center justify-center gap-8 px-8 pt-2 pb-2 mb-5 lg:gap-10 lg:px-10 xl:gap-12 xl:px-12">
               <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
                   "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  isRouteActive("/new-in") && "text-foreground"
+                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
                 )}
               >
-                <span className="link-underline-grow">New Arrivals</span>
+                <span className="link-underline-grow">Interactive Gallery</span>
+              </button>
+
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
+                className={cn(
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
+                )}
+              >
+                <span className="link-underline-grow">Designers</span>
               </button>
 
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
@@ -1083,26 +1093,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   )}
                 </div>
               ))}
-
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
-                className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Designers</span>
-              </button>
-
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
-                className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Interactive Gallery</span>
-              </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
