@@ -996,7 +996,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="mega-menu-shop-by-room w-screen border-y border-border bg-background px-[60px] py-10"
+            className="mega-menu-shop-by-room w-screen bg-background px-[60px] py-10"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -1005,8 +1005,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="flex w-full items-start justify-start gap-12 overflow-visible">
-              <div className="grid min-w-0 flex-[0_1_720px] grid-cols-4 gap-8">
+            <div className="flex w-full items-start justify-start gap-12 overflow-visible bg-background">
+              <div className="grid min-w-0 flex-[0_1_720px] grid-cols-4 gap-8 bg-background">
                 {megaMenuTaxonomyColumns.map((column) => (
                   <div key={column.title} className="min-w-0">
                     <h3 className={megaMenuHeadingClass}>{column.title}</h3>
@@ -1042,15 +1042,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 ))}
               </div>
 
-              <div className="grid min-w-0 flex-[0_1_620px] grid-cols-4 gap-4 overflow-visible pb-6">
+              <div className="grid min-w-0 flex-[0_1_620px] grid-cols-4 gap-4 overflow-visible bg-background pb-6">
                 {megaMenuShowcaseCards.map((card) => (
                   <button
                     key={card.label}
                     type="button"
                     onClick={() => navigateFromMegaMenu(card.category)}
-                    className="group flex min-w-0 flex-col gap-3 pb-6 text-center"
+                    className="group flex min-w-0 flex-col gap-3 bg-background pb-6 text-center"
                   >
-                    <span className="aspect-[4/5] w-full overflow-hidden bg-muted">
+                    <span className="aspect-[4/5] w-full overflow-hidden bg-background">
                       <img
                         src={card.image}
                         alt=""
