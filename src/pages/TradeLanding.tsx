@@ -315,12 +315,14 @@ const HeroJoinForm = ({
           <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
         </button>
       </div>
-      <Turnstile
-        theme={ghost ? "dark" : "light"}
-        className="flex min-h-[65px] justify-center md:justify-start"
-        onVerify={setTurnstileToken}
-        onExpire={() => setTurnstileToken("")}
-      />
+      <div className="my-4 flex w-full justify-start">
+        <Turnstile
+          theme={ghost ? "dark" : "light"}
+          className="flex min-h-[65px] justify-start"
+          onVerify={setTurnstileToken}
+          onExpire={() => setTurnstileToken("")}
+        />
+      </div>
       <button
         type="submit"
         disabled={joinLoading || !turnstileToken}
@@ -329,7 +331,7 @@ const HeroJoinForm = ({
         {joinLoading ? "Submitting…" : "Submit Application"}
       </button>
       {joinError && <p className={cn("text-center font-body text-[11px] md:text-left", ghost ? "text-background" : "text-destructive")}>{joinError}</p>}
-      <p className={cn("text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-background/95" : "text-muted-foreground")}>
+      <p className={cn("mt-4 pt-1 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-background/95" : "text-muted-foreground")}>
         Already registered? <Link to="/trade/login" className={cn("underline underline-offset-2 transition-colors", ghost ? "text-background hover:text-background/80" : "text-foreground hover:text-foreground/80")}>Sign in</Link>
       </p>
     </form>
