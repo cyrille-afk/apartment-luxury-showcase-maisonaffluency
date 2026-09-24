@@ -603,6 +603,13 @@
       "when": 1790213362373,
       "tag": "0085_guest_inquiries_contact_capture",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1790213723389,
+      "tag": "0086_trade_accounts_radar",
+      "breakpoints": true
     }
   ]
 }
