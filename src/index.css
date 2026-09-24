@@ -2,30 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Instrument Serif';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Work Sans';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/WorkSans-Regular.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Work Sans';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/fonts/WorkSans-Medium.ttf') format('truetype');
-}
-
 /* Trade routes never mount or expose the third-party floating WhatsApp launcher.
    The data attribute is also applied to launchers injected after React mounts. */
 html.hide-whatsapp-widget #whatsapp-floating-widget,

@@ -40,66 +40,6 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-const megaMenuRooms = [
-  { label: "Living Room", slug: "living-room", image: cloudinaryUrl("living-room-hero_zxfcxl", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
-  { label: "Dining Room", slug: "dining-room", image: cloudinaryUrl("dining-room_ey0bu5", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
-  { label: "Bedroom", slug: "bedroom", image: cloudinaryUrl("bedroom-second_cyfmdj", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
-  { label: "Office", slug: "office", image: cloudinaryUrl("home-office-desk_g0ywv2", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
-] as const;
-
-type MegaMenuRoom = (typeof megaMenuRooms)[number];
-type ImagePriority = "high" | "auto" | "low";
-
-const megaMenuImageCache = new Map<string, Promise<boolean>>();
-
-function preloadMegaMenuImage(src: string, priority: ImagePriority = "low") {
-  const cached = megaMenuImageCache.get(src);
-  if (cached) return cached;
-
-  const promise = new Promise<boolean>((resolve) => {
-    if (typeof Image === "undefined") {
-      resolve(false);
-      return;
-    }
-
-    const image = new window.Image();
-    image.decoding = "async";
-    try {
-      (image as HTMLImageElement & { fetchPriority?: ImagePriority }).fetchPriority = priority;
-    } catch {
-      // Unsupported browsers still preload normally.
-    }
-    image.onload = () => {
-      if (typeof image.decode === "function") {
-        image.decode().then(() => resolve(true)).catch(() => resolve(true));
-      } else {
-        resolve(true);
-      }
-    };
-    image.onerror = () => resolve(false);
-    image.src = src;
-  });
-
-  megaMenuImageCache.set(src, promise);
-  void promise.then((loaded) => {
-    if (!loaded) megaMenuImageCache.delete(src);
-  });
-  return promise;
-}
-
-let megaMenuWarmupStarted = false;
-function warmMegaMenuImages() {
-  if (megaMenuWarmupStarted || typeof window === "undefined") return;
-  megaMenuWarmupStarted = true;
-
-  void preloadMegaMenuImage(megaMenuRooms[0].image, "high");
-  const warmRemaining = () => {
-    megaMenuRooms.slice(1).forEach((room) => void preloadMegaMenuImage(room.image, "low"));
-  };
-  if (window.requestIdleCallback) window.requestIdleCallback(warmRemaining, { timeout: 700 });
-  else window.setTimeout(warmRemaining, 120);
-}
-
 const leftNavItems = [{
   label: "Designers",
   mobileLabel: "Designers & Makers",
@@ -210,12 +150,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
-  const [activeMegaRoom, setActiveMegaRoom] = useState<MegaMenuRoom>(megaMenuRooms[0]);
-  const [loadedMegaRooms, setLoadedMegaRooms] = useState<Set<string>>(() => new Set());
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  const requestedMegaRoomRef = useRef<MegaMenuRoom["slug"]>(megaMenuRooms[0].slug);
   // featuredDoc removed — AD free-download flow discontinued.
 
   // ── Transparent floating header over the home hero ─────────────────────
@@ -367,36 +304,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     return () => document.removeEventListener('click', handleClick);
   }, [megaMenuOpen]);
 
-  useEffect(() => {
-    if (!megaMenuOpen) return;
-    let cancelled = false;
-    const markLoaded = (room: MegaMenuRoom) => (loaded: boolean) => {
-      if (!loaded || cancelled) return;
-      setLoadedMegaRooms((current) => {
-        if (current.has(room.slug)) return current;
-        const next = new Set(current);
-        next.add(room.slug);
-        return next;
-      });
-    };
-
-    void preloadMegaMenuImage(activeMegaRoom.image, "high").then(markLoaded(activeMegaRoom));
-    const preloadRemaining = () => {
-      megaMenuRooms.forEach((room) => {
-        void preloadMegaMenuImage(room.image, "low").then(markLoaded(room));
-      });
-    };
-    const idleId = window.requestIdleCallback
-      ? window.requestIdleCallback(preloadRemaining, { timeout: 700 })
-      : window.setTimeout(preloadRemaining, 120);
-
-    return () => {
-      cancelled = true;
-      if (window.requestIdleCallback) window.cancelIdleCallback(idleId);
-      else window.clearTimeout(idleId);
-    };
-  }, [megaMenuOpen]);
-
   // Sync mega-menu highlight when filter is cleared externally (e.g. ProductGrid "Clear Filter")
   useEffect(() => {
     const handleExternalClear = (e: CustomEvent) => {
@@ -536,34 +443,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     navigate(categoryUrl(category, subcategory));
   };
 
-  const activateMegaRoom = (room: MegaMenuRoom) => {
-    requestedMegaRoomRef.current = room.slug;
-    void preloadMegaMenuImage(room.image, "high").then((loaded) => {
-      if (!loaded || requestedMegaRoomRef.current !== room.slug) return;
-      setLoadedMegaRooms((current) => new Set(current).add(room.slug));
-      setActiveMegaRoom(room);
-    });
-  };
-
   const megaMenuLinkClass =
-    "mb-3 block w-full whitespace-nowrap text-left font-['Work_Sans'] text-[16px] leading-[1.35] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
+    "block w-full text-left text-xs leading-relaxed text-muted-foreground antialiased transition-colors hover:text-foreground";
 
   const megaMenuHeadingClass =
-    "mb-8 border-b border-border pb-4 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
+    "mb-4 border-b border-foreground pb-2 text-xs font-semibold uppercase tracking-widest text-foreground";
 
-  const megaMenuClusterHeadingClass =
-    "mb-4 font-['Work_Sans'] text-[9px] font-medium uppercase tracking-[0.1em] text-foreground/50 transition-colors duration-300 hover:text-foreground";
-
-  return <>
-    <div
-      aria-hidden="true"
-      onClick={() => setMegaMenuOpen(false)}
-      className={cn(
-        "fixed inset-0 z-40 bg-foreground/25 transition-opacity duration-300 ease-out",
-        megaMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-      )}
-    />
-    <nav className={cn(
+  return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       location.pathname === "/trade-program"
@@ -1028,8 +914,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-                onPointerEnter={warmMegaMenuImages}
-                onFocus={warmMegaMenuImages}
                 className={cn(
                   "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
                   (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
@@ -1098,115 +982,79 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-full border-t border-border bg-background shadow-[0_24px_60px_hsl(var(--foreground)/0.08)]"
+            className="w-full border-t border-border bg-background px-12 py-12"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
               @keyframes megaMenuReveal {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
+                from { opacity: 0; filter: blur(10px); transform: translateY(-10px); }
+                to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="relative h-[680px] w-full overflow-hidden bg-background">
-              <div className="grid h-full w-[66%] grid-cols-[1.2fr_4fr] gap-12 p-12">
-                  <section className="min-w-0 border-r border-border pr-12">
-                    <h3 className={megaMenuHeadingClass}>Shop by room</h3>
-                    <nav className="flex flex-col items-start gap-5" aria-label="Shop by room">
-                      {megaMenuRooms.map((room) => (
-                        <a
-                          key={room.slug}
-                          href={`/search?room=${room.slug}`}
-                          onMouseEnter={() => activateMegaRoom(room)}
-                          onFocus={() => activateMegaRoom(room)}
-                          onClick={() => setMegaMenuOpen(false)}
-                          className={cn(
-                            "relative py-1 font-['Work_Sans'] text-[21px] font-light not-italic leading-[1.5] tracking-[0.06em] antialiased transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
-                            activeMegaRoom.slug === room.slug
-                              ? "text-foreground after:w-8"
-                              : "text-muted-foreground after:w-0 hover:text-foreground"
-                          )}
-                        >
-                          {room.label}
-                        </a>
-                      ))}
-                    </nav>
-                  </section>
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-3 items-start gap-16">
+              <div className="min-w-0">
+                <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
+                <ul className="space-y-3">
+                  <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
+                  <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
+                  <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
+                  <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
+                </ul>
+              </div>
 
-                  <div className="flex min-w-0 flex-col">
-                    <div className="grid w-full grid-cols-4 justify-between gap-10">
-                      <section className="min-w-0">
-                        <h3 className={megaMenuHeadingClass}>Furniture</h3>
-                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
-                        <ul>
-                          {SUBCATEGORY_MAP.Seating?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Seating", subcategory)}>{subcategory}</button></li>
-                          ))}
-                        </ul>
-                      </section>
-
-                      <section className="min-w-0">
-                        <h3 className={megaMenuHeadingClass}>Tables &amp; Storage</h3>
-                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Tables")}>Tables &amp; Casegoods</button>
-                        <ul>
-                          {SUBCATEGORY_MAP.Tables?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", subcategory)}>{subcategory}</button></li>
-                          ))}
-                          {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
-                          ))}
-                        </ul>
-                      </section>
-
-                      <section className="min-w-0">
-                        <h3 className={megaMenuHeadingClass}>Lighting</h3>
-                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Lighting")}>Illumination</button>
-                        <ul>
-                          {SUBCATEGORY_MAP.Lighting?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Lighting", subcategory)}>{subcategory}</button></li>
-                          ))}
-                        </ul>
-                      </section>
-
-                      <section className="min-w-0">
-                        <h3 className={megaMenuHeadingClass}>Decor &amp; Objects</h3>
-                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Décor")}>Objet d&apos;Art</button>
-                        <ul>
-                          {SUBCATEGORY_MAP.Rugs?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Rugs", subcategory)}>{subcategory}</button></li>
-                          ))}
-                          {SUBCATEGORY_MAP.Décor?.map((subcategory) => (
-                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Décor", subcategory)}>{subcategory}</button></li>
-                          ))}
-                        </ul>
-                      </section>
-                    </div>
-
-                    <div className="mt-auto flex items-center justify-between border-t border-border pt-6">
-                      <button onClick={() => { setMegaMenuOpen(false); navigate("/new-in"); }} className="group flex items-center font-body text-[9px] uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground">
-                        Explore full collection
-                        <span className="ml-4 h-px w-10 bg-border transition-all duration-500 group-hover:w-16 group-hover:bg-foreground" />
+              <div className="min-w-0">
+                <h3 className={megaMenuHeadingClass}>Furniture</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { heading: "Seating", category: "Seating" },
+                    { heading: "Tables", category: "Tables" },
+                    { heading: "Storage", category: "Storage" },
+                  ].map(({ heading, category }) => (
+                    <div key={category} className="min-w-0">
+                      <button
+                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+                        onClick={() => navigateFromMegaMenu(category)}
+                      >
+                        {heading}
                       </button>
-                      <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency · Est. 2017</span>
+                      <ul className="space-y-2">
+                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                          <li key={subcategory}>
+                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
+                              {subcategory}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                </div>
-
-              <aside className="absolute inset-y-0 right-0 h-full w-[34%] border-l border-border bg-muted">
-                <div className="absolute inset-0 overflow-hidden bg-muted">
-                  {megaMenuRooms.map((room) => (
-                    <img
-                      key={room.slug}
-                      src={activeMegaRoom.slug === room.slug || loadedMegaRooms.has(room.slug) ? room.image : undefined}
-                      alt={`${room.label} interior`}
-                      decoding="async"
-                      className={cn(
-                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out motion-reduce:transition-none",
-                        activeMegaRoom.slug === room.slug ? "opacity-100" : "opacity-0"
-                      )}
-                    />
                   ))}
                 </div>
-              </aside>
+              </div>
+
+              <div className="min-w-0">
+                <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {["Lighting", "Rugs", "Décor"].map((category) => (
+                    <div key={category} className="min-w-0">
+                      <button
+                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+                        onClick={() => navigateFromMegaMenu(category)}
+                      >
+                        {category}
+                      </button>
+                      <ul className="space-y-2">
+                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                          <li key={subcategory}>
+                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
+                              {subcategory}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
           </div>
