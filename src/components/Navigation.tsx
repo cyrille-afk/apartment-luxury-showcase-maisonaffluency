@@ -554,7 +554,16 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const megaMenuClusterHeadingClass =
     "mb-3 font-['Work_Sans'] text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground";
 
-  return <><nav className={cn(
+  return <>
+    <div
+      aria-hidden="true"
+      onClick={() => setMegaMenuOpen(false)}
+      className={cn(
+        "fixed inset-0 z-40 bg-foreground/25 transition-opacity duration-300 ease-out",
+        megaMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+      )}
+    />
+    <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       location.pathname === "/trade-program"
@@ -1094,8 +1103,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           >
             <style>{`
               @keyframes megaMenuReveal {
-                from { opacity: 0; filter: blur(10px); transform: translateY(-10px); }
-                to { opacity: 1; filter: blur(0); transform: translateY(0); }
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
             <div className="mx-auto flex h-[460px] w-full max-w-7xl overflow-hidden border-x border-border bg-background">
@@ -1112,7 +1121,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           onFocus={() => activateMegaRoom(room)}
                           onClick={() => setMegaMenuOpen(false)}
                           className={cn(
-                            "relative py-1 font-['Instrument_Serif'] text-[27px] leading-[1.22] transition-colors duration-300 after:absolute after:bottom-1 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
+                            "relative py-1.5 font-['Instrument_Serif'] text-[27px] font-normal leading-[1.22] tracking-[0.03em] transition-colors duration-300 after:absolute after:bottom-1 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
                             activeMegaRoom.slug === room.slug
                               ? "text-foreground after:w-8"
                               : "text-muted-foreground after:w-0 hover:text-foreground"
