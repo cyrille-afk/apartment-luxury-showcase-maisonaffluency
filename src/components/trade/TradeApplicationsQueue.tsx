@@ -116,7 +116,7 @@ export default function TradeApplicationsQueue() {
       qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] }),
     ]);
     toast.success("Trade application permanently deleted.");
-    navigate("/admin/trade-applications", { replace: true });
+    navigate("/trade/admin/trade-applications", { replace: true });
   };
 
   return (
