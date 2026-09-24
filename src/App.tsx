@@ -366,6 +366,36 @@ function RouteScrollLockFailsafe() {
   const location = useLocation();
 
   useLayoutEffect(() => {
+    const isTradeRoute = location.pathname.includes("/trade");
+    document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
+
+    const markFloatingWhatsAppWidgets = () => {
+      if (!isTradeRoute) return;
+
+      const candidates = document.querySelectorAll<HTMLElement>(
+        '#whatsapp-floating-widget, [id*="whatsapp-widget" i], [class*="whatsapp-widget" i], [data-widget*="whatsapp" i], a[href*="wa.me" i], a[href*="api.whatsapp.com" i], iframe[src*="whatsapp" i]'
+      );
+
+      candidates.forEach((candidate) => {
+        let element: HTMLElement | null = candidate;
+        while (element && element !== document.body) {
+          const style = window.getComputedStyle(element);
+          if (style.position === "fixed") {
+            element.setAttribute("data-trade-floating-whatsapp", "hidden");
+            break;
+          }
+          element = element.parentElement;
+        }
+      });
+    };
+
+    markFloatingWhatsAppWidgets();
+    const whatsappWidgetObserver = new MutationObserver(markFloatingWhatsAppWidgets);
+    if (isTradeRoute) {
+      whatsappWidgetObserver.observe(document.body, { childList: true, subtree: true });
+      window.addEventListener("resize", markFloatingWhatsAppWidgets);
+    }
+
     const isPublicProductDetail = /^\/designers\/[^/]+\/[^/]+\/?$/.test(location.pathname);
     const isProductDetail =
       isPublicProductDetail ||
@@ -385,6 +415,11 @@ function RouteScrollLockFailsafe() {
       clearDarkIosChrome();
     }
     return () => {
+      whatsappWidgetObserver.disconnect();
+      window.removeEventListener("resize", markFloatingWhatsAppWidgets);
+      document.querySelectorAll('[data-trade-floating-whatsapp="hidden"]').forEach((element) => {
+        element.removeAttribute("data-trade-floating-whatsapp");
+      });
       document.documentElement.classList.remove("product-detail-root");
       document.documentElement.classList.remove("public-product-canvas");
     };
