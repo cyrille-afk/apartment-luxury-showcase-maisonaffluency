@@ -27,7 +27,7 @@ export function trackDownload(documentId?: string, label?: string) {
           .maybeSingle();
         if (app?.country) country = app.country;
       } catch {
-        // If trade_applications lookup fails, continue without country
+        // If trade_accounts lookup fails, continue without country
       }
 
       const { error } = await supabase.from("document_downloads").insert({

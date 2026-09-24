@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-/* Extracted from TradeLanding — FAQ column shared by the /trade/apply page. */
+/* Extracted from TradeLanding — FAQ column shared by the /trade-program page. */
 const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 

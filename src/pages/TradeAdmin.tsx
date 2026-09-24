@@ -310,7 +310,7 @@ const TradeAdmin = () => {
           templateData: {
             firstName: checklistPreview.firstName,
             items: checklistPreview.items,
-            editUrl: `${window.location.origin}/trade/apply/complete/preview-token`,
+            editUrl: `${window.location.origin}/trade-program`,
           },
         },
       });
