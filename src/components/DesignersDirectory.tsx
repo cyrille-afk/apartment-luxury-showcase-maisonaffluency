@@ -483,7 +483,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
             <span className="font-body text-xs text-muted-foreground/50">Loading…</span>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2 md:gap-3">
             {designers.map((d) => {
               const hasIg = designersWithIgPosts.has(d.id);
               const igUrl = hasIg ? undefined : (d.instagramUrl || INSTAGRAM_LINKS[d.slug]);
@@ -493,9 +493,9 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                   to={`/designers/${d.slug}`}
                   className="group/sub rounded-none overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
                 >
-                  <div className="aspect-square relative bg-muted/10 overflow-hidden">
+                  <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
-                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" })} alt={d.name} className="w-full h-full object-cover object-center transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
+                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover object-center transition-transform duration-500 group-hover/sub:scale-110" loading="lazy" decoding="async" fetchPriority="low" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
@@ -586,10 +586,10 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts, pr
   }, [isOpen]);
 
   return (
-    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-1 group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
-      <div className="relative overflow-hidden aspect-square group">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-1 md:col-span-2 group self-stretch rounded-none overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+      <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-[400px] group">
         {cardImageUrl ? (
-          <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" })} alt={item.name} draggable={false} className="w-full h-full object-cover object-center scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
+          <img {...cldResponsiveImg(cardImageUrl, { widths: [480, 720, 960, 1280], sizes: "(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 720px" })} alt={item.name} draggable={false} className="w-full h-full object-cover object-center scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
@@ -665,7 +665,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
     >
 
 
-      <div className="relative overflow-hidden aspect-square group bg-muted/20">
+      <div className="relative overflow-hidden aspect-[4/5] md:aspect-auto md:h-[400px] group bg-muted/20">
         {cardImageUrl ? (
           <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover object-center scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : "low"} />
 
