@@ -144,9 +144,9 @@ function EditableBlock({ title, values, onChange, placeholder, suggestions, onPi
       <h4 className="font-body text-[10px] font-semibold uppercase tracking-[0.24em] text-foreground">{title}</h4>
       <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         {values.map((value, index) => (
-          <span key={`${value}-${index}`} className="inline-flex items-center gap-1.5 border border-border bg-background py-1 pl-2.5 pr-1.5 font-body text-[11px] text-foreground">
+          <span key={`${value}-${index}`} className={chipClass(kind, true)}>
             {value}
-            <button type="button" aria-label={`Remove ${value}`} onClick={() => onChange(values.filter((_, i) => i !== index))} className="text-muted-foreground hover:text-destructive">
+            <button type="button" aria-label={`Remove ${value}`} onClick={() => onChange(values.filter((_, i) => i !== index))} className={chipCloseClass(kind)}>
               <X className="h-3 w-3" />
             </button>
           </span>
@@ -282,14 +282,14 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
           {editing ? (
             <>
               <EditableBlock title="Design Dialect" placeholder="Tag" values={draft.tones} onChange={(tones) => setDraft((d) => ({ ...d, tones }))} />
-              <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} suggestions={catalog} onPick={persistAffinities} />
-              <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} suggestions={materialCatalog} onPick={persistMaterials} />
+              <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} suggestions={catalog} onPick={persistAffinities} kind="affinity" />
+              <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} suggestions={materialCatalog} onPick={persistMaterials} kind="material" />
             </>
           ) : (
             <>
               <InsightBlock title="Design Dialect" values={dialect} />
-              <InsightBlock title="Historical Affinities" values={affinities} />
-              <InsightBlock title="Materiality Profile" values={materials} />
+              <InsightBlock title="Historical Affinities" values={affinities} kind="affinity" />
+              <InsightBlock title="Materiality Profile" values={materials} kind="material" />
             </>
           )}
 
