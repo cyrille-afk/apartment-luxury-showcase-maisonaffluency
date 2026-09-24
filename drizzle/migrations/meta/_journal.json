@@ -554,6 +554,13 @@
       "when": 1790071383246,
       "tag": "0078_designer_brand_names_public_view",
       "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1790210417645,
+      "tag": "0079_trade_signups_portfolio_reference",
+      "breakpoints": true
     }
   ]
 }

@@ -42,6 +42,13 @@ Deno.serve(async (req) => {
     return json({ error: 'A valid work email is required' }, 400)
   }
   if (step !== 1 && step !== 2 && step !== 3) return json({ error: 'Invalid step' }, 400)
+  if (
+    step === 2 && websiteUrl &&
+    !/^@[A-Za-z0-9._]{1,30}$/.test(websiteUrl) &&
+    !/^(https?:\/\/)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(\/\S*)?$/.test(websiteUrl)
+  ) {
+    return json({ error: 'Enter a website or an Instagram handle starting with @' }, 400)
+  }
 
   const supabase = createClient(supabaseUrl, serviceKey)
 
@@ -55,6 +62,7 @@ Deno.serve(async (req) => {
   if (step === 2) {
     payload.company_name = companyName
     payload.website_url = websiteUrl
+    payload.portfolio_reference = websiteUrl
   }
   if (step === 3) {
     payload.business_reg_number = businessRegNumber
@@ -165,7 +173,7 @@ Deno.serve(async (req) => {
   if (step === 3 && signupId) {
     const { data: row } = await supabase
       .from('trade_program_signups')
-      .select('company_name, website_url, business_reg_number, credential_document_path')
+      .select('company_name, website_url, portfolio_reference, business_reg_number, credential_document_path')
       .eq('id', signupId)
       .maybeSingle()
     const clean = (v?: string | null) => (v ?? '').replace(/\s+/g, ' ').trim()
@@ -175,7 +183,7 @@ Deno.serve(async (req) => {
       '',
       `• *Studio:* ${studio}`,
       `• *Email:* ${email}`,
-      `• *Website:* ${clean(row?.website_url) || '—'}`,
+      `• *Website / IG:* ${clean(row?.portfolio_reference ?? row?.website_url) || '—'}`,
       `• *Reg. No:* ${clean(row?.business_reg_number) || '—'}`,
       `• *Document:* ${row?.credential_document_path ? 'uploaded' : 'none'}`,
       ...(existing ? ['• *Returning applicant*'] : []),
@@ -214,7 +222,7 @@ Deno.serve(async (req) => {
             email,
             phone: '',
             subject: 'New Trade Account Request',
-            message: `Trade Program application completed.\nStudio: ${studio}\nWebsite: ${clean(row?.website_url) || '—'}\nRegistration No: ${clean(row?.business_reg_number) || '—'}\nCredential document: ${row?.credential_document_path ? 'uploaded' : 'none'}`,
+            message: `Trade Program application completed.\nStudio: ${studio}\nWebsite / IG: ${clean(row?.portfolio_reference ?? row?.website_url) || '—'}\nRegistration No: ${clean(row?.business_reg_number) || '—'}\nCredential document: ${row?.credential_document_path ? 'uploaded' : 'none'}`,
           },
         },
       })

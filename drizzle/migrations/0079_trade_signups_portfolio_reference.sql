@@ -1,0 +1,2 @@
+ALTER TABLE public.trade_program_signups ADD COLUMN IF NOT EXISTS portfolio_reference text;
+UPDATE public.trade_program_signups SET portfolio_reference = website_url WHERE portfolio_reference IS NULL AND website_url IS NOT NULL;

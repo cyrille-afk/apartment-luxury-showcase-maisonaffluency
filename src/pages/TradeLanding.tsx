@@ -311,8 +311,8 @@ const HeroJoinForm = ({
               <input id="company" name="company" required placeholder="Studio name" className={inputCls} />
             </div>
             <div>
-              <label htmlFor="website" className={labelCls}>Website or Portfolio Link</label>
-              <input id="website" name="website" placeholder="www.yourstudio.com" className={inputCls} />
+              <label htmlFor="website" className={labelCls}>Website or Instagram Handle</label>
+              <input id="website" name="website" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
             </div>
             <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
               {joinLoading ? "Saving…" : "Continue"}
@@ -467,6 +467,13 @@ const TradeLanding = () => {
     const formData = new FormData(e.currentTarget);
     const companyName = ((formData.get("company") as string) || "").trim();
     const websiteUrl = ((formData.get("website") as string) || "").trim();
+    // Accept a domain/URL (e.g. yourwebsite.com, https://www.site.co/page) or an @handle.
+    const IG_RE = /^@[A-Za-z0-9._]{1,30}$/;
+    const DOMAIN_RE = /^(https?:\/\/)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(\/\S*)?$/;
+    if (websiteUrl && !IG_RE.test(websiteUrl) && !DOMAIN_RE.test(websiteUrl)) {
+      setJoinError("Enter a website (e.g., yourwebsite.com) or an Instagram handle starting with @.");
+      return;
+    }
     setJoinLoading(true);
     setJoinError(null);
     const { error } = await supabase.functions.invoke("trade-program-signup", {
