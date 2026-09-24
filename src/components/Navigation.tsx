@@ -40,19 +40,48 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-const megaMenuShowcaseCards = [
-  { label: "Seating", category: "Seating", image: cloudinaryUrl("bespoke-sofa_gxidtx", { width: 480, quality: "auto:good", crop: "fill" }) },
-  { label: "Tables", category: "Tables", image: cloudinaryUrl("intimate-table-detail_aqxvvm", { width: 480, quality: "auto:good", crop: "fill" }) },
-  { label: "Storage", category: "Storage", image: cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 480, quality: "auto:good", crop: "fill" }) },
-  { label: "Lighting", category: "Lighting", image: cloudinaryUrl("details-lamp_clzcrk", { width: 480, quality: "auto:good", crop: "fill" }) },
-] as const;
+type RoomNavKey = "living" | "dining" | "bedroom" | "office";
 
-const megaMenuTaxonomyColumns = [
-  { title: "Furniture", categories: ["Seating", "Bedroom"] },
-  { title: "Tables & Storage", categories: ["Tables", "Storage"] },
-  { title: "Lighting", categories: ["Lighting"] },
-  { title: "Decor & Objects", categories: ["Rugs", "Décor"] },
-] as const;
+interface RoomNavCategory {
+  label: string;
+  category: string;
+  subcategories: string[];
+}
+
+const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
+  living: [
+    { label: "Seating", category: "Seating", subcategories: ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools"] },
+    { label: "Tables", category: "Tables", subcategories: ["Coffee Tables", "Side Tables", "Consoles"] },
+    { label: "Storage", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bookcases", "Bars"] },
+    { label: "Lighting", category: "Lighting", subcategories: ["Floor Lights", "Table Lights", "Wall Lights", "Ceiling Lights"] },
+    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
+    { label: "Décor", category: "Décor", subcategories: ["Mirrors", "Decorative Objects", "Cushions & Throws", "Vases & Vessels"] },
+  ],
+  dining: [
+    { label: "Dining Tables", category: "Tables", subcategories: ["Dining Tables"] },
+    { label: "Dining Seating", category: "Seating", subcategories: ["Chairs", "Ottomans & Stools"] },
+    { label: "Sideboards & Bars", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bars"] },
+    { label: "Lighting", category: "Lighting", subcategories: ["Ceiling Lights", "Wall Lights", "Table Lights"] },
+    { label: "Tableware", category: "Décor", subcategories: ["Tableware & Linens", "Candle Holders", "Vases & Vessels"] },
+    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
+  ],
+  bedroom: [
+    { label: "Beds", category: "Bedroom", subcategories: ["Beds", "Bedding", "Sofa-Beds"] },
+    { label: "Bedside Tables", category: "Bedroom", subcategories: ["Bedside Tables"] },
+    { label: "Bedroom Seating", category: "Seating", subcategories: ["Armchairs", "Daybeds & Benches", "Ottomans & Stools"] },
+    { label: "Storage", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bookcases"] },
+    { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Wall Lights", "Floor Lights"] },
+    { label: "Textiles & Décor", category: "Décor", subcategories: ["Cushions & Throws", "Mirrors", "Decorative Objects"] },
+  ],
+  office: [
+    { label: "Desks", category: "Tables", subcategories: ["Desks", "Consoles"] },
+    { label: "Office Seating", category: "Seating", subcategories: ["Chairs", "Armchairs", "Ottomans & Stools"] },
+    { label: "Bookcases", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
+    { label: "Task Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights", "Wall Lights"] },
+    { label: "Desk Objects", category: "Décor", subcategories: ["Desk Accessories", "Boxes", "Decorative Objects"] },
+    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
+  ],
+};
 
 const leftNavItems = [{
   label: "Designers",
@@ -163,10 +192,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
-  const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
+  const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
+  const [activeRoomCategory, setActiveRoomCategory] = useState(0);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  const roomMenuCloseTimer = useRef<number | null>(null);
   // featuredDoc removed — AD free-download flow discontinued.
 
   // ── Transparent floating header over the home hero ─────────────────────
@@ -457,11 +488,24 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     navigate(categoryUrl(category, subcategory));
   };
 
-  const megaMenuLinkClass =
-    "block w-full text-left font-sans text-[0.9rem] leading-relaxed text-foreground antialiased transition-opacity duration-200 hover:opacity-50";
+  const openRoomMenu = (room: RoomNavKey) => {
+    if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
+    if (activeRoomMenu !== room) setActiveRoomCategory(0);
+    setActiveRoomMenu(room);
+    setMegaMenuOpen(true);
+  };
 
-  const megaMenuHeadingClass =
-    "mb-4 font-sans text-xs font-normal uppercase tracking-[0.1em] text-muted-foreground";
+  const scheduleRoomMenuClose = () => {
+    if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
+    roomMenuCloseTimer.current = window.setTimeout(() => {
+      setMegaMenuOpen(false);
+      setActiveRoomMenu(null);
+    }, 140);
+  };
+
+  const keepRoomMenuOpen = () => {
+    if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
+  };
 
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
@@ -473,7 +517,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         : "bg-[#FAFAFA] border-b border-border/30 md:bg-white md:border-b md:border-zinc-100"
     )}>
 
-      <div className="mx-auto w-full max-w-[1380px] px-6">
+      <div className="mx-auto w-full max-w-[1500px] px-6">
         {/* Mobile: single row */}
         <div className="relative flex h-20 xsp:h-24 items-center justify-between md:hidden">
           <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
@@ -915,7 +959,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="flex items-center justify-center flex-wrap gap-12 lg:gap-16 pt-2 pb-2 mb-5">
+          <nav className="flex items-center justify-center gap-7 lg:gap-10 xl:gap-12 pt-2 pb-2 mb-5">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className={cn(
@@ -926,16 +970,24 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 <span className="link-underline-grow">New In</span>
               </button>
 
-              <button
-                onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-                className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
-                  (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Categories</span>
-                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
-              </button>
+              {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
+                <Button
+                  key={room}
+                  type="button"
+                  variant="ghost"
+                  onMouseEnter={() => openRoomMenu(room)}
+                  onMouseLeave={scheduleRoomMenuClose}
+                  onFocus={() => openRoomMenu(room)}
+                  onClick={() => openRoomMenu(room)}
+                  aria-expanded={megaMenuOpen && activeRoomMenu === room}
+                  className={cn(
+                    "group relative h-auto rounded-none p-0 font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
+                    megaMenuOpen && activeRoomMenu === room && "text-foreground"
+                  )}
+                >
+                  <span className="link-underline-grow">{room}</span>
+                </Button>
+              ))}
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
@@ -992,80 +1044,66 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         </div>
 
 
-        {/* Horizontal mega menu */}
-        {megaMenuOpen && (
+        {/* Room-first two-column drill-down */}
+        {megaMenuOpen && activeRoomMenu && (
           <div
             ref={megaMenuRef}
-            className="mega-menu-shop-by-room relative w-screen ml-[calc(50%-50vw)] bg-white px-[60px] py-10 [&_*]:!bg-transparent"
-            style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+            onMouseEnter={keepRoomMenuOpen}
+            onMouseLeave={scheduleRoomMenuClose}
+            className="absolute left-1/2 top-full w-[min(620px,calc(100vw-48px))] -translate-x-1/2 bg-background shadow-xl"
+            style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
               @keyframes megaMenuReveal {
-                from { opacity: 0; filter: blur(10px); transform: translateY(-10px); }
-                to { opacity: 1; filter: blur(0); transform: translateY(0); }
+                from { opacity: 0; transform: translateY(-6px); }
+                to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
-            <div className="flex w-full items-start justify-start gap-12 overflow-visible bg-background">
-              <div className="grid min-w-0 flex-[0_1_720px] grid-cols-4 gap-8 bg-background">
-                {megaMenuTaxonomyColumns.map((column) => (
-                  <div key={column.title} className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}>{column.title}</h3>
-                    <div className="space-y-5">
-                      {column.categories.map((category) => (
-                        <div key={category}>
-                          {column.categories.length > 1 && (
-                            <button
-                              type="button"
-                              className="mb-2.5 block w-full text-left font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground transition-opacity hover:opacity-50"
-                              onClick={() => navigateFromMegaMenu(category)}
-                            >
-                              {category}
-                            </button>
-                          )}
-                          <ul className="space-y-2.5">
-                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                              <li key={subcategory}>
-                                <button
-                                  type="button"
-                                  className={megaMenuLinkClass}
-                                  onClick={() => navigateFromMegaMenu(category, subcategory)}
-                                >
-                                  {subcategory}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+            <div className="grid grid-cols-2 px-9 py-8">
+              <div className="border-r border-border/60 pr-8">
+                <p className="mb-5 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                  {activeRoomMenu}
+                </p>
+                <div>
+                  {roomNavigation[activeRoomMenu].map((item, index) => (
+                    <Button
+                      key={item.label}
+                      type="button"
+                      variant="ghost"
+                      onMouseEnter={() => setActiveRoomCategory(index)}
+                      onFocus={() => setActiveRoomCategory(index)}
+                      onClick={() => navigateFromMegaMenu(item.category)}
+                      className={cn(
+                        "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                        activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      {item.label}
+                      <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
+                    </Button>
+                  ))}
+                </div>
               </div>
 
-              <div className="grid min-w-0 flex-[0_1_620px] grid-cols-4 gap-4 overflow-visible bg-background pb-6">
-                {megaMenuShowcaseCards.map((card) => (
-                  <button
-                    key={card.label}
-                    type="button"
-                    onClick={() => navigateFromMegaMenu(card.category)}
-                    className="group flex min-w-0 flex-col gap-3 bg-background pb-6 text-center"
-                  >
-                    <span className="aspect-[4/5] w-full overflow-hidden bg-background">
-                      <img
-                        src={card.image}
-                        alt=""
-                        width={480}
-                        height={600}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.03]"
-                      />
-                    </span>
-                    <span className="font-sans text-[0.8rem] text-foreground">{card.label}</span>
-                  </button>
-                ))}
+              <div className="pl-8">
+                <p className="mb-5 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+                  {roomNavigation[activeRoomMenu][activeRoomCategory]?.label}
+                </p>
+                <div>
+                  {roomNavigation[activeRoomMenu][activeRoomCategory]?.subcategories.map((subcategory) => (
+                    <Button
+                      key={subcategory}
+                      type="button"
+                      variant="ghost"
+                      onClick={() => navigateFromMegaMenu(roomNavigation[activeRoomMenu][activeRoomCategory].category, subcategory)}
+                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    >
+                      {subcategory}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
-
           </div>
         )}
       </div>
