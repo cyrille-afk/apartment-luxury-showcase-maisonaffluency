@@ -76,6 +76,7 @@ export default {
         "chip-material": "hsl(var(--chip-material))",
         "chip-material-foreground": "hsl(var(--chip-material-foreground))",
         "chip-material-border": "hsl(var(--chip-material-border))",
+        "suggestion-material": "hsl(var(--suggestion-material))",
         whatsapp: "hsl(var(--whatsapp))",
         "pdf-red": "hsl(var(--pdf-red))",
         success: "hsl(var(--success))",
