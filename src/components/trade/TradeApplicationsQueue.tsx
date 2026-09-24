@@ -80,6 +80,7 @@ export default function TradeApplicationsQueue() {
     if (error) return toast.error("Could not update the application.");
     toast.success(`${a.studio_name ?? a.email} — ${STATUS_LABEL[status]}`);
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
+    qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] });
   };
 
   const rerun = async (a: Account) => {
