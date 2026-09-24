@@ -9305,6 +9305,7 @@ export type Database = {
           email: string
           id: string
           invite_email_sent_at: string | null
+          portfolio_reference: string | null
           referrer: string | null
           source: string
           step: number
@@ -9320,6 +9321,7 @@ export type Database = {
           email: string
           id?: string
           invite_email_sent_at?: string | null
+          portfolio_reference?: string | null
           referrer?: string | null
           source?: string
           step?: number
@@ -9335,6 +9337,7 @@ export type Database = {
           email?: string
           id?: string
           invite_email_sent_at?: string | null
+          portfolio_reference?: string | null
           referrer?: string | null
           source?: string
           step?: number
