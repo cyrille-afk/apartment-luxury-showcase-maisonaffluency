@@ -44,9 +44,8 @@ function ShowroomLegacyRedirect() {
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
+import LegacyTradeSignupRedirect from "./components/trade/LegacyTradeSignupRedirect";
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
-const TradeApply = lazy(() => import("./pages/TradeApply"));
-const TradeProcessing = lazy(() => import("./pages/TradeProcessing"));
 const TradeActivate = lazy(() => import("./pages/TradeActivate"));
 const TradeClientDashboard = lazy(() => import("./pages/TradeClientDashboard"));
 const TradeOnboarding = lazy(() => import("./pages/TradeOnboarding"));
@@ -55,9 +54,7 @@ const Studios = lazy(() => import("./pages/Studios"));
 const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
 const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const StudioInsights = lazy(() => import("./pages/StudioInsights"));
-const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const CollectorSignup = lazy(() => import("./pages/CollectorSignup"));
-const TradeApplicationEdit = lazy(() => import("./pages/TradeApplicationEdit"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeMobileLaunch = lazy(() => import("./pages/TradeMobileLaunch"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
@@ -66,7 +63,6 @@ const TradeGuidesAnalytics = lazy(() => import("./pages/TradeGuidesAnalytics"));
 const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
-const AdminTradeReview = lazy(() => import("./pages/AdminTradeReview"));
 const TradeAdminTools = lazy(() => import("./pages/TradeAdminTools"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
 const TradeConciergeUsage = lazy(() => import("./pages/TradeConciergeUsage"));
@@ -695,16 +691,16 @@ const App = () => {
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
-                  <Route path="/trade/apply" element={<Suspense fallback={null}><TradeApply /></Suspense>} />
-                  <Route path="/trade/processing" element={<Suspense fallback={null}><TradeProcessing /></Suspense>} />
+                  <Route path="/trade/apply" element={<LegacyTradeSignupRedirect />} />
+                  <Route path="/trade/processing" element={<LegacyTradeSignupRedirect />} />
                   <Route path="/trade/activate" element={<Suspense fallback={null}><TradeActivate /></Suspense>} />
                   <Route path="/trade-dashboard" element={<Suspense fallback={null}><TradeClientDashboard /></Suspense>} />
                   <Route path="/trade-onboarding" element={<Suspense fallback={null}><TradeOnboarding /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
-                  <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
+                  <Route path="/trade/register" element={<LegacyTradeSignupRedirect />} />
                   <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />
                   <Route path="/cn" element={<Suspense fallback={null}><PortalCN /></Suspense>} />
-                  <Route path="/trade/apply/complete/:token" element={<Suspense fallback={null}><TradeApplicationEdit /></Suspense>} />
+                  <Route path="/trade/apply/complete/:token" element={<LegacyTradeSignupRedirect />} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>} />
                   <Route path="/products/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal={false} /></Suspense>} />
@@ -751,7 +747,7 @@ const App = () => {
                   <Route path="/trade/spec-sheet" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSpecSheet /></Suspense>} />
                   <Route path="/trade/launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
                   <Route path="/trade/mobile-launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
-                  <Route path="/admin/trade-review" element={<Suspense fallback={<PageLoadingSkeleton />}><AdminTradeReview /></Suspense>} />
+                  <Route path="/admin/trade-review" element={<Navigate to="/trade/admin/trade-applications" replace />} />
                   <Route path="/admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
                   <Route path="/admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                   <Route path="/admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
@@ -764,7 +760,7 @@ const App = () => {
                     <Route index element={<TradeDashboard />} />
                     <Route path="dashboard" element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
-                    <Route path="admin/trade-review" element={<Suspense fallback={<PageLoadingSkeleton />}><AdminTradeReview /></Suspense>} />
+                    <Route path="admin/trade-review" element={<Navigate to="/trade/admin/trade-applications" replace />} />
                     <Route path="admin/tools" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminTools /></Suspense>} />
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
