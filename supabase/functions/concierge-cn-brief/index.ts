@@ -191,7 +191,7 @@ ${transcript}`;
 
   if (insertErr) {
     console.error("cn-brief insert failed", insertErr);
-    return new Response(JSON.stringify({ error: "insert_failed", detail: insertErr.message }), {
+    return new Response(JSON.stringify({ error: "insert_failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
