@@ -123,6 +123,9 @@ export type Database = {
       }
       acquisition_leads: {
         Row: {
+          activation_token_expires_at: string | null
+          activation_token_hash: string | null
+          activation_token_used_at: string | null
           aesthetic_profile: string | null
           aesthetic_score: number | null
           business_email: string
@@ -158,6 +161,9 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          activation_token_expires_at?: string | null
+          activation_token_hash?: string | null
+          activation_token_used_at?: string | null
           aesthetic_profile?: string | null
           aesthetic_score?: number | null
           business_email: string
@@ -193,6 +199,9 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          activation_token_expires_at?: string | null
+          activation_token_hash?: string | null
+          activation_token_used_at?: string | null
           aesthetic_profile?: string | null
           aesthetic_score?: number | null
           business_email?: string
