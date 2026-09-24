@@ -84,7 +84,7 @@ type Scope = {
 const SCOPES: Scope[] = [
   { table: "profiles", by: "user_id", column: "id", mode: "anonymise", scrub: { email: null, first_name: "Erased", last_name: "Erased", phone: null } },
   { table: "trade_applications", by: "user_id", mode: "anonymise", scrub: { company_website: null, instagram_handle: null, tax_vat_id: null, certification_details: null } },
-  { table: "trade_accounts", by: "user_id", mode: "anonymise", scrub: { email: null, contact_name: null, phone_number: null, website_or_ig: null, instagram_handle: null, tax_vat_id: null, business_reg_number: null, admin_notes: null } },
+  { table: "trade_accounts", by: "user_id", mode: "anonymise", scrub: { email: "erased@erased.invalid", contact_name: null, phone_number: null, website_or_ig: null, instagram_handle: null, tax_vat_id: null, business_reg_number: null, admin_notes: null } },
   { table: "inquiries", by: "email", mode: "delete" },
   { table: "custom_inquiries", by: "email", mode: "delete" },
   { table: "abandoned_carts", by: "email", mode: "delete" },
