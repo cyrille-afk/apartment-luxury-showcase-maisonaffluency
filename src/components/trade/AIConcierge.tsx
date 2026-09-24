@@ -1,3 +1,4 @@
+import { GuestContactCapture } from "./GuestContactCapture";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Shimmer } from "@/components/ai-elements/shimmer";
@@ -3815,7 +3816,14 @@ export function AIConcierge({
         portal_session_hint: sessionId ? sessionId.slice(0, 64) : null,
         messages,
       });
-      if (error) console.warn("[guest-inquiry]", error.message);
+      if (error) { console.warn("[guest-inquiry]", error.message); return; }
+      if (sessionStorage.getItem("cn_portal:contact_captured")) return;
+      // Hand-off runs server-side in a few seconds; ask only whether it was serious.
+      for (let i = 0; i < 8; i++) {
+        await new Promise((r) => setTimeout(r, 3000));
+        const { data: serious } = await supabase.rpc("guest_inquiry_is_serious", { _guest_key: guestKey } as any);
+        if (serious) { setGuestContactKey(guestKey); return; }
+      }
     })().catch((e) => console.warn("[cn-brief]", e));
   }, [timeline, streaming, lang]);
 
