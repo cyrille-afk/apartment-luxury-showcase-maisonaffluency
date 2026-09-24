@@ -413,7 +413,7 @@ const TradeLanding = () => {
       };
     }
     const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, step: 3, companyName, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
+      body: { email, completeApplication: true, companyName, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
     });
     setJoinLoading(false);
     setTurnstileToken("");
@@ -516,7 +516,7 @@ const TradeLanding = () => {
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div ref={heroRef} className="relative flex h-[calc(100svh-6rem)] min-h-[580px] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
+        <div ref={heroRef} className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
           {/* Debug 12-column overlay (desktop only) — add ?debug-grid to the URL to show */}
           {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-grid") && (
             <div aria-hidden className="pointer-events-none absolute inset-0 z-[80] hidden md:grid md:grid-cols-12">
@@ -528,7 +528,7 @@ const TradeLanding = () => {
             </div>
           )}
           {/* Left Side: title (mobile) / title + form (desktop) */}
-          <div className="relative z-20 flex shrink-0 h-auto w-full items-center justify-center bg-background px-6 pb-4 pt-2 md:col-start-3 md:col-span-4 md:h-auto md:justify-start md:px-0 md:py-12">
+          <div className="relative z-20 flex h-auto w-full items-center justify-center bg-background px-6 pb-10 pt-2 md:col-start-3 md:col-span-4 md:justify-start md:px-0 md:py-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -542,7 +542,7 @@ const TradeLanding = () => {
               </h1>
               <motion.div
                 style={{ y: mobileFormRise }}
-                className="relative z-30 mx-auto mt-4 hidden w-full bg-background px-3 py-3 shadow-[0_12px_35px_hsl(var(--foreground)/0.08)] md:mx-0 md:block md:bg-transparent md:p-0 md:shadow-none md:!transform-none"
+                className="relative z-30 mx-auto mt-4 w-full bg-background py-3 md:mx-0 md:bg-transparent md:p-0 md:!transform-none"
               >
                 <HeroJoinForm
                   ghost={false}
@@ -560,36 +560,13 @@ const TradeLanding = () => {
           </div>
 
           {/* Right Side: hero photograph (inline on mobile and desktop) */}
-          <div className="relative min-h-[68%] flex-1 w-full bg-background md:col-start-7 md:col-span-5 md:h-full">
+          <div className="relative h-[70svh] min-h-[520px] w-full bg-background md:col-start-7 md:col-span-5 md:h-full md:min-h-0">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
               className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-[50%_20%] md:object-contain md:object-center"
               data-pin-nopin="true"
             />
-
-            {/* Mobile form overlay — floats just below the chandelier globe and above the table */}
-            <div className="absolute inset-x-0 top-[24%] z-30 px-5 md:hidden">
-              {/* Readability underlay — blends into the photograph */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 -top-10 -bottom-12 bg-gradient-to-b from-black/0 via-black/40 to-black/0"
-              />
-              <div className="relative mx-auto w-[85%] max-w-md">
-                <HeroJoinForm
-                  ghost
-                  submitted={applicationSubmitted}
-                  joinLoading={joinLoading}
-                  joinError={joinError}
-                  joinCredentialFile={joinCredentialFile}
-                  setJoinCredentialFile={setJoinCredentialFile}
-                  handleApplicationSubmit={handleApplicationSubmit}
-                  turnstileToken={turnstileToken}
-                  setTurnstileToken={setTurnstileToken}
-                />
-              </div>
-            </div>
-
 
             {/* WhatsApp share — direct deep link */}
             <div className="absolute bottom-6 right-6 md:bottom-7 md:right-7 z-40">

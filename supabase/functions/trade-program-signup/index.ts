@@ -33,7 +33,9 @@ Deno.serve(async (req) => {
   }
 
   const email = String(body.email ?? '').trim().toLowerCase()
-  const step = Number(body.step ?? 1)
+  // The current application submits once; numeric steps remain accepted only
+  // for older cached clients during rollout.
+  const step = body.completeApplication === true ? 3 : Number(body.step ?? 1)
   const companyName = body.companyName ? String(body.companyName).trim().slice(0, 200) : null
   const websiteUrl = body.websiteUrl ? String(body.websiteUrl).trim().slice(0, 300) : null
   const businessRegNumber = body.businessRegNumber
