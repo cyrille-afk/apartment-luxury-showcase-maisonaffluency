@@ -86,6 +86,7 @@ const TradeAdminPrivacyRequests = lazy(() => import("./pages/TradeAdminPrivacyRe
 const TradeAdminSubProcessors = lazy(() => import("./pages/TradeAdminSubProcessors"));
 const TradeAdminOutbound = lazy(() => import("./pages/TradeAdminOutbound"));
 const TradeAdminAcquisitions = lazy(() => import("./pages/TradeAdminAcquisitions"));
+const TradeAdminApplications = lazy(() => import("./pages/TradeAdminApplications"));
 const DpaTemplate = lazy(() => import("./pages/DpaTemplate"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
@@ -756,6 +757,8 @@ const App = () => {
                   <Route path="/admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
                   <Route path="/admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
                   <Route path="/admin/acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
+                  <Route path="/admin/client-acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
+                  <Route path="/admin/trade-applications" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminApplications /></Suspense>} />
                   <Route path="/compliance/dpa-template" element={<Suspense fallback={<PageLoadingSkeleton />}><DpaTemplate /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
@@ -781,6 +784,8 @@ const App = () => {
                     <Route path="admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
                     <Route path="admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
                     <Route path="admin/acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
+                    <Route path="admin/client-acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
+                    <Route path="admin/trade-applications" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminApplications /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />

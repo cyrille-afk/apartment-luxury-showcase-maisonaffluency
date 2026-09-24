@@ -369,12 +369,24 @@ export function TradeSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink
-                      to="/trade/admin/acquisitions"
+                      to="/trade/admin/trade-applications"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                    >
+                      <Inbox className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Inbound Applications</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/admin/client-acquisitions"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
                     >
                       <Target className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>Acquisitions</span>}
+                      {!collapsed && <span>Client Acquisitions</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
