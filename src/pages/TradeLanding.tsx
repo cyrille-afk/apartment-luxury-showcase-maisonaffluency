@@ -327,7 +327,7 @@ const HeroJoinForm = ({
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-website" : "website"} className={labelCls}>Website or Instagram Handle</label>
-        <input id={ghost ? "mobile-website" : "website"} name="website" required minLength={3} maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-invalid={Boolean(portfolioError)} aria-describedby={portfolioError ? (ghost ? "mobile-website-error" : "website-error") : undefined} onChange={() => portfolioError && setPortfolioError(null)} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
+        <input id={ghost ? "mobile-website" : "website"} name="website" minLength={3} maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-required="true" aria-invalid={Boolean(portfolioError)} aria-describedby={portfolioError ? (ghost ? "mobile-website-error" : "website-error") : undefined} onChange={() => portfolioError && setPortfolioError(null)} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
         {portfolioError && <p id={ghost ? "mobile-website-error" : "website-error"} role="alert" className="mt-1.5 text-left font-body text-[10px] uppercase tracking-wide text-destructive">{portfolioError}</p>}
       </div>
       <div>
