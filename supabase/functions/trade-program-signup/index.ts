@@ -1,6 +1,7 @@
 import { detectFileType } from '../_shared/fileSignature.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTradeRequestWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
+import { scoreTradeApplication } from '../_shared/tradeRadar.ts'
 
 const ADMIN_EMAILS = ['concierge@myaffluency.com', 'cyrille@maisonaffluency.com']
 
@@ -235,37 +236,63 @@ Deno.serve(async (req) => {
       const rt = (globalThis as any).EdgeRuntime
       if (rt?.waitUntil) rt.waitUntil(task)
     }
-    const waBody = [
-      '🚨 *New Trade Account Request on Maison Affluency*',
-      '',
-      `• *Studio:* ${studio}`,
-      `• *Email:* ${email}`,
-      `• *Website / IG:* ${clean(row?.portfolio_reference ?? row?.website_url) || '—'}`,
-      `• *Reg. No:* ${clean(row?.business_reg_number) || '—'}`,
-      `• *Document:* ${row?.credential_document_path ? 'uploaded' : 'none'}`,
-      ...(existing ? ['• *Returning applicant*'] : []),
-      '',
-      'Review in the Admin Dashboard.',
-    ].join('\n')
+    // AI Critical Radar runs in the background after Turnstile validation;
+    // the applicant's response never waits on it. The WhatsApp alert is sent
+    // once scoring finishes (or fails), with the radar block included.
+    const websiteOrIg = clean(row?.portfolio_reference ?? row?.website_url)
+    const alertTask = (async () => {
+      const radar = await scoreTradeApplication({
+        studio, email, websiteOrIg,
+        regNumber: clean(row?.business_reg_number),
+        hasDocument: Boolean(row?.credential_document_path),
+        returning: Boolean(existing),
+      })
+      if (!radar.ok) console.error('trade radar failed', radar.error)
+      if (acct?.id) {
+        await supabase.from('trade_accounts').update(radar.ok
+          ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: 'scored', radar_scored_at: new Date().toISOString() }
+          : { radar_status: 'failed', radar_flag: radar.error.slice(0, 300), radar_scored_at: new Date().toISOString() }
+        ).eq('id', acct.id)
+      }
+      const radarLines = radar.ok
+        ? ['', '📊 *AI Critical Radar:*', `• *Confidence:* ${radar.score}/100`, `• *Flag:* ${radar.flag}`]
+        : ['', '📊 *AI Critical Radar:* unavailable']
+      const waBody = [
+        '🚨 *New Trade Account Request on Maison Affluency*',
+        '',
+        `• *Studio:* ${studio}`,
+        `• *Email:* ${email}`,
+        `• *Website / IG:* ${clean(row?.portfolio_reference ?? row?.website_url) || '—'}`,
+        `• *Reg. No:* ${clean(row?.business_reg_number) || '—'}`,
+        `• *Document:* ${row?.credential_document_path ? 'uploaded' : 'none'}`,
+        ...(existing ? ['• *Returning applicant*'] : []),
+          ...radarLines,
+        '',
+        'Review in the Admin Dashboard.',
+      ].join('\n')
 
-    try {
-      const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: '' })
-      await supabase.from('admin_alert_log').insert({
-        channel: 'twilio_whatsapp',
-        event: 'trade_application_request',
-        status: result.ok ? 'sent' : 'failed',
-        provider_message_id: result.ok ? result.sid : null,
-        payload: { signup_id: signupId, email, source: 'trade-program-hero', twilio_status: result.status ?? null, used_template: result.usedTemplate, template_status: result.templateStatus },
-        error: result.ok ? null : String(result.error ?? 'unknown').slice(0, 2000),
-      })
-      if (!result.ok) console.error('Trade signup WhatsApp failed', result.error)
-    } catch (e) {
-      console.error('Trade signup WhatsApp error', e)
-      await supabase.from('admin_alert_log').insert({
-        channel: 'twilio_whatsapp', event: 'trade_application_request', status: 'failed',
-        payload: { signup_id: signupId, email }, error: String(e instanceof Error ? e.message : e).slice(0, 2000),
-      })
-    }
+      try {
+        const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: '' })
+        await supabase.from('admin_alert_log').insert({
+          channel: 'twilio_whatsapp',
+          event: 'trade_application_request',
+          status: result.ok ? 'sent' : 'failed',
+          provider_message_id: result.ok ? result.sid : null,
+          payload: { signup_id: signupId, email, source: 'trade-program-hero', twilio_status: result.status ?? null, used_template: result.usedTemplate, template_status: result.templateStatus },
+          error: result.ok ? null : String(result.error ?? 'unknown').slice(0, 2000),
+        })
+        if (!result.ok) console.error('Trade signup WhatsApp failed', result.error)
+      } catch (e) {
+        console.error('Trade signup WhatsApp error', e)
+        await supabase.from('admin_alert_log').insert({
+          channel: 'twilio_whatsapp', event: 'trade_application_request', status: 'failed',
+          payload: { signup_id: signupId, email }, error: String(e instanceof Error ? e.message : e).slice(0, 2000),
+        })
+      }
+    })()
+    // deno-lint-ignore no-explicit-any
+    const rt2 = (globalThis as any).EdgeRuntime
+    if (rt2?.waitUntil) rt2.waitUntil(alertTask); else await alertTask
 
     for (const adminEmail of ADMIN_EMAILS) {
       const { error: notifyErr } = await supabase.functions.invoke('send-transactional-email', {
