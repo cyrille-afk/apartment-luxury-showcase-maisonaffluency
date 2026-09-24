@@ -40,6 +40,22 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
+const megaMenuShowcaseCards = [
+  { label: "Seating", category: "Seating", image: cloudinaryUrl("bespoke-sofa_gxidtx", { width: 480, quality: "auto:good", crop: "fill" }) },
+  { label: "Tables", category: "Tables", image: cloudinaryUrl("intimate-table-detail_aqxvvm", { width: 480, quality: "auto:good", crop: "fill" }) },
+  { label: "Storage", category: "Storage", image: cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 480, quality: "auto:good", crop: "fill" }) },
+  { label: "Lighting", category: "Lighting", image: cloudinaryUrl("details-lamp_clzcrk", { width: 480, quality: "auto:good", crop: "fill" }) },
+  { label: "Objects", category: "Décor", image: cloudinaryUrl("small-room-vase_s3nz5o", { width: 480, quality: "auto:good", crop: "fill" }) },
+] as const;
+
+const megaMenuVibes = [
+  "Sociable",
+  "Intimate",
+  "Sanctuary",
+  "Calming",
+  "Statement",
+] as const;
+
 const leftNavItems = [{
   label: "Designers",
   mobileLabel: "Designers & Makers",
@@ -444,10 +460,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "block w-full text-left text-xs leading-relaxed text-muted-foreground antialiased transition-colors hover:text-foreground";
+    "block w-full text-left font-sans text-[0.9rem] leading-relaxed text-foreground antialiased transition-opacity duration-200 hover:opacity-50";
 
   const megaMenuHeadingClass =
-    "mb-4 border-b border-foreground pb-2 text-xs font-semibold uppercase tracking-widest text-foreground";
+    "mb-4 font-sans text-xs font-normal uppercase tracking-[0.1em] text-muted-foreground";
 
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
@@ -982,7 +998,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {megaMenuOpen && (
           <div
             ref={megaMenuRef}
-            className="w-full border-t border-border bg-background px-12 py-12"
+            className="mega-menu-shop-by-room w-screen border-y border-border bg-background px-[60px] py-10"
             style={{ animation: "megaMenuReveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
           >
             <style>{`
@@ -991,69 +1007,51 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="mx-auto grid w-full max-w-7xl grid-cols-3 items-start gap-16">
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
-                <ul className="space-y-3">
-                  <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
-                  <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
-                  <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
-                  <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
-                </ul>
-              </div>
+            <div className="flex w-full items-start gap-[60px]">
+              <div className="grid w-1/4 shrink-0 grid-cols-2 gap-12">
+                <div className="min-w-0">
+                  <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
+                  <ul className="space-y-2.5">
+                    <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
+                    <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
+                    <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
+                    <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
+                  </ul>
+                </div>
 
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Furniture</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { heading: "Seating", category: "Seating" },
-                    { heading: "Tables", category: "Tables" },
-                    { heading: "Storage", category: "Storage" },
-                  ].map(({ heading, category }) => (
-                    <div key={category} className="min-w-0">
-                      <button
-                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={() => navigateFromMegaMenu(category)}
-                      >
-                        {heading}
-                      </button>
-                      <ul className="space-y-2">
-                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                          <li key={subcategory}>
-                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
-                              {subcategory}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                <div className="min-w-0">
+                  <h3 className={megaMenuHeadingClass}>Shop By Vibe</h3>
+                  <ul className="space-y-2.5">
+                    {megaMenuVibes.map((vibe) => (
+                      <li key={vibe}>
+                        <a href="/gallery" className={megaMenuLinkClass}>{vibe}</a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
 
-              <div className="min-w-0">
-                <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {["Lighting", "Rugs", "Décor"].map((category) => (
-                    <div key={category} className="min-w-0">
-                      <button
-                        className="mb-2 block text-left text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={() => navigateFromMegaMenu(category)}
-                      >
-                        {category}
-                      </button>
-                      <ul className="space-y-2">
-                        {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                          <li key={subcategory}>
-                            <button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>
-                              {subcategory}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+              <div className="grid w-3/4 grid-cols-5 gap-4">
+                {megaMenuShowcaseCards.map((card) => (
+                  <button
+                    key={card.label}
+                    type="button"
+                    onClick={() => navigateFromMegaMenu(card.category)}
+                    className="group flex min-w-0 flex-col gap-3 text-center"
+                  >
+                    <span className="aspect-[4/5] w-full overflow-hidden bg-muted">
+                      <img
+                        src={card.image}
+                        alt=""
+                        width={480}
+                        height={600}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.03]"
+                      />
+                    </span>
+                    <span className="font-sans text-[0.8rem] text-foreground">{card.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
