@@ -631,6 +631,13 @@
       "when": 1790221079983,
       "tag": "0089_trade_accounts_approved_at",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1790227689513,
+      "tag": "0090_admin_delete_trade_applications",
+      "breakpoints": true
     }
   ]
 }
