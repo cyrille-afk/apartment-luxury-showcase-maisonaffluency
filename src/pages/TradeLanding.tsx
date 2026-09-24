@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Quote, Sparkles, Upload } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -442,6 +442,20 @@ const TradeLanding = () => {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinEmail, setJoinEmail] = useState("");
   const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
+
+  // Clicking "Trade Program" in the navbar forces a clean, unsubmitted
+  // application view — even when already on this page after a submission.
+  const location = useLocation();
+  useEffect(() => {
+    const resetSignal = (location.state as { resetApplication?: number } | null)?.resetApplication;
+    if (!resetSignal) return;
+    localStorage.removeItem("tradeProgramApplication");
+    setJoinStep(1);
+    setJoinLoading(false);
+    setJoinError(null);
+    setJoinEmail("");
+    setJoinCredentialFile(null);
+  }, [location.state]);
 
   const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
