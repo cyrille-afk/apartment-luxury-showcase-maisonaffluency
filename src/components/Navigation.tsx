@@ -452,10 +452,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "block w-full text-left text-[12px] leading-[1.65] text-muted-foreground antialiased transition-all duration-300 hover:translate-x-1 hover:text-foreground";
+    "block w-full text-left font-['Work_Sans'] text-[11px] leading-[1.7] text-muted-foreground antialiased transition-all duration-300 hover:translate-x-1 hover:text-foreground";
 
   const megaMenuHeadingClass =
-    "mb-6 flex items-center gap-3 border-b border-border pb-3 font-body text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
+    "mb-6 border-b border-border pb-3 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
+
+  const megaMenuClusterHeadingClass =
+    "mb-3 font-['Work_Sans'] text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground";
 
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
@@ -999,55 +1002,80 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="mx-auto flex min-h-[440px] w-full max-w-7xl overflow-hidden border-x border-border bg-background">
-              <div className="flex w-[70%] flex-col justify-between px-12 py-10 xl:px-16 xl:py-12">
-                <div className="grid grid-cols-[1.05fr_1.35fr_0.8fr] gap-10 xl:gap-14">
+            <div className="mx-auto flex h-[460px] w-full max-w-7xl overflow-hidden border-x border-border bg-background">
+              <div className="flex w-[70%] flex-col justify-between px-10 py-10 xl:px-12 xl:py-12">
+                <div className="grid grid-cols-[0.78fr_1.25fr_1.45fr] gap-9 xl:gap-12">
                   <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}><span className="text-accent">01</span>Furniture</h3>
+                    <h3 className={megaMenuHeadingClass}>Shop by room</h3>
+                    <nav className="flex flex-col items-start" aria-label="Shop by room">
+                      {megaMenuRooms.map((room) => (
+                        <a
+                          key={room.slug}
+                          href={`/search?room=${room.slug}`}
+                          onMouseEnter={() => setActiveMegaRoom(room)}
+                          onFocus={() => setActiveMegaRoom(room)}
+                          onClick={() => setMegaMenuOpen(false)}
+                          className={cn(
+                            "relative py-1 font-['Instrument_Serif'] text-[27px] leading-[1.22] transition-colors duration-300 after:absolute after:bottom-1 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
+                            activeMegaRoom.slug === room.slug
+                              ? "text-foreground after:w-8"
+                              : "text-muted-foreground after:w-0 hover:text-foreground"
+                          )}
+                        >
+                          {room.label}
+                        </a>
+                      ))}
+                    </nav>
+                  </section>
+
+                  <section className="min-w-0">
+                    <h3 className={megaMenuHeadingClass}>Furniture</h3>
                     <div className="grid grid-cols-2 gap-7">
-                      {["Seating", "Tables"].map((category) => (
-                        <div key={category} className="min-w-0">
-                          <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu(category)}>
-                            {category}
-                          </button>
-                          <ul className="space-y-1">
-                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                              <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>{subcategory}</button></li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                      <div className="min-w-0">
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
+                        <ul className="space-y-0.5">
+                          {SUBCATEGORY_MAP.Seating?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Seating", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="min-w-0">
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Tables")}>Tables &amp; Storage</button>
+                        <ul className="space-y-0.5">
+                          {SUBCATEGORY_MAP.Tables?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", subcategory)}>{subcategory}</button></li>
+                          ))}
+                          {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </section>
 
                   <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}><span className="text-accent">02</span>Lighting &amp; Accents</h3>
-                    <div className="grid grid-cols-3 gap-6">
-                      {["Lighting", "Rugs", "Décor"].map((category) => (
-                        <div key={category} className="min-w-0">
-                          <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu(category)}>
-                            {category}
-                          </button>
-                          <ul className="space-y-1">
-                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
-                              <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu(category, subcategory)}>{subcategory}</button></li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                    <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
+                    <div className="grid grid-cols-[0.8fr_1.2fr] gap-7">
+                      <div className="min-w-0">
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Lighting")}>Illumination</button>
+                        <ul className="space-y-0.5">
+                          {SUBCATEGORY_MAP.Lighting?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Lighting", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="min-w-0">
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Décor")}>Objet d&apos;Art</button>
+                        <ul className="columns-2 gap-5 space-y-0.5">
+                          {SUBCATEGORY_MAP.Rugs?.map((subcategory) => (
+                            <li key={subcategory} className="break-inside-avoid"><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Rugs", subcategory)}>{subcategory}</button></li>
+                          ))}
+                          {SUBCATEGORY_MAP.Décor?.map((subcategory) => (
+                            <li key={subcategory} className="break-inside-avoid"><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Décor", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  </section>
-
-                  <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}><span className="text-accent">03</span>Storage</h3>
-                    <button className="mb-3 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground" onClick={() => navigateFromMegaMenu("Storage")}>
-                      View Storage
-                    </button>
-                    <ul className="space-y-1">
-                      {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
-                      ))}
-                    </ul>
                   </section>
                 </div>
 
@@ -1061,36 +1089,18 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </div>
 
               <aside className="w-[30%] border-l border-border bg-muted/30 p-5">
-                <div className="relative h-[320px] overflow-hidden border border-border bg-muted">
-                  <img
-                    key={activeMegaRoom.slug}
-                    src={activeMegaRoom.image}
-                    alt={`${activeMegaRoom.label} interior`}
-                    className="h-full w-full animate-fade-in object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/70 to-transparent px-6 pb-5 pt-16">
-                    <p className="font-display text-2xl text-background">{activeMegaRoom.label}</p>
-                  </div>
-                </div>
-                <div className="pt-5">
-                  <p className="mb-3 font-body text-[9px] uppercase tracking-[0.3em] text-accent">Shop by room</p>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                    {megaMenuRooms.map((room) => (
-                      <a
-                        key={room.slug}
-                        href={`/search?room=${room.slug}`}
-                        onMouseEnter={() => setActiveMegaRoom(room)}
-                        onFocus={() => setActiveMegaRoom(room)}
-                        onClick={() => setMegaMenuOpen(false)}
-                        className={cn(
-                          "border-b py-2 font-display text-[17px] transition-colors duration-300",
-                          activeMegaRoom.slug === room.slug ? "border-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {room.label}
-                      </a>
-                    ))}
-                  </div>
+                <div className="relative h-full overflow-hidden border border-border bg-muted">
+                  {megaMenuRooms.map((room) => (
+                    <img
+                      key={room.slug}
+                      src={room.image}
+                      alt={`${room.label} interior`}
+                      className={cn(
+                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out",
+                        activeMegaRoom.slug === room.slug ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  ))}
                 </div>
               </aside>
             </div>
