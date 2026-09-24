@@ -272,7 +272,7 @@ export function useAttributedDesignerPicks(
       if (!designer) return [];
       const table = publicOnly ? "designer_curator_picks_public" : "designer_curator_picks";
       const columns = publicOnly ? CURATOR_PICK_GRID_COLUMNS : CURATOR_PICK_GRID_COLUMNS_TRADE;
-      const escapedName = designer.name.replaceAll(",", "\\,");
+      const escapedName = designer.name.replace(/,/g, "\\,");
       let query = supabase
         .from(table)
         .select(columns)
