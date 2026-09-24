@@ -5,14 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, PauseCircle, RefreshCw } from "lucide-react";
+import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 
-type Dna = {
+type Dna = VisualThemeDna & {
   status: string;
-  aesthetic_label: string | null;
-  aesthetic_summary: string | null;
-  dominant_tones: string[];
-  historical_affinities: string[];
-  materials: string[];
   error: string | null;
 };
 type Account = {
@@ -61,7 +57,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, error)",
+          "id, email, studio_name, contact_name, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);
@@ -123,8 +119,9 @@ export default function TradeApplicationsQueue() {
           {accounts.map((a) => {
             const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
             return (
-              <li key={a.id} className="grid gap-4 px-6 py-5 md:grid-cols-[1.1fr_1fr_1.6fr_auto]">
-                <div className="space-y-1 text-sm">
+              <li key={a.id} className="bg-background">
+                <div className="grid gap-5 px-6 py-5 md:grid-cols-[1.1fr_1fr_auto]">
+                 <div className="space-y-1 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{a.studio_name ?? "(studio not provided)"}</span>
                     <Badge variant={a.status === "approved" ? "default" : "outline"} className="rounded-none text-[10px] uppercase tracking-wider">
@@ -142,7 +139,7 @@ export default function TradeApplicationsQueue() {
                   <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</div>
                 </div>
 
-                <div className="space-y-2 text-sm">
+                 <div className="space-y-2 text-sm">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI Critical Radar</p>
                   {a.radar_status === "scored" && a.radar_score !== null ? (
                     <>
@@ -163,36 +160,7 @@ export default function TradeApplicationsQueue() {
                   )}
                 </div>
 
-                <div className="space-y-2 text-sm">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Studio Aesthetic DNA</p>
-                  {!dna || dna.status === "pending" || dna.status === "processing" ? (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Analysing portfolio…
-                    </div>
-                  ) : dna.status === "failed" ? (
-                    <p className="text-destructive">{dna.error ?? "Analysis failed"}</p>
-                  ) : (
-                    <>
-                      <p className="font-serif text-base text-foreground">{dna.aesthetic_label}</p>
-                      <p className="text-muted-foreground">{dna.aesthetic_summary}</p>
-                      <div className="flex flex-wrap gap-1">
-                        {[...dna.dominant_tones, ...dna.historical_affinities, ...dna.materials].map((t) => (
-                          <Badge key={t} variant="secondary" className="rounded-none text-[10px]">{t}</Badge>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => rerun(a)}
-                    disabled={busy === a.id + "dna"}
-                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-50"
-                  >
-                    <RefreshCw className="h-3 w-3" /> Re-run analysis
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-2 md:w-56">
+                 <div className="flex flex-col gap-2 md:w-56">
                   <Button
                     onClick={() => setStatus(a, "approved")}
                     disabled={a.status === "approved" || busy !== null}
@@ -210,7 +178,28 @@ export default function TradeApplicationsQueue() {
                     {busy === a.id + "on_hold" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PauseCircle className="mr-2 h-4 w-4" />}
                     Hold / Review
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => rerun(a)}
+                    disabled={busy === a.id + "dna" || busy !== null}
+                    className="mt-1 rounded-none text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                  >
+                    {busy === a.id + "dna" ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    Re-run analysis
+                  </Button>
                 </div>
+                </div>
+
+                {!dna || dna.status === "pending" || dna.status === "processing" ? (
+                  <div className="flex items-center gap-2 border-t border-border px-6 py-6 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Analysing portfolio…
+                  </div>
+                ) : dna.status === "failed" ? (
+                  <div className="border-t border-border px-6 py-6 text-sm text-destructive">{dna.error ?? "Analysis failed"}</div>
+                ) : (
+                  <VisualThemeAnalysis dna={dna} />
+                )}
               </li>
             );
           })}

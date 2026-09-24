@@ -60,6 +60,7 @@ All colors MUST be HSL.
     --collection-card-canvas: 60 20% 98%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 40 20% 97.1%;
+    --visual-evidence: 60 11% 98.2%;
     --product-canvas-dark: 0 0% 10.2%;
     --warm-gray: 32 10% 50%;
     --spec-dimension-icon: 207 24% 68%;
@@ -147,6 +148,7 @@ All colors MUST be HSL.
     --collection-card-canvas: 34 18% 18%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 168 12% 14%;
+    --visual-evidence: 168 10% 18%;
     --spec-dimension-icon: 207 24% 68%;
 
     --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);
