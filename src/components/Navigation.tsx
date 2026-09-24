@@ -47,6 +47,59 @@ const megaMenuRooms = [
   { label: "Office", slug: "office", image: cloudinaryUrl("home-office-desk_g0ywv2", { width: 900, height: 780, quality: "auto:good", crop: "fill", gravity: "auto" }) },
 ] as const;
 
+type MegaMenuRoom = (typeof megaMenuRooms)[number];
+type ImagePriority = "high" | "auto" | "low";
+
+const megaMenuImageCache = new Map<string, Promise<boolean>>();
+
+function preloadMegaMenuImage(src: string, priority: ImagePriority = "low") {
+  const cached = megaMenuImageCache.get(src);
+  if (cached) return cached;
+
+  const promise = new Promise<boolean>((resolve) => {
+    if (typeof Image === "undefined") {
+      resolve(false);
+      return;
+    }
+
+    const image = new Image();
+    image.decoding = "async";
+    try {
+      (image as HTMLImageElement & { fetchPriority?: ImagePriority }).fetchPriority = priority;
+    } catch {
+      // Unsupported browsers still preload normally.
+    }
+    image.onload = () => {
+      if (typeof image.decode === "function") {
+        image.decode().then(() => resolve(true)).catch(() => resolve(true));
+      } else {
+        resolve(true);
+      }
+    };
+    image.onerror = () => resolve(false);
+    image.src = src;
+  });
+
+  megaMenuImageCache.set(src, promise);
+  void promise.then((loaded) => {
+    if (!loaded) megaMenuImageCache.delete(src);
+  });
+  return promise;
+}
+
+let megaMenuWarmupStarted = false;
+function warmMegaMenuImages() {
+  if (megaMenuWarmupStarted || typeof window === "undefined") return;
+  megaMenuWarmupStarted = true;
+
+  void preloadMegaMenuImage(megaMenuRooms[0].image, "high");
+  const warmRemaining = () => {
+    megaMenuRooms.slice(1).forEach((room) => void preloadMegaMenuImage(room.image, "low"));
+  };
+  if (window.requestIdleCallback) window.requestIdleCallback(warmRemaining, { timeout: 700 });
+  else window.setTimeout(warmRemaining, 120);
+}
+
 const leftNavItems = [{
   label: "Designers",
   mobileLabel: "Designers & Makers",
@@ -157,10 +210,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [megaMenuHoverCat, setMegaMenuHoverCat] = useState<string | null>(null);
-  const [activeMegaRoom, setActiveMegaRoom] = useState<(typeof megaMenuRooms)[number]>(megaMenuRooms[0]);
+  const [activeMegaRoom, setActiveMegaRoom] = useState<MegaMenuRoom>(megaMenuRooms[0]);
+  const [loadedMegaRooms, setLoadedMegaRooms] = useState<Set<string>>(() => new Set());
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  const requestedMegaRoomRef = useRef(megaMenuRooms[0].slug);
   // featuredDoc removed — AD free-download flow discontinued.
 
   // ── Transparent floating header over the home hero ─────────────────────
@@ -312,6 +367,36 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     return () => document.removeEventListener('click', handleClick);
   }, [megaMenuOpen]);
 
+  useEffect(() => {
+    if (!megaMenuOpen) return;
+    let cancelled = false;
+    const markLoaded = (room: MegaMenuRoom) => (loaded: boolean) => {
+      if (!loaded || cancelled) return;
+      setLoadedMegaRooms((current) => {
+        if (current.has(room.slug)) return current;
+        const next = new Set(current);
+        next.add(room.slug);
+        return next;
+      });
+    };
+
+    void preloadMegaMenuImage(activeMegaRoom.image, "high").then(markLoaded(activeMegaRoom));
+    const preloadRemaining = () => {
+      megaMenuRooms.forEach((room) => {
+        void preloadMegaMenuImage(room.image, "low").then(markLoaded(room));
+      });
+    };
+    const idleId = window.requestIdleCallback
+      ? window.requestIdleCallback(preloadRemaining, { timeout: 700 })
+      : window.setTimeout(preloadRemaining, 120);
+
+    return () => {
+      cancelled = true;
+      if (window.requestIdleCallback) window.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
+    };
+  }, [megaMenuOpen]);
+
   // Sync mega-menu highlight when filter is cleared externally (e.g. ProductGrid "Clear Filter")
   useEffect(() => {
     const handleExternalClear = (e: CustomEvent) => {
@@ -449,6 +534,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     setActiveMegaSub(subcategory);
     setMegaMenuOpen(false);
     navigate(categoryUrl(category, subcategory));
+  };
+
+  const activateMegaRoom = (room: MegaMenuRoom) => {
+    requestedMegaRoomRef.current = room.slug;
+    void preloadMegaMenuImage(room.image, "high").then((loaded) => {
+      if (!loaded || requestedMegaRoomRef.current !== room.slug) return;
+      setLoadedMegaRooms((current) => new Set(current).add(room.slug));
+      setActiveMegaRoom(room);
+    });
   };
 
   const megaMenuLinkClass =
@@ -925,6 +1019,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+                onPointerEnter={warmMegaMenuImages}
+                onFocus={warmMegaMenuImages}
                 className={cn(
                   "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
                   (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
@@ -1012,8 +1108,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         <a
                           key={room.slug}
                           href={`/search?room=${room.slug}`}
-                          onMouseEnter={() => setActiveMegaRoom(room)}
-                          onFocus={() => setActiveMegaRoom(room)}
+                          onMouseEnter={() => activateMegaRoom(room)}
+                          onFocus={() => activateMegaRoom(room)}
                           onClick={() => setMegaMenuOpen(false)}
                           className={cn(
                             "relative py-1 font-['Instrument_Serif'] text-[27px] leading-[1.22] transition-colors duration-300 after:absolute after:bottom-1 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
@@ -1093,10 +1189,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   {megaMenuRooms.map((room) => (
                     <img
                       key={room.slug}
-                      src={room.image}
+                      src={activeMegaRoom.slug === room.slug || loadedMegaRooms.has(room.slug) ? room.image : undefined}
                       alt={`${room.label} interior`}
+                      decoding="async"
+                      fetchPriority={activeMegaRoom.slug === room.slug ? "high" : "low"}
                       className={cn(
-                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out",
+                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out motion-reduce:transition-none",
                         activeMegaRoom.slug === room.slug ? "opacity-100" : "opacity-0"
                       )}
                     />
