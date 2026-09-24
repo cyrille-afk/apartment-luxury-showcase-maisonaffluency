@@ -233,7 +233,7 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
           {editing ? (
             <>
               <EditableBlock title="Design Dialect" placeholder="Tag" values={draft.tones} onChange={(tones) => setDraft((d) => ({ ...d, tones }))} />
-              <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} />
+              <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} suggestions={catalog} onPick={persistAffinities} />
               <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} />
             </>
           ) : (
