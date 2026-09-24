@@ -80,8 +80,8 @@ export default function VisualThemeAnalysis({ dna }: { dna: VisualThemeDna }) {
 
   return (
     <section className="border-t border-border bg-card" aria-label="Visual theme analysis">
-      <div className="grid lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
-        <div className="space-y-6 border-b border-border p-5 md:p-7 lg:border-b-0 lg:border-r">
+      <div className="grid min-w-0 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
+        <div className="min-w-0 space-y-6 border-b border-border p-5 md:p-7 lg:border-b-0 lg:border-r">
           <div>
             <p className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Curatorial Insights</p>
             <h3 className="mt-2 font-serif text-xl text-foreground">{dna.aesthetic_label || "Studio Visual Language"}</h3>
@@ -101,13 +101,13 @@ export default function VisualThemeAnalysis({ dna }: { dna: VisualThemeDna }) {
           </div>
         </div>
 
-        <div className="p-5 md:p-7">
-          <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0 overflow-hidden p-5 md:p-7">
+          <div className="flex min-w-0 flex-col gap-2 xs:flex-row xs:items-end xs:justify-between xs:gap-4">
             <div>
               <p className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Source Review</p>
               <h3 className="mt-2 font-serif text-xl text-foreground">Visual Evidence Matrix</h3>
             </div>
-            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{images.length}/6 assets</span>
+            <span className="shrink-0 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{images.length}/6 assets</span>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-1.5 md:gap-2">
