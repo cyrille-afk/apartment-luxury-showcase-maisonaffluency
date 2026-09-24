@@ -451,7 +451,7 @@ export default function OrderIntakeSheet({
                Specifications Recorded
              </p>
              <p className="mx-auto mt-6 max-w-sm font-body text-sm leading-7 text-muted-foreground">
-               Our Concierge desk has successfully registered your parameters and custom material swatches for the {productTitle || "selected piece"}. A formal proforma transaction estimate is being compiled by our Paris atelier and will be routed to your verified studio inbox within 48 hours.
+                Our Concierge desk has successfully registered your configuration and material parameters for the Aragon Coffee Table, 1928. A formal project proposal and logistics brief are being compiled by our Paris atelier and will be transmitted directly to your priority studio inbox.
              </p>
              <Button
                type="button"
