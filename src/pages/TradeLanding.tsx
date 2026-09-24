@@ -244,6 +244,11 @@ const HeroJoinForm = ({
   setTurnstileToken,
 }: HeroJoinFormProps) => {
   const credentialFileRef = useRef<HTMLInputElement>(null);
+  const [prefillParams] = useSearchParams();
+  const prefillEmail = (prefillParams.get("email") || "").slice(0, 254);
+  const prefillFirm = (prefillParams.get("firm") || prefillParams.get("company") || "").slice(0, 200);
+  const prefillPhone = (prefillParams.get("phone") || "").slice(0, 30);
+  const prefillWebsite = (prefillParams.get("website") || "").slice(0, 300);
   const [isLoading, setIsLoading] = useState(false);
   const [portfolioError, setPortfolioError] = useState<string | null>(null);
   const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -315,19 +320,19 @@ const HeroJoinForm = ({
     <form onSubmit={submitApplication} className={cn("mx-auto flex w-full max-w-lg flex-col gap-3 md:mx-0", ghost && "max-w-md")}>
       <div>
         <label htmlFor={ghost ? "mobile-email" : "email"} className={labelCls}>Work Email</label>
-        <input id={ghost ? "mobile-email" : "email"} type="email" name="email" required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
+        <input id={ghost ? "mobile-email" : "email"} type="email" name="email" defaultValue={prefillEmail} required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-company" : "company"} className={labelCls}>Company / Firm Name</label>
-        <input id={ghost ? "mobile-company" : "company"} name="company" required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
+        <input id={ghost ? "mobile-company" : "company"} name="company" defaultValue={prefillFirm} required maxLength={200} autoComplete="organization" placeholder="Studio name" className={inputCls} />
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-phone" : "phone"} className={labelCls}>Phone Number</label>
-        <input id={ghost ? "mobile-phone" : "phone"} type="tel" name="phone" required minLength={7} maxLength={30} autoComplete="tel" placeholder="E.G., +1 212 555 0199" className={inputCls} />
+        <input id={ghost ? "mobile-phone" : "phone"} type="tel" name="phone" defaultValue={prefillPhone} required minLength={7} maxLength={30} autoComplete="tel" placeholder="E.G., +1 212 555 0199" className={inputCls} />
       </div>
       <div>
         <label htmlFor={ghost ? "mobile-website" : "website"} className={labelCls}>Website or Instagram Handle</label>
-        <input id={ghost ? "mobile-website" : "website"} name="website" minLength={3} maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-required="true" aria-invalid={Boolean(portfolioError)} aria-describedby={portfolioError ? (ghost ? "mobile-website-error" : "website-error") : undefined} onChange={() => portfolioError && setPortfolioError(null)} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
+        <input id={ghost ? "mobile-website" : "website"} name="website" defaultValue={prefillWebsite} minLength={3} maxLength={300} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-required="true" aria-invalid={Boolean(portfolioError)} aria-describedby={portfolioError ? (ghost ? "mobile-website-error" : "website-error") : undefined} onChange={() => portfolioError && setPortfolioError(null)} placeholder="e.g., yourwebsite.com or @instagramhandle" className={inputCls} />
         {portfolioError && <p id={ghost ? "mobile-website-error" : "website-error"} role="alert" className="mt-1.5 text-left font-body text-[10px] uppercase tracking-wide text-destructive">{portfolioError}</p>}
       </div>
       <div>
@@ -459,7 +464,7 @@ const TradeLanding = () => {
       };
     }
     const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, completeApplication: true, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
+      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName: (searchParams.get("name") || "").slice(0, 120) || undefined, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
     });
     setJoinLoading(false);
     setTurnstileToken("");
@@ -484,11 +489,11 @@ const TradeLanding = () => {
     });
   }, []);
 
-  // Legacy #apply/#register deep links now live on the dedicated application page.
+  // Legacy #apply/#register deep links scroll to the application form.
   useEffect(() => {
     const hash = window.location.hash;
     if (hash === "#register" || hash === "#apply") {
-      navigate("/trade/apply", { replace: true });
+      document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [navigate]);
 
@@ -1024,7 +1029,7 @@ const TradeLanding = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <button
-                onClick={() => navigate("/trade/apply")}
+                onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); window.setTimeout(() => (document.getElementById("email") ?? document.getElementById("mobile-email"))?.focus({ preventScroll: true }), 500); }}
                 className="inline-flex items-center px-8 py-3 bg-[hsl(var(--gold))] hover:bg-[hsl(var(--gold)/0.9)] text-white border border-[hsl(var(--gold))] font-body text-xs uppercase tracking-[0.2em] rounded-none transition-all duration-300 font-bold min-w-[160px] justify-center"
               >
                 Apply Now
