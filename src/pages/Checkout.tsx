@@ -2063,7 +2063,7 @@ export default function Checkout() {
     if (!user?.id || vatPrefilled.current) return;
     vatPrefilled.current = true;
     supabase
-      .from("trade_applications")
+      .from("trade_accounts")
       .select("tax_vat_id, status")
       .eq("user_id", user.id)
       .eq("status", "approved")

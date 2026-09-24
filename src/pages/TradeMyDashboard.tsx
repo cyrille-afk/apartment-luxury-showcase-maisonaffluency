@@ -100,12 +100,12 @@ export default function TradeMyDashboard() {
       .maybeSingle()
       .then(({ data }) => setImpersonated(data as ImpersonatedUser | null));
     supabase
-      .from("trade_applications")
+      .from("trade_accounts")
       .select("status")
       .eq("user_id", asUserId!)
       .order("created_at", { ascending: false })
       .limit(1)
-      .then(({ data }) => setImpersonatedStatus((data?.[0]?.status as any) || "none"));
+      .then(({ data }) => { const s = data?.[0]?.status; setImpersonatedStatus(((s === "pending_review" || s === "on_hold") ? "pending" : s) as any || "none"); });
     supabase
       .from("user_roles")
       .select("role")
@@ -134,7 +134,7 @@ export default function TradeMyDashboard() {
                 <p className="font-body text-sm font-medium text-amber-900 dark:text-amber-100">Access restricted</p>
                 <p className="font-body text-xs text-amber-900/80 dark:text-amber-100/80 mt-0.5">
                   The Trade Portal is reserved for approved interior designers and architects. Your account has access to this personal dashboard only.{" "}
-                  <Link to="/trade/register" className="underline underline-offset-2 font-medium hover:opacity-80">
+                  <Link to="/trade-program" className="underline underline-offset-2 font-medium hover:opacity-80">
                     Apply for trade access
                   </Link>{" "}
                   to unlock trade pricing, spec sheets, project folders and FF&amp;E tools.

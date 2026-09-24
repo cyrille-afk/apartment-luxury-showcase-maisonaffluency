@@ -50,14 +50,13 @@ export function useRegionalLogistics() {
       }
       let tier: RegionTier = mapCountryToRegionTier((profile as any)?.country);
       const { data: app } = await supabase
-        .from("trade_applications")
-        .select("region_tier, country")
+        .from("trade_accounts")
+        .select("country")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (app?.region_tier) tier = app.region_tier as RegionTier;
-      else if (app?.country) tier = mapCountryToRegionTier(app.country);
+      if (app?.country) tier = mapCountryToRegionTier(app.country);
 
       const { data: rules } = await supabase
         .from("regional_logistics_tiers")
