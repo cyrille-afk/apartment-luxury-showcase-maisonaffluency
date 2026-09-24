@@ -1018,8 +1018,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="grid grid-cols-2 px-8 py-8">
-                        <div className="border-r border-border/60 pr-7">
+                      <div className="flex items-stretch">
+                        <div className="w-1/2 shrink-0 border-r border-border/60 px-8 py-8">
                           {roomNavigation.living.map((item, index) => (
                             <Button
                               key={item.label}
@@ -1052,17 +1052,14 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           </Button>
                         </div>
 
-                        <div className="relative min-h-56 pl-7">
+                        <div className="w-1/2 px-8 py-8">
                           {activeRoomCategory !== null && (
-                            <div className={cn(
-                              "absolute left-7 right-0",
-                              activeRoomCategory === -1 ? "top-48" :
-                              activeRoomCategory === 0 ? "top-0" :
-                              activeRoomCategory === 1 ? "top-8" :
-                              activeRoomCategory === 2 ? "top-16" :
-                              activeRoomCategory === 3 ? "top-24" :
-                              activeRoomCategory === 4 ? "top-32" : "top-40"
-                            )}>
+                            <div>
+                              <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
+                                {activeRoomCategory === -1
+                                  ? "Shop By Room"
+                                  : `${roomNavigation.living[activeRoomCategory]?.label} Collections`}
+                              </div>
                             {activeRoomCategory === -1 ? (
                               <>
                               <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
@@ -1133,8 +1130,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
-            <div className="grid grid-cols-2 px-9 py-8">
-              <div className="border-r border-border/60 pr-8">
+            <div className="flex items-stretch">
+              <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                 <div>
                   {roomNavigation[activeRoomMenu].map((item, index) => (
                     <Button
@@ -1156,16 +1153,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               </div>
 
-              <div className="relative min-h-48 pl-8">
+              <div className="w-1/2 px-9 py-8">
                 {activeRoomCategory !== null && (
-                <div className={cn(
-                  "absolute left-8 right-0",
-                  activeRoomCategory === 0 ? "top-0" :
-                  activeRoomCategory === 1 ? "top-8" :
-                  activeRoomCategory === 2 ? "top-16" :
-                  activeRoomCategory === 3 ? "top-24" :
-                  activeRoomCategory === 4 ? "top-32" : "top-40"
-                )}>
+                <div>
+                  <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
+                    {roomNavigation[activeRoomMenu][activeRoomCategory]?.label} Collections
+                  </div>
                   {roomNavigation[activeRoomMenu][activeRoomCategory]?.subcategories.map((subcategory) => (
                     <Button
                       key={subcategory}
