@@ -8311,6 +8311,7 @@ export type Database = {
           credential_document_path: string | null
           email: string
           id: string
+          phone_number: string | null
           radar_flag: string | null
           radar_score: number | null
           radar_scored_at: string | null
@@ -8332,6 +8333,7 @@ export type Database = {
           credential_document_path?: string | null
           email: string
           id?: string
+          phone_number?: string | null
           radar_flag?: string | null
           radar_score?: number | null
           radar_scored_at?: string | null
@@ -8353,6 +8355,7 @@ export type Database = {
           credential_document_path?: string | null
           email?: string
           id?: string
+          phone_number?: string | null
           radar_flag?: string | null
           radar_score?: number | null
           radar_scored_at?: string | null
@@ -9581,6 +9584,7 @@ export type Database = {
           email: string
           id: string
           invite_email_sent_at: string | null
+          phone_number: string | null
           portfolio_reference: string | null
           referrer: string | null
           source: string
@@ -9597,6 +9601,7 @@ export type Database = {
           email: string
           id?: string
           invite_email_sent_at?: string | null
+          phone_number?: string | null
           portfolio_reference?: string | null
           referrer?: string | null
           source?: string
@@ -9613,6 +9618,7 @@ export type Database = {
           email?: string
           id?: string
           invite_email_sent_at?: string | null
+          phone_number?: string | null
           portfolio_reference?: string | null
           referrer?: string | null
           source?: string
