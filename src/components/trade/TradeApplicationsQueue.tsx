@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, PauseCircle, RefreshCw } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
+import { WaitingClock } from "@/components/trade/TimeToApproval";
 
 type Dna = VisualThemeDna & {
   status: string;
@@ -136,7 +137,13 @@ export default function TradeApplicationsQueue() {
                     </a>
                   )}
                   {a.business_reg_number && <div className="text-xs text-muted-foreground">Reg. {a.business_reg_number}</div>}
-                  <div className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</div>
+                  <div className="pt-1">
+                    <WaitingClock
+                      createdAt={a.created_at}
+                      open={a.status === "pending_review" || a.status === "on_hold"}
+                      highIntent={a.radar_score !== null && a.radar_score >= 80}
+                    />
+                  </div>
                 </div>
 
                  <div className="space-y-2 text-sm">
