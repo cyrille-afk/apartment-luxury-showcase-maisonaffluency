@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import TradeApplicationsQueue from "@/components/trade/TradeApplicationsQueue";
+import { TimeToApprovalKpi } from "@/components/trade/TimeToApproval";
 
 const TradeAdminApplications = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -40,7 +41,7 @@ const TradeAdminApplications = () => {
       </Helmet>
 
       <div className="w-full px-8 py-12 md:px-10 md:py-16">
-        <TradeApplicationsQueue />
+        <div className="space-y-6"><TimeToApprovalKpi /><TradeApplicationsQueue /></div>
       </div>
     </div>
   );

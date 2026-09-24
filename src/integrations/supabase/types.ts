@@ -8256,6 +8256,7 @@ export type Database = {
       trade_accounts: {
         Row: {
           admin_notes: string | null
+          approved_at: string | null
           business_reg_number: string | null
           contact_name: string | null
           created_at: string
@@ -8276,6 +8277,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          approved_at?: string | null
           business_reg_number?: string | null
           contact_name?: string | null
           created_at?: string
@@ -8296,6 +8298,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          approved_at?: string | null
           business_reg_number?: string | null
           contact_name?: string | null
           created_at?: string
