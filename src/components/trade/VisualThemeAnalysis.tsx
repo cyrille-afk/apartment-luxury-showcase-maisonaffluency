@@ -71,12 +71,43 @@ function EvidenceImage({ src, index }: { src?: string; index: number }) {
   );
 }
 
-function EditableBlock({ title, values, onChange, placeholder }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string }) {
+let catalogDesignersCache: Promise<string[]> | null = null;
+function loadCatalogDesigners() {
+  if (!catalogDesignersCache) {
+    catalogDesignersCache = (async () => {
+      const [d, p] = await Promise.all([
+        supabase.from("designers").select("name, display_name").limit(2000),
+        supabase.from("trade_products").select("brand_name").not("brand_name", "is", null).limit(5000),
+      ]);
+      const map = new Map<string, string>();
+      const push = (v?: string | null) => { const t = v?.trim(); if (t && !map.has(t.toLowerCase())) map.set(t.toLowerCase(), t); };
+      (d.data ?? []).forEach((r: any) => { push(r.display_name || r.name); });
+      (p.data ?? []).forEach((r: any) => push(r.brand_name));
+      return [...map.values()].sort((a, b) => a.localeCompare(b));
+    })().catch(() => { catalogDesignersCache = null; return []; });
+  }
+  return catalogDesignersCache;
+}
+
+function EditableBlock({ title, values, onChange, placeholder, suggestions, onPick }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string; suggestions?: string[]; onPick?: (next: string[]) => void }) {
   const [draft, setDraft] = useState("");
+  const [open, setOpen] = useState(false);
+  const [hi, setHi] = useState(0);
+  const q = draft.trim().toLowerCase();
+  const matches = suggestions && q
+    ? suggestions.filter((s) => s.toLowerCase().includes(q) && !values.some((v) => v.toLowerCase() === s.toLowerCase())).slice(0, 8)
+    : [];
+  const showList = open && matches.length > 0;
   const add = () => {
     const v = draft.trim();
     if (v && !values.some((x) => x.toLowerCase() === v.toLowerCase())) onChange([...values, v].slice(0, 12));
     setDraft("");
+  };
+  const pick = (name: string) => {
+    const next = values.some((x) => x.toLowerCase() === name.toLowerCase()) ? values : [...values, name].slice(0, 12);
+    onChange(next);
+    onPick?.(next);
+    setDraft(""); setOpen(false); setHi(0);
   };
   return (
     <div className="border-t border-border pt-4 first:border-t-0 first:pt-0">
@@ -90,15 +121,42 @@ function EditableBlock({ title, values, onChange, placeholder }: { title: string
             </button>
           </span>
         ))}
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
-          onBlur={add}
-          maxLength={60}
-          placeholder={`+ Add ${placeholder}`}
-          className="min-w-[8rem] flex-1 border-b border-dashed border-border bg-transparent px-1 py-1 font-body text-[11px] text-foreground placeholder:text-muted-foreground focus:border-foreground focus:outline-none"
-        />
+        <div className="relative min-w-[8rem] flex-1">
+          <input
+            value={draft}
+            onChange={(e) => { setDraft(e.target.value); setOpen(true); setHi(0); }}
+            onFocus={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (showList && e.key === "ArrowDown") { e.preventDefault(); setHi((h) => (h + 1) % matches.length); return; }
+              if (showList && e.key === "ArrowUp") { e.preventDefault(); setHi((h) => (h - 1 + matches.length) % matches.length); return; }
+              if (showList && e.key === "Escape") { setOpen(false); return; }
+              if (e.key === "Enter" && showList) { e.preventDefault(); pick(matches[Math.min(hi, matches.length - 1)]); return; }
+              if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+            }}
+            onBlur={() => { setOpen(false); add(); }}
+            maxLength={60}
+            placeholder={`+ Add ${placeholder}`}
+            role={suggestions ? "combobox" : undefined}
+            aria-expanded={suggestions ? showList : undefined}
+            className="w-full border-b border-dashed border-border bg-transparent px-1 py-1 font-body text-[11px] text-foreground placeholder:text-muted-foreground focus:border-foreground focus:outline-none"
+          />
+          {showList && (
+            <ul role="listbox" className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-auto border border-border bg-visual-evidence text-xs shadow-md">
+              {matches.map((m, i) => (
+                <li
+                  key={m}
+                  role="option"
+                  aria-selected={i === hi}
+                  onMouseDown={(e) => { e.preventDefault(); pick(m); }}
+                  onMouseEnter={() => setHi(i)}
+                  className={`cursor-pointer px-3 py-1.5 font-body text-foreground ${i === hi ? "bg-muted" : ""}`}
+                >
+                  {m}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
