@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Quote, Sparkles, Upload } from "lucide-react";
+import { LoaderCircle, Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
@@ -217,7 +217,7 @@ interface HeroJoinFormProps {
   joinError: string | null;
   joinCredentialFile: File | null;
   setJoinCredentialFile: (f: File | null) => void;
-  handleApplicationSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleApplicationSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   turnstileToken: string;
   setTurnstileToken: (t: string) => void;
 }
@@ -234,6 +234,20 @@ const HeroJoinForm = ({
   setTurnstileToken,
 }: HeroJoinFormProps) => {
   const credentialFileRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!e.currentTarget.checkValidity() || !turnstileToken) {
+      await handleApplicationSubmit(e);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await handleApplicationSubmit(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const labelCls = cn(
     "mb-1.5 block text-left font-body text-[10px] uppercase tracking-[0.22em]",
     ghost ? "text-white/85" : "text-muted-foreground"
@@ -275,7 +289,7 @@ const HeroJoinForm = ({
           </p>
         </motion.div>
   ) : (
-    <form onSubmit={handleApplicationSubmit} className={cn("mx-auto flex w-full max-w-lg flex-col gap-3 md:mx-0", ghost && "max-w-md")}>
+    <form onSubmit={submitApplication} className={cn("mx-auto flex w-full max-w-lg flex-col gap-3 md:mx-0", ghost && "max-w-md")}>
       <div>
         <label htmlFor={ghost ? "mobile-email" : "email"} className={labelCls}>Work Email</label>
         <input id={ghost ? "mobile-email" : "email"} type="email" name="email" required maxLength={254} autoComplete="email" placeholder="Your work email" className={inputCls} />
@@ -325,10 +339,16 @@ const HeroJoinForm = ({
       </div>
       <button
         type="submit"
-        disabled={joinLoading || !turnstileToken}
-        className="h-12 w-full bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:bg-chip-affinity disabled:text-chip-affinity-foreground disabled:opacity-100"
+        disabled={isLoading || joinLoading || !turnstileToken}
+        aria-label={isLoading ? "Submitting application" : undefined}
+        aria-busy={isLoading}
+        className="flex h-12 w-full items-center justify-center bg-chip-affinity font-body text-[10px] font-semibold uppercase tracking-widest text-chip-affinity-foreground transition-colors hover:bg-foreground disabled:cursor-not-allowed disabled:bg-chip-affinity disabled:text-chip-affinity-foreground disabled:opacity-100"
       >
-        {joinLoading ? "Submitting…" : "Submit Application"}
+        {isLoading || joinLoading ? (
+          <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          "Submit Application"
+        )}
       </button>
       {joinError && <p className={cn("text-center font-body text-[11px] md:text-left", ghost ? "text-background" : "text-destructive")}>{joinError}</p>}
       <p className={cn("mt-4 pt-1 text-center font-body text-[11px] tracking-wide md:text-left md:text-xs", ghost ? "text-background/95" : "text-muted-foreground")}>
