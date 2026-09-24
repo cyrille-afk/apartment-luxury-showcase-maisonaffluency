@@ -1091,6 +1091,7 @@ export function AIConcierge({
   const [cnViewingOpen, setCnViewingOpen] = useState(false);
   const cnBriefFiredRef = useRef(false);
   const cnLastBriefUserTurnRef = useRef(0);
+  const [guestContactKey, setGuestContactKey] = useState<string | null>(null);
 
   // Compact side panel for Design Director next-step CTAs.
   type NextStepKind = "source" | "quote" | "match";
@@ -5672,6 +5673,9 @@ export function AIConcierge({
                 </div>
               );
             })}
+            {guestContactKey && !streaming && (
+              <GuestContactCapture guestKey={guestContactKey} onDone={() => setGuestContactKey(null)} />
+            )}
             {showTypingDots && (
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
