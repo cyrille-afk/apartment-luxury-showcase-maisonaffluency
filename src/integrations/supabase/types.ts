@@ -8306,11 +8306,17 @@ export type Database = {
           admin_notes: string | null
           approved_at: string | null
           business_reg_number: string | null
+          city: string | null
           contact_name: string | null
+          country: string | null
           created_at: string
           credential_document_path: string | null
           email: string
           id: string
+          instagram_handle: string | null
+          intent: string | null
+          job_title: string | null
+          legacy_application_id: string | null
           phone_number: string | null
           radar_flag: string | null
           radar_score: number | null
@@ -8319,20 +8325,29 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           signup_id: string | null
+          source: string | null
           status: string
           studio_name: string | null
+          tax_vat_id: string | null
           updated_at: string
+          user_id: string | null
           website_or_ig: string | null
         }
         Insert: {
           admin_notes?: string | null
           approved_at?: string | null
           business_reg_number?: string | null
+          city?: string | null
           contact_name?: string | null
+          country?: string | null
           created_at?: string
           credential_document_path?: string | null
           email: string
           id?: string
+          instagram_handle?: string | null
+          intent?: string | null
+          job_title?: string | null
+          legacy_application_id?: string | null
           phone_number?: string | null
           radar_flag?: string | null
           radar_score?: number | null
@@ -8341,20 +8356,29 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           signup_id?: string | null
+          source?: string | null
           status?: string
           studio_name?: string | null
+          tax_vat_id?: string | null
           updated_at?: string
+          user_id?: string | null
           website_or_ig?: string | null
         }
         Update: {
           admin_notes?: string | null
           approved_at?: string | null
           business_reg_number?: string | null
+          city?: string | null
           contact_name?: string | null
+          country?: string | null
           created_at?: string
           credential_document_path?: string | null
           email?: string
           id?: string
+          instagram_handle?: string | null
+          intent?: string | null
+          job_title?: string | null
+          legacy_application_id?: string | null
           phone_number?: string | null
           radar_flag?: string | null
           radar_score?: number | null
@@ -8363,9 +8387,12 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           signup_id?: string | null
+          source?: string | null
           status?: string
           studio_name?: string | null
+          tax_vat_id?: string | null
           updated_at?: string
+          user_id?: string | null
           website_or_ig?: string | null
         }
         Relationships: [
