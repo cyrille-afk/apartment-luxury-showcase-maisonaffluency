@@ -693,6 +693,7 @@ const TradeAtelierProfile = () => {
                       founder: designer.founder,
                       parentBrand: isParentBrand ? designer.name : null,
                     });
+                    const curatorialEditionLine = formatCuratorialEditionLine(pick);
                     const productPath = tradeProductPathForPick(pick, designerSlug || slug, designerLabel || designer.name);
                     return (
                     <div
@@ -727,12 +728,12 @@ const TradeAtelierProfile = () => {
                             />
                           );
                         })()}
-                        {formatCuratorialEditionLine(pick) && (
+                        {curatorialEditionLine && (
                           <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                            {formatCuratorialEditionLine(pick)}
+                            {curatorialEditionLine}
                           </p>
                         )}
-                        {showReedition && (
+                        {showReedition && !curatorialEditionLine && (
                           <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
                             {ECART_REEDITION_LABEL}
                           </p>
