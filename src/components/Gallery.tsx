@@ -539,7 +539,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [gridCols, setGridCols] = useState<GalleryGridCols>(4);
+  const [gridCols, setGridCols] = useState<GalleryGridCols>(3);
   const [activeMobilePill, setActiveMobilePill] = useState(-1);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -1069,7 +1069,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   });
   return <>
        <section id="gallery" ref={ref} className="pt-0 pb-4 md:pt-0 md:pb-24 bg-white scroll-header-offset">
-        <div className="mx-auto max-w-7xl px-6 md:px-12">
+        <div className="mx-auto w-full px-6 md:px-12 lg:px-[60px]">
           <motion.div initial={{
           opacity: 0,
           y: 30
