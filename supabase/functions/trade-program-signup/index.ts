@@ -51,6 +51,29 @@ Deno.serve(async (req) => {
     return json({ error: 'Enter a website or an Instagram handle starting with @' }, 400)
   }
 
+  // Bot protection: the final submission (account creation + alerts) requires
+  // a valid Cloudflare Turnstile token before any insert or notification.
+  if (step === 3) {
+    const token = String(body['cf-turnstile-response'] ?? '').trim()
+    const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
+    if (!secret) return json({ error: 'Security check unavailable' }, 503)
+    if (!token || token.length > 4096) return json({ error: 'Security check required' }, 403)
+    const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? ''
+    try {
+      const form = new URLSearchParams({ secret, response: token })
+      if (ip) form.set('remoteip', ip)
+      const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form })
+      const v = await r.json()
+      if (!v.success) {
+        console.warn('Turnstile failed:', v['error-codes'])
+        return json({ error: 'Security check failed' }, 403)
+      }
+    } catch (err) {
+      console.error('Turnstile verify error:', err)
+      return json({ error: 'Security check failed' }, 403)
+    }
+  }
+
   const supabase = createClient(supabaseUrl, serviceKey)
 
   const { data: existing } = await supabase
