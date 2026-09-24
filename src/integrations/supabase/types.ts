@@ -4174,6 +4174,24 @@ export type Database = {
           },
         ]
       }
+      internal_job_tokens: {
+        Row: {
+          created_at: string
+          name: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          token?: string
+        }
+        Relationships: []
+      }
       items: {
         Row: {
           balance_due: number
@@ -10546,6 +10564,7 @@ export type Database = {
         Args: { _pick_id: string }
         Returns: boolean
       }
+      _internal_job_token: { Args: never; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {
