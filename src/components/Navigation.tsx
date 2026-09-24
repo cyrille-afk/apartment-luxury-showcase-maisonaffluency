@@ -191,7 +191,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
-  const [activeRoomCategory, setActiveRoomCategory] = useState(0);
+  const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -488,7 +488,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
   const openRoomMenu = (room: RoomNavKey) => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
-    if (activeRoomMenu !== room) setActiveRoomCategory(room === "living" ? -1 : 0);
+    if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
     setMegaMenuOpen(true);
   };
@@ -1010,19 +1010,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       `}</style>
                       <div className="grid grid-cols-2 px-8 py-8">
                         <div className="border-r border-border/60 pr-7">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onMouseEnter={() => setActiveRoomCategory(-1)}
-                            onFocus={() => setActiveRoomCategory(-1)}
-                            className={cn(
-                              "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                              activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
-                            )}
-                          >
-                            Shop By Room
-                            <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
-                          </Button>
                           {roomNavigation.living.map((item, index) => (
                             <Button
                               key={item.label}
@@ -1032,7 +1019,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
-                                "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
                                 activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
                               )}
                             >
@@ -1040,18 +1027,41 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
                             </Button>
                           ))}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onMouseEnter={() => setActiveRoomCategory(-1)}
+                            onFocus={() => setActiveRoomCategory(-1)}
+                            className={cn(
+                              "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                              activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
+                            )}
+                          >
+                            Shop By Room
+                            <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
+                          </Button>
                         </div>
 
-                        <div className="pl-7">
-                          {activeRoomCategory === -1 ? (
-                            <div>
+                        <div className="relative min-h-56 pl-7">
+                          {activeRoomCategory !== null && (
+                            <div className={cn(
+                              "absolute left-7 right-0",
+                              activeRoomCategory === -1 ? "top-48" :
+                              activeRoomCategory === 0 ? "top-0" :
+                              activeRoomCategory === 1 ? "top-8" :
+                              activeRoomCategory === 2 ? "top-16" :
+                              activeRoomCategory === 3 ? "top-24" :
+                              activeRoomCategory === 4 ? "top-32" : "top-40"
+                            )}>
+                            {activeRoomCategory === -1 ? (
+                              <>
                               <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
                                 Living Rooms
                               </Button>
                               <Button type="button" variant="ghost" onClick={() => navigateToRoom("office")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
                                 Office
                               </Button>
-                            </div>
+                              </>
                           ) : (
                             roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
                               <Button
@@ -1064,6 +1074,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                 {subcategory}
                               </Button>
                             ))
+                          )}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1133,9 +1145,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
             `}</style>
             <div className="grid grid-cols-2 px-9 py-8">
               <div className="border-r border-border/60 pr-8">
-                <p className="mb-5 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {activeRoomMenu}
-                </p>
                 <div>
                   {roomNavigation[activeRoomMenu].map((item, index) => (
                     <Button
@@ -1146,7 +1155,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       onFocus={() => setActiveRoomCategory(index)}
                       onClick={() => navigateFromMegaMenu(item.category)}
                       className={cn(
-                        "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                        "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
                         activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
                       )}
                     >
@@ -1157,11 +1166,16 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               </div>
 
-              <div className="pl-8">
-                <p className="mb-5 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {roomNavigation[activeRoomMenu][activeRoomCategory]?.label}
-                </p>
-                <div>
+              <div className="relative min-h-48 pl-8">
+                {activeRoomCategory !== null && (
+                <div className={cn(
+                  "absolute left-8 right-0",
+                  activeRoomCategory === 0 ? "top-0" :
+                  activeRoomCategory === 1 ? "top-8" :
+                  activeRoomCategory === 2 ? "top-16" :
+                  activeRoomCategory === 3 ? "top-24" :
+                  activeRoomCategory === 4 ? "top-32" : "top-40"
+                )}>
                   {roomNavigation[activeRoomMenu][activeRoomCategory]?.subcategories.map((subcategory) => (
                     <Button
                       key={subcategory}
@@ -1174,6 +1188,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </Button>
                   ))}
                 </div>
+                )}
               </div>
             </div>
           </div>
