@@ -610,6 +610,13 @@
       "when": 1790213723389,
       "tag": "0086_trade_accounts_radar",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1790219066457,
+      "tag": "0087_studio_aesthetic_dna_admin_update",
+      "breakpoints": true
     }
   ]
 }
