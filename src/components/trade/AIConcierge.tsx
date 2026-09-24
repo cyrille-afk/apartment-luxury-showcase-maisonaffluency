@@ -3790,14 +3790,32 @@ export function AIConcierge({
     const invitedName = typeof window !== "undefined"
       ? sessionStorage.getItem("cn_portal:invited_name")
       : null;
-    const payload = {
-      session_id: sessionId,
-      invited_name: invitedName,
-      messages: chatMsgs.map((t) => ({ role: t.role, content: t.content })),
-    };
-    supabase.functions
-      .invoke("concierge-cn-brief", { body: payload })
-      .catch((e) => console.warn("[cn-brief]", e));
+    const messages = chatMsgs
+      .slice(-40)
+      .map((t) => ({ role: t.role, content: String(t.content ?? "").slice(0, 1200) }));
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.functions.invoke("concierge-cn-brief", {
+          body: { session_id: sessionId, invited_name: invitedName, messages },
+        });
+        return;
+      }
+      // Guests: write-only sandbox queue; admins bridge it into briefs.
+      let guestKey = sessionStorage.getItem("cn_portal:guest_key");
+      if (!guestKey) {
+        guestKey = crypto.randomUUID();
+        sessionStorage.setItem("cn_portal:guest_key", guestKey);
+      }
+      const { error } = await supabase.from("guest_inquiries").insert({
+        guest_key: guestKey,
+        lang: "zh",
+        invited_name: invitedName ? invitedName.slice(0, 120) : null,
+        portal_session_hint: sessionId ? sessionId.slice(0, 64) : null,
+        messages,
+      });
+      if (error) console.warn("[guest-inquiry]", error.message);
+    })().catch((e) => console.warn("[cn-brief]", e));
   }, [timeline, streaming, lang]);
 
 
