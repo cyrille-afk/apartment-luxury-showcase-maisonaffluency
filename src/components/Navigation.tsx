@@ -490,9 +490,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
   const openRoomMenu = (room: RoomNavKey) => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
-    if (activeRoomMenu !== room) setActiveRoomCategory(0);
+    if (activeRoomMenu !== room) setActiveRoomCategory(room === "living" ? -1 : 0);
     setActiveRoomMenu(room);
     setMegaMenuOpen(true);
+  };
+
+  const navigateToRoom = (room: "living-room" | "office") => {
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    navigate(`/search?room=${room}`);
   };
 
   const scheduleRoomMenuClose = () => {
@@ -971,22 +977,101 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </button>
 
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
-                <Button
+                <div
                   key={room}
-                  type="button"
-                  variant="ghost"
-                  onMouseEnter={() => openRoomMenu(room)}
+                  className="relative"
+                  onMouseEnter={keepRoomMenuOpen}
                   onMouseLeave={scheduleRoomMenuClose}
-                  onFocus={() => openRoomMenu(room)}
-                  onClick={() => openRoomMenu(room)}
-                  aria-expanded={megaMenuOpen && activeRoomMenu === room}
-                  className={cn(
-                    "group relative h-auto rounded-none p-0 font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
-                    megaMenuOpen && activeRoomMenu === room && "text-foreground"
-                  )}
                 >
-                  <span className="link-underline-grow">{room}</span>
-                </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onMouseEnter={() => openRoomMenu(room)}
+                    onFocus={() => openRoomMenu(room)}
+                    onClick={() => openRoomMenu(room)}
+                    aria-expanded={megaMenuOpen && activeRoomMenu === room}
+                    className={cn(
+                      "group relative h-auto rounded-none p-0 font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
+                      megaMenuOpen && activeRoomMenu === room && "text-foreground"
+                    )}
+                  >
+                    <span className="link-underline-grow">{room}</span>
+                  </Button>
+
+                  {room === "living" && megaMenuOpen && activeRoomMenu === "living" && (
+                    <div
+                      ref={megaMenuRef}
+                      className="absolute left-0 top-full z-50 mt-3 w-[540px] bg-background shadow-xl"
+                      style={{ animation: "livingMenuReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                    >
+                      <style>{`
+                        @keyframes livingMenuReveal {
+                          from { opacity: 0; transform: translateY(-5px); }
+                          to { opacity: 1; transform: translateY(0); }
+                        }
+                      `}</style>
+                      <div className="grid grid-cols-2 px-8 py-8">
+                        <div className="border-r border-border/60 pr-7">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onMouseEnter={() => setActiveRoomCategory(-1)}
+                            onFocus={() => setActiveRoomCategory(-1)}
+                            className={cn(
+                              "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                              activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
+                            )}
+                          >
+                            Shop By Room
+                            <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
+                          </Button>
+                          {roomNavigation.living.map((item, index) => (
+                            <Button
+                              key={item.label}
+                              type="button"
+                              variant="ghost"
+                              onMouseEnter={() => setActiveRoomCategory(index)}
+                              onFocus={() => setActiveRoomCategory(index)}
+                              onClick={() => navigateFromMegaMenu(item.category)}
+                              className={cn(
+                                "mb-3 flex h-auto w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
+                              )}
+                            >
+                              {item.label}
+                              <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
+                            </Button>
+                          ))}
+                        </div>
+
+                        <div className="pl-7">
+                          {activeRoomCategory === -1 ? (
+                            <div>
+                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                                Living Rooms
+                              </Button>
+                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("office")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                                Office
+                              </Button>
+                            </div>
+                          ) : (
+                            roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
+                              <Button
+                                key={subcategory}
+                                type="button"
+                                variant="ghost"
+                                onClick={() => navigateFromMegaMenu(roomNavigation.living[activeRoomCategory].category, subcategory)}
+                                className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                              >
+                                {subcategory}
+                              </Button>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
 
               <button
@@ -1045,7 +1130,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
 
         {/* Room-first two-column drill-down */}
-        {megaMenuOpen && activeRoomMenu && (
+        {megaMenuOpen && activeRoomMenu && activeRoomMenu !== "living" && (
           <div
             ref={megaMenuRef}
             onMouseEnter={keepRoomMenuOpen}
