@@ -320,7 +320,8 @@ serve(async (req) => {
   const arr = (v: unknown) => Array.isArray(v) ? v.map(String).slice(0, 8) : [];
   await supabase.from("studio_aesthetic_dna").update({
     status: "complete",
-    image_urls: usable,
+    // A transient CDN block must never blank evidence that was already saved.
+    image_urls: usable.length ? usable : priorImages,
     aesthetic_label: parsed.aesthetic_label ? String(parsed.aesthetic_label).slice(0, 120) : null,
     aesthetic_summary: parsed.aesthetic_summary ? String(parsed.aesthetic_summary).slice(0, 1500) : null,
     dominant_tones: arr(parsed.dominant_tones),
