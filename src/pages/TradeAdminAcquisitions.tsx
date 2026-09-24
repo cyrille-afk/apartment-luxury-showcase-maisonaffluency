@@ -276,7 +276,13 @@ const TradeAdminAcquisitions = () => {
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
-      return (data ?? []) as unknown as Lead[];
+      // Inbound applicants (3-step form) live in the Trade Applications queue,
+      // never in outbound acquisitions.
+      const { data: inbound } = await supabase.from("trade_accounts").select("email").limit(2000);
+      const inboundEmails = new Set((inbound ?? []).map((r) => r.email.toLowerCase()));
+      return ((data ?? []) as unknown as Lead[]).filter(
+        (l) => !l.business_email || !inboundEmails.has(l.business_email.toLowerCase()),
+      );
     },
   });
 
