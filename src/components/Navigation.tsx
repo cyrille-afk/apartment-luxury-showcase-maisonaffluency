@@ -1192,7 +1192,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       src={activeMegaRoom.slug === room.slug || loadedMegaRooms.has(room.slug) ? room.image : undefined}
                       alt={`${room.label} interior`}
                       decoding="async"
-                      fetchPriority={activeMegaRoom.slug === room.slug ? "high" : "low"}
                       className={cn(
                         "absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out motion-reduce:transition-none",
                         activeMegaRoom.slug === room.slug ? "opacity-100" : "opacity-0"
