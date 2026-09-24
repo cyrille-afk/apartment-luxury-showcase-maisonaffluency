@@ -335,6 +335,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     ? (attribution.designer || (pick as any).designer_name || "").trim()
                     : "";
                   const parentBrand = !isParentBrand && founderIsBrand && designer.founder
+                    && (designer as any).is_independent !== true
                     && ![designer.name, designer.display_name].includes(designer.founder)
                     ? designer.founder.trim()
                     : "";
