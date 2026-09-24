@@ -24,7 +24,7 @@ import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptio
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
-import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAttributedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -605,6 +605,10 @@ const PublicDesignerProfile = () => {
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: attributedPicks = [] } = useAttributedDesignerPicks(
+    designer && !isParentBrand ? designer : undefined,
+    { publicOnly: true },
+  );
   // Arnold Madsen owns no products of his own: his portrait surfaces Dagmar's
   // Clam Chair & Clam Stool, attributed to Dagmar (see isArnoldClamChair below).
   const isArnoldMadsenProfile = designer?.slug === "arnold-madsen";
@@ -664,7 +668,7 @@ const PublicDesignerProfile = () => {
     ? groupedPicks
     : isArnoldMadsenProfile
       ? (dagmarClamPicks as any[])
-      : ownPicks;
+      : [...ownPicks, ...attributedPicks];
 
   // Child designers must never inherit biography text, philosophy, or media from
   // the parent brand — parent bios embed inline image/video URLs that would leak.
@@ -1899,8 +1903,9 @@ const PublicDesignerProfile = () => {
                   // second card drops down. Desktop layout is untouched.
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
-                  const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
-                  const rawDesignerSlug = isGrouped && ap.designer_slug && ap.designer_slug !== designer.slug ? ap.designer_slug : undefined;
+                  const isCrossAttribution = ap.designer_id !== designer.id;
+                  const rawDesignerLabel = (isGrouped || isCrossAttribution) && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
+                  const rawDesignerSlug = (isGrouped || isCrossAttribution) && ap.designer_slug && ap.designer_slug !== designer.slug ? ap.designer_slug : undefined;
                   // Cosmetic fallback: for parent-brand picks whose title encodes
                   // the attributed designer inline (e.g. "Firefly Chandelier by
                   // Damien Langlois-Meurinne"), parse the "by X" tail and use it
@@ -1935,7 +1940,7 @@ const PublicDesignerProfile = () => {
                   // Only strip the "by X" tail from the displayed title when we
                   // actually used the parsed attribution — never touch titles
                   // that already have a proper attribution row.
-                  const displayTitle = parsedLabel ? parsed.cleanTitle : pick.title;
+                  const displayTitle = (parsedLabel || (isCrossAttribution && parsed.attribution)) ? parsed.cleanTitle : pick.title;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
                   // Parent brand attribution: always name the editing house on a
                   // child designer's card, matching the trade portal. The house

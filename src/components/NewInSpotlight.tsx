@@ -8,7 +8,7 @@ import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import type { Designer, DesignerCuratorPick } from "@/hooks/useDesigner";
-import { useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
+import { useDesignerPicks, useGroupedDesignerPicks, useAttributedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
@@ -78,6 +78,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     isParentBrand ? undefined : designer.founder
   );
   const { data: simplePicks = [] } = useDesignerPicks(hasOverride ? undefined : designer.id, { publicOnly: true });
+  const { data: attributedPicks = [] } = useAttributedDesignerPicks(
+    !hasOverride && !isParentBrand ? designer : undefined,
+    { publicOnly: true },
+  );
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     isParentBrand ? designer : undefined,
     { publicOnly: true }
@@ -86,7 +90,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     ? (picksOverride as DesignerCuratorPick[])
     : isParentBrand
       ? (groupedPicks as any as DesignerCuratorPick[])
-      : simplePicks;
+      : [...simplePicks, ...attributedPicks];
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
@@ -339,6 +343,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     && ![designer.name, designer.display_name].includes(designer.founder)
                     ? designer.founder.trim()
                     : "";
+                  const producingAtelier = !isParentBrand
+                    && pick.designer_id !== designer.id
+                    && (pick as any).designer_name
+                    ? String((pick as any).designer_name).trim()
+                    : "";
 
                   // "for X" / "by X" subtitles are editor attribution, not a brand line.
                   // On an individual designer page they belong appended to the product name.
@@ -352,6 +361,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
+                    || producingAtelier
                     || parentBrand
                     || (editorSuffix || subtitleIsFinish ? "" : composed.remainingSubtitle)
                     || (editorSuffix || subtitleIsFinish ? "" : pick.subtitle)
@@ -359,10 +369,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     || designer.name
                     || ""
                   ).trim();
+                  const creditedTitle = producingAtelier
+                    ? splitTitleAttribution(composed.title, pick.subtitle).title
+                    : attribution.title;
                   const productLine = editorSuffix
                     && !attribution.title.toLowerCase().includes(editorSuffix.toLowerCase())
-                    ? `${attribution.title} ${editorSuffix}`
-                    : attribution.title;
+                    ? `${creditedTitle} ${editorSuffix}`
+                    : creditedTitle;
                   const brandSlug = resolveSlug(brandLine);
                   return (
                     <>
