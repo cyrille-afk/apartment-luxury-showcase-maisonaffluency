@@ -345,6 +345,7 @@ const TradeRegistrationForm = ({
           // Unified payload flag: tells the inquiry route to fire the same
           // Twilio WhatsApp alert used by quote requests.
           source: "trade_application",
+          websiteOrIg: form.companyWebsite || form.instagramHandle || undefined,
         },
       }).catch((err) => console.error("Email notification failed:", err));
 

@@ -59,6 +59,7 @@ const InquirySchema = z.object({
     "trade_application",
   ]).optional(),
   attachmentPath: z.string().trim().max(500).optional(),
+  websiteOrIg: z.string().trim().max(300).optional(),
 });
 
 const TWILIO_GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
@@ -297,7 +298,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const {
       name, firm, company, email, phone, message, subject, turnstileToken,
-      productId, productSlug, productName, designerName, selectedFinish, source,
+      productId, productSlug, productName, designerName, selectedFinish, source, websiteOrIg,
       attachmentPath,
     } = parsed.data;
 
@@ -455,6 +456,63 @@ const handler = async (req: Request): Promise<Response> => {
 
 
 
+
+    // Inbound Applications: every trade application and cart / product quote
+    // request also lands in trade_accounts as pending_review, then the managed
+    // visual reader builds the 3x2 evidence matrix in the background.
+    if (isTradeApplication || resolvedSource === "public_product" ||
+        resolvedSource === "bespoke_configuration" || productId || productName) {
+      try {
+        const lowerEmail = email.trim().toLowerCase();
+        const domain = lowerEmail.split("@")[1] ?? "";
+        const { data: personal } = await supabase.from("personal_email_domains")
+          .select("domain").eq("domain", domain).maybeSingle();
+        const fromMessage = /(?:^|\n)(?:Website|Instagram):\s*(\S+)/i.exec(message || "")?.[1];
+        const reference = (websiteOrIg || fromMessage || (!personal && domain ? domain : "")).trim() || null;
+        const cleanPhone = (phone || "").trim();
+        const phoneOk = cleanPhone.length >= 7 && cleanPhone.length <= 30;
+        const { data: existingAcct } = await supabase.from("trade_accounts")
+          .select("id, status, studio_name, contact_name, phone_number, website_or_ig")
+          .ilike("email", lowerEmail).maybeSingle();
+        let acctId: string | null = existingAcct?.id ?? null;
+        if (existingAcct) {
+          await supabase.from("trade_accounts").update({
+            studio_name: existingAcct.studio_name || companyName || null,
+            contact_name: existingAcct.contact_name || name || null,
+            phone_number: existingAcct.phone_number || (phoneOk ? cleanPhone : null),
+            website_or_ig: existingAcct.website_or_ig || reference,
+          }).eq("id", existingAcct.id);
+        } else {
+          const { data: created, error: acctErr } = await supabase.from("trade_accounts").insert({
+            email: lowerEmail,
+            studio_name: companyName || null,
+            contact_name: name || null,
+            phone_number: phoneOk ? cleanPhone : null,
+            website_or_ig: reference,
+            status: "pending_review",
+            admin_notes: `Source: ${isTradeApplication ? "trade application" : "cart / product inquiry"}${productName ? ` — ${productName}` : ""}`,
+          }).select("id").single();
+          if (acctErr) console.error("trade_accounts insert failed", acctErr);
+          acctId = created?.id ?? null;
+        }
+        if (acctId && reference) {
+          await supabase.from("studio_aesthetic_dna").upsert(
+            { trade_account_id: acctId, status: "pending" },
+            { onConflict: "trade_account_id", ignoreDuplicates: true },
+          );
+          const task = fetch(`${SUPABASE_URL}/functions/v1/analyze-studio-aesthetic`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ trade_account_id: acctId }),
+          }).then((r) => r.text()).catch((e) => console.error("aesthetic trigger failed", e));
+          // deno-lint-ignore no-explicit-any
+          const rt = (globalThis as any).EdgeRuntime;
+          if (rt?.waitUntil) rt.waitUntil(task);
+        }
+      } catch (e) {
+        console.error("Inbound Applications sync failed", e);
+      }
+    }
 
     // 1. Admin notification → concierge + owner inbox
     for (const adminEmail of ADMIN_EMAILS) {
