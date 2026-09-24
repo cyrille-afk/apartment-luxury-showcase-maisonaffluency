@@ -546,7 +546,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "block w-full whitespace-nowrap pb-2.5 text-left font-['Work_Sans'] text-[12px] leading-[1.35] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
+    "mb-3 block w-full whitespace-nowrap text-left font-['Work_Sans'] text-[14px] leading-[1.35] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
 
   const megaMenuHeadingClass =
     "mb-8 border-b border-border pb-4 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
@@ -1107,10 +1107,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
-            <div className="mx-auto flex h-[600px] w-full max-w-[1560px] overflow-hidden border-x border-border bg-background">
-              <div className="flex w-[66%] flex-col justify-between px-8 py-11 xl:px-12 xl:py-12">
-                <div className="grid h-full grid-cols-[1.3fr_repeat(4,minmax(0,1fr))] gap-6 2xl:gap-8">
-                  <section className="min-w-0 border-r border-border pr-6 2xl:pr-8">
+            <div className="relative mx-auto h-[680px] w-full max-w-[1560px] overflow-hidden border-x border-border bg-background">
+              <div className="grid h-full w-[66%] grid-cols-[1.2fr_4fr] gap-10 p-10">
+                  <section className="min-w-0 border-r border-border pr-10">
                     <h3 className={megaMenuHeadingClass}>Shop by room</h3>
                     <nav className="flex flex-col items-start gap-5" aria-label="Shop by room">
                       {megaMenuRooms.map((room) => (
@@ -1133,63 +1132,66 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </nav>
                   </section>
 
-                  <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}>Furniture</h3>
-                    <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
-                    <ul>
-                      {SUBCATEGORY_MAP.Seating?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Seating", subcategory)}>{subcategory}</button></li>
-                      ))}
-                    </ul>
-                  </section>
+                  <div className="flex min-w-0 flex-col">
+                    <div className="grid w-full grid-cols-4 gap-12">
+                      <section className="min-w-0">
+                        <h3 className={megaMenuHeadingClass}>Furniture</h3>
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
+                        <ul>
+                          {SUBCATEGORY_MAP.Seating?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Seating", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </section>
 
-                  <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}>Tables &amp; Storage</h3>
-                    <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Tables")}>Tables &amp; Casegoods</button>
-                    <ul>
-                      {SUBCATEGORY_MAP.Tables?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", subcategory)}>{subcategory}</button></li>
-                      ))}
-                      {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
-                      ))}
-                    </ul>
-                  </section>
+                      <section className="min-w-0">
+                        <h3 className={megaMenuHeadingClass}>Tables &amp; Storage</h3>
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Tables")}>Tables &amp; Casegoods</button>
+                        <ul>
+                          {SUBCATEGORY_MAP.Tables?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Tables", subcategory)}>{subcategory}</button></li>
+                          ))}
+                          {SUBCATEGORY_MAP.Storage?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Storage", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </section>
 
-                  <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}>Lighting</h3>
-                    <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Lighting")}>Illumination</button>
-                    <ul>
-                      {SUBCATEGORY_MAP.Lighting?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Lighting", subcategory)}>{subcategory}</button></li>
-                      ))}
-                    </ul>
-                  </section>
+                      <section className="min-w-0">
+                        <h3 className={megaMenuHeadingClass}>Lighting</h3>
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Lighting")}>Illumination</button>
+                        <ul>
+                          {SUBCATEGORY_MAP.Lighting?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Lighting", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </section>
 
-                  <section className="min-w-0">
-                    <h3 className={megaMenuHeadingClass}>Decor &amp; Objects</h3>
-                    <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Décor")}>Objet d&apos;Art</button>
-                    <ul>
-                      {SUBCATEGORY_MAP.Rugs?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Rugs", subcategory)}>{subcategory}</button></li>
-                      ))}
-                      {SUBCATEGORY_MAP.Décor?.map((subcategory) => (
-                        <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Décor", subcategory)}>{subcategory}</button></li>
-                      ))}
-                    </ul>
-                  </section>
+                      <section className="min-w-0">
+                        <h3 className={megaMenuHeadingClass}>Decor &amp; Objects</h3>
+                        <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Décor")}>Objet d&apos;Art</button>
+                        <ul>
+                          {SUBCATEGORY_MAP.Rugs?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Rugs", subcategory)}>{subcategory}</button></li>
+                          ))}
+                          {SUBCATEGORY_MAP.Décor?.map((subcategory) => (
+                            <li key={subcategory}><button className={megaMenuLinkClass} onClick={() => navigateFromMegaMenu("Décor", subcategory)}>{subcategory}</button></li>
+                          ))}
+                        </ul>
+                      </section>
+                    </div>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-border pt-6">
+                      <button onClick={() => { setMegaMenuOpen(false); navigate("/new-in"); }} className="group flex items-center font-body text-[9px] uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground">
+                        Explore full collection
+                        <span className="ml-4 h-px w-10 bg-border transition-all duration-500 group-hover:w-16 group-hover:bg-foreground" />
+                      </button>
+                      <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency · Est. 2017</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
-                  <button onClick={() => { setMegaMenuOpen(false); navigate("/new-in"); }} className="group flex items-center font-body text-[9px] uppercase tracking-[0.25em] text-muted-foreground transition-colors hover:text-foreground">
-                    Explore full collection
-                    <span className="ml-4 h-px w-10 bg-border transition-all duration-500 group-hover:w-16 group-hover:bg-foreground" />
-                  </button>
-                  <span className="font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Maison Affluency · Est. 2017</span>
-                </div>
-              </div>
-
-              <aside className="relative w-[34%] border-l border-border bg-muted">
+              <aside className="absolute inset-y-0 right-0 h-full w-[34%] border-l border-border bg-muted">
                 <div className="absolute inset-0 overflow-hidden bg-muted">
                   {megaMenuRooms.map((room) => (
                     <img
