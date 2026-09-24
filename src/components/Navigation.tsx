@@ -546,13 +546,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const megaMenuLinkClass =
-    "block w-full text-left font-['Work_Sans'] text-[11px] leading-[1.7] text-muted-foreground antialiased transition-all duration-300 hover:translate-x-1 hover:text-foreground";
+    "block w-full text-left font-['Work_Sans'] text-[11px] leading-[1.75] text-muted-foreground antialiased transition-colors duration-300 hover:text-foreground";
 
   const megaMenuHeadingClass =
-    "mb-6 border-b border-border pb-3 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
+    "mb-8 border-b border-border pb-4 font-['Work_Sans'] text-[10px] font-medium uppercase tracking-[0.25em] text-foreground";
 
   const megaMenuClusterHeadingClass =
-    "mb-3 font-['Work_Sans'] text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground";
+    "mb-4 font-['Work_Sans'] text-[9px] font-medium uppercase tracking-[0.1em] text-foreground/50 transition-colors duration-300 hover:text-foreground";
 
   return <>
     <div
@@ -1107,12 +1107,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; transform: translateY(0); }
               }
             `}</style>
-            <div className="mx-auto flex h-[460px] w-full max-w-7xl overflow-hidden border-x border-border bg-background">
-              <div className="flex w-[70%] flex-col justify-between px-10 py-10 xl:px-12 xl:py-12">
-                <div className="grid grid-cols-[0.78fr_1.25fr_1.45fr] gap-9 xl:gap-12">
-                  <section className="min-w-0">
+            <div className="mx-auto flex h-[500px] w-full max-w-[1440px] overflow-hidden border-x border-border bg-background">
+              <div className="flex w-[66%] flex-col justify-between px-10 py-11 xl:px-14 xl:py-12">
+                <div className="grid h-full grid-cols-[0.82fr_1fr_1.18fr] gap-10 xl:gap-14">
+                  <section className="min-w-0 border-r border-border pr-8 xl:pr-12">
                     <h3 className={megaMenuHeadingClass}>Shop by room</h3>
-                    <nav className="flex flex-col items-start" aria-label="Shop by room">
+                    <nav className="flex flex-col items-start gap-5" aria-label="Shop by room">
                       {megaMenuRooms.map((room) => (
                         <a
                           key={room.slug}
@@ -1121,7 +1121,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           onFocus={() => activateMegaRoom(room)}
                           onClick={() => setMegaMenuOpen(false)}
                           className={cn(
-                            "relative py-1.5 font-['Instrument_Serif'] text-[27px] font-normal leading-[1.22] tracking-[0.03em] transition-colors duration-300 after:absolute after:bottom-1 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
+                            "relative py-1 font-['Work_Sans'] text-[21px] font-light leading-[1.5] tracking-[0.06em] antialiased transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:h-px after:bg-accent after:transition-all after:duration-500",
                             activeMegaRoom.slug === room.slug
                               ? "text-foreground after:w-8"
                               : "text-muted-foreground after:w-0 hover:text-foreground"
@@ -1133,9 +1133,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </nav>
                   </section>
 
-                  <section className="min-w-0">
+                  <section className="min-w-0 px-1">
                     <h3 className={megaMenuHeadingClass}>Furniture</h3>
-                    <div className="grid grid-cols-2 gap-7">
+                    <div className="grid grid-cols-2 gap-8">
                       <div className="min-w-0">
                         <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Seating")}>Seating</button>
                         <ul className="space-y-0.5">
@@ -1158,9 +1158,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </div>
                   </section>
 
-                  <section className="min-w-0">
+                  <section className="min-w-0 pl-1">
                     <h3 className={megaMenuHeadingClass}>Lighting &amp; Accents</h3>
-                    <div className="grid grid-cols-[0.8fr_1.2fr] gap-7">
+                    <div className="grid grid-cols-[0.82fr_1.18fr] gap-8">
                       <div className="min-w-0">
                         <button className={megaMenuClusterHeadingClass} onClick={() => navigateFromMegaMenu("Lighting")}>Illumination</button>
                         <ul className="space-y-0.5">
@@ -1193,8 +1193,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               </div>
 
-              <aside className="w-[30%] border-l border-border bg-muted/30 p-5">
-                <div className="relative h-full overflow-hidden border border-border bg-muted">
+              <aside className="relative w-[34%] border-l border-border bg-muted">
+                <div className="absolute inset-0 overflow-hidden bg-muted">
                   {megaMenuRooms.map((room) => (
                     <img
                       key={room.slug}
