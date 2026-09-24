@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Loader2, PauseCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
 
@@ -48,6 +49,7 @@ function linkFor(ref: string) {
 
 export default function TradeApplicationsQueue() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
 
@@ -92,6 +94,29 @@ export default function TradeApplicationsQueue() {
     if (error || data?.ok === false) toast.error(data?.error ?? "Analysis failed.");
     else toast.success("Aesthetic analysis updated.");
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
+  };
+
+  const declineAndDelete = async (a: Account) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this trade application metadata profile?",
+    );
+    if (!confirmed) return;
+
+    setBusy(a.id + "delete");
+    const { error } = await supabase.from("trade_accounts").delete().eq("id", a.id);
+    setBusy(null);
+
+    if (error) {
+      toast.error("Could not delete the trade application.");
+      return;
+    }
+
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["trade-applications-queue"] }),
+      qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] }),
+    ]);
+    toast.success("Trade application permanently deleted.");
+    navigate("/admin/trade-applications", { replace: true });
   };
 
   return (
@@ -196,6 +221,17 @@ export default function TradeApplicationsQueue() {
                     {busy === a.id + "dna" ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
                     Re-run analysis
                   </Button>
+                   <Button
+                     type="button"
+                     variant="ghost"
+                     size="sm"
+                     onClick={() => declineAndDelete(a)}
+                     disabled={busy !== null}
+                     className="h-auto justify-start rounded-none px-0 py-1 text-xs font-medium tracking-wide text-neutral-400 antialiased transition-colors hover:bg-transparent hover:text-red-600"
+                   >
+                     {busy === a.id + "delete" ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
+                     Decline &amp; Delete Application
+                   </Button>
                 </div>
                 </div>
 
