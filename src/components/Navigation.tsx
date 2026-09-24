@@ -62,7 +62,7 @@ function preloadMegaMenuImage(src: string, priority: ImagePriority = "low") {
       return;
     }
 
-    const image = new Image();
+    const image = new window.Image();
     image.decoding = "async";
     try {
       (image as HTMLImageElement & { fetchPriority?: ImagePriority }).fetchPriority = priority;
@@ -215,7 +215,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  const requestedMegaRoomRef = useRef(megaMenuRooms[0].slug);
+  const requestedMegaRoomRef = useRef<MegaMenuRoom["slug"]>(megaMenuRooms[0].slug);
   // featuredDoc removed — AD free-download flow discontinued.
 
   // ── Transparent floating header over the home hero ─────────────────────
