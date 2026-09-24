@@ -3988,6 +3988,53 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_inquiries: {
+        Row: {
+          bridged_brief_id: string | null
+          created_at: string
+          guest_key: string
+          id: string
+          invited_name: string | null
+          lang: string
+          messages: Json
+          portal_session_hint: string | null
+          processed_at: string | null
+          status: string
+        }
+        Insert: {
+          bridged_brief_id?: string | null
+          created_at?: string
+          guest_key: string
+          id?: string
+          invited_name?: string | null
+          lang?: string
+          messages: Json
+          portal_session_hint?: string | null
+          processed_at?: string | null
+          status?: string
+        }
+        Update: {
+          bridged_brief_id?: string | null
+          created_at?: string
+          guest_key?: string
+          id?: string
+          invited_name?: string | null
+          lang?: string
+          messages?: Json
+          portal_session_hint?: string | null
+          processed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_inquiries_bridged_brief_id_fkey"
+            columns: ["bridged_brief_id"]
+            isOneToOne: false
+            referencedRelation: "cn_director_briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guide_views: {
         Row: {
           created_at: string
