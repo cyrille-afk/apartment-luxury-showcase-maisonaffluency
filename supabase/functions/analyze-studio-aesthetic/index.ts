@@ -24,6 +24,35 @@ const MODEL = modelFor("balanced");
 const MAX_ATTEMPTS = 3;
 const MAX_IMAGES = 6;
 const UUID_RE = /^[0-9a-f-]{36}$/i;
+const BROWSER_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Cache-Control": "no-cache",
+};
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function retryDelay(response: Response, attempt: number) {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds)) return Math.min(Math.max(seconds * 1000, 1000), 15_000);
+    const date = Date.parse(retryAfter);
+    if (Number.isFinite(date)) return Math.min(Math.max(date - Date.now(), 1000), 15_000);
+  }
+  return 1_000 * (2 ** attempt) + Math.floor(Math.random() * 350);
+}
+
+async function fetchWithRetry(input: string, init: RequestInit, attempts = 2): Promise<Response> {
+  let response: Response | null = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    response = await fetch(input, init);
+    if (response.status !== 429 && response.status < 500) return response;
+    if (attempt + 1 < attempts) await wait(retryDelay(response, attempt));
+  }
+  return response as Response;
+}
 
 function resolveSourceUrl(ref: string | null): string | null {
   if (!ref) return null;
@@ -42,11 +71,15 @@ async function instagramViaGraph(handle: string): Promise<ScrapeResult> {
   if (!token) return { text: "", images: [], notes: ["Meta token not configured"] };
   const G = "https://graph.facebook.com/v21.0";
   try {
-    const acc = await fetch(`${G}/me/accounts?fields=instagram_business_account&limit=25&access_token=${token}`).then((r) => r.json());
+    const acc = await fetchWithRetry(`${G}/me/accounts?fields=instagram_business_account&limit=25&access_token=${token}`, {
+      headers: { Accept: "application/json" },
+    }).then((r) => r.json());
     const igId = (acc?.data ?? []).map((p: any) => p?.instagram_business_account?.id).find(Boolean);
     if (!igId) return { text: "", images: [], notes: [`Instagram lookup unavailable (${acc?.error?.message ?? "no linked IG business account"})`] };
     const fields = `business_discovery.username(${encodeURIComponent(handle)}){username,name,biography,website,followers_count,media.limit(18){media_type,media_url,thumbnail_url,caption}}`;
-    const d = await fetch(`${G}/${igId}?fields=${fields}&access_token=${token}`).then((r) => r.json());
+    const d = await fetchWithRetry(`${G}/${igId}?fields=${fields}&access_token=${token}`, {
+      headers: { Accept: "application/json" },
+    }).then((r) => r.json());
     const bd = d?.business_discovery;
     if (!bd) return { text: "", images: [], notes: [`Instagram @${handle}: ${d?.error?.message ?? "not found or not a business/creator account"}`] };
     const media = (bd.media?.data ?? []) as any[];
@@ -70,10 +103,17 @@ async function scrape(url: string): Promise<ScrapeResult> {
   let text = "";
   if (!key) return { text, images: [], notes: ["Web reader not configured"] };
   try {
-    const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+    const res = await fetchWithRetry("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ url, formats: ["markdown", "html"], onlyMainContent: false, timeout: 30000 }),
+      body: JSON.stringify({
+        url,
+        formats: ["markdown", "html"],
+        onlyMainContent: false,
+        timeout: 30000,
+        maxAge: 86_400_000,
+        headers: BROWSER_HEADERS,
+      }),
     });
     if (res.ok) {
       const d = (await res.json())?.data ?? {};
@@ -115,7 +155,9 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
     const ig = await instagramViaGraph(handle);
     merge(ig);
     for (const n of ig.notes) n.startsWith("website:") ? (website = n.slice(8)) : notes.push(n);
-    if (images.length < MAX_IMAGES) { const r = await scrape(`https://www.instagram.com/${handle}/`); merge(r); }
+    // Do not scrape Instagram HTML or rotate proxies. The official Graph API
+    // is the only Instagram source; the managed reader may inspect a linked
+    // studio website when the account publishes one.
   }
   if (website && images.length < MAX_IMAGES) { const r = await scrape(resolveSourceUrl(website)!); merge(r); notes.push(...r.notes); source ??= website; }
   // Last resort: the studio's own domain from a business email.
@@ -166,7 +208,10 @@ serve(async (req) => {
   }
 
   const { data: dna } = await supabase
-    .from("studio_aesthetic_dna").select("status, attempts").eq("trade_account_id", id).maybeSingle();
+    .from("studio_aesthetic_dna")
+    .select("status, attempts, image_urls, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials")
+    .eq("trade_account_id", id)
+    .maybeSingle();
   if (dna?.status === "processing") return json({ ok: true, skipped: "already processing" });
   if (isInternal && (dna?.attempts ?? 0) >= MAX_ATTEMPTS) return json({ ok: false, skipped: "attempt cap" });
 
@@ -209,21 +254,49 @@ serve(async (req) => {
   const content: unknown[] = [{ type: "text", text: prompt }];
   // Fetch images ourselves and inline them as data URLs: many CDNs block the
   // model provider's fetcher, which rejects the whole request.
+  const priorImages = Array.isArray(dna?.image_urls)
+    ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
+    : [];
+  const candidates = [...new Set([...priorImages, ...images])].slice(0, MAX_IMAGES);
   const usable: string[] = [];
-  for (const url of images) {
+  for (let index = 0; index < candidates.length; index += 1) {
+    const url = candidates[index];
     try {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), 8000);
-      const r = await fetch(url, { signal: ctl.signal, headers: { "User-Agent": "Mozilla/5.0" } });
+      const r = await fetchWithRetry(url, {
+        signal: ctl.signal,
+        headers: {
+          ...BROWSER_HEADERS,
+          Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          Referer: "https://www.instagram.com/",
+        },
+      });
       clearTimeout(t);
       const type = r.headers.get("content-type") ?? "";
-      if (!r.ok || !/^image\/(jpeg|png|webp|gif)/.test(type)) continue;
+      if (!r.ok || !/^image\/(jpeg|png|webp|gif)/.test(type)) {
+        if (r.status === 429) console.warn("portfolio image rate limited after bounded retry", new URL(url).hostname);
+        continue;
+      }
       const buf = new Uint8Array(await r.arrayBuffer());
       if (buf.length < 5_000 || buf.length > 4_000_000) continue;
       let bin = "";
       for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
       content.push({ type: "image_url", image_url: { url: `data:${type.split(";")[0]};base64,${btoa(bin)}` } });
-      usable.push(url);
+      const extension = type.includes("png") ? "png" : type.includes("webp") ? "webp" : type.includes("gif") ? "gif" : "jpg";
+      const path = `studio-aesthetic/${id}/evidence-${index + 1}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from("assets").upload(path, buf, {
+        contentType: type.split(";")[0],
+        cacheControl: "31536000",
+        upsert: true,
+      });
+      if (uploadError) {
+        console.warn("portfolio image cache failed", path, uploadError.message);
+        usable.push(url);
+      } else {
+        const { data: publicAsset } = supabase.storage.from("assets").getPublicUrl(path);
+        usable.push(publicAsset.publicUrl);
+      }
     } catch { /* skip unreachable image */ }
   }
 
