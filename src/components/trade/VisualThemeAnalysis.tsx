@@ -174,6 +174,20 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
 
   while (palette.length < 4) palette.push(["Deep Ink", "Jade", "Terracotta", "Warm Gold"][palette.length]);
 
+  const [catalog, setCatalog] = useState<string[]>([]);
+  useEffect(() => { if (editing && !catalog.length) loadCatalogDesigners().then(setCatalog); }, [editing, catalog.length]);
+
+  const persistAffinities = async (next: string[]) => {
+    if (!accountId) return;
+    const { data, error } = await supabase
+      .from("studio_aesthetic_dna")
+      .update({ historical_affinities: next, status: "complete", error: null })
+      .eq("trade_account_id", accountId)
+      .select("trade_account_id");
+    if (error || !data?.length) toast.error(error?.message ?? "Could not save designer.");
+    else toast.success("Designer added to profile.");
+  };
+
   const toggle = async () => {
     if (!editing) {
       setDraft({ tones: cleanList(dna.dominant_tones, 12), affinities: cleanList(dna.historical_affinities, 12), materials: cleanList(dna.materials, 12) });
