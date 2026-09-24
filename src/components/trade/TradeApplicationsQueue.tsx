@@ -123,7 +123,7 @@ export default function TradeApplicationsQueue() {
           {accounts.map((a) => {
             const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
             return (
-              <li key={a.id} className="grid gap-4 px-6 py-5 md:grid-cols-[1.2fr_2fr_auto]">
+              <li key={a.id} className="grid gap-4 px-6 py-5 md:grid-cols-[1.1fr_1fr_1.6fr_auto]">
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{a.studio_name ?? "(studio not provided)"}</span>
