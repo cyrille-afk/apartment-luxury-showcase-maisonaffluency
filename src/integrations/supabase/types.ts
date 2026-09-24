@@ -7427,6 +7427,77 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_aesthetic_dna: {
+        Row: {
+          aesthetic_label: string | null
+          aesthetic_summary: string | null
+          analyzed_at: string | null
+          attempts: number
+          created_at: string
+          dominant_tones: string[]
+          error: string | null
+          historical_affinities: string[]
+          id: string
+          image_urls: string[]
+          materials: string[]
+          model: string | null
+          predicted_designer_matches: Json
+          raw_analysis: Json | null
+          source_url: string | null
+          status: string
+          trade_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          aesthetic_label?: string | null
+          aesthetic_summary?: string | null
+          analyzed_at?: string | null
+          attempts?: number
+          created_at?: string
+          dominant_tones?: string[]
+          error?: string | null
+          historical_affinities?: string[]
+          id?: string
+          image_urls?: string[]
+          materials?: string[]
+          model?: string | null
+          predicted_designer_matches?: Json
+          raw_analysis?: Json | null
+          source_url?: string | null
+          status?: string
+          trade_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          aesthetic_label?: string | null
+          aesthetic_summary?: string | null
+          analyzed_at?: string | null
+          attempts?: number
+          created_at?: string
+          dominant_tones?: string[]
+          error?: string | null
+          historical_affinities?: string[]
+          id?: string
+          image_urls?: string[]
+          materials?: string[]
+          model?: string | null
+          predicted_designer_matches?: Json
+          raw_analysis?: Json | null
+          source_url?: string | null
+          status?: string
+          trade_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_aesthetic_dna_trade_account_id_fkey"
+            columns: ["trade_account_id"]
+            isOneToOne: true
+            referencedRelation: "trade_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       studio_alerts: {
         Row: {
           board_id: string | null
@@ -8098,6 +8169,65 @@ export type Database = {
           viewport?: string | null
         }
         Relationships: []
+      }
+      trade_accounts: {
+        Row: {
+          admin_notes: string | null
+          business_reg_number: string | null
+          contact_name: string | null
+          created_at: string
+          credential_document_path: string | null
+          email: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          signup_id: string | null
+          status: string
+          studio_name: string | null
+          updated_at: string
+          website_or_ig: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_reg_number?: string | null
+          contact_name?: string | null
+          created_at?: string
+          credential_document_path?: string | null
+          email: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signup_id?: string | null
+          status?: string
+          studio_name?: string | null
+          updated_at?: string
+          website_or_ig?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          business_reg_number?: string | null
+          contact_name?: string | null
+          created_at?: string
+          credential_document_path?: string | null
+          email?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signup_id?: string | null
+          status?: string
+          studio_name?: string | null
+          updated_at?: string
+          website_or_ig?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_accounts_signup_id_fkey"
+            columns: ["signup_id"]
+            isOneToOne: true
+            referencedRelation: "trade_program_signups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_applications: {
         Row: {
