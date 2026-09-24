@@ -754,7 +754,7 @@ const TradeLanding = () => {
           <p className="max-w-5xl mx-auto px-6 py-2.5 text-center font-body text-[11px] md:text-xs text-muted-foreground uppercase tracking-[0.18em]">
             {isUKVariant
               ? "Shipping to the UK from European ateliers — France, Italy & beyond"
-              : "Shipping worldwide from European ateliers — France, Italy & beyond"}
+              : "Shipping worldwide from European & global ateliers — France, Italy, Australia & beyond"}
           </p>
         </div>
 
