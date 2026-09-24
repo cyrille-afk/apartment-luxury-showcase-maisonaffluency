@@ -245,7 +245,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (event === "SIGNED_OUT") {
           const path = window.location.pathname;
-          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade/register" && path !== "/trade-program") {
+          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade-program") {
             window.location.href = "/trade/login";
           }
         }

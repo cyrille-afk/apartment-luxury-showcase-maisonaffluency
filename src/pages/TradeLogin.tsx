@@ -235,7 +235,7 @@ const TradeLogin = () => {
         <div className="text-center mt-8 space-y-3">
           <p className="font-body text-sm md:text-xs text-muted-foreground">
             Don't have a trade account?{" "}
-            <Link to="/trade/register" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
+            <Link to="/trade-program" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
               Apply here
             </Link>
           </p>
@@ -246,7 +246,7 @@ const TradeLogin = () => {
           </div>
           <p className="font-body text-sm md:text-xs text-muted-foreground">
             Not a design professional?{" "}
-            <Link to="/trade/register?type=public" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
+            <Link to="/trade-program" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
               Create a free account
             </Link>
           </p>

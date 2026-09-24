@@ -270,7 +270,7 @@ export default function TradeSpecSheet() {
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">Continue exploring</p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <li><Link to="/trade-program" className="text-foreground hover:underline">Trade programme</Link></li>
-              <li><Link to="/trade/register" className="text-foreground hover:underline">Register for trade</Link></li>
+              <li><Link to="/trade-program" className="text-foreground hover:underline">Register for trade</Link></li>
               <li><Link to="/trade/login" className="text-foreground hover:underline">Trade sign in</Link></li>
               <li><Link to="/designers" className="text-foreground hover:underline">Designers A–Z</Link></li>
               <li><Link to="/collectibles" className="text-foreground hover:underline">Collectibles</Link></li>

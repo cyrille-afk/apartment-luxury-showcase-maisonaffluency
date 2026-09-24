@@ -121,7 +121,7 @@ export default function TradeFirstCta({
             Sign In to View Trade Pricing
           </Link>
           <Link
-            to="/trade/register"
+            to="/trade-program"
             className={secondaryBtn}
           >
             Apply for a Trade Account

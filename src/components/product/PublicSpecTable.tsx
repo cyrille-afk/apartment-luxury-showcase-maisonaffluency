@@ -163,7 +163,7 @@ export function TradeExclusiveCard({
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
 
-  const applyHref = `/trade/apply${q.toString() ? `?${q.toString()}` : ""}`;
+  const applyHref = `/trade-program${q.toString() ? `?${q.toString()}` : ""}`;
 
   return (
     <div className="rounded-none border border-border/60 bg-muted/30 p-6 md:p-8">

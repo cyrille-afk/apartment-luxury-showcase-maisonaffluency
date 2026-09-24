@@ -21,7 +21,7 @@ const CORE_PATHS = [
   "/studios",
   "/trade-program",
   "/trade/login",
-  "/trade/register",
+  "/trade-program",
   "/favorites",
 ];
 

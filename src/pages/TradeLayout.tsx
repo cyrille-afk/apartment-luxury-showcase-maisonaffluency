@@ -276,7 +276,7 @@ function TradePublicGate({ path }: { path: string }) {
           <Link to="/trade/login" className="w-full sm:w-auto px-7 py-3 bg-foreground text-background font-body text-xs uppercase tracking-[0.16em] rounded-full hover:opacity-90 transition-opacity">
             Sign in
           </Link>
-          <Link to="/trade/register" className="w-full sm:w-auto px-7 py-3 border border-border font-body text-xs uppercase tracking-[0.16em] rounded-full hover:bg-muted transition-colors">
+          <Link to="/trade-program" className="w-full sm:w-auto px-7 py-3 border border-border font-body text-xs uppercase tracking-[0.16em] rounded-full hover:bg-muted transition-colors">
             Apply for access
           </Link>
         </div>
