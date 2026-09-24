@@ -315,10 +315,10 @@ const HeroJoinForm = ({
           <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
         </button>
       </div>
-      <div className="my-4 w-full p-0">
+      <div className="my-4 flex w-full justify-start p-0">
         <Turnstile
           theme={ghost ? "dark" : "light"}
-          className="m-0 min-h-[65px] p-0"
+          className="m-0 h-[65px] w-[300px] shrink-0 p-0"
           onVerify={setTurnstileToken}
           onExpire={() => setTurnstileToken("")}
         />
