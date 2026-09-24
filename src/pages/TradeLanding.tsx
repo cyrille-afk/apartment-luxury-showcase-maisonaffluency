@@ -586,10 +586,11 @@ const TradeLanding = () => {
               transition={{ duration: 1 }}
               className="relative w-[85%] max-w-xl text-justify md:w-full md:pr-8 md:text-left lg:pr-12"
             >
-              <h1 className="font-display whitespace-nowrap text-[1.4rem] leading-[1.2] text-foreground sm:text-3xl lg:text-4xl tracking-wide md:whitespace-normal">
+              <h1 className="text-center font-display text-xl leading-[1.15] text-foreground tracking-wide md:text-left md:text-3xl md:whitespace-normal lg:text-4xl">
                 <span className="hidden md:block md:whitespace-nowrap">Welcome to</span>
                 <span className="hidden md:block md:whitespace-nowrap">Our <span className="text-accent">Trade Program</span></span>
-                <span className="md:hidden">Welcome to Our <span className="text-accent">Trade Program</span></span>
+                <span className="block whitespace-nowrap md:hidden">Welcome to Our</span>
+                <span className="mt-0.5 block whitespace-nowrap text-accent md:hidden">Trade Program</span>
               </h1>
               <div className="relative z-30 mx-auto mt-4 w-full bg-background py-3 md:mx-0 md:bg-transparent md:p-0">
                 <HeroJoinForm
@@ -608,11 +609,11 @@ const TradeLanding = () => {
           </div>
 
           {/* Right Side: hero photograph (inline on mobile and desktop) */}
-          <div className="relative aspect-[4/3] w-full bg-background md:aspect-auto md:col-start-7 md:col-span-5 md:h-full md:min-h-0">
+          <div className="relative aspect-[6/5] w-full bg-background md:aspect-auto md:col-start-7 md:col-span-5 md:h-full md:min-h-0">
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-[50%_20%] md:object-contain md:object-center"
+              className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-center md:object-contain md:object-center"
               data-pin-nopin="true"
             />
 
@@ -630,8 +631,8 @@ const TradeLanding = () => {
         </div>
 
         {/* ─── Stats Bar ─── */}
-        <div className="w-full border-y border-border bg-background py-6 md:py-0">
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-x-5 gap-y-8 px-6 md:grid-cols-4 md:gap-0 md:px-0 md:divide-x md:divide-border">
+        <div className="w-full border-y border-border bg-background py-2 md:py-0">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-0 px-4 md:grid-cols-4 md:px-0 md:divide-x md:divide-border">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -639,12 +640,12 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex min-h-[72px] flex-col items-center justify-center px-2 py-2 md:min-h-0 md:py-5"
+                className="flex min-h-[48px] flex-col items-center justify-center px-1 py-1.5 md:min-h-0 md:px-2 md:py-5"
               >
-                <span className="font-display text-xl md:text-3xl text-foreground tracking-wide">
+                <span className="font-display text-base text-foreground tracking-wide md:text-3xl">
                   {stat.value}
                 </span>
-                <span className="mt-1 text-center font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground md:text-xs md:tracking-[0.15em]">
+                <span className="mt-0.5 text-center font-body text-[8px] uppercase tracking-[0.08em] text-foreground md:mt-1 md:text-xs md:tracking-[0.15em] md:text-muted-foreground">
                   {stat.label}
                 </span>
               </motion.div>
