@@ -161,6 +161,12 @@ export async function requireCronOrAdmin(
   const cronSecret = Deno.env.get("CRON_SECRET");
   const hdr = req.headers.get("x-cron-secret");
   if (cronSecret && hdr && hdr === cronSecret) return { ok: true, via: "cron" };
+  const internal = req.headers.get("x-internal-token");
+  if (internal && internal.length >= 32) {
+    const svc = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data } = await svc.from("internal_job_tokens").select("token").eq("name", "scheduler").maybeSingle();
+    if (data?.token && data.token === internal) return { ok: true, via: "cron" };
+  }
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (serviceKey && req.headers.get("Authorization") === `Bearer ${serviceKey}`) {
     return { ok: true, via: "service" };
