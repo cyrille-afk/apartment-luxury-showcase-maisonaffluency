@@ -143,6 +143,27 @@ export default function TradeApplicationsQueue() {
                 </div>
 
                 <div className="space-y-2 text-sm">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI Critical Radar</p>
+                  {a.radar_status === "scored" && a.radar_score !== null ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif text-lg text-foreground">{a.radar_score}/100</span>
+                        <Badge variant={priorityFor(a.radar_score).variant} className="rounded-none text-[10px] uppercase tracking-wider">
+                          {priorityFor(a.radar_score).label} priority
+                        </Badge>
+                      </div>
+                      {a.radar_flag && <p className="text-muted-foreground">{a.radar_flag}</p>}
+                    </>
+                  ) : a.radar_status === "failed" ? (
+                    <p className="text-destructive">Scoring failed{a.radar_flag ? `: ${a.radar_flag}` : ""}</p>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Scoring…
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 text-sm">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Studio Aesthetic DNA</p>
                   {!dna || dna.status === "pending" || dna.status === "processing" ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
