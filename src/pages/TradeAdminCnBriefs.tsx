@@ -59,7 +59,25 @@ export default function TradeAdminCnBriefs() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  const [guestPending, setGuestPending] = useState(0);
+  const [bridging, setBridging] = useState(false);
+  const loadGuestCount = async () => {
+    const { count } = await supabase
+      .from("guest_inquiries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending");
+    setGuestPending(count || 0);
+  };
+  const bridgeGuests = async () => {
+    setBridging(true);
+    const { data, error } = await supabase.functions.invoke("bridge-guest-inquiries", { body: {} });
+    setBridging(false);
+    if (error) { toast.error("Could not import guest chats"); return; }
+    toast.success(`Guest chats: ${data?.bridged ?? 0} new brief(s), ${data?.low_intent ?? 0} low intent`);
+    await Promise.all([load(), loadGuestCount()]);
+  };
+
+  useEffect(() => { load(); loadGuestCount(); }, []);
 
   const filtered = useMemo(
     () => briefs.filter((b) => statusFilter === "all" || b.status === statusFilter),
@@ -120,6 +138,9 @@ export default function TradeAdminCnBriefs() {
                 {s}
               </button>
             ))}
+            <Button variant="outline" size="sm" onClick={bridgeGuests} disabled={bridging}>
+              {bridging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : `Import guest chats${guestPending ? ` (${guestPending})` : ""}`}
+            </Button>
             <Button variant="outline" size="sm" onClick={load} disabled={loading}>
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Refresh"}
             </Button>
