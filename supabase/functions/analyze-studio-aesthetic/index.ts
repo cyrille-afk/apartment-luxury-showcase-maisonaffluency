@@ -31,36 +31,100 @@ function resolveSourceUrl(ref: string | null): string | null {
   return /^https?:\/\//i.test(v) ? v : `https://${v}`;
 }
 
-async function scrape(url: string): Promise<{ text: string; images: string[] }> {
+type ScrapeResult = { text: string; images: string[]; notes: string[] };
+
+// Instagram blocks generic scrapers, so handles are read through the Meta
+// Graph API's business_discovery (works for public Business/Creator accounts).
+async function instagramViaGraph(handle: string): Promise<ScrapeResult> {
+  const notes: string[] = [];
+  const token = Deno.env.get("META_ACCESS_TOKEN");
+  if (!token) return { text: "", images: [], notes: ["Meta token not configured"] };
+  const G = "https://graph.facebook.com/v21.0";
+  try {
+    const acc = await fetch(`${G}/me/accounts?fields=instagram_business_account&limit=25&access_token=${token}`).then((r) => r.json());
+    const igId = (acc?.data ?? []).map((p: any) => p?.instagram_business_account?.id).find(Boolean);
+    if (!igId) return { text: "", images: [], notes: [`Instagram lookup unavailable (${acc?.error?.message ?? "no linked IG business account"})`] };
+    const fields = `business_discovery.username(${encodeURIComponent(handle)}){username,name,biography,website,followers_count,media.limit(18){media_type,media_url,thumbnail_url,caption}}`;
+    const d = await fetch(`${G}/${igId}?fields=${fields}&access_token=${token}`).then((r) => r.json());
+    const bd = d?.business_discovery;
+    if (!bd) return { text: "", images: [], notes: [`Instagram @${handle}: ${d?.error?.message ?? "not found or not a business/creator account"}`] };
+    const media = (bd.media?.data ?? []) as any[];
+    const images = media
+      .map((m) => (m.media_type === "VIDEO" ? m.thumbnail_url : m.media_url))
+      .filter((u: unknown): u is string => typeof u === "string" && u.startsWith("https://"))
+      .slice(0, MAX_IMAGES);
+    const captions = media.map((m) => m.caption).filter(Boolean).slice(0, 12).join("\n---\n");
+    const text = [`Instagram @${bd.username} — ${bd.name ?? ""}`, bd.biography ?? "", bd.website ? `Website: ${bd.website}` : "", captions]
+      .filter(Boolean).join("\n").slice(0, 4000);
+    return { text, images, notes: bd.website ? [`website:${bd.website}`] : notes };
+  } catch (e) {
+    return { text: "", images: [], notes: [`Instagram lookup error: ${(e as Error).message}`] };
+  }
+}
+
+async function scrape(url: string): Promise<ScrapeResult> {
   const key = Deno.env.get("FIRECRAWL_API_KEY");
   const images = new Set<string>();
+  const notes: string[] = [];
   let text = "";
-  if (key) {
-    try {
-      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ url, formats: ["markdown", "html"], onlyMainContent: false, timeout: 30000 }),
-      });
-      if (res.ok) {
-        const d = (await res.json())?.data ?? {};
-        text = String(d.markdown ?? "").slice(0, 4000);
-        const og = d.metadata?.ogImage ?? d.metadata?.["og:image"];
-        if (typeof og === "string") images.add(og);
-        const html = String(d.html ?? "");
-        for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
-          const src = m[1];
-          if (/^https:\/\//.test(src) && !/\.svg(\?|$)|sprite|logo|icon|avatar/i.test(src)) images.add(src);
-          if (images.size >= MAX_IMAGES * 2) break;
-        }
-      } else {
-        console.error("firecrawl failed", res.status, (await res.text()).slice(0, 300));
+  if (!key) return { text, images: [], notes: ["Web reader not configured"] };
+  try {
+    const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ url, formats: ["markdown", "html"], onlyMainContent: false, timeout: 30000 }),
+    });
+    if (res.ok) {
+      const d = (await res.json())?.data ?? {};
+      text = String(d.markdown ?? "").slice(0, 4000);
+      const og = d.metadata?.ogImage ?? d.metadata?.["og:image"];
+      if (typeof og === "string") images.add(og);
+      const html = String(d.html ?? "");
+      for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+        const src = m[1];
+        if (/^https:\/\//.test(src) && !/\.svg(\?|$)|sprite|logo|icon|avatar/i.test(src)) images.add(src);
+        if (images.size >= MAX_IMAGES * 2) break;
       }
-    } catch (e) {
-      console.error("firecrawl error", e);
+    } else {
+      const t = (await res.text()).slice(0, 200);
+      console.error("firecrawl failed", res.status, t);
+      notes.push(`${new URL(url).hostname} blocked the reader (${res.status})`);
     }
+  } catch (e) {
+    console.error("firecrawl error", e);
+    notes.push(`${url} unreachable`);
   }
-  return { text, images: [...images].slice(0, MAX_IMAGES) };
+  return { text, images: [...images].slice(0, MAX_IMAGES), notes };
+}
+
+const PERSONAL = /^(gmail|googlemail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|qq|163|126|gmx|yandex|mail)\./i;
+
+async function gather(ref: string | null, email: string | null): Promise<ScrapeResult & { source: string | null }> {
+  const notes: string[] = [];
+  const v = (ref ?? "").trim();
+  const handle = v.startsWith("@") ? v.slice(1)
+    : (v.match(/instagram\.com\/([A-Za-z0-9._]+)/i)?.[1] ?? null);
+  let text = "", images: string[] = [], source: string | null = resolveSourceUrl(ref);
+  const merge = (r: ScrapeResult) => {
+    if (r.text) text = [text, r.text].filter(Boolean).join("\n\n").slice(0, 6000);
+    images = [...new Set([...images, ...r.images])].slice(0, MAX_IMAGES);
+  };
+  let website: string | null = handle ? null : source;
+  if (handle) {
+    const ig = await instagramViaGraph(handle);
+    merge(ig);
+    for (const n of ig.notes) n.startsWith("website:") ? (website = n.slice(8)) : notes.push(n);
+    if (images.length < MAX_IMAGES) { const r = await scrape(`https://www.instagram.com/${handle}/`); merge(r); }
+  }
+  if (website && images.length < MAX_IMAGES) { const r = await scrape(resolveSourceUrl(website)!); merge(r); notes.push(...r.notes); source ??= website; }
+  // Last resort: the studio's own domain from a business email.
+  const domain = email?.split("@")[1]?.toLowerCase();
+  if (!text && images.length === 0 && domain && !PERSONAL.test(domain)) {
+    const r = await scrape(`https://${domain}`);
+    merge(r); notes.push(...r.notes);
+    if (r.text || r.images.length) source = `https://${domain}`;
+  }
+  return { text, images, notes, source };
 }
 
 serve(async (req) => {
