@@ -178,6 +178,35 @@ Deno.serve(async (req) => {
       .maybeSingle()
     const clean = (v?: string | null) => (v ?? '').replace(/\s+/g, ' ').trim()
     const studio = clean(row?.company_name) || '(not provided)'
+
+    // Inbound pipeline: create/refresh the trade account in pending_review and
+    // kick off the Instagram/website Vision AI analysis in the background.
+    const { data: acct, error: acctErr } = await supabase
+      .from('trade_accounts')
+      .upsert({
+        signup_id: signupId,
+        email,
+        studio_name: clean(row?.company_name) || null,
+        contact_name: body.firstName ? String(body.firstName).trim().slice(0, 100) : null,
+        website_or_ig: clean(row?.portfolio_reference ?? row?.website_url) || null,
+        business_reg_number: row?.business_reg_number ?? null,
+        credential_document_path: row?.credential_document_path ?? null,
+      }, { onConflict: 'signup_id' })
+      .select('id, status')
+      .single()
+    if (acctErr) console.error('trade_accounts upsert failed', acctErr)
+    if (acct?.id) {
+      await supabase.from('studio_aesthetic_dna')
+        .upsert({ trade_account_id: acct.id, status: 'pending' }, { onConflict: 'trade_account_id', ignoreDuplicates: true })
+      const task = fetch(`${supabaseUrl}/functions/v1/analyze-studio-aesthetic`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trade_account_id: acct.id }),
+      }).then((r) => r.text()).catch((e) => console.error('aesthetic analysis trigger failed', e))
+      // deno-lint-ignore no-explicit-any
+      const rt = (globalThis as any).EdgeRuntime
+      if (rt?.waitUntil) rt.waitUntil(task)
+    }
     const waBody = [
       '🚨 *New Trade Account Request on Maison Affluency*',
       '',
