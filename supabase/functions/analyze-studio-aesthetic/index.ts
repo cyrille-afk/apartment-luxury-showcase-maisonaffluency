@@ -28,7 +28,13 @@ const BROWSER_HEADERS = {
   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
-  "Cache-Control": "no-cache",
+  "Sec-CH-UA": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  "Sec-CH-UA-Mobile": "?0",
+  "Sec-CH-UA-Platform": '"macOS"',
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Upgrade-Insecure-Requests": "1",
 };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -155,9 +161,14 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
     const ig = await instagramViaGraph(handle);
     merge(ig);
     for (const n of ig.notes) n.startsWith("website:") ? (website = n.slice(8)) : notes.push(n);
-    // Do not scrape Instagram HTML or rotate proxies. The official Graph API
-    // is the only Instagram source; the managed reader may inspect a linked
-    // studio website when the account publishes one.
+    // Keep the official API first. If it cannot resolve a public profile, use
+    // the configured managed reader's cached/compliant retrieval path rather
+    // than attempting direct HTML requests or proxy rotation from this worker.
+    if (!ig.text && ig.images.length === 0 && source) {
+      const managed = await scrape(source);
+      merge(managed);
+      notes.push(...managed.notes);
+    }
   }
   if (website && images.length < MAX_IMAGES) { const r = await scrape(resolveSourceUrl(website)!); merge(r); notes.push(...r.notes); source ??= website; }
   // Last resort: the studio's own domain from a business email.
@@ -269,7 +280,10 @@ serve(async (req) => {
         headers: {
           ...BROWSER_HEADERS,
           Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-          Referer: "https://www.instagram.com/",
+          "Sec-Fetch-Dest": "image",
+          "Sec-Fetch-Mode": "no-cors",
+          "Sec-Fetch-Site": "cross-site",
+          Referer: /(?:instagram\.com|fbcdn\.net)/i.test(url) ? "https://www.instagram.com/" : sourceUrl,
         },
       });
       clearTimeout(t);
@@ -300,6 +314,17 @@ serve(async (req) => {
     } catch { /* skip unreachable image */ }
   }
 
+  // Persist evidence before invoking AI. A later gateway rejection or rate
+  // limit must not leave the Visual Evidence Matrix blank or force a rescrape.
+  const cachedEvidence = [...new Set([...usable, ...priorImages])].slice(0, MAX_IMAGES);
+  if (cachedEvidence.length > 0) {
+    const { error: evidenceError } = await supabase
+      .from("studio_aesthetic_dna")
+      .update({ image_urls: cachedEvidence })
+      .eq("trade_account_id", id);
+    if (evidenceError) console.error("portfolio evidence persistence failed", evidenceError.message);
+  }
+
   const aiRes = await fetch(GATEWAY, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -321,7 +346,7 @@ serve(async (req) => {
   await supabase.from("studio_aesthetic_dna").update({
     status: "complete",
     // A transient CDN block must never blank evidence that was already saved.
-    image_urls: usable.length ? usable : priorImages,
+    image_urls: cachedEvidence,
     aesthetic_label: parsed.aesthetic_label ? String(parsed.aesthetic_label).slice(0, 120) : null,
     aesthetic_summary: parsed.aesthetic_summary ? String(parsed.aesthetic_summary).slice(0, 1500) : null,
     dominant_tones: arr(parsed.dominant_tones),
