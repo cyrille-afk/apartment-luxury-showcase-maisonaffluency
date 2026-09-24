@@ -198,10 +198,10 @@ export default function TradeApplicationsQueue() {
                 ) : dna.status === "failed" ? (
                   <>
                     <div className="border-t border-border px-6 pt-5 text-xs text-destructive">{dna.error ?? "Analysis failed"} — use “Re-run analysis” to retry.</div>
-                    <VisualThemeAnalysis dna={dna} />
+                    <VisualThemeAnalysis dna={dna} accountId={a.id} onSaved={() => qc.invalidateQueries({ queryKey: ["trade-applications-queue"] })} />
                   </>
                 ) : (
-                  <VisualThemeAnalysis dna={dna} />
+                  <VisualThemeAnalysis dna={dna} accountId={a.id} onSaved={() => qc.invalidateQueries({ queryKey: ["trade-applications-queue"] })} />
                 )}
               </li>
             );
