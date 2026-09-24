@@ -160,6 +160,7 @@ All colors MUST be HSL.
     --chip-material: 60 15% 94.9%;
     --chip-material-foreground: 0 0% 15%;
     --chip-material-border: 60 8% 88.8%;
+    --suggestion-material: 60 10% 70%;
     --spec-dimension-icon: 207 24% 68%;
 
     --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);

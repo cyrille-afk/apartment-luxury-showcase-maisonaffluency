@@ -179,9 +179,10 @@ function EditableBlock({ title, values, onChange, placeholder, suggestions, onPi
                   aria-selected={i === hi}
                   onMouseDown={(e) => { e.preventDefault(); pick(m); }}
                   onMouseEnter={() => setHi(i)}
-                  className={`cursor-pointer px-3 py-1.5 font-body text-foreground ${i === hi ? "bg-muted" : ""}`}
+                  className={`flex cursor-pointer items-center space-x-3 px-3 py-1.5 font-body text-foreground ${i === hi ? "bg-muted" : ""}`}
                 >
-                  {m}
+                  <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-sm border ${kind === "material" ? "border-chip-material-border bg-suggestion-material" : kind === "affinity" ? "border-chip-affinity bg-chip-affinity" : "border-border bg-muted-foreground/40"}`} />
+                  <span className="truncate">{m}</span>
                 </li>
               ))}
             </ul>
