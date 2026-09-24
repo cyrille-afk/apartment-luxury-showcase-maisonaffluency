@@ -1088,6 +1088,63 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       </div>
                     </div>
                   )}
+
+                  {room !== "living" && megaMenuOpen && activeRoomMenu === room && (
+                    <div
+                      ref={megaMenuRef}
+                      className="absolute left-0 top-full z-50 mt-3 w-[min(620px,calc(100vw-48px))] bg-background shadow-xl"
+                      style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                    >
+                      <style>{`
+                        @keyframes megaMenuReveal {
+                          from { opacity: 0; transform: translateY(-6px); }
+                          to { opacity: 1; transform: translateY(0); }
+                        }
+                      `}</style>
+                      <div className="flex items-stretch">
+                        <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
+                          {roomNavigation[room].map((item, index) => (
+                            <Button
+                              key={item.label}
+                              type="button"
+                              variant="ghost"
+                              onMouseEnter={() => setActiveRoomCategory(index)}
+                              onFocus={() => setActiveRoomCategory(index)}
+                              onClick={() => navigateFromMegaMenu(item.category)}
+                              className={cn(
+                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
+                              )}
+                            >
+                              {item.label}
+                              <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
+                            </Button>
+                          ))}
+                        </div>
+
+                        <div className="w-1/2 px-9 py-8">
+                          {activeRoomCategory !== null && (
+                            <div>
+                              <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
+                                {roomNavigation[room][activeRoomCategory]?.label} Collections
+                              </div>
+                              {roomNavigation[room][activeRoomCategory]?.subcategories.map((subcategory) => (
+                                <Button
+                                  key={subcategory}
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() => navigateFromMegaMenu(roomNavigation[room][activeRoomCategory].category, subcategory)}
+                                  className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                >
+                                  {subcategory}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -1113,69 +1170,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
             </nav>
         </div>
-
-
-        {/* Room-first two-column drill-down */}
-        {megaMenuOpen && activeRoomMenu && activeRoomMenu !== "living" && (
-          <div
-            ref={megaMenuRef}
-            onMouseEnter={keepRoomMenuOpen}
-            onMouseLeave={scheduleRoomMenuClose}
-            className="absolute left-1/2 top-full w-[min(620px,calc(100vw-48px))] -translate-x-1/2 bg-background shadow-xl"
-            style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-          >
-            <style>{`
-              @keyframes megaMenuReveal {
-                from { opacity: 0; transform: translateY(-6px); }
-                to { opacity: 1; transform: translateY(0); }
-              }
-            `}</style>
-            <div className="flex items-stretch">
-              <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
-                <div>
-                  {roomNavigation[activeRoomMenu].map((item, index) => (
-                    <Button
-                      key={item.label}
-                      type="button"
-                      variant="ghost"
-                      onMouseEnter={() => setActiveRoomCategory(index)}
-                      onFocus={() => setActiveRoomCategory(index)}
-                      onClick={() => navigateFromMegaMenu(item.category)}
-                      className={cn(
-                        "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                        activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
-                      )}
-                    >
-                      {item.label}
-                      <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="w-1/2 px-9 py-8">
-                {activeRoomCategory !== null && (
-                <div>
-                  <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
-                    {roomNavigation[activeRoomMenu][activeRoomCategory]?.label} Collections
-                  </div>
-                  {roomNavigation[activeRoomMenu][activeRoomCategory]?.subcategories.map((subcategory) => (
-                    <Button
-                      key={subcategory}
-                      type="button"
-                      variant="ghost"
-                      onClick={() => navigateFromMegaMenu(roomNavigation[activeRoomMenu][activeRoomCategory].category, subcategory)}
-                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                    >
-                      {subcategory}
-                    </Button>
-                  ))}
-                </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
     {authGateMounted && (
