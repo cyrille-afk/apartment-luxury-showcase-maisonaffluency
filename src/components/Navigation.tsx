@@ -29,6 +29,10 @@ import {
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
+import livingRoomAmbient from "@/assets/living-room-hero.jpg";
+import diningRoomAmbient from "@/assets/dining-room.jpg";
+import bedroomAmbient from "@/assets/bedroom.jpg";
+import lightingAmbient from "@/assets/christopher-boots-installation.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -84,6 +88,13 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
   dining: [{ label: "Dining", slug: "dining" }],
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
+};
+
+const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
+  living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
+  dining: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture" },
+  bedroom: { src: bedroomAmbient, alt: "Serene bedroom with layered natural materials" },
+  lighting: { src: lightingAmbient, alt: "Atmospheric installation illuminated by sculptural lighting" },
 };
 
 const leftNavItems = [{
@@ -514,6 +525,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
   const keepRoomMenuOpen = () => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
+  };
+
+  const resetRoomPreviewUnlessEnteringSubmenu = (event: React.MouseEvent<HTMLElement>) => {
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Element && nextTarget.closest("[data-room-submenu]")) return;
+    setActiveRoomCategory(null);
   };
 
   return <><nav className={cn(
@@ -1024,7 +1041,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex h-auto items-stretch overflow-visible">
+                      <div className="flex min-h-[288px] items-stretch overflow-hidden">
                         <div className="w-1/2 shrink-0 border-r border-border/60 px-8 py-8">
                           {roomNavigation.living.map((item, index) => (
                             <Button
@@ -1032,6 +1049,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(index)}
+                              onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
@@ -1047,6 +1065,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                             type="button"
                             variant="ghost"
                             onMouseEnter={() => setActiveRoomCategory(-1)}
+                            onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                             onFocus={() => setActiveRoomCategory(-1)}
                             className={cn(
                               "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
@@ -1058,9 +1077,22 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           </Button>
                         </div>
 
-                        <div className="w-1/2 shrink-0 px-8 py-8">
-                          {activeRoomCategory !== null && (
-                            <div>
+                        <div data-room-submenu className="relative min-h-[288px] w-1/2 shrink-0 overflow-hidden">
+                          <img
+                            src={roomAmbientImages.living.src}
+                            alt={roomAmbientImages.living.alt}
+                            className={cn(
+                              "absolute inset-0 size-full object-cover transition-opacity duration-300",
+                              activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
+                            )}
+                          />
+                          <div
+                            className={cn(
+                              "absolute inset-0 overflow-y-auto px-8 py-8 transition-opacity duration-300",
+                              activeRoomCategory === null ? "pointer-events-none opacity-0" : "opacity-100"
+                            )}
+                          >
+                            {activeRoomCategory !== null && <div>
                               <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
                                 {activeRoomCategory === -1
                                   ? "Shop By Room"
@@ -1088,8 +1120,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               </Button>
                             ))
                           )}
-                            </div>
-                          )}
+                            </div>}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1108,7 +1140,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex h-auto items-stretch overflow-visible">
+                      <div className="flex min-h-[288px] items-stretch overflow-hidden">
                         <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                           {roomNavigation[room].map((item, index) => (
                             <Button
@@ -1116,6 +1148,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(index)}
+                              onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
@@ -1132,6 +1165,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(-1)}
+                                onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(-1)}
                               className={cn(
                                 "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
@@ -1144,9 +1178,22 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           )}
                         </div>
 
-                        <div className="w-1/2 shrink-0 px-9 py-8">
-                          {activeRoomCategory !== null && (
-                            <div>
+                        <div data-room-submenu className="relative min-h-[288px] w-1/2 shrink-0 overflow-hidden">
+                          <img
+                            src={roomAmbientImages[room].src}
+                            alt={roomAmbientImages[room].alt}
+                            className={cn(
+                              "absolute inset-0 size-full object-cover transition-opacity duration-300",
+                              activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
+                            )}
+                          />
+                          <div
+                            className={cn(
+                              "absolute inset-0 overflow-y-auto px-9 py-8 transition-opacity duration-300",
+                              activeRoomCategory === null ? "pointer-events-none opacity-0" : "opacity-100"
+                            )}
+                          >
+                            {activeRoomCategory !== null && <div>
                               <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
                                 {activeRoomCategory === -1
                                   ? "Shop By Room"
@@ -1175,8 +1222,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                       {subcategory}
                                     </Button>
                                   ))}
-                            </div>
-                          )}
+                            </div>}
+                          </div>
                         </div>
                       </div>
                     </div>
