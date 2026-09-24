@@ -21,6 +21,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireCronOrAdmin } from "../_shared/auth.ts";
 
 export const CURRENCIES = [
   "EUR", "USD", "SGD", "GBP", "CHF", "AED", "HKD", "AUD", "JPY", "CAD",
@@ -107,6 +108,12 @@ async function fetchOpenErApi(): Promise<{ rates: EurBase; date: string | null }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  {
+    const __auth = await requireCronOrAdmin(req, "sync-currency-rates");
+    if (!__auth.ok) {
+      return new Response(JSON.stringify(__auth.body), { status: __auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+  }
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
