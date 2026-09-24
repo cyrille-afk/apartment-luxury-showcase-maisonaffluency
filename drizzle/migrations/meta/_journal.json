@@ -624,6 +624,13 @@
       "when": 1790219927190,
       "tag": "0088_catalog_material_terms",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1790221079983,
+      "tag": "0089_trade_accounts_approved_at",
+      "breakpoints": true
     }
   ]
 }
