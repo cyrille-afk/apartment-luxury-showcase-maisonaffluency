@@ -9,9 +9,48 @@ import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
 import { bootIossRouting } from "./config/iossConfig";
 import { ensureStorageHeadroom, installStorageQuotaGuard } from "./lib/storageReclaim";
 
+const WHATSAPP_WIDGET_ID = "whatsapp-floating-widget";
+
+function syncWhatsAppWidgetVisibility() {
+  if (typeof window === "undefined") return;
+
+  const widget = document.getElementById(WHATSAPP_WIDGET_ID);
+  if (!widget) return;
+
+  const pathname = window.location.pathname;
+  const shouldHide = pathname.includes("/trade") || pathname.includes("/join-trade");
+  if (shouldHide) {
+    widget.style.setProperty("display", "none", "important");
+  } else {
+    widget.style.removeProperty("display");
+  }
+}
+
+function installWhatsAppWidgetRouteGuard() {
+  if (typeof window === "undefined") return;
+
+  const sync = () => queueMicrotask(syncWhatsAppWidgetVisibility);
+  const observer = new MutationObserver(sync);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  const originalPushState = window.history.pushState.bind(window.history);
+  const originalReplaceState = window.history.replaceState.bind(window.history);
+  window.history.pushState = (...args) => {
+    originalPushState(...args);
+    sync();
+  };
+  window.history.replaceState = (...args) => {
+    originalReplaceState(...args);
+    sync();
+  };
+  window.addEventListener("popstate", sync);
+  sync();
+}
+
 // Keep room for the login session: a full browser store makes sign-in fail.
 installStorageQuotaGuard();
 ensureStorageHeadroom();
+installWhatsAppWidgetRouteGuard();
 
 // Align the browser's tax preview with the server's EU routing switch.
 bootIossRouting();
