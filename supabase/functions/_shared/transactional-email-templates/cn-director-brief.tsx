@@ -28,6 +28,7 @@ interface Props {
   piecesOfInterest?: Piece[]
   contactEmail?: string
   contactPhone?: string
+  contactPending?: boolean
   briefId?: string
 }
 
@@ -41,6 +42,7 @@ const Email = ({
   piecesOfInterest = [],
   contactEmail,
   contactPhone,
+  contactPending = false,
   briefId,
 }: Props) => (
   <Html lang="en" dir="ltr">
@@ -112,6 +114,14 @@ const Email = ({
               <Text style={label}>Contact</Text>
               {contactEmail ? <Text style={paragraph}>{contactEmail}</Text> : null}
               {contactPhone ? <Text style={paragraph}>{contactPhone}</Text> : null}
+            </>
+          ) : contactPending ? (
+            <>
+              <Hr style={hr} />
+              <Text style={label}>Contact</Text>
+              <Text style={paragraph}>
+                The guest has not left contact details yet. Any email or WhatsApp they share later will appear on this brief in the CN Director Briefs dashboard live stream.
+              </Text>
             </>
           ) : null}
 

@@ -136,28 +136,62 @@ Deno.serve(async (req) => {
     bridged++;
 
     if (CN_DIRECTOR_EMAIL) {
-      const { error: mailErr } = await admin.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "cn-director-brief",
-          recipientEmail: CN_DIRECTOR_EMAIL,
-          idempotencyKey: `cn-brief-${brief.id}`,
-          templateData: {
-            invitedName: invitedName || "Guest visitor",
-            viewingRequested: false,
-            projectSummary: s.project_summary,
-            aesthetic: s.aesthetic,
-            budgetBand: s.budget_band,
-            sentiment: s.sentiment,
-            piecesOfInterest: pieces,
-            contactEmail: row.contact_email,
-            contactPhone: row.contact_whatsapp,
-            briefId: brief.id,
-          },
-        },
-      });
-      if (mailErr) console.error("guest bridge email failed", mailErr);
+      const job = sendDirectorEmailAfterHold(brief.id, {
+        invitedName: invitedName || "Guest visitor",
+        viewingRequested: false,
+        projectSummary: s.project_summary,
+        aesthetic: s.aesthetic,
+        budgetBand: s.budget_band,
+        sentiment: s.sentiment,
+        piecesOfInterest: pieces,
+        briefId: brief.id,
+      }, row.contact_email, row.contact_whatsapp);
+      const rt = (globalThis as any).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(job); else await job;
     }
   }
 
   return json({ status: "ok", bridged, low_intent: lowIntent, failed, superseded: superseded.length });
 });
+
+// Hold the director email up to 60s so a guest's email/WhatsApp (written onto
+// the brief by guest_inquiry_add_contact) can be bundled in. Sends early as
+// soon as contact details appear; otherwise sends the dashboard fallback.
+const HOLD_MS = 60_000;
+const POLL_MS = 3_000;
+async function sendDirectorEmailAfterHold(
+  briefId: string,
+  base: Record<string, unknown>,
+  initialEmail: string | null,
+  initialPhone: string | null,
+) {
+  try {
+    let email = initialEmail || null;
+    let phone = initialPhone || null;
+    const deadline = Date.now() + HOLD_MS;
+    while (!email && !phone && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, POLL_MS));
+      const { data } = await admin.from("cn_director_briefs")
+        .select("contact_email, contact_phone").eq("id", briefId).maybeSingle();
+      email = data?.contact_email || null;
+      phone = data?.contact_phone || null;
+    }
+    const { error: mailErr } = await admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "cn-director-brief",
+        recipientEmail: CN_DIRECTOR_EMAIL,
+        idempotencyKey: `cn-brief-${briefId}`,
+        templateData: {
+          ...base,
+          contactEmail: email || undefined,
+          contactPhone: phone || undefined,
+          contactPending: !email && !phone,
+        },
+      },
+    });
+    if (mailErr) console.error("guest bridge email failed", mailErr);
+    else console.log("guest bridge email sent", { briefId, withContact: !!(email || phone) });
+  } catch (e) {
+    console.error("guest bridge email hold failed", e);
+  }
+}
