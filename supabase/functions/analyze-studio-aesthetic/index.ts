@@ -270,13 +270,15 @@ serve(async (req) => {
   const { text, images, notes, source, screenshots = [] } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
   run.found = images.length;
-  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429/i.test(n));
+  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
   run.rl += notes.filter((n) => /\(429\)/.test(n)).length;
   const priorImages = Array.isArray(dna?.image_urls)
     ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
     : [];
   if (sourceUrl !== initialUrl) await supabase.from("studio_aesthetic_dna").update({ source_url: sourceUrl }).eq("trade_account_id", id);
-  if (!text && images.length === 0 && screenshots.length === 0 && priorImages.length === 0) {
+  // A crawl that captured nothing new must never re-profile from old evidence
+  // alone: keep prior images and manual tags, mark it retryable.
+  if (!text && images.length === 0 && screenshots.length === 0) {
     return fail(`Could not read the website / Instagram profile${notes.length ? ` — ${[...new Set(notes)].join("; ")}` : ""}`);
   }
 
