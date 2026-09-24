@@ -45,15 +45,13 @@ const megaMenuShowcaseCards = [
   { label: "Tables", category: "Tables", image: cloudinaryUrl("intimate-table-detail_aqxvvm", { width: 480, quality: "auto:good", crop: "fill" }) },
   { label: "Storage", category: "Storage", image: cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 480, quality: "auto:good", crop: "fill" }) },
   { label: "Lighting", category: "Lighting", image: cloudinaryUrl("details-lamp_clzcrk", { width: 480, quality: "auto:good", crop: "fill" }) },
-  { label: "Objects", category: "Décor", image: cloudinaryUrl("small-room-vase_s3nz5o", { width: 480, quality: "auto:good", crop: "fill" }) },
 ] as const;
 
-const megaMenuVibes = [
-  "Sociable",
-  "Intimate",
-  "Sanctuary",
-  "Calming",
-  "Statement",
+const megaMenuTaxonomyColumns = [
+  { title: "Furniture", categories: ["Seating", "Bedroom"] },
+  { title: "Tables & Storage", categories: ["Tables", "Storage"] },
+  { title: "Lighting", categories: ["Lighting"] },
+  { title: "Decor & Objects", categories: ["Rugs", "Décor"] },
 ] as const;
 
 const leftNavItems = [{
@@ -1007,31 +1005,44 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 to { opacity: 1; filter: blur(0); transform: translateY(0); }
               }
             `}</style>
-            <div className="flex w-full items-start gap-[60px]">
-              <div className="grid w-1/4 shrink-0 grid-cols-2 gap-12">
-                <div className="min-w-0">
-                  <h3 className={megaMenuHeadingClass}>Shop By Room</h3>
-                  <ul className="space-y-2.5">
-                    <li><a href="/search?room=living-room" className={megaMenuLinkClass}>Living Room</a></li>
-                    <li><a href="/search?room=dining-room" className={megaMenuLinkClass}>Dining Room</a></li>
-                    <li><a href="/search?room=bedroom" className={megaMenuLinkClass}>Bedroom</a></li>
-                    <li><a href="/search?room=office" className={megaMenuLinkClass}>Office</a></li>
-                  </ul>
-                </div>
-
-                <div className="min-w-0">
-                  <h3 className={megaMenuHeadingClass}>Shop By Vibe</h3>
-                  <ul className="space-y-2.5">
-                    {megaMenuVibes.map((vibe) => (
-                      <li key={vibe}>
-                        <a href="/gallery" className={megaMenuLinkClass}>{vibe}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+            <div className="grid w-full grid-cols-2 items-start gap-[60px]">
+              <div className="grid min-w-0 grid-cols-4 gap-8">
+                {megaMenuTaxonomyColumns.map((column) => (
+                  <div key={column.title} className="min-w-0">
+                    <h3 className={megaMenuHeadingClass}>{column.title}</h3>
+                    <div className="space-y-5">
+                      {column.categories.map((category) => (
+                        <div key={category}>
+                          {column.categories.length > 1 && (
+                            <button
+                              type="button"
+                              className="mb-2.5 block w-full text-left font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground transition-opacity hover:opacity-50"
+                              onClick={() => navigateFromMegaMenu(category)}
+                            >
+                              {category}
+                            </button>
+                          )}
+                          <ul className="space-y-2.5">
+                            {SUBCATEGORY_MAP[category]?.map((subcategory) => (
+                              <li key={subcategory}>
+                                <button
+                                  type="button"
+                                  className={megaMenuLinkClass}
+                                  onClick={() => navigateFromMegaMenu(category, subcategory)}
+                                >
+                                  {subcategory}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="grid w-3/4 grid-cols-5 gap-4">
+              <div className="grid min-w-0 grid-cols-4 gap-4">
                 {megaMenuShowcaseCards.map((card) => (
                   <button
                     key={card.label}
