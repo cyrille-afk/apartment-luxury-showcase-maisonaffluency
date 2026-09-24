@@ -14,6 +14,7 @@ const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uplo
 const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773975478/Screen_Shot_2026-03-20_at_10.57.13_AM_yiqv4q.png";
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import Navigation from "@/components/Navigation";
+import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
@@ -219,6 +220,8 @@ interface HeroJoinFormProps {
   handleJoinSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleStudioSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   handleCredentialsSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  turnstileToken: string;
+  setTurnstileToken: (t: string) => void;
 }
 
 const HeroJoinForm = ({
@@ -231,6 +234,8 @@ const HeroJoinForm = ({
   handleJoinSubmit,
   handleStudioSubmit,
   handleCredentialsSubmit,
+  turnstileToken,
+  setTurnstileToken,
 }: HeroJoinFormProps) => {
   const credentialFileRef = useRef<HTMLInputElement>(null);
   const labelCls = cn(
@@ -372,7 +377,13 @@ const HeroJoinForm = ({
                 <Upload className="ml-3 h-3.5 w-3.5 shrink-0" />
               </button>
             </div>
-            <button type="submit" disabled={joinLoading} className={cn(goldBtn, "mt-1")}>
+            <Turnstile
+              theme={ghost ? "dark" : "light"}
+              className="flex min-h-[65px] justify-center md:justify-start"
+              onVerify={setTurnstileToken}
+              onExpire={() => setTurnstileToken("")}
+            />
+            <button type="submit" disabled={joinLoading || !turnstileToken} className={cn(goldBtn, "mt-1")}>
               {joinLoading ? "Submitting…" : "Submit Application"}
             </button>
           </form>
@@ -442,6 +453,7 @@ const TradeLanding = () => {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinEmail, setJoinEmail] = useState("");
   const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   // Clicking "Trade Program" in the navbar forces a clean, unsubmitted
   // application view — even when already on this page after a submission.
@@ -455,6 +467,7 @@ const TradeLanding = () => {
     setJoinError(null);
     setJoinEmail("");
     setJoinCredentialFile(null);
+    setTurnstileToken("");
   }, [location.state]);
 
   const handleJoinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -513,6 +526,10 @@ const TradeLanding = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const businessRegNumber = ((formData.get("regNumber") as string) || "").trim();
+    if (!turnstileToken) {
+      setJoinError("Please complete the security check.");
+      return;
+    }
     setJoinLoading(true);
     setJoinError(null);
     let document: { name: string; contentType: string; data: string } | undefined;
@@ -530,9 +547,10 @@ const TradeLanding = () => {
       };
     }
     const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email: joinEmail, step: 3, businessRegNumber, document },
+      body: { email: joinEmail, step: 3, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
     });
     setJoinLoading(false);
+    setTurnstileToken("");
     if (error) {
       setJoinError("We couldn't submit your application. Please try again.");
       return;
@@ -670,6 +688,8 @@ const TradeLanding = () => {
                   handleJoinSubmit={handleJoinSubmit}
                   handleStudioSubmit={handleStudioSubmit}
                   handleCredentialsSubmit={handleCredentialsSubmit}
+                  turnstileToken={turnstileToken}
+                  setTurnstileToken={setTurnstileToken}
                 />
               </motion.div>
             </motion.div>
@@ -702,6 +722,8 @@ const TradeLanding = () => {
                   handleJoinSubmit={handleJoinSubmit}
                   handleStudioSubmit={handleStudioSubmit}
                   handleCredentialsSubmit={handleCredentialsSubmit}
+                  turnstileToken={turnstileToken}
+                  setTurnstileToken={setTurnstileToken}
                 />
               </div>
             </div>
