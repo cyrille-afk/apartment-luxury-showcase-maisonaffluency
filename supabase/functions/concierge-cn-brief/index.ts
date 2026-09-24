@@ -14,6 +14,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+import { requireUser } from "../_shared/auth.ts";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const CN_DIRECTOR_EMAIL = Deno.env.get("CN_DIRECTOR_EMAIL") || "";
 const CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -47,6 +48,14 @@ serve(async (req) => {
     });
   }
 
+  const auth = await requireUser(req, "concierge-cn-brief");
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.body), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   let body: Body;
   try {
     body = await req.json();
@@ -66,8 +75,16 @@ serve(async (req) => {
 
   // session_id column is uuid + FK; only forward when it looks like a uuid.
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const sessionUuid = body.session_id && UUID_RE.test(body.session_id) ? body.session_id : null;
+  // Never trust a client-supplied session id: only accept a live, unrevoked
+  // portal session, otherwise brief under the signed-in caller only.
+  let sessionUuid: string | null = null;
+  if (body.session_id && UUID_RE.test(body.session_id)) {
+    const { data: ps } = await admin.from("portal_sessions")
+      .select("id, expires_at, revoked_at").eq("id", body.session_id).maybeSingle();
+    if (ps && !ps.revoked_at && Date.parse(ps.expires_at) > Date.now()) sessionUuid = ps.id;
+  }
   const sessionKey = sessionUuid || "no-session";
+  void UUID_RE;
   const invitedName = (body.invited_name || "").slice(0, 120) || null;
 
   // 24h dedupe unless force=true.
@@ -174,7 +191,7 @@ ${transcript}`;
 
   if (insertErr) {
     console.error("cn-brief insert failed", insertErr);
-    return new Response(JSON.stringify({ error: "insert_failed", detail: insertErr.message }), {
+    return new Response(JSON.stringify({ error: "insert_failed" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

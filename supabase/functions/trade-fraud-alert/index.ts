@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireCronOrAdmin } from "../_shared/auth.ts";
 
 const ADMIN_EMAILS = [
   "ops@maisonaffluency.com",
@@ -24,6 +25,12 @@ interface WebhookPayload {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+  {
+    const __auth = await requireCronOrAdmin(req, "trade-fraud-alert");
+    if (!__auth.ok) {
+      return new Response(JSON.stringify(__auth.body), { status: __auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
   }
 
   if (req.method !== "POST") {

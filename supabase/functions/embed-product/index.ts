@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireCronOrAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,12 @@ async function gatewayPost(path: string, apiKey: string, body: unknown) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+  {
+    const __auth = await requireCronOrAdmin(req, "embed-product");
+    if (!__auth.ok) {
+      return new Response(JSON.stringify(__auth.body), { status: __auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
   }
 
   try {

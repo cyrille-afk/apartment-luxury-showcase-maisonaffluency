@@ -89,6 +89,50 @@ Deno.serve(async (req) => {
     )
   }
 
+  // ── Privileged caller check ────────────────────────────────────────────
+  // service role / admin → any template. Otherwise only two narrow cases:
+  //  • welcome-registration for a just-created account whose email matches
+  //  • manual-shipping-quote-request by a signed-in user, forced to concierge
+  {
+    const deny = (status: number, error: string) =>
+      new Response(JSON.stringify({ error }), {
+        status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const svc = createClient(supabaseUrl, supabaseServiceKey)
+    let privileged = authHeader === `Bearer ${supabaseServiceKey}`
+    let callerId: string | null = null
+    if (!privileged && authHeader.startsWith('Bearer ')) {
+      const anon = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!)
+      const { data } = await anon.auth.getClaims(authHeader.slice(7))
+      const sub = data?.claims?.sub as string | undefined
+      if (sub && data?.claims?.role === 'authenticated') {
+        callerId = sub
+        const { data: roles } = await svc
+          .from('user_roles').select('role').eq('user_id', sub).in('role', ['admin', 'super_admin'])
+        privileged = (roles?.length ?? 0) > 0
+      }
+    }
+    if (!privileged) {
+      if (templateName === 'welcome-registration') {
+        const m = /^welcome-reg-([0-9a-f-]{36})$/i.exec(String(idempotencyKey))
+        if (!m) return deny(403, 'Forbidden')
+        const { data: u } = await svc.auth.admin.getUserById(m[1])
+        const created = u?.user?.created_at ? Date.parse(u.user.created_at) : 0
+        if (
+          !u?.user?.email ||
+          u.user.email.toLowerCase() !== String(recipientEmail ?? '').toLowerCase() ||
+          Date.now() - created > 15 * 60 * 1000
+        ) return deny(403, 'Forbidden')
+      } else if (templateName === 'manual-shipping-quote-request' && callerId) {
+        recipientEmail = 'concierge@myaffluency.com'
+      } else {
+        return deny(callerId ? 403 : 401, callerId ? 'Forbidden' : 'Unauthorized')
+      }
+    }
+  }
+
   if (
     (templateName === 'quote-confirmation-payment-link' ||
       templateName === 'quote-confirmation-internal-copy') &&

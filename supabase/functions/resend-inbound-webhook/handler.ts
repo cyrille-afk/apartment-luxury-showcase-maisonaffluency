@@ -296,7 +296,18 @@ export function createInboundHandler(deps: InboundDeps) {
 
     // ---- Deliver the private portal key -----------------------------------
     const slug = studioSlug(lead.studio_name);
-    const portalUrl = `${SITE}/trade/activate?token=${lead.id}&studio=${encodeURIComponent(slug)}`;
+    // Single-use, unguessable activation token (only its SHA-256 is stored).
+    const rawBytes = new Uint8Array(32);
+    crypto.getRandomValues(rawBytes);
+    const activationToken = Array.from(rawBytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+    const tokenHash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(activationToken))))
+      .map((b) => b.toString(16).padStart(2, "0")).join("");
+    await supabase.from("acquisition_leads").update({
+      activation_token_hash: tokenHash,
+      activation_token_expires_at: new Date(Date.now() + 14 * 86400_000).toISOString(),
+      activation_token_used_at: null,
+    }).eq("id", lead.id);
+    const portalUrl = `${SITE}/trade/activate?token=${activationToken}&studio=${encodeURIComponent(slug)}`;
     let recipient = fromEmail || lead.business_email;
     let keySubject = `Re: Priority trade access for ${lead.studio_name} / Maison Affluency`;
 
@@ -328,7 +339,7 @@ export function createInboundHandler(deps: InboundDeps) {
           studioName: lead.studio_name,
           salutation: salutation(lead),
           studioSlug: slug,
-          uniquePortalKey: `/trade/activate?token=${lead.id}`,
+          uniquePortalKey: `/trade/activate?token=${activationToken}`,
         },
       },
       supabase,

@@ -123,6 +123,9 @@ export type Database = {
       }
       acquisition_leads: {
         Row: {
+          activation_token_expires_at: string | null
+          activation_token_hash: string | null
+          activation_token_used_at: string | null
           aesthetic_profile: string | null
           aesthetic_score: number | null
           business_email: string
@@ -158,6 +161,9 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          activation_token_expires_at?: string | null
+          activation_token_hash?: string | null
+          activation_token_used_at?: string | null
           aesthetic_profile?: string | null
           aesthetic_score?: number | null
           business_email: string
@@ -193,6 +199,9 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          activation_token_expires_at?: string | null
+          activation_token_hash?: string | null
+          activation_token_used_at?: string | null
           aesthetic_profile?: string | null
           aesthetic_score?: number | null
           business_email?: string
@@ -4173,6 +4182,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      internal_job_tokens: {
+        Row: {
+          created_at: string
+          name: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          token?: string
+        }
+        Relationships: []
       }
       items: {
         Row: {
@@ -10546,6 +10573,7 @@ export type Database = {
         Args: { _pick_id: string }
         Returns: boolean
       }
+      _internal_job_token: { Args: never; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {

@@ -8,6 +8,7 @@
 // ask it to pick from them by id only — no free-text invention.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireUser } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,6 +79,12 @@ Output STRICT JSON only, no code fences:
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  {
+    const __auth = await requireUser(req, "trade-concierge-realign");
+    if (!__auth.ok) {
+      return new Response(JSON.stringify(__auth.body), { status: __auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+  }
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   const apiKey = Deno.env.get("LOVABLE_API_KEY");

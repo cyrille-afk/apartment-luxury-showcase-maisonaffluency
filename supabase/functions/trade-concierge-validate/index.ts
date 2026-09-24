@@ -1,3 +1,4 @@
+import { requireUser } from "../_shared/auth.ts";
 // Structured validation for tearsheet manual edits.
 //
 // Takes a DIFF (skipped ids, locked ids, title rename, kept items) and asks
@@ -83,6 +84,12 @@ Output STRICT JSON only, no code fences:
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  {
+    const __auth = await requireUser(req, "trade-concierge-validate");
+    if (!__auth.ok) {
+      return new Response(JSON.stringify(__auth.body), { status: __auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+  }
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }

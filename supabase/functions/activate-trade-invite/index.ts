@@ -19,8 +19,11 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TOKEN_RE = /^[0-9a-f]{64}$/i;
+async function sha256Hex(v: string) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v));
+  return Array.from(new Uint8Array(d)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 function splitName(full: string | null): { first: string; last: string } {
   const parts = String(full ?? "").trim().split(/\s+/).filter(Boolean);
@@ -37,7 +40,7 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const token = String((body as { token?: unknown }).token ?? "").trim();
-    if (!UUID_RE.test(token)) {
+    if (!TOKEN_RE.test(token)) {
       return json({ error: "invalid_token" }, 400);
     }
 
@@ -49,8 +52,8 @@ serve(async (req) => {
 
     const { data: lead, error: leadErr } = await supabase
       .from("acquisition_leads")
-      .select("id, studio_name, founder_name, business_email, country")
-      .eq("id", token)
+      .select("id, studio_name, founder_name, business_email, country, activation_token_expires_at, activation_token_used_at, campaign_status")
+      .eq("activation_token_hash", await sha256Hex(token))
       .maybeSingle();
 
     if (leadErr) {
@@ -60,6 +63,24 @@ serve(async (req) => {
     if (!lead || !lead.business_email) {
       return json({ error: "invalid_token" }, 404);
     }
+    // Privileged-issuance check: token must be unexpired, unused, and the lead
+    // must have been cleared for activation by the portal-key workflow.
+    if (
+      lead.activation_token_used_at ||
+      !lead.activation_token_expires_at ||
+      Date.parse(lead.activation_token_expires_at) < Date.now() ||
+      !["replied_interested", "portal_activated", "activated"].includes(String(lead.campaign_status))
+    ) {
+      return json({ error: "invalid_token" }, 404);
+    }
+    // Burn the token before provisioning (single use, race-safe).
+    const { data: burned } = await supabase
+      .from("acquisition_leads")
+      .update({ activation_token_used_at: new Date().toISOString(), activation_token_hash: null })
+      .eq("id", lead.id)
+      .is("activation_token_used_at", null)
+      .select("id");
+    if (!burned?.length) return json({ error: "invalid_token" }, 404);
 
     const email = String(lead.business_email).trim().toLowerCase();
     const { first, last } = splitName(lead.founder_name);
