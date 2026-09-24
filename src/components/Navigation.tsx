@@ -43,7 +43,7 @@ const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quali
 const megaMenuShowcaseCards = [
   { label: "Seating", category: "Seating", image: cloudinaryUrl("bespoke-sofa_gxidtx", { width: 480, quality: "auto:good", crop: "fill" }) },
   { label: "Tables", category: "Tables", image: cloudinaryUrl("intimate-table-detail_aqxvvm", { width: 480, quality: "auto:good", crop: "fill" }) },
-  { label: "Storage", category: "Storage", image: cloudinaryUrl("details-console_clzcrk", { width: 480, quality: "auto:good", crop: "fill" }) },
+  { label: "Storage", category: "Storage", image: cloudinaryUrl("AffluencySG_204_1_qbbpqb", { width: 480, quality: "auto:good", crop: "fill" }) },
   { label: "Lighting", category: "Lighting", image: cloudinaryUrl("details-lamp_clzcrk", { width: 480, quality: "auto:good", crop: "fill" }) },
   { label: "Objects", category: "Décor", image: cloudinaryUrl("small-room-vase_s3nz5o", { width: 480, quality: "auto:good", crop: "fill" }) },
 ] as const;
