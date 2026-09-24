@@ -126,7 +126,25 @@ serve(async (req) => {
   ].join("\n");
 
   const content: unknown[] = [{ type: "text", text: prompt }];
-  for (const url of images) content.push({ type: "image_url", image_url: { url } });
+  // Fetch images ourselves and inline them as data URLs: many CDNs block the
+  // model provider's fetcher, which rejects the whole request.
+  const usable: string[] = [];
+  for (const url of images) {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 8000);
+      const r = await fetch(url, { signal: ctl.signal, headers: { "User-Agent": "Mozilla/5.0" } });
+      clearTimeout(t);
+      const type = r.headers.get("content-type") ?? "";
+      if (!r.ok || !/^image\/(jpeg|png|webp|gif)/.test(type)) continue;
+      const buf = new Uint8Array(await r.arrayBuffer());
+      if (buf.length < 5_000 || buf.length > 4_000_000) continue;
+      let bin = "";
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      content.push({ type: "image_url", image_url: { url: `data:${type.split(";")[0]};base64,${btoa(bin)}` } });
+      usable.push(url);
+    } catch { /* skip unreachable image */ }
+  }
 
   const aiRes = await fetch(GATEWAY, {
     method: "POST",
@@ -148,7 +166,7 @@ serve(async (req) => {
   const arr = (v: unknown) => Array.isArray(v) ? v.map(String).slice(0, 8) : [];
   await supabase.from("studio_aesthetic_dna").update({
     status: "complete",
-    image_urls: images,
+    image_urls: usable,
     aesthetic_label: parsed.aesthetic_label ? String(parsed.aesthetic_label).slice(0, 120) : null,
     aesthetic_summary: parsed.aesthetic_summary ? String(parsed.aesthetic_summary).slice(0, 1500) : null,
     dominant_tones: arr(parsed.dominant_tones),
