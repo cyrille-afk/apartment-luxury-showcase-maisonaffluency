@@ -73,7 +73,7 @@ export function TradeSidebar() {
     if (!isAdmin) return;
     const [quotes, apps, samples] = await Promise.all([
       supabase.from("trade_quotes").select("id", { count: "exact", head: true }).eq("status", "submitted"),
-      supabase.from("trade_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("trade_accounts").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
       supabase.from("trade_sample_requests").select("id", { count: "exact", head: true }).eq("status", "requested"),
     ]);
     setSubmittedQuotes(quotes.count || 0);
@@ -86,7 +86,7 @@ export function TradeSidebar() {
   }, [fetchCounts]);
 
   useRealtimeTables(
-    ["trade_quotes", "trade_applications", "trade_sample_requests"],
+    ["trade_quotes", "trade_accounts", "trade_sample_requests"],
     () => void fetchCounts(),
     isAdmin,
   );

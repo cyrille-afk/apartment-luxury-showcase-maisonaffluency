@@ -217,20 +217,33 @@ Deno.serve(async (req) => {
 
     // Inbound pipeline: create/refresh the trade account in pending_review and
     // kick off the Instagram/website Vision AI analysis in the background.
-    const { data: acct, error: acctErr } = await supabase
+    // One row per email: refresh an existing account (never downgrading an
+    // approved one), otherwise create a new pending_review row.
+    const acctFields: Record<string, unknown> = {
+      email,
+      studio_name: clean(row?.company_name) || null,
+      contact_name: body.contactName ? String(body.contactName).trim().slice(0, 120) : body.firstName ? String(body.firstName).trim().slice(0, 100) : null,
+      phone_number: phoneNumber,
+      website_or_ig: clean(row?.portfolio_reference ?? row?.website_url) || null,
+      business_reg_number: row?.business_reg_number ?? null,
+      credential_document_path: row?.credential_document_path ?? null,
+      source: body.source ? String(body.source).replace(/[^a-z0-9_\-]/gi, '').slice(0, 80) || null : 'trade-program',
+      intent: body.intent ? String(body.intent).replace(/[^a-z0-9_\-]/gi, '').slice(0, 80) || null : null,
+    }
+    for (const k of Object.keys(acctFields)) if (acctFields[k] === null && k !== 'email') delete acctFields[k]
+    const { data: existingAcct } = await supabase
       .from('trade_accounts')
-      .upsert({
-        signup_id: signupId,
-        email,
-        studio_name: clean(row?.company_name) || null,
-        contact_name: body.firstName ? String(body.firstName).trim().slice(0, 100) : null,
-        phone_number: phoneNumber,
-        website_or_ig: clean(row?.portfolio_reference ?? row?.website_url) || null,
-        business_reg_number: row?.business_reg_number ?? null,
-        credential_document_path: row?.credential_document_path ?? null,
-      }, { onConflict: 'signup_id' })
-      .select('id, status')
-      .single()
+      .select('id, signup_id')
+      .or(`signup_id.eq.${signupId},email.ilike.${email.replace(/[,()]/g, '')}`)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const { data: acct, error: acctErr } = existingAcct
+      ? await supabase.from('trade_accounts')
+          .update({ ...acctFields, ...(existingAcct.signup_id ? {} : { signup_id: signupId }) })
+          .eq('id', existingAcct.id).select('id, status').single()
+      : await supabase.from('trade_accounts')
+          .insert({ ...acctFields, signup_id: signupId }).select('id, status').single()
     if (acctErr) console.error('trade_accounts upsert failed', acctErr)
     if (acct?.id) {
       await supabase.from('studio_aesthetic_dna')

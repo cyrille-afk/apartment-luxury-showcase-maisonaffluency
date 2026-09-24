@@ -135,7 +135,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
         first_name: firstName,
         last_name: lastName,
       });
-      navigate(`/trade/register?${qs.toString()}`);
+      navigate(`/trade-program?${qs.toString()}`);
     }
   };
 
@@ -221,7 +221,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               {/* Full professional vetting form — deliberately distinct from
                   the quick consumer account above. */}
               <button
-                onClick={() => { onClose(); navigate("/trade/register?intent=trade_vetting&source=spec_sheet_gate"); }}
+                onClick={() => { onClose(); navigate("/trade-program?intent=trade_vetting&source=spec_sheet_gate"); }}
                 className="underline underline-offset-2 hover:text-foreground transition-colors"
               >
                 Apply for trade access
@@ -302,7 +302,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
             {isDesigner && (
               <p className="font-body text-[10px] text-muted-foreground/70 text-center mt-3 leading-relaxed">
                 As a design professional, you may also{" "}
-                <button onClick={() => navigate("/trade/register")} className="underline underline-offset-2 hover:text-foreground transition-colors">
+                <button onClick={() => navigate("/trade-program")} className="underline underline-offset-2 hover:text-foreground transition-colors">
                   apply for trade access
                 </button>{" "}
                 for exclusive pricing.

@@ -117,9 +117,9 @@ export default function TradeAdminDashboard() {
     queryKey: ["admin-pending-apps"],
     queryFn: async () => {
       const { count } = await supabase
-        .from("trade_applications")
+        .from("trade_accounts")
         .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
+        .eq("status", "pending_review");
       return count || 0;
     },
     enabled: isAdmin,

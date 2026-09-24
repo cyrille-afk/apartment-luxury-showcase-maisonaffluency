@@ -19,7 +19,7 @@ interface GatedContentProps {
  * children with an unlock CTA on top.
  *
  * Access request routes:
- *   - Trade professionals → /trade/register
+ *   - Trade professionals → /trade-program
  *   - Private collectors  → /collector-signup
  */
 export const GatedContent = ({
@@ -61,7 +61,7 @@ export const GatedContent = ({
           )}
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Link
-              to="/trade/register"
+              to="/trade-program"
               className="inline-flex items-center px-3 py-1.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
             >
               Trade Access

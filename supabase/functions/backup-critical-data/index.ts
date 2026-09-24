@@ -19,6 +19,7 @@ const ALLOWED_TABLES = new Set([
   "profiles",
   "user_roles",
   "trade_applications",
+  "trade_accounts",
   "journal_articles",
 ]);
 

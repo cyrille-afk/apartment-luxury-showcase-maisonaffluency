@@ -652,6 +652,20 @@
       "when": 1790229310155,
       "tag": "0092_add_trade_application_phone",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1790240040124,
+      "tag": "0093_consolidate_trade_applications_into_trade_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1790240251067,
+      "tag": "0094_trade_accounts_access_functions",
+      "breakpoints": true
     }
   ]
 }

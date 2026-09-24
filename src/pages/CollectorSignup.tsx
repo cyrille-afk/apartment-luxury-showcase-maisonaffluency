@@ -195,7 +195,7 @@ const CollectorSignup = () => {
 
               <p className="font-body text-[11px] text-muted-foreground text-center leading-relaxed">
                 Trade professional instead?{" "}
-                <Link to="/trade/register" className="underline hover:text-foreground">
+                <Link to="/trade-program" className="underline hover:text-foreground">
                   Apply to the Trade Program
                 </Link>
                 .

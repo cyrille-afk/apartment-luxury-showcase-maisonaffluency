@@ -348,13 +348,13 @@ const handler = async (req: Request): Promise<Response> => {
         companyName = (profileRow?.company || "").trim();
         if (!companyName) {
           const { data: appRow } = await supabase
-            .from("trade_applications")
-            .select("company_name")
+            .from("trade_accounts")
+            .select("studio_name")
             .eq("user_id", authUserId)
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle();
-          companyName = (appRow?.company_name || "").trim();
+          companyName = (appRow?.studio_name || "").trim();
         }
       } catch (e) {
         console.error("Trade profile company lookup failed:", e);

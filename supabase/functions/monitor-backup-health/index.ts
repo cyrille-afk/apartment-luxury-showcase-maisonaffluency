@@ -26,6 +26,7 @@ const EXPECTED_TABLES = [
   "profiles",
   "user_roles",
   "trade_applications",
+  "trade_accounts",
   "journal_articles",
 ];
 

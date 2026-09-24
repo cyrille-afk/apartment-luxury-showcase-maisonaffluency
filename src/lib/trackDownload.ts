@@ -16,17 +16,18 @@ export function trackDownload(documentId?: string, label?: string) {
       if (!session?.user) return;
       const userId = session.user.id;
 
-      // Look up country from trade_applications
+      // Look up country from trade_accounts
       let country = "";
       try {
         const { data: app } = await supabase
-          .from("trade_applications")
+          .from("trade_accounts")
           .select("country")
           .eq("user_id", userId)
+          .limit(1)
           .maybeSingle();
         if (app?.country) country = app.country;
       } catch {
-        // If trade_applications lookup fails, continue without country
+        // If trade_accounts lookup fails, continue without country
       }
 
       const { error } = await supabase.from("document_downloads").insert({

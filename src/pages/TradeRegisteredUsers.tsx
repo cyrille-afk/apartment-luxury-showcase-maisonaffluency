@@ -69,7 +69,7 @@ export default function TradeRegisteredUsers() {
 
       const [rolesRes, appsRes] = await Promise.all([
         supabase.from("user_roles").select("user_id, role"),
-        supabase.from("trade_applications").select("user_id, status").order("created_at", { ascending: false }),
+        supabase.from("trade_accounts").select("user_id, status").order("created_at", { ascending: false }),
       ]);
 
       const rolesMap = new Map<string, string[]>();
@@ -81,7 +81,7 @@ export default function TradeRegisteredUsers() {
 
       const appMap = new Map<string, string>();
       (appsRes.data || []).forEach((a: any) => {
-        if (!appMap.has(a.user_id)) appMap.set(a.user_id, a.status);
+        if (a.user_id && !appMap.has(a.user_id)) appMap.set(a.user_id, a.status === "pending_review" || a.status === "on_hold" ? "pending" : a.status);
       });
 
       return profiles.map((p: any): RegisteredUser => ({

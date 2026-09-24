@@ -2857,7 +2857,7 @@ const PublicProductPageContent: React.FC = () => {
                       Sign in to view
                     </Link>
                     <Link
-                      to="/trade/register"
+                      to="/trade-program"
                       className="inline-flex items-center justify-center px-5 py-3 rounded-luxury-micro border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
                     >
                       Apply for trade access

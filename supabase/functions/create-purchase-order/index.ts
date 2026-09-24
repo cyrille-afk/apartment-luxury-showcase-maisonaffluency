@@ -62,7 +62,7 @@ serve(async (req) => {
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
     const [{ data: profile }, { data: tradeApplication }] = await Promise.all([
       admin.from("profiles").select("company, trade_status").eq("id", userId).maybeSingle(),
-      admin.from("trade_applications").select("status, tax_vat_id").eq("user_id", userId)
+      admin.from("trade_accounts").select("status, tax_vat_id").eq("user_id", userId)
         .eq("status", "approved").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     if (profile?.trade_status !== "approved" || tradeApplication?.status !== "approved") {

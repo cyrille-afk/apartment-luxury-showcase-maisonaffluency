@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       [rolesRes, profileRes, appRes] = await Promise.all([
         client.from("user_roles").select("role").eq("user_id", userId),
         client.from("profiles").select("first_name, last_name, company, email, trade_status, has_seen_trade_intro, concierge_name").eq("id", userId).single(),
-        client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
+        client.from("trade_accounts").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
       console.warn("Unable to refresh trade access state; keeping existing permissions.", error);
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (appRes.data && appRes.data.length > 0) {
-      setApplicationStatus(appRes.data[0].status as any);
+      { const s = appRes.data[0].status; setApplicationStatus((s === "pending_review" || s === "on_hold" ? "pending" : s) as any); }
     } else {
       setApplicationStatus("none");
     }
@@ -245,7 +245,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (event === "SIGNED_OUT") {
           const path = window.location.pathname;
-          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade/register" && path !== "/trade-program") {
+          if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade-program") {
             window.location.href = "/trade/login";
           }
         }
