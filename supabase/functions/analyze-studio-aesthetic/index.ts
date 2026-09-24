@@ -67,6 +67,15 @@ function resolveSourceUrl(ref: string | null): string | null {
   return /^https?:\/\//i.test(v) ? v : `https://${v}`;
 }
 
+function isCachedEvidenceUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.pathname.includes("/storage/v1/object/public/assets/studio-aesthetic/");
+  } catch {
+    return false;
+  }
+}
+
 type ScrapeResult = { text: string; images: string[]; notes: string[] };
 
 // Instagram blocks generic scrapers, so handles are read through the Meta
@@ -272,6 +281,10 @@ serve(async (req) => {
   const usable: string[] = [];
   for (let index = 0; index < candidates.length; index += 1) {
     const url = candidates[index];
+    if (isCachedEvidenceUrl(url)) {
+      usable.push(url);
+      continue;
+    }
     try {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), 30_000);
