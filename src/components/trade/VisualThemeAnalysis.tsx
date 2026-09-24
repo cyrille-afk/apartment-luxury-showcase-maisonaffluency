@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ImageOff } from "lucide-react";
+import { Check, ImageOff, Loader2, Pencil, X } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export type VisualThemeDna = {
   aesthetic_label: string | null;
@@ -69,27 +71,120 @@ function EvidenceImage({ src, index }: { src?: string; index: number }) {
   );
 }
 
-export default function VisualThemeAnalysis({ dna }: { dna: VisualThemeDna }) {
+function EditableBlock({ title, values, onChange, placeholder }: { title: string; values: string[]; onChange: (v: string[]) => void; placeholder: string }) {
+  const [draft, setDraft] = useState("");
+  const add = () => {
+    const v = draft.trim();
+    if (v && !values.some((x) => x.toLowerCase() === v.toLowerCase())) onChange([...values, v].slice(0, 12));
+    setDraft("");
+  };
+  return (
+    <div className="border-t border-border pt-4 first:border-t-0 first:pt-0">
+      <h4 className="font-body text-[10px] font-semibold uppercase tracking-[0.24em] text-foreground">{title}</h4>
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        {values.map((value, index) => (
+          <span key={`${value}-${index}`} className="inline-flex items-center gap-1.5 border border-border bg-background py-1 pl-2.5 pr-1.5 font-body text-[11px] text-foreground">
+            {value}
+            <button type="button" aria-label={`Remove ${value}`} onClick={() => onChange(values.filter((_, i) => i !== index))} className="text-muted-foreground hover:text-destructive">
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
+          onBlur={add}
+          maxLength={60}
+          placeholder={`+ Add ${placeholder}`}
+          className="min-w-[8rem] flex-1 border-b border-dashed border-border bg-transparent px-1 py-1 font-body text-[11px] text-foreground placeholder:text-muted-foreground focus:border-foreground focus:outline-none"
+        />
+      </div>
+    </div>
+  );
+}
+
+export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: VisualThemeDna; accountId?: string; onSaved?: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState({ tones: [] as string[], affinities: [] as string[], materials: [] as string[] });
   const dialect = cleanList(dna.dominant_tones);
   const affinities = cleanList(dna.historical_affinities);
   const materials = cleanList(dna.materials);
   const images = cleanList(dna.image_urls, 6);
-  const palette = dialect.slice(0, 4);
+  const palette = (editing ? draft.tones : dialect).slice(0, 4);
 
   while (palette.length < 4) palette.push(["Deep Ink", "Jade", "Terracotta", "Warm Gold"][palette.length]);
+
+  const toggle = async () => {
+    if (!editing) {
+      setDraft({ tones: cleanList(dna.dominant_tones, 12), affinities: cleanList(dna.historical_affinities, 12), materials: cleanList(dna.materials, 12) });
+      setEditing(true);
+      return;
+    }
+    if (!accountId) { setEditing(false); return; }
+    setSaving(true);
+    const hasTags = draft.tones.length + draft.affinities.length + draft.materials.length > 0;
+    const { data, error } = await supabase
+      .from("studio_aesthetic_dna")
+      .update({
+        dominant_tones: draft.tones,
+        historical_affinities: draft.affinities,
+        materials: draft.materials,
+        ...(hasTags ? { status: "complete", error: null } : {}),
+      })
+      .eq("trade_account_id", accountId)
+      .select("trade_account_id");
+    setSaving(false);
+    if (error || !data?.length) { toast.error(error?.message ?? "Could not save tags."); return; }
+    toast.success("Tags saved.");
+    setEditing(false);
+    onSaved?.();
+  };
 
   return (
     <section className="border-t border-border bg-card" aria-label="Visual theme analysis">
       <div className="grid min-w-0 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
         <div className="min-w-0 space-y-6 border-b border-border p-5 md:p-7 lg:border-b-0 lg:border-r">
-          <div>
-            <p className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Curatorial Insights</p>
-            <h3 className="mt-2 font-serif text-xl text-foreground">{dna.aesthetic_label || "Studio Visual Language"}</h3>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Curatorial Insights</p>
+              <h3 className="mt-2 font-serif text-xl text-foreground">{dna.aesthetic_label || "Studio Visual Language"}</h3>
+            </div>
+            {accountId && (
+              <div className="flex shrink-0 items-center gap-3">
+                {editing && (
+                  <button type="button" onClick={() => setEditing(false)} disabled={saving} className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={toggle}
+                  disabled={saving}
+                  aria-pressed={editing}
+                  className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.2em] text-foreground hover:text-primary disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : editing ? <Check className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
+                  {editing ? "[ Save Tags ]" : "[ Edit Tags ]"}
+                </button>
+              </div>
+            )}
           </div>
 
-          <InsightBlock title="Design Dialect" values={dialect} />
-          <InsightBlock title="Historical Affinities" values={affinities} />
-          <InsightBlock title="Materiality Profile" values={materials} />
+          {editing ? (
+            <>
+              <EditableBlock title="Design Dialect" placeholder="Tag" values={draft.tones} onChange={(tones) => setDraft((d) => ({ ...d, tones }))} />
+              <EditableBlock title="Historical Affinities" placeholder="Tag" values={draft.affinities} onChange={(affinities) => setDraft((d) => ({ ...d, affinities }))} />
+              <EditableBlock title="Materiality Profile" placeholder="Tag" values={draft.materials} onChange={(materials) => setDraft((d) => ({ ...d, materials }))} />
+            </>
+          ) : (
+            <>
+              <InsightBlock title="Design Dialect" values={dialect} />
+              <InsightBlock title="Historical Affinities" values={affinities} />
+              <InsightBlock title="Materiality Profile" values={materials} />
+            </>
+          )}
 
           <div className="border-t border-border pt-4">
             <h4 className="font-body text-[10px] font-semibold uppercase tracking-[0.24em] text-foreground">AI Summary Notes</h4>
