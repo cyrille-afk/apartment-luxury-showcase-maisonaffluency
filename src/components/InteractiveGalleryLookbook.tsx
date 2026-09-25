@@ -170,7 +170,6 @@ function GalleryTour() {
         </div>
         <div className="mx-auto mt-5 max-w-6xl text-center">
           <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
-          <h2 className="mt-2 font-display text-2xl md:text-4xl">Tour Our Gallery</h2>
           <p className="mx-auto mt-3 hidden w-full whitespace-nowrap text-center font-body text-xs leading-relaxed text-muted-foreground md:block">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship.</p>
         </div>
       </div>
@@ -181,10 +180,6 @@ function GalleryTour() {
 function CuratorsCanvas() {
   return (
     <motion.div key="curators" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto min-h-[68vh] max-w-[1400px] px-6 py-12 md:px-12 md:py-16">
-      <div className="mb-10 border-b border-border pb-6 md:mb-14">
-        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Maison Affluency</p>
-        <h2 className="mt-3 font-display text-3xl md:text-5xl">The Curators</h2>
-      </div>
       <div className="grid gap-12 md:grid-cols-2 md:gap-16">
         {curatingTeam.map((member, index) => (
           <motion.article key={member.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="grid gap-6 sm:grid-cols-[minmax(180px,0.8fr)_1.2fr] sm:items-start">
@@ -208,6 +203,7 @@ export default function InteractiveGalleryLookbook() {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activePin, setActivePin] = useState<string | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
+  const [portraitSceneIds, setPortraitSceneIds] = useState<Set<string>>(() => new Set());
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
   const space = SPACES[roomSpaceIndex];
@@ -344,15 +340,26 @@ export default function InteractiveGalleryLookbook() {
     { key: "curators", label: "The Curators", onClick: () => setGalleryState({ kind: "curators" }), active: galleryState.kind === "curators" },
   ];
 
+  const activeTitle = galleryState.kind === "room"
+    ? activePage.title
+    : galleryState.kind === "tour"
+      ? "Tour Our Gallery"
+      : "The Curators";
+  const activeCategory = galleryState.kind === "room"
+    ? space.label
+    : galleryState.kind === "tour"
+      ? "Tour Our Gallery"
+      : "The Curators";
+  const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
+  const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
+
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
-      {galleryState.kind === "room" && (
-        <header className="flex items-center justify-center px-6 py-4 text-center md:py-5">
-          <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
-            {activePage.title}
-          </h2>
-        </header>
-      )}
+      <header className="flex min-h-20 items-center justify-center px-6 py-4 text-center md:min-h-24 md:py-5">
+        <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
+          {activeTitle}
+        </h2>
+      </header>
 
       <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
         <div className="flex min-h-9 snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
@@ -363,6 +370,28 @@ export default function InteractiveGalleryLookbook() {
           ))}
         </div>
       </nav>
+
+      <div className="mx-auto flex min-h-12 w-full max-w-[1280px] items-center justify-between border-b border-border/60 px-4 md:min-h-14 md:px-0">
+        <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
+          {activeCategory}
+        </span>
+        {galleryState.kind === "room" && (
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-9 rounded-none hover:bg-muted">
+              <ChevronLeft className="size-4" strokeWidth={1.4} />
+            </Button>
+            <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-9 rounded-none hover:bg-muted">
+              <ChevronRight className="size-4" strokeWidth={1.4} />
+            </Button>
+            <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-9 rounded-none hover:bg-muted">
+              <GalleryHorizontal className="size-4" strokeWidth={1.4} />
+            </Button>
+            <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
+              {sceneIdx + 1} / {galleryPages.length}
+            </span>
+          </div>
+        )}
+      </div>
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
@@ -378,7 +407,7 @@ export default function InteractiveGalleryLookbook() {
                   contextualPanel
                 />
               )}
-              <div className="relative flex w-full items-center justify-center overflow-hidden bg-transparent">
+              <div className={`relative flex w-full items-center justify-center overflow-hidden transition-colors duration-300 ${activeSceneIsPortrait ? "bg-muted/30" : "bg-transparent"}`}>
                 <AnimatePresence mode="wait">
                   {activePage.scenes.map((pageScene) => (
                     <motion.div
@@ -392,6 +421,15 @@ export default function InteractiveGalleryLookbook() {
                       <img
                         src={large(pageScene.id)}
                         alt={`${space.label} — ${pageScene.title}`}
+                         onLoad={(event) => {
+                           if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
+                           setPortraitSceneIds((current) => {
+                             if (current.has(pageScene.id)) return current;
+                             const next = new Set(current);
+                             next.add(pageScene.id);
+                             return next;
+                           });
+                         }}
                         className="block h-auto max-h-[60vh] w-auto max-w-full object-contain"
                       />
                       {hotspotsForScene(pageScene).map((hotspot) => (
@@ -413,25 +451,6 @@ export default function InteractiveGalleryLookbook() {
               </div>
             </div>
 
-            <div className="flex min-h-14 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-16 md:px-0">
-              <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
-                {space.label}
-              </span>
-              <div className="flex items-center gap-1 md:gap-2">
-                <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-10 rounded-none hover:bg-muted">
-                  <ChevronLeft className="size-4" strokeWidth={1.4} />
-                </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-10 rounded-none hover:bg-muted">
-                  <ChevronRight className="size-4" strokeWidth={1.4} />
-                </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-10 rounded-none hover:bg-muted">
-                  <GalleryHorizontal className="size-4" strokeWidth={1.4} />
-                </Button>
-                <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
-                  {sceneIdx + 1} / {galleryPages.length}
-                </span>
-              </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
