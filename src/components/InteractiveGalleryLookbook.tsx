@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GalleryHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryHorizontal, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -84,26 +84,101 @@ type Hotspot = {
 
 function GalleryTour() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const onPlay = () => trackVideoEvent("play", "showroom-tour");
-    const onPause = () => trackVideoEvent("pause", "showroom-tour");
+    video.volume = 1;
+    video.muted = false;
+    const onPlay = () => {
+      setIsPlaying(true);
+      trackVideoEvent("play", "showroom-tour");
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+      trackVideoEvent("pause", "showroom-tour");
+    };
+    const onTimeUpdate = () => setCurrentTime(video.currentTime);
+    const onDurationChange = () => setDuration(Number.isFinite(video.duration) ? video.duration : 0);
+    const onVolumeChange = () => {
+      setVolume(video.volume);
+      setIsMuted(video.muted);
+    };
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
-    void video.play().catch(() => undefined);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("durationchange", onDurationChange);
+    video.addEventListener("volumechange", onVolumeChange);
     const detachMilestones = attachMilestoneTracking(video, "showroom-tour");
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("durationchange", onDurationChange);
+      video.removeEventListener("volumechange", onVolumeChange);
       detachMilestones();
     };
   }, []);
 
+  const togglePlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.muted = false;
+      if (video.volume === 0) video.volume = 1;
+      void video.play();
+    } else {
+      video.pause();
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+  };
+
+  const updateVolume = (value: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = value;
+    video.muted = value === 0;
+  };
+
+  const seekTo = (value: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = value;
+  };
+
+  const formatTime = (seconds: number) => {
+    if (!Number.isFinite(seconds)) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}:${Math.floor(seconds % 60).toString().padStart(2, "0")}`;
+  };
+
   return (
-    <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto flex min-h-[68vh] max-w-[1500px] items-center px-4 py-8 md:px-10">
+    <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-[1500px] px-4 py-12 md:px-10 md:py-16">
       <div className="w-full bg-muted/30 p-3 md:p-8">
-        <video ref={videoRef} src={APARTMENT_TOUR_VIDEO_URL} autoPlay muted loop controls playsInline poster={large("bespoke-sofa_gxidtx")} className="mx-auto aspect-video w-full max-w-6xl bg-foreground object-cover" />
+        <div className="relative mx-auto aspect-video w-full max-w-6xl overflow-hidden bg-foreground">
+          <video ref={videoRef} src={APARTMENT_TOUR_VIDEO_URL} playsInline poster={large("bespoke-sofa_gxidtx")} onClick={togglePlayback} className="size-full cursor-pointer object-cover" />
+          <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 border-t border-background/30 bg-foreground/85 px-3 py-2 text-background md:gap-4 md:px-5 md:py-3">
+            <Button type="button" variant="ghost" size="icon" onClick={togglePlayback} aria-label={isPlaying ? "Pause gallery tour" : "Play gallery tour with sound"} className="size-9 shrink-0 rounded-none text-background hover:bg-background/15 hover:text-background">
+              {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
+            </Button>
+            <input type="range" min={0} max={duration || 0} step={0.1} value={Math.min(currentTime, duration || 0)} onChange={(event) => seekTo(Number(event.target.value))} aria-label="Video progress" className="h-1 min-w-0 flex-1 cursor-pointer accent-background" />
+            <span className="hidden min-w-24 text-right font-body text-[10px] tabular-nums sm:block">{formatTime(currentTime)} / {formatTime(duration)}</span>
+            <Button type="button" variant="ghost" size="icon" onClick={toggleMute} aria-label={isMuted ? "Unmute gallery tour" : "Mute gallery tour"} className="size-9 shrink-0 rounded-none text-background hover:bg-background/15 hover:text-background">
+              {isMuted || volume === 0 ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+            </Button>
+            <input type="range" min={0} max={1} step={0.05} value={isMuted ? 0 : volume} onChange={(event) => updateVolume(Number(event.target.value))} aria-label="Video volume" className="hidden h-1 w-24 cursor-pointer accent-background sm:block" />
+          </div>
+        </div>
         <div className="mx-auto mt-5 max-w-6xl text-center">
           <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
           <h2 className="mt-2 font-display text-2xl md:text-4xl">Tour Our Gallery</h2>
