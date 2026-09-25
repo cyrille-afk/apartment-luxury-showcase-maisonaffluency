@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GalleryHorizontal, Play, X } from "lucide-react";
+import { GalleryHorizontal, Play, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -378,7 +378,20 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-            <div className="relative w-full">
+            <div className={`relative mx-auto max-w-full ${activeSceneIsPortrait ? "w-full" : "w-fit"}`}>
+              <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-2 md:px-0">
+                <span className="font-body text-[10px] font-light uppercase tracking-[0.2em] text-muted-foreground">
+                  {activeCategory}
+                </span>
+                <div className="flex items-center gap-3">
+                  <span className="font-body text-[10px] font-light uppercase tracking-[0.2em] text-muted-foreground">
+                    {sceneIdx + 1} / {galleryPages.length}
+                  </span>
+                  <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-7 rounded-none p-0 text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <GalleryHorizontal className="size-3.5" strokeWidth={1.25} />
+                  </Button>
+                </div>
+              </div>
               {lightboxProduct && (
                 <PublicProductLightbox
                   product={lightboxProduct}
@@ -390,9 +403,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                 />
               )}
               <div className={`relative flex w-full items-center justify-center overflow-hidden transition-colors duration-300 ${activeSceneIsPortrait ? "bg-muted/30" : "bg-transparent"}`}>
-                <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute right-4 top-4 z-20 size-9 rounded-none bg-background/80 hover:bg-background">
-                  <GalleryHorizontal className="size-4" strokeWidth={1.4} />
-                </Button>
                 <AnimatePresence mode="wait">
                   {activePage.scenes.map((pageScene) => (
                     <motion.div
@@ -435,24 +445,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                 </div>
               </div>
             </div>
-
-            <div className="flex min-h-12 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-14 md:px-0">
-              <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
-                {activeCategory}
-              </span>
-              <div className="flex items-center gap-1 md:gap-2">
-                <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-9 rounded-none hover:bg-muted">
-                  <ChevronLeft className="size-4" strokeWidth={1.4} />
-                </Button>
-                <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-9 rounded-none hover:bg-muted">
-                  <ChevronRight className="size-4" strokeWidth={1.4} />
-                </Button>
-                <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
-                  {sceneIdx + 1} / {galleryPages.length}
-                </span>
-              </div>
-            </div>
-
           </motion.div>
         )}
       </AnimatePresence>
