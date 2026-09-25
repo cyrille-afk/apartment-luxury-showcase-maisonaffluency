@@ -589,16 +589,6 @@ function singularizeSub(s: string): string {
                     decoding="async"
                   />
                 )}
-                {formatCuratorialEditionLine(item.pick) && (
-                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                    {formatCuratorialEditionLine(item.pick)}
-                  </p>
-                )}
-                {isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) && (
-                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                    {ECART_REEDITION_LABEL}
-                  </p>
-                )}
                 <button
                   type="button"
                   onClick={(event) => {
