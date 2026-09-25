@@ -189,7 +189,7 @@ const Hero = () => {
             type="button"
             onClick={() => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-              scrollToSection("apartment-tour-heading");
+              navigate("/gallery");
             }}
             className="flex min-h-[44px] items-center justify-center font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] transition-opacity duration-300 hover:opacity-70"
           >
@@ -220,7 +220,7 @@ const Hero = () => {
             type="button"
             onClick={() => {
               trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-              scrollToSection("apartment-tour");
+              navigate("/gallery");
             }}
             className="transition-opacity duration-300 hover:opacity-70"
           >
