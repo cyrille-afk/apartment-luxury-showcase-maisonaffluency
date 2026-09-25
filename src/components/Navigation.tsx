@@ -1080,7 +1080,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
                           <div
                             className={cn(
-                              "absolute inset-0 bg-collection-card-canvas p-6 transition-opacity duration-300",
+                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
                               activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
                             )}
                           >
@@ -1185,7 +1185,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
                           <div
                             className={cn(
-                              "absolute inset-0 bg-collection-card-canvas p-6 transition-opacity duration-300",
+                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
                               activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
                             )}
                           >
