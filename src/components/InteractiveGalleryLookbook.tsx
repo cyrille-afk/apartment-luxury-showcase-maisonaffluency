@@ -76,6 +76,12 @@ const DINING_ROOM_FEATURED_PICK_IDS = [
   "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b",
 ];
 
+// Curator picks shown to the LEFT of the Dining Room gallery image (desktop only)
+const DINING_ROOM_LEFT_PICK_IDS = [
+  "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
+  "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
+];
+
 type Hotspot = {
   id: string;
   image_identifier: string;
@@ -370,7 +376,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     () => DINING_ROOM_FEATURED_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
     [allPicks],
   );
-  const showDiningRoomFeaturedPicks = galleryState.kind === "room" && space.key === "dining-room" && diningRoomFeaturedPicks.length > 0;
+  const diningRoomLeftPicks = useMemo(
+    () => DINING_ROOM_LEFT_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks],
+  );
+  const isDiningRoom = galleryState.kind === "room" && space.key === "dining-room";
+  const showDiningRoomFeaturedPicks = isDiningRoom && diningRoomFeaturedPicks.length > 0;
+  const showDiningRoomLeftPicks = isDiningRoom && diningRoomLeftPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
@@ -393,7 +405,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : showDiningRoomFeaturedPicks ? "md:w-full" : "md:w-fit"}`}>
+             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : (showDiningRoomFeaturedPicks || showDiningRoomLeftPicks) ? "md:w-full" : "md:w-fit"}`}>
               <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
@@ -417,7 +429,18 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${showDiningRoomFeaturedPicks ? "md:items-stretch md:gap-6" : ""}`}>
+               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showDiningRoomFeaturedPicks || showDiningRoomLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
+                 {showDiningRoomLeftPicks && (
+                   <aside aria-label="Dining Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
+                     {diningRoomLeftPicks.map((pick) => (
+                       <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
+                         <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
+                         <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
+                         <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
+                       </Button>
+                     ))}
+                   </aside>
+                 )}
                  <div className="flex min-w-0 flex-1 items-center justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
