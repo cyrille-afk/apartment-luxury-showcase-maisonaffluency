@@ -90,8 +90,7 @@ interface Props {
   /** When true, render inline instead of portaling to document.body */
   inline?: boolean;
   /** Gallery-only contextual presentation without a viewport backdrop. */
-  pinned?: boolean;
-  inline?: boolean;
+  contextualPanel?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -214,7 +213,7 @@ const DimensionsButtonGrid = ({
 /* ------------------------------------------------------------------ */
 
 
-const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline, pinned = false }: Props) => {
+const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline, contextualPanel = false }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -663,17 +662,17 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         {...overlayMotion}
         className={cn(
           "flex justify-center",
-          pinned
+          contextualPanel
             ? "pointer-events-none absolute inset-x-0 top-0 z-30 items-start px-3 pt-3 md:px-8 md:pt-6"
             : "fixed inset-0 z-[10000] items-stretch bg-foreground/60 backdrop-blur-sm md:items-center md:p-6 lg:p-8"
         )}
-        onClick={pinned ? undefined : requestClose}
+        onClick={contextualPanel ? undefined : requestClose}
       >
         <motion.div
           {...panelMotion}
           className={cn(
             "relative mx-auto flex w-full max-w-6xl flex-col overflow-y-auto bg-background min-h-0",
-            pinned
+            contextualPanel
               ? "pointer-events-auto max-h-[min(72vh,720px)] border border-border/60 shadow-2xl"
               : "h-dvh max-h-dvh shadow-2xl md:h-auto md:max-h-[95vh]"
           )}
@@ -681,7 +680,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         >
           {/* Mobile header */}
           <div
-            className={cn("md:hidden sticky top-0 z-20 items-center justify-between bg-background/90 border-b border-border/60 shrink-0", pinned ? "flex" : "flex backdrop-blur-sm")}
+            className={cn("md:hidden sticky top-0 z-20 flex items-center justify-between bg-background/90 border-b border-border/60 shrink-0", !contextualPanel && "backdrop-blur-sm")}
             style={{
               paddingTop: "max(0.75rem, env(safe-area-inset-top))",
               paddingBottom: "0.5rem",

@@ -301,7 +301,7 @@ export default function InteractiveGalleryLookbook() {
                 onClose={() => setLightboxProduct(null)}
                 onSelectRelated={setLightboxProduct}
                 inline
-                pinned
+                contextualPanel
               />
             )}
             <div className="relative w-full bg-muted/40 md:flex md:min-h-[55vh] md:justify-center">
