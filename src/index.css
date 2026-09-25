@@ -629,7 +629,7 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
 }
 @media (min-width: 768px) {
   :root {
-    --header-h: 9.5rem; /* desktop: two-row header (ribbon + brand/nav) */
+    --header-h: 7rem; /* desktop: locked 64px brand row + 48px primary row */
   }
 }
 .scroll-header-offset {
