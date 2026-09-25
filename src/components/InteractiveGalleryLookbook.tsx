@@ -112,6 +112,7 @@ function GalleryTour() {
     if (!video) return;
     video.volume = 1;
     video.muted = false;
+    video.playbackRate = 0.75;
     const onPlay = () => {
       setIsPlaying(true);
       trackVideoEvent("play", "showroom-tour");
