@@ -1078,14 +1078,18 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         </div>
 
                         <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
-                          <img
-                            src={roomAmbientImages.living.src}
-                            alt={roomAmbientImages.living.alt}
+                          <div
                             className={cn(
-                              "absolute inset-0 size-full object-contain object-center transition-opacity duration-300",
+                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
                               activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
                             )}
-                          />
+                          >
+                            <img
+                              src={roomAmbientImages.living.src}
+                              alt={roomAmbientImages.living.alt}
+                              className="size-full object-contain object-center"
+                            />
+                          </div>
                           <div
                             className={cn(
                               "absolute inset-0 overflow-y-auto px-8 py-8 transition-opacity duration-300",
@@ -1179,14 +1183,18 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         </div>
 
                         <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
-                          <img
-                            src={roomAmbientImages[room].src}
-                            alt={roomAmbientImages[room].alt}
+                          <div
                             className={cn(
-                              "absolute inset-0 size-full object-contain object-center transition-opacity duration-300",
+                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
                               activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
                             )}
-                          />
+                          >
+                            <img
+                              src={roomAmbientImages[room].src}
+                              alt={roomAmbientImages[room].alt}
+                              className="size-full object-contain object-center"
+                            />
+                          </div>
                           <div
                             className={cn(
                               "absolute inset-0 overflow-y-auto px-9 py-8 transition-opacity duration-300",
