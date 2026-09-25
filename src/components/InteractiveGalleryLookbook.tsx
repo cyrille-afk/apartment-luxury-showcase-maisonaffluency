@@ -17,6 +17,7 @@ import { curatingTeam } from "@/components/CuratingTeam";
 type Scene = { title: string; id: string };
 type Space = { key: string; label: string; scenes: Scene[] };
 type GalleryState = { kind: "room"; spaceIndex: number } | { kind: "tour" } | { kind: "curators" };
+type GalleryPage = { scenes: Scene[]; title: string };
 
 /** Scene titles match gallery_hotspots.image_identifier exactly. */
 const SPACES: Space[] = [
@@ -67,6 +68,11 @@ const SPACES: Space[] = [
 const large = (id: string) => cloudinaryUrl(id, { width: 1920, quality: "auto:good" });
 const thumb = (id: string) => cloudinaryUrl(id, { width: 320, height: 220, crop: "fill", gravity: "auto", quality: "auto" });
 const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const createGalleryPages = (space: Space): GalleryPage[] => [
+  { scenes: [space.scenes[0]], title: space.scenes[0].title },
+  { scenes: space.scenes.slice(1, 3), title: space.scenes.slice(1, 3).map((scene) => scene.title).join(" · ") },
+  { scenes: [space.scenes[3]], title: space.scenes[3].title },
+];
 
 type Hotspot = {
   id: string;
@@ -209,7 +215,8 @@ export default function InteractiveGalleryLookbook() {
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
   const space = SPACES[roomSpaceIndex];
-  const scene = space.scenes[sceneIdx];
+  const galleryPages = useMemo(() => createGalleryPages(space), [space]);
+  const activePage = galleryPages[sceneIdx];
 
   useEffect(() => {
     supabase
@@ -276,9 +283,9 @@ export default function InteractiveGalleryLookbook() {
     return [...merged.values()];
   }, [manifest]);
 
-  const sceneHotspots = useMemo(
-    () => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title)),
-    [hotspots, scene.title],
+  const hotspotsForScene = useCallback(
+    (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title)),
+    [hotspots],
   );
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
@@ -308,8 +315,8 @@ export default function InteractiveGalleryLookbook() {
     if (galleryState.kind !== "room") return;
     setActivePin(null);
     setLightboxProduct(null);
-    setSceneIdx((index) => (index + direction + space.scenes.length) % space.scenes.length);
-  }, [galleryState.kind, space.scenes.length]);
+    setSceneIdx((index) => (index + direction + galleryPages.length) % galleryPages.length);
+  }, [galleryState.kind, galleryPages.length]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -330,7 +337,7 @@ export default function InteractiveGalleryLookbook() {
   };
   const selectScene = (spaceIndex: number, sceneIndex: number) => {
     setGalleryState({ kind: "room", spaceIndex });
-    setSceneIdx(sceneIndex);
+    setSceneIdx(sceneIndex === 0 ? 0 : sceneIndex === 3 ? 2 : 1);
     setActivePin(null);
     setLightboxProduct(null);
   };
@@ -367,25 +374,40 @@ export default function InteractiveGalleryLookbook() {
                   contextualPanel
                 />
               )}
-              <div className="relative w-full overflow-hidden">
+              <div className={`relative w-full overflow-hidden ${activePage.scenes.length === 2 ? "grid grid-cols-2 items-center gap-2 bg-muted/20 p-2 md:h-[55vh] md:max-h-[500px] md:gap-4 md:p-4" : sceneIdx === 2 ? "flex items-center justify-center bg-muted/20 p-2 md:h-[55vh] md:max-h-[500px] md:p-4" : ""}`}>
                 <AnimatePresence mode="wait">
-                  <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full object-contain" />
+                  {activePage.scenes.map((pageScene) => (
+                    <motion.div
+                      key={pageScene.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.45 }}
+                      className={activePage.scenes.length === 1 && sceneIdx === 0 ? "relative w-full" : "relative mx-auto aspect-[3/4] h-auto w-full max-w-full overflow-hidden md:h-full md:w-auto"}
+                    >
+                      <img
+                        src={large(pageScene.id)}
+                        alt={`${space.label} — ${pageScene.title}`}
+                        className={activePage.scenes.length === 1 && sceneIdx === 0 ? "block h-auto w-full object-contain" : "absolute inset-0 block size-full object-contain"}
+                      />
+                      {hotspotsForScene(pageScene).map((hotspot) => (
+                        <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+                          <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
+                            <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                            <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+                          </span>
+                        </Button>
+                      ))}
+                    </motion.div>
+                  ))}
                 </AnimatePresence>
-                {sceneHotspots.map((hotspot) => (
-                  <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-                    <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
-                      <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                      <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-                    </span>
-                  </Button>
-                ))}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
-                  {space.scenes.map((roomScene, index) => (
-                    <span key={roomScene.id} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
+                  {galleryPages.map((galleryPage, index) => (
+                    <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
                   ))}
                 </div>
                 <span className="pointer-events-none absolute bottom-3 right-4 z-20 font-body text-[10px] tracking-[0.22em] text-background drop-shadow-md">
-                  {String(sceneIdx + 1).padStart(2, "0")} / {String(space.scenes.length).padStart(2, "0")}
+                  {sceneIdx + 1} / {galleryPages.length}
                 </span>
               </div>
 
@@ -401,7 +423,7 @@ export default function InteractiveGalleryLookbook() {
             </div>
 
             <div className="relative mx-auto mt-2 max-w-3xl px-12 pb-24 text-center md:mt-1 md:pb-24">
-              <h2 className="font-display text-2xl md:text-3xl">{scene.title}</h2>
+              <h2 className="font-display text-2xl md:text-3xl">{activePage.title}</h2>
             </div>
           </motion.div>
         )}
