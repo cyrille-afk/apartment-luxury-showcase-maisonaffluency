@@ -8,23 +8,21 @@ const Footer = () => {
       className="relative z-0 mb-0 bg-background px-4 pb-0 pt-12 md:px-8 md:pb-0 md:pt-16"
     >
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* Floating privacy / cookie banner */}
-        <div className="rounded-lg bg-foreground/95 backdrop-blur-sm px-6 py-4 shadow-lg text-center">
-          <span className="font-body text-xs uppercase tracking-[0.15em] text-background/80">
+        <div className="px-2 py-1 text-center">
+          <span className="font-body text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/70">
             By using this site you agree to our{" "}
-            <a href="/privacy" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Privacy Policy</a>
+            <a href="/privacy" className="underline decoration-border underline-offset-2 transition-colors hover:text-foreground">Privacy Policy</a>
             {" "}&{" "}
-            <a href="/terms" className="text-background underline underline-offset-2 hover:text-accent transition-colors">Terms of Service</a>
+            <a href="/terms" className="underline decoration-border underline-offset-2 transition-colors hover:text-foreground">Terms of Service</a>
             {" "}·{" "}
             <button
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("ma-open-consent"));
               }}
-              className="text-background underline underline-offset-2 hover:text-accent transition-colors"
+              className="underline decoration-border underline-offset-2 transition-colors hover:text-foreground"
             >
               Cookie Settings
             </button>
-
           </span>
         </div>
 
