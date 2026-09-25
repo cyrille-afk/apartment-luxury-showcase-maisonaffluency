@@ -674,7 +674,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             "relative mx-auto flex w-full flex-col bg-background",
             contextualPanel
               ? "pointer-events-auto h-auto max-w-none overflow-visible border border-border/60 shadow-2xl"
-              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[95vh]"
+              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-[94vh] md:max-h-[94vh] md:overflow-hidden"
           )}
           onClick={(e) => e.stopPropagation()}
         >
