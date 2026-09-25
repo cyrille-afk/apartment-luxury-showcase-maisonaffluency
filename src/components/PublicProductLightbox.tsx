@@ -674,7 +674,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             "relative mx-auto flex w-full flex-col bg-background",
             contextualPanel
               ? "pointer-events-auto h-auto max-w-none overflow-visible border border-border/60 shadow-2xl"
-              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[95vh]"
+              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-[94vh] md:max-h-[94vh] md:overflow-hidden"
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -713,11 +713,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Upper two-column editorial block — constrained to stay above the fold */}
-          <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-5 md:p-8", contextualPanel && "h-auto max-h-none overflow-visible")}>
-            <div className={cn("grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10", !contextualPanel && "md:h-[min(420px,48vh)] md:grid-rows-[1fr]")}>
+          <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-4 md:p-6", contextualPanel && "h-auto max-h-none overflow-visible")}>
+            <div className={cn("grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:h-[min(300px,38vh)] md:grid-rows-[1fr]")}>
 
               {/* LEFT COLUMN — standardized hero image container */}
-              <div className={cn("relative flex w-full items-center justify-center", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:h-full")}>
+              <div className={cn("relative flex w-full items-center justify-center", contextualPanel ? "md:h-full md:min-h-0 md:overflow-hidden" : "min-h-0 md:h-full")}>
                 {product.image_url ? (
                   <>
                     {!imageLoaded && !imageFailed && (
@@ -737,8 +737,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto object-contain transition-opacity duration-300",
-                        !contextualPanel && "md:h-full",
+                        "w-full h-auto object-contain transition-opacity duration-300 md:h-full",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
@@ -806,8 +805,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* RIGHT COLUMN — specs card + CTAs */}
-              <div className={cn("flex w-full flex-col md:border-l md:border-border/40 md:pl-10", contextualPanel ? "h-auto overflow-visible" : "md:h-full md:min-h-0 md:overflow-hidden")}>
-                <div className={cn("pr-1", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:flex-1 md:overflow-y-auto")}>
+              <div className={cn("flex w-full flex-col md:border-l md:border-border/40 md:pl-8", contextualPanel ? "h-auto overflow-visible" : "md:h-full md:min-h-0 md:overflow-visible")}>
+                <div className={cn("pr-1", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:flex-1 md:overflow-visible")}>
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
@@ -949,7 +948,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
               {/* CTA block */}
-              <div className="shrink-0 pt-4">
+              <div className="shrink-0 pt-3">
                 <div className="flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
@@ -994,19 +993,19 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 md:pt-6 pb-7 md:pb-9"
+            className="w-full border-t border-border/40 mt-3 md:mt-4 pt-3 md:pt-4 pb-3 md:pb-4"
           >
-            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
               Curator Notes
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="flex gap-4">
                 <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
                     Design Significance
                   </p>
-                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                  <p className="font-body text-xs leading-normal text-foreground/85">
                     {curatorNotes.significance}
                   </p>
                 </div>
@@ -1018,7 +1017,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
                     Spatial Calculation
                   </p>
-                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                  <p className="font-body text-xs leading-normal text-foreground/85">
                     {curatorNotes.spatial}
                   </p>
                 </div>
@@ -1030,7 +1029,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
                     Historical Provenance
                   </p>
-                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                  <p className="font-body text-xs leading-normal text-foreground/85">
                     {curatorNotes.provenance}
                   </p>
                 </div>
@@ -1039,7 +1038,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </motion.div>
 
           {/* More From — final exploration tier */}
-          <div className="w-full border-t border-border/40 pt-6 md:pt-8 pb-4 md:pb-6">
+          <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
             {relatedStrip}
           </div>
         </div>
