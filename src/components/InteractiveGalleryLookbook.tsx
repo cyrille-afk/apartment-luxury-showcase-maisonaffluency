@@ -142,7 +142,6 @@ function GalleryTour() {
         <div className="relative mx-auto aspect-video w-full max-w-6xl overflow-hidden bg-foreground">
           <video
             ref={videoRef}
-            src={APARTMENT_TOUR_VIDEO_URL}
             controls
             playsInline
             preload="metadata"
@@ -151,7 +150,9 @@ function GalleryTour() {
               if (videoRef.current?.paused) playImmersively();
             }}
             className="aspect-video w-full object-cover"
-          />
+          >
+            <source src={APARTMENT_TOUR_VIDEO_URL} type="video/mp4" />
+          </video>
           {!isPlaying && (
             <Button
               type="button"
