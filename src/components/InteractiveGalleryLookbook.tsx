@@ -245,6 +245,7 @@ export default function InteractiveGalleryLookbook() {
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
     setActivePin(null);
+    setLightboxProduct(null);
     setSceneIdx((index) => (index + direction + space.scenes.length) % space.scenes.length);
   }, [galleryState.kind, space.scenes.length]);
 
@@ -263,11 +264,13 @@ export default function InteractiveGalleryLookbook() {
     setGalleryState({ kind: "room", spaceIndex });
     setSceneIdx(0);
     setActivePin(null);
+    setLightboxProduct(null);
   };
   const selectScene = (spaceIndex: number, sceneIndex: number) => {
     setGalleryState({ kind: "room", spaceIndex });
     setSceneIdx(sceneIndex);
     setActivePin(null);
+    setLightboxProduct(null);
   };
 
   const ribbonItems = [
@@ -290,7 +293,17 @@ export default function InteractiveGalleryLookbook() {
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto w-full max-w-[1500px] pt-4 md:px-10 md:pt-8">
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] pt-4 md:px-10 md:pt-8">
+            {lightboxProduct && (
+              <PublicProductLightbox
+                product={lightboxProduct}
+                allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
+                onClose={() => setLightboxProduct(null)}
+                onSelectRelated={setLightboxProduct}
+                inline
+                contextualPanel
+              />
+            )}
             <div className="relative w-full bg-muted/40 md:flex md:min-h-[55vh] md:justify-center">
               <div className="relative w-full md:inline-flex md:w-auto md:items-center">
                 <AnimatePresence mode="wait">
@@ -317,28 +330,9 @@ export default function InteractiveGalleryLookbook() {
               </Button>
             </div>
 
-            <div className="relative mx-auto mt-8 max-w-3xl px-12 text-center">
+            <div className="relative mx-auto mt-8 max-w-3xl px-12 pb-24 text-center md:pb-32">
               <h2 className="font-display text-2xl md:text-3xl">{scene.title}</h2>
-              <p className="mt-3 font-body text-[11px] uppercase tracking-[0.28em] text-muted-foreground">In this scene</p>
               <span className="absolute right-0 top-1/2 -translate-y-1/2 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
-            </div>
-
-            <div className="mx-auto mt-14 max-w-[1320px] px-4 md:px-0">
-              {sceneHotspots.length === 0 ? <p className="text-center font-body text-sm text-muted-foreground">Pieces for this scene are available upon request.</p> : (
-                <div className="grid grid-cols-2 gap-x-8 gap-y-16 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12 lg:gap-y-20">
-                  {sceneHotspots.map((hotspot) => (
-                    <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} onMouseEnter={() => setActivePin(hotspot.id)} className="group h-auto min-w-0 flex-col items-center justify-start rounded-none bg-transparent p-0 text-center hover:bg-transparent">
-                      <span className="flex aspect-square w-full items-center justify-center bg-transparent p-8 md:p-10">
-                        {hotspot.product_image_url ? <img src={hotspot.product_image_url} alt="" loading="lazy" className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]" /> : <span className="font-display text-sm text-muted-foreground">{hotspot.product_name}</span>}
-                      </span>
-                      <span className="mt-5 block w-full whitespace-normal font-display text-base leading-snug">{hotspot.product_name}</span>
-                      {hotspot.designer_name && <span className="mt-2 block w-full whitespace-normal font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{hotspot.designer_name}</span>}
-                      {(hotspot.materials || hotspot.dimensions) && <span className="mt-2 block w-full whitespace-normal font-body text-xs leading-relaxed text-muted-foreground">{[hotspot.materials, hotspot.dimensions].filter(Boolean).join(" · ")}</span>}
-                      <span className="mt-3 block w-full font-body text-xs text-foreground">Price upon Request</span>
-                    </Button>
-                  ))}
-                </div>
-              )}
             </div>
           </motion.div>
         )}
@@ -370,9 +364,6 @@ export default function InteractiveGalleryLookbook() {
         )}
       </AnimatePresence>
 
-      {lightboxProduct && (
-        <PublicProductLightbox product={lightboxProduct} allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)} onClose={() => setLightboxProduct(null)} onSelectRelated={setLightboxProduct} />
-      )}
     </section>
   );
 }
