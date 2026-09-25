@@ -29,4 +29,4 @@
 - [x] Rebuild The Curators as two balanced editorial founder profiles with French identity markers.
 - [x] Increase the gallery utility ribbon typography and rebalance its vertical spacing.
 - [x] Replace portrait gallery side fills with a seamless architectural ruled canvas while preserving hotspot coordinates.
-- [x] Restore edge-to-edge single-photo gallery scenes with tappable hotspots on mobile only.
+- [x] Restore the original mobile gallery experience with its scene accordion, swipeable images, and product hotspots on the homepage and gallery page; keep desktop on the new lookbook.

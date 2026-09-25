@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 import { scrollToSection } from "@/lib/scrollToSection";
 import LazyOnVisible from "@/components/LazyOnVisible";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Retry wrapper for dynamic imports — handles stale Vite chunks after HMR
 function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
@@ -28,6 +29,7 @@ const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBann
 // Lazy-load everything below the fold to reduce initial JS
 
 const InteractiveGalleryLookbook = lazyRetry(() => import("@/components/InteractiveGalleryLookbook"));
+const Gallery = lazyRetry(() => import("@/components/Gallery"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
@@ -468,7 +470,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             {!routeIsCategory && (
               <LazyOnVisible id="gallery" className="home-deferred-section scroll-header-offset bg-background" minHeight="100vh" rootMargin="400px 0px">
                 <Suspense fallback={<SectionFallback />}>
-                  <InteractiveGalleryLookbook initialView="living-room" />
+                  {isMobile ? <Gallery /> : <InteractiveGalleryLookbook initialView="living-room" />}
                 </Suspense>
               </LazyOnVisible>
             )}
