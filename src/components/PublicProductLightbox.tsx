@@ -80,6 +80,8 @@ export interface PublicLightboxItem {
   /** Per-image captions keyed by gallery_images index. */
   gallery_captions?: Record<string, string> | null;
   is_upholstered?: boolean | null;
+  /** False for gallery-only hotspot details with no verified catalog product page. */
+  is_catalog_item?: boolean;
 }
 
 interface Props {
@@ -570,7 +572,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const productPageSlug = isDagmarClamChairFinishCard
     ? "clam-chair"
     : slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""));
-  const productPageHref = productPageDesignerSlug
+  const productPageHref = product.is_catalog_item !== false && productPageDesignerSlug
     ? `/designers/${productPageDesignerSlug}/${productPageSlug}`
     : null;
 

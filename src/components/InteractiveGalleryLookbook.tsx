@@ -71,38 +71,32 @@ const normalize = (value: string) => value.toLowerCase().normalize("NFD").replac
 const createGalleryPages = (space: Space): GalleryPage[] =>
   space.scenes.map((scene) => ({ scenes: [scene], title: scene.title }));
 
-// Curator picks shown beside specific room gallery images (desktop only)
-// key = room key, value = { right?: pick IDs, left?: pick IDs }
-const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[] }> = {
-  "dining-room": {
-    right: [
-      "4b46af75-4c35-4a81-bea6-822810ae3422", // Cloud Filigrane — JMW
-      "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b", // Volume 3 Blue — Milan Pekar
-    ],
-    left: [
-      "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
-      "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
-    ],
-  },
-  "boudoir": {
-    right: [
-      "294326f2-a7a0-4447-8b50-f3bde7de2cc5", // Toshiro Table Lamp in Blue — Made in Kira
-      "cd18f654-d48f-4b86-80a0-62e10255b581", // Gold Leaves+Glass Snake Vessel — Nathalie Ziegler
-    ],
-    left: [
-      "ca386961-7986-43cf-aa8c-853249a177a5", // Lyric Desk Walnut — Atelier BdM
-      "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
-    ],
-  },
-  "master-suite": {
-    right: [
-      "da524883-8938-441a-b902-f12deb378ca7", // Bud Table Lamp — Atelier Demichelis
-    ],
-    left: [
-      "1419dd7f-b404-44d2-ae68-ca46890920ea", // Villa Pedestal Nightstand — Adam Court (Okha)
-      "6f32db0d-3d34-4035-9bf4-b42cb33940e9", // Brunelleschi Perspective — Iksel
-    ],
-  },
+// Keep the explicitly selected blue Toshiro finish when its Boudoir hotspot is shown.
+const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
+  "A Dreamy Tuscan Landscape:Astra Dining Table": "3b6f6177-adfa-4f23-8cf7-75396028fe95",
+  "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "4b46af75-4c35-4a81-bea6-822810ae3422",
+  "A Sophisticated Boudoir:Toshiro Lamp": "294326f2-a7a0-4447-8b50-f3bde7de2cc5",
+  "A Sophisticated Boudoir:Lyric Desk": "ca386961-7986-43cf-aa8c-853249a177a5",
+  "A Sophisticated Boudoir:Gold Leaves+Glass Snake Vessel (Unique Piece)": "cd18f654-d48f-4b86-80a0-62e10255b581",
+  "A Masterful Suite:Villa Pedestal": "1419dd7f-b404-44d2-ae68-ca46890920ea",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover": "6f32db0d-3d34-4035-9bf4-b42cb33940e9",
+  "A Masterful Suite:Bud Table Lamp": "da524883-8938-441a-b902-f12deb378ca7",
+};
+// The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
+const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set(["A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier"]);
+// Honor the previously curated placements on the first photo of these rooms.
+const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
+  "A Dreamy Tuscan Landscape:Astra Dining Table": "left",
+  "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian": "left",
+  "A Dreamy Tuscan Landscape:Crystalline Vase Volume 3": "right",
+  "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "right",
+  "A Sophisticated Boudoir:Lyric Desk": "left",
+  "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian": "left",
+  "A Sophisticated Boudoir:Toshiro Lamp": "right",
+  "A Sophisticated Boudoir:Gold Leaves+Glass Snake Vessel (Unique Piece)": "right",
+  "A Masterful Suite:Villa Pedestal": "left",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
+  "A Masterful Suite:Bud Table Lamp": "right",
 };
 
 type Hotspot = {
@@ -118,6 +112,8 @@ type Hotspot = {
   link_url: string | null;
   mapped_pick_id: string | null;
 };
+
+type ScenePick = { hotspot: Hotspot; product: PublicLightboxItem; image: string };
 
 function GalleryTour() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -323,8 +319,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     [hotspots],
   );
 
-  const openHotspot = useCallback((hotspot: Hotspot) => {
-    setActivePin(hotspot.id);
+  const resolveHotspotProduct = useCallback((hotspot: Hotspot): PublicLightboxItem | null => {
+    const preferredId = FEATURED_HOTSPOT_PICK_IDS[`${hotspot.image_identifier}:${hotspot.product_name}`];
+    const preferred = preferredId ? allPicks.find((pick) => pick.id === preferredId) : null;
     const exact = hotspot.mapped_pick_id ? allPicks.find((pick) => pick.id === hotspot.mapped_pick_id) : null;
     const productName = normalize(hotspot.product_name);
     const designerName = normalize(hotspot.designer_name || "");
@@ -342,9 +339,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       brand_name: hotspot.designer_name || "Maison Affluency",
       materials: hotspot.materials,
       dimensions: hotspot.dimensions,
+      is_catalog_item: false,
     } : null;
-    setLightboxProduct(exact || fuzzy || fallback);
+    return preferred || exact || fuzzy || fallback;
   }, [allPicks]);
+
+  const openHotspot = useCallback((hotspot: Hotspot) => {
+    setActivePin(hotspot.id);
+    setLightboxProduct(resolveHotspotProduct(hotspot));
+  }, [resolveHotspotProduct]);
 
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
@@ -395,19 +398,26 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
-  const roomPickIds = galleryState.kind === "room" ? ROOM_FEATURED_PICK_IDS[space.key] : undefined;
-  const rightPickIds = roomPickIds?.right ?? [];
-  const leftPickIds = roomPickIds?.left ?? [];
-  const featuredRightPicks = useMemo(
-    () => rightPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks, rightPickIds],
+  const scenePicks = activeScene ? hotspotsForScene(activeScene)
+    .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
+    .map((hotspot): ScenePick | null => {
+      const product = resolveHotspotProduct(hotspot);
+      const image = product?.id.startsWith("hotspot-") ? hotspot.product_image_url : product?.image_url || hotspot.product_image_url;
+      return product && image ? { hotspot, product, image } : null;
+    })
+    .filter((pick): pick is ScenePick => pick !== null) : [];
+  const sideForPick = ({ hotspot }: ScenePick) => SIDE_PICK_OVERRIDES[`${hotspot.image_identifier}:${hotspot.product_name}`] || (hotspot.x_percent < 50 ? "left" : "right");
+  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const hasScenePicks = scenePicks.length > 0;
+
+  const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
+    <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
+      <img src={image} alt={hotspot.product_name} loading="lazy" className="aspect-square w-full object-contain" />
+      <span className="mt-1.5 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{product.id.startsWith("hotspot-") ? hotspot.product_name : product.title}</span>
+      <span className="mt-1 block w-full whitespace-normal break-words font-body text-[9px] font-light uppercase leading-tight tracking-wider text-muted-foreground">{product.brand_name}</span>
+    </Button>
   );
-  const featuredLeftPicks = useMemo(
-    () => leftPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks, leftPickIds],
-  );
-  const showFeaturedRightPicks = featuredRightPicks.length > 0;
-  const showFeaturedLeftPicks = featuredLeftPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
@@ -430,7 +440,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : (showFeaturedRightPicks || showFeaturedLeftPicks) ? "md:w-full" : "md:w-fit"}`}>
+              <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
               <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
@@ -454,18 +464,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showFeaturedRightPicks || showFeaturedLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
-                 {showFeaturedLeftPicks && (
-                   <aside aria-label="Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
-                     {featuredLeftPicks.map((pick) => (
-                       <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-                         <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
-                         <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
-                         <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
-                       </Button>
-                     ))}
-                   </aside>
-                 )}
+               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
+                  {hasScenePicks && (
+                    <aside aria-label="Products on the left of this photo" className="hidden w-40 shrink-0 content-center border-r border-border/60 pr-2 md:grid lg:w-52 lg:pr-4 xl:w-56 xl:pr-6">
+                      <div className="grid grid-cols-2 content-center gap-x-2 gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
+                    </aside>
+                  )}
                  <div className="flex min-w-0 flex-1 items-center justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
@@ -503,15 +507,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                      ))}
                    </AnimatePresence>
                  </div>
-                  {showFeaturedRightPicks && (
-                    <aside aria-label="Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
-                      {featuredRightPicks.map((pick) => (
-                        <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-                          <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
-                          <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
-                          <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
-                        </Button>
-                      ))}
+                  {hasScenePicks && (
+                    <aside aria-label="Products on the right of this photo" className="hidden w-40 shrink-0 content-center border-l border-border/60 pl-2 md:grid lg:w-52 lg:pl-4 xl:w-56 xl:pl-6">
+                      <div className="grid grid-cols-2 content-center gap-x-2 gap-y-4">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
