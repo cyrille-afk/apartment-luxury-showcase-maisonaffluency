@@ -318,24 +318,24 @@ export default function InteractiveGalleryLookbook() {
               </Button>
             </div>
 
-            <div className="mt-5 flex items-baseline justify-between gap-6">
+            <div className="relative mx-auto mt-8 max-w-3xl px-12 text-center">
               <h2 className="font-display text-2xl md:text-3xl">{scene.title}</h2>
-              <span className="shrink-0 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
+              <p className="mt-3 font-body text-[11px] uppercase tracking-[0.28em] text-muted-foreground">In this scene</p>
+              <span className="absolute right-0 top-1/2 -translate-y-1/2 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
             </div>
 
-            <div className="mt-14">
-              <h3 className="mb-8 font-body text-[11px] uppercase tracking-[0.28em] text-muted-foreground">In this scene</h3>
-              {sceneHotspots.length === 0 ? <p className="font-body text-sm text-muted-foreground">Pieces for this scene are available upon request.</p> : (
-                <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="mx-auto mt-14 max-w-[1320px]">
+              {sceneHotspots.length === 0 ? <p className="text-center font-body text-sm text-muted-foreground">Pieces for this scene are available upon request.</p> : (
+                <div className="grid grid-cols-2 gap-x-8 gap-y-16 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12 lg:gap-y-20">
                   {sceneHotspots.map((hotspot) => (
-                    <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} onMouseEnter={() => setActivePin(hotspot.id)} className="h-auto min-w-0 flex-col items-stretch justify-start rounded-none p-0 text-left hover:bg-transparent">
-                      <span className={`flex aspect-square w-full items-center justify-center bg-background p-6 ring-1 transition ${activePin === hotspot.id ? "ring-foreground" : "ring-border"}`}>
-                        {hotspot.product_image_url ? <img src={hotspot.product_image_url} alt="" loading="lazy" className="max-h-full max-w-full object-contain" /> : <span className="font-display text-sm text-muted-foreground">{hotspot.product_name}</span>}
+                    <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} onMouseEnter={() => setActivePin(hotspot.id)} className="group h-auto min-w-0 flex-col items-center justify-start rounded-none bg-transparent p-0 text-center hover:bg-transparent">
+                      <span className="flex aspect-square w-full items-center justify-center bg-transparent p-8 md:p-10">
+                        {hotspot.product_image_url ? <img src={hotspot.product_image_url} alt="" loading="lazy" className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]" /> : <span className="font-display text-sm text-muted-foreground">{hotspot.product_name}</span>}
                       </span>
-                      <span className="mt-4 block w-full whitespace-normal font-display text-base leading-snug">{hotspot.product_name}</span>
-                      {hotspot.designer_name && <span className="mt-1 block w-full whitespace-normal font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">{hotspot.designer_name}</span>}
-                      {(hotspot.materials || hotspot.dimensions) && <span className="mt-1 block w-full whitespace-normal font-body text-xs text-muted-foreground">{[hotspot.materials, hotspot.dimensions].filter(Boolean).join(" · ")}</span>}
-                      <span className="mt-2 block w-full font-body text-xs text-foreground">Price upon Request</span>
+                      <span className="mt-5 block w-full whitespace-normal font-display text-base leading-snug">{hotspot.product_name}</span>
+                      {hotspot.designer_name && <span className="mt-2 block w-full whitespace-normal font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{hotspot.designer_name}</span>}
+                      {(hotspot.materials || hotspot.dimensions) && <span className="mt-2 block w-full whitespace-normal font-body text-xs leading-relaxed text-muted-foreground">{[hotspot.materials, hotspot.dimensions].filter(Boolean).join(" · ")}</span>}
+                      <span className="mt-3 block w-full font-body text-xs text-foreground">Price upon Request</span>
                     </Button>
                   ))}
                 </div>
