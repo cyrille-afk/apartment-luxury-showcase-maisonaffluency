@@ -96,7 +96,6 @@ const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[]
   },
   "master-suite": {
     right: [
-      "9e7ca18f-b1b6-45d4-bf5e-dbc28f489435", // MicMac Chandelier — Hervé van der Straeten
       "da524883-8938-441a-b902-f12deb378ca7", // Bud Table Lamp — Atelier Demichelis
     ],
     left: [
