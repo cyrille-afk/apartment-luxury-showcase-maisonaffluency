@@ -663,7 +663,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         className={cn(
           "flex justify-center",
           contextualPanel
-            ? "pointer-events-none absolute inset-x-0 top-0 z-30 items-start px-3 pt-3 md:px-8 md:pt-6"
+            ? "pointer-events-none absolute inset-x-0 top-0 z-30 items-start"
             : "fixed inset-0 z-[10000] items-stretch bg-foreground/60 backdrop-blur-sm md:items-center md:p-6 lg:p-8"
         )}
         onClick={contextualPanel ? undefined : requestClose}
@@ -671,10 +671,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         <motion.div
           {...panelMotion}
           className={cn(
-            "relative mx-auto flex w-full max-w-6xl flex-col bg-background",
+            "relative mx-auto flex w-full flex-col bg-background",
             contextualPanel
-              ? "pointer-events-auto h-auto overflow-visible border border-border/60 shadow-2xl"
-              : "h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[95vh]"
+              ? "pointer-events-auto h-auto max-w-none overflow-visible border border-border/60 shadow-2xl"
+              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[95vh]"
           )}
           onClick={(e) => e.stopPropagation()}
         >
