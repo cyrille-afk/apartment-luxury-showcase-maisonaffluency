@@ -79,9 +79,11 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
   ],
   lighting: [
     { label: "Ceiling Lights", category: "Lighting", subcategories: ["Ceiling Lights"] },
-    { label: "Floor Lights", category: "Lighting", subcategories: ["Floor Lights"] },
-    { label: "Table Lights", category: "Lighting", subcategories: ["Table Lights"] },
     { label: "Wall Lights", category: "Lighting", subcategories: ["Wall Lights"] },
+    { label: "Table Lights", category: "Lighting", subcategories: ["Table Lights"] },
+    { label: "Floor Lights", category: "Lighting", subcategories: ["Floor Lights"] },
+    { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
+    { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
   ],
 };
 
