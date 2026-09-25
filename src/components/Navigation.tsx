@@ -527,12 +527,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
   };
 
-  const resetRoomPreviewUnlessEnteringSubmenu = (event: React.MouseEvent<HTMLElement>) => {
-    const nextTarget = event.relatedTarget;
-    if (nextTarget instanceof Element && nextTarget.closest("[data-room-submenu]")) return;
-    setActiveRoomCategory(null);
-  };
-
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
@@ -1049,7 +1043,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(index)}
-                              onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
@@ -1065,7 +1058,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                             type="button"
                             variant="ghost"
                             onMouseEnter={() => setActiveRoomCategory(-1)}
-                            onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                             onFocus={() => setActiveRoomCategory(-1)}
                             className={cn(
                               "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
@@ -1152,7 +1144,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(index)}
-                              onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
@@ -1170,7 +1161,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               type="button"
                               variant="ghost"
                               onMouseEnter={() => setActiveRoomCategory(-1)}
-                                onMouseLeave={resetRoomPreviewUnlessEnteringSubmenu}
                               onFocus={() => setActiveRoomCategory(-1)}
                               className={cn(
                                 "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
