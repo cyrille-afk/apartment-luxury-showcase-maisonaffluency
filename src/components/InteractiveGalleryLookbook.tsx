@@ -464,7 +464,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                         : "relative mx-auto w-fit max-w-full overflow-hidden bg-transparent"}
                     >
                       {activeSceneIsPortrait && (
-                        <div className="order-2 flex flex-col justify-around gap-7 md:order-1 md:h-[55vh]">
+                        <div className="order-2 flex flex-col gap-y-12 md:order-1">
                           {portraitProducts.slice(0, 2).map((item) => <PortraitProduct key={item.hotspot.id} item={item} onSelect={openHotspot} />)}
                         </div>
                       )}
@@ -493,7 +493,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                         ))}
                       </div>
                       {activeSceneIsPortrait && (
-                        <div className="order-3 flex flex-col justify-around gap-7 md:h-[55vh]">
+                        <div className="order-3 flex flex-col gap-y-12">
                           {portraitProducts.slice(2, 4).map((item) => <PortraitProduct key={item.hotspot.id} item={item} onSelect={openHotspot} />)}
                         </div>
                       )}
