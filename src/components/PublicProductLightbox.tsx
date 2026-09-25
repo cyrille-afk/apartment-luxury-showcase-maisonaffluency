@@ -737,8 +737,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto object-contain transition-opacity duration-300",
-                        !contextualPanel && "md:h-full",
+                        "w-full h-auto object-contain transition-opacity duration-300 md:h-full",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
