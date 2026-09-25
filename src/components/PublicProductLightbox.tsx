@@ -89,6 +89,9 @@ interface Props {
   onSelectRelated?: (item: PublicLightboxItem) => void;
   /** When true, render inline instead of portaling to document.body */
   inline?: boolean;
+  /** Gallery-only contextual presentation without a viewport backdrop. */
+  pinned?: boolean;
+  inline?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -211,7 +214,7 @@ const DimensionsButtonGrid = ({
 /* ------------------------------------------------------------------ */
 
 
-const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline }: Props) => {
+const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline, pinned = false }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -658,17 +661,27 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       <motion.div
         key="pp-lightbox-overlay"
         {...overlayMotion}
-        className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-stretch md:items-center justify-center md:p-6 lg:p-8"
-        onClick={requestClose}
+        className={cn(
+          "flex justify-center",
+          pinned
+            ? "pointer-events-none absolute inset-x-0 top-0 z-30 items-start px-3 pt-3 md:px-8 md:pt-6"
+            : "fixed inset-0 z-[10000] items-stretch bg-foreground/60 backdrop-blur-sm md:items-center md:p-6 lg:p-8"
+        )}
+        onClick={pinned ? undefined : requestClose}
       >
         <motion.div
           {...panelMotion}
-          className="relative w-full max-w-6xl h-dvh max-h-dvh md:h-auto md:max-h-[95vh] mx-auto bg-background shadow-2xl overflow-y-auto flex flex-col min-h-0"
+          className={cn(
+            "relative mx-auto flex w-full max-w-6xl flex-col overflow-y-auto bg-background min-h-0",
+            pinned
+              ? "pointer-events-auto max-h-[min(72vh,720px)] border border-border/60 shadow-2xl"
+              : "h-dvh max-h-dvh shadow-2xl md:h-auto md:max-h-[95vh]"
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile header */}
           <div
-            className="md:hidden sticky top-0 z-20 flex items-center justify-between bg-background/90 backdrop-blur-sm border-b border-border/60 shrink-0"
+            className={cn("md:hidden sticky top-0 z-20 items-center justify-between bg-background/90 border-b border-border/60 shrink-0", pinned ? "flex" : "flex backdrop-blur-sm")}
             style={{
               paddingTop: "max(0.75rem, env(safe-area-inset-top))",
               paddingBottom: "0.5rem",
