@@ -73,10 +73,31 @@ const createGalleryPages = (space: Space): GalleryPage[] =>
 
 // Keep the explicitly selected blue Toshiro finish when its Boudoir hotspot is shown.
 const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
+  "A Dreamy Tuscan Landscape:Astra Dining Table": "3b6f6177-adfa-4f23-8cf7-75396028fe95",
+  "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "4b46af75-4c35-4a81-bea6-822810ae3422",
   "A Sophisticated Boudoir:Toshiro Lamp": "294326f2-a7a0-4447-8b50-f3bde7de2cc5",
+  "A Sophisticated Boudoir:Lyric Desk": "ca386961-7986-43cf-aa8c-853249a177a5",
+  "A Sophisticated Boudoir:Gold Leaves+Glass Snake Vessel (Unique Piece)": "cd18f654-d48f-4b86-80a0-62e10255b581",
+  "A Masterful Suite:Villa Pedestal": "1419dd7f-b404-44d2-ae68-ca46890920ea",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover": "6f32db0d-3d34-4035-9bf4-b42cb33940e9",
+  "A Masterful Suite:Bud Table Lamp": "da524883-8938-441a-b902-f12deb378ca7",
 };
 // The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
 const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set(["A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier"]);
+// Honor the previously curated placements on the first photo of these rooms.
+const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
+  "A Dreamy Tuscan Landscape:Astra Dining Table": "left",
+  "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian": "left",
+  "A Dreamy Tuscan Landscape:Crystalline Vase Volume 3": "right",
+  "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "right",
+  "A Sophisticated Boudoir:Lyric Desk": "left",
+  "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian": "left",
+  "A Sophisticated Boudoir:Toshiro Lamp": "right",
+  "A Sophisticated Boudoir:Gold Leaves+Glass Snake Vessel (Unique Piece)": "right",
+  "A Masterful Suite:Villa Pedestal": "left",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
+  "A Masterful Suite:Bud Table Lamp": "right",
+};
 
 type Hotspot = {
   id: string;
@@ -385,8 +406,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       return product && image ? { hotspot, product, image } : null;
     })
     .filter((pick): pick is ScenePick => pick !== null) : [];
-  const featuredLeftPicks = scenePicks.filter(({ hotspot }) => hotspot.x_percent < 50).sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
-  const featuredRightPicks = scenePicks.filter(({ hotspot }) => hotspot.x_percent >= 50).sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const sideForPick = ({ hotspot }: ScenePick) => SIDE_PICK_OVERRIDES[`${hotspot.image_identifier}:${hotspot.product_name}`] || (hotspot.x_percent < 50 ? "left" : "right");
+  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
   const hasScenePicks = scenePicks.length > 0;
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
