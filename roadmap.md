@@ -8,4 +8,4 @@
 - [x] Restore interactive gallery hotspots and product lightboxes.
 - [x] Add Tour Our Gallery and The Curators to the gallery ribbon.
 - [x] Verify room, video, curator, carousel, and product-detail states.
-- [ ] Transform gallery scene products into a centered, free-floating editorial grid.
+- [x] Transform gallery scene products into a centered, free-floating editorial grid.
