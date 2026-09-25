@@ -5,8 +5,7 @@ import { ChevronUp } from "lucide-react";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import Gallery from "@/components/Gallery";
-import ApartmentTourInterlude from "@/components/ApartmentTourInterlude";
+import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 
 // BackToTopButton removed — the floating quick-actions panel now provides
@@ -63,25 +62,19 @@ const PublicGallery = () => {
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
       </Helmet>
 
-      <div className="min-h-screen bg-white text-foreground">
+      <div className="min-h-screen bg-background text-foreground">
         <Navigation />
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
-        <div className="mx-auto max-w-7xl px-6 md:px-12">
-          <div
-            className="pt-[var(--header-h)]"
-            style={headerOffset ? { paddingTop: headerOffset } : undefined}
-          >
-            <ApartmentTourInterlude compact />
-          </div>
-        </div>
-
-        <div className="pb-20">
-          <Gallery />
+        <div
+          className="pt-[var(--header-h)]"
+          style={headerOffset ? { paddingTop: headerOffset } : undefined}
+        >
+          <InteractiveGalleryLookbook />
         </div>
 
         <Footer />
-        <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" forceDisplay />
+        
 
       </div>
     </>
