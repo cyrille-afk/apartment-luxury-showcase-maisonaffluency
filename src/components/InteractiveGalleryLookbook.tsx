@@ -75,6 +75,8 @@ const createGalleryPages = (space: Space): GalleryPage[] =>
 const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
   "A Sophisticated Boudoir:Toshiro Lamp": "294326f2-a7a0-4447-8b50-f3bde7de2cc5",
 };
+// The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
+const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set(["A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier"]);
 
 type Hotspot = {
   id: string;
@@ -376,6 +378,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
   const scenePicks = activeScene ? hotspotsForScene(activeScene)
+    .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
       const image = hotspot.product_image_url || product?.image_url;
@@ -389,7 +392,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
       <img src={image} alt={hotspot.product_name} loading="lazy" className="aspect-square w-full object-contain" />
-      <span className="mt-1.5 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{hotspot.product_name}</span>
+      <span className="mt-1.5 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{product.id.startsWith("hotspot-") ? hotspot.product_name : product.title}</span>
       <span className="mt-1 block w-full whitespace-normal break-words font-body text-[9px] font-light uppercase leading-tight tracking-wider text-muted-foreground">{product.brand_name}</span>
     </Button>
   );
