@@ -19,4 +19,5 @@
 - [x] Add the in-image scene timeline and counter, fully open the hotspot preview, and compress gallery header spacing.
 - [x] Restore four single-photo room slides with centered, uncropped portrait presentation and independent hotspots.
 - [x] Compress the gallery header and align the timeline, image canvas, and footer to one 1280px grid.
+- [x] Replace the Tour video text overlay with a solid geometric play icon while preserving fullscreen sound playback.
 - [x] Elevate room titles, frame the gallery timeline, and consolidate slide controls beneath the canvas.
