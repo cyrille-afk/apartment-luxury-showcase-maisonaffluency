@@ -10,3 +10,4 @@
 - [x] Verify room, video, curator, carousel, and product-detail states.
 - [x] Transform gallery scene products into a centered, free-floating editorial grid.
 - [x] Repair the Interactive Gallery canvas, hotspot scaling, and room ribbon on mobile.
+- [ ] Make Tour Our Gallery the autoplaying default and first ribbon destination.
