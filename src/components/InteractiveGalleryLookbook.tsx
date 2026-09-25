@@ -349,10 +349,18 @@ export default function InteractiveGalleryLookbook() {
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-24 text-foreground">
-      <nav aria-label="Gallery timeline" className="border-b border-border">
-        <div className="mx-auto flex min-h-14 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:min-h-10 md:justify-center md:gap-9 md:px-6">
+      {galleryState.kind === "room" && (
+        <header className="flex min-h-24 items-center justify-center px-6 py-6 text-center md:min-h-32 md:py-8">
+          <h2 className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-foreground md:text-xs">
+            {activePage.title}
+          </h2>
+        </header>
+      )}
+
+      <nav aria-label="Gallery timeline" className="border-y border-border/60 py-4 md:py-6">
+        <div className="mx-auto flex min-h-12 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
           {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-14 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] md:h-10 ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-12 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
             </Button>
           ))}
@@ -405,24 +413,27 @@ export default function InteractiveGalleryLookbook() {
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
                   ))}
                 </div>
-                <span className="pointer-events-none absolute bottom-3 right-4 z-20 font-body text-[10px] tracking-[0.22em] text-background drop-shadow-md">
+              </div>
+            </div>
+
+            <div className="flex min-h-16 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-20 md:px-0">
+              <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
+                {space.label}
+              </span>
+              <div className="flex items-center gap-1 md:gap-2">
+                <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-10 rounded-none hover:bg-muted">
+                  <ChevronLeft className="size-4" strokeWidth={1.4} />
+                </Button>
+                <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-10 rounded-none hover:bg-muted">
+                  <ChevronRight className="size-4" strokeWidth={1.4} />
+                </Button>
+                <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-10 rounded-none hover:bg-muted">
+                  <GalleryHorizontal className="size-4" strokeWidth={1.4} />
+                </Button>
+                <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
                   {sceneIdx + 1} / {galleryPages.length}
                 </span>
               </div>
-
-              <Button type="button" size="icon" variant="secondary" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute right-4 top-4 z-20 rounded-full bg-background/85 backdrop-blur">
-                <GalleryHorizontal className="size-4" />
-              </Button>
-              <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="absolute bottom-0 left-0 top-16 z-10 h-auto w-16 rounded-none text-background/90 hover:bg-foreground/10 hover:text-background">
-                <ChevronLeft className="size-9 drop-shadow" strokeWidth={1.2} />
-              </Button>
-              <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="absolute bottom-0 right-0 top-0 z-10 h-auto w-16 rounded-none text-background/90 hover:bg-foreground/10 hover:text-background">
-                <ChevronRight className="size-9 drop-shadow" strokeWidth={1.2} />
-              </Button>
-            </div>
-
-            <div className="relative mx-auto mt-2 max-w-3xl px-12 pb-24 text-center md:mt-1 md:pb-24">
-              <h2 className="font-display text-2xl md:text-3xl">{activePage.title}</h2>
             </div>
           </motion.div>
         )}
@@ -439,7 +450,8 @@ export default function InteractiveGalleryLookbook() {
               {SPACES.map((room, spaceIndex) => (
                 <div key={room.key} className="flex shrink-0 gap-2">
                   {room.scenes.map((roomScene, sceneIndex) => {
-                    const active = spaceIndex === roomSpaceIndex && sceneIndex === sceneIdx;
+                    const pageIndex = sceneIndex === 0 ? 0 : sceneIndex === 3 ? 2 : 1;
+                    const active = spaceIndex === roomSpaceIndex && pageIndex === sceneIdx;
                     return (
                       <Button key={roomScene.id} type="button" variant="ghost" onClick={() => selectScene(spaceIndex, sceneIndex)} aria-label={`${room.label}: ${roomScene.title}`} className="h-auto shrink-0 flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
                         <img src={thumb(roomScene.id)} alt="" loading="lazy" className={`h-20 w-32 object-cover transition ${active ? "ring-2 ring-foreground" : "opacity-70 hover:opacity-100"}`} />

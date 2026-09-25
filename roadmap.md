@@ -18,3 +18,4 @@
 - [x] Launch the gallery tour fullscreen with sound and pause it on fullscreen exit.
 - [x] Add the in-image scene timeline and counter, fully open the hotspot preview, and compress gallery header spacing.
 - [x] Regroup each room into three pages with an editorial portrait diptych and independent hotspots.
+- [x] Elevate room titles, frame the gallery timeline, and consolidate slide controls beneath the canvas.
