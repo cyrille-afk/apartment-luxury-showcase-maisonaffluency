@@ -399,13 +399,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
   // so we don't clobber it on close.
   useEffect(() => {
-    if (!product) return;
+    if (!product || contextualPanel) return;
     const wasAlreadyHidden = document.body.style.overflow === "hidden";
     document.body.style.overflow = "hidden";
     return () => {
       if (!wasAlreadyHidden) document.body.style.overflow = "";
     };
-  }, [product]);
+  }, [product, contextualPanel]);
 
   const relatedProducts = useMemo(() => {
     if (!product) return [];
