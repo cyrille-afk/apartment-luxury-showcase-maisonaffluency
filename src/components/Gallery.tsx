@@ -418,7 +418,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeMobilePill, setActiveMobilePill] = useState(-1);
+  const [activeMobilePill, setActiveMobilePill] = useState(0);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
