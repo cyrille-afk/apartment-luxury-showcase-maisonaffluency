@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GalleryHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryHorizontal, Play, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -84,20 +84,54 @@ type Hotspot = {
 
 function GalleryTour() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const playImmersively = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    video.volume = 1;
+
+    if (video.requestFullscreen) {
+      void video.requestFullscreen().catch(() => undefined);
+    } else {
+      const safariVideo = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+      safariVideo.webkitEnterFullscreen?.();
+    }
+
+    void video.play().catch(() => setIsPlaying(false));
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     video.volume = 1;
     video.muted = false;
-    const onPlay = () => trackVideoEvent("play", "showroom-tour");
-    const onPause = () => trackVideoEvent("pause", "showroom-tour");
+    const onPlay = () => {
+      setIsPlaying(true);
+      trackVideoEvent("play", "showroom-tour");
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+      trackVideoEvent("pause", "showroom-tour");
+    };
+    const onFullscreenChange = () => {
+      if (document.fullscreenElement !== video && !video.paused) video.pause();
+    };
+    const onWebkitEndFullscreen = () => {
+      if (!video.paused) video.pause();
+    };
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    video.addEventListener("webkitendfullscreen", onWebkitEndFullscreen);
     const detachMilestones = attachMilestoneTracking(video, "showroom-tour");
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      video.removeEventListener("webkitendfullscreen", onWebkitEndFullscreen);
       detachMilestones();
     };
   }, []);
@@ -113,8 +147,23 @@ function GalleryTour() {
             playsInline
             preload="metadata"
             poster={large("bespoke-sofa_gxidtx")}
+            onClick={() => {
+              if (videoRef.current?.paused) playImmersively();
+            }}
             className="aspect-video w-full object-cover"
           />
+          {!isPlaying && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              onClick={playImmersively}
+              aria-label="Play gallery tour fullscreen with sound"
+              className="absolute left-1/2 top-1/2 z-10 size-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background/90 text-foreground shadow-xl hover:bg-background"
+            >
+              <Play className="ml-1 size-6" fill="currentColor" />
+            </Button>
+          )}
         </div>
         <div className="mx-auto mt-5 max-w-6xl text-center">
           <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>

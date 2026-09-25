@@ -15,3 +15,4 @@
 - [x] Center the gallery tour with equal spacing and user-directed sound controls.
 - [x] Restore the gallery tour's 16:9 frame and native fullscreen controls.
 - [x] Restore the room canvas width, flush preview alignment, and compact gallery spacing.
+- [x] Launch the gallery tour fullscreen with sound and pause it on fullscreen exit.
