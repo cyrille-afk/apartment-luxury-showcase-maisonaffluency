@@ -207,7 +207,7 @@ export default function InteractiveGalleryLookbook() {
       subcategory: pick.subcategory || null,
       pdf_url: pick.pdf_url || null,
       pdf_urls: pick.pdf_urls || null,
-      size_variants: pick.size_variants || null,
+      size_variants: (pick as any).size_variants || null,
     }));
     const merged = new Map<string, PublicLightboxItem>();
     staticPicks.forEach((pick) => merged.set(`${normalize(pick.brand_name)}:${normalize(pick.title)}`, pick));
