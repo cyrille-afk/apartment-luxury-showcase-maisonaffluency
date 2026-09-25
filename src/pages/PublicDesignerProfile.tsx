@@ -2132,6 +2132,12 @@ const PublicDesignerProfile = () => {
                       </div>
 
 
+                      {/* Edition / Reedition label — isolated below image, clean spacing */}
+                      {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                        <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+                          {curatorialEditionLine || ECART_REEDITION_LABEL}
+                        </p>
+                      )}
                       {/* Editorial text block — designer / product / price hierarchy */}
                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
                         <div className="flex min-w-0 flex-1 flex-col text-left">
