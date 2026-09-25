@@ -103,6 +103,7 @@ function GalleryTour() {
       safariVideo.webkitEnterFullscreen?.();
     }
 
+    video.playbackRate = 0.75;
     void video.play().catch(() => setIsPlaying(false));
   }, []);
 
