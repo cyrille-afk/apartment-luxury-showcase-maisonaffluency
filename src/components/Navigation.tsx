@@ -1028,7 +1028,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="living"
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[540px] overflow-visible bg-background shadow-xl"
+                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
                       style={{ animation: "livingMenuReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
@@ -1037,32 +1037,34 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex min-h-72 items-stretch overflow-hidden">
-                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-8 py-8">
-                          {roomNavigation.living.map((item, index) => (
-                            <Button
-                              key={item.label}
-                              type="button"
-                              variant="ghost"
-                              onMouseEnter={() => setActiveRoomCategory(index)}
-                              onFocus={() => setActiveRoomCategory(index)}
-                              onClick={() => navigateFromMegaMenu(item.category)}
-                              className={cn(
-                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                                activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
-                              )}
-                            >
-                              {item.label}
-                              <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
-                            </Button>
-                          ))}
+                      <div className="flex min-h-96 items-stretch overflow-hidden">
+                        <div className="flex min-h-full w-1/2 shrink-0 flex-col border-r border-border/60 px-8 py-8">
+                          <div>
+                            {roomNavigation.living.map((item, index) => (
+                              <Button
+                                key={item.label}
+                                type="button"
+                                variant="ghost"
+                                onMouseEnter={() => setActiveRoomCategory(index)}
+                                onFocus={() => setActiveRoomCategory(index)}
+                                onClick={() => navigateFromMegaMenu(item.category)}
+                                className={cn(
+                                  "flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                  activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
+                                )}
+                              >
+                                {item.label}
+                                <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
+                              </Button>
+                            ))}
+                          </div>
                           <Button
                             type="button"
                             variant="ghost"
                             onMouseEnter={() => setActiveRoomCategory(-1)}
                             onFocus={() => setActiveRoomCategory(-1)}
                             className={cn(
-                              "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                              "mt-auto flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
                               activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
                             )}
                           >
@@ -1129,7 +1131,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu={room}
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(620px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
                       style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
@@ -1138,26 +1140,27 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex min-h-72 items-stretch overflow-hidden">
-                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
-                          {roomNavigation[room].map((item, index) => (
-                            <Button
-                              key={item.label}
-                              type="button"
-                              variant="ghost"
-                              onMouseEnter={() => setActiveRoomCategory(index)}
-                              onFocus={() => setActiveRoomCategory(index)}
-                              onClick={() => navigateFromMegaMenu(item.category)}
-                              className={cn(
-                                "flex w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                                roomNavigation[room].length <= 4 ? "h-14" : "h-8",
-                                activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
-                              )}
-                            >
-                              {item.label}
-                              <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
-                            </Button>
-                          ))}
+                      <div className="flex min-h-96 items-stretch overflow-hidden">
+                        <div className="flex min-h-full w-1/2 shrink-0 flex-col border-r border-border/60 px-9 py-8">
+                          <div>
+                            {roomNavigation[room].map((item, index) => (
+                              <Button
+                                key={item.label}
+                                type="button"
+                                variant="ghost"
+                                onMouseEnter={() => setActiveRoomCategory(index)}
+                                onFocus={() => setActiveRoomCategory(index)}
+                                onClick={() => navigateFromMegaMenu(item.category)}
+                                className={cn(
+                                  "flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                  activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
+                                )}
+                              >
+                                {item.label}
+                                <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
+                              </Button>
+                            ))}
+                          </div>
                           {roomFlyouts[room] && (
                             <Button
                               type="button"
@@ -1165,7 +1168,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               onMouseEnter={() => setActiveRoomCategory(-1)}
                               onFocus={() => setActiveRoomCategory(-1)}
                               className={cn(
-                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                "mt-auto flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
                                 activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
                               )}
                             >
