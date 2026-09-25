@@ -91,6 +91,7 @@ function GalleryTour() {
     const onPause = () => trackVideoEvent("pause", "showroom-tour");
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    void video.play().catch(() => undefined);
     const detachMilestones = attachMilestoneTracking(video, "showroom-tour");
     return () => {
       video.removeEventListener("play", onPlay);
