@@ -490,17 +490,17 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                      ))}
                    </AnimatePresence>
                  </div>
-                 {showDiningRoomFeaturedPicks && (
-                   <aside aria-label="Dining Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
-                     {diningRoomFeaturedPicks.map((pick) => (
-                       <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-                         <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
-                         <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
-                         <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
-                       </Button>
-                     ))}
-                   </aside>
-                 )}
+                  {showFeaturedRightPicks && (
+                    <aside aria-label="Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
+                      {featuredRightPicks.map((pick) => (
+                        <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
+                          <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
+                          <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
+                          <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
+                        </Button>
+                      ))}
+                    </aside>
+                  )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
