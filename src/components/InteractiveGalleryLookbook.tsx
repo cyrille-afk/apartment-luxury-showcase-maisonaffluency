@@ -280,9 +280,9 @@ export default function InteractiveGalleryLookbook() {
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-24 text-foreground">
       <nav aria-label="Gallery timeline" className="border-b border-border">
-        <div className="mx-auto flex min-h-16 max-w-[1580px] items-center gap-7 overflow-x-auto px-6 md:justify-center md:gap-9">
+        <div className="mx-auto flex min-h-14 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:min-h-16 md:justify-center md:gap-9 md:px-6">
           {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-16 shrink-0 rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-14 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] md:h-16 ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
             </Button>
           ))}
@@ -291,11 +291,11 @@ export default function InteractiveGalleryLookbook() {
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-[1500px] px-4 pt-8 md:px-10">
-            <div className="relative flex min-h-[55vh] justify-center bg-muted/40">
-              <div className="relative inline-flex items-center">
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto w-full max-w-[1500px] pt-4 md:px-10 md:pt-8">
+            <div className="relative w-full bg-muted/40 md:flex md:min-h-[55vh] md:justify-center">
+              <div className="relative w-full md:inline-flex md:w-auto md:items-center">
                 <AnimatePresence mode="wait">
-                  <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block max-h-[78vh] w-auto max-w-full" />
+                  <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full md:max-h-[78vh] md:w-auto md:max-w-full" />
                 </AnimatePresence>
                 {sceneHotspots.map((hotspot) => (
                   <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
@@ -324,7 +324,7 @@ export default function InteractiveGalleryLookbook() {
               <span className="absolute right-0 top-1/2 -translate-y-1/2 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
             </div>
 
-            <div className="mx-auto mt-14 max-w-[1320px]">
+            <div className="mx-auto mt-14 max-w-[1320px] px-4 md:px-0">
               {sceneHotspots.length === 0 ? <p className="text-center font-body text-sm text-muted-foreground">Pieces for this scene are available upon request.</p> : (
                 <div className="grid grid-cols-2 gap-x-8 gap-y-16 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12 lg:gap-y-20">
                   {sceneHotspots.map((hotspot) => (
