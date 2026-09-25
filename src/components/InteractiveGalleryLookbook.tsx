@@ -196,8 +196,12 @@ function CuratorsCanvas() {
   );
 }
 
-export default function InteractiveGalleryLookbook() {
-  const [galleryState, setGalleryState] = useState<GalleryState>({ kind: "tour" });
+type InteractiveGalleryLookbookProps = {
+  initialView?: "tour" | "living-room";
+};
+
+export default function InteractiveGalleryLookbook({ initialView = "tour" }: InteractiveGalleryLookbookProps) {
+  const [galleryState, setGalleryState] = useState<GalleryState>(initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -371,28 +375,6 @@ export default function InteractiveGalleryLookbook() {
         </div>
       </nav>
 
-      <div className="mx-auto flex min-h-12 w-full max-w-[1280px] items-center justify-between border-b border-border/60 px-4 md:min-h-14 md:px-0">
-        <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
-          {activeCategory}
-        </span>
-        {galleryState.kind === "room" && (
-          <div className="flex items-center gap-1 md:gap-2">
-            <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-9 rounded-none hover:bg-muted">
-              <ChevronLeft className="size-4" strokeWidth={1.4} />
-            </Button>
-            <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-9 rounded-none hover:bg-muted">
-              <ChevronRight className="size-4" strokeWidth={1.4} />
-            </Button>
-            <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-9 rounded-none hover:bg-muted">
-              <GalleryHorizontal className="size-4" strokeWidth={1.4} />
-            </Button>
-            <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
-              {sceneIdx + 1} / {galleryPages.length}
-            </span>
-          </div>
-        )}
-      </div>
-
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
@@ -408,6 +390,9 @@ export default function InteractiveGalleryLookbook() {
                 />
               )}
               <div className={`relative flex w-full items-center justify-center overflow-hidden transition-colors duration-300 ${activeSceneIsPortrait ? "bg-muted/30" : "bg-transparent"}`}>
+                <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute right-4 top-4 z-20 size-9 rounded-none bg-background/80 hover:bg-background">
+                  <GalleryHorizontal className="size-4" strokeWidth={1.4} />
+                </Button>
                 <AnimatePresence mode="wait">
                   {activePage.scenes.map((pageScene) => (
                     <motion.div
@@ -448,6 +433,23 @@ export default function InteractiveGalleryLookbook() {
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="flex min-h-12 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-14 md:px-0">
+              <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
+                {activeCategory}
+              </span>
+              <div className="flex items-center gap-1 md:gap-2">
+                <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="size-9 rounded-none hover:bg-muted">
+                  <ChevronLeft className="size-4" strokeWidth={1.4} />
+                </Button>
+                <Button type="button" size="icon" variant="ghost" aria-label="Next scene" onClick={() => step(1)} className="size-9 rounded-none hover:bg-muted">
+                  <ChevronRight className="size-4" strokeWidth={1.4} />
+                </Button>
+                <span className="min-w-14 pl-2 text-right font-body text-[10px] tracking-[0.22em] text-foreground">
+                  {sceneIdx + 1} / {galleryPages.length}
+                </span>
               </div>
             </div>
 

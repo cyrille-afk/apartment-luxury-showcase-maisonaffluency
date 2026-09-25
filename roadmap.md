@@ -22,3 +22,5 @@
 - [x] Replace the Tour video text overlay with a solid geometric play icon while preserving fullscreen sound playback.
 - [x] Elevate room titles, frame the gallery timeline, and consolidate slide controls beneath the canvas.
 - [x] Lock gallery header geometry across every state, move controls above the canvas, and ground portrait scenes.
+- [x] Replace the homepage legacy gallery stack with the interactive lookbook and lock the global desktop header height.
+- [x] Make the homepage lookbook open on the hotspot canvas with its controls below and drawer toggle over the image.

@@ -27,14 +27,11 @@ const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBann
 
 // Lazy-load everything below the fold to reduce initial JS
 
-const Gallery = lazyRetry(() => import("@/components/Gallery"));
+const InteractiveGalleryLookbook = lazyRetry(() => import("@/components/InteractiveGalleryLookbook"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
-const GalleryDetailsFloatingNav = lazyRetry(() => import("@/components/GalleryDetailsFloatingNav"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
-const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
-const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
 
 const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
@@ -52,7 +49,7 @@ function parseDeepLink(hash: string) {
  * Tracked section IDs for scroll-based hash updates.
  * Order matters — later sections win when multiple are visible.
  */
-const TRACKED_SECTIONS = ["home", "overview", "gallery"] as const;
+const TRACKED_SECTIONS = ["home", "gallery"] as const;
 
 type IdleWindow = Window & {
   scheduler?: {
@@ -469,32 +466,17 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         {showBelowFoldSections ? (
           <>
             {!routeIsCategory && (
-              <div className="home-below-fold bg-white">
-                <LazyOnVisible id="overview" className="home-deferred-section scroll-header-offset" minHeight="60vh" rootMargin="400px 0px">
-                  <Suspense fallback={null}>
-                    <ApartmentTourInterlude compact />
-                  </Suspense>
-                </LazyOnVisible>
-                <LazyOnVisible id="gallery" className="home-deferred-section scroll-header-offset" minHeight="100vh" rootMargin="120px 0px">
-                  <Suspense fallback={<SectionFallback />}>
-                    <Gallery />
-                  </Suspense>
-                </LazyOnVisible>
-              </div>
+              <LazyOnVisible id="gallery" className="home-deferred-section scroll-header-offset bg-background" minHeight="100vh" rootMargin="400px 0px">
+                <Suspense fallback={<SectionFallback />}>
+                  <InteractiveGalleryLookbook initialView="living-room" />
+                </Suspense>
+              </LazyOnVisible>
             )}
 
             {routeIsCategory && (
               <Suspense fallback={null}>
                 <ProductGrid sectionScope="designers" />
               </Suspense>
-            )}
-
-            {!routeIsCategory && (
-              <LazyOnVisible className="home-deferred-section" minHeight="40vh" rootMargin="600px 0px">
-                <Suspense fallback={null}>
-                  <InstagramFeed />
-                </Suspense>
-              </LazyOnVisible>
             )}
 
             <LazyOnVisible className="home-deferred-section" minHeight="200px" rootMargin="400px 0px">
@@ -505,13 +487,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
           </>
         ) : null}
       </main>
-
-      {showBelowFoldSections && showOverlays && !routeIsCategory && (
-        <Suspense fallback={null}>
-          <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" />
-        </Suspense>
-      )}
-
 
       {/* ExitIntentBanner "Chat with us" pill removed per user request. */}
 

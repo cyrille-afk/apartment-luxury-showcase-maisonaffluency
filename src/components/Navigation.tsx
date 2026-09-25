@@ -878,8 +878,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
-          {/* ROW 1 — slim utility ribbon with imposing centered brand lockup */}
-          <div className="grid grid-cols-3 items-center justify-items-center border-b border-neutral-100 pb-1 pt-2">
+          {/* ROW 1 — fixed-height utility ribbon with centered brand lockup */}
+          <div className="grid min-h-16 grid-cols-3 items-center justify-items-center border-b border-neutral-100 py-3">
             <div className="flex items-center justify-self-start">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
@@ -981,7 +981,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="mx-auto flex w-full max-w-[1400px] items-center justify-center gap-10 px-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
+          <nav className="mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
