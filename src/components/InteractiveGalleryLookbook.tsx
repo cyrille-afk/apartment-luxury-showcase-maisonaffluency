@@ -98,14 +98,12 @@ function PortraitProduct({ item, onSelect }: { item: SceneProduct; onSelect: (ho
       onClick={() => onSelect(item.hotspot)}
       className="group flex h-auto w-full flex-col items-center rounded-none bg-transparent p-0 text-center hover:bg-transparent"
     >
-      <span className="flex h-[15vh] min-h-28 w-full items-end justify-center md:h-[17vh]">
-        <img
-          src={item.product.image_url}
-          alt={item.product.title}
-          loading="lazy"
-          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-        />
-      </span>
+      <img
+        src={item.product.image_url}
+        alt={item.product.title}
+        loading="lazy"
+        className="max-h-[26vh] w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+      />
       <span className="mt-3 block w-full px-2 font-body text-[10px] font-light uppercase leading-normal tracking-[0.12em] text-foreground">
         {item.product.title}
       </span>
