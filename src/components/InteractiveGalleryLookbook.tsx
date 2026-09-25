@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { GalleryHorizontal, Play, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryHorizontal, Play, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -353,8 +353,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     if (galleryState.kind !== "room") return;
     setActivePin(null);
     setLightboxProduct(null);
-    setSceneIdx((index) => (index + direction + galleryPages.length) % galleryPages.length);
-  }, [galleryState.kind, galleryPages.length]);
+    const nextIndex = sceneIdx + direction;
+    if (nextIndex >= 0 && nextIndex < galleryPages.length) {
+      setSceneIdx(nextIndex);
+      return;
+    }
+    const nextSpaceIndex = (roomSpaceIndex + direction + SPACES.length) % SPACES.length;
+    setGalleryState({ kind: "room", spaceIndex: nextSpaceIndex });
+    setSceneIdx(direction > 0 ? 0 : SPACES[nextSpaceIndex].scenes.length - 1);
+  }, [galleryState.kind, galleryPages.length, roomSpaceIndex, sceneIdx]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -503,6 +510,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                              </span>
                            </Button>
                          ))}
+                          <Button type="button" size="icon" variant="default" aria-label="Previous gallery photo" title="Previous gallery photo" onClick={() => step(-1)} className="absolute left-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
+                            <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden="true" />
+                          </Button>
+                          <Button type="button" size="icon" variant="default" aria-label="Next gallery photo" title="Next gallery photo" onClick={() => step(1)} className="absolute right-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
+                            <ChevronRight className="size-5" strokeWidth={1.5} aria-hidden="true" />
+                          </Button>
                        </motion.div>
                      ))}
                    </AnimatePresence>
