@@ -31,7 +31,8 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
-import bedroomAmbient from "@/assets/bedroom.jpg";
+import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
+import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -91,8 +92,8 @@ const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>
 
 const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
-  dining: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture" },
-  bedroom: { src: bedroomAmbient, alt: "Serene bedroom with layered natural materials" },
+  dining: { src: intimateDiningAmbient, alt: "Intimate dining setting with collectible furniture" },
+  bedroom: { src: calmingBedroomAmbient, alt: "Calming bedroom with layered natural materials" },
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
 };
 
