@@ -345,19 +345,19 @@ export default function InteractiveGalleryLookbook() {
   ];
 
   return (
-    <section aria-label="Interactive Gallery" className="bg-background pb-24 text-foreground">
+    <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
       {galleryState.kind === "room" && (
-        <header className="flex min-h-24 items-center justify-center px-6 py-6 text-center md:min-h-32 md:py-8">
-          <h2 className="font-body text-[11px] font-light uppercase tracking-[0.3em] text-foreground md:text-xs">
+        <header className="flex items-center justify-center px-6 py-4 text-center md:py-5">
+          <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
             {activePage.title}
           </h2>
         </header>
       )}
 
-      <nav aria-label="Gallery timeline" className="border-y border-border/60 py-4 md:py-6">
-        <div className="mx-auto flex min-h-12 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
+      <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
+        <div className="flex min-h-9 snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
           {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-12 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-9 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
             </Button>
           ))}
@@ -366,7 +366,7 @@ export default function InteractiveGalleryLookbook() {
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] md:px-10">
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
             <div className="relative w-full">
               {lightboxProduct && (
                 <PublicProductLightbox
@@ -413,7 +413,7 @@ export default function InteractiveGalleryLookbook() {
               </div>
             </div>
 
-            <div className="flex min-h-16 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-20 md:px-0">
+            <div className="flex min-h-14 w-full items-center justify-between border-b border-border/60 px-4 md:min-h-16 md:px-0">
               <span className="font-body text-[10px] uppercase tracking-[0.26em] text-foreground">
                 {space.label}
               </span>
