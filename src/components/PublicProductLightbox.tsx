@@ -713,8 +713,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Upper two-column editorial block — constrained to stay above the fold */}
-          <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-5 md:p-8", contextualPanel && "h-auto max-h-none overflow-visible")}>
-            <div className={cn("grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10", !contextualPanel && "md:h-[min(420px,48vh)] md:grid-rows-[1fr]")}>
+          <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-4 md:p-6", contextualPanel && "h-auto max-h-none overflow-visible")}>
+            <div className={cn("grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8", !contextualPanel && "md:h-[min(330px,40vh)] md:grid-rows-[1fr]")}>
 
               {/* LEFT COLUMN — standardized hero image container */}
               <div className={cn("relative flex w-full items-center justify-center", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:h-full")}>
