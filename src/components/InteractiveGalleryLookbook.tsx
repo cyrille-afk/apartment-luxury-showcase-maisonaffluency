@@ -71,16 +71,26 @@ const normalize = (value: string) => value.toLowerCase().normalize("NFD").replac
 const createGalleryPages = (space: Space): GalleryPage[] =>
   space.scenes.map((scene) => ({ scenes: [scene], title: scene.title }));
 
-const DINING_ROOM_FEATURED_PICK_IDS = [
-  "4b46af75-4c35-4a81-bea6-822810ae3422",
-  "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b",
-];
-
-// Curator picks shown to the LEFT of the Dining Room gallery image (desktop only)
-const DINING_ROOM_LEFT_PICK_IDS = [
-  "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
-  "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
-];
+// Curator picks shown beside specific room gallery images (desktop only)
+// key = room key, value = { right?: pick IDs, left?: pick IDs }
+const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[] }> = {
+  "dining-room": {
+    right: [
+      "4b46af75-4c35-4a81-bea6-822810ae3422", // Cloud Filigrane — JMW
+      "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b", // Volume 3 Blue — Milan Pekar
+    ],
+    left: [
+      "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
+      "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
+    ],
+  },
+  "boudoir": {
+    right: [
+      "258ad1fe-ae9d-4574-8448-b89e735ed6c7", // Custom Saint-Just Glass Chandelier — Nathalie Ziegler
+      "cd18f654-d48f-4b86-80a0-62e10255b581", // Gold Leaves+Glass Snake Vessel — Nathalie Ziegler
+    ],
+  },
+};
 
 type Hotspot = {
   id: string;
@@ -372,17 +382,19 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
-  const diningRoomFeaturedPicks = useMemo(
-    () => DINING_ROOM_FEATURED_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks],
+  const roomPickIds = galleryState.kind === "room" ? ROOM_FEATURED_PICK_IDS[space.key] : undefined;
+  const rightPickIds = roomPickIds?.right ?? [];
+  const leftPickIds = roomPickIds?.left ?? [];
+  const featuredRightPicks = useMemo(
+    () => rightPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks, rightPickIds],
   );
-  const diningRoomLeftPicks = useMemo(
-    () => DINING_ROOM_LEFT_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks],
+  const featuredLeftPicks = useMemo(
+    () => leftPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks, leftPickIds],
   );
-  const isDiningRoom = galleryState.kind === "room" && space.key === "dining-room";
-  const showDiningRoomFeaturedPicks = isDiningRoom && diningRoomFeaturedPicks.length > 0;
-  const showDiningRoomLeftPicks = isDiningRoom && diningRoomLeftPicks.length > 0;
+  const showFeaturedRightPicks = featuredRightPicks.length > 0;
+  const showFeaturedLeftPicks = featuredLeftPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
@@ -405,7 +417,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : (showDiningRoomFeaturedPicks || showDiningRoomLeftPicks) ? "md:w-full" : "md:w-fit"}`}>
+             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : (showFeaturedRightPicks || showFeaturedLeftPicks) ? "md:w-full" : "md:w-fit"}`}>
               <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
@@ -429,10 +441,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showDiningRoomFeaturedPicks || showDiningRoomLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
-                 {showDiningRoomLeftPicks && (
-                   <aside aria-label="Dining Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
-                     {diningRoomLeftPicks.map((pick) => (
+               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showFeaturedRightPicks || showFeaturedLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
+                 {showFeaturedLeftPicks && (
+                   <aside aria-label="Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
+                     {featuredLeftPicks.map((pick) => (
                        <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
                          <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
                          <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
@@ -478,17 +490,17 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                      ))}
                    </AnimatePresence>
                  </div>
-                 {showDiningRoomFeaturedPicks && (
-                   <aside aria-label="Dining Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
-                     {diningRoomFeaturedPicks.map((pick) => (
-                       <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-                         <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
-                         <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
-                         <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
-                       </Button>
-                     ))}
-                   </aside>
-                 )}
+                  {showFeaturedRightPicks && (
+                    <aside aria-label="Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
+                      {featuredRightPicks.map((pick) => (
+                        <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
+                          <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
+                          <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
+                          <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
+                        </Button>
+                      ))}
+                    </aside>
+                  )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
