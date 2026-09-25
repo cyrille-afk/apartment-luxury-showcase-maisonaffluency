@@ -1,2 +1,3 @@
 - Render the original `Gallery` experience on mobile for both the homepage and `/gallery`, while desktop uses `InteractiveGalleryLookbook`; this preserves the earlier mobile accordion, swipe gallery, and hotspot interactions without changing the desktop lookbook.
 - Derive desktop lookbook side picks from each photo's `gallery_hotspots` coordinates and resolve details against the public catalog with image-only fallback; this keeps slide picks synchronized with their visible objects without exposing trade-only catalog entries.
+- Desktop gallery chevrons traverse all four photos before moving to the next/previous room, wrapping across the seven rooms; this provides uninterrupted photo navigation while leaving the mobile accordion untouched.
