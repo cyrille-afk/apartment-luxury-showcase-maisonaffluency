@@ -94,6 +94,15 @@ const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[]
       "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
     ],
   },
+  "master-suite": {
+    right: [
+      "da524883-8938-441a-b902-f12deb378ca7", // Bud Table Lamp — Atelier Demichelis
+    ],
+    left: [
+      "1419dd7f-b404-44d2-ae68-ca46890920ea", // Villa Pedestal Nightstand — Adam Court (Okha)
+      "6f32db0d-3d34-4035-9bf4-b42cb33940e9", // Brunelleschi Perspective — Iksel
+    ],
+  },
 };
 
 type Hotspot = {
