@@ -182,7 +182,7 @@ function GalleryTour() {
         <div className="mx-auto mt-5 max-w-6xl text-center">
           <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
           <h2 className="mt-2 font-display text-2xl md:text-4xl">Tour Our Gallery</h2>
-          <p className="mx-auto mt-3 hidden max-w-md font-body text-xs leading-relaxed text-muted-foreground md:block">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship.</p>
+          <p className="mx-auto mt-3 hidden w-full whitespace-nowrap text-center font-body text-xs leading-relaxed text-muted-foreground md:block">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship.</p>
         </div>
       </div>
     </motion.div>
