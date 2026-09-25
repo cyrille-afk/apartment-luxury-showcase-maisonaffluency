@@ -441,10 +441,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showDiningRoomFeaturedPicks || showDiningRoomLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
-                 {showDiningRoomLeftPicks && (
-                   <aside aria-label="Dining Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
-                     {diningRoomLeftPicks.map((pick) => (
+               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${(showFeaturedRightPicks || showFeaturedLeftPicks) ? "md:items-stretch md:gap-6" : ""}`}>
+                 {showFeaturedLeftPicks && (
+                   <aside aria-label="Room featured products" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-r border-border/60 pr-6 md:grid">
+                     {featuredLeftPicks.map((pick) => (
                        <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
                          <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
                          <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
