@@ -1417,16 +1417,6 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
             <span className="font-display text-3xl text-muted-foreground/20">{pick.title.charAt(0)}</span>
           </div>
         )}
-        {!pick.is_trade_only && formatCuratorialEditionLine(pick) && (
-          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-            {formatCuratorialEditionLine(pick)}
-          </p>
-        )}
-        {!pick.is_trade_only && isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder }) && (
-          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-            {ECART_REEDITION_LABEL}
-          </p>
-        )}
         {/* Description overlay on hover — hidden on touch devices so the
             grid stays clean on mobile (mirrors PublicDesignerProfile).
             Mobile users see the description inside the product sheet only. */}
@@ -1457,7 +1447,12 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
 
       </div>
       {/* Info below the card */}
-      <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+        {!pick.is_trade_only && (formatCuratorialEditionLine(pick) || isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder })) && (
+          <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+            {formatCuratorialEditionLine(pick) || ECART_REEDITION_LABEL}
+          </p>
+        )}
+        <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
           <div className="flex min-w-0 flex-1 flex-col text-left">
             {pick.is_trade_only ? (
               <>

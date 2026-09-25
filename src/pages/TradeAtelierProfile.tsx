@@ -728,16 +728,6 @@ const TradeAtelierProfile = () => {
                             />
                           );
                         })()}
-                        {curatorialEditionLine && (
-                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                            {curatorialEditionLine}
-                          </p>
-                        )}
-                        {showReedition && !curatorialEditionLine && (
-                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                            {ECART_REEDITION_LABEL}
-                          </p>
-                        )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             type="button"
@@ -782,7 +772,12 @@ const TradeAtelierProfile = () => {
                           )}
                         </div>
                       </div>
-                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                       {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                         <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+                           {curatorialEditionLine || ECART_REEDITION_LABEL}
+                         </p>
+                       )}
+                        <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
                          <div className="flex min-w-0 flex-1 flex-col text-left">
                           {designerLabel && designerSlug ? (
                             <Link

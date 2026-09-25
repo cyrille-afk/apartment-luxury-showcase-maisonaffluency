@@ -2073,16 +2073,6 @@ const PublicDesignerProfile = () => {
                           alternateClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
                           alternateStyle={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                         />
-                        {curatorialEditionLine && (
-                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                            {curatorialEditionLine}
-                          </p>
-                        )}
-                        {showReedition && !curatorialEditionLine && (
-                          <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                            {ECART_REEDITION_LABEL}
-                          </p>
-                        )}
                         {/* Inventory badges — lower-left of the frame */}
                         <InventoryBadgeStack
                           badges={inventoryBadgesForPick(pick as AttributedCuratorPick)}
@@ -2142,6 +2132,12 @@ const PublicDesignerProfile = () => {
                       </div>
 
 
+                      {/* Edition / Reedition label — isolated below image, clean spacing */}
+                      {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                        <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+                          {curatorialEditionLine || ECART_REEDITION_LABEL}
+                        </p>
+                      )}
                       {/* Editorial text block — designer / product / price hierarchy */}
                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
                         <div className="flex min-w-0 flex-1 flex-col text-left">
