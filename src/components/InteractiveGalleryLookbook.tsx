@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GalleryHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryHorizontal, Play, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -162,9 +162,9 @@ function GalleryTour() {
               variant="default"
               onClick={playImmersively}
               aria-label="Play gallery tour fullscreen with sound"
-              className="absolute left-1/2 top-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 rounded-none border border-background/20 bg-foreground px-8 py-3.5 font-body text-xs font-light uppercase tracking-[0.2em] text-background shadow-none transition-colors duration-300 hover:border-background/40 hover:bg-foreground/90"
+              className="absolute left-1/2 top-1/2 z-10 size-14 -translate-x-1/2 -translate-y-1/2 rounded-none border border-background/20 bg-foreground p-0 text-background shadow-none transition-colors duration-300 hover:border-background/40 hover:bg-foreground/90"
             >
-              Play Video
+              <Play className="size-5 fill-current" strokeWidth={0} aria-hidden="true" />
             </Button>
           )}
         </div>
