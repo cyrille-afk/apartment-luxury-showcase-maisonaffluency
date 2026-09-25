@@ -713,11 +713,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </button>
 
           {/* Upper two-column editorial block — constrained to stay above the fold */}
-          <div className="max-w-6xl mx-auto p-5 md:p-8 w-full flex flex-col">
+          <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-5 md:p-8", contextualPanel && "h-auto max-h-none overflow-visible")}>
             <div className={cn("grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10", !contextualPanel && "md:h-[min(420px,48vh)] md:grid-rows-[1fr]")}>
 
               {/* LEFT COLUMN — standardized hero image container */}
-              <div className="relative w-full md:h-full min-h-0 flex items-center justify-center">
+              <div className={cn("relative flex w-full items-center justify-center", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:h-full")}>
                 {product.image_url ? (
                   <>
                     {!imageLoaded && !imageFailed && (
@@ -737,7 +737,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto md:h-full object-contain transition-opacity duration-300",
+                        "w-full h-auto object-contain transition-opacity duration-300",
+                        !contextualPanel && "md:h-full",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
@@ -805,8 +806,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* RIGHT COLUMN — specs card + CTAs */}
-              <div className={cn("flex w-full flex-col md:pl-10 md:border-l md:border-border/40", !contextualPanel && "md:h-full md:min-h-0 md:overflow-hidden")}>
-                <div className={cn("pr-1", !contextualPanel && "min-h-0 md:flex-1 md:overflow-y-auto")}>
+              <div className={cn("flex w-full flex-col md:border-l md:border-border/40 md:pl-10", contextualPanel ? "h-auto overflow-visible" : "md:h-full md:min-h-0 md:overflow-hidden")}>
+                <div className={cn("pr-1", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:flex-1 md:overflow-y-auto")}>
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
