@@ -382,17 +382,19 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
-  const diningRoomFeaturedPicks = useMemo(
-    () => DINING_ROOM_FEATURED_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks],
+  const roomPickIds = galleryState.kind === "room" ? ROOM_FEATURED_PICK_IDS[space.key] : undefined;
+  const rightPickIds = roomPickIds?.right ?? [];
+  const leftPickIds = roomPickIds?.left ?? [];
+  const featuredRightPicks = useMemo(
+    () => rightPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks, rightPickIds],
   );
-  const diningRoomLeftPicks = useMemo(
-    () => DINING_ROOM_LEFT_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
-    [allPicks],
+  const featuredLeftPicks = useMemo(
+    () => leftPickIds.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks, leftPickIds],
   );
-  const isDiningRoom = galleryState.kind === "room" && space.key === "dining-room";
-  const showDiningRoomFeaturedPicks = isDiningRoom && diningRoomFeaturedPicks.length > 0;
-  const showDiningRoomLeftPicks = isDiningRoom && diningRoomLeftPicks.length > 0;
+  const showFeaturedRightPicks = featuredRightPicks.length > 0;
+  const showFeaturedLeftPicks = featuredLeftPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
