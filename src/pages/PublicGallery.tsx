@@ -6,12 +6,15 @@ import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
+import Gallery from "@/components/Gallery";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // BackToTopButton removed — the floating quick-actions panel now provides
 // Back-to-Top alongside All Categories, A–Z, and WhatsApp on mobile/PWA.
 
 const PublicGallery = () => {
+  const isMobile = useIsMobile();
   // iOS Safari runs with viewport-fit=cover, so the fixed nav is 96px + the
   // status-bar inset — taller than the static --header-h constant. Measure the
   // real nav height so the interlude never tucks under the header.
@@ -70,7 +73,7 @@ const PublicGallery = () => {
           className="pt-[var(--header-h)]"
           style={headerOffset ? { paddingTop: headerOffset } : undefined}
         >
-          <InteractiveGalleryLookbook />
+          {isMobile ? <Gallery /> : <InteractiveGalleryLookbook />}
         </div>
 
         <Footer />
