@@ -49,7 +49,7 @@ function parseDeepLink(hash: string) {
  * Tracked section IDs for scroll-based hash updates.
  * Order matters — later sections win when multiple are visible.
  */
-const TRACKED_SECTIONS = ["home", "overview", "gallery"] as const;
+const TRACKED_SECTIONS = ["home", "gallery"] as const;
 
 type IdleWindow = Window & {
   scheduler?: {
@@ -468,7 +468,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             {!routeIsCategory && (
               <LazyOnVisible id="gallery" className="home-deferred-section scroll-header-offset bg-background" minHeight="100vh" rootMargin="400px 0px">
                 <Suspense fallback={<SectionFallback />}>
-                  <InteractiveGalleryLookbook />
+                  <InteractiveGalleryLookbook initialView="living-room" />
                 </Suspense>
               </LazyOnVisible>
             )}
