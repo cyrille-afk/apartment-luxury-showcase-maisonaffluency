@@ -68,11 +68,8 @@ const SPACES: Space[] = [
 const large = (id: string) => cloudinaryUrl(id, { width: 1920, quality: "auto:good" });
 const thumb = (id: string) => cloudinaryUrl(id, { width: 320, height: 220, crop: "fill", gravity: "auto", quality: "auto" });
 const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-const createGalleryPages = (space: Space): GalleryPage[] => [
-  { scenes: [space.scenes[0]], title: space.scenes[0].title },
-  { scenes: space.scenes.slice(1, 3), title: space.scenes.slice(1, 3).map((scene) => scene.title).join(" · ") },
-  { scenes: [space.scenes[3]], title: space.scenes[3].title },
-];
+const createGalleryPages = (space: Space): GalleryPage[] =>
+  space.scenes.map((scene) => ({ scenes: [scene], title: scene.title }));
 
 type Hotspot = {
   id: string;
@@ -336,7 +333,7 @@ export default function InteractiveGalleryLookbook() {
   };
   const selectScene = (spaceIndex: number, sceneIndex: number) => {
     setGalleryState({ kind: "room", spaceIndex });
-    setSceneIdx(sceneIndex === 0 ? 0 : sceneIndex === 3 ? 2 : 1);
+    setSceneIdx(sceneIndex);
     setActivePin(null);
     setLightboxProduct(null);
   };
@@ -381,7 +378,7 @@ export default function InteractiveGalleryLookbook() {
                   contextualPanel
                 />
               )}
-              <div className={`relative w-full overflow-hidden ${activePage.scenes.length === 2 ? "grid grid-cols-2 items-center gap-2 bg-muted/20 p-2 md:h-[55vh] md:max-h-[500px] md:gap-4 md:p-4" : sceneIdx === 2 ? "flex items-center justify-center bg-muted/20 p-2 md:h-[55vh] md:max-h-[500px] md:p-4" : ""}`}>
+              <div className="relative flex w-full items-center justify-center overflow-hidden bg-transparent">
                 <AnimatePresence mode="wait">
                   {activePage.scenes.map((pageScene) => (
                     <motion.div
@@ -390,12 +387,12 @@ export default function InteractiveGalleryLookbook() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.45 }}
-                      className={activePage.scenes.length === 1 && sceneIdx === 0 ? "relative w-full" : "relative mx-auto aspect-[3/4] h-auto w-full max-w-full overflow-hidden md:h-full md:w-auto"}
+                      className="relative mx-auto w-fit max-w-full overflow-hidden bg-transparent"
                     >
                       <img
                         src={large(pageScene.id)}
                         alt={`${space.label} — ${pageScene.title}`}
-                        className={activePage.scenes.length === 1 && sceneIdx === 0 ? "block h-auto w-full object-contain" : "absolute inset-0 block size-full object-contain"}
+                        className="block h-auto max-h-[60vh] w-auto max-w-full object-contain"
                       />
                       {hotspotsForScene(pageScene).map((hotspot) => (
                         <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
@@ -450,8 +447,7 @@ export default function InteractiveGalleryLookbook() {
               {SPACES.map((room, spaceIndex) => (
                 <div key={room.key} className="flex shrink-0 gap-2">
                   {room.scenes.map((roomScene, sceneIndex) => {
-                    const pageIndex = sceneIndex === 0 ? 0 : sceneIndex === 3 ? 2 : 1;
-                    const active = spaceIndex === roomSpaceIndex && pageIndex === sceneIdx;
+                    const active = spaceIndex === roomSpaceIndex && sceneIndex === sceneIdx;
                     return (
                       <Button key={roomScene.id} type="button" variant="ghost" onClick={() => selectScene(spaceIndex, sceneIndex)} aria-label={`${room.label}: ${roomScene.title}`} className="h-auto shrink-0 flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
                         <img src={thumb(roomScene.id)} alt="" loading="lazy" className={`h-20 w-32 object-cover transition ${active ? "ring-2 ring-foreground" : "opacity-70 hover:opacity-100"}`} />
