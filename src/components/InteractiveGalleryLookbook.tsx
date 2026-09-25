@@ -376,7 +376,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     () => DINING_ROOM_FEATURED_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
     [allPicks],
   );
-  const showDiningRoomFeaturedPicks = galleryState.kind === "room" && space.key === "dining-room" && diningRoomFeaturedPicks.length > 0;
+  const diningRoomLeftPicks = useMemo(
+    () => DINING_ROOM_LEFT_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks],
+  );
+  const isDiningRoom = galleryState.kind === "room" && space.key === "dining-room";
+  const showDiningRoomFeaturedPicks = isDiningRoom && diningRoomFeaturedPicks.length > 0;
+  const showDiningRoomLeftPicks = isDiningRoom && diningRoomLeftPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
