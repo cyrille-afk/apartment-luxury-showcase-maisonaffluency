@@ -383,7 +383,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-            <div className={`relative mx-auto max-w-full ${activeSceneIsPortrait ? "w-full border-x border-border/40" : "w-fit"}`}>
+             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : "md:w-fit"}`}>
               <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
@@ -416,7 +416,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.45 }}
-                      className="relative mx-auto w-fit max-w-full overflow-hidden bg-transparent"
+                       className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                     >
                       <img
                         src={large(pageScene.id)}
@@ -430,10 +430,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                              return next;
                            });
                          }}
-                        className="block h-auto max-h-[60vh] w-auto max-w-full object-contain"
+                         className="block h-auto w-full object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
                       />
                       {hotspotsForScene(pageScene).map((hotspot) => (
-                        <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+                         <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                           <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
                             <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
                             <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
