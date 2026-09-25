@@ -39,4 +39,4 @@
 - [x] Remove Roman Frankel from the Made in Kira name in the Designer Editor.
 - [x] Show each desktop gallery photo's hotspot product images as clickable picks on the matching side; preserve mobile gallery and existing curated selections.
 - [x] Add black rectangular midpoint chevrons beside desktop gallery photos to move through photos and adjacent rooms.
-- [ ] Hide side product photos on the first gallery photo only and restore vertical side stacks across rooms.
+- [x] Hide side product photos on the first gallery photo only and restore vertical side stacks across rooms.

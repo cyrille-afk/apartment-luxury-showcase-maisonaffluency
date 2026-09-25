@@ -98,6 +98,14 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
   "A Masterful Suite:Bud Table Lamp": "right",
 };
+const CURATED_SIDE_PICK_ORDER = [
+  "A Dreamy Tuscan Landscape:Astra Dining Table",
+  "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian",
+  "A Sophisticated Boudoir:Lyric Desk",
+  "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian",
+  "A Masterful Suite:Villa Pedestal",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover",
+];
 
 type Hotspot = {
   id: string;
@@ -414,8 +422,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     })
     .filter((pick): pick is ScenePick => pick !== null) : [];
   const sideForPick = ({ hotspot }: ScenePick) => SIDE_PICK_OVERRIDES[`${hotspot.image_identifier}:${hotspot.product_name}`] || (hotspot.x_percent < 50 ? "left" : "right");
-  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
-  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const sortSidePicks = (a: ScenePick, b: ScenePick) => {
+    const position = ({ hotspot }: ScenePick) => CURATED_SIDE_PICK_ORDER.indexOf(`${hotspot.image_identifier}:${hotspot.product_name}`);
+    const aOrder = position(a);
+    const bOrder = position(b);
+    if (aOrder !== -1 || bOrder !== -1) return (aOrder === -1 ? Infinity : aOrder) - (bOrder === -1 ? Infinity : bOrder);
+    return a.hotspot.y_percent - b.hotspot.y_percent;
+  };
+  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort(sortSidePicks);
+  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
