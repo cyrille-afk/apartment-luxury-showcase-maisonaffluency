@@ -289,16 +289,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   primaryClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
                   alternateClassName="!h-full !w-full !max-h-full !max-w-full !object-contain object-center mix-blend-multiply !p-6"
                 />
-                {formatCuratorialEditionLine(pick) && (
-                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                    {formatCuratorialEditionLine(pick)}
-                  </p>
-                )}
-                {showReedition && (
-                  <p className="pointer-events-none absolute left-6 top-4 z-10 bg-transparent text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                    {ECART_REEDITION_LABEL}
-                  </p>
-                )}
                 {/* Inventory badges — lower-left of the frame */}
                 <InventoryBadgeStack
                   badges={inventoryBadgesForPick(pick)}
