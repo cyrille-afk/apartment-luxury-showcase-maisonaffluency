@@ -179,15 +179,18 @@ function GalleryTour() {
 
 function CuratorsCanvas() {
   return (
-    <motion.div key="curators" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto min-h-[68vh] max-w-[1400px] px-6 py-12 md:px-12 md:py-16">
-      <div className="grid gap-12 md:grid-cols-2 md:gap-16">
+    <motion.div key="curators" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto min-h-[68vh] w-full max-w-[1280px] px-4 py-10 md:px-0 md:py-14">
+      <div className="mx-auto grid w-full max-w-[1040px] gap-6 md:grid-cols-2 md:gap-8">
         {curatingTeam.map((member, index) => (
-          <motion.article key={member.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="grid gap-6 sm:grid-cols-[minmax(180px,0.8fr)_1.2fr] sm:items-start">
-            <img src={member.image} alt={member.name} className="aspect-[4/5] w-full object-cover" />
-            <div className="border-t border-border pt-5">
-              <h3 className="font-display text-2xl">{member.name}</h3>
-              <p className="mt-2 font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{member.role}</p>
-              <p className="mt-6 font-body text-sm leading-7 text-muted-foreground">{member.bio}</p>
+          <motion.article key={member.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="border border-border/60 bg-card p-5 md:p-7">
+            <img src={member.image} alt={member.name} className="aspect-[4/5] w-full object-cover object-top" />
+            <div className="border-t border-border/60 pt-6">
+              <div className="flex items-center gap-3">
+                <h3 className="font-display text-2xl font-light leading-none text-foreground md:text-3xl">{member.name}</h3>
+                <span role="img" aria-label="French founder" className="text-base leading-none">🇫🇷</span>
+              </div>
+              <p className="mt-3 font-body text-[10px] font-light uppercase tracking-[0.2em] text-muted-foreground">{member.role}</p>
+              <p className="mt-6 max-w-[46ch] font-body text-sm font-light leading-relaxed text-muted-foreground">{member.bio}</p>
             </div>
           </motion.article>
         ))}
