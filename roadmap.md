@@ -38,3 +38,4 @@
 - [x] Add Master Suite featured curator picks (Villa Pedestal, Brunelleschi, Bud Table Lamp) beside the gallery image, desktop only.
 - [x] Remove Roman Frankel from the Made in Kira name in the Designer Editor.
 - [x] Show each desktop gallery photo's hotspot product images as clickable picks on the matching side; preserve mobile gallery and existing curated selections.
+- [ ] Add black rectangular midpoint chevrons beside desktop gallery photos to move through photos and adjacent rooms.
