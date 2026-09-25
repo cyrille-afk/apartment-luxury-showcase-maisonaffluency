@@ -37,3 +37,4 @@
 - [x] Add Lyric Desk Walnut (Atelier BdM) and PéPé Dining Chair (Hamrei) curator picks to the left of the Boudoir gallery image on desktop only.
 - Add Master Suite featured curator picks (Villa Pedestal, Brunelleschi, Bud Table Lamp) beside the gallery image, desktop only.
 - [x] Remove Roman Frankel from the Made in Kira name in the Designer Editor.
+- [ ] Show each desktop gallery photo's hotspot product images as clickable picks on the matching side; preserve mobile gallery and existing curated selections.
