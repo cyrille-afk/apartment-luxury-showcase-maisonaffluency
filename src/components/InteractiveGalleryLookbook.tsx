@@ -71,6 +71,11 @@ const normalize = (value: string) => value.toLowerCase().normalize("NFD").replac
 const createGalleryPages = (space: Space): GalleryPage[] =>
   space.scenes.map((scene) => ({ scenes: [scene], title: scene.title }));
 
+const DINING_ROOM_FEATURED_PICK_IDS = [
+  "4b46af75-4c35-4a81-bea6-822810ae3422",
+  "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b",
+];
+
 type Hotspot = {
   id: string;
   image_identifier: string;
@@ -361,6 +366,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
+  const diningRoomFeaturedPicks = useMemo(
+    () => DINING_ROOM_FEATURED_PICK_IDS.map((id) => allPicks.find((pick) => pick.id === id)).filter((pick): pick is PublicLightboxItem => Boolean(pick)),
+    [allPicks],
+  );
+  const showDiningRoomFeaturedPicks = galleryState.kind === "room" && space.key === "dining-room" && diningRoomFeaturedPicks.length > 0;
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
@@ -383,7 +393,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
-             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : "md:w-fit"}`}>
+             <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : showDiningRoomFeaturedPicks ? "md:w-full" : "md:w-fit"}`}>
               <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
@@ -407,42 +417,55 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-              <div className="relative flex w-full items-center justify-center overflow-hidden bg-background">
-                <AnimatePresence mode="wait">
-                  {activePage.scenes.map((pageScene) => (
-                    <motion.div
-                      key={pageScene.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.45 }}
-                       className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
-                    >
-                      <img
-                        src={large(pageScene.id)}
-                        alt={`${space.label} — ${pageScene.title}`}
-                         onLoad={(event) => {
-                           if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
-                           setPortraitSceneIds((current) => {
-                             if (current.has(pageScene.id)) return current;
-                             const next = new Set(current);
-                             next.add(pageScene.id);
-                             return next;
-                           });
-                         }}
-                         className="block h-auto w-full object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
-                      />
-                      {hotspotsForScene(pageScene).map((hotspot) => (
-                         <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-                          <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
-                            <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                            <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-                          </span>
-                        </Button>
-                      ))}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${showDiningRoomFeaturedPicks ? "md:items-stretch md:gap-6" : ""}`}>
+                 <div className="flex min-w-0 flex-1 items-center justify-center">
+                   <AnimatePresence mode="wait">
+                     {activePage.scenes.map((pageScene) => (
+                       <motion.div
+                         key={pageScene.id}
+                         initial={{ opacity: 0 }}
+                         animate={{ opacity: 1 }}
+                         exit={{ opacity: 0 }}
+                         transition={{ duration: 0.45 }}
+                         className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
+                       >
+                         <img
+                           src={large(pageScene.id)}
+                           alt={`${space.label} — ${pageScene.title}`}
+                           onLoad={(event) => {
+                             if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
+                             setPortraitSceneIds((current) => {
+                               if (current.has(pageScene.id)) return current;
+                               const next = new Set(current);
+                               next.add(pageScene.id);
+                               return next;
+                             });
+                           }}
+                           className="block h-auto w-full object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
+                         />
+                         {hotspotsForScene(pageScene).map((hotspot) => (
+                           <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+                             <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
+                               <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                               <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+                             </span>
+                           </Button>
+                         ))}
+                       </motion.div>
+                     ))}
+                   </AnimatePresence>
+                 </div>
+                 {showDiningRoomFeaturedPicks && (
+                   <aside aria-label="Dining Room curator picks" className="hidden w-56 shrink-0 grid-cols-1 content-center gap-6 border-l border-border/60 pl-6 md:grid">
+                     {diningRoomFeaturedPicks.map((pick) => (
+                       <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} className="h-auto w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
+                         <img src={pick.image_url} alt={pick.title} className="aspect-[4/3] w-full object-contain" />
+                         <span className="mt-3 block font-display text-base font-light leading-tight text-foreground">{pick.title}</span>
+                         <span className="mt-1 block font-body text-[10px] font-light uppercase tracking-[0.18em] text-muted-foreground">{pick.brand_name}</span>
+                       </Button>
+                     ))}
+                   </aside>
+                 )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
