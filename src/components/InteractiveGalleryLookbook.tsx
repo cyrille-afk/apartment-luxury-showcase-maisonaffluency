@@ -76,6 +76,12 @@ const DINING_ROOM_FEATURED_PICK_IDS = [
   "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b",
 ];
 
+// Curator picks shown to the LEFT of the Dining Room gallery image (desktop only)
+const DINING_ROOM_LEFT_PICK_IDS = [
+  "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
+  "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
+];
+
 type Hotspot = {
   id: string;
   image_identifier: string;
