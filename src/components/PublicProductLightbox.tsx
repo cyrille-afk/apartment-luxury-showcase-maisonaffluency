@@ -1030,7 +1030,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
                     Historical Provenance
                   </p>
-                  <p className="font-body text-sm leading-[1.75] text-foreground/85">
+                  <p className="font-body text-xs leading-normal text-foreground/85">
                     {curatorNotes.provenance}
                   </p>
                 </div>
