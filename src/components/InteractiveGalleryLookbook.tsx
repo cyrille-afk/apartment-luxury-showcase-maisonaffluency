@@ -168,11 +168,11 @@ export default function InteractiveGalleryLookbook() {
             variant="secondary"
             aria-label="Open scene carousel"
             onClick={() => setDrawerOpen((v) => !v)}
-            className="absolute left-4 top-4 rounded-full bg-background/85 backdrop-blur"
+            className="absolute left-4 top-4 z-20 rounded-full bg-background/85 backdrop-blur"
           >
             <GalleryHorizontal className="size-4" />
           </Button>
-          <button type="button" aria-label="Previous scene" onClick={() => step(-1)} className="absolute left-0 top-0 flex h-full w-16 items-center justify-center text-background/90 hover:text-background">
+          <button type="button" aria-label="Previous scene" onClick={() => step(-1)} className="absolute left-0 top-16 bottom-0 flex w-16 items-center justify-center text-background/90 hover:text-background">
             <ChevronLeft className="size-9 drop-shadow" strokeWidth={1.2} />
           </button>
           <button type="button" aria-label="Next scene" onClick={() => step(1)} className="absolute right-0 top-0 flex h-full w-16 items-center justify-center text-background/90 hover:text-background">
