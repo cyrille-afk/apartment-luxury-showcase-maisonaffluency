@@ -402,7 +402,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
-      const image = hotspot.product_image_url || product?.image_url;
+      const image = product?.id.startsWith("hotspot-") ? hotspot.product_image_url : product?.image_url || hotspot.product_image_url;
       return product && image ? { hotspot, product, image } : null;
     })
     .filter((pick): pick is ScenePick => pick !== null) : [];
