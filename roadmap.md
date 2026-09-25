@@ -1,6 +1,7 @@
 # Roadmap
 
-- [x] Restore the second Living Room photo's top alignment and remove its Vintage Lounge Chair hotspot and side photo.
+- [x] Restore the Vintage Lounge Chair hotspot on mobile while hiding it only from the matching desktop scene.
+- [x] Top-align Living Room photos 2–4 on desktop.
 - [x] Replace room product-grid landing with editorial lookbook.
 - [x] Add the nine-room navigation ribbon.
 - [x] Add room-specific imagery, arrows, counters, and keyboard navigation.

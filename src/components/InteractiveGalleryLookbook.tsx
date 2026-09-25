@@ -73,6 +73,7 @@ const createGalleryPages = (space: Space): GalleryPage[] =>
 
 // Keep the explicitly selected blue Toshiro finish when its Boudoir hotspot is shown.
 const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
+  "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003": "0302a3b6-1ebf-4c57-8886-935bc48f9dfd",
   "A Dreamy Tuscan Landscape:Astra Dining Table": "3b6f6177-adfa-4f23-8cf7-75396028fe95",
   "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "4b46af75-4c35-4a81-bea6-822810ae3422",
   "A Sophisticated Boudoir:Toshiro Lamp": "294326f2-a7a0-4447-8b50-f3bde7de2cc5",
@@ -83,7 +84,10 @@ const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
   "A Masterful Suite:Bud Table Lamp": "da524883-8938-441a-b902-f12deb378ca7",
 };
 // The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
-const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set(["A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier"]);
+const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set([
+  "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003",
+  "A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier",
+]);
 // Honor the previously curated placements on the first photo of these rooms.
 const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Dreamy Tuscan Landscape:Astra Dining Table": "left",
@@ -490,7 +494,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                        <div className="grid grid-cols-1 content-center gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                  <div className={`flex min-w-0 flex-1 justify-center ${roomSpaceIndex === 0 && sceneIdx === 1 ? "items-start" : "items-center"}`}>
+                  <div className={`flex min-w-0 flex-1 justify-center ${roomSpaceIndex === 0 && sceneIdx > 0 ? "items-start" : "items-center"}`}>
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
                        <motion.div
@@ -515,7 +519,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                            }}
                            className="block h-auto w-full object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
                          />
-                         {hotspotsForScene(pageScene).map((hotspot) => (
+                          {hotspotsForScene(pageScene).filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`)).map((hotspot) => (
                            <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
                                <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
