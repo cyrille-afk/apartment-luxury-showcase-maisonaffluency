@@ -344,9 +344,9 @@ export default function InteractiveGalleryLookbook() {
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-24 text-foreground">
       <nav aria-label="Gallery timeline" className="border-b border-border">
-        <div className="mx-auto flex min-h-14 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:min-h-12 md:justify-center md:gap-9 md:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1580px] snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:min-h-10 md:justify-center md:gap-9 md:px-6">
           {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-14 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] md:h-12 ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-14 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] md:h-10 ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
             </Button>
           ))}
@@ -355,8 +355,8 @@ export default function InteractiveGalleryLookbook() {
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] pt-1 md:px-10 md:pt-0">
-            <div className="relative w-full overflow-hidden">
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] md:px-10">
+            <div className="relative w-full">
               {lightboxProduct && (
                 <PublicProductLightbox
                   product={lightboxProduct}
@@ -367,7 +367,7 @@ export default function InteractiveGalleryLookbook() {
                   contextualPanel
                 />
               )}
-              <div className="relative w-full">
+              <div className="relative w-full overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full object-contain" />
                 </AnimatePresence>
@@ -379,6 +379,14 @@ export default function InteractiveGalleryLookbook() {
                     </span>
                   </Button>
                 ))}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
+                  {space.scenes.map((roomScene, index) => (
+                    <span key={roomScene.id} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
+                  ))}
+                </div>
+                <span className="pointer-events-none absolute bottom-3 right-4 z-20 font-body text-[10px] tracking-[0.22em] text-background drop-shadow-md">
+                  {String(sceneIdx + 1).padStart(2, "0")} / {String(space.scenes.length).padStart(2, "0")}
+                </span>
               </div>
 
               <Button type="button" size="icon" variant="secondary" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute right-4 top-4 z-20 rounded-full bg-background/85 backdrop-blur">
@@ -392,9 +400,8 @@ export default function InteractiveGalleryLookbook() {
               </Button>
             </div>
 
-            <div className="relative mx-auto mt-3 max-w-3xl px-12 pb-24 text-center md:mt-2 md:pb-24">
+            <div className="relative mx-auto mt-2 max-w-3xl px-12 pb-24 text-center md:mt-1 md:pb-24">
               <h2 className="font-display text-2xl md:text-3xl">{scene.title}</h2>
-              <span className="absolute right-0 top-1/2 -translate-y-1/2 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
             </div>
           </motion.div>
         )}

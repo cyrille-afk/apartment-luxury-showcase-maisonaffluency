@@ -21,7 +21,7 @@ const PublicGallery = () => {
     const measure = () => {
       const nav = document.querySelector("nav");
       const h = nav?.getBoundingClientRect().height;
-      if (h) setHeaderOffset(Math.ceil(h + 12));
+      if (h) setHeaderOffset(Math.ceil(h));
     };
     measure();
     const raf = requestAnimationFrame(measure);
