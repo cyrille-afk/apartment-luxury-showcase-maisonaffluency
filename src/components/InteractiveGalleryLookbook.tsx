@@ -98,6 +98,14 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
   "A Masterful Suite:Bud Table Lamp": "right",
 };
+const CURATED_SIDE_PICK_ORDER = [
+  "A Dreamy Tuscan Landscape:Astra Dining Table",
+  "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian",
+  "A Sophisticated Boudoir:Lyric Desk",
+  "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian",
+  "A Masterful Suite:Villa Pedestal",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover",
+];
 
 type Hotspot = {
   id: string;
@@ -405,7 +413,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
-  const scenePicks = activeScene ? hotspotsForScene(activeScene)
+  const scenePicks = activeScene && !(roomSpaceIndex === 0 && sceneIdx === 0) ? hotspotsForScene(activeScene)
     .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
@@ -414,8 +422,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     })
     .filter((pick): pick is ScenePick => pick !== null) : [];
   const sideForPick = ({ hotspot }: ScenePick) => SIDE_PICK_OVERRIDES[`${hotspot.image_identifier}:${hotspot.product_name}`] || (hotspot.x_percent < 50 ? "left" : "right");
-  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
-  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort((a, b) => a.hotspot.x_percent - b.hotspot.x_percent);
+  const sortSidePicks = (a: ScenePick, b: ScenePick) => {
+    const position = ({ hotspot }: ScenePick) => CURATED_SIDE_PICK_ORDER.indexOf(`${hotspot.image_identifier}:${hotspot.product_name}`);
+    const aOrder = position(a);
+    const bOrder = position(b);
+    if (aOrder !== -1 || bOrder !== -1) return (aOrder === -1 ? Infinity : aOrder) - (bOrder === -1 ? Infinity : bOrder);
+    return a.hotspot.y_percent - b.hotspot.y_percent;
+  };
+  const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort(sortSidePicks);
+  const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
@@ -474,7 +489,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                   {hasScenePicks && (
                     <aside aria-label="Products on the left of this photo" className="hidden w-40 shrink-0 content-center border-r border-border/60 pr-2 md:grid lg:w-52 lg:pr-4 xl:w-56 xl:pr-6">
-                      <div className="grid grid-cols-2 content-center gap-x-2 gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
+                       <div className="grid grid-cols-1 content-center gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
                  <div className="flex min-w-0 flex-1 items-center justify-center">
@@ -522,7 +537,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                  </div>
                   {hasScenePicks && (
                     <aside aria-label="Products on the right of this photo" className="hidden w-40 shrink-0 content-center border-l border-border/60 pl-2 md:grid lg:w-52 lg:pl-4 xl:w-56 xl:pl-6">
-                      <div className="grid grid-cols-2 content-center gap-x-2 gap-y-4">{featuredRightPicks.map(renderScenePick)}</div>
+                       <div className="grid grid-cols-1 content-center gap-y-4">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
