@@ -27,3 +27,4 @@
 - [x] Match the gallery utility ribbon to the photo width with microtype, counter-first ordering, and no chevrons.
 - [x] Float the privacy notice as muted text and place the Tour introduction above the video.
 - [x] Rebuild The Curators as two balanced editorial founder profiles with French identity markers.
+- [x] Increase the gallery utility ribbon typography and rebalance its vertical spacing.

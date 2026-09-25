@@ -382,12 +382,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
             <div className={`relative mx-auto max-w-full ${activeSceneIsPortrait ? "w-full" : "w-fit"}`}>
-              <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-2 md:px-0">
-                <span className="font-body text-[10px] font-light uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
+                <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
                 </span>
                 <div className="flex items-center gap-3">
-                  <span className="font-body text-[10px] font-light uppercase tracking-[0.2em] text-muted-foreground">
+                  <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                     {sceneIdx + 1} / {galleryPages.length}
                   </span>
                   <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-7 rounded-none p-0 text-muted-foreground hover:bg-muted hover:text-foreground">
