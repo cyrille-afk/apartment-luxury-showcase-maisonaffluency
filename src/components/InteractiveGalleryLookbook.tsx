@@ -151,7 +151,7 @@ function GalleryTour() {
             ref={videoRef}
             controls
             playsInline
-            preload="metadata"
+            preload="none"
             poster={large("bespoke-sofa_gxidtx")}
             onClick={() => {
               if (videoRef.current?.paused) playImmersively();
