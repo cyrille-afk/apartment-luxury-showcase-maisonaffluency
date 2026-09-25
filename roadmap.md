@@ -30,3 +30,4 @@
 - [x] Increase the gallery utility ribbon typography and rebalance its vertical spacing.
 - [x] Replace portrait gallery side fills with a seamless architectural ruled canvas while preserving hotspot coordinates.
 - [x] Restore the original mobile gallery experience with its scene accordion, swipeable images, and product hotspots on the homepage and gallery page; keep desktop on the new lookbook.
+- [x] Point both Singapore Gallery Preview buttons to the gallery page instead of retired landing-page sections.
