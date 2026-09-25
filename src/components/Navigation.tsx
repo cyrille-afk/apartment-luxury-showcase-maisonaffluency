@@ -1041,8 +1041,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex items-stretch overflow-hidden">
-                        <div className="w-1/2 shrink-0 border-r border-border/60 px-8 py-8">
+                      <div className="flex min-h-72 items-stretch overflow-hidden">
+                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-8 py-8">
                           {roomNavigation.living.map((item, index) => (
                             <Button
                               key={item.label}
@@ -1077,7 +1077,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           </Button>
                         </div>
 
-                        <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
+                        <div data-room-submenu className="relative min-h-full w-1/2 shrink-0 overflow-hidden">
                           <div
                             className={cn(
                               "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
@@ -1144,8 +1144,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="flex items-stretch overflow-hidden">
-                        <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
+                      <div className="flex min-h-72 items-stretch overflow-hidden">
+                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                           {roomNavigation[room].map((item, index) => (
                             <Button
                               key={item.label}
@@ -1156,7 +1156,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               onFocus={() => setActiveRoomCategory(index)}
                               onClick={() => navigateFromMegaMenu(item.category)}
                               className={cn(
-                                "flex h-8 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                "flex w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
+                                roomNavigation[room].length <= 4 ? "h-14" : "h-8",
                                 activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
                               )}
                             >
@@ -1182,7 +1183,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           )}
                         </div>
 
-                        <div data-room-submenu className="relative w-1/2 shrink-0 overflow-hidden">
+                        <div data-room-submenu className="relative min-h-full w-1/2 shrink-0 overflow-hidden">
                           <div
                             className={cn(
                               "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
