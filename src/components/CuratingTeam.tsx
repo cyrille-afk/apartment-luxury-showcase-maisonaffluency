@@ -10,7 +10,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 const cyrilleDelvalImg = cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 800, quality: "auto", crop: "fill" });
 const elsaLemarignierImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 800, quality: "auto", crop: "fill" });
 
-const curatingTeam = [
+export const curatingTeam = [
   {
     id: 1,
     name: "Cyrille Delval",
