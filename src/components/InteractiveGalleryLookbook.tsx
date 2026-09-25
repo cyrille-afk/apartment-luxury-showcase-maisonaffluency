@@ -86,7 +86,7 @@ const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[]
   },
   "boudoir": {
     right: [
-      "258ad1fe-ae9d-4574-8448-b89e735ed6c7", // Custom Saint-Just Glass Chandelier — Nathalie Ziegler
+      "294326f2-a7a0-4447-8b50-f3bde7de2cc5", // Toshiro Table Lamp in Blue — Made in Kira
       "cd18f654-d48f-4b86-80a0-62e10255b581", // Gold Leaves+Glass Snake Vessel — Nathalie Ziegler
     ],
     left: [
