@@ -71,16 +71,26 @@ const normalize = (value: string) => value.toLowerCase().normalize("NFD").replac
 const createGalleryPages = (space: Space): GalleryPage[] =>
   space.scenes.map((scene) => ({ scenes: [scene], title: scene.title }));
 
-const DINING_ROOM_FEATURED_PICK_IDS = [
-  "4b46af75-4c35-4a81-bea6-822810ae3422",
-  "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b",
-];
-
-// Curator picks shown to the LEFT of the Dining Room gallery image (desktop only)
-const DINING_ROOM_LEFT_PICK_IDS = [
-  "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
-  "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
-];
+// Curator picks shown beside specific room gallery images (desktop only)
+// key = room key, value = { right?: pick IDs, left?: pick IDs }
+const ROOM_FEATURED_PICK_IDS: Record<string, { right?: string[]; left?: string[] }> = {
+  "dining-room": {
+    right: [
+      "4b46af75-4c35-4a81-bea6-822810ae3422", // Cloud Filigrane — JMW
+      "064c17bb-b2da-4b5f-88e7-af9c1c4f4f6b", // Volume 3 Blue — Milan Pekar
+    ],
+    left: [
+      "3b6f6177-adfa-4f23-8cf7-75396028fe95", // Astra Dining Table — Pendhapa
+      "9030bcbd-c452-43b7-9562-b951f5fdf151", // PéPé Dining Chair — Hamrei
+    ],
+  },
+  "boudoir": {
+    right: [
+      "258ad1fe-ae9d-4574-8448-b89e735ed6c7", // Custom Saint-Just Glass Chandelier — Nathalie Ziegler
+      "cd18f654-d48f-4b86-80a0-62e10255b581", // Gold Leaves+Glass Snake Vessel — Nathalie Ziegler
+    ],
+  },
+};
 
 type Hotspot = {
   id: string;
