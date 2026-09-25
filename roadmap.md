@@ -32,3 +32,4 @@
 - [x] Restore the original mobile gallery experience with its scene accordion, swipeable images, and product hotspots on the homepage and gallery page; keep desktop on the new lookbook.
 - [x] Point both Singapore Gallery Preview buttons to the gallery page instead of retired landing-page sections.
 - [x] Add Cloud Filigrane and Volume 3 Blue curator picks beside the Dining Room gallery image on desktop only.
+- [x] Add Astra Dining Table and PéPé Dining Chair curator picks to the left of the Dining Room gallery image on desktop only.
