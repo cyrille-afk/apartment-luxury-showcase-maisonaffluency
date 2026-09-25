@@ -1,0 +1,1 @@
+- Render the original `Gallery` experience on mobile for both the homepage and `/gallery`, while desktop uses `InteractiveGalleryLookbook`; this preserves the earlier mobile accordion, swipe gallery, and hotspot interactions without changing the desktop lookbook.
