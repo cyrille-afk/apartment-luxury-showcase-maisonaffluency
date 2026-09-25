@@ -30,3 +30,4 @@
 - [x] Increase the gallery utility ribbon typography and rebalance its vertical spacing.
 - [x] Replace portrait gallery side fills with a seamless architectural ruled canvas while preserving hotspot coordinates.
 - [x] Transform portrait gallery scenes into a three-column editorial product spread with four mapped products.
+- [x] Strip portrait spread product containers and use dynamic aspect ratios with airy spacing.
