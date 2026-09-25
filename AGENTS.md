@@ -2,3 +2,4 @@
 - Derive desktop lookbook side picks from each photo's `gallery_hotspots` coordinates and resolve details against the public catalog with image-only fallback; this keeps slide picks synchronized with their visible objects without exposing trade-only catalog entries.
 - Desktop gallery chevrons traverse all four photos before moving to the next/previous room, wrapping across the seven rooms; this provides uninterrupted photo navigation while leaving the mobile accordion untouched.
 - Only the first Living Room photo hides desktop side product picks; all other photos keep vertical one-column picks, with explicitly curated first-scene order preserved, so the gallery entrance stays clean without changing hotspot pins.
+- Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
