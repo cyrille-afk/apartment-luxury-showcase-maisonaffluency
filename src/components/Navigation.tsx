@@ -88,7 +88,7 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
 };
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
-  dining: [{ label: "Dining", slug: "dining" }],
+  dining: [{ label: "Dining", slug: "dining-room" }],
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
 

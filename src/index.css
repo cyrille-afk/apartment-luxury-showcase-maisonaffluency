@@ -83,6 +83,11 @@ All colors MUST be HSL.
     --product-canvas-dark: 0 0% 10.2%;
     --warm-gray: 32 10% 50%;
     --spec-dimension-icon: 207 24% 68%;
+    --lookbook-bg: 0 0% 4%;
+    --lookbook-foreground: 32 20% 97%;
+    --lookbook-muted: 30 8% 72%;
+    --lookbook-border: 32 10% 82% / 0.28;
+    --lookbook-overlay: linear-gradient(180deg, hsl(0 0% 0% / 0.42) 0%, hsl(0 0% 0% / 0.08) 42%, hsl(0 0% 0% / 0.62) 100%);
 
     /* Brand / third-party colors */
     --whatsapp: 142 70% 49%;
@@ -175,6 +180,11 @@ All colors MUST be HSL.
     --chip-material-border: 60 8% 88.8%;
     --suggestion-material: 60 10% 70%;
     --spec-dimension-icon: 207 24% 68%;
+    --lookbook-bg: 0 0% 4%;
+    --lookbook-foreground: 32 20% 97%;
+    --lookbook-muted: 30 8% 72%;
+    --lookbook-border: 32 10% 82% / 0.28;
+    --lookbook-overlay: linear-gradient(180deg, hsl(0 0% 0% / 0.42) 0%, hsl(0 0% 0% / 0.08) 42%, hsl(0 0% 0% / 0.62) 100%);
 
     --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);
     --gradient-warm: linear-gradient(180deg, hsl(168 15% 12%) 0%, hsl(168 12% 16%) 100%);
