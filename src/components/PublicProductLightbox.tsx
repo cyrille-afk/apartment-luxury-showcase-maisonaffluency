@@ -949,7 +949,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
               {/* CTA block */}
-              <div className="shrink-0 pt-4">
+              <div className="shrink-0 pt-3">
                 <div className="flex flex-col gap-4">
                 {/* Primary CTA */}
                 <div className="flex flex-col gap-2">
