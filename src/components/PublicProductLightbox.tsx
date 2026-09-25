@@ -994,12 +994,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="w-full border-t border-border/40 mt-6 md:mt-8 pt-5 md:pt-6 pb-7 md:pb-9"
+            className="w-full border-t border-border/40 mt-3 md:mt-4 pt-3 md:pt-4 pb-3 md:pb-4"
           >
-            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-5">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
               Curator Notes
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="flex gap-4">
                 <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
