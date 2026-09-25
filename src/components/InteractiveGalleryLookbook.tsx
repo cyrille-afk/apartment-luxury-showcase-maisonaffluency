@@ -307,7 +307,7 @@ export default function InteractiveGalleryLookbook() {
                 ))}
               </div>
 
-              <Button type="button" size="icon" variant="secondary" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute left-4 top-4 z-20 rounded-full bg-background/85 backdrop-blur">
+              <Button type="button" size="icon" variant="secondary" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="absolute right-4 top-4 z-20 rounded-full bg-background/85 backdrop-blur">
                 <GalleryHorizontal className="size-4" />
               </Button>
               <Button type="button" size="icon" variant="ghost" aria-label="Previous scene" onClick={() => step(-1)} className="absolute bottom-0 left-0 top-16 z-10 h-auto w-16 rounded-none text-background/90 hover:bg-foreground/10 hover:text-background">
