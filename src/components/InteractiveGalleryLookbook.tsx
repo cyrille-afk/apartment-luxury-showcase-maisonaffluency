@@ -383,12 +383,12 @@ export default function InteractiveGalleryLookbook() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.45 }}
-                      className={activePage.scenes.length === 1 && sceneIdx === 0 ? "relative w-full" : "relative mx-auto inline-grid h-full max-w-full place-items-center overflow-hidden"}
+                      className={activePage.scenes.length === 1 && sceneIdx === 0 ? "relative w-full" : "relative mx-auto aspect-[3/4] h-auto w-full max-w-full overflow-hidden md:h-full md:w-auto"}
                     >
                       <img
                         src={large(pageScene.id)}
                         alt={`${space.label} — ${pageScene.title}`}
-                        className={activePage.scenes.length === 1 && sceneIdx === 0 ? "block h-auto w-full object-contain" : "col-start-1 row-start-1 block h-full w-auto max-w-full object-contain"}
+                        className={activePage.scenes.length === 1 && sceneIdx === 0 ? "block h-auto w-full object-contain" : "absolute inset-0 block size-full object-contain"}
                       />
                       {hotspotsForScene(pageScene).map((hotspot) => (
                         <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
