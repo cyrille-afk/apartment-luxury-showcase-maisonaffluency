@@ -1028,7 +1028,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="living"
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(800px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
                       style={{ animation: "livingMenuReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
@@ -1038,7 +1038,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         }
                       `}</style>
                       <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="flex min-h-full w-1/2 shrink-0 flex-col border-r border-border/60 px-8 py-8">
+                        <div className="flex min-h-full w-[325px] shrink-0 flex-col border-r border-border/60 px-8 py-8">
                           <div>
                             {roomNavigation.living.map((item, index) => (
                               <Button
@@ -1073,7 +1073,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           </Button>
                         </div>
 
-                        <div data-room-submenu className="relative min-h-full w-1/2 shrink-0 overflow-hidden">
+                        <div data-room-submenu className="relative min-h-full min-w-0 flex-1 overflow-hidden">
                           <div
                             className={cn(
                               "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
