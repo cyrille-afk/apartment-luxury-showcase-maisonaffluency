@@ -305,18 +305,18 @@ export default function InteractiveGalleryLookbook() {
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] pt-2 md:px-10 md:pt-3">
-            {lightboxProduct && (
-              <PublicProductLightbox
-                product={lightboxProduct}
-                allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
-                onClose={() => setLightboxProduct(null)}
-                onSelectRelated={setLightboxProduct}
-                inline
-                contextualPanel
-              />
-            )}
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1500px] pt-1 md:px-10 md:pt-0">
             <div className="relative w-full overflow-hidden">
+              {lightboxProduct && (
+                <PublicProductLightbox
+                  product={lightboxProduct}
+                  allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
+                  onClose={() => setLightboxProduct(null)}
+                  onSelectRelated={setLightboxProduct}
+                  inline
+                  contextualPanel
+                />
+              )}
               <div className="relative w-full">
                 <AnimatePresence mode="wait">
                   <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full object-contain" />
@@ -342,7 +342,7 @@ export default function InteractiveGalleryLookbook() {
               </Button>
             </div>
 
-            <div className="relative mx-auto mt-4 max-w-3xl px-12 pb-24 text-center md:mt-5 md:pb-24">
+            <div className="relative mx-auto mt-3 max-w-3xl px-12 pb-24 text-center md:mt-2 md:pb-24">
               <h2 className="font-display text-2xl md:text-3xl">{scene.title}</h2>
               <span className="absolute right-0 top-1/2 -translate-y-1/2 font-body text-xs tracking-[0.2em] text-muted-foreground">{sceneIdx + 1} / {space.scenes.length}</span>
             </div>
