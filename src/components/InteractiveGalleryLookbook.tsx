@@ -85,6 +85,37 @@ type Hotspot = {
   mapped_pick_id: string | null;
 };
 
+type SceneProduct = {
+  hotspot: Hotspot;
+  product: PublicLightboxItem;
+};
+
+function PortraitProduct({ item, onSelect }: { item: SceneProduct; onSelect: (hotspot: Hotspot) => void }) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={() => onSelect(item.hotspot)}
+      className="group flex h-auto w-full flex-col items-center rounded-none bg-transparent p-0 text-center hover:bg-transparent"
+    >
+      <span className="flex h-[15vh] min-h-28 w-full items-end justify-center md:h-[17vh]">
+        <img
+          src={item.product.image_url}
+          alt={item.product.title}
+          loading="lazy"
+          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+        />
+      </span>
+      <span className="mt-3 block w-full px-2 font-body text-[10px] font-light uppercase leading-normal tracking-[0.12em] text-foreground">
+        {item.product.title}
+      </span>
+      <span className="mt-1 block font-body text-[9px] font-light uppercase leading-normal tracking-[0.1em] text-muted-foreground">
+        Price upon Request
+      </span>
+    </Button>
+  );
+}
+
 function GalleryTour() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -289,8 +320,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     [hotspots],
   );
 
-  const openHotspot = useCallback((hotspot: Hotspot) => {
-    setActivePin(hotspot.id);
+  const resolveHotspotProduct = useCallback((hotspot: Hotspot): PublicLightboxItem | null => {
     const exact = hotspot.mapped_pick_id ? allPicks.find((pick) => pick.id === hotspot.mapped_pick_id) : null;
     const productName = normalize(hotspot.product_name);
     const designerName = normalize(hotspot.designer_name || "");
@@ -309,8 +339,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       materials: hotspot.materials,
       dimensions: hotspot.dimensions,
     } : null;
-    setLightboxProduct(exact || fuzzy || fallback);
+    return exact || fuzzy || fallback;
   }, [allPicks]);
+
+  const openHotspot = useCallback((hotspot: Hotspot) => {
+    setActivePin(hotspot.id);
+    setLightboxProduct(resolveHotspotProduct(hotspot));
+  }, [resolveHotspotProduct]);
 
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
@@ -361,6 +396,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
+  const portraitProducts = useMemo<SceneProduct[]>(() => {
+    if (!activeScene || !activeSceneIsPortrait) return [];
+    return hotspotsForScene(activeScene)
+      .map((hotspot) => {
+        const product = resolveHotspotProduct(hotspot);
+        return product ? { hotspot, product } : null;
+      })
+      .filter((item): item is SceneProduct => item !== null)
+      .slice(0, 4);
+  }, [activeScene, activeSceneIsPortrait, hotspotsForScene, resolveHotspotProduct]);
 
   return (
     <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
@@ -407,7 +452,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   contextualPanel
                 />
               )}
-              <div className="relative flex w-full items-center justify-center overflow-hidden bg-background">
+              <div className="relative w-full overflow-hidden bg-background">
                 <AnimatePresence mode="wait">
                   {activePage.scenes.map((pageScene) => (
                     <motion.div
@@ -416,30 +461,44 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.45 }}
-                      className="relative mx-auto w-fit max-w-full overflow-hidden bg-transparent"
+                      className={activeSceneIsPortrait
+                        ? "mx-auto grid w-full grid-cols-2 items-center gap-x-5 gap-y-8 px-4 py-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-12 md:px-0 md:py-0"
+                        : "relative mx-auto w-fit max-w-full overflow-hidden bg-transparent"}
                     >
-                      <img
-                        src={large(pageScene.id)}
-                        alt={`${space.label} — ${pageScene.title}`}
-                         onLoad={(event) => {
-                           if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
-                           setPortraitSceneIds((current) => {
-                             if (current.has(pageScene.id)) return current;
-                             const next = new Set(current);
-                             next.add(pageScene.id);
-                             return next;
-                           });
-                         }}
-                        className="block h-auto max-h-[60vh] w-auto max-w-full object-contain"
-                      />
-                      {hotspotsForScene(pageScene).map((hotspot) => (
-                        <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-                          <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
-                            <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                            <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-                          </span>
-                        </Button>
-                      ))}
+                      {activeSceneIsPortrait && (
+                        <div className="order-2 flex flex-col justify-around gap-7 md:order-1 md:h-[55vh]">
+                          {portraitProducts.slice(0, 2).map((item) => <PortraitProduct key={item.hotspot.id} item={item} onSelect={openHotspot} />)}
+                        </div>
+                      )}
+                      <div className={`relative mx-auto w-fit max-w-full overflow-hidden bg-transparent ${activeSceneIsPortrait ? "order-1 col-span-2 md:order-2 md:col-span-1" : ""}`}>
+                        <img
+                          src={large(pageScene.id)}
+                          alt={`${space.label} — ${pageScene.title}`}
+                          onLoad={(event) => {
+                              if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
+                              setPortraitSceneIds((current) => {
+                                if (current.has(pageScene.id)) return current;
+                                const next = new Set(current);
+                                next.add(pageScene.id);
+                                return next;
+                              });
+                            }}
+                          className={`block h-auto w-auto max-w-full object-contain ${activeSceneIsPortrait ? "max-h-[55vh]" : "max-h-[60vh]"}`}
+                        />
+                        {hotspotsForScene(pageScene).map((hotspot) => (
+                          <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+                            <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
+                              <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                              <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
+                      {activeSceneIsPortrait && (
+                        <div className="order-3 flex flex-col justify-around gap-7 md:h-[55vh]">
+                          {portraitProducts.slice(2, 4).map((item) => <PortraitProduct key={item.hotspot.id} item={item} onSelect={openHotspot} />)}
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
