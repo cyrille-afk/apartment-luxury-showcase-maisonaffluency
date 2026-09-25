@@ -2363,8 +2363,8 @@ const DesignersHoverHero = () => {
             "flex h-10 w-full shrink-0 items-center rounded-md border px-4 backdrop-blur-[12px]",
             "transition-[background-color,border-color] duration-300",
             searchOpen
-              ? "border-background/20 bg-background/[0.08]"
-              : "border-background/20 bg-background/[0.05]"
+              ? "border-white bg-background/[0.08]"
+              : "border-white/80 bg-background/[0.05]"
           )}
           aria-label="Designer directory controls"
         >
@@ -2389,7 +2389,7 @@ const DesignersHoverHero = () => {
             spellCheck={false}
             aria-expanded={searchOpen}
             aria-controls="designers-search-sheet"
-            className="h-full min-w-0 flex-1 appearance-none bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-background outline-none placeholder:text-background/70 focus:bg-transparent focus:outline-none focus:ring-0"
+            className="h-full min-w-0 flex-1 appearance-none bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-white outline-none placeholder:text-white placeholder:opacity-100 focus:bg-transparent focus:outline-none focus:ring-0"
           />
           {searchOpen && (
             <button
@@ -2402,7 +2402,7 @@ const DesignersHoverHero = () => {
             </button>
           )}
         </div>
-        <p className="mt-2.5 max-w-md text-center font-serif text-[11px] leading-relaxed text-background/70">
+        <p className="mt-2.5 max-w-md text-center font-serif text-[11px] leading-relaxed text-white">
           150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
