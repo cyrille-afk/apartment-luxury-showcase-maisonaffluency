@@ -91,6 +91,7 @@ function GalleryTour() {
     const onPause = () => trackVideoEvent("pause", "showroom-tour");
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    void video.play().catch(() => undefined);
     const detachMilestones = attachMilestoneTracking(video, "showroom-tour");
     return () => {
       video.removeEventListener("play", onPlay);
@@ -102,13 +103,11 @@ function GalleryTour() {
   return (
     <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto flex min-h-[68vh] max-w-[1500px] items-center px-4 py-8 md:px-10">
       <div className="w-full bg-muted/30 p-3 md:p-8">
-        <video ref={videoRef} src={APARTMENT_TOUR_VIDEO_URL} controls playsInline poster={large("bespoke-sofa_gxidtx")} className="mx-auto aspect-video w-full max-w-6xl bg-foreground object-cover" />
-        <div className="mx-auto mt-5 flex max-w-6xl items-end justify-between gap-6">
-          <div>
-            <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
-            <h2 className="mt-2 font-display text-2xl md:text-4xl">Tour Our Gallery</h2>
-          </div>
-          <p className="hidden max-w-sm text-right font-body text-xs leading-relaxed text-muted-foreground md:block">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship.</p>
+        <video ref={videoRef} src={APARTMENT_TOUR_VIDEO_URL} autoPlay muted loop controls playsInline poster={large("bespoke-sofa_gxidtx")} className="mx-auto aspect-video w-full max-w-6xl bg-foreground object-cover" />
+        <div className="mx-auto mt-5 max-w-6xl text-center">
+          <p className="font-body text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
+          <h2 className="mt-2 font-display text-2xl md:text-4xl">Tour Our Gallery</h2>
+          <p className="mx-auto mt-3 hidden max-w-md font-body text-xs leading-relaxed text-muted-foreground md:block">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship.</p>
         </div>
       </div>
     </motion.div>
@@ -139,7 +138,7 @@ function CuratorsCanvas() {
 }
 
 export default function InteractiveGalleryLookbook() {
-  const [galleryState, setGalleryState] = useState<GalleryState>({ kind: "room", spaceIndex: 0 });
+  const [galleryState, setGalleryState] = useState<GalleryState>({ kind: "tour" });
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -272,8 +271,8 @@ export default function InteractiveGalleryLookbook() {
   };
 
   const ribbonItems = [
-    ...SPACES.map((item, index) => ({ key: item.key, label: item.label, onClick: () => selectSpace(index), active: galleryState.kind === "room" && roomSpaceIndex === index })),
     { key: "tour", label: "Tour Our Gallery", onClick: () => setGalleryState({ kind: "tour" }), active: galleryState.kind === "tour" },
+    ...SPACES.map((item, index) => ({ key: item.key, label: item.label, onClick: () => selectSpace(index), active: galleryState.kind === "room" && roomSpaceIndex === index })),
     { key: "curators", label: "The Curators", onClick: () => setGalleryState({ kind: "curators" }), active: galleryState.kind === "curators" },
   ];
 
