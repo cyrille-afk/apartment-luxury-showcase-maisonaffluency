@@ -133,6 +133,7 @@ type IndexProps = {
 };
 
 const Index = ({ categoryMode = false }: IndexProps = {}) => {
+  const isMobile = useIsMobile();
   const routeIsCategory = categoryMode || isCategoryRoute();
   const [showBanner, setShowBanner] = useState(false);
   const [showNavigation, setShowNavigation] = useState(true);
