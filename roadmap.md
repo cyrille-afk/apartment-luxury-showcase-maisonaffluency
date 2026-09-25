@@ -28,3 +28,4 @@
 - [x] Float the privacy notice as muted text and place the Tour introduction above the video.
 - [x] Rebuild The Curators as two balanced editorial founder profiles with French identity markers.
 - [x] Increase the gallery utility ribbon typography and rebalance its vertical spacing.
+- [x] Replace portrait gallery side fills with a seamless architectural ruled canvas while preserving hotspot coordinates.
