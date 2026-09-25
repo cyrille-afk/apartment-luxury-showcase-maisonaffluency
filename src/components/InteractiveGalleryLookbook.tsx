@@ -379,10 +379,10 @@ export default function InteractiveGalleryLookbook() {
                 contextualPanel
               />
             )}
-            <div className="relative w-full bg-muted/40 md:flex md:min-h-[55vh] md:justify-center">
+            <div className="relative w-full bg-muted/40 md:flex md:justify-center">
               <div className="relative w-full md:inline-flex md:w-auto md:items-center">
                 <AnimatePresence mode="wait">
-                  <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full md:max-h-[78vh] md:w-auto md:max-w-full" />
+                  <motion.img key={scene.id} src={large(scene.id)} alt={`${space.label} — ${scene.title}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45 }} className="block h-auto w-full object-contain md:max-h-[50vh] md:w-auto md:max-w-full" />
                 </AnimatePresence>
                 {sceneHotspots.map((hotspot) => (
                   <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-9 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>

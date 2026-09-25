@@ -399,13 +399,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // Track whether body overflow was already hidden (e.g. by a parent Gallery lightbox)
   // so we don't clobber it on close.
   useEffect(() => {
-    if (!product) return;
+    if (!product || contextualPanel) return;
     const wasAlreadyHidden = document.body.style.overflow === "hidden";
     document.body.style.overflow = "hidden";
     return () => {
       if (!wasAlreadyHidden) document.body.style.overflow = "";
     };
-  }, [product]);
+  }, [product, contextualPanel]);
 
   const relatedProducts = useMemo(() => {
     if (!product) return [];
@@ -671,10 +671,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         <motion.div
           {...panelMotion}
           className={cn(
-            "relative mx-auto flex w-full max-w-6xl flex-col overflow-y-auto bg-background min-h-0",
+            "relative mx-auto flex w-full max-w-6xl flex-col bg-background",
             contextualPanel
-              ? "pointer-events-auto max-h-[min(72vh,720px)] border border-border/60 shadow-2xl"
-              : "h-dvh max-h-dvh shadow-2xl md:h-auto md:max-h-[95vh]"
+              ? "pointer-events-auto h-auto overflow-visible border border-border/60 shadow-2xl"
+              : "h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[95vh]"
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -714,7 +714,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Upper two-column editorial block — constrained to stay above the fold */}
           <div className="max-w-6xl mx-auto p-5 md:p-8 w-full flex flex-col">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 md:h-[min(420px,48vh)] md:grid-rows-[1fr]">
+            <div className={cn("grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-10", !contextualPanel && "md:h-[min(420px,48vh)] md:grid-rows-[1fr]")}>
 
               {/* LEFT COLUMN — standardized hero image container */}
               <div className="relative w-full md:h-full min-h-0 flex items-center justify-center">
@@ -805,8 +805,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* RIGHT COLUMN — specs card + CTAs */}
-              <div className="w-full md:h-full md:min-h-0 flex flex-col md:pl-10 md:border-l md:border-border/40 md:overflow-hidden">
-                <div className="md:flex-1 md:overflow-y-auto min-h-0 pr-1">
+              <div className={cn("flex w-full flex-col md:pl-10 md:border-l md:border-border/40", !contextualPanel && "md:h-full md:min-h-0 md:overflow-hidden")}>
+                <div className={cn("pr-1", !contextualPanel && "min-h-0 md:flex-1 md:overflow-y-auto")}>
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
