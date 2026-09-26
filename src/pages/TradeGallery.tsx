@@ -34,7 +34,7 @@ import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProj
 
 
 const slugifyForUrl = (s: string) =>
-  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 interface DraftQuote {
   id: string;

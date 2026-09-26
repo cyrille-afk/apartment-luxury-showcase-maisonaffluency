@@ -79,7 +79,7 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
 
 /** Mirrors the slugifier used by PublicProductLightbox + PublicProductPage. */
 const slugifyProduct = (s: string) =>
-  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 /**
  * Cosmetic attribution parser for curator picks whose title encodes the
