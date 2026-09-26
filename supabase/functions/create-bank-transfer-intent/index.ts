@@ -156,7 +156,8 @@ serve(async (req) => {
       });
     } catch (err) {
       console.error("[create-bank-transfer-intent] stripe error", err);
-      return json({ error: "bank_transfer_unavailable", detail: (err as Error)?.message ?? "" }, 200);
+      console.error("[create-bank-transfer-intent] stripe error", err);
+      return json({ error: "bank_transfer_unavailable" }, 200);
     }
 
     const next = intent.next_action as any;
