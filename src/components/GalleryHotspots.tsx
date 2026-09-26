@@ -609,7 +609,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               setActiveId(null);
                             }}
                           >
-                            {onViewFullProduct ? "Explore the craftsmanship →" : (<><ShoppingCart className="w-3 h-3" />Add to Quote</>)}
+                            {onViewFullProduct ? "View Full Product →" : (<><ShoppingCart className="w-3 h-3" />Add to Quote</>)}
                           </button>
                         )}
 
