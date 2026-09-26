@@ -464,7 +464,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       const product = resolveHotspotProduct(hotspot);
       const useScenePhoto = (hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "Astra Dining Table")
         || hotspot.product_name === "Eggshell DOT Side Table"
-        || (hotspot.image_identifier === "A Masterful Suite" && hotspot.product_name === "Crystalline Blue Vessel Volume 5");
+        || (hotspot.image_identifier === "A Masterful Suite" && hotspot.product_name === "Crystalline Blue Vessel Volume 5")
+        || (hotspot.image_identifier === "Yellow Crystalline" && hotspot.product_name === "Yellow Crystalline Vessel Volume 5");
        const image = roomSpaceIndex === 0 && (sceneIdx === 1 || sceneIdx === 2) && /^Niko (340|420) Custom Sofa\b/.test(hotspot.product_name)
          ? LIVING_ROOM_NIKO_PHOTO
          : hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "PéPé S Icewood x FJ Hakimian"
