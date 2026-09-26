@@ -14,6 +14,7 @@ import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductL
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cloudinaryUrl, cloudinarySrcSet, cldResponsiveImg } from "@/lib/cloudinary";
@@ -331,7 +332,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl bg-muted/40 ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
-      <button type="button" onClick={onExpand} aria-label={`Expand ${item.title} photo`} className="absolute inset-0 z-10 w-full cursor-zoom-in" />
+      <Button type="button" variant="ghost" onClick={onExpand} aria-label={`Expand ${item.title} photo`} className="absolute inset-0 z-10 h-full w-full cursor-zoom-in rounded-none p-0 hover:bg-transparent" />
 
       <img
         {...imgProps}
