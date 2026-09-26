@@ -572,7 +572,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
           {expandedScene && (
             <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
               <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} className="block max-h-[calc(100dvh-4rem)] max-w-full object-contain" />
-              {hotspotsForScene(expandedScene).filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`)).map((hotspot) => (
+              {hotspotsForScene(expandedScene).map((hotspot) => (
                 <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                   <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
                     <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />

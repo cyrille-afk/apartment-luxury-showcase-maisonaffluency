@@ -18,6 +18,11 @@ const corsHeaders = {
 const PRICING_COLUMNS =
   "id, source_pick_id, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, lead_time, lead_time_weeks_min, lead_time_weeks_max, stock_status_override, spec_sheet_url, is_allocation_restricted, allocation_unit_cap, available_stock_units";
 
+// Only genuine UUIDs may be matched against the uuid `id` column; friendly
+// codes (e.g. "tp-210") and hotspot references match `source_pick_id` only,
+// otherwise Postgres raises 22P02 and the whole batch 500s.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
