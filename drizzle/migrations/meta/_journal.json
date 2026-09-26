@@ -666,6 +666,13 @@
       "when": 1790240251067,
       "tag": "0094_trade_accounts_access_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1790463658531,
+      "tag": "0095_public_micmac_gallery_pins_only",
+      "breakpoints": true
     }
   ]
 }
