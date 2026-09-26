@@ -4,5 +4,5 @@
 - Only the first Living Room photo hides desktop side product picks; all other photos keep vertical one-column picks, with explicitly curated first-scene order preserved, so the gallery entrance stays clean without changing hotspot pins.
 - Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
 - Gallery hotspot product details use the shared centered `PublicProductLightbox` in a body portal, including over expanded photos, so long specifications remain visible without clipping or displacing the gallery canvas.
-- Fetch the two approved MicMac gallery pins through a narrowly scoped public RPC rather than widening trade-only designer access; only the pin's presentation data is public.
+- Fetch the two approved MicMac gallery pins through a narrowly scoped public RPC and use that presentation data for both pins and desktop side photos rather than widening trade-only designer access; only the pin's presentation data is public.
 - Reveal gallery photos and their hotspot pins only after both the photo and pin data are ready (and catalog data on desktop); this prevents mismatched entrance timing on desktop, expanded, and mobile scenes.
