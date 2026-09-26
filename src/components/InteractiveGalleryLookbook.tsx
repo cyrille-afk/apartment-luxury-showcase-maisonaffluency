@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { queryKeys } from "@/lib/queryKeys";
@@ -252,6 +253,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [activePin, setActivePin] = useState<string | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
+  const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [portraitSceneIds, setPortraitSceneIds] = useState<Set<string>>(() => new Set());
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
@@ -355,6 +357,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   }, [allPicks]);
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
+    setExpandedScene(null);
     setActivePin(hotspot.id);
     setLightboxProduct(resolveHotspotProduct(hotspot));
   }, [resolveHotspotProduct]);
@@ -375,22 +378,24 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (lightboxProduct) return;
+      if (lightboxProduct || expandedScene) return;
       if (event.key === "ArrowLeft") step(-1);
       if (event.key === "ArrowRight") step(1);
       if (event.key === "Escape") setDrawerOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxProduct, step]);
+  }, [lightboxProduct, expandedScene, step]);
 
   const selectSpace = (spaceIndex: number) => {
+    setExpandedScene(null);
     setGalleryState({ kind: "room", spaceIndex });
     setSceneIdx(0);
     setActivePin(null);
     setLightboxProduct(null);
   };
   const selectScene = (spaceIndex: number, sceneIndex: number) => {
+    setExpandedScene(null);
     setGalleryState({ kind: "room", spaceIndex });
     setSceneIdx(sceneIndex);
     setActivePin(null);
@@ -505,20 +510,22 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                          transition={{ duration: 0.45 }}
                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
-                         <img
-                           src={large(pageScene.id)}
-                           alt={`${space.label} — ${pageScene.title}`}
-                           onLoad={(event) => {
-                             if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
-                             setPortraitSceneIds((current) => {
-                               if (current.has(pageScene.id)) return current;
-                               const next = new Set(current);
-                               next.add(pageScene.id);
-                               return next;
-                             });
-                           }}
-                           className="block h-auto w-full object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
-                         />
+                         <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
+                           <img
+                             src={large(pageScene.id)}
+                             alt={`${space.label} — ${pageScene.title}`}
+                             onLoad={(event) => {
+                               if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
+                               setPortraitSceneIds((current) => {
+                                 if (current.has(pageScene.id)) return current;
+                                 const next = new Set(current);
+                                 next.add(pageScene.id);
+                                 return next;
+                               });
+                             }}
+                             className="block h-auto w-full cursor-zoom-in object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
+                           />
+                         </Button>
                           {hotspotsForScene(pageScene).filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`)).map((hotspot) => (
                            <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
@@ -552,6 +559,26 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Dialog open={!!expandedScene} onOpenChange={(open) => { if (!open) setExpandedScene(null); }}>
+        <DialogContent hideClose className="flex h-[100dvh] w-screen max-w-none items-center justify-center overflow-hidden rounded-none border-none bg-foreground/95 p-4 shadow-none sm:p-8" aria-describedby={undefined}>
+          <DialogTitle className="sr-only">{expandedScene ? `${space.label} — ${expandedScene.title}` : "Gallery photo"}</DialogTitle>
+          {expandedScene && (
+            <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
+              <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} className="block max-h-[calc(100dvh-4rem)] max-w-full object-contain" />
+              {hotspotsForScene(expandedScene).filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`)).map((hotspot) => (
+                <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+                  <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
+                    <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                    <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+                  </span>
+                </Button>
+              ))}
+            </div>
+          )}
+          <Button type="button" variant="ghost" size="icon" aria-label="Close expanded photo" onClick={() => setExpandedScene(null)} className="absolute right-4 top-4 z-20 text-background hover:bg-background/20 hover:text-background"><X className="size-5" /></Button>
+        </DialogContent>
+      </Dialog>
 
       <AnimatePresence>
         {drawerOpen && galleryState.kind === "room" && (

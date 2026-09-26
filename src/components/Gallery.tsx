@@ -279,13 +279,14 @@ type MobileGalleryImageCardProps = {
   isHotspotSection: boolean;
   hotspots: GalleryHotspotPosition[];
   onHotspotActivate: (hotspot: GalleryHotspotPosition) => void;
+  onExpand: () => void;
   /** Position within the horizontal strip. */
   index: number;
   /** Currently visible slide of the strip. */
   activeIndex: number;
 };
 
-const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate, index, activeIndex }: MobileGalleryImageCardProps) => {
+const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate, onExpand, index, activeIndex }: MobileGalleryImageCardProps) => {
   const [naturalAspect, setNaturalAspect] = useState(16 / 10);
 
   // Native loading="lazy" does not defer siblings that are only horizontally
@@ -330,6 +331,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl bg-muted/40 ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
       style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
     >
+      <button type="button" onClick={onExpand} aria-label={`Expand ${item.title} photo`} className="absolute inset-0 z-10 w-full cursor-zoom-in" />
 
       <img
         {...imgProps}
@@ -1070,6 +1072,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             isHotspotSection={isHotspotSection}
                             hotspots={itemHotspots}
                             onHotspotActivate={(hotspot) => handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId)}
+                            onExpand={() => openLightbox(originalSectionIndex, index)}
                           />
                         );
                       })}
@@ -1257,7 +1260,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           </VisuallyHidden>
            {isMobile ? (
              /* ── Mobile: Embla Carousel lightbox ── */
-              <div className="relative w-full h-full flex flex-col items-center justify-start overflow-y-auto pt-4 pb-6">
+              <div className="relative w-full h-full flex flex-col items-center justify-center overflow-y-auto py-4">
                 {/* Title */}
                 <h3 className="text-lg font-serif text-white mt-2 mb-1.5 text-center px-4 shrink-0">
                   {currentSectionItems[currentItemIndex]?.title}
