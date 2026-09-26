@@ -112,6 +112,8 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "An Artistic Statement:Martell Wall Lamp": "left",
   "An Artistic Statement:Lantern Table Lamp": "left",
   "An Artistic Statement:Eggshell DOT Side Table": "right",
+  "A Workspace of Distinction:Bernt Petersen 4-Drawer Desk": "right",
+  "Refined Details:Bernt Petersen 4-Drawer Desk": "right",
 };
 const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:Astra Dining Table",
@@ -278,6 +280,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  const [hotspotsReady, setHotspotsReady] = useState(false);
+  const [loadedScenes, setLoadedScenes] = useState<Set<string>>(() => new Set());
   const [activePin, setActivePin] = useState<string | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
@@ -292,7 +296,19 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     void Promise.all([
       supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
       fetchPublicMicMacPins(),
-    ]).then(([{ data }, special]) => setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true })))));
+    ]).then(([{ data }, special]) => {
+      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))));
+      setHotspotsReady(true);
+    });
+  }, []);
+
+  const markSceneLoaded = useCallback((id: string) => {
+    setLoadedScenes((current) => {
+      if (current.has(id)) return current;
+      const next = new Set(current);
+      next.add(id);
+      return next;
+    });
   }, []);
 
   const { data: manifest } = useQuery({
@@ -574,11 +590,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                          transition={{ duration: 0.45 }}
                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
+                          {(() => {
+                            const sceneReady = hotspotsReady && loadedScenes.has(pageScene.id);
+                            return <>
                          <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
                            <img
                              src={large(pageScene.id)}
                              alt={`${space.label} — ${pageScene.title}`}
                              onLoad={(event) => {
+                                markSceneLoaded(pageScene.id);
                                if (event.currentTarget.naturalHeight <= event.currentTarget.naturalWidth) return;
                                setPortraitSceneIds((current) => {
                                  if (current.has(pageScene.id)) return current;
@@ -587,10 +607,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                                  return next;
                                });
                              }}
-                             className="block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full"
+                              className={`block h-auto w-full cursor-zoom-in object-contain transition-opacity duration-300 md:max-h-[72vh] md:w-auto md:max-w-full ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
-                          {hotspotsForScene(pageScene).map((hotspot) => (
+                           {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
                            <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
                                <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -610,6 +630,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                           <Button type="button" size="icon" variant="default" aria-label="Next gallery photo" title="Next gallery photo" onClick={() => step(1)} className="absolute right-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
                             <ChevronRight className="size-5" strokeWidth={1.5} aria-hidden="true" />
                           </Button>
+                            </>;
+                          })()}
                        </motion.div>
                      ))}
                    </AnimatePresence>
@@ -635,8 +657,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
           <DialogTitle className="sr-only">{expandedScene ? `${space.label} — ${expandedScene.title}` : "Gallery photo"}</DialogTitle>
           {expandedScene && (
             <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
-              <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} className="block max-h-[calc(100dvh-4rem)] max-w-full object-contain" />
-              {hotspotsForScene(expandedScene).map((hotspot) => (
+               <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} onLoad={() => markSceneLoaded(expandedScene.id)} className={`block max-h-[calc(100dvh-4rem)] max-w-full object-contain transition-opacity duration-300 ${hotspotsReady && loadedScenes.has(expandedScene.id) ? "opacity-100" : "opacity-0"}`} />
+               {hotspotsReady && loadedScenes.has(expandedScene.id) && hotspotsForScene(expandedScene).map((hotspot) => (
                 <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
                   <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
                     <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
