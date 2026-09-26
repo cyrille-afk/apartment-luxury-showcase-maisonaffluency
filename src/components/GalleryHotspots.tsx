@@ -100,7 +100,7 @@ interface PendingHotspot {
   y_percent: number;
 }
 
-const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, filterDesigner }: GalleryHotspotsProps) => {
+const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuote, onRequestQuote, onViewProduct, onViewFullProduct, filterDesigner }: GalleryHotspotsProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isSuperAdmin } = useAuth();
@@ -588,12 +588,17 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           </button>
                         )}
 
-                        {/* Trade: Add to Quote */}
+                        {/* Trade: View Full Product (replaces Add to Quote) */}
                         {onAddToQuote && (
                           <button
                             className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (onViewFullProduct) {
+                                onViewFullProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
+                                setActiveId(null);
+                                return;
+                              }
                               onAddToQuote({
                                 product_name: hotspot.product_name,
                                 designer_name: hotspot.designer_name,
@@ -604,8 +609,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               setActiveId(null);
                             }}
                           >
-                            <ShoppingCart className="w-3 h-3" />
-                            Add to Quote
+                            {onViewFullProduct ? "View Full Product →" : (<><ShoppingCart className="w-3 h-3" />Add to Quote</>)}
                           </button>
                         )}
 
