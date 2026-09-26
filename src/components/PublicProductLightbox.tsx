@@ -605,16 +605,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                   {relatedProducts.length > 4 && (
                     <div className="flex items-center gap-1">
-                   {product.restricted_gallery_pin ? (
-                     <span className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">{designerDisplay}</span>
-                   ) : <button
+                      <button
                         type="button"
                         onClick={() => scrollRelated(-1)}
                         aria-label="Scroll left"
                         className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4" />
-                   </button>}
+                      </button>
                       <button
                         type="button"
                         onClick={() => scrollRelated(1)}
@@ -817,7 +815,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
                 <div>
-                  <button
+                  {product.restricted_gallery_pin ? (
+                    <span className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">{designerDisplay}</span>
+                  ) : <button
                     type="button"
                     onClick={() => {
                       if (!linkedDesigner?.slug) return;
@@ -829,7 +829,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
                   >
                     {designerDisplay}
-                  </button>
+                  </button>}
                   <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
                     {product.title}
                   </h2>

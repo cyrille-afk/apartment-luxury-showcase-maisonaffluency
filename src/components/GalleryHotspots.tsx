@@ -514,7 +514,9 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                       )}
                       <div className="p-3">
                         <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
-                        {hotspot.designer_name && (
+                        {hotspot.designer_name && (hotspot.product_name === "Bronze MicMac Chandelier" && hotspot.designer_name === "Hervé van der Straeten" && !onAddToQuote ? (
+                          <span className="block font-body text-xs text-muted-foreground mt-0.5">{hotspot.designer_name}</span>
+                        ) : (
                           <a
                             href={`/designers/${hotspot.designer_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`}
                             onClick={(e) => { e.stopPropagation(); navigate(`/designers/${hotspot.designer_name!.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}?expanded=true`); }}
@@ -522,7 +524,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           >
                             {hotspot.designer_name}
                           </a>
-                        )}
+                        ))}
                         {/* Edition badge */}
                         {(() => {
                           const edition = getHotspotEdition(hotspot.product_name);
