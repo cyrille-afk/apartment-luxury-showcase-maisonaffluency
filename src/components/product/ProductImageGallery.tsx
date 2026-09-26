@@ -521,10 +521,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <CornerTooltip label="Presentation" side="top" align="end">
                   <DropdownMenuTrigger
                     aria-label="Presentation and more actions"
-                    className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
+                    className="relative isolate flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+                    <Images size={20} strokeWidth={1.5} className="text-primary-foreground" />
                   </DropdownMenuTrigger>
                 </CornerTooltip>
                 <DropdownMenuContent align="end" className="min-w-[190px]">
@@ -539,13 +539,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <button
                   type="button"
                   aria-label="Presentation"
-                  className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse"
+                  className="relative isolate flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
                   onClick={(e) => {
                     e.stopPropagation();
                     setPresentOpen(true);
                   }}
                 >
-                  <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+                  <Images size={20} strokeWidth={1.5} className="text-primary-foreground" />
                 </button>
               </CornerTooltip>
             )}
