@@ -9,7 +9,7 @@ const Footer = () => {
     >
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="px-2 py-1 text-center">
-          <span className="font-body text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground/70">
+          <span className="font-body text-[9px] font-light uppercase tracking-[0.18em] text-muted-foreground">
             By using this site you agree to our{" "}
             <a href="/privacy" className="underline decoration-border underline-offset-2 transition-colors hover:text-foreground">Privacy Policy</a>
             {" "}&{" "}
