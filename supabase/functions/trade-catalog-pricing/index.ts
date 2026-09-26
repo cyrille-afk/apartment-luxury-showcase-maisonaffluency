@@ -82,11 +82,17 @@ serve(async (req) => {
       );
     }
 
+    // Both `id` and `source_pick_id` are uuid columns, so friendly codes
+    // (e.g. "tp-210") and hotspot references can never match; querying with
+    // them raises Postgres 22P02 and 500s the whole batch. Skip them.
+    const uuidPickIds = pickIds.filter((id) => UUID_RE.test(id));
+    if (!uuidPickIds.length) return json({ products: [] });
+
     const { data, error } = await admin
       .from("trade_products")
       .select(PRICING_COLUMNS)
       .eq("is_active", true)
-      .or(pickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
+      .or(uuidPickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
     if (error) {
       console.error("[trade-catalog-pricing] lookup failed", error);
       return json({ error: "Unable to load pricing." }, 500);
