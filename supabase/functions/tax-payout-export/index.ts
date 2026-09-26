@@ -14,7 +14,9 @@ const corsHeaders = {
 
 function csvCell(v: unknown): string {
   if (v === null || v === undefined) return ''
-  const s = String(v)
+  let s = String(v)
+  // Neutralise spreadsheet formulas (=, +, -, @, tab, CR) — skip plain numbers.
+  if (/^[=+\-@\t\r]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) s = `'${s}`
   if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
   return s
 }

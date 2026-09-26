@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (destination) {
       const decoded = decodeURIComponent(destination)
       const d = new URL(decoded)
-      if (d.hostname === 'maisonaffluency.com' || d.hostname.endsWith('.maisonaffluency.com') || d.hostname.endsWith('.lovable.app')) {
+      if (d.protocol === 'https:' && (d.hostname === 'maisonaffluency.com' || d.hostname.endsWith('.maisonaffluency.com') || d.hostname === 'apartment-luxury-showcase-maisonaffluency.lovable.app')) {
         safeDestination = d.toString()
       }
     }

@@ -67,7 +67,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         error: "transcription_failed",
         status: response.status,
-        detail: bodyText.slice(0, 500),
       }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -81,7 +80,7 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("transcribe fatal", err);
-    return new Response(JSON.stringify({ error: "internal_error", detail: String(err) }), {
+    return new Response(JSON.stringify({ error: "internal_error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
