@@ -619,6 +619,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     // Prefer designer-matched result; only fall back if no designer match found
     if (!best && !normDesigner) best = bestNoDesigner;
 
+    return best;
+  }, [allCuratorPicks]);
+
+  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    const best = resolveHotspotPick(productName, designerName, mappedPickId);
     if (best) {
       setHotspotLightboxProduct(best);
       return;
@@ -632,7 +637,21 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (linkUrl) {
       window.location.href = linkUrl;
     }
-  }, [allCuratorPicks, navigate]);
+  }, [resolveHotspotPick, navigate]);
+
+  /** Trade mode: hotspot CTA navigates straight to the full product page. */
+  const handleHotspotViewFullProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    const best = resolveHotspotPick(productName, designerName, mappedPickId);
+    if (best?.designer_slug) {
+      const slug = slugifyProduct(best.title + (best.subtitle ? `-${best.subtitle}` : ""));
+      navigate(`/designers/${best.designer_slug}/${slug}`, {
+        state: { from: window.location.pathname + window.location.search },
+      });
+      return;
+    }
+    // No resolvable product page — fall back to the lightbox / link behavior.
+    handleHotspotViewProduct(productName, designerName, linkUrl, mappedPickId);
+  }, [resolveHotspotPick, navigate, handleHotspotViewProduct]);
 
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
