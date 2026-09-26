@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GalleryHorizontal, Play, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryHorizontal, Images, Play, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import EditorialGalleryLandingHint from "@/components/product/EditorialGalleryLandingHint";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { queryKeys } from "@/lib/queryKeys";
@@ -357,7 +358,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   }, [allPicks]);
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
-    setExpandedScene(null);
     setActivePin(hotspot.id);
     setLightboxProduct(resolveHotspotProduct(hotspot));
   }, [resolveHotspotProduct]);
@@ -483,7 +483,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   </Button>
                 </div>
               </div>
-              {lightboxProduct && (
+              {lightboxProduct && !expandedScene && (
                 <PublicProductLightbox
                   product={lightboxProduct}
                   allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
@@ -534,6 +534,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                              </span>
                            </Button>
                          ))}
+                          <div className="absolute bottom-3 right-3 z-20 hidden items-center gap-2 md:flex">
+                             <EditorialGalleryLandingHint key={pageScene.id} onClick={() => setExpandedScene(pageScene)} />
+                             <Button type="button" size="icon" variant="ghost" aria-label="Presentation — expand photo" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="size-10 rounded-full bg-background/90 shadow-lg backdrop-blur-sm hover:bg-background">
+                               <Images className="size-5 text-foreground/80" strokeWidth={1.5} />
+                             </Button>
+                           </div>
                           <Button type="button" size="icon" variant="default" aria-label="Previous gallery photo" title="Previous gallery photo" onClick={() => step(-1)} className="absolute left-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
                             <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden="true" />
                           </Button>
@@ -575,6 +581,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                 </Button>
               ))}
             </div>
+          )}
+          {lightboxProduct && (
+            <PublicProductLightbox
+              product={lightboxProduct}
+              allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
+              onClose={() => setLightboxProduct(null)}
+              onSelectRelated={setLightboxProduct}
+              inline
+            />
           )}
           <Button type="button" variant="ghost" size="icon" aria-label="Close expanded photo" onClick={() => setExpandedScene(null)} className="absolute right-4 top-4 z-20 text-background hover:bg-background/20 hover:text-background"><X className="size-5" /></Button>
         </DialogContent>
