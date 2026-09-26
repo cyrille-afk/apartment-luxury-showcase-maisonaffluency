@@ -489,8 +489,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                   allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
                   onClose={() => setLightboxProduct(null)}
                   onSelectRelated={setLightboxProduct}
-                  inline
-                  contextualPanel
                 />
               )}
                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
@@ -588,7 +586,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
               onClose={() => setLightboxProduct(null)}
               onSelectRelated={setLightboxProduct}
-              inline
             />
           )}
           <Button type="button" variant="ghost" size="icon" aria-label="Close expanded photo" onClick={() => setExpandedScene(null)} className="absolute right-4 top-4 z-20 text-background hover:bg-background/20 hover:text-background"><X className="size-5" /></Button>

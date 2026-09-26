@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Restore natural desktop product-lightbox height so dimensions, actions, notes, and related images do not overlap or leave a blank lower panel.
 - [x] Make every room photo expandable in a centered lightbox with correctly positioned hotspots on desktop and mobile.
 - [x] Restore the Vintage Lounge Chair hotspot on mobile while hiding it only from the matching desktop scene.
 - [x] Top-align Living Room photos 2–4 on desktop.
