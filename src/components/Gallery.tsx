@@ -10,7 +10,7 @@ import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PrivateTourDialog from "./PrivateTourDialog";
-import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductLightbox";
+import PublicProductLightbox, { slugifyProduct, type PublicLightboxItem } from "./PublicProductLightbox";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -548,14 +548,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return [...byKey.values()];
   }, [dbCuratorPicks]);
 
-  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+  const resolveHotspotPick = useCallback((productName: string, designerName: string, mappedPickId?: string | null): PublicLightboxItem | null => {
     // Manual override — admin-picked exact catalog item wins over fuzzy matching.
     if (mappedPickId) {
       const forced = allCuratorPicks.find((p) => p.id === mappedPickId);
-      if (forced) {
-        setHotspotLightboxProduct(forced);
-        return;
-      }
+      if (forced) return forced;
     }
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
     const normName = norm(productName);
@@ -622,6 +619,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     // Prefer designer-matched result; only fall back if no designer match found
     if (!best && !normDesigner) best = bestNoDesigner;
 
+    return best;
+  }, [allCuratorPicks]);
+
+  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    const best = resolveHotspotPick(productName, designerName, mappedPickId);
     if (best) {
       setHotspotLightboxProduct(best);
       return;
@@ -635,7 +637,21 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (linkUrl) {
       window.location.href = linkUrl;
     }
-  }, [allCuratorPicks, navigate]);
+  }, [resolveHotspotPick, navigate]);
+
+  /** Trade mode: hotspot CTA navigates straight to the full product page. */
+  const handleHotspotViewFullProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    const best = resolveHotspotPick(productName, designerName, mappedPickId);
+    if (best?.designer_slug) {
+      const slug = slugifyProduct(best.title + (best.subtitle ? `-${best.subtitle}` : ""));
+      navigate(`/designers/${best.designer_slug}/${slug}`, {
+        state: { from: window.location.pathname + window.location.search },
+      });
+      return;
+    }
+    // No resolvable product page — fall back to the lightbox / link behavior.
+    handleHotspotViewProduct(productName, designerName, linkUrl, mappedPickId);
+  }, [resolveHotspotPick, navigate, handleHotspotViewProduct]);
 
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
@@ -1288,7 +1304,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
                                  filterDesigner={filterDesigner}
-                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
+                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote, onViewFullProduct: handleHotspotViewFullProduct } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                               />
                            )}
                           </div>
@@ -1366,7 +1382,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
                          filterDesigner={filterDesigner}
-                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
+                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote, onViewFullProduct: handleHotspotViewFullProduct } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
                       {/* Close + fullscreen buttons — desktop near image */}
                       <div className={`hidden md:flex flex-col gap-2 absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>
