@@ -629,7 +629,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         id: "gallery-micmac-chandelier", title: productName, brand_name: designerName,
         image_url: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773196208/Screen_Shot_2026-03-11_at_10.29.03_AM_givmmu.png",
         materials: "Cage of bronze with a golden brown patina", dimensions: "70 × 70 × 55 cm / 40 kg",
-        is_catalog_item: false,
+        is_catalog_item: false, restricted_gallery_pin: true,
       });
       return;
     }

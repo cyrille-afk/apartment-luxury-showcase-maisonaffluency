@@ -82,6 +82,8 @@ export interface PublicLightboxItem {
   is_upholstered?: boolean | null;
   /** False for gallery-only hotspot details with no verified catalog product page. */
   is_catalog_item?: boolean;
+  /** Gallery pin for a trade-only designer: never link into their restricted catalogue. */
+  restricted_gallery_pin?: boolean;
 }
 
 interface Props {
@@ -603,14 +605,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                   {relatedProducts.length > 4 && (
                     <div className="flex items-center gap-1">
-                      <button
+                   {product.restricted_gallery_pin ? (
+                     <span className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">{designerDisplay}</span>
+                   ) : <button
                         type="button"
                         onClick={() => scrollRelated(-1)}
                         aria-label="Scroll left"
                         className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
                       >
                         <ChevronLeft className="w-4 h-4" />
-                      </button>
+                   </button>}
                       <button
                         type="button"
                         onClick={() => scrollRelated(1)}

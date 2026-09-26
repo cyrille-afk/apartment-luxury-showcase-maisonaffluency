@@ -9,6 +9,6 @@ export async function fetchPublicMicMacPins() {
 
 export function mergeGalleryPins<T extends { id: string }>(regular: T[], special: T[]): T[] {
   const byId = new Map(regular.map((pin) => [pin.id, pin]));
-  special.forEach((pin) => byId.set(pin.id, pin));
+  special.forEach((pin) => { if (!byId.has(pin.id)) byId.set(pin.id, pin); });
   return [...byId.values()];
 }

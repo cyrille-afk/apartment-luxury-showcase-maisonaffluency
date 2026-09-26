@@ -134,6 +134,7 @@ type Hotspot = {
   dimensions: string | null;
   link_url: string | null;
   mapped_pick_id: string | null;
+  restricted_gallery_pin?: boolean;
 };
 
 type ScenePick = { hotspot: Hotspot; product: PublicLightboxItem; image: string };
@@ -291,7 +292,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     void Promise.all([
       supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
       fetchPublicMicMacPins(),
-    ]).then(([{ data }, special]) => setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null })))));
+    ]).then(([{ data }, special]) => setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true })))));
   }, []);
 
   const { data: manifest } = useQuery({
@@ -358,6 +359,14 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   );
 
   const resolveHotspotProduct = useCallback((hotspot: Hotspot): PublicLightboxItem | null => {
+    if (hotspot.restricted_gallery_pin) return hotspot.product_image_url ? {
+      id: `hotspot-${hotspot.id}`,
+      title: hotspot.product_name,
+      image_url: hotspot.product_image_url,
+      brand_name: hotspot.designer_name || "Maison Affluency",
+      is_catalog_item: false,
+      restricted_gallery_pin: true,
+    } : null;
     const preferredId = FEATURED_HOTSPOT_PICK_IDS[`${hotspot.image_identifier}:${hotspot.product_name}`];
     const preferred = preferredId ? allPicks.find((pick) => pick.id === preferredId) : null;
     const exact = hotspot.mapped_pick_id ? allPicks.find((pick) => pick.id === hotspot.mapped_pick_id) : null;
@@ -460,7 +469,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
   const scenePicks = activeScene && !(roomSpaceIndex === 0 && sceneIdx === 0) ? hotspotsForScene(activeScene)
-    .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
+    .filter((hotspot) => !hotspot.restricted_gallery_pin && !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
       const useScenePhoto = (hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "Astra Dining Table")
