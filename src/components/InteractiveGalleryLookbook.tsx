@@ -14,6 +14,7 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { attachMilestoneTracking, trackVideoEvent } from "@/lib/videoTracking";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { curatingTeam } from "@/components/CuratingTeam";
 
 type Scene = { title: string; id: string };
@@ -287,10 +288,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const activePage = galleryPages[sceneIdx];
 
   useEffect(() => {
-    supabase
-      .from("gallery_hotspots")
-      .select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id")
-      .then(({ data }) => setHotspots((data as Hotspot[]) || []));
+    void Promise.all([
+      supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
+      fetchPublicMicMacPins(),
+    ]).then(([{ data }, special]) => setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null })))));
   }, []);
 
   const { data: manifest } = useQuery({
