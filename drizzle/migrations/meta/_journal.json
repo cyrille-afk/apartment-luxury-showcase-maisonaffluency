@@ -673,6 +673,13 @@
       "when": 1790463658531,
       "tag": "0095_public_micmac_gallery_pins_only",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1790466507220,
+      "tag": "0096_restrict_suppliers_read",
+      "breakpoints": true
     }
   ]
 }
