@@ -105,8 +105,8 @@ const leftNavItems = [{
   href: "/designers",
   icon: Palette,
 }, {
-  label: "Interactive Gallery",
-  mobileLabel: "Interactive Gallery",
+  label: "Our Gallery",
+  mobileLabel: "Our Gallery",
   href: "/gallery",
   icon: Image,
 }, {
@@ -989,7 +989,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
                 )}
               >
-                <span className="link-underline-grow">Interactive Gallery</span>
+                <span className="link-underline-grow">Our Gallery</span>
               </button>
 
               <button
