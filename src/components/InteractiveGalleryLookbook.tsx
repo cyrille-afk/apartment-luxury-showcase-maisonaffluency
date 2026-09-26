@@ -546,12 +546,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                              </span>
                            </Button>
                          ))}
-                          <div className="absolute bottom-3 right-3 z-20 hidden items-center gap-2 md:flex">
-                             <EditorialGalleryLandingHint key={pageScene.id} onClick={() => setExpandedScene(pageScene)} />
-                             <Button type="button" size="icon" variant="ghost" aria-label="Presentation — expand photo" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="size-10 rounded-full bg-background/90 shadow-lg backdrop-blur-sm hover:bg-background">
-                               <Images className="size-5 text-foreground/80" strokeWidth={1.5} />
-                             </Button>
-                           </div>
+                           <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
+                              <EditorialGalleryLandingHint key={pageScene.id} onClick={() => setExpandedScene(pageScene)} className="mr-2.5 px-2.5 py-1 text-[9px] tracking-[0.18em] text-foreground/70 shadow-sm" />
+                              <button type="button" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse">
+                                <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+                              </button>
+                            </div>
                           <Button type="button" size="icon" variant="default" aria-label="Previous gallery photo" title="Previous gallery photo" onClick={() => step(-1)} className="absolute left-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
                             <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden="true" />
                           </Button>
