@@ -517,8 +517,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               )}
                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                   {hasScenePicks && (
-                    <aside aria-label="Products on the left of this photo" className="hidden w-40 shrink-0 content-center border-r border-border/60 pr-2 md:grid lg:w-52 lg:pr-4 xl:w-56 xl:pr-6">
-                       <div className="grid grid-cols-1 content-center gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
+                     <aside aria-label="Products on the left of this photo" className="hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5">
+                        <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
                   <div className="flex min-w-0 flex-1 items-start justify-center">
@@ -573,8 +573,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                    </AnimatePresence>
                  </div>
                   {hasScenePicks && (
-                    <aside aria-label="Products on the right of this photo" className="hidden w-40 shrink-0 content-center border-l border-border/60 pl-2 md:grid lg:w-52 lg:pl-4 xl:w-56 xl:pl-6">
-                       <div className="grid grid-cols-1 content-center gap-y-4">{featuredRightPicks.map(renderScenePick)}</div>
+                     <aside aria-label="Products on the right of this photo" className="hidden w-40 shrink-0 content-center border-l border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5">
+                        <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
