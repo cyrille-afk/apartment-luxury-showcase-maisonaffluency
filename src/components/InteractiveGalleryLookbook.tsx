@@ -108,6 +108,9 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Masterful Suite:Villa Pedestal": "left",
   "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
   "A Masterful Suite:Bud Table Lamp": "right",
+  "An Artistic Statement:Martell Wall Lamp": "left",
+  "An Artistic Statement:Lantern Table Lamp": "left",
+  "An Artistic Statement:Eggshell DOT Side Table": "right",
 };
 const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:Astra Dining Table",
