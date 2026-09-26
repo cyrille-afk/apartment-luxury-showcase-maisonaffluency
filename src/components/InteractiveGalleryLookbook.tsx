@@ -106,9 +106,12 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian": "left",
   "A Sophisticated Boudoir:Toshiro Lamp": "right",
   "A Sophisticated Boudoir:Gold Leaves+Glass Snake Vessel (Unique Piece)": "right",
+  "A Masterful Suite:Bronze MicMac Chandelier": "left",
+  "A Masterful Suite:Bud Table Lamp": "left",
   "A Masterful Suite:Villa Pedestal": "left",
-  "A Masterful Suite:Brunelleschi Perspective Wallcover": "left",
-  "A Masterful Suite:Bud Table Lamp": "right",
+  "A Masterful Suite:Brunelleschi Perspective Wallcover": "right",
+  "A Masterful Suite:Crystalline Blue Vessel Volume 5": "right",
+  "A Masterful Suite:Giudecca Rug (Custom)": "right",
   "An Artistic Statement:Martell Wall Lamp": "left",
   "An Artistic Statement:Lantern Table Lamp": "left",
   "An Artistic Statement:Eggshell DOT Side Table": "right",
@@ -120,8 +123,12 @@ const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian",
   "A Sophisticated Boudoir:Lyric Desk",
   "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian",
+  "A Masterful Suite:Bronze MicMac Chandelier",
+  "A Masterful Suite:Bud Table Lamp",
   "A Masterful Suite:Villa Pedestal",
   "A Masterful Suite:Brunelleschi Perspective Wallcover",
+  "A Masterful Suite:Crystalline Blue Vessel Volume 5",
+  "A Masterful Suite:Giudecca Rug (Custom)",
 ];
 
 type Hotspot = {
