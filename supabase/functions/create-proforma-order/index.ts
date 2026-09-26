@@ -114,6 +114,17 @@ serve(async (req) => {
     };
 
     // Idempotent on order_ref: re-issuing the invoice must not duplicate orders.
+    // Never let a caller overwrite someone else's order via a chosen order_ref.
+    {
+      const { data: existing } = await supabase
+        .from("shop_orders")
+        .select("user_id")
+        .eq("order_ref", orderRef)
+        .maybeSingle();
+      if (existing && existing.user_id !== userId) {
+        return json({ error: "Order reference already in use." }, 409);
+      }
+    }
     const { data: order, error } = await supabase
       .from("shop_orders")
       .upsert(row, { onConflict: "order_ref" })
