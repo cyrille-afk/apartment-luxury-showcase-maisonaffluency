@@ -250,7 +250,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // reset the close lifecycle. iOS/PWA occasionally misses framer-motion's exit
   // callback; the timeout above guarantees the invisible overlay is unmounted.
   useEffect(() => {
-    if (!propProduct?.id || propProduct.restricted_gallery_pin) return;
+    if (!propProduct?.id) return;
     closeStartedRef.current = false;
     closedRef.current = false;
     if (closeTimerRef.current) {
@@ -412,7 +412,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   }, [product, contextualPanel]);
 
   const relatedProducts = useMemo(() => {
-    if (!product) return [];
+    if (!product || product.restricted_gallery_pin) return [];
     const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url);
     // Vary selection per product using a simple hash offset
     const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -994,7 +994,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Curator Notes — immediate context below the product details */}
-          <motion.div
+          {!product.restricted_gallery_pin && <motion.div
             key={`curator-notes-${product.id}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1041,12 +1041,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
-          </motion.div>
+          </motion.div>}
 
           {/* More From — final exploration tier */}
-          <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
+          {!product.restricted_gallery_pin && <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
             {relatedStrip}
-          </div>
+          </div>}
         </div>
       </motion.div>
     </motion.div>
