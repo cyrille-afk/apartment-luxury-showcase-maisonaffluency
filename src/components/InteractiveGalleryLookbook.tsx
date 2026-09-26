@@ -535,7 +535,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                                  return next;
                                });
                              }}
-                             className="block h-auto w-full cursor-zoom-in object-contain md:max-h-[60vh] md:w-auto md:max-w-full"
+                             className="block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full"
                            />
                          </Button>
                           {hotspotsForScene(pageScene).map((hotspot) => (
