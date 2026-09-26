@@ -125,7 +125,7 @@ function applyRugPerSqmPricing(
 
 
 function slugify(s: string) {
-  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 function resolveGalleryImageByFinishFilename(heroList: string[], labels: Array<string | null | undefined>): string | null {

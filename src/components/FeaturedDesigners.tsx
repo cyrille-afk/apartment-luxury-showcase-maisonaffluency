@@ -1872,7 +1872,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
 ];
 
 function slugifyProduct(s: string) {
-  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 const FeaturedDesigners = () => {

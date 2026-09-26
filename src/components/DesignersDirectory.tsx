@@ -1362,7 +1362,7 @@ const SUBCATEGORY_TO_TAGS: Record<string, string[]> = {
 
 // ─── Product Pick Card (shown when category filter is active) ────────────────
 function pickSlugify(s: string) {
-  return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: PickItem; onFavorite?: (id: string) => void; isFavorited?: boolean; rrp?: PublicRrpRow | null; hideFavorite?: boolean }) => {
