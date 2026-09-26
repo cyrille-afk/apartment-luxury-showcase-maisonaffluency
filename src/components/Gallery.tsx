@@ -548,14 +548,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return [...byKey.values()];
   }, [dbCuratorPicks]);
 
-  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+  const resolveHotspotPick = useCallback((productName: string, designerName: string, mappedPickId?: string | null): PublicLightboxItem | null => {
     // Manual override — admin-picked exact catalog item wins over fuzzy matching.
     if (mappedPickId) {
       const forced = allCuratorPicks.find((p) => p.id === mappedPickId);
-      if (forced) {
-        setHotspotLightboxProduct(forced);
-        return;
-      }
+      if (forced) return forced;
     }
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
     const normName = norm(productName);
