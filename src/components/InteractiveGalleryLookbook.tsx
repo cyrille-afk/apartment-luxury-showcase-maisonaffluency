@@ -468,20 +468,20 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   };
 
   const ribbonItems = [
-    { key: "tour", label: "Tour Our Gallery", onClick: () => setGalleryState({ kind: "tour" }), active: galleryState.kind === "tour" },
-    ...SPACES.map((item, index) => ({ key: item.key, label: item.label, onClick: () => selectSpace(index), active: galleryState.kind === "room" && roomSpaceIndex === index })),
+    { key: "tour", label: "Gallery Tour", onClick: () => setGalleryState({ kind: "tour" }), active: galleryState.kind === "tour" },
     { key: "curators", label: "The Curators", onClick: () => setGalleryState({ kind: "curators" }), active: galleryState.kind === "curators" },
+    ...SPACES.map((item, index) => ({ key: item.key, label: item.label, onClick: () => selectSpace(index), active: galleryState.kind === "room" && roomSpaceIndex === index })),
   ];
 
   const activeTitle = galleryState.kind === "room"
     ? activePage.title
     : galleryState.kind === "tour"
-      ? "Tour Our Gallery"
+      ? "Gallery Tour"
       : "The Curators";
   const activeCategory = galleryState.kind === "room"
     ? space.label
     : galleryState.kind === "tour"
-      ? "Tour Our Gallery"
+      ? "Gallery Tour"
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
   const activeSceneReady = !!activeScene && hotspotsReady && catalogReady && loadedScenes.has(activeScene.id);
