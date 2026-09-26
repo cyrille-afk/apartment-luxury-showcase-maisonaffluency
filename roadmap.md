@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Place the Office desk side pick on the right in photos 1/4 and 2/4.
+- [ ] Reveal gallery photos and their hotspots together after both are ready, on desktop and mobile.
 - [x] Show only the two MicMac Chandelier gallery pins on Master Suite photos 1/4 and 3/4 while preserving Hervé van der Straeten's trade-only catalogue status.
 - [x] Hide the tour video's initial native loading indicator and reset to its opening image after exit or completion.
 - [x] Restore natural desktop product-lightbox height so dimensions, actions, notes, and related images do not overlap or leave a blank lower panel.
