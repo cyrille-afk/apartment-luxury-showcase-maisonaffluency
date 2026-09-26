@@ -1,3 +1,4 @@
+import { detectFileType } from "../_shared/fileSignature.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
@@ -118,7 +119,14 @@ serve(async (req) => {
     let storagePath: string | null = null;
     if (pdfBase64) {
       try {
+        if (typeof pdfBase64 !== "string" || pdfBase64.length > 14_000_000) {
+          throw new Error("purchase-order PDF too large");
+        }
         const bytes = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
+        // Only genuine PDFs up to 10 MB are stored and sent to suppliers.
+        if (bytes.byteLength > 10 * 1024 * 1024 || detectFileType(bytes) !== "application/pdf") {
+          throw new Error("purchase-order document is not a valid PDF");
+        }
         storagePath = `${item.quote_id}/${item.po_number}-${Date.now()}.pdf`;
         const { error: upErr } = await supabase.storage
           .from("purchase-orders")
