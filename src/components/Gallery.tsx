@@ -342,7 +342,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, hotspotsRead
       <img
         {...imgProps}
         alt={item.title}
-        className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-300 ${sceneReady ? 'opacity-100' : 'opacity-0'} ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
+        className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${sceneReady ? 'opacity-100' : 'opacity-0'} ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
         decoding="async"
 
