@@ -582,6 +582,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
           )}
           {lightboxProduct && (
             <PublicProductLightbox
+              inline
               product={lightboxProduct}
               allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
               onClose={() => setLightboxProduct(null)}
