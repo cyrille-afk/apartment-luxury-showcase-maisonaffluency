@@ -100,6 +100,7 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Dreamy Tuscan Landscape:PéPé S Icewood x FJ Hakimian": "left",
   "A Dreamy Tuscan Landscape:Crystalline Vase Volume 3": "right",
   "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "right",
+  "A Highly Customised Dining Room:Crystalline Vase Volume 3": "right",
   "A Sophisticated Boudoir:Lyric Desk": "left",
   "A Sophisticated Boudoir:PéPé S Icewood x FJ Hakimian": "left",
   "A Sophisticated Boudoir:Toshiro Lamp": "right",
