@@ -545,19 +545,6 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             </a>
                           ) : null;
                         })()}
-                        {onAddToQuote && (() => {
-                          const price = getHotspotPrice(hotspot.product_name);
-                          return price ? (
-                            <p className="font-display text-sm text-accent font-semibold mt-1.5">
-                              {formatPrice(price.cents, price.currency, price.price_unit)}
-                            </p>
-                          ) : (
-                            <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
-                          );
-                        })()}
-                        {!onAddToQuote && (
-                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
-                        )}
                         {hotspot.link_url && !onAddToQuote && !onRequestQuote && (
                           <button
                             className="inline-block mt-2 text-xs text-primary underline underline-offset-2 font-body hover:text-primary/80 transition-colors"
@@ -609,7 +596,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               setActiveId(null);
                             }}
                           >
-                            {onViewFullProduct ? "View Full Product →" : (<><ShoppingCart className="w-3 h-3" />Add to Quote</>)}
+                            {onViewFullProduct ? "Explore the craftsmanship →" : (<><ShoppingCart className="w-3 h-3" />Add to Quote</>)}
                           </button>
                         )}
 
