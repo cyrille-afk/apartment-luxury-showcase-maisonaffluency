@@ -4,6 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -222,14 +223,16 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     setHotspots([]);
     setActiveId(null);
     const fetchHotspots = async () => {
-      const { data } = await supabase
-        .from("gallery_hotspots")
-        .select("*")
-        .eq("image_identifier", imageIdentifier);
-      if (data) setHotspots(data);
+      const [{ data }, special] = await Promise.all([
+        supabase.from("gallery_hotspots").select("*").eq("image_identifier", imageIdentifier),
+        onAddToQuote ? Promise.resolve([]) : fetchPublicMicMacPins(),
+      ]);
+      setHotspots(mergeGalleryPins(data || [], special.filter((pin) => pin.image_identifier === imageIdentifier).map((pin): Hotspot => ({
+        ...pin, link_url: null, materials: null, dimensions: null, mapped_pick_id: null,
+      }))));
     };
     fetchHotspots();
-  }, [imageIdentifier]);
+  }, [imageIdentifier, onAddToQuote]);
 
   // Filter hotspots by designer when opened from a designer card
   const displayHotspots = useMemo(() => {
