@@ -38,7 +38,7 @@ import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
  *  Accents are transliterated (GÉLULE → gelule) so the generated URL matches
  *  the resolver in publicProductPageQuery — otherwise the link 404s. */
-const slugifyProduct = (s: string) =>
+export const slugifyProduct = (s: string) =>
   s
     .toLowerCase()
     .normalize("NFD")

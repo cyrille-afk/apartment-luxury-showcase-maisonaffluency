@@ -10,7 +10,7 @@ import PinchHint from "./PinchHint";
 import GalleryHotspots from "./GalleryHotspots";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import PrivateTourDialog from "./PrivateTourDialog";
-import PublicProductLightbox, { type PublicLightboxItem } from "./PublicProductLightbox";
+import PublicProductLightbox, { slugifyProduct, type PublicLightboxItem } from "./PublicProductLightbox";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
