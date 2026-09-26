@@ -85,6 +85,8 @@ const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
   "A Masterful Suite:Brunelleschi Perspective Wallcover": "6f32db0d-3d34-4035-9bf4-b42cb33940e9",
   "A Masterful Suite:Bud Table Lamp": "da524883-8938-441a-b902-f12deb378ca7",
 };
+// The Dining Room chair uses its first curator photo, not the older cropped hotspot image.
+const DINING_CHAIR_FIRST_PHOTO = "https://res.cloudinary.com/dif1oamtj/image/upload/v1790428122/Screen_Shot_2026-09-26_at_9.07.39_PM_wzo5mz.png";
 // The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
 const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set([
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003",
@@ -439,7 +441,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
       const useScenePhoto = hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "Astra Dining Table";
-      const image = useScenePhoto ? hotspot.product_image_url || product?.image_url : product?.id.startsWith("hotspot-") ? hotspot.product_image_url : product?.image_url || hotspot.product_image_url;
+      const image = hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "PéPé S Icewood x FJ Hakimian"
+        ? DINING_CHAIR_FIRST_PHOTO
+        : useScenePhoto ? hotspot.product_image_url || product?.image_url : product?.id.startsWith("hotspot-") ? hotspot.product_image_url : product?.image_url || hotspot.product_image_url;
       return product && image ? { hotspot, product, image } : null;
     })
     .filter((pick): pick is ScenePick => pick !== null) : [];
