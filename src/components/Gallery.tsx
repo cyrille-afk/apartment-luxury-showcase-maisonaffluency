@@ -1304,7 +1304,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 visible={true}
                                 onCloseLightbox={closeLightbox}
                                  filterDesigner={filterDesigner}
-                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
+                                 {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote, onViewFullProduct: handleHotspotViewFullProduct } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                               />
                            )}
                           </div>
@@ -1382,7 +1382,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                          visible={!imageZoomed}
                          onCloseLightbox={closeLightbox}
                          filterDesigner={filterDesigner}
-                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
+                         {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote, onViewFullProduct: handleHotspotViewFullProduct } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
                        />
                       {/* Close + fullscreen buttons — desktop near image */}
                       <div className={`hidden md:flex flex-col gap-2 absolute z-50 ${isExpanded ? 'bottom-2 -right-12 lg:-right-14' : 'bottom-2 -right-12 lg:-right-14'}`}>

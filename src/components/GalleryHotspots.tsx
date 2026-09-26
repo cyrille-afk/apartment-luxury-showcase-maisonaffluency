@@ -90,6 +90,7 @@ interface GalleryHotspotsProps {
    *  When `mappedPickId` is provided, the consumer should open that exact
    *  catalog item and skip fuzzy matching. */
   onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => void;
+  onViewFullProduct?: (productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => void;
   /** When set, only show hotspots matching this designer name */
   filterDesigner?: string | null;
 }
