@@ -376,16 +376,31 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     setSceneIdx(direction > 0 ? 0 : SPACES[nextSpaceIndex].scenes.length - 1);
   }, [galleryState.kind, galleryPages.length, roomSpaceIndex, sceneIdx]);
 
+  const stepExpanded = useCallback((direction: number) => {
+    if (!expandedScene || galleryState.kind !== "room" || galleryPages.length === 0) return;
+    const current = galleryPages.findIndex((scene) => scene.id === expandedScene.id);
+    const nextIndex = ((current < 0 ? sceneIdx : current) + direction + galleryPages.length) % galleryPages.length;
+    setSceneIdx(nextIndex);
+    setExpandedScene(galleryPages[nextIndex]);
+    setActivePin(null);
+    setLightboxProduct(null);
+  }, [expandedScene, galleryState.kind, galleryPages, sceneIdx]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (lightboxProduct || expandedScene) return;
+      if (lightboxProduct) return;
+      if (expandedScene) {
+        if (event.key === "ArrowLeft") stepExpanded(-1);
+        if (event.key === "ArrowRight") stepExpanded(1);
+        return;
+      }
       if (event.key === "ArrowLeft") step(-1);
       if (event.key === "ArrowRight") step(1);
       if (event.key === "Escape") setDrawerOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxProduct, expandedScene, step]);
+  }, [lightboxProduct, expandedScene, step, stepExpanded]);
 
   const selectSpace = (spaceIndex: number) => {
     setExpandedScene(null);
