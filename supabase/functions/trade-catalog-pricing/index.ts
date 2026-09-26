@@ -81,7 +81,15 @@ serve(async (req) => {
       .from("trade_products")
       .select(PRICING_COLUMNS)
       .eq("is_active", true)
-      .or(pickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
+      .or(
+        pickIds
+          .map((id) =>
+            UUID_RE.test(id)
+              ? `source_pick_id.eq.${id},id.eq.${id}`
+              : `source_pick_id.eq.${id}`,
+          )
+          .join(","),
+      );
     if (error) {
       console.error("[trade-catalog-pricing] lookup failed", error);
       return json({ error: "Unable to load pricing." }, 500);
