@@ -487,7 +487,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const activeSceneReady = !!activeScene && hotspotsReady && catalogReady && loadedScenes.has(activeScene.id);
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
   const scenePicks = activeScene && !(roomSpaceIndex === 0 && sceneIdx === 0) ? hotspotsForScene(activeScene)
-    .filter((hotspot) => !hotspot.restricted_gallery_pin && !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
+    .filter((hotspot) => !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
       const useScenePhoto = (hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "Astra Dining Table")
