@@ -18,6 +18,11 @@ const corsHeaders = {
 const PRICING_COLUMNS =
   "id, source_pick_id, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, lead_time, lead_time_weeks_min, lead_time_weeks_max, stock_status_override, spec_sheet_url, is_allocation_restricted, allocation_unit_cap, available_stock_units";
 
+// Only genuine UUIDs may be matched against the uuid `id` column; friendly
+// codes (e.g. "tp-210") and hotspot references match `source_pick_id` only,
+// otherwise Postgres raises 22P02 and the whole batch 500s.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -77,11 +82,17 @@ serve(async (req) => {
       );
     }
 
+    // Both `id` and `source_pick_id` are uuid columns, so friendly codes
+    // (e.g. "tp-210") and hotspot references can never match; querying with
+    // them raises Postgres 22P02 and 500s the whole batch. Skip them.
+    const uuidPickIds = pickIds.filter((id) => UUID_RE.test(id));
+    if (!uuidPickIds.length) return json({ products: [] });
+
     const { data, error } = await admin
       .from("trade_products")
       .select(PRICING_COLUMNS)
       .eq("is_active", true)
-      .or(pickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
+      .or(uuidPickIds.map((id) => `source_pick_id.eq.${id},id.eq.${id}`).join(","));
     if (error) {
       console.error("[trade-catalog-pricing] lookup failed", error);
       return json({ error: "Unable to load pricing." }, 500);
