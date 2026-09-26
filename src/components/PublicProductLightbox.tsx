@@ -250,7 +250,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // reset the close lifecycle. iOS/PWA occasionally misses framer-motion's exit
   // callback; the timeout above guarantees the invisible overlay is unmounted.
   useEffect(() => {
-    if (!propProduct?.id) return;
+    if (!propProduct?.id || propProduct.restricted_gallery_pin) return;
     closeStartedRef.current = false;
     closedRef.current = false;
     if (closeTimerRef.current) {
@@ -352,16 +352,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         ? product.brand_name.split(" - ")[0].trim()
         : product.brand_name)
     : undefined;
-  const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
+  const { data: linkedDesigner } = useDesignerByName(product?.restricted_gallery_pin ? undefined : designerDisplayName);
 
   // Publicly visible RRP (only for products flagged public_rrp_visible, e.g. Apparatus).
-  const { data: publicRrp } = usePublicRrp(product?.id);
+  const { data: publicRrp } = usePublicRrp(product?.restricted_gallery_pin ? undefined : product?.id);
   const { displayRow: publicRrpDisplayRow } = usePublicRrpDisplay(publicRrp);
   const publicPriceLabel = formatPublicRrp(publicRrpDisplayRow);
   const accountDiscount = useAccountDiscount();
   const { showTradePrice, tierLabel } = useTradePriceMode();
   const showMemberTradePrice = accountDiscount.eligible && showTradePrice;
-  const { data: tradePricing } = useTradeProductPricing(product?.id, showMemberTradePrice);
+  const { data: tradePricing } = useTradeProductPricing(product?.restricted_gallery_pin ? undefined : product?.id, showMemberTradePrice && !product?.restricted_gallery_pin);
   const brandDiscountCaps = useBrandDiscountCaps(showMemberTradePrice);
   const [tradeDisplayCurrency] = useTradeDisplayCurrency();
   const fxRates = useFxRates();
