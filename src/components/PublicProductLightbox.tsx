@@ -676,7 +676,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             "relative mx-auto flex w-full flex-col bg-background",
             contextualPanel
               ? "pointer-events-auto h-auto max-w-none overflow-visible border border-border/60 shadow-2xl"
-              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-[94vh] md:max-h-[94vh] md:overflow-hidden"
+              : "max-w-6xl h-dvh max-h-dvh min-h-0 overflow-y-auto shadow-2xl md:h-auto md:max-h-[calc(100dvh-3rem)] md:overflow-y-auto"
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -714,12 +714,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <X size={18} />
           </button>
 
-          {/* Upper two-column editorial block — constrained to stay above the fold */}
+           {/* Upper two-column editorial block — grows with the dimensions and actions */}
           <div className={cn("mx-auto flex w-full max-w-6xl flex-col p-4 md:p-6", contextualPanel && "h-auto max-h-none overflow-visible")}>
-            <div className={cn("grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8 md:h-[min(300px,38vh)] md:grid-rows-[1fr]")}>
+             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start md:gap-8">
 
               {/* LEFT COLUMN — standardized hero image container */}
-              <div className={cn("relative flex w-full items-center justify-center", contextualPanel ? "md:h-full md:min-h-0 md:overflow-hidden" : "min-h-0 md:h-full")}>
+               <div className="relative flex w-full min-h-0 items-center justify-center md:max-h-[300px]">
                 {product.image_url ? (
                   <>
                     {!imageLoaded && !imageFailed && (
@@ -739,7 +739,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onLoad={() => { setImageLoaded(true); setImageFailed(false); }}
                       onError={() => { setImageFailed(true); setImageLoaded(true); }}
                       className={cn(
-                        "w-full h-auto object-contain transition-opacity duration-300 md:h-full",
+                         "h-auto w-full object-contain transition-opacity duration-300 md:max-h-[300px]",
                         imageFailed || !imageLoaded ? "opacity-0" : "opacity-100"
                       )}
                     />
@@ -807,8 +807,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               {/* RIGHT COLUMN — specs card + CTAs */}
-              <div className={cn("flex w-full flex-col md:border-l md:border-border/40 md:pl-8", contextualPanel ? "h-auto overflow-visible" : "md:h-full md:min-h-0 md:overflow-visible")}>
-                <div className={cn("pr-1", contextualPanel ? "h-auto overflow-visible" : "min-h-0 md:flex-1 md:overflow-visible")}>
+               <div className="flex w-full flex-col md:border-l md:border-border/40 md:pl-8">
+                 <div className="pr-1">
 
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
