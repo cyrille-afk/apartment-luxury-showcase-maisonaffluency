@@ -87,6 +87,8 @@ const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
 };
 // The Dining Room chair uses its first curator photo, not the older cropped hotspot image.
 const DINING_CHAIR_FIRST_PHOTO = "https://res.cloudinary.com/dif1oamtj/image/upload/v1790428122/Screen_Shot_2026-09-26_at_9.07.39_PM_wzo5mz.png";
+// Use the requested sofa photograph only for the Living Room's second and third side picks.
+const LIVING_ROOM_NIKO_PHOTO = "https://res.cloudinary.com/dif1oamtj/image/upload/v1779900275/Niko-9_ynis9l.jpg";
 // The Boudoir's chandelier side pick was explicitly replaced by the Toshiro lamp.
 const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set([
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003",
@@ -441,8 +443,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     .map((hotspot): ScenePick | null => {
       const product = resolveHotspotProduct(hotspot);
       const useScenePhoto = hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "Astra Dining Table";
-      const image = hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "PéPé S Icewood x FJ Hakimian"
-        ? DINING_CHAIR_FIRST_PHOTO
+       const image = roomSpaceIndex === 0 && (sceneIdx === 1 || sceneIdx === 2) && /^Niko (340|420) Custom Sofa\b/.test(hotspot.product_name)
+         ? LIVING_ROOM_NIKO_PHOTO
+         : hotspot.image_identifier === "A Dreamy Tuscan Landscape" && hotspot.product_name === "PéPé S Icewood x FJ Hakimian"
+         ? DINING_CHAIR_FIRST_PHOTO
         : useScenePhoto ? hotspot.product_image_url || product?.image_url : product?.id.startsWith("hotspot-") ? hotspot.product_image_url : product?.image_url || hotspot.product_image_url;
       return product && image ? { hotspot, product, image } : null;
     })
