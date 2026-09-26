@@ -78,7 +78,10 @@ serve(async (req) => {
 
     // Net-buy: managed freight is MANDATORY and locked from a saved shipping_quote.
     // Server-side freight always wins over client-supplied numbers — this is the audit lock.
-    if (billingMode === "net_buy") {
+    // Never trust caller-supplied shipping: agent-commission quotes use the
+    // attached freight quote when present, otherwise shipping is quoted later.
+    if (billingMode !== "net_buy") shippingCentsSafe = 0;
+    if (billingMode === "net_buy" || quote.managed_freight_quote_id) {
       if (!quote.managed_freight_quote_id) {
         throw new Error(
           "Managed freight quote required for net-buy checkout. Attach a freight estimate to this quote before paying.",
