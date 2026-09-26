@@ -465,7 +465,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
             event.currentTarget.src = hotspot.product_image_url;
           }
         }}
-        className="block aspect-square w-full border border-border/60 bg-background object-contain"
+        className={`block aspect-square w-full border border-border/60 bg-background ${hotspot.product_name === "Astra Dining Table" ? "object-cover" : "object-contain"}`}
       />
       <span className="mt-1.5 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{product.id.startsWith("hotspot-") ? hotspot.product_name : product.title}</span>
       <span className="mt-1 block w-full whitespace-normal break-words font-body text-[9px] font-light uppercase leading-tight tracking-wider text-muted-foreground">{product.brand_name}</span>
