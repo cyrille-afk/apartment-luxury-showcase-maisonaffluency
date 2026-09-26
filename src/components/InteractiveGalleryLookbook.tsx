@@ -378,10 +378,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
 
   const stepExpanded = useCallback((direction: number) => {
     if (!expandedScene || galleryState.kind !== "room" || galleryPages.length === 0) return;
-    const current = galleryPages.findIndex((scene) => scene.id === expandedScene.id);
-    const nextIndex = ((current < 0 ? sceneIdx : current) + direction + galleryPages.length) % galleryPages.length;
+    const nextIndex = (sceneIdx + direction + galleryPages.length) % galleryPages.length;
     setSceneIdx(nextIndex);
-    setExpandedScene(galleryPages[nextIndex]);
+    setExpandedScene(galleryPages[nextIndex].scenes[0] ?? null);
     setActivePin(null);
     setLightboxProduct(null);
   }, [expandedScene, galleryState.kind, galleryPages, sceneIdx]);
@@ -614,11 +613,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               </Button>
               <div className="absolute inset-x-0 bottom-4 z-20 flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2" role="tablist" aria-label="Photos in this room">
-                  {galleryPages.map((scene, index) => (
-                    <button key={scene.id} type="button" role="tab" aria-selected={scene.id === expandedScene.id} aria-label={`Photo ${index + 1} of ${galleryPages.length}`} onClick={() => { setSceneIdx(index); setExpandedScene(scene); setActivePin(null); setLightboxProduct(null); }} className={`size-2 rounded-full transition-colors ${scene.id === expandedScene.id ? "bg-background" : "bg-background/40 hover:bg-background/70"}`} />
+                  {galleryPages.map((galleryPage, index) => (
+                    <button key={galleryPage.title} type="button" role="tab" aria-selected={index === sceneIdx} aria-label={`Photo ${index + 1} of ${galleryPages.length}`} onClick={() => { setSceneIdx(index); setExpandedScene(galleryPage.scenes[0] ?? null); setActivePin(null); setLightboxProduct(null); }} className={`size-2 rounded-full transition-colors ${index === sceneIdx ? "bg-background" : "bg-background/40 hover:bg-background/70"}`} />
                   ))}
                 </div>
-                <span className="font-body text-[11px] uppercase tracking-[0.28em] text-background/80">{(galleryPages.findIndex((scene) => scene.id === expandedScene.id) + 1) || 1} / {galleryPages.length}</span>
+                <span className="font-body text-[11px] uppercase tracking-[0.28em] text-background/80">{sceneIdx + 1} / {galleryPages.length}</span>
               </div>
             </>
           )}
