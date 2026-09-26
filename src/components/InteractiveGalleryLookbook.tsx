@@ -563,8 +563,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                          ))}
                            <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                                <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
-                              <button type="button" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse">
-                                <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
+<button type="button" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-[#8a2438]/60 bg-[#5a1622]/85 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse">
+                                <Images size={20} strokeWidth={1.5} className="text-[#f5e6ea]" />
                               </button>
                             </div>
                           <Button type="button" size="icon" variant="default" aria-label="Previous gallery photo" title="Previous gallery photo" onClick={() => step(-1)} className="absolute left-0 top-1/2 z-20 hidden h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background shadow-none hover:bg-foreground/85 md:flex">
