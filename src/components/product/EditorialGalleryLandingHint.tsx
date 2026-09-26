@@ -5,11 +5,13 @@ import { Images } from "lucide-react";
 interface EditorialGalleryLandingHintProps {
   onClick?: () => void;
   className?: string;
+  tone?: "light" | "crimson";
 }
 
 export default function EditorialGalleryLandingHint({
   onClick,
   className,
+  tone = "light",
 }: EditorialGalleryLandingHintProps) {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -31,9 +33,10 @@ export default function EditorialGalleryLandingHint({
       }}
       className={cn(
         "hidden md:flex items-center gap-2 px-4 py-2.5 rounded-full",
-        "bg-background/90 backdrop-blur-sm border border-border/60 shadow-lg",
-        "font-body text-[11px] uppercase tracking-[0.14em] text-foreground",
-        "transition-all duration-700 ease-out hover:bg-background",
+        "backdrop-blur-sm shadow-lg font-body uppercase transition-all duration-700 ease-out",
+        tone === "crimson"
+          ? "bg-[#5a1622]/85 border border-[#8a2438]/60 text-[#f5e6ea] text-[11px] tracking-[0.22em] hover:bg-[#6b1b2a]/90"
+          : "bg-background/90 border border-border/60 text-foreground text-[11px] tracking-[0.14em] hover:bg-background",
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none",
         className
       )}
