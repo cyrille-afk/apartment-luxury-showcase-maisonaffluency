@@ -216,6 +216,14 @@ function GalleryTour() {
           >
             <source src={APARTMENT_TOUR_VIDEO_URL} type="video/mp4" />
           </video>
+          {!hasStarted && (
+            <img
+              src={large("bespoke-sofa_gxidtx")}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 aspect-video h-full w-full object-cover"
+            />
+          )}
           {!isPlaying && (
             <Button
               type="button"
