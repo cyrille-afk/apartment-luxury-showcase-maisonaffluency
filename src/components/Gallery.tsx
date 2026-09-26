@@ -280,6 +280,7 @@ type MobileGalleryImageCardProps = {
   item: typeof galleryExperiences[number]["items"][number];
   isHotspotSection: boolean;
   hotspots: GalleryHotspotPosition[];
+  hotspotsReady: boolean;
   onHotspotActivate: (hotspot: GalleryHotspotPosition) => void;
   onExpand: () => void;
   /** Position within the horizontal strip. */
@@ -288,8 +289,10 @@ type MobileGalleryImageCardProps = {
   activeIndex: number;
 };
 
-const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate, onExpand, index, activeIndex }: MobileGalleryImageCardProps) => {
+const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, hotspotsReady, onHotspotActivate, onExpand, index, activeIndex }: MobileGalleryImageCardProps) => {
   const [naturalAspect, setNaturalAspect] = useState(16 / 10);
+  const [photoLoaded, setPhotoLoaded] = useState(false);
+  const sceneReady = photoLoaded && hotspotsReady;
 
   // Native loading="lazy" does not defer siblings that are only horizontally
   // off-screen inside a scroll strip, and Chromium's lazy threshold is large
@@ -322,6 +325,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
     const img = event.currentTarget;
     if (img.naturalWidth > 0 && img.naturalHeight > 0) {
       setNaturalAspect(img.naturalWidth / img.naturalHeight);
+      setPhotoLoaded(true);
     }
   }, []);
 
@@ -338,7 +342,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       <img
         {...imgProps}
         alt={item.title}
-        className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
+        className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-opacity duration-300 ${sceneReady ? 'opacity-100' : 'opacity-0'} ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
         loading="lazy"
         decoding="async"
 
@@ -350,7 +354,7 @@ const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotAct
       {!isHotspotSection && (
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
       )}
-      {hotspots.map((hotspot, hotspotIndex) => (
+      {sceneReady && hotspots.map((hotspot, hotspotIndex) => (
         <button
           key={`${item.title}-hotspot-${hotspotIndex}`}
           type="button"
@@ -669,6 +673,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   // ── Hotspot positions per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
   const [hotspotPositions, setHotspotPositions] = useState<Record<string, GalleryHotspotPosition[]>>({});
+  const [hotspotsReady, setHotspotsReady] = useState(false);
   useEffect(() => {
     const fetchCounts = async () => {
       const [{ data }, special] = await Promise.all([
@@ -693,6 +698,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         setHotspotCounts(counts);
         setHotspotPositions(positions);
       }
+      setHotspotsReady(true);
     };
     fetchCounts();
   }, []);
@@ -1099,6 +1105,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             item={item}
                             isHotspotSection={isHotspotSection}
                             hotspots={itemHotspots}
+                            hotspotsReady={hotspotsReady}
                             onHotspotActivate={(hotspot) => handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId)}
                             onExpand={() => openLightbox(originalSectionIndex, index)}
                           />

@@ -311,7 +311,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     });
   }, []);
 
-  const { data: manifest } = useQuery({
+  const { data: manifest, isFetched: catalogReady } = useQuery({
     queryKey: queryKeys.curatorPicksLightbox(),
     queryFn: fetchCatalogManifest,
     staleTime: 5 * 60_000,
@@ -483,6 +483,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       ? "Tour Our Gallery"
       : "The Curators";
   const activeScene = galleryState.kind === "room" ? activePage.scenes[0] : undefined;
+  const activeSceneReady = !!activeScene && hotspotsReady && catalogReady && loadedScenes.has(activeScene.id);
   const activeSceneIsPortrait = activeScene ? portraitSceneIds.has(activeScene.id) : false;
   const scenePicks = activeScene && !(roomSpaceIndex === 0 && sceneIdx === 0) ? hotspotsForScene(activeScene)
     .filter((hotspot) => !hotspot.restricted_gallery_pin && !EXCLUDED_SIDE_PICK_HOTSPOTS.has(`${hotspot.image_identifier}:${hotspot.product_name}`))
@@ -575,7 +576,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               )}
                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                   {hasScenePicks && (
-                     <aside aria-label="Products on the left of this photo" className="hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5">
+                      <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
@@ -591,7 +592,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
                           {(() => {
-                            const sceneReady = hotspotsReady && loadedScenes.has(pageScene.id);
+                            const sceneReady = hotspotsReady && catalogReady && loadedScenes.has(pageScene.id);
                             return <>
                          <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
                            <img
@@ -637,7 +638,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                    </AnimatePresence>
                  </div>
                   {hasScenePicks && (
-                     <aside aria-label="Products on the right of this photo" className="hidden w-40 shrink-0 content-center border-l border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5">
+                      <aside aria-label="Products on the right of this photo" className={`hidden w-40 shrink-0 content-center border-l border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
