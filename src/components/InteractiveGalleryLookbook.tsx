@@ -558,7 +558,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                            </Button>
                          ))}
                            <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
-                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-lookbook-bg/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
+                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
                               <button type="button" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/90 shadow-sm backdrop-blur-sm touch-manipulation animate-gallery-icon-pulse">
                                 <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
                               </button>
