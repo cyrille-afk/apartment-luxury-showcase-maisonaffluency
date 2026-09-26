@@ -376,16 +376,30 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     setSceneIdx(direction > 0 ? 0 : SPACES[nextSpaceIndex].scenes.length - 1);
   }, [galleryState.kind, galleryPages.length, roomSpaceIndex, sceneIdx]);
 
+  const stepExpanded = useCallback((direction: number) => {
+    if (!expandedScene || galleryState.kind !== "room" || galleryPages.length === 0) return;
+    const nextIndex = (sceneIdx + direction + galleryPages.length) % galleryPages.length;
+    setSceneIdx(nextIndex);
+    setExpandedScene(galleryPages[nextIndex].scenes[0] ?? null);
+    setActivePin(null);
+    setLightboxProduct(null);
+  }, [expandedScene, galleryState.kind, galleryPages, sceneIdx]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (lightboxProduct || expandedScene) return;
+      if (lightboxProduct) return;
+      if (expandedScene) {
+        if (event.key === "ArrowLeft") stepExpanded(-1);
+        if (event.key === "ArrowRight") stepExpanded(1);
+        return;
+      }
       if (event.key === "ArrowLeft") step(-1);
       if (event.key === "ArrowRight") step(1);
       if (event.key === "Escape") setDrawerOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxProduct, expandedScene, step]);
+  }, [lightboxProduct, expandedScene, step, stepExpanded]);
 
   const selectSpace = (spaceIndex: number) => {
     setExpandedScene(null);
@@ -588,6 +602,24 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               onClose={() => setLightboxProduct(null)}
               onSelectRelated={setLightboxProduct}
             />
+          )}
+          {expandedScene && galleryPages.length > 1 && (
+            <>
+              <Button type="button" variant="ghost" size="icon" aria-label="Previous photo in this room" onClick={() => stepExpanded(-1)} className="absolute left-3 top-1/2 z-20 h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background hover:bg-foreground/90 hover:text-background sm:left-6">
+                <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden="true" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" aria-label="Next photo in this room" onClick={() => stepExpanded(1)} className="absolute right-3 top-1/2 z-20 h-12 w-10 -translate-y-1/2 rounded-none bg-foreground text-background hover:bg-foreground/90 hover:text-background sm:right-6">
+                <ChevronRight className="size-5" strokeWidth={1.5} aria-hidden="true" />
+              </Button>
+              <div className="absolute inset-x-0 bottom-4 z-20 flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2" role="tablist" aria-label="Photos in this room">
+                  {galleryPages.map((galleryPage, index) => (
+                    <button key={galleryPage.title} type="button" role="tab" aria-selected={index === sceneIdx} aria-label={`Photo ${index + 1} of ${galleryPages.length}`} onClick={() => { setSceneIdx(index); setExpandedScene(galleryPage.scenes[0] ?? null); setActivePin(null); setLightboxProduct(null); }} className={`size-2 rounded-full transition-colors ${index === sceneIdx ? "bg-background" : "bg-background/40 hover:bg-background/70"}`} />
+                  ))}
+                </div>
+                <span className="font-body text-[11px] uppercase tracking-[0.28em] text-background/80">{sceneIdx + 1} / {galleryPages.length}</span>
+              </div>
+            </>
           )}
           <Button type="button" variant="ghost" size="icon" aria-label="Close expanded photo" onClick={() => setExpandedScene(null)} className="absolute right-4 top-4 z-20 text-background hover:bg-background/20 hover:text-background"><X className="size-5" /></Button>
         </DialogContent>
