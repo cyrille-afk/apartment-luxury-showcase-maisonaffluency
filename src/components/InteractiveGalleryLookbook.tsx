@@ -511,7 +511,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
                        <div className="grid grid-cols-1 content-center gap-y-4">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                  <div className={`flex min-w-0 flex-1 justify-center items-start md:pt-[5.1vh]`}>
+                  <div className="flex min-w-0 flex-1 items-start justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
                        <motion.div
