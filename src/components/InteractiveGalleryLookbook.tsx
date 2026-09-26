@@ -136,6 +136,7 @@ type ScenePick = { hotspot: Hotspot; product: PublicLightboxItem; image: string 
 function GalleryTour() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const playImmersively = useCallback(() => {
     const video = videoRef.current;
@@ -159,8 +160,15 @@ function GalleryTour() {
     if (!video) return;
     video.volume = 1;
     video.muted = false;
+    const resetToStart = () => {
+      video.pause();
+      video.currentTime = 0;
+      setIsPlaying(false);
+      setHasStarted(false);
+    };
     const onPlay = () => {
       setIsPlaying(true);
+      setHasStarted(true);
       trackVideoEvent("play", "showroom-tour");
     };
     const onPause = () => {
@@ -168,19 +176,19 @@ function GalleryTour() {
       trackVideoEvent("pause", "showroom-tour");
     };
     const onFullscreenChange = () => {
-      if (document.fullscreenElement !== video && !video.paused) video.pause();
+      if (document.fullscreenElement !== video) resetToStart();
     };
-    const onWebkitEndFullscreen = () => {
-      if (!video.paused) video.pause();
-    };
+    const onWebkitEndFullscreen = () => resetToStart();
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    video.addEventListener("ended", resetToStart);
     document.addEventListener("fullscreenchange", onFullscreenChange);
     video.addEventListener("webkitendfullscreen", onWebkitEndFullscreen);
     const detachMilestones = attachMilestoneTracking(video, "showroom-tour");
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
+      video.removeEventListener("ended", resetToStart);
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       video.removeEventListener("webkitendfullscreen", onWebkitEndFullscreen);
       detachMilestones();
@@ -197,7 +205,7 @@ function GalleryTour() {
         <div className="relative mx-auto aspect-video w-full max-w-6xl overflow-hidden bg-foreground">
           <video
             ref={videoRef}
-            controls
+            controls={hasStarted}
             playsInline
             preload="none"
             poster={large("bespoke-sofa_gxidtx")}
@@ -208,6 +216,14 @@ function GalleryTour() {
           >
             <source src={APARTMENT_TOUR_VIDEO_URL} type="video/mp4" />
           </video>
+          {!hasStarted && (
+            <img
+              src={large("bespoke-sofa_gxidtx")}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 aspect-video h-full w-full object-cover"
+            />
+          )}
           {!isPlaying && (
             <Button
               type="button"
