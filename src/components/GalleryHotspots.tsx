@@ -4,6 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -222,14 +223,16 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     setHotspots([]);
     setActiveId(null);
     const fetchHotspots = async () => {
-      const { data } = await supabase
-        .from("gallery_hotspots")
-        .select("*")
-        .eq("image_identifier", imageIdentifier);
-      if (data) setHotspots(data);
+      const [{ data }, special] = await Promise.all([
+        supabase.from("gallery_hotspots").select("*").eq("image_identifier", imageIdentifier),
+        onAddToQuote ? Promise.resolve([]) : fetchPublicMicMacPins(),
+      ]);
+      setHotspots(mergeGalleryPins(data || [], special.filter((pin) => pin.image_identifier === imageIdentifier).map((pin): Hotspot => ({
+        ...pin, link_url: null, materials: null, dimensions: null, mapped_pick_id: null,
+      }))));
     };
     fetchHotspots();
-  }, [imageIdentifier]);
+  }, [imageIdentifier, onAddToQuote]);
 
   // Filter hotspots by designer when opened from a designer card
   const displayHotspots = useMemo(() => {
@@ -511,7 +514,9 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                       )}
                       <div className="p-3">
                         <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
-                        {hotspot.designer_name && (
+                        {hotspot.designer_name && (hotspot.product_name === "Bronze MicMac Chandelier" && hotspot.designer_name === "Hervé van der Straeten" && !onAddToQuote ? (
+                          <span className="block font-body text-xs text-muted-foreground mt-0.5">{hotspot.designer_name}</span>
+                        ) : (
                           <a
                             href={`/designers/${hotspot.designer_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`}
                             onClick={(e) => { e.stopPropagation(); navigate(`/designers/${hotspot.designer_name!.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}?expanded=true`); }}
@@ -519,7 +524,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                           >
                             {hotspot.designer_name}
                           </a>
-                        )}
+                        ))}
                         {/* Edition badge */}
                         {(() => {
                           const edition = getHotspotEdition(hotspot.product_name);

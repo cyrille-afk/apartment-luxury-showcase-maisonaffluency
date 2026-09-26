@@ -11315,6 +11315,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_micmac_gallery_pins: {
+        Args: never
+        Returns: {
+          designer_name: string
+          id: string
+          image_identifier: string
+          product_image_url: string
+          product_name: string
+          x_percent: number
+          y_percent: number
+        }[]
+      }
       purge_rejected_trade_credentials_dispatch: {
         Args: never
         Returns: undefined

@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
@@ -623,6 +624,15 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   }, [allCuratorPicks]);
 
   const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    if (productName === "Bronze MicMac Chandelier" && designerName === "Hervé van der Straeten") {
+      setHotspotLightboxProduct({
+        id: "gallery-micmac-chandelier", title: productName, brand_name: designerName,
+        image_url: "https://res.cloudinary.com/dif1oamtj/image/upload/v1773196208/Screen_Shot_2026-03-11_at_10.29.03_AM_givmmu.png",
+        materials: "Cage of bronze with a golden brown patina", dimensions: "70 × 70 × 55 cm / 40 kg",
+        is_catalog_item: false, restricted_gallery_pin: true,
+      });
+      return;
+    }
     const best = resolveHotspotPick(productName, designerName, mappedPickId);
     if (best) {
       setHotspotLightboxProduct(best);
@@ -661,13 +671,14 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [hotspotPositions, setHotspotPositions] = useState<Record<string, GalleryHotspotPosition[]>>({});
   useEffect(() => {
     const fetchCounts = async () => {
-      const { data } = await supabase
-        .from("gallery_hotspots")
-        .select("image_identifier, x_percent, y_percent, product_name, designer_name, link_url, mapped_pick_id");
-      if (data) {
+      const [{ data }, special] = await Promise.all([
+        supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, link_url, mapped_pick_id"),
+        fetchPublicMicMacPins(),
+      ]);
+      if (data || special.length) {
         const counts: Record<string, number> = {};
           const positions: Record<string, GalleryHotspotPosition[]> = {};
-        for (const row of data as any[]) {
+        for (const row of mergeGalleryPins(data || [], special.map((pin) => ({ ...pin, link_url: null, mapped_pick_id: null })))) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
           positions[row.image_identifier].push({

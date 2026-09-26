@@ -82,6 +82,8 @@ export interface PublicLightboxItem {
   is_upholstered?: boolean | null;
   /** False for gallery-only hotspot details with no verified catalog product page. */
   is_catalog_item?: boolean;
+  /** Gallery pin for a trade-only designer: never link into their restricted catalogue. */
+  restricted_gallery_pin?: boolean;
 }
 
 interface Props {
@@ -350,16 +352,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         ? product.brand_name.split(" - ")[0].trim()
         : product.brand_name)
     : undefined;
-  const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
+  const { data: linkedDesigner } = useDesignerByName(product?.restricted_gallery_pin ? undefined : designerDisplayName);
 
   // Publicly visible RRP (only for products flagged public_rrp_visible, e.g. Apparatus).
-  const { data: publicRrp } = usePublicRrp(product?.id);
+  const { data: publicRrp } = usePublicRrp(product?.restricted_gallery_pin ? undefined : product?.id);
   const { displayRow: publicRrpDisplayRow } = usePublicRrpDisplay(publicRrp);
   const publicPriceLabel = formatPublicRrp(publicRrpDisplayRow);
   const accountDiscount = useAccountDiscount();
   const { showTradePrice, tierLabel } = useTradePriceMode();
   const showMemberTradePrice = accountDiscount.eligible && showTradePrice;
-  const { data: tradePricing } = useTradeProductPricing(product?.id, showMemberTradePrice);
+  const { data: tradePricing } = useTradeProductPricing(product?.restricted_gallery_pin ? undefined : product?.id, showMemberTradePrice && !product?.restricted_gallery_pin);
   const brandDiscountCaps = useBrandDiscountCaps(showMemberTradePrice);
   const [tradeDisplayCurrency] = useTradeDisplayCurrency();
   const fxRates = useFxRates();
@@ -410,7 +412,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   }, [product, contextualPanel]);
 
   const relatedProducts = useMemo(() => {
-    if (!product) return [];
+    if (!product || product.restricted_gallery_pin) return [];
     const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url);
     // Vary selection per product using a simple hash offset
     const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -813,7 +815,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               {/* Stone card — brand, dimensions, finishes, handcrafted details */}
               <div className="bg-muted/40 border border-border/60 p-5 flex flex-col gap-4">
                 <div>
-                  <button
+                  {product.restricted_gallery_pin ? (
+                    <span className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))]">{designerDisplay}</span>
+                  ) : <button
                     type="button"
                     onClick={() => {
                       if (!linkedDesigner?.slug) return;
@@ -825,7 +829,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
                   >
                     {designerDisplay}
-                  </button>
+                  </button>}
                   <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
                     {product.title}
                   </h2>
@@ -990,7 +994,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Curator Notes — immediate context below the product details */}
-          <motion.div
+          {!product.restricted_gallery_pin && <motion.div
             key={`curator-notes-${product.id}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1037,12 +1041,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
-          </motion.div>
+          </motion.div>}
 
           {/* More From — final exploration tier */}
-          <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
+          {!product.restricted_gallery_pin && <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
             {relatedStrip}
-          </div>
+          </div>}
         </div>
       </motion.div>
     </motion.div>
