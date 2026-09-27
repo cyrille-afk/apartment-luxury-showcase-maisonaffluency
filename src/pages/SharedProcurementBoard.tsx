@@ -1,0 +1,269 @@
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { AnimatePresence, motion } from "framer-motion";
+import { Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import { formatMoneyIn } from "@/lib/displayMoney";
+
+type Item = {
+  id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
+  lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
+};
+type Shared = {
+  board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
+  role: "client" | "contractor"; invite_email: string; claimed: boolean; items: Item[];
+};
+
+const PENDING_KEY = "ma_pending_board_claim";
+const signupSchema = z.object({
+  email: z.string().trim().email("Enter a valid email").max(255),
+  password: z.string().min(8, "At least 8 characters").max(72),
+});
+
+export default function SharedProcurementBoard() {
+  const { token = "" } = useParams();
+  const { user } = useAuth();
+  const [data, setData] = useState<Shared | null | undefined>(undefined);
+  const [signupOpen, setSignupOpen] = useState(false);
+  const [microPrompt, setMicroPrompt] = useState(false);
+  const [commentFor, setCommentFor] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
+
+  const load = useCallback(async () => {
+    const { data: d } = await supabase.rpc("get_shared_board" as any, { _token: token });
+    setData((d as Shared) ?? null);
+  }, [token]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Link a freshly signed-in account to this invite (referral + contractor access).
+  useEffect(() => {
+    if (!user || !data || data.claimed) return;
+    if (localStorage.getItem(PENDING_KEY) !== token) return;
+    supabase.rpc("claim_board_invite" as any, { _token: token }).then(({ error }) => {
+      localStorage.removeItem(PENDING_KEY);
+      if (!error) { toast({ title: "Your account is now linked to this board" }); load(); }
+    });
+  }, [user, data, token, load]);
+
+  const react = async (item: Item, reaction: "up" | "down" | "heart") => {
+    const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: reaction, _comment: null });
+    if (error) { toast({ title: "Could not save", variant: "destructive" }); return; }
+    toast({ title: reaction === "heart" ? `${item.product_name} approved` : "Feedback shared with your designer" });
+    if (!user) setMicroPrompt(true);
+    load();
+  };
+
+  const sendComment = async (itemId: string) => {
+    const text = comment.trim().slice(0, 1000);
+    if (!text) return;
+    const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: itemId, _reaction: null, _comment: text });
+    if (error) { toast({ title: "Could not send comment", variant: "destructive" }); return; }
+    setComment(""); setCommentFor(null);
+    toast({ title: "Comment sent to your designer" });
+    if (!user) setMicroPrompt(true);
+  };
+
+  const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
+
+  if (data === undefined) return <div className="min-h-screen bg-background" />;
+  if (data === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <Helmet><title>Link unavailable — Maison Affluency</title><meta name="robots" content="noindex" /></Helmet>
+        <div>
+          <h1 className="font-display text-2xl text-foreground">This link is no longer available</h1>
+          <p className="mt-2 font-body text-sm text-muted-foreground">Please ask your designer for a new invitation.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="min-h-screen bg-background"
+      onClickCapture={(e) => {
+        if (contractorLocked && !signupOpen && !(e.target as HTMLElement).closest("[data-allow-guest]")) {
+          e.preventDefault(); e.stopPropagation(); setSignupOpen(true);
+        }
+      }}
+    >
+      <Helmet><title>{`${data.board_title} — ${data.studio_name}`}</title><meta name="robots" content="noindex" /></Helmet>
+
+      {data.role === "client" && (
+        <div className="border-b border-border/60 bg-muted/30 py-2 text-center font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Viewing Project Portfolio via Maison Affluency Trade Network
+        </div>
+      )}
+
+      <header className="mx-auto max-w-6xl px-6 pb-10 pt-14 text-center">
+        {data.studio_logo_url && <img src={data.studio_logo_url} alt={data.studio_name} className="mx-auto mb-6 h-10 object-contain" />}
+        <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{data.studio_name}</p>
+        <h1 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{data.board_title}</h1>
+        {data.client_name && <p className="mt-2 font-body text-sm text-muted-foreground">Prepared for {data.client_name}</p>}
+        {data.role === "contractor" && user && data.claimed && (
+          <ContractorAdd token={token} onAdded={load} />
+        )}
+      </header>
+
+      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-16 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
+        {data.items.map((item, i) => (
+          <motion.article key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.05, 0.4) }}>
+            <div className="aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
+              {item.image_url && <img src={item.image_url} alt={item.product_name} className="h-full w-full object-contain" loading="lazy" />}
+            </div>
+            <h2 className="mt-4 font-display text-lg text-foreground">{item.product_name}</h2>
+            {item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
+            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(item.msrp_cents, item.currency)}</p>
+            {item.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {item.lead_time}</p>}
+
+            <div className="mt-4 flex items-center gap-1" data-allow-guest={data.role === "client" ? "" : undefined}>
+              <FeedbackButton label="Heart to approve" active={item.my_reaction === "heart"} onClick={() => react(item, "heart")}><Heart className={`h-4 w-4 ${item.my_reaction === "heart" ? "fill-current" : ""}`} /></FeedbackButton>
+              <FeedbackButton label="Like" active={item.my_reaction === "up"} onClick={() => react(item, "up")}><ThumbsUp className="h-4 w-4" /></FeedbackButton>
+              <FeedbackButton label="Dislike" active={item.my_reaction === "down"} onClick={() => react(item, "down")}><ThumbsDown className="h-4 w-4" /></FeedbackButton>
+              <FeedbackButton label="Comment" active={commentFor === item.id} onClick={() => setCommentFor(commentFor === item.id ? null : item.id)}><MessageSquare className="h-4 w-4" /></FeedbackButton>
+            </div>
+            <AnimatePresence>
+              {commentFor === item.id && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden" data-allow-guest="">
+                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={1000} placeholder="Share a thought with your designer" className="mt-3 rounded-none text-sm" />
+                  <Button size="sm" className="mt-2 rounded-none" onClick={() => sendComment(item.id)}>Send</Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.article>
+        ))}
+      </main>
+
+      <AnimatePresence>
+        {microPrompt && !user && !signupOpen && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} data-allow-guest=""
+            className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-lg items-center gap-4 border border-border bg-card p-4 shadow-lg">
+            <p className="flex-1 font-body text-xs text-foreground">Save your approval choices and sync with your designer by creating a secure password.</p>
+            <Button size="sm" className="rounded-none" onClick={() => setSignupOpen(true)}>Create</Button>
+            <button onClick={() => setMicroPrompt(false)} aria-label="Dismiss"><X className="h-4 w-4 text-muted-foreground" /></button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <SignupOverlay
+        open={signupOpen}
+        onClose={() => setSignupOpen(false)}
+        data={data}
+        token={token}
+      />
+    </div>
+  );
+}
+
+function FeedbackButton({ label, active, onClick, children }: { label: string; active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" aria-label={label} aria-pressed={active} onClick={onClick}
+      className={`flex h-9 w-9 items-center justify-center border transition-colors ${active ? "border-foreground bg-foreground text-background" : "border-border/60 text-muted-foreground hover:border-foreground hover:text-foreground"}`}>
+      {children}
+    </button>
+  );
+}
+
+function SignupOverlay({ open, onClose, data, token }: { open: boolean; onClose: () => void; data: Shared; token: string }) {
+  const [email, setEmail] = useState(data.invite_email);
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = signupSchema.safeParse({ email, password });
+    if (!parsed.success) { setErr(parsed.error.issues[0].message); return; }
+    setBusy(true); setErr(null);
+    localStorage.setItem(PENDING_KEY, token);
+    const { data: res, error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: { emailRedirectTo: `${window.location.origin}/shared/board/${token}` },
+    });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    if (res.session) onClose(); else setSent(true);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} data-allow-guest=""
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm">
+          <motion.div initial={{ y: 16 }} animate={{ y: 0 }} className="relative w-full max-w-md bg-card p-8">
+            <button onClick={onClose} className="absolute right-4 top-4" aria-label="Close"><X className="h-4 w-4 text-muted-foreground" /></button>
+            {sent ? (
+              <div className="text-center">
+                <h2 className="font-display text-2xl text-foreground">Check your email</h2>
+                <p className="mt-3 font-body text-sm text-muted-foreground">Confirm your address, and you will return to this board with your account linked.</p>
+              </div>
+            ) : (
+              <>
+                <h2 className="font-display text-2xl text-foreground">
+                  {data.role === "contractor" ? "Claim your Trade ID" : "Save your choices"}
+                </h2>
+                <p className="mt-3 font-body text-sm text-muted-foreground">
+                  {data.role === "contractor"
+                    ? `${data.studio_name} has invited you to collaborate on Maison Affluency. Claim your Trade ID to add pieces to this board.`
+                    : `Create a secure password to keep your approvals in sync with ${data.studio_name}.`}
+                </p>
+                <form onSubmit={submit} className="mt-6 space-y-3">
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} placeholder="Email" className="rounded-none" autoComplete="email" />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} maxLength={72} placeholder="Password" className="rounded-none" autoComplete="new-password" />
+                  {err && <p className="font-body text-xs text-destructive">{err}</p>}
+                  <Button type="submit" disabled={busy} className="w-full rounded-none">{busy ? "Creating…" : "Create Account"}</Button>
+                </form>
+              </>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function ContractorAdd({ token, onAdded }: { token: string; onAdded: () => void }) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<{ id: string; product_name: string; brand_name: string | null }[]>([]);
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) { setResults([]); return; }
+    const t = setTimeout(async () => {
+      const { data } = await supabase.from("trade_products").select("id, product_name, brand_name").eq("is_active", true)
+        .ilike("product_name", `%${term.replace(/[%_]/g, "")}%`).limit(8);
+      setResults((data as any) || []);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [q]);
+  const add = async (id: string) => {
+    const { error } = await supabase.rpc("contractor_add_board_item" as any, { _token: token, _product_id: id });
+    if (error) { toast({ title: "Could not add piece", variant: "destructive" }); return; }
+    toast({ title: "Added to the board" }); setQ(""); onAdded();
+  };
+  return (
+    <div className="relative mx-auto mt-8 max-w-md text-left">
+      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the catalogue to add a piece" className="rounded-none" />
+      {results.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full border border-border bg-card shadow-md">
+          {results.map((r) => (
+            <li key={r.id}>
+              <button onClick={() => add(r.id)} className="flex w-full items-center justify-between px-3 py-2 text-left font-body text-sm hover:bg-muted">
+                <span>{r.product_name}</span><Plus className="h-3.5 w-3.5" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

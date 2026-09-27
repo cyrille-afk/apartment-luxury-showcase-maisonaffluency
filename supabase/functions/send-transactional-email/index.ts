@@ -127,6 +127,35 @@ Deno.serve(async (req) => {
         ) return deny(403, 'Forbidden')
       } else if (templateName === 'manual-shipping-quote-request' && callerId) {
         recipientEmail = 'concierge@myaffluency.com'
+      } else if (templateName === 'board-collaborator-invite' && callerId) {
+        // Only the inviter, for their own just-created invite; the link and
+        // recipient are rebuilt from the stored invite, never trusted as sent.
+        const m = /^board-invite-([0-9a-f-]{36})$/i.exec(String(idempotencyKey))
+        const token = String(templateData.token ?? '')
+        if (!m || !/^[0-9a-f]{48}$/.test(token)) return deny(403, 'Forbidden')
+        const { data: inv } = await svc
+          .from('board_invites')
+          .select('email, role, token_hash, invited_by, created_at, board:client_boards(title, studio_name, studio_id)')
+          .eq('id', m[1]).maybeSingle()
+        const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))))
+          .map((b) => b.toString(16).padStart(2, '0')).join('')
+        if (
+          !inv || inv.invited_by !== callerId || inv.token_hash !== hash ||
+          Date.now() - Date.parse(inv.created_at) > 15 * 60 * 1000
+        ) return deny(403, 'Forbidden')
+        const board = (inv as any).board ?? {}
+        let studioName = board.studio_name as string | null
+        if (!studioName && board.studio_id) {
+          const { data: s } = await svc.from('studios').select('name').eq('id', board.studio_id).maybeSingle()
+          studioName = s?.name ?? null
+        }
+        recipientEmail = inv.email
+        templateData = {
+          studioName: studioName || 'Your designer',
+          boardTitle: board.title || 'A project board',
+          role: inv.role,
+          link: `https://www.maisonaffluency.com/shared/board/${token}`,
+        }
       } else {
         return deny(callerId ? 403 : 401, callerId ? 'Forbidden' : 'Unauthorized')
       }

@@ -39,6 +39,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /shared/
 Disallow: /api/
 Disallow: /trade/admin
 Disallow: /trade/admin/trade-review

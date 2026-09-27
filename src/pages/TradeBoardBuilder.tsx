@@ -40,6 +40,7 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
+import ProcurementBoardPanel from "@/components/trade/procurement/ProcurementBoardPanel";
 
 interface Board {
   id: string;
@@ -809,6 +810,8 @@ const TradeBoardBuilder = () => {
             </div>
           </details>
         )}
+
+        <ProcurementBoardPanel boardId={board.id} items={items} />
 
         {/* Items grouped by sub-folder */}
         {items.length === 0 ? (
