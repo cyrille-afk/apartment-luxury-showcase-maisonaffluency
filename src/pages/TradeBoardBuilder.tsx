@@ -1071,7 +1071,7 @@ const TradeBoardBuilder = () => {
 
       {/* Add products dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="font-display">
               Add Products
