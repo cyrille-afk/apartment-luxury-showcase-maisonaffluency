@@ -226,7 +226,7 @@ export default function FinishesDrawer({
                           <span className="block h-full w-full bg-muted/40" />
                         )}
                       </span>
-                      <span className="flex-1 truncate font-body text-xs text-foreground">{selected?.name || "Select…"}</span>
+                      <span className="flex-1 truncate font-body text-xs text-foreground">{selected?.name || activeVariant?.[key] || "Select…"}</span>
                       <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </button>
                     {isOpen && (
