@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
@@ -874,11 +874,20 @@ const TradeBoardBuilder = () => {
                     id="studio-name"
                     value={board.studio_name || ""}
                     placeholder="e.g. Atelier Riviera"
+                    onFocus={() => { studioNameFocusRef.current = board.studio_name; }}
                     onBlur={async (e) => {
                       const v = e.target.value.trim() || null;
-                      if (v === (board.studio_name || null)) return;
+                      // Compare against the value at focus time — board state
+                      // already holds the typed value via onChange, so comparing
+                      // against board.studio_name would always early-return.
+                      if (v === (studioNameFocusRef.current || null)) return;
+                      const { error } = await supabase.from("client_boards").update({ studio_name: v } as any).eq("id", board.id);
+                      if (error) {
+                        setBoard({ ...board, studio_name: studioNameFocusRef.current });
+                        toast({ title: "Could not save studio name", variant: "destructive" });
+                        return;
+                      }
                       setBoard({ ...board, studio_name: v });
-                      await supabase.from("client_boards").update({ studio_name: v } as any).eq("id", board.id);
                       toast({ title: "Studio name saved" });
                     }}
                     onChange={(e) => setBoard({ ...board, studio_name: e.target.value })}
@@ -892,11 +901,17 @@ const TradeBoardBuilder = () => {
                     id="studio-logo"
                     value={board.studio_logo_url || ""}
                     placeholder="https://yourstudio.com/logo.png"
+                    onFocus={() => { studioLogoFocusRef.current = board.studio_logo_url; }}
                     onBlur={async (e) => {
                       const v = e.target.value.trim() || null;
-                      if (v === (board.studio_logo_url || null)) return;
+                      if (v === (studioLogoFocusRef.current || null)) return;
+                      const { error } = await supabase.from("client_boards").update({ studio_logo_url: v } as any).eq("id", board.id);
+                      if (error) {
+                        setBoard({ ...board, studio_logo_url: studioLogoFocusRef.current });
+                        toast({ title: "Could not save logo URL", variant: "destructive" });
+                        return;
+                      }
                       setBoard({ ...board, studio_logo_url: v });
-                      await supabase.from("client_boards").update({ studio_logo_url: v } as any).eq("id", board.id);
                       toast({ title: "Logo URL saved" });
                     }}
                     onChange={(e) => setBoard({ ...board, studio_logo_url: e.target.value })}
