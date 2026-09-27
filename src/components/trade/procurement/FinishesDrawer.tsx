@@ -44,6 +44,9 @@ export default function FinishesDrawer({
   const [glbs, setGlbs] = useState<Glb[]>([]);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [preview, setPreview] = useState<Variant | null>(null);
+  // User-picked swatches per axis (real fabric/finish names from the product
+  // sheet's swatch list, which need not match variant axis labels).
+  const [picked, setPicked] = useState<{ top?: Swatch; base?: Swatch }>({});
 
   useEffect(() => {
     if (!open) return;
@@ -123,8 +126,11 @@ export default function FinishesDrawer({
       const r = roleOf(sw.category) || (i === 0 ? "top" : "base");
       (out as any)[r] = sw.image_url;
     });
+    // Explicitly picked swatches win over variant-derived textures.
+    if (picked.top?.image_url) out.fabric = picked.top.image_url;
+    if (picked.base?.image_url) out.base = picked.base.image_url;
     return out;
-  }, [activeVariant, swatches]);
+  }, [activeVariant, swatches, picked]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
