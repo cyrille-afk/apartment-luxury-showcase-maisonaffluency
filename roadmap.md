@@ -51,3 +51,5 @@
 - [x] Add black rectangular midpoint chevrons beside desktop gallery photos to move through photos and adjacent rooms.
 - [x] Hide side product photos on the first gallery photo only and restore vertical side stacks across rooms.
 - [x] Add vertical breathing room between gallery side photos and keep both columns inset between their boundary lines.
+
+- [x] Collaborative Procurement Board: studio matrix/client editorial toggle, invites with email, guest feedback, contractor sign-up referral.
