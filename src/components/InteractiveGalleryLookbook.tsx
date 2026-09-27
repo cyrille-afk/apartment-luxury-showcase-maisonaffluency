@@ -113,8 +113,8 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Masterful Suite:Crystalline Blue Vessel Volume 5": "right",
   "A Masterful Suite:Giudecca Rug (Custom)": "right",
   "A Venitian Cocoon:Bronze MicMac Chandelier": "left",
-  "An Artistic Statement:Martell Wall Lamp": "left",
-  "An Artistic Statement:Lantern Table Lamp": "left",
+  "An Artistic Statement:Martell Wall Lamp": "right",
+  "An Artistic Statement:Lantern Table Lamp": "right",
   "An Artistic Statement:Eggshell DOT Side Table": "right",
   "A Workspace of Distinction:Bernt Petersen 4-Drawer Desk": "left",
   "Refined Details:Bernt Petersen 4-Drawer Desk": "left",
@@ -137,6 +137,9 @@ const CURATED_SIDE_PICK_ORDER = [
   "A Sun Lit Reading Corner:Japanese Cranes Wallcover",
   "A Sun Lit Reading Corner:Blue Glazed Vallauris Floor Lamp",
   "A Sun Lit Reading Corner:AB Chair",
+  "An Artistic Statement:Martell Wall Lamp",
+  "An Artistic Statement:Lantern Table Lamp",
+  "An Artistic Statement:Eggshell DOT Side Table",
 ];
 
 type Hotspot = {
