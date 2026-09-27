@@ -170,54 +170,53 @@ export default function FinishesDrawer({
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
         ) : (
           <>
-            {/* PALETTE — visual swatch grid (pre-cropped finish assets) */}
-            <div className="border-b border-border/60 px-6 py-5">
-              <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
-              <div className="grid grid-cols-4 gap-2.5">
-                {variants.map((v, idx) => {
-                  const isActive = !!activeVariant && finishLabel(activeVariant) === finishLabel(v);
-                  const topSw = swatchFor(v.top);
-                  const baseSw = swatchFor(v.base);
-                  const topImg = topSw?.image_url || null;
-                  const baseImg = baseSw?.image_url || null;
-                  const label = [v.top, v.base].filter(Boolean).join(" / ");
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      title={finishLabel(v)}
-                      onClick={() => {
-                        setPreview(v);
-                        onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
-                      }}
-                      className={`group relative aspect-square overflow-hidden border transition-all ${
-                        isActive
-                          ? "border-primary ring-1 ring-primary ring-offset-1 ring-offset-background"
-                          : "border-border/60 hover:border-foreground/40"
-                      }`}
-                    >
-                      {topImg && baseImg && norm(v.top) !== norm(v.base) ? (
-                        <span className="flex h-full w-full flex-col">
-                          <img src={topImg} alt={v.top || ""} className="h-1/2 w-full object-cover" loading="lazy" />
-                          <img src={baseImg} alt={v.base || ""} className="h-1/2 w-full object-cover" loading="lazy" />
-                        </span>
-                      ) : (topImg || baseImg) ? (
-                        <img src={topImg || baseImg || ""} alt={label} className="h-full w-full object-cover" loading="lazy" />
-                      ) : (
-                        <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] leading-tight text-muted-foreground">
-                          {label || v.label || "Finish"}
-                        </span>
-                      )}
-                      {isActive && (
-                        <span className="absolute inset-x-0 bottom-0 bg-primary/90 px-1 py-0.5 text-center font-body text-[8px] uppercase tracking-[0.12em] text-primary-foreground">
-                          Selected
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Per-axis labelled swatches — same structure as the product page */}
+            {([
+              { key: "top" as const, title: "Upholstery" },
+              { key: "base" as const, title: "Frame Finish" },
+            ]).map(({ key, title }) => {
+              const opts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
+              if (!opts.length) return null;
+              return (
+                <div key={key} className="border-b border-border/60 px-6 py-5">
+                  <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {title} <span className="normal-case tracking-normal">({opts.length})</span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {opts.map((name) => {
+                      const isActive = norm(activeVariant?.[key]) === norm(name);
+                      const img = swatchFor(name)?.image_url || null;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => {
+                            const other = key === "top" ? "base" : "top";
+                            const v =
+                              variants.find((x) => norm(x[key]) === norm(name) && norm(x[other]) === norm(activeVariant?.[other])) ||
+                              variants.find((x) => norm(x[key]) === norm(name));
+                            if (!v) return;
+                            setPreview(v);
+                            onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                          }}
+                          className="text-left"
+                        >
+                          <span className={`block aspect-square overflow-hidden border transition-all ${isActive ? "border-primary ring-1 ring-primary ring-offset-1 ring-offset-background" : "border-border/60 hover:border-foreground/40"}`}>
+                            {img ? (
+                              <img src={img} alt={name} className="h-full w-full object-cover" loading="lazy" />
+                            ) : (
+                              <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] text-muted-foreground">{name}</span>
+                            )}
+                          </span>
+                          <span className={`mt-1.5 block font-body text-[11px] leading-tight ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
 
             {/* Single state-driven metadata card */}
             {activeVariant && (
