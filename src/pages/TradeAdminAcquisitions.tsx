@@ -21,7 +21,8 @@ import DesignerAssignSelect from "@/components/trade/DesignerAssignSelect";
 import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
-import { ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+import B2BOutreachModal from "@/components/trade/B2BOutreachModal";
+import { Briefcase, ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -29,6 +30,7 @@ type Lead = {
   founder_name: string | null;
   business_email: string;
   website_url: string | null;
+  linkedin_url: string | null;
   source_index: string | null;
   aesthetic_profile: string | null;
   predicted_designer_matches: string[] | null;
@@ -232,6 +234,7 @@ const TradeAdminAcquisitions = () => {
   const [activeCity, setActiveCity] = useState<string>(DEFAULT_CITY);
   const [calibrating, setCalibrating] = useState(false);
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
+  const [b2bLeadId, setB2bLeadId] = useState<string | null>(null);
   const markDmSent = async (id: string) => {
     const sentAt = new Date().toISOString();
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
@@ -262,7 +265,7 @@ const TradeAdminAcquisitions = () => {
       const { data, error } = await supabase
         .from("acquisition_leads")
         .select(
-          "id, studio_name, founder_name, business_email, website_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at, instagram_outreach_status, instagram_dm_sent_at",
+          "id, studio_name, founder_name, business_email, website_url, linkedin_url, source_index, aesthetic_profile, predicted_designer_matches, campaign_status, verified_at, email_sent_at, email_error, created_at, country, city, instagram_handle, executive_emails, reply_received_at, reply_intent, portal_key_sent_at, instagram_outreach_status, instagram_dm_sent_at",
         )
         .in("campaign_status", [
           "unprocessed",
@@ -841,6 +844,15 @@ const TradeAdminAcquisitions = () => {
                         )}
                         Deploy via Resend Email
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setB2bLeadId(lead.id)}
+                        title="B2B acquisition workspace"
+                        aria-label={`Open B2B acquisition workspace for ${lead.studio_name}`}
+                        className="inline-flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:bg-foreground hover:text-background"
+                      >
+                        <Briefcase className="h-4 w-4" />
+                      </button>
                       {lead.instagram_handle && (
                         <button
                           type="button"
@@ -953,6 +965,22 @@ const TradeAdminAcquisitions = () => {
           </table>
         </div>
       </div>
+
+      {(() => {
+        const l = filtered.find((x) => x.id === b2bLeadId);
+        if (!l) return null;
+        return (
+          <B2BOutreachModal
+            open
+            onOpenChange={(o) => !o && setB2bLeadId(null)}
+            studioName={l.studio_name}
+            founderName={l.founder_name}
+            instagramHandle={l.instagram_handle}
+            linkedinUrl={l.linkedin_url}
+            onInstagramLaunched={() => markDmSent(l.id)}
+          />
+        );
+      })()}
 
       {(() => {
         const igLead = filtered.find((l) => l.id === igLeadId);
