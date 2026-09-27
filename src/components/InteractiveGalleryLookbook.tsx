@@ -533,7 +533,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-      <div className="w-full bg-[hsl(var(--collection-card-canvas))] p-3 lg:p-4">
+      <div className="w-full bg-[hsl(var(--product-canvas))] p-3 lg:p-4">
         <img
           src={image}
           alt={hotspot.product_name}
