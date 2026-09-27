@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
       if (!m || !/^[0-9a-f]{48}$/.test(token)) return deny(403, 'Forbidden')
       const { data: inv } = await svc
         .from('board_invites')
-        .select('email, role, token_hash, invited_by, created_at, board:client_boards(title, studio_name, studio_logo_url, hide_maison_branding, studio_id, project:projects(name))')
+        .select('email, role, token_hash, invited_by, created_at, board:client_boards(title, studio_name, studio_logo_url, hide_maison_branding, studio_id, project_id)')
         .eq('id', m[1]).maybeSingle()
       const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))))
         .map((b) => b.toString(16).padStart(2, '0')).join('')
@@ -135,11 +135,16 @@ Deno.serve(async (req) => {
         studioName = studioName || s?.name || null
         studioLogoUrl = studioLogoUrl || s?.logo_url || null
       }
+      let projectName: string | null = null
+      if (board.project_id) {
+        const { data: p } = await svc.from('projects').select('name').eq('id', board.project_id).maybeSingle()
+        projectName = p?.name ?? null
+      }
       recipientEmail = inv.email
       templateData = {
         studioName: studioName || 'Your designer', studioLogoUrl,
         hideMaisonBranding: board.hide_maison_branding !== false,
-        projectName: board.project?.name || board.title || 'Project portfolio',
+        projectName: projectName || board.title || 'Project portfolio',
         boardTitle: board.title || 'Curated selection', role: inv.role,
         link: `https://www.maisonaffluency.com/shared/board/${token}`,
       }
