@@ -2063,6 +2063,42 @@ export type Database = {
         }
         Relationships: []
       }
+      competitor_intel_runs: {
+        Row: {
+          finished_at: string | null
+          highlights: Json
+          id: string
+          lease_expires_at: string
+          pause_reason: string | null
+          started_at: string
+          stats: Json
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          finished_at?: string | null
+          highlights?: Json
+          id?: string
+          lease_expires_at?: string
+          pause_reason?: string | null
+          started_at?: string
+          stats?: Json
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          finished_at?: string | null
+          highlights?: Json
+          id?: string
+          lease_expires_at?: string
+          pause_reason?: string | null
+          started_at?: string
+          stats?: Json
+          status?: string
+          summary?: string | null
+        }
+        Relationships: []
+      }
       competitor_traffic: {
         Row: {
           avg_duration_seconds: number | null
