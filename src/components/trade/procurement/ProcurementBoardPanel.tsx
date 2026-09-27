@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Link2, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X } from "lucide-react";
+import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -200,7 +200,6 @@ export default function ProcurementBoardPanel({ boardId, items }: {
       </AnimatePresence>
 
       <InviteCollaboratorDialog open={inviteOpen} onOpenChange={setInviteOpen} boardId={boardId} onInvited={loadCollab} />
-      <span className="sr-only"><Link2 /></span>
     </section>
   );
 }
