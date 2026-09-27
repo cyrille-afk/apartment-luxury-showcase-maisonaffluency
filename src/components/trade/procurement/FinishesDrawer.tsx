@@ -170,28 +170,49 @@ export default function FinishesDrawer({
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
         ) : (
           <>
-            {/* PALETTE — clickable chip cloud */}
+            {/* PALETTE — visual swatch grid (pre-cropped finish assets) */}
             <div className="border-b border-border/60 px-6 py-5">
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-4 gap-2.5">
                 {variants.map((v, idx) => {
-                  const chipLabel = finishLabel(v);
                   const isActive = !!activeVariant && finishLabel(activeVariant) === finishLabel(v);
+                  const topSw = swatchFor(v.top);
+                  const baseSw = swatchFor(v.base);
+                  const topImg = topSw?.image_url || null;
+                  const baseImg = baseSw?.image_url || null;
+                  const label = [v.top, v.base].filter(Boolean).join(" / ");
                   return (
                     <button
                       key={idx}
                       type="button"
+                      title={finishLabel(v)}
                       onClick={() => {
                         setPreview(v);
                         onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
                       }}
-                      className={`border px-3 py-1.5 font-body text-[11px] tracking-[0.04em] transition-colors ${
+                      className={`group relative aspect-square overflow-hidden border transition-all ${
                         isActive
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/60 text-foreground hover:bg-muted/40"
+                          ? "border-primary ring-1 ring-primary ring-offset-1 ring-offset-background"
+                          : "border-border/60 hover:border-foreground/40"
                       }`}
                     >
-                      {chipLabel}
+                      {topImg && baseImg && norm(v.top) !== norm(v.base) ? (
+                        <span className="flex h-full w-full flex-col">
+                          <img src={topImg} alt={v.top || ""} className="h-1/2 w-full object-cover" loading="lazy" />
+                          <img src={baseImg} alt={v.base || ""} className="h-1/2 w-full object-cover" loading="lazy" />
+                        </span>
+                      ) : (topImg || baseImg) ? (
+                        <img src={topImg || baseImg || ""} alt={label} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] leading-tight text-muted-foreground">
+                          {label || v.label || "Finish"}
+                        </span>
+                      )}
+                      {isActive && (
+                        <span className="absolute inset-x-0 bottom-0 bg-primary/90 px-1 py-0.5 text-center font-body text-[8px] uppercase tracking-[0.12em] text-primary-foreground">
+                          Selected
+                        </span>
+                      )}
                     </button>
                   );
                 })}
