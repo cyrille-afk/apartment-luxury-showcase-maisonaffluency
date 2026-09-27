@@ -3,7 +3,6 @@
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { crypto } from "https://deno.land/std@0.224.0/crypto/mod.ts";
 import { encodeHex } from "https://deno.land/std@0.224.0/encoding/hex.ts";
 
 const URL_ = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL")!;
@@ -68,7 +67,7 @@ Deno.test({
 
       // A's session token opens board A, not board B.
       const { data: viaA } = await svc.rpc("_board_invite_by_token", { _token: va.body.token });
-      assertEquals((viaA as any)?.board_id ?? (Array.isArray(viaA) ? viaA[0]?.board_id : undefined), a.id);
+      assertEquals((viaA as any)?.board_id, a.id);
 
       // B's code still valid and independent → B's session opens B.
       const vb = await call({ action: "verify", slug: slugB, email, code: "123456" });
