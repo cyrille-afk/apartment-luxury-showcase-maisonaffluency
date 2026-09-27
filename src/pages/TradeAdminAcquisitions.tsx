@@ -889,12 +889,14 @@ const TradeAdminAcquisitions = () => {
                           <Badge
                             variant="outline"
                             className={`text-[10px] uppercase tracking-[0.18em] ${
-                              lead.instagram_outreach_status === "dm_sent"
+                              lead.instagram_outreach_status === "dm_sent" || /^dm sent/i.test(lead.instagram_outreach_status ?? "")
                                 ? "border-purple-500/50 bg-purple-500/10 text-purple-600"
                                 : "border-border text-muted-foreground"
                             }`}
                           >
-                            {lead.instagram_outreach_status === "dm_sent" ? "DM_Sent" : "Untouched"}
+                            {lead.instagram_outreach_status === "dm_sent" || /^dm sent/i.test(lead.instagram_outreach_status ?? "")
+                              ? "DM_Sent"
+                              : "Untouched"}
                           </Badge>
                         </div>
                       </>
@@ -977,7 +979,9 @@ const TradeAdminAcquisitions = () => {
             founderName={l.founder_name}
             instagramHandle={l.instagram_handle}
             linkedinUrl={l.linkedin_url}
-            onInstagramLaunched={() => markDmSent(l.id)}
+            onInstagramLaunched={(hook) =>
+              markDmSent(l.id, hook === "B" ? "DM Sent - White-Label" : "DM Sent - AI Procurement")
+            }
           />
         );
       })()}
