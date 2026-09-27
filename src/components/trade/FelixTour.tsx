@@ -255,17 +255,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       frame = requestAnimationFrame(tick);
     };
-    // Observe the application root, not the tour portal: tooltip renders must not reset settling.
-    const observer = new MutationObserver(onChange);
-    const root = document.getElementById("root");
-    if (root) observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["open", "data-state"] });
+    // The frame loop discovers async targets; ResizeObserver watches only their layout.
+    // Unrelated page mutations must not postpone this step forever.
     frame = requestAnimationFrame(tick);
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, true);
     return () => {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
-      observer.disconnect();
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
@@ -300,8 +297,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const close = useCallback((completed: boolean) => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+    transitionTimer.current = null;
     setOpen(false);
     setIsPaused(false);
+    setTransitioning(false);
     if (completed) {
       try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
     }
@@ -362,25 +361,25 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     <div
       aria-hidden="true"
       data-felix-spotlight
-      className={cn("pointer-events-none fixed z-[131] rounded-md border-2 border-accent motion-reduce:!transition-none", step.pulse && "animate-pulse")}
+      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent motion-reduce:!transition-none"
       style={{
         top: 0,
         left: 0,
         transform: `translate3d(${rect.left - PAD}px, ${rect.top - PAD}px, 0)`,
         width: rect.width + PAD * 2,
         height: rect.height + PAD * 2,
-        opacity: settled && !transitioning ? 1 : 0,
+        opacity: 1,
         transition: SPOTLIGHT_EASE,
         boxShadow: "0 0 0 100vmax hsl(var(--foreground) / 0.4), 0 0 24px hsl(var(--accent) / 0.35)",
       }}
-    />
+    >{step.pulse && <span className="absolute inset-0 rounded-md border-2 border-accent animate-pulse motion-reduce:animate-none" />}</div>
   );
 
   return createPortal(
     <>
       {/* Dimmed backdrop with a clear window around the target */}
       {!isPaused && <div className="pointer-events-none fixed inset-0 z-[130] overflow-hidden print:hidden">
-        {(!rect || !settled) && <div className="absolute inset-0 bg-foreground/40" />}
+        {!rect && <div className="absolute inset-0 bg-foreground/40" />}
         {ring}
       </div>}
 
