@@ -152,7 +152,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
                       <td className="px-3 py-2">{r.image_url ? <img src={r.image_url} alt="" className="h-10 w-10 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-10 w-10 bg-muted" />}</td>
-                      <td className="truncate px-3 text-foreground" title={r.product_name}>{r.product_name}</td>
+                      <td className="truncate px-3 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="block truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span>}</td>
                       <td className="truncate px-3 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
                       <td className="px-3 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
                       <td className="px-3 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
