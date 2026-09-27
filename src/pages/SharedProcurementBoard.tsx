@@ -33,10 +33,10 @@ const signupSchema = z.object({
 });
 
 export default function SharedProcurementBoard() {
-  const { token: param = "" } = useParams();
-  const isLegacy = /^[0-9a-f]{48}$/.test(param);
-  const sessionKey = (slug: string) => `ma_board_session:${slug}`;
-  const [token, setToken] = useState<string>(() => (isLegacy ? param : localStorage.getItem(sessionKey(param)) || ""));
+  const { token: first = "", board: second } = useParams();
+  const param = second ? `${first}/${second}` : first;
+  const isLegacy = !second && /^[0-9a-f]{48}$/.test(first);
+  const [token, setToken] = useState<string>(() => (isLegacy ? first : readSession(param)));
   const { user } = useAuth();
   const [data, setData] = useState<Shared | null | undefined>(undefined);
   const [loadError, setLoadError] = useState(false);
@@ -53,11 +53,12 @@ export default function SharedProcurementBoard() {
     setLoadError(false);
     const { data: d, error } = await supabase.rpc("get_shared_board" as any, { _token: token });
     if (error) { setLoadError(true); setData(null); return; }
-    if (!d && !isLegacy) { localStorage.removeItem(sessionKey(param)); setToken(""); return; }
+    if (!d && !isLegacy) { clearSession(param); setToken(""); return; }
     // Legacy token links: remember the session and mask the address as the project slug.
     if (d && isLegacy) {
-      const slug = slugify((d as Shared).project_name || (d as Shared).board_title);
-      if (slug) { localStorage.setItem(sessionKey(slug), token); window.history.replaceState(null, "", `/shared/board/${slug}`); }
+      const sh = d as Shared;
+      const slug = sh.project_name ? `${slugify(sh.project_name)}/${slugify(sh.board_title)}` : `board/${slugify(sh.board_title)}`;
+      writeSession(slug, token); window.history.replaceState(null, "", `/shared/board/${slug}`);
     }
     setData((d as Shared) ?? null);
   }, [token, isLegacy, param]);
@@ -166,7 +167,7 @@ export default function SharedProcurementBoard() {
   const drawerItem = data?.items.find((i) => i.id === drawerFor) ?? null;
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
-  if (!token) return <AccessGate slug={param} onVerified={(t) => { localStorage.setItem(sessionKey(param), t); setToken(t); }} />;
+  if (!token) return <AccessGate slug={param} onVerified={(t) => { writeSession(param, t); setToken(t); }} />;
   if (data === undefined) return <div className="min-h-screen bg-background" />;
   if (data === null) {
     return (
@@ -402,6 +403,20 @@ function ContractorAdd({ token, onAdded }: { token: string; onAdded: () => void 
       )}
     </div>
   );
+}
+
+// Per-guest, per-board session cookie; each verified email gets its own token.
+const cookieName = (slug: string) => `ma_bs_${slug.replace(/[^a-z0-9]+/gi, "_")}`;
+function readSession(slug: string) {
+  const m = document.cookie.match(new RegExp(`(?:^|; )${cookieName(slug)}=([0-9a-f]{48})`));
+  return m ? m[1] : "";
+}
+function writeSession(slug: string, token: string) {
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${cookieName(slug)}=${token}; Path=/shared/board; Max-Age=${60 * 60 * 24 * 30}; SameSite=Strict${secure}`;
+}
+function clearSession(slug: string) {
+  document.cookie = `${cookieName(slug)}=; Path=/shared/board; Max-Age=0; SameSite=Strict`;
 }
 
 function slugify(t: string) {

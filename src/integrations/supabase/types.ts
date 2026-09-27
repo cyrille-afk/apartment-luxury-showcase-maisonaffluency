@@ -777,6 +777,38 @@ export type Database = {
         }
         Relationships: []
       }
+      board_guest_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          invite_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invite_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invite_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_guest_sessions_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "board_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       board_invites: {
         Row: {
           accepted_user_id: string | null
@@ -10881,6 +10913,7 @@ export type Database = {
         Returns: boolean
       }
       _internal_job_token: { Args: never; Returns: string }
+      _norm_board_path: { Args: { _p: string }; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {

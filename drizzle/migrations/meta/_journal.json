@@ -729,6 +729,13 @@
       "when": 1790507756834,
       "tag": "0103_grant_board_slug_service",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1790508085703,
+      "tag": "0104_board_guest_sessions_and_board_slug",
+      "breakpoints": true
     }
   ]
 }
