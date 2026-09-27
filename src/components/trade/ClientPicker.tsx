@@ -106,13 +106,14 @@ export default function ClientPicker({
       const cached = clients.find((c) => c.id === value);
       const primary = primaries[value];
       if (cached) {
-        setPicked({
+        const resolved = {
           id: cached.id, name: cached.name, type: cached.type,
           primary_contact: primary ? {
             first_name: primary.first_name, last_name: primary.last_name,
             role_title: primary.role_title, email: primary.email, phone: primary.phone,
           } : null,
-        });
+        };
+        if (!cancelled) setPicked(resolved);
         return;
       }
       const { data: c } = await supabase.from("clients" as any)
@@ -122,13 +123,14 @@ export default function ClientPicker({
         .select("first_name, last_name, role_title, email, phone")
         .eq("client_id", value).eq("is_primary", true).maybeSingle();
       if (cancelled) return;
-      setPicked({
+      const resolved = {
         id: (c as any).id, name: (c as any).name, type: (c as any).type,
         primary_contact: ct ? {
           first_name: (ct as any).first_name, last_name: (ct as any).last_name,
           role_title: (ct as any).role_title, email: (ct as any).email, phone: (ct as any).phone,
         } : null,
-      });
+      };
+      if (!cancelled) setPicked(resolved);
     })();
     return () => { cancelled = true; };
   }, [value, clients, primaries]);
