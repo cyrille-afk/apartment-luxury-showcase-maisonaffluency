@@ -850,7 +850,7 @@ const TradeBoardBuilder = () => {
 
         {/* Client Portal white-label settings */}
         {isEditable && (
-          <details className="mb-6 rounded-md border border-border bg-card/40 group">
+          <details className="mb-6 rounded-md border border-border bg-card/40 group" data-felix-target="branding-panel">
             <summary className="cursor-pointer list-none flex items-center justify-between gap-2 px-4 py-3">
               <span className="flex items-center gap-2">
                 <Palette className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
@@ -867,7 +867,7 @@ const TradeBoardBuilder = () => {
               <p className="font-body text-xs text-muted-foreground">
                  Your studio identity is shown by default. Turn on Maison Affluency branding only when you want it included.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-felix-target="branding-whitelabel">
                 <div className="space-y-1.5">
                   <Label htmlFor="studio-name" className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">
                     Studio name
@@ -932,7 +932,7 @@ const TradeBoardBuilder = () => {
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="flex items-center justify-between gap-3 pt-1" data-felix-target="branding-whitelabel">
                 <div>
                   <Label htmlFor="hide-maison" className="font-body text-sm text-foreground cursor-pointer">
                      Use studio branding only
