@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -33,7 +33,10 @@ const signupSchema = z.object({
 });
 
 export default function SharedProcurementBoard() {
-  const { token = "" } = useParams();
+  const { token: param = "" } = useParams();
+  const isLegacy = /^[0-9a-f]{48}$/.test(param);
+  const sessionKey = (slug: string) => `ma_board_session:${slug}`;
+  const [token, setToken] = useState<string>(() => (isLegacy ? param : localStorage.getItem(sessionKey(param)) || ""));
   const { user } = useAuth();
   const [data, setData] = useState<Shared | null | undefined>(undefined);
   const [loadError, setLoadError] = useState(false);
@@ -46,11 +49,18 @@ export default function SharedProcurementBoard() {
   const [drawerFor, setDrawerFor] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!token) { setData(undefined); return; }
     setLoadError(false);
     const { data: d, error } = await supabase.rpc("get_shared_board" as any, { _token: token });
     if (error) { setLoadError(true); setData(null); return; }
+    if (!d && !isLegacy) { localStorage.removeItem(sessionKey(param)); setToken(""); return; }
+    // Legacy token links: remember the session and mask the address as the project slug.
+    if (d && isLegacy) {
+      const slug = slugify((d as Shared).project_name || (d as Shared).board_title);
+      if (slug) { localStorage.setItem(sessionKey(slug), token); window.history.replaceState(null, "", `/shared/board/${slug}`); }
+    }
     setData((d as Shared) ?? null);
-  }, [token]);
+  }, [token, isLegacy, param]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -127,22 +137,36 @@ export default function SharedProcurementBoard() {
     return out;
   }, [data, catalog, picks]);
 
-  const sendTimers = useRef<Record<string, number>>({});
+  // Drawer selections stay local until the client presses the action button.
+  const [drawerPicks, setDrawerPicks] = useState<Record<string, FinishSelection>>({});
   const chooseFinish = (item: Item, sel: FinishSelection) => {
-    setPicks((p) => ({ ...p, [item.id]: sel }));
-    window.clearTimeout(sendTimers.current[item.id]);
-    sendTimers.current[item.id] = window.setTimeout(async () => {
+    const base = resolved[item.id];
+    const same = base && (base.top ?? null) === (sel.top ?? null) && (base.base ?? null) === (sel.base ?? null);
+    setDrawerPicks((p) => { const n = { ...p }; if (same) delete n[item.id]; else n[item.id] = sel; return n; });
+  };
+  const submitDecision = async (item: Item, changed: boolean) => {
+    const sel = drawerPicks[item.id];
+    if (changed && sel) {
       const text = `Finish request: ${[sel.top, sel.base].filter(Boolean).join(" / ") || sel.label}`;
       const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: null, _comment: text });
-      if (error) { toast({ title: "Could not send your finish choice", variant: "destructive" }); return; }
-      toast({ title: `Finish choice sent to ${data?.studio_name ?? "your designer"}` });
-      if (!user) setMicroPrompt(true);
-    }, 1500);
+      if (error) { toast({ title: "Could not send your proposal", variant: "destructive" }); return; }
+      setPicks((p) => ({ ...p, [item.id]: sel }));
+      toast({ title: `Finish update proposed to ${data?.studio_name ?? "your designer"}` });
+    } else {
+      const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: "heart", _comment: null });
+      if (error) { toast({ title: "Could not save your approval", variant: "destructive" }); return; }
+      toast({ title: `${item.product_name} approved` });
+    }
+    setDrawerPicks((p) => { const n = { ...p }; delete n[item.id]; return n; });
+    setDrawerFor(null);
+    if (!user) setMicroPrompt(true);
+    load();
   };
 
   const drawerItem = data?.items.find((i) => i.id === drawerFor) ?? null;
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
+  if (!token) return <AccessGate slug={param} onVerified={(t) => { localStorage.setItem(sessionKey(param), t); setToken(t); }} />;
   if (data === undefined) return <div className="min-h-screen bg-background" />;
   if (data === null) {
     return (
@@ -233,7 +257,7 @@ export default function SharedProcurementBoard() {
         <div data-allow-guest="">
           <FinishesDrawer
             open={!!drawerFor}
-            onOpenChange={(o) => !o && setDrawerFor(null)}
+            onOpenChange={(o) => { if (!o) { setDrawerPicks((p) => { const n = { ...p }; delete n[drawerItem.id]; return n; }); setDrawerFor(null); } }}
             productId={drawerItem.product_id}
             productName={drawerItem.product_name}
             baseImage={drawerItem.image_url}
@@ -242,6 +266,14 @@ export default function SharedProcurementBoard() {
             initialBase={resolved[drawerItem.id]?.base}
             preloaded={catalog[drawerItem.product_id]}
             onSelect={(sel) => chooseFinish(drawerItem, sel)}
+            footer={(() => {
+              const changed = !!drawerPicks[drawerItem.id];
+              return (
+                <Button className="h-11 w-full rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={() => submitDecision(drawerItem, changed)}>
+                  {changed ? "Propose Finish Update" : "Approve Selection"}
+                </Button>
+              );
+            })()}
           />
         </div>
       )}
@@ -292,7 +324,7 @@ function SignupOverlay({ open, onClose, data, token }: { open: boolean; onClose:
     const { data: res, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: { emailRedirectTo: `https://www.maisonaffluency.com/shared/board/${token}` },
+      options: { emailRedirectTo: `https://www.maisonaffluency.com${window.location.pathname}` },
     });
     setBusy(false);
     if (error) { setErr(error.message); return; }
@@ -368,6 +400,67 @@ function ContractorAdd({ token, onAdded }: { token: string; onAdded: () => void 
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function slugify(t: string) {
+  return (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function AccessGate({ slug, onVerified }: { slug: string; onVerified: (token: string) => void }) {
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"email" | "code">("email");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const call = async (body: Record<string, string>) => {
+    const { data, error } = await supabase.functions.invoke("board-access", { body: { slug, ...body } });
+    if (error) {
+      let msg = "Access denied.";
+      try { msg = (await (error as any).context?.json())?.error || msg; } catch { /* keep default */ }
+      throw new Error(msg);
+    }
+    return data as any;
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr(null);
+    const parsed = z.string().trim().email().max(255).safeParse(email);
+    if (!parsed.success) { setErr("Enter a valid email"); return; }
+    setBusy(true);
+    try {
+      if (step === "email") { await call({ action: "request", email: parsed.data }); setStep("code"); }
+      else {
+        if (!/^\d{6}$/.test(code)) { setErr("Enter the 6-digit code"); setBusy(false); return; }
+        const r = await call({ action: "verify", email: parsed.data, code });
+        onVerified(r.token);
+      }
+    } catch (x: any) { setErr(x.message); }
+    setBusy(false);
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <Helmet><title>Private board</title><meta name="robots" content="noindex" /></Helmet>
+      <form onSubmit={submit} className="w-full max-w-sm text-center">
+        <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Private Project Board</p>
+        <h1 className="mt-3 font-display text-2xl text-foreground">{step === "email" ? "Verify your email" : "Enter your code"}</h1>
+        <p className="mt-2 font-body text-sm text-muted-foreground">
+          {step === "email" ? "Enter the email address your designer invited." : `We sent a 6-digit code to ${email}.`}
+        </p>
+        <div className="mt-6 space-y-3 text-left">
+          {step === "email" ? (
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} placeholder="name@example.com" className="rounded-none" autoComplete="email" autoFocus />
+          ) : (
+            <Input inputMode="numeric" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" className="rounded-none text-center tracking-[0.5em]" autoComplete="one-time-code" autoFocus />
+          )}
+          {err && <p className="font-body text-xs text-destructive">{err}</p>}
+          <Button type="submit" disabled={busy} className="w-full rounded-none">{busy ? "Please wait…" : step === "email" ? "Send Code" : "Open Board"}</Button>
+          {step === "code" && <button type="button" className="w-full font-body text-xs text-muted-foreground underline" onClick={() => { setStep("email"); setCode(""); }}>Use a different email</button>}
+        </div>
+      </form>
     </div>
   );
 }

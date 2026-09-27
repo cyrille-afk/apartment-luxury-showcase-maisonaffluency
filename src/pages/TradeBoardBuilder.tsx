@@ -1005,6 +1005,14 @@ const TradeBoardBuilder = () => {
             initialTop={finishes[finishItem.id]?.top ?? finishItem.fabric_label ?? null}
             initialBase={finishes[finishItem.id]?.base ?? finishItem.wood_label ?? null}
             onSelect={(sel) => applyFinish(finishItem, sel)}
+            footer={
+              <Button className="h-11 w-full rounded-none font-body text-[11px] uppercase tracking-[0.2em]" onClick={async () => {
+                const sel = finishes[finishItem.id];
+                if (sel) await applyFinish(finishItem, sel);
+                setFinishItem(null);
+                toast({ title: "Variant applied. Dynamic cost matrix and client editorial view updated successfully." });
+              }}>Apply to Project Board</Button>
+            }
           />
         )}
 

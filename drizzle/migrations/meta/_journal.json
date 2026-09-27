@@ -708,6 +708,27 @@
       "when": 1790500767969,
       "tag": "0100_shared_board_finishes",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1790507617540,
+      "tag": "0101_board_slug_otp_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1790507657574,
+      "tag": "0102_fix_submit_board_feedback_cols",
+      "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1790507756834,
+      "tag": "0103_grant_board_slug_service",
+      "breakpoints": true
     }
   ]
 }

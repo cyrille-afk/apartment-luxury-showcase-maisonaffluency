@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public._board_slug(uuid) TO service_role;

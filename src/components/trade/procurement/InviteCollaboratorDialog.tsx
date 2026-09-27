@@ -49,7 +49,8 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       return;
     }
     const { id, token } = data as { id: string; token: string };
-    const url = `${SHARE_ORIGIN}/shared/board/${token}`;
+    const { data: slug } = await supabase.rpc("board_share_slug" as any, { _board_id: boardId });
+    const url = `${SHARE_ORIGIN}/shared/board/${(slug as string) || token}`;
     setLink(url);
     const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
       body: { templateName: "board-collaborator-invite", recipientEmail: parsed.data, idempotencyKey: `board-invite-${id}`, templateData: { token } },

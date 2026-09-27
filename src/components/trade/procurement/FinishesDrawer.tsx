@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -113,7 +114,7 @@ export const finishLabel = (v: Variant) =>
   [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
 
 export default function FinishesDrawer({
-  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect, preloaded,
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect, preloaded, footer,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -127,6 +128,8 @@ export default function FinishesDrawer({
   onSelect: (sel: FinishSelection) => void;
   /** Guest boards: catalogue data fetched through the invite token instead of direct table reads. */
   preloaded?: PreloadedFinishes | null;
+  /** Sticky action area at the bottom of the drawer. */
+  footer?: React.ReactNode;
 }) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [gallery, setGallery] = useState<string[]>([]);
@@ -427,6 +430,9 @@ export default function FinishesDrawer({
               </div>
             )}
           </>
+        )}
+        {footer && (
+          <div className="sticky bottom-0 border-t border-border/60 bg-background px-6 py-4">{footer}</div>
         )}
       </SheetContent>
     </Sheet>
