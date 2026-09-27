@@ -715,6 +715,13 @@
       "when": 1790507617540,
       "tag": "0101_board_slug_otp_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1790507657574,
+      "tag": "0102_fix_submit_board_feedback_cols",
+      "breakpoints": true
     }
   ]
 }
