@@ -200,7 +200,7 @@ export default function FinishesDrawer({
       if (alive) setLoading(false);
     })();
     return () => { alive = false; };
-  }, [open, productId, clientMode]);
+  }, [open, productId, clientMode, preloaded]);
 
   const imageFor = (v: Variant | null) => {
     if (!v) return null;
