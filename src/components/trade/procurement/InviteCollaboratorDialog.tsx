@@ -10,6 +10,12 @@ import { copyTextToClipboard } from "@/lib/clipboard";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
+// Share links must always point at the public production domain — the preview
+// runs on a sandbox origin (lovableproject.com) that recipients cannot use.
+const SHARE_ORIGIN = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? window.location.origin
+  : "https://www.maisonaffluency.com";
+
 export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
