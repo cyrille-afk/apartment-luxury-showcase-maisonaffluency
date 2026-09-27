@@ -49,10 +49,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     userIdRef.current = user?.id ?? null;
   }, [user]);
 
-  const fetchUserData = useCallback(async (userId: string, client: any) => {
+  // Retries the role/profile lookup with backoff so a single dropped request
+  // can never demote a signed-in admin/trade user to public-only view.
+  const MAX_LOOKUP_ATTEMPTS = 4;
+  const lookupRetryTimerRef = useRef<number | null>(null);
+
+  const fetchUserData = useCallback(async (userId: string, client: any, attempt = 0): Promise<boolean> => {
     let rolesRes: any;
     let profileRes: any;
     let appRes: any;
+    let lookupError: any = null;
 
     try {
       [rolesRes, profileRes, appRes] = await Promise.all([
@@ -61,12 +67,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         client.from("trade_accounts").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
-      console.warn("Unable to refresh trade access state; keeping existing permissions.", error);
-      return false;
+      lookupError = error;
     }
 
-    if (rolesRes.error || appRes.error) {
-      console.warn("Unable to refresh trade access state; keeping existing permissions.", rolesRes.error || appRes.error);
+    // A missing profile row is legitimate (PGRST116); anything else on any of
+    // the three lookups is treated as a transient failure worth retrying.
+    if (!lookupError) {
+      const profileLookupFailed = profileRes.error && profileRes.error.code !== "PGRST116";
+      if (rolesRes.error || appRes.error || profileLookupFailed) {
+        lookupError = rolesRes.error || appRes.error || profileRes.error;
+      }
+    }
+
+    if (lookupError) {
+      if (attempt + 1 < MAX_LOOKUP_ATTEMPTS) {
+        // Exponential backoff: 500ms → 1s → 2s, then one delayed retry below.
+        await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+        return fetchUserData(userId, client, attempt + 1);
+      }
+      console.warn("Role lookup failed after retries; keeping existing permissions.", lookupError);
+      // Last-resort background retry for a flaky connection at page load —
+      // without it an admin would stay stuck in public-only mode all session.
+      if (lookupRetryTimerRef.current) window.clearTimeout(lookupRetryTimerRef.current);
+      lookupRetryTimerRef.current = window.setTimeout(() => {
+        if (userIdRef.current === userId) void fetchUserData(userId, client);
+      }, 8000);
       return false;
     }
 
@@ -255,6 +280,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
+      if (lookupRetryTimerRef.current) window.clearTimeout(lookupRetryTimerRef.current);
       subscription.unsubscribe();
     };
   }, [sbClient, fetchUserData]);
