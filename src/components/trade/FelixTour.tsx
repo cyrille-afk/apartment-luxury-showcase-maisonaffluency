@@ -207,6 +207,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let frame = 0;
     let last: Rect | null = null;
     let stableSince = 0;
+    let ready = false;
     let didEnter = false;
     let didScroll = false;
     let watched: Element[] = [];
@@ -241,16 +242,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
+        ready = false;
         setSettled(false);
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
-        setSettled(false);
       } else if (now - stableSince >= 160) {
         setRect((previous) => previous && sameRect(previous, next) ? previous : next);
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         setStepDone(current.done ? current.done() : true);
+        ready = true;
         setSettled(true);
       }
       frame = requestAnimationFrame(tick);
