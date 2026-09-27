@@ -246,7 +246,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
         ) : (
           <motion.div key="editorial" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="grid grid-cols-1 gap-x-8 gap-y-12 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((r) => (
-              <article key={r.id}>
+              <article key={r.id} className="flex flex-col">
                 <div className="relative aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
                   {onOpenFinishes && (
                     <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Materials and finishes for ${r.product_name}`}
@@ -256,16 +256,22 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   )}
                   {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} className="h-full w-full object-contain" loading="lazy" />}
                 </div>
-                 <h3 className="mt-4 font-display text-lg text-foreground">{r.product_name}</h3>
-                 {finishOverrides[r.id] && (
-                   <p className="mt-1 flex items-center gap-2 font-body text-xs text-muted-foreground">
-                     <FinishChips fo={finishOverrides[r.id]} />
-                     <span className="truncate">{finishOverrides[r.id].label}</span>
-                   </p>
-                 )}
-                 <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
-                {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
-                {r.approval_status === "approved" && <p className="mt-2 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
+                <div className="mt-4 flex min-h-[96px] flex-1 flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-lg text-foreground">{r.product_name}</h3>
+                    {finishOverrides[r.id] && (
+                      <p className="mt-1 flex items-start gap-2 font-body text-xs text-muted-foreground">
+                        <FinishChips fo={finishOverrides[r.id]} />
+                        <span className="line-clamp-2">{finishOverrides[r.id].label}</span>
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    {r.approval_status === "approved" && <p className="mb-1 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
+                    <p className="font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
+                    {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
+                  </div>
+                </div>
               </article>
             ))}
           </motion.div>
