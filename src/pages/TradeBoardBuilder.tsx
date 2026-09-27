@@ -1081,58 +1081,127 @@ const TradeBoardBuilder = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <Input value={search} onChange={e => { setSearch(e.target.value); searchProducts(e.target.value); }} placeholder="Search products…" className="mb-3" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" className="mb-3" />
           <div className="flex-1 overflow-y-auto min-h-0">
-            {groupedProducts.map(([brand, prods]) => {
-              const collapsed = !search.trim() && collapsedBrands.has(brand);
-              return (
-                <div key={brand} className="mb-1">
+            {search.trim() ? (
+              /* Global search bypasses the directory entirely */
+              <div className="space-y-1">
+                {searchResults.map(p => (
                   <button
-                    type="button"
-                    onClick={() => setCollapsedBrands(prev => {
-                      const next = new Set(prev);
-                      if (next.has(brand)) next.delete(brand); else next.add(brand);
-                      return next;
-                    })}
-                    className="w-full flex items-center gap-2 px-1 py-2 text-left sticky top-0 bg-popover z-10"
+                    key={p.id}
+                    disabled={addedIds.has(p.id)}
+                    onClick={() => addProduct(p.id)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
                   >
-                    {collapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                    <span className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">{brand || "Unknown designer"}</span>
-                    <span className="font-body text-[10px] text-muted-foreground/60">({prods.length})</span>
-                  </button>
-                  {!collapsed && (
-                    <div className="space-y-1">
-                      {prods.map(p => (
-                        <button
-                          key={p.id}
-                          disabled={addedIds.has(p.id)}
-                          onClick={() => addProduct(p.id)}
-                          className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
-                        >
-                          <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
-                            {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
-                            {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
-                            <p className="font-body text-xs text-muted-foreground">{p.category}</p>
-                          </div>
-                          {addedIds.has(p.id) ? (
-                            <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          ) : (
-                            <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
-                          )}
-                        </button>
-                      ))}
+                    <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
+                      {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
+                      {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
                     </div>
-                  )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
+                      <p className="font-body text-xs text-muted-foreground truncate">{p.brand_name}{p.category ? ` · ${p.category}` : ""}</p>
+                    </div>
+                    {addedIds.has(p.id) ? (
+                      <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    ) : (
+                      <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                ))}
+                {searchResults.length === 0 && (
+                  <p className="text-center text-muted-foreground text-sm py-8">No matching pieces found</p>
+                )}
+              </div>
+            ) : selectedBrand ? (
+              /* Drill-down: one designer's catalog */
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBrand(null)}
+                  className="flex items-center gap-1.5 mb-3 font-body text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> All Designers & Makers
+                </button>
+                <p className="font-display text-lg text-foreground mb-3">{selectedBrand}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedBrandProducts.map(p => (
+                    <button
+                      key={p.id}
+                      disabled={addedIds.has(p.id)}
+                      onClick={() => addProduct(p.id)}
+                      className="group rounded-md border border-border/60 overflow-hidden text-left hover:border-foreground/30 transition-colors disabled:opacity-40"
+                    >
+                      <div className="aspect-[4/3] bg-muted overflow-hidden relative">
+                        {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" /> : null}
+                        {p.image_from_hotspot && <HotspotImageBadge className="top-1 left-1 px-1 py-0 text-[8px]" />}
+                        <div className="absolute top-1.5 right-1.5 rounded-full bg-background/80 p-1">
+                          {addedIds.has(p.id) ? (
+                            <Check className="h-3.5 w-3.5 text-green-500" />
+                          ) : (
+                            <Plus className="h-3.5 w-3.5 text-foreground" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <p className="font-body text-xs text-foreground truncate">{p.product_name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground truncate">{p.category}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              );
-            })}
-            {products.length === 0 && (
-              <p className="text-center text-muted-foreground text-sm py-8">
-                {search.trim() ? "No matching favorites found" : "No saved favorites yet — save items from the showroom first"}
-              </p>
+              </div>
+            ) : (
+              /* A–Z directory of Designers & Makers */
+              <div>
+                <div className="flex flex-wrap gap-x-1.5 gap-y-1 mb-4 sticky top-0 bg-popover z-10 py-1">
+                  {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter => {
+                    const enabled = availableLetters.has(letter);
+                    const active = letterFilter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        disabled={!enabled}
+                        onClick={() => setLetterFilter(active ? null : letter)}
+                        className={`font-body text-[11px] w-5 h-5 rounded transition-colors ${
+                          active
+                            ? "bg-foreground text-background"
+                            : enabled
+                              ? "text-foreground hover:bg-muted"
+                              : "text-muted-foreground/30 cursor-default"
+                        }`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {visibleDesigners.map(d => (
+                    <button
+                      key={d.brand || "unknown"}
+                      type="button"
+                      onClick={() => setSelectedBrand(d.brand)}
+                      className="flex items-center gap-3 p-2 rounded-md border border-border/60 hover:border-foreground/30 transition-colors text-left"
+                    >
+                      <div className="w-10 h-10 rounded bg-muted shrink-0 overflow-hidden">
+                        {d.image ? <img src={d.image} alt="" className="w-full h-full object-cover" /> : null}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground truncate">{d.brand || "Unknown designer"}</p>
+                        <p className="font-body text-[10px] text-muted-foreground">{d.count} {d.count === 1 ? "piece" : "pieces"}</p>
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    </button>
+                  ))}
+                </div>
+                {visibleDesigners.length === 0 && (
+                  <p className="text-center text-muted-foreground text-sm py-8">No designers under this letter</p>
+                )}
+              </div>
+            )}
+            {!catalogLoaded && products.length === 0 && (
+              <p className="text-center text-muted-foreground text-sm py-8">Loading catalog…</p>
             )}
           </div>
         </DialogContent>
