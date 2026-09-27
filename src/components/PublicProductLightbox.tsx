@@ -1041,7 +1041,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
             </div>
-          </motion.div>}
+          </motion.div>
 
           {/* More From — final exploration tier */}
           {!product.restricted_gallery_pin && <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
