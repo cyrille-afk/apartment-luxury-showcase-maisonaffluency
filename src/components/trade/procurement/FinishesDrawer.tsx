@@ -163,7 +163,7 @@ export default function FinishesDrawer({
                 </div>
               </div>
             )}
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-border/60 pb-8">
               {variants.map((v, idx) => {
                 const label = finishLabel(v);
                 const img = imageFor(v) || baseImage;
@@ -174,24 +174,40 @@ export default function FinishesDrawer({
                     <button
                       type="button"
                       onClick={() => { setPreview(v); onSelect({ label, price_cents: v.price_cents ?? null, image_url: imageFor(v) }); }}
-                      className={`flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 ${active ? "bg-muted/50" : ""}`}
+                      className={`flex w-full items-start gap-4 px-6 py-5 text-left transition-colors hover:bg-muted/40 ${active ? "bg-muted/50" : ""}`}
                     >
                       <div className="h-16 w-16 shrink-0 bg-[hsl(var(--product-canvas))]">
                         {img && <img src={img} alt="" className="h-full w-full object-contain p-1" loading="lazy" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-body text-sm text-foreground">{[v.top, v.base].filter(Boolean).join(" / ")}</p>
-                        {v.label && <p className="truncate font-body text-[11px] text-muted-foreground">{v.label}</p>}
-                        <p className="mt-1 font-body text-xs tabular-nums text-foreground">
-                          {formatMoneyIn(v.price_cents ?? null, currency, "Price upon Request")}
-                        </p>
-                        {!clientMode && (
-                          <p className="font-body text-[11px] tabular-nums text-muted-foreground">
-                            Trade {formatMoneyIn(trade, currency, "—")} · Margin {discount}% · Lead {v.lead_time || lead || "—"}
-                          </p>
-                        )}
+                        {/* Identity Layer */}
+                        <p className="font-body text-sm font-medium text-foreground">{[v.top, v.base].filter(Boolean).join(" / ")}</p>
+                        {v.label && <p className="mt-0.5 font-body text-[11px] text-muted-foreground">{v.label}</p>}
+
+                        {/* Price & Logistics Breakdown Grid */}
+                        <div className={`mt-4 grid gap-x-4 gap-y-1 ${clientMode ? "grid-cols-1" : "grid-cols-3"}`}>
+                          <div>
+                            <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Client Price</p>
+                            <p className="font-display text-sm tabular-nums text-foreground">
+                              {formatMoneyIn(v.price_cents ?? null, currency, "Price upon Request")}
+                            </p>
+                          </div>
+                          {!clientMode && (
+                            <>
+                              <div>
+                                <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
+                                <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
+                                <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
+                              </div>
+                              <div>
+                                <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
+                                <p className="font-body text-sm text-foreground">{v.lead_time || lead || "—"}</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                      {active && <Check className="h-4 w-4 shrink-0 self-start text-primary" />}
                     </button>
                   </li>
                 );
