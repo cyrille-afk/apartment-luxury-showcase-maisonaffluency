@@ -247,6 +247,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
+        if (!ready) setSettled(false);
       } else if (now - stableSince >= 160) {
         setRect((previous) => previous && sameRect(previous, next) ? previous : next);
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
