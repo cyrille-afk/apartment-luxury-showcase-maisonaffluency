@@ -154,7 +154,6 @@ const TradeBoardBuilder = () => {
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [collapsedBrands, setCollapsedBrands] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [copyButtonLabel, setCopyButtonLabel] = useState("Copy Current Link");
@@ -278,31 +277,33 @@ const TradeBoardBuilder = () => {
     return groups;
   }, [items, subfolders]);
 
-  const searchProducts = useCallback(async (q: string) => {
-    if (!user) return;
-    // Source from user's saved favorites only
-    let query = supabase
-      .from("trade_favorites")
-      .select("product_id, trade_products!inner(id, product_name, brand_name, image_url, category)")
-      .eq("user_id", user.id);
-    if (q.trim()) {
-      query = query.or(`trade_products.product_name.ilike.%${q}%,trade_products.brand_name.ilike.%${q}%`);
-    }
-    const { data } = await query.order("created_at", { ascending: false });
-    const prods = (data || []).map((f: any) => f.trade_products).filter(Boolean) as Product[];
-    // Deduplicate by product id
-    const seen = new Set<string>();
-    const unique = prods.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [letterFilter, setLetterFilter] = useState<string | null>(null);
 
-    // Fill missing images from the linked curator pick (preferred — uses
-    // source_pick_id), then from gallery_hotspots as a final fallback.
+  // Load the full active trade catalog once per dialog open — the A–Z designer
+  // directory and drill-down views are derived client-side from this list.
+  const loadCatalog = useCallback(async () => {
+    if (!user || catalogLoaded) return;
+    const { data } = await supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, image_url, category")
+      .neq("is_active", false)
+      .order("brand_name")
+      .order("product_name");
+    const unique = (data || []) as Product[];
     await fillTradeProductImageFallbacks(unique);
     await fillHotspotImages(unique.filter(p => !p.image_url));
-
     setProducts(unique);
-  }, [user]);
+    setCatalogLoaded(true);
+  }, [user, catalogLoaded]);
 
-  useEffect(() => { if (addOpen) searchProducts(search); }, [addOpen, search, searchProducts]);
+  useEffect(() => { if (addOpen) loadCatalog(); }, [addOpen, loadCatalog]);
+
+  // Reset drill-down state each time the dialog opens
+  useEffect(() => {
+    if (addOpen) { setSelectedBrand(null); setLetterFilter(null); setSearch(""); }
+  }, [addOpen]);
 
   const groupedProducts = useMemo(() => {
     const map = new Map<string, Product[]>();
@@ -313,6 +314,36 @@ const TradeBoardBuilder = () => {
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [products]);
+
+  // Designer directory entries: brand name, product count, representative image
+  const designerDirectory = useMemo(() =>
+    groupedProducts.map(([brand, prods]) => ({
+      brand,
+      count: prods.length,
+      image: prods.find(p => p.image_url)?.image_url ?? null,
+    })),
+  [groupedProducts]);
+
+  const availableLetters = useMemo(() =>
+    new Set(designerDirectory.map(d => (d.brand || "#").charAt(0).toUpperCase())),
+  [designerDirectory]);
+
+  const visibleDesigners = useMemo(() =>
+    letterFilter
+      ? designerDirectory.filter(d => (d.brand || "#").charAt(0).toUpperCase() === letterFilter)
+      : designerDirectory,
+  [designerDirectory, letterFilter]);
+
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return products.filter(p =>
+      p.product_name?.toLowerCase().includes(q) || p.brand_name?.toLowerCase().includes(q));
+  }, [products, search]);
+
+  const selectedBrandProducts = useMemo(() =>
+    selectedBrand ? (groupedProducts.find(([b]) => b === selectedBrand)?.[1] ?? []) : [],
+  [groupedProducts, selectedBrand]);
 
   const addProduct = async (productId: string) => {
     if (!id) return;
@@ -1040,7 +1071,7 @@ const TradeBoardBuilder = () => {
 
       {/* Add products dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="font-display">
               Add Products
@@ -1049,58 +1080,127 @@ const TradeBoardBuilder = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <Input value={search} onChange={e => { setSearch(e.target.value); searchProducts(e.target.value); }} placeholder="Search products…" className="mb-3" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" className="mb-3" />
           <div className="flex-1 overflow-y-auto min-h-0">
-            {groupedProducts.map(([brand, prods]) => {
-              const collapsed = !search.trim() && collapsedBrands.has(brand);
-              return (
-                <div key={brand} className="mb-1">
+            {search.trim() ? (
+              /* Global search bypasses the directory entirely */
+              <div className="space-y-1">
+                {searchResults.map(p => (
                   <button
-                    type="button"
-                    onClick={() => setCollapsedBrands(prev => {
-                      const next = new Set(prev);
-                      if (next.has(brand)) next.delete(brand); else next.add(brand);
-                      return next;
-                    })}
-                    className="w-full flex items-center gap-2 px-1 py-2 text-left sticky top-0 bg-popover z-10"
+                    key={p.id}
+                    disabled={addedIds.has(p.id)}
+                    onClick={() => addProduct(p.id)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
                   >
-                    {collapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                    <span className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">{brand || "Unknown designer"}</span>
-                    <span className="font-body text-[10px] text-muted-foreground/60">({prods.length})</span>
-                  </button>
-                  {!collapsed && (
-                    <div className="space-y-1">
-                      {prods.map(p => (
-                        <button
-                          key={p.id}
-                          disabled={addedIds.has(p.id)}
-                          onClick={() => addProduct(p.id)}
-                          className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
-                        >
-                          <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
-                            {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
-                            {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
-                            <p className="font-body text-xs text-muted-foreground">{p.category}</p>
-                          </div>
-                          {addedIds.has(p.id) ? (
-                            <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          ) : (
-                            <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
-                          )}
-                        </button>
-                      ))}
+                    <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
+                      {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
+                      {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
                     </div>
-                  )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
+                      <p className="font-body text-xs text-muted-foreground truncate">{p.brand_name}{p.category ? ` · ${p.category}` : ""}</p>
+                    </div>
+                    {addedIds.has(p.id) ? (
+                      <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    ) : (
+                      <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                ))}
+                {searchResults.length === 0 && (
+                  <p className="text-center text-muted-foreground text-sm py-8">No matching pieces found</p>
+                )}
+              </div>
+            ) : selectedBrand ? (
+              /* Drill-down: one designer's catalog */
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBrand(null)}
+                  className="flex items-center gap-1.5 mb-3 font-body text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> All Designers & Makers
+                </button>
+                <p className="font-display text-lg text-foreground mb-3">{selectedBrand}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedBrandProducts.map(p => (
+                    <button
+                      key={p.id}
+                      disabled={addedIds.has(p.id)}
+                      onClick={() => addProduct(p.id)}
+                      className="group rounded-md border border-border/60 overflow-hidden text-left hover:border-foreground/30 transition-colors disabled:opacity-40"
+                    >
+                      <div className="aspect-[4/3] bg-muted overflow-hidden relative">
+                        {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" /> : null}
+                        {p.image_from_hotspot && <HotspotImageBadge className="top-1 left-1 px-1 py-0 text-[8px]" />}
+                        <div className="absolute top-1.5 right-1.5 rounded-full bg-background/80 p-1">
+                          {addedIds.has(p.id) ? (
+                            <Check className="h-3.5 w-3.5 text-green-500" />
+                          ) : (
+                            <Plus className="h-3.5 w-3.5 text-foreground" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <p className="font-body text-xs text-foreground truncate">{p.product_name}</p>
+                        <p className="font-body text-[10px] text-muted-foreground truncate">{p.category}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              );
-            })}
-            {products.length === 0 && (
-              <p className="text-center text-muted-foreground text-sm py-8">
-                {search.trim() ? "No matching favorites found" : "No saved favorites yet — save items from the showroom first"}
-              </p>
+              </div>
+            ) : (
+              /* A–Z directory of Designers & Makers */
+              <div>
+                <div className="flex flex-wrap gap-x-1.5 gap-y-1 mb-4 sticky top-0 bg-popover z-10 py-1">
+                  {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(letter => {
+                    const enabled = availableLetters.has(letter);
+                    const active = letterFilter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        disabled={!enabled}
+                        onClick={() => setLetterFilter(active ? null : letter)}
+                        className={`font-body text-[11px] w-5 h-5 rounded transition-colors ${
+                          active
+                            ? "bg-foreground text-background"
+                            : enabled
+                              ? "text-foreground hover:bg-muted"
+                              : "text-muted-foreground/30 cursor-default"
+                        }`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {visibleDesigners.map(d => (
+                    <button
+                      key={d.brand || "unknown"}
+                      type="button"
+                      onClick={() => setSelectedBrand(d.brand)}
+                      className="flex items-center gap-3 p-2 rounded-md border border-border/60 hover:border-foreground/30 transition-colors text-left"
+                    >
+                      <div className="w-10 h-10 rounded bg-muted shrink-0 overflow-hidden">
+                        {d.image ? <img src={d.image} alt="" className="w-full h-full object-cover" /> : null}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body text-xs uppercase tracking-[0.12em] text-foreground truncate">{d.brand || "Unknown designer"}</p>
+                        <p className="font-body text-[10px] text-muted-foreground">{d.count} {d.count === 1 ? "piece" : "pieces"}</p>
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    </button>
+                  ))}
+                </div>
+                {visibleDesigners.length === 0 && (
+                  <p className="text-center text-muted-foreground text-sm py-8">No designers under this letter</p>
+                )}
+              </div>
+            )}
+            {!catalogLoaded && products.length === 0 && (
+              <p className="text-center text-muted-foreground text-sm py-8">Loading catalog…</p>
             )}
           </div>
         </DialogContent>
