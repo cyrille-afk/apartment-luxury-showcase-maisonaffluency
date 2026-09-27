@@ -30,10 +30,30 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
+/** Small cropped finish swatch chips (fabric + wood) with label tooltips. */
+export function FinishChips({ fo, size = "h-5 w-5" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null } | null; size?: string }) {
+  if (!fo) return null;
+  const chips = [
+    { name: fo.top, img: fo.top_image },
+    { name: fo.base, img: fo.base_image },
+  ].filter((c) => c.name || c.img);
+  if (!chips.length) return null;
+  return (
+    <span className="inline-flex items-center gap-1">
+      {chips.map((c, i) => (
+        <span key={i} title={c.name ?? undefined} aria-label={c.name ?? undefined}
+          className={`${size} shrink-0 overflow-hidden rounded-full border border-border/60 bg-[hsl(var(--product-canvas))]`}>
+          {c.img ? <img src={c.img} alt="" className="h-full w-full object-cover" loading="lazy" /> : <span className="block h-full w-full bg-muted" />}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
   onOpenFinishes?: (itemId: string) => void;
-  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null }>;
+  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
@@ -169,7 +189,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
                       <td className="px-2 py-1">{r.image_url ? <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-8 w-8 bg-muted" />}</td>
-                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="block truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span>}</td>
+                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-3.5 w-3.5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
                       <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
                       <td className="px-2 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
@@ -236,8 +256,14 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   )}
                   {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} className="h-full w-full object-contain" loading="lazy" />}
                 </div>
-                <h3 className="mt-4 font-display text-lg text-foreground">{r.product_name}</h3>
-                <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
+                 <h3 className="mt-4 font-display text-lg text-foreground">{r.product_name}</h3>
+                 {finishOverrides[r.id] && (
+                   <p className="mt-1 flex items-center gap-2 font-body text-xs text-muted-foreground">
+                     <FinishChips fo={finishOverrides[r.id]} />
+                     <span className="truncate">{finishOverrides[r.id].label}</span>
+                   </p>
+                 )}
+                 <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
                 {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
                 {r.approval_status === "approved" && <p className="mt-2 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
               </article>

@@ -40,7 +40,7 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
-import ProcurementBoardPanel from "@/components/trade/procurement/ProcurementBoardPanel";
+import ProcurementBoardPanel, { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 
@@ -556,7 +556,12 @@ const TradeBoardBuilder = () => {
           {item.product?.product_name}
         </button>
         <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
-        {finishes[item.id] && <p className="font-body text-[11px] text-foreground mt-1 truncate">{finishes[item.id].label}</p>}
+        {finishes[item.id] && (
+          <p className="font-body text-[11px] text-muted-foreground mt-1 flex items-center gap-1.5">
+            <FinishChips fo={finishes[item.id]} size="h-4 w-4" />
+            <span className="truncate">{finishes[item.id].label}</span>
+          </p>
+        )}
         {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
         {isEditable && (
           <div className="flex items-center gap-1 mt-2">
