@@ -164,6 +164,7 @@ const TradeProjects = lazy(() => import("./pages/TradeProjects"));
 const TradeProjectDetail = lazy(() => import("./pages/TradeProjectDetail"));
 const TradeProjectStudio = lazy(() => import("./pages/TradeProjectStudio"));
 const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
+const SharedProcurementBoard = lazy(() => import("./pages/SharedProcurementBoard"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
 const TradeDesignersAdmin = lazy(() => import("./pages/TradeDesignersAdmin"));
@@ -773,6 +774,7 @@ const App = () => {
                   
                   <Route path="/pay/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><GuestPayPage /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
+                  <Route path="/shared/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedProcurementBoard /></Suspense>} />
                   <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
                   <Route path="/designer-upload/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerUpload /></Suspense>} />
 
