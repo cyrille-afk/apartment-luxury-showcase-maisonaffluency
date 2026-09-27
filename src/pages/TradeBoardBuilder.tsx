@@ -888,7 +888,7 @@ const TradeBoardBuilder = () => {
           </details>
         )}
 
-        <ProcurementBoardPanel boardId={board.id} items={items} finishOverrides={finishes} />
+        <ProcurementBoardPanel boardId={board.id} items={items} finishOverrides={finishes} onOpenFinishes={(id) => { const it = items.find((i) => i.id === id); if (it) setFinishItem(it); }} />
         {finishItem && (
           <FinishesDrawer
             open={!!finishItem}

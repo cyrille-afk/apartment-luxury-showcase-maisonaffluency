@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X } from "lucide-react";
+import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +30,9 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
-export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {} }: {
+export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
+  onOpenFinishes?: (itemId: string) => void;
   finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
@@ -226,8 +227,14 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
           <motion.div key="editorial" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="grid grid-cols-1 gap-x-8 gap-y-12 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((r) => (
               <article key={r.id}>
-                <div className="aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
-                  {r.image_url && <img src={r.image_url} alt={r.product_name} className="h-full w-full object-contain" loading="lazy" />}
+                <div className="relative aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
+                  {onOpenFinishes && (
+                    <button type="button" onClick={() => onOpenFinishes(r.id)} aria-label={`Materials and finishes for ${r.product_name}`}
+                      className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 border border-border/60 bg-background/85 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm transition-colors hover:bg-background">
+                      <Box className="h-3.5 w-3.5" strokeWidth={1.5} /> 3D View
+                    </button>
+                  )}
+                  {(finishOverrides[r.id]?.image_url || r.image_url) && <img src={finishOverrides[r.id]?.image_url || r.image_url!} alt={r.product_name} className="h-full w-full object-contain" loading="lazy" />}
                 </div>
                 <h3 className="mt-4 font-display text-lg text-foreground">{r.product_name}</h3>
                 <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
