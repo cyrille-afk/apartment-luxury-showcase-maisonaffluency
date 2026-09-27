@@ -96,7 +96,8 @@ export default function FinishesDrawer({
     return null;
   };
 
-  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? null;
+  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? variants[0] ?? null;
+  const trade = activeVariant?.price_cents ? Math.round(activeVariant.price_cents * (1 - discount / 100)) : null;
   const glb = useMemo(() => {
     if (!glbs.length) return null;
     const lbl = norm(activeVariant?.label);
