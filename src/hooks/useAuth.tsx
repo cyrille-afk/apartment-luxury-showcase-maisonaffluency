@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let rolesRes: any;
     let profileRes: any;
     let appRes: any;
+    let lookupError: any = null;
 
     try {
       [rolesRes, profileRes, appRes] = await Promise.all([
@@ -66,14 +67,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         client.from("trade_accounts").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
-      return retryOrFail(userId, client, attempt, error);
+      lookupError = error;
     }
 
     // A missing profile row is legitimate (PGRST116); anything else on any of
     // the three lookups is treated as a transient failure worth retrying.
-    const profileLookupFailed = profileRes.error && profileRes.error.code !== "PGRST116";
-    if (rolesRes.error || appRes.error || profileLookupFailed) {
-      return retryOrFail(userId, client, attempt, rolesRes.error || appRes.error || profileRes.error);
+    if (!lookupError) {
+      const profileLookupFailed = profileRes.error && profileRes.error.code !== "PGRST116";
+      if (rolesRes.error || appRes.error || profileLookupFailed) {
+        lookupError = rolesRes.error || appRes.error || profileRes.error;
+      }
+    }
+
+    if (lookupError) {
+      if (attempt + 1 < MAX_LOOKUP_ATTEMPTS) {
+        // Exponential backoff: 500ms → 1s → 2s, then one delayed retry below.
+        await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+        return fetchUserData(userId, client, attempt + 1);
+      }
+      console.warn("Role lookup failed after retries; keeping existing permissions.", lookupError);
+      // Last-resort background retry for a flaky connection at page load —
+      // without it an admin would stay stuck in public-only mode all session.
+      if (lookupRetryTimerRef.current) window.clearTimeout(lookupRetryTimerRef.current);
+      lookupRetryTimerRef.current = window.setTimeout(() => {
+        if (userIdRef.current === userId) void fetchUserData(userId, client);
+      }, 8000);
+      return false;
     }
 
     if (rolesRes.data) {
