@@ -15,7 +15,65 @@ const roleOf = (cat: string | null) => {
   return null;
 };
 
-export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null };
+export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null };
+
+const normKey = (s?: string | null) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+const variantImage = (v: any, imgMap: Record<string, number>, gallery: string[]) => {
+  if (!v) return null;
+  const keys = [
+    [normKey(v.base), normKey(v.top), normKey(v.label)].join("|"),
+    [normKey(v.base), normKey(v.top)].join("|"),
+    normKey(v.top), normKey(v.base),
+  ];
+  for (const k of keys) if (k in imgMap && gallery[imgMap[k]]) return gallery[imgMap[k]];
+  return null;
+};
+
+/** Resolve each board item's saved finish (variant_label + fabric/wood labels)
+ *  to the same price & image the drawer shows, so cards match on load. */
+export async function resolveSavedFinishes(
+  items: { id: string; product_id: string; variant_label?: string | null; fabric_label?: string | null; wood_label?: string | null }[],
+): Promise<Record<string, FinishSelection>> {
+  const withSel = items.filter((i) => i.variant_label || i.fabric_label || i.wood_label);
+  if (!withSel.length) return {};
+  const { data: tps } = await supabase.from("trade_products").select("id, source_pick_id").in("id", Array.from(new Set(withSel.map((i) => i.product_id))));
+  const pickOf = new Map((tps || []).map((t: any) => [t.id, t.source_pick_id as string | null]));
+  const pickIds = Array.from(new Set((tps || []).map((t: any) => t.source_pick_id).filter(Boolean)));
+  if (!pickIds.length) return {};
+  const [{ data: picks }, { data: sws }] = await Promise.all([
+    supabase.from("designer_curator_picks").select("id, size_variants, variant_image_map, gallery_images").in("id", pickIds),
+    supabase.from("product_fabric_swatches_public").select("pick_id, name, image_url, category").in("pick_id", pickIds),
+  ]);
+  const pickMap = new Map((picks || []).map((p: any) => [p.id, p]));
+  const out: Record<string, FinishSelection> = {};
+  for (const it of withSel) {
+    const pid = pickOf.get(it.product_id);
+    const p: any = pid && pickMap.get(pid);
+    if (!p) continue;
+    const variants: any[] = Array.isArray(p.size_variants) ? p.size_variants.filter((v: any) => v.top || v.base) : [];
+    const lbl = it.variant_label || "";
+    const [pair] = lbl.split(" · ");
+    const [lt, lb] = (pair || "").split(" / ");
+    const top = it.fabric_label || lt || null;
+    const base = it.wood_label || lb || null;
+    const v =
+      variants.find((x) => finishLabel(x) === lbl) ||
+      variants.find((x) => normKey(x.top) === normKey(top) && normKey(x.base) === normKey(base)) ||
+      variants.find((x) => normKey(x.top) === normKey(lt) && normKey(x.base) === normKey(lb)) ||
+      variants.find((x) => normKey(x.base) === normKey(base)) ||
+      null;
+    const img = variantImage(v ? { ...v, top: v.top, base: base || v.base } : { top, base }, p.variant_image_map || {}, p.gallery_images || [])
+      || variantImage(v, p.variant_image_map || {}, p.gallery_images || []);
+    out[it.id] = {
+      label: [top, base].filter(Boolean).join(" / ") || lbl,
+      price_cents: v?.price_cents ?? null,
+      image_url: img,
+      top, base,
+    };
+  }
+  return out;
+}
+
 
 type Variant = { top?: string; base?: string; label?: string; price_cents?: number; lead_time?: string };
 
@@ -24,7 +82,7 @@ export const finishLabel = (v: Variant) =>
   [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
 
 export default function FinishesDrawer({
-  open, onOpenChange, productId, productName, baseImage, clientMode, current, onSelect,
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -33,6 +91,8 @@ export default function FinishesDrawer({
   baseImage: string | null;
   clientMode: boolean;
   current?: string | null;
+  initialTop?: string | null;
+  initialBase?: string | null;
   onSelect: (sel: FinishSelection) => void;
 }) {
   const [variants, setVariants] = useState<Variant[]>([]);
@@ -75,7 +135,13 @@ export default function FinishesDrawer({
           supabase.from("trade_product_glb_variants").select("variant_label, glb_url, is_default, material_roles").eq("product_id", productId),
           supabase.from("product_fabric_swatches_public").select("name, image_url, category").eq("pick_id", t.source_pick_id),
         ]);
-        if (alive) { setGlbs((g as Glb[]) || []); setSwatches((sw as Swatch[]) || []); }
+        if (alive) {
+          const list = (sw as Swatch[]) || [];
+          setGlbs((g as Glb[]) || []); setSwatches(list);
+          const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
+          const t0 = find(initialTop, "fabric"), b0 = find(initialBase, "base");
+          if (t0 || b0) setPicked({ ...(t0 ? { top: t0 } : {}), ...(b0 ? { base: b0 } : {}) });
+        }
         const p: any = pick || {};
         if (!alive) return;
         setVariants(Array.isArray(p.size_variants) ? p.size_variants.filter((v: Variant) => v.top || v.base) : []);
@@ -93,6 +159,8 @@ export default function FinishesDrawer({
 
   const imageFor = (v: Variant | null) => {
     if (!v) return null;
+    return variantImage(v, imgMap, gallery);
+
     const keys = [
       [norm(v.base), norm(v.top), norm(v.label)].join("|"),
       [norm(v.base), norm(v.top)].join("|"),
@@ -113,7 +181,16 @@ export default function FinishesDrawer({
     );
   };
 
-  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? variants[0] ?? null;
+  const activeVariant = preview
+    ?? variants.find((v) => finishLabel(v) === current)
+    ?? (() => {
+      const [pair] = (current || "").split(" · ");
+      const [ct, cb] = pair.split(" / ");
+      const t = initialTop || ct, b = initialBase || cb;
+      const hit = variants.find((v) => norm(v.top) === norm(t) && norm(v.base) === norm(b)) || variants.find((v) => norm(v.base) === norm(b));
+      return hit ? { ...hit, top: t || hit.top, base: b || hit.base } : null;
+    })()
+    ?? variants[0] ?? null;
   const trade = activeVariant?.price_cents ? Math.round(activeVariant.price_cents * (1 - discount / 100)) : null;
   const glb = useMemo(() => {
     if (!glbs.length) return null;
@@ -201,12 +278,13 @@ export default function FinishesDrawer({
                     variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(activeVariant?.[other])) ||
                     variants.find((x) => norm(x[key]) === norm(sw.name));
                   if (v) {
-                    setPreview(v);
-                    onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                    const shown = { ...v, [key]: sw.name, [other]: (picked[other]?.name) || v[other] };
+                    setPreview(shown);
+                    onSelect({ label: [shown.top, shown.base].filter(Boolean).join(" / "), price_cents: v.price_cents ?? null, image_url: imageFor(v), top: shown.top ?? null, base: shown.base ?? null });
                   } else if (activeVariant) {
                     const merged = { ...activeVariant, [key]: sw.name };
                     setPreview(merged);
-                    onSelect({ label: finishLabel(merged), price_cents: merged.price_cents ?? null, image_url: imageFor(merged) });
+                    onSelect({ label: [merged.top, merged.base].filter(Boolean).join(" / "), price_cents: merged.price_cents ?? null, image_url: imageFor(merged), top: merged.top ?? null, base: merged.base ?? null });
                   }
                 };
                 return (
