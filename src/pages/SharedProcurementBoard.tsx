@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
+import { Box, Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,10 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { formatMoneyIn } from "@/lib/displayMoney";
+import FinishesDrawer, { resolveFinishFrom, type FinishSelection, type PreloadedFinishes } from "@/components/trade/procurement/FinishesDrawer";
+import { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 
 type Item = {
-  id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
+  id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
   lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
+  variant_label: string | null; fabric_label: string | null; wood_label: string | null; my_finish: string | null;
 };
 type Shared = {
   board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
@@ -38,6 +41,9 @@ export default function SharedProcurementBoard() {
   const [microPrompt, setMicroPrompt] = useState(false);
   const [commentFor, setCommentFor] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [catalog, setCatalog] = useState<Record<string, PreloadedFinishes> | null>(null);
+  const [picks, setPicks] = useState<Record<string, FinishSelection>>({});
+  const [drawerFor, setDrawerFor] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoadError(false);
@@ -99,6 +105,42 @@ export default function SharedProcurementBoard() {
     if (!user) setMicroPrompt(true);
   };
 
+  // Catalogue finish data (variants, cropped swatches, 3D models) via the invite token.
+  useEffect(() => {
+    if (!data) return;
+    supabase.rpc("get_shared_board_finishes" as any, { _token: token }).then(({ data: c }) => setCatalog((c as any) || {}));
+  }, [data, token]);
+
+  // Card state: the client's own request wins over the designer's saved finish.
+  const resolved = useMemo(() => {
+    const out: Record<string, FinishSelection> = {};
+    if (!data || !catalog) return out;
+    for (const it of data.items) {
+      const c = catalog[it.product_id];
+      if (!c) continue;
+      if (picks[it.id]) { out[it.id] = picks[it.id]; continue; }
+      const [mt, mb] = (it.my_finish || "").split(" / ");
+      const src = it.my_finish ? { fabric_label: mt || null, wood_label: mb || null } : it;
+      if (!(src.fabric_label || src.wood_label || (src as any).variant_label)) continue;
+      out[it.id] = resolveFinishFrom(src, c, c.swatches || []);
+    }
+    return out;
+  }, [data, catalog, picks]);
+
+  const sendTimers = useRef<Record<string, number>>({});
+  const chooseFinish = (item: Item, sel: FinishSelection) => {
+    setPicks((p) => ({ ...p, [item.id]: sel }));
+    window.clearTimeout(sendTimers.current[item.id]);
+    sendTimers.current[item.id] = window.setTimeout(async () => {
+      const text = `Finish request: ${[sel.top, sel.base].filter(Boolean).join(" / ") || sel.label}`;
+      const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: null, _comment: text });
+      if (error) { toast({ title: "Could not send your finish choice", variant: "destructive" }); return; }
+      toast({ title: `Finish choice sent to ${data?.studio_name ?? "your designer"}` });
+      if (!user) setMicroPrompt(true);
+    }, 1500);
+  };
+
+  const drawerItem = data?.items.find((i) => i.id === drawerFor) ?? null;
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
   if (data === undefined) return <div className="min-h-screen bg-background" />;
@@ -144,14 +186,28 @@ export default function SharedProcurementBoard() {
       </header>
 
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-16 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-        {data.items.map((item, i) => (
+        {data.items.map((item, i) => {
+          const fo = resolved[item.id];
+          return (
           <motion.article key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.05, 0.4) }}>
-            <div className="aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
-              {item.image_url && <img src={item.image_url} alt={item.product_name} className="h-full w-full object-contain" loading="lazy" />}
+            <div className="relative aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
+              {(fo?.image_url || item.image_url) && <img src={fo?.image_url || item.image_url || ""} alt={item.product_name} className="h-full w-full object-contain" loading="lazy" />}
+              {catalog?.[item.product_id] && (catalog[item.product_id].variants?.length > 0) && (
+                <button type="button" data-allow-guest="" onClick={() => setDrawerFor(item.id)} aria-label={`3D View — choose finishes for ${item.product_name}`}
+                  className="absolute left-3 top-3 flex items-center gap-1.5 border border-border/60 bg-background/90 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.16em] text-foreground backdrop-blur transition-colors hover:border-foreground">
+                  <Box className="h-3.5 w-3.5" /> 3D View
+                </button>
+              )}
             </div>
             <h2 className="mt-4 font-display text-lg text-foreground">{item.product_name}</h2>
-            {item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
-            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(item.msrp_cents, item.currency)}</p>
+            {fo ? (
+              <div className="mt-1.5 flex items-center gap-2">
+                <FinishChips fo={fo} size="h-7 w-7" />
+                <p className="font-body text-xs text-muted-foreground">{fo.label}</p>
+              </div>
+            ) : item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
+            {picks[item.id] && <p className="mt-1 font-body text-[10px] uppercase tracking-[0.16em] text-primary">Your request sent to {data.studio_name}</p>}
+            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(fo?.price_cents ?? item.msrp_cents, item.currency)}</p>
             {item.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {item.lead_time}</p>}
 
             <div className="mt-4 flex items-center gap-1" data-allow-guest={data.role === "client" ? "" : undefined}>
@@ -169,8 +225,26 @@ export default function SharedProcurementBoard() {
               )}
             </AnimatePresence>
           </motion.article>
-        ))}
+          );
+        })}
       </main>
+
+      {drawerItem && catalog?.[drawerItem.product_id] && (
+        <div data-allow-guest="">
+          <FinishesDrawer
+            open={!!drawerFor}
+            onOpenChange={(o) => !o && setDrawerFor(null)}
+            productId={drawerItem.product_id}
+            productName={drawerItem.product_name}
+            baseImage={drawerItem.image_url}
+            clientMode
+            initialTop={resolved[drawerItem.id]?.top}
+            initialBase={resolved[drawerItem.id]?.base}
+            preloaded={catalog[drawerItem.product_id]}
+            onSelect={(sel) => chooseFinish(drawerItem, sel)}
+          />
+        </div>
+      )}
 
       <AnimatePresence>
         {microPrompt && !user && !signupOpen && (
