@@ -164,7 +164,7 @@ export default function FinishesDrawer({
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
               <div className="flex flex-wrap gap-2">
                 {variants.map((v, idx) => {
-                  const chipLabel = v.top || v.base || v.label || "—";
+                  const chipLabel = finishLabel(v);
                   const isActive = !!activeVariant && finishLabel(activeVariant) === finishLabel(v);
                   return (
                     <button
