@@ -148,7 +148,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
           <motion.div key="matrix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
             <table className="w-full table-fixed font-body text-[11px] leading-tight">
               <colgroup>
-                <col className="w-11" /><col className="w-[18%]" /><col className="w-[10%]" /><col className="w-[7%]" /><col className="w-[5%]" /><col className="w-[7%]" /><col className="w-[8%]" /><col className="w-[6%]" /><col className="w-[8%]" /><col />
+                <col className="w-11" /><col className="w-[16%]" /><col className="w-[9%]" /><col className="w-[7%]" /><col className="w-[5%]" /><col className="w-[7%]" /><col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[10%]" /><col />
               </colgroup>
               <thead className="border-b border-border/60 text-left text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
