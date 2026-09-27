@@ -193,6 +193,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, open, step.route]);
 
+  // Bring the highlighted control into view on each step.
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => {
+      document.querySelector(`[data-felix-target="${step.target}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [open, step.target, location.pathname]);
+
   // Action-required steps: re-check on any click; invite click ends the tour.
   useEffect(() => {
     if (!open) return;
@@ -310,7 +319,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     <>
       {/* Dimmed backdrop with a clear window around the target */}
       {!isPaused && (
-        <div className="fixed inset-0 z-[130] print:hidden" onClick={() => close(false)}>
+        <div className="pointer-events-none fixed inset-0 z-[130] print:hidden [&>div]:pointer-events-auto" onClick={() => close(false)}>
           {rect ? (
             <>
               <div className="absolute inset-x-0 top-0 bg-foreground/40" style={{ height: Math.max(rect.top - PAD, 0) }} />
