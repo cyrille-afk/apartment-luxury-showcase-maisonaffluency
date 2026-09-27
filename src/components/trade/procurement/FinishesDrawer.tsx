@@ -125,6 +125,8 @@ export default function FinishesDrawer({
   initialTop?: string | null;
   initialBase?: string | null;
   onSelect: (sel: FinishSelection) => void;
+  /** Guest boards: catalogue data fetched through the invite token instead of direct table reads. */
+  preloaded?: PreloadedFinishes | null;
 }) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [gallery, setGallery] = useState<string[]>([]);
@@ -145,6 +147,18 @@ export default function FinishesDrawer({
     if (!open) return;
     setPreview(null);
     setPicked({});
+    if (preloaded) {
+      const list = preloaded.swatches || [];
+      setCurrency(preloaded.currency || "EUR"); setLead(preloaded.lead);
+      setGlbs(preloaded.glbs || []); setSwatches(list);
+      setVariants((preloaded.variants || []).filter((v: Variant) => v.top || v.base));
+      setImgMap(preloaded.variant_image_map || {}); setGallery(preloaded.gallery_images || []);
+      const find = (n?: string | null, role?: string) => n ? (list.find((x) => roleOf(x.category) === role && norm(x.name) === norm(n)) || null) : null;
+      const t0 = find(initialTop, "fabric"), b0 = find(initialBase, "base");
+      setPicked({ ...(t0 ? { top: t0 } : {}), ...(b0 ? { base: b0 } : {}) });
+      setLoading(false);
+      return;
+    }
     let alive = true;
     setLoading(true);
     (async () => {
