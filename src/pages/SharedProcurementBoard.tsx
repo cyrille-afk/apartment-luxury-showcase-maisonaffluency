@@ -18,6 +18,7 @@ type Item = {
 };
 type Shared = {
   board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
+  project_name: string | null; hide_maison_branding: boolean;
   role: "client" | "contractor"; invite_email: string; claimed: boolean; items: Item[];
 };
 
@@ -31,13 +32,16 @@ export default function SharedProcurementBoard() {
   const { token = "" } = useParams();
   const { user } = useAuth();
   const [data, setData] = useState<Shared | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [microPrompt, setMicroPrompt] = useState(false);
   const [commentFor, setCommentFor] = useState<string | null>(null);
   const [comment, setComment] = useState("");
 
   const load = useCallback(async () => {
-    const { data: d } = await supabase.rpc("get_shared_board" as any, { _token: token });
+    setLoadError(false);
+    const { data: d, error } = await supabase.rpc("get_shared_board" as any, { _token: token });
+    if (error) { setLoadError(true); setData(null); return; }
     setData((d as Shared) ?? null);
   }, [token]);
 
@@ -79,8 +83,9 @@ export default function SharedProcurementBoard() {
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <Helmet><title>Link unavailable — Maison Affluency</title><meta name="robots" content="noindex" /></Helmet>
         <div>
-          <h1 className="font-display text-2xl text-foreground">This link is no longer available</h1>
-          <p className="mt-2 font-body text-sm text-muted-foreground">Please ask your designer for a new invitation.</p>
+          <h1 className="font-display text-2xl text-foreground">{loadError ? "We couldn't open this board" : "This link is no longer available"}</h1>
+          <p className="mt-2 font-body text-sm text-muted-foreground">{loadError ? "Please try again. If it continues, ask your designer to resend the invitation." : "Please ask your designer for a new invitation."}</p>
+          {loadError && <Button variant="outline" className="mt-5 rounded-none" onClick={load}>Try Again</Button>}
         </div>
       </div>
     );
@@ -95,9 +100,9 @@ export default function SharedProcurementBoard() {
         }
       }}
     >
-      <Helmet><title>{`${data.board_title} — ${data.studio_name}`}</title><meta name="robots" content="noindex" /></Helmet>
+      <Helmet><title>{`${data.project_name || data.board_title} — ${data.studio_name}`}</title><meta name="robots" content="noindex" /></Helmet>
 
-      {data.role === "client" && (
+      {data.role === "client" && !data.hide_maison_branding && (
         <div className="border-b border-border/60 bg-muted/30 py-2 text-center font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           Viewing Project Portfolio via Maison Affluency Trade Network
         </div>
@@ -106,7 +111,8 @@ export default function SharedProcurementBoard() {
       <header className="mx-auto max-w-6xl px-6 pb-10 pt-14 text-center">
         {data.studio_logo_url && <img src={data.studio_logo_url} alt={data.studio_name} className="mx-auto mb-6 h-10 object-contain" />}
         <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{data.studio_name}</p>
-        <h1 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{data.board_title}</h1>
+        <h1 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{data.project_name || data.board_title}</h1>
+        {data.project_name && <p className="mt-2 font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">{data.board_title}</p>}
         {data.client_name && <p className="mt-2 font-body text-sm text-muted-foreground">Prepared for {data.client_name}</p>}
         {data.role === "contractor" && user && data.claimed && (
           <ContractorAdd token={token} onAdded={load} />
@@ -188,7 +194,7 @@ function SignupOverlay({ open, onClose, data, token }: { open: boolean; onClose:
     const { data: res, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: { emailRedirectTo: `${window.location.origin}/shared/board/${token}` },
+      options: { emailRedirectTo: `https://www.maisonaffluency.com/shared/board/${token}` },
     });
     setBusy(false);
     if (error) { setErr(error.message); return; }

@@ -153,7 +153,7 @@ const TradeBoards = ({ embedded = false }: { embedded?: boolean }) => {
     setCreating(true);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_id: clientId, client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, studio_name: currentStudio?.name ?? null, studio_logo_url: currentStudio?.logo_url ?? null, hide_maison_branding: true, title: title.trim(), client_id: clientId, client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
       .select()
       .single();
     setCreating(false);

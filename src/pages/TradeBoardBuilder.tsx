@@ -805,15 +805,15 @@ const TradeBoardBuilder = () => {
                 <span className="font-body text-xs uppercase tracking-[0.18em] text-foreground">
                   Client Portal Branding
                 </span>
-                {board.hide_maison_branding && (
-                  <Badge variant="secondary" className="text-[10px]">White-label active</Badge>
+                 {board.hide_maison_branding && (
+                   <Badge variant="secondary" className="text-[10px]">Studio branding</Badge>
                 )}
               </span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
             <div className="px-4 pb-4 pt-1 space-y-4 border-t border-border/60">
               <p className="font-body text-xs text-muted-foreground">
-                When the client opens your share link, they'll see your studio's branding instead of Maison Affluency's.
+                 Your studio identity is shown by default. Turn on Maison Affluency branding only when you want it included.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -868,10 +868,10 @@ const TradeBoardBuilder = () => {
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div>
                   <Label htmlFor="hide-maison" className="font-body text-sm text-foreground cursor-pointer">
-                    Hide Maison Affluency branding
+                     Use studio branding only
                   </Label>
                   <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-                    Recommended once your studio name &amp; logo are set.
+                     Turn off to include Maison Affluency branding.
                   </p>
                 </div>
                 <Switch
