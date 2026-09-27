@@ -143,6 +143,7 @@ export default function FinishesDrawer({
               baseTextureUrl={textures.base ?? null}
               topTextureUrl={textures.top ?? null}
               materialRoles={glb.material_roles || undefined}
+              autoOpen
             />
           </div>
         )}
