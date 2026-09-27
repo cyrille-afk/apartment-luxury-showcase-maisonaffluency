@@ -176,45 +176,54 @@ export default function FinishesDrawer({
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
         ) : (
           <>
-            {/* Per-axis labelled swatches — same structure as the product page */}
+            {/* Swatch sections — the exact linked finish list from the product
+                sheet (product_fabric_swatches_public), with name labels and
+                pre-cropped images. Falls back to variant-axis names only when
+                a section has no linked swatches. */}
             {([
               { key: "top" as const, title: "Upholstery" },
               { key: "base" as const, title: "Frame Finish" },
             ]).map(({ key, title }) => {
-              const opts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
-              if (!opts.length) return null;
+              const linked = swatches.filter((s) => (key === "top" ? roleOf(s.category) === "fabric" : roleOf(s.category) === "base"));
+              const axisOpts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
+              if (!linked.length && !axisOpts.length) return null;
               return (
                 <div key={key} className="border-b border-border/60 px-6 py-5">
                   <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {title} <span className="normal-case tracking-normal">({opts.length})</span>
+                    {title} <span className="normal-case tracking-normal">({linked.length || axisOpts.length})</span>
                   </p>
                   <div className="grid grid-cols-3 gap-3">
-                    {opts.map((name) => {
-                      const isActive = norm(activeVariant?.[key]) === norm(name);
-                      const img = swatchFor(name)?.image_url || null;
+                    {(linked.length ? linked : axisOpts.map((name) => ({ name, image_url: swatchFor(name)?.image_url || null, category: null }))).map((sw) => {
+                      const isActive = norm(picked[key]?.name) === norm(sw.name) || (!picked[key] && norm(activeVariant?.[key]) === norm(sw.name));
                       return (
                         <button
-                          key={name}
+                          key={sw.name}
                           type="button"
                           onClick={() => {
+                            setPicked((p) => ({ ...p, [key]: sw }));
                             const other = key === "top" ? "base" : "top";
                             const v =
-                              variants.find((x) => norm(x[key]) === norm(name) && norm(x[other]) === norm(activeVariant?.[other])) ||
-                              variants.find((x) => norm(x[key]) === norm(name));
-                            if (!v) return;
-                            setPreview(v);
-                            onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                              variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(activeVariant?.[other])) ||
+                              variants.find((x) => norm(x[key]) === norm(sw.name));
+                            if (v) {
+                              setPreview(v);
+                              onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                            } else if (activeVariant) {
+                              const merged = { ...activeVariant, [key]: sw.name };
+                              setPreview(merged);
+                              onSelect({ label: finishLabel(merged), price_cents: merged.price_cents ?? null, image_url: imageFor(merged) });
+                            }
                           }}
                           className="text-left"
                         >
                           <span className={`block aspect-square overflow-hidden border transition-all ${isActive ? "border-primary ring-1 ring-primary ring-offset-1 ring-offset-background" : "border-border/60 hover:border-foreground/40"}`}>
-                            {img ? (
-                              <img src={img} alt={name} className="h-full w-full object-cover" loading="lazy" />
+                            {sw.image_url ? (
+                              <img src={sw.image_url} alt={sw.name} className="h-full w-full object-cover" loading="lazy" />
                             ) : (
-                              <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] text-muted-foreground">{name}</span>
+                              <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] text-muted-foreground">{sw.name}</span>
                             )}
                           </span>
-                          <span className={`mt-1.5 block font-body text-[11px] leading-tight ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{name}</span>
+                          <span className={`mt-1.5 block font-body text-[11px] leading-tight ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{sw.name}</span>
                         </button>
                       );
                     })}
