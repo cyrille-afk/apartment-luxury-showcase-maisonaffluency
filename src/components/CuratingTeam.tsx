@@ -16,7 +16,7 @@ export const curatingTeam: { id: number; name: string; role: string; image: stri
     name: "Cyrille Delval",
     role: "Co-Founder and CEO",
     image: cyrilleDelvalImg,
-    bio: "During a 4 year span, Cyrille studied Art History at the renown Birkbeck College in London whilst navigating a successful investment banking career in London and New York at once. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
+    bio: "Whilst juggling a demanding investment banking career in NYC and London over the course of 15 years, Cyrille majored in History of Art at the renown Birkbeck College, University of London. This lead him to a serial entrepreneurship life where business and passion mingle. As Affluency co-founder, Cyrille leads Maison Affluency's development in Southeast Asia and the Middle East, sharing his passion for exceptional craftsmanship and unique design pieces.",
     linkedin: "https://www.linkedin.com/in/cyrilledelval/",
   },
   {
