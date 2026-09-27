@@ -15,7 +15,7 @@ const roleOf = (cat: string | null) => {
   return null;
 };
 
-export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null };
+export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null };
 
 const normKey = (s?: string | null) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
 const variantImage = (v: any, imgMap: Record<string, number>, gallery: string[]) => {
@@ -71,6 +71,7 @@ export async function resolveSavedFinishes(
     const top = it.fabric_label || lt || null;
     const base = it.wood_label || lb || null;
     const sw: any = (sws || []).find((x: any) => x.pick_id === pid && normKey(x.name) === normKey(top));
+    const swBase: any = (sws || []).find((x: any) => x.pick_id === pid && normKey(x.name) === normKey(base));
     const v =
       variants.find((x) => normKey(x.top) === normKey(top) && normKey(x.base) === normKey(base)) ||
       matchTopVariant(variants, top, base, sw?.price_tier_label) ||
@@ -85,6 +86,8 @@ export async function resolveSavedFinishes(
       price_cents: v?.price_cents ?? null,
       image_url: img,
       top, base,
+      top_image: sw?.image_url ?? null,
+      base_image: swBase?.image_url ?? null,
     };
   }
   return out;
@@ -290,15 +293,19 @@ export default function FinishesDrawer({
                     variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(otherName)) ||
                     matchTopVariant(variants, fabricName, baseName, tier) ||
                     variants.find((x) => norm(x[key]) === norm(sw.name));
-                  if (v) {
-                    const shown = { ...v, [key]: sw.name, [other]: otherName || v[other] };
-                    setPreview(shown);
-                    onSelect({ label: [shown.top, shown.base].filter(Boolean).join(" / "), price_cents: v.price_cents ?? null, image_url: imageFor(v), top: shown.top ?? null, base: shown.base ?? null });
-                  } else if (activeVariant) {
-                    const merged = { ...activeVariant, [key]: sw.name };
-                    setPreview(merged);
-                    onSelect({ label: [merged.top, merged.base].filter(Boolean).join(" / "), price_cents: merged.price_cents ?? null, image_url: imageFor(merged), top: merged.top ?? null, base: merged.base ?? null });
-                  }
+                   const imgFor = (axis: "top" | "base", name?: string | null): string | null =>
+                     (axis === key ? sw.image_url : null) ??
+                     (picked[axis] && norm(picked[axis]!.name) === norm(name ?? undefined) ? picked[axis]!.image_url : null) ??
+                     swatchFor(name ?? undefined)?.image_url ?? null;
+                   if (v) {
+                     const shown = { ...v, [key]: sw.name, [other]: otherName || v[other] };
+                     setPreview(shown);
+                     onSelect({ label: [shown.top, shown.base].filter(Boolean).join(" / "), price_cents: v.price_cents ?? null, image_url: imageFor(v), top: shown.top ?? null, base: shown.base ?? null, top_image: imgFor("top", shown.top), base_image: imgFor("base", shown.base) });
+                   } else if (activeVariant) {
+                     const merged = { ...activeVariant, [key]: sw.name };
+                     setPreview(merged);
+                     onSelect({ label: [merged.top, merged.base].filter(Boolean).join(" / "), price_cents: merged.price_cents ?? null, image_url: imageFor(merged), top: merged.top ?? null, base: merged.base ?? null, top_image: imgFor("top", merged.top), base_image: imgFor("base", merged.base) });
+                   }
                 };
                 return (
                   <div key={key} className="relative">
