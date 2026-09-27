@@ -144,14 +144,28 @@ export default function SharedProcurementBoard() {
       </header>
 
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-16 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-        {data.items.map((item, i) => (
+        {data.items.map((item, i) => {
+          const fo = resolved[item.id];
+          return (
           <motion.article key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.05, 0.4) }}>
-            <div className="aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
-              {item.image_url && <img src={item.image_url} alt={item.product_name} className="h-full w-full object-contain" loading="lazy" />}
+            <div className="relative aspect-[4/5] bg-[hsl(var(--product-canvas))] p-6">
+              {(fo?.image_url || item.image_url) && <img src={fo?.image_url || item.image_url || ""} alt={item.product_name} className="h-full w-full object-contain" loading="lazy" />}
+              {catalog?.[item.product_id] && (catalog[item.product_id].variants?.length > 0) && (
+                <button type="button" data-allow-guest="" onClick={() => setDrawerFor(item.id)} aria-label={`3D View — choose finishes for ${item.product_name}`}
+                  className="absolute left-3 top-3 flex items-center gap-1.5 border border-border/60 bg-background/90 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.16em] text-foreground backdrop-blur transition-colors hover:border-foreground">
+                  <Box className="h-3.5 w-3.5" /> 3D View
+                </button>
+              )}
             </div>
             <h2 className="mt-4 font-display text-lg text-foreground">{item.product_name}</h2>
-            {item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
-            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(item.msrp_cents, item.currency)}</p>
+            {fo ? (
+              <div className="mt-1.5 flex items-center gap-2">
+                <FinishChips fo={fo} size="h-7 w-7" />
+                <p className="font-body text-xs text-muted-foreground">{fo.label}</p>
+              </div>
+            ) : item.finish && <p className="mt-0.5 font-body text-xs text-muted-foreground">{item.finish}</p>}
+            {picks[item.id] && <p className="mt-1 font-body text-[10px] uppercase tracking-[0.16em] text-primary">Your request sent to {data.studio_name}</p>}
+            <p className="mt-1 font-body text-sm text-foreground">{formatMoneyIn(fo?.price_cents ?? item.msrp_cents, item.currency)}</p>
             {item.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {item.lead_time}</p>}
 
             <div className="mt-4 flex items-center gap-1" data-allow-guest={data.role === "client" ? "" : undefined}>
