@@ -49,7 +49,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     userIdRef.current = user?.id ?? null;
   }, [user]);
 
-  const fetchUserData = useCallback(async (userId: string, client: any) => {
+  // Retries the role/profile lookup with backoff so a single dropped request
+  // can never demote a signed-in admin/trade user to public-only view.
+  const MAX_LOOKUP_ATTEMPTS = 4;
+  const lookupRetryTimerRef = useRef<number | null>(null);
+
+  const fetchUserData = useCallback(async (userId: string, client: any, attempt = 0): Promise<boolean> => {
     let rolesRes: any;
     let profileRes: any;
     let appRes: any;
@@ -61,13 +66,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         client.from("trade_accounts").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
-      console.warn("Unable to refresh trade access state; keeping existing permissions.", error);
-      return false;
+      return retryOrFail(userId, client, attempt, error);
     }
 
-    if (rolesRes.error || appRes.error) {
-      console.warn("Unable to refresh trade access state; keeping existing permissions.", rolesRes.error || appRes.error);
-      return false;
+    // A missing profile row is legitimate (PGRST116); anything else on any of
+    // the three lookups is treated as a transient failure worth retrying.
+    const profileLookupFailed = profileRes.error && profileRes.error.code !== "PGRST116";
+    if (rolesRes.error || appRes.error || profileLookupFailed) {
+      return retryOrFail(userId, client, attempt, rolesRes.error || appRes.error || profileRes.error);
     }
 
     if (rolesRes.data) {
