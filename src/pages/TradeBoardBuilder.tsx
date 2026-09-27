@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
@@ -923,9 +924,9 @@ const TradeBoardBuilder = () => {
               {board.studio_logo_url && (
                 <div className="flex items-center justify-center rounded border border-border/60 bg-background p-6">
                   <img
-                    src={board.studio_logo_url}
+                    src={trimLogoUrl(board.studio_logo_url) ?? ""}
                     alt="Logo preview"
-                    className="max-h-24 w-auto max-w-[320px] object-contain"
+                    className="max-h-48 w-auto max-w-[480px] object-contain"
                     onError={(e) => { e.currentTarget.style.display = "none"; }}
                     onLoad={(e) => { e.currentTarget.style.display = ""; }}
                   />
@@ -949,9 +950,9 @@ const TradeBoardBuilder = () => {
                   <div className="px-6 py-10 text-center">
                     {board.studio_logo_url ? (
                       <img
-                        src={board.studio_logo_url}
+                        src={trimLogoUrl(board.studio_logo_url) ?? ""}
                         alt=""
-                        className="mx-auto mb-4 h-10 object-contain"
+                        className="mx-auto mb-4 h-20 object-contain"
                         onError={(e) => { e.currentTarget.style.display = "none"; }}
                         onLoad={(e) => { e.currentTarget.style.display = ""; }}
                       />

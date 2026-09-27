@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
@@ -132,7 +133,7 @@ export default function SharedProcurementBoard() {
       )}
 
       <header className="mx-auto max-w-6xl px-6 pb-10 pt-14 text-center">
-        {data.studio_logo_url && <img src={data.studio_logo_url} alt={data.studio_name} className="mx-auto mb-6 h-10 object-contain" />}
+        {data.studio_logo_url && <img src={trimLogoUrl(data.studio_logo_url) ?? ""} alt={data.studio_name} className="mx-auto mb-6 h-14 object-contain" />}
         <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{data.studio_name}</p>
         <h1 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{data.project_name || data.board_title}</h1>
         {data.project_name && <p className="mt-2 font-body text-xs uppercase tracking-[0.18em] text-muted-foreground">{data.board_title}</p>}
