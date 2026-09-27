@@ -113,7 +113,7 @@ export const finishLabel = (v: Variant) =>
   [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
 
 export default function FinishesDrawer({
-  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect,
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, initialTop, initialBase, onSelect, preloaded,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
