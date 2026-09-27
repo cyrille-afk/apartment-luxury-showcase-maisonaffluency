@@ -921,17 +921,53 @@ const TradeBoardBuilder = () => {
                 </div>
               </div>
               {board.studio_logo_url && (
-                <div className="flex items-center gap-3 px-3 py-2 rounded border border-border/60 bg-background">
+                <div className="flex items-center justify-center rounded border border-border/60 bg-background p-6">
                   <img
                     src={board.studio_logo_url}
                     alt="Logo preview"
-                    className="h-8 w-auto max-w-[120px] object-contain"
+                    className="max-h-24 w-auto max-w-[320px] object-contain"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                    onLoad={(e) => { e.currentTarget.style.display = ""; }}
                   />
-                  <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Logo preview
-                  </span>
                 </div>
               )}
+              <div className="overflow-hidden rounded-md border border-border/60">
+                <div className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
+                  <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    What your client receives
+                  </span>
+                  <span className="font-body text-[10px] text-muted-foreground">
+                    {board.hide_maison_branding ? "Studio branding only" : "With Maison Affluency banner"}
+                  </span>
+                </div>
+                <div className="bg-background">
+                  {!board.hide_maison_branding && (
+                    <div className="border-b border-border/60 bg-muted/30 py-2 text-center font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      Viewing Project Portfolio via Maison Affluency Trade Network
+                    </div>
+                  )}
+                  <div className="px-6 py-10 text-center">
+                    {board.studio_logo_url ? (
+                      <img
+                        src={board.studio_logo_url}
+                        alt=""
+                        className="mx-auto mb-4 h-10 object-contain"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        onLoad={(e) => { e.currentTarget.style.display = ""; }}
+                      />
+                    ) : (
+                      <p className="mb-4 font-body text-xs text-muted-foreground">Add a logo URL above to see it here</p>
+                    )}
+                    <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                      {board.studio_name || "Your studio name"}
+                    </p>
+                    <h3 className="mt-2 font-display text-2xl text-foreground">{board.title}</h3>
+                    {board.client_name && (
+                      <p className="mt-2 font-body text-sm text-muted-foreground">Prepared for {board.client_name}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center justify-between gap-3 pt-1" data-felix-target="branding-whitelabel">
                 <div>
                   <Label htmlFor="hide-maison" className="font-body text-sm text-foreground cursor-pointer">
