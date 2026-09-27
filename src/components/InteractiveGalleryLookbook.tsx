@@ -213,7 +213,7 @@ function GalleryTour() {
   return (
     <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-[1500px] px-4 pb-12 pt-7 md:px-10 md:pb-16 md:pt-9">
       <div className="mx-auto mb-7 max-w-6xl text-center md:mb-9">
-        <p className="font-body text-[10px] font-bold uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
+        <p className="font-body text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
         <p className="mx-auto mt-3 w-full text-center font-body text-[11px] leading-relaxed tracking-[0.08em] text-muted-foreground md:whitespace-nowrap">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship</p>
       </div>
       <div className="w-full bg-muted/30 p-3 md:p-8">
