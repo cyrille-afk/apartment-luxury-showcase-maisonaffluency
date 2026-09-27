@@ -667,7 +667,7 @@ const TradeBoardBuilder = () => {
                   <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Contact</span>
                   {(() => {
                     const pc = resolvedClient?.primary_contact;
-                    const rows: React.ReactNode[] = [];
+                    const rows: ReactNode[] = [];
                     if (pc?.email) {
                       rows.push(
                         <a key="email" href={`mailto:${pc.email}`} className="flex items-center gap-2 font-body text-xs text-foreground hover:text-primary transition-colors">
