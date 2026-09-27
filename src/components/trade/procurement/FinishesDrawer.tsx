@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { formatMoneyIn } from "@/lib/displayMoney";
@@ -47,6 +48,7 @@ export default function FinishesDrawer({
   // User-picked swatches per axis (real fabric/finish names from the product
   // sheet's swatch list, which need not match variant axis labels).
   const [picked, setPicked] = useState<{ top?: Swatch; base?: Swatch }>({});
+  const [openAxis, setOpenAxis] = useState<"top" | "base" | null>(null);
 
   useEffect(() => {
     if (!open) return;
