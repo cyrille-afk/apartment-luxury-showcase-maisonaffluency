@@ -658,7 +658,109 @@ const TradeBoardBuilder = () => {
           </div>
         </div>
 
-        {/* Concierge hand-off: Next stage CTA */}
+        {/* Client Overview Card — full width */}
+        <div className="mb-8 rounded-md border border-border/60 bg-muted/20 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 items-start">
+            {/* Column 1 — Client Profile */}
+            <div className="min-w-0">
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Client</span>
+              <div className="mt-1.5">
+                <ClientPicker
+                  value={board.client_id}
+                  onChange={async (c: PickedClient | null) => {
+                    const newId = c?.id ?? null;
+                    const newName = c?.name ?? "";
+                    setBoard((prev) => (prev ? { ...prev, client_id: newId, client_name: newName } : prev));
+                    setResolvedClient(c);
+                    await supabase
+                      .from("client_boards")
+                      .update({ client_id: newId, client_name: newName } as any)
+                      .eq("id", board.id);
+                    toast({ title: newId ? "Client attached" : "Client cleared" });
+                  }}
+                  onResolved={setResolvedClient}
+                  showContactDetails={false}
+                  showManageLink={false}
+                  size="sm"
+                  placeholder="Attach a client…"
+                  disabled={!isEditable}
+                />
+              </div>
+              {(() => {
+                const pc = resolvedClient?.primary_contact;
+                const fullName = pc ? [pc.first_name, pc.last_name].filter(Boolean).join(" ") : "";
+                if (!fullName && !pc?.role_title) return null;
+                return (
+                  <div className="mt-2.5">
+                    {fullName && (
+                      <p className="font-display text-sm font-semibold text-primary leading-tight">{fullName}</p>
+                    )}
+                    {pc?.role_title && (
+                      <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {pc.role_title}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Column 2 — Contact Node */}
+            <div className="min-w-0">
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Contact</span>
+              {(() => {
+                const pc = resolvedClient?.primary_contact;
+                const rows: ReactNode[] = [];
+                if (pc?.email) {
+                  rows.push(
+                    <a key="email" href={`mailto:${pc.email}`} className="flex items-center gap-2 font-body text-xs text-foreground hover:text-primary transition-colors">
+                      <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate">{pc.email}</span>
+                    </a>
+                  );
+                }
+                if (pc?.phone) {
+                  rows.push(
+                    <a key="phone" href={`tel:${pc.phone}`} className="flex items-center gap-2 font-body text-xs text-foreground hover:text-primary transition-colors">
+                      <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate">{pc.phone}</span>
+                    </a>
+                  );
+                }
+                if (rows.length === 0) {
+                  rows.push(<span key="none" className="font-body text-xs text-muted-foreground/70">No contact on file</span>);
+                }
+                return <div className="mt-1.5 space-y-1.5">{rows}</div>;
+              })()}
+            </div>
+
+            {/* Column 3 — Project Mapping */}
+            <div className="min-w-0">
+              <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Active Project</span>
+              <div className="mt-1.5">
+                <ProjectPicker
+                  value={board.project_id}
+                  onChange={async (id) => {
+                    setBoard((prev) => (prev ? { ...prev, project_id: id } : prev));
+                    await supabase.from("client_boards").update({ project_id: id } as any).eq("id", board.id);
+                    toast({ title: id ? "Folder assigned to project" : "Removed from project" });
+                  }}
+                  compact
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Manage clients — bottom right */}
+          <div className="mt-3 pt-3 border-t border-border/40 flex justify-end">
+            <Link
+              to="/trade/clients"
+              className="inline-flex items-center gap-1 text-[11px] font-body text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Manage clients <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
         {isEditable && items.length > 0 && (
           <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-start gap-3">
