@@ -305,7 +305,7 @@ export default function ClientPicker({
         )}
       </div>
 
-      {picked?.primary_contact && (picked.primary_contact.first_name || picked.primary_contact.email) && (
+      {showContactDetails && picked?.primary_contact && (picked.primary_contact.first_name || picked.primary_contact.email) && (
         <div className="text-xs font-body text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5">
           <span className="flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
@@ -317,7 +317,7 @@ export default function ClientPicker({
         </div>
       )}
 
-      {showManageLink && (
+      {showContactDetails && showManageLink && (
         <Link
           to="/trade/clients"
           className="inline-flex items-center gap-1 text-[11px] font-body text-muted-foreground hover:text-foreground"
