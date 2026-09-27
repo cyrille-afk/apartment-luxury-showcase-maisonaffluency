@@ -278,31 +278,33 @@ const TradeBoardBuilder = () => {
     return groups;
   }, [items, subfolders]);
 
-  const searchProducts = useCallback(async (q: string) => {
-    if (!user) return;
-    // Source from user's saved favorites only
-    let query = supabase
-      .from("trade_favorites")
-      .select("product_id, trade_products!inner(id, product_name, brand_name, image_url, category)")
-      .eq("user_id", user.id);
-    if (q.trim()) {
-      query = query.or(`trade_products.product_name.ilike.%${q}%,trade_products.brand_name.ilike.%${q}%`);
-    }
-    const { data } = await query.order("created_at", { ascending: false });
-    const prods = (data || []).map((f: any) => f.trade_products).filter(Boolean) as Product[];
-    // Deduplicate by product id
-    const seen = new Set<string>();
-    const unique = prods.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [letterFilter, setLetterFilter] = useState<string | null>(null);
 
-    // Fill missing images from the linked curator pick (preferred — uses
-    // source_pick_id), then from gallery_hotspots as a final fallback.
+  // Load the full active trade catalog once per dialog open — the A–Z designer
+  // directory and drill-down views are derived client-side from this list.
+  const loadCatalog = useCallback(async () => {
+    if (!user || catalogLoaded) return;
+    const { data } = await supabase
+      .from("trade_products")
+      .select("id, product_name, brand_name, image_url, category")
+      .neq("is_active", false)
+      .order("brand_name")
+      .order("product_name");
+    const unique = (data || []) as Product[];
     await fillTradeProductImageFallbacks(unique);
     await fillHotspotImages(unique.filter(p => !p.image_url));
-
     setProducts(unique);
-  }, [user]);
+    setCatalogLoaded(true);
+  }, [user, catalogLoaded]);
 
-  useEffect(() => { if (addOpen) searchProducts(search); }, [addOpen, search, searchProducts]);
+  useEffect(() => { if (addOpen) loadCatalog(); }, [addOpen, loadCatalog]);
+
+  // Reset drill-down state each time the dialog opens
+  useEffect(() => {
+    if (addOpen) { setSelectedBrand(null); setLetterFilter(null); setSearch(""); }
+  }, [addOpen]);
 
   const groupedProducts = useMemo(() => {
     const map = new Map<string, Product[]>();
@@ -313,6 +315,36 @@ const TradeBoardBuilder = () => {
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [products]);
+
+  // Designer directory entries: brand name, product count, representative image
+  const designerDirectory = useMemo(() =>
+    groupedProducts.map(([brand, prods]) => ({
+      brand,
+      count: prods.length,
+      image: prods.find(p => p.image_url)?.image_url ?? null,
+    })),
+  [groupedProducts]);
+
+  const availableLetters = useMemo(() =>
+    new Set(designerDirectory.map(d => (d.brand || "#").charAt(0).toUpperCase())),
+  [designerDirectory]);
+
+  const visibleDesigners = useMemo(() =>
+    letterFilter
+      ? designerDirectory.filter(d => (d.brand || "#").charAt(0).toUpperCase() === letterFilter)
+      : designerDirectory,
+  [designerDirectory, letterFilter]);
+
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return products.filter(p =>
+      p.product_name?.toLowerCase().includes(q) || p.brand_name?.toLowerCase().includes(q));
+  }, [products, search]);
+
+  const selectedBrandProducts = useMemo(() =>
+    selectedBrand ? (groupedProducts.find(([b]) => b === selectedBrand)?.[1] ?? []) : [],
+  [groupedProducts, selectedBrand]);
 
   const addProduct = async (productId: string) => {
     if (!id) return;
