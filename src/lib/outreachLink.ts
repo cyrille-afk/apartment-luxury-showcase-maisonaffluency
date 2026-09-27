@@ -33,6 +33,6 @@ export const captureOutreachClick = () => {
       _hook: hookRaw === "A" || hookRaw === "B" ? hookRaw : null,
       _agent: agent && UUID.test(agent) ? agent : null,
       _lead: lead && UUID.test(lead) ? lead : null,
-    } as never);
+    } as never).then(({ error }) => { if (error) sessionStorage.removeItem(key); });
   } catch { /* tracking must never break the page */ }
 };
