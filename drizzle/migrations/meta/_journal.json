@@ -764,6 +764,13 @@
       "when": 1790513626479,
       "tag": "0108_acquisition_outreach_events",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1790514278963,
+      "tag": "0109_outreach_link_clicks",
+      "breakpoints": true
     }
   ]
 }

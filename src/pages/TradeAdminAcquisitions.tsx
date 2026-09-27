@@ -986,6 +986,7 @@ const TradeAdminAcquisitions = () => {
         return (
           <LinkedInOutreachModal
             open
+            leadId={l.id}
             onOpenChange={(o) => !o && setLiLeadId(null)}
             studioName={l.studio_name}
             founderName={l.founder_name}
@@ -1001,6 +1002,7 @@ const TradeAdminAcquisitions = () => {
         return (
           <B2BOutreachModal
             open
+            leadId={l.id}
             onOpenChange={(o) => !o && setB2bLeadId(null)}
             studioName={l.studio_name}
             founderName={l.founder_name}
@@ -1019,6 +1021,7 @@ const TradeAdminAcquisitions = () => {
         return (
           <InstagramOutreachModal
             open
+            leadId={igLead.id}
             onOpenChange={(o) => !o && setIgLeadId(null)}
             studioName={igLead.studio_name}
             founderName={igLead.founder_name}

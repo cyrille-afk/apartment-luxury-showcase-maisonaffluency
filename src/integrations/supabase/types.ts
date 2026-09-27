@@ -238,6 +238,41 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_link_clicks: {
+        Row: {
+          agent_id: string | null
+          channel: string
+          created_at: string
+          hook: string | null
+          id: string
+          lead_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          channel: string
+          created_at?: string
+          hook?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          channel?: string
+          created_at?: string
+          hook?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_link_clicks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_outreach_events: {
         Row: {
           agent_id: string | null
@@ -11379,6 +11414,10 @@ export type Database = {
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
+      }
+      log_outreach_click: {
+        Args: { _agent: string; _channel: string; _hook: string; _lead: string }
+        Returns: undefined
       }
       log_public_download_event: {
         Args: {
