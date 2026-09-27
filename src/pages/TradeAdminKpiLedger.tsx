@@ -26,12 +26,14 @@ const useLedger = (range: Range, enabled: boolean) =>
       const from = since(range);
       const ev = supabase.from("acquisition_outreach_events").select("lead_id, channel, hook, agent_id, created_at").limit(10000);
       const clicks = supabase.from("email_click_log").select("recipient_email, clicked_at").in("template_name", ACQ_TEMPLATES).limit(10000);
+      const sends = supabase.from("email_send_log").select("id", { count: "exact", head: true }).in("template_name", ACQ_TEMPLATES).eq("status", "sent");
       const invites = supabase.from("board_invites").select("id", { count: "exact", head: true });
       const apps = supabase.from("trade_applications").select("reviewed_by, reviewed_at, status").eq("status", "approved");
-      if (from) { ev.gte("created_at", from); clicks.gte("clicked_at", from); invites.gte("created_at", from); apps.gte("reviewed_at", from); }
-      const [e, c, i, a, l] = await Promise.all([
+      if (from) { ev.gte("created_at", from); clicks.gte("clicked_at", from); invites.gte("created_at", from); sends.gte("created_at", from); apps.gte("reviewed_at", from); }
+      const [e, c, i, a, l, s] = await Promise.all([
         ev, clicks, invites, apps,
         supabase.from("acquisition_leads").select("id, reply_received_at, reply_intent, portal_activated_at").limit(10000),
+        sends,
       ]);
       const err = e.error || c.error || i.error || a.error || l.error;
       if (err) throw err;
@@ -39,7 +41,7 @@ const useLedger = (range: Range, enabled: boolean) =>
       const { data: profiles } = agentIds.length
         ? await supabase.from("profiles").select("id, first_name, last_name, email").in("id", agentIds)
         : { data: [] as { id: string; first_name: string | null; last_name: string | null; email: string | null }[] };
-      return { from, events: e.data ?? [], clicks: c.data ?? [], viral: i.count ?? 0, apps: a.data ?? [], leads: l.data ?? [], profiles: profiles ?? [] };
+      return { from, events: e.data ?? [], clicks: c.data ?? [], viral: i.count ?? 0, emailSends: s.count ?? 0, apps: a.data ?? [], leads: l.data ?? [], profiles: profiles ?? [] };
     },
   });
 
@@ -65,7 +67,7 @@ export default function TradeAdminKpiLedger() {
 
   const k = useMemo(() => {
     if (!data) return null;
-    const { from, events, leads, apps, clicks } = data;
+    const { from, events, leads, apps, clicks, emailSends } = data;
     const leadMap = new Map(leads.map((l) => [l.id, l]));
     const converted = (id: string | null) => {
       const l = id ? leadMap.get(id) : undefined;
@@ -98,11 +100,13 @@ export default function TradeAdminKpiLedger() {
       if (e.lead_id && leadMap.get(e.lead_id)?.reply_intent === "positive") a.demos.add(e.lead_id);
     }
     for (const ap of apps) if (ap.reviewed_by) get(ap.reviewed_by).ids++;
+    const emSent = Math.max(em.length, emailSends);
+    const outbound = ig.length + li.length + emSent;
     return {
-      outbound: events.length, conversions, rate: pct(conversions, events.length),
+      outbound, conversions, rate: pct(conversions, outbound),
       ig: { sent: ig.length, replies: replied(ig) },
       li: { sent: li.length, replies: replied(li) },
-      em: { sent: em.length, replies: replied(em), clicks: clicks.length },
+      em: { sent: emSent, replies: replied(em), clicks: clicks.length },
       A: hook("A"), B: hook("B"),
       agents: [...agents.values()].sort((x, y) => y.ig + y.li + y.em - (x.ig + x.li + x.em)),
     };
