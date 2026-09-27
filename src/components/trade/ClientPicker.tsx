@@ -36,6 +36,10 @@ type Props = {
   disabled?: boolean;
   /** Show a small "manage" link next to the field. */
   showManageLink?: boolean;
+  /** Render the inline contact details + manage link (default true). Set false when the parent renders its own card. */
+  showContactDetails?: boolean;
+  /** Fires whenever the resolved client (with primary contact) changes, including on initial load. */
+  onResolved?: (client: PickedClient | null) => void;
   className?: string;
 };
 
@@ -50,7 +54,7 @@ type ContactRow = {
 
 export default function ClientPicker({
   value, onChange, size = "md", placeholder = "Select a client…",
-  disabled, showManageLink = true, className,
+  disabled, showManageLink = true, showContactDetails = true, onResolved, className,
 }: Props) {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
@@ -102,13 +106,14 @@ export default function ClientPicker({
       const cached = clients.find((c) => c.id === value);
       const primary = primaries[value];
       if (cached) {
-        setPicked({
+        const resolved = {
           id: cached.id, name: cached.name, type: cached.type,
           primary_contact: primary ? {
             first_name: primary.first_name, last_name: primary.last_name,
             role_title: primary.role_title, email: primary.email, phone: primary.phone,
           } : null,
-        });
+        };
+        if (!cancelled) setPicked(resolved);
         return;
       }
       const { data: c } = await supabase.from("clients" as any)
@@ -118,16 +123,20 @@ export default function ClientPicker({
         .select("first_name, last_name, role_title, email, phone")
         .eq("client_id", value).eq("is_primary", true).maybeSingle();
       if (cancelled) return;
-      setPicked({
+      const resolved = {
         id: (c as any).id, name: (c as any).name, type: (c as any).type,
         primary_contact: ct ? {
           first_name: (ct as any).first_name, last_name: (ct as any).last_name,
           role_title: (ct as any).role_title, email: (ct as any).email, phone: (ct as any).phone,
         } : null,
-      });
+      };
+      if (!cancelled) setPicked(resolved);
     })();
     return () => { cancelled = true; };
   }, [value, clients, primaries]);
+
+  // Notify parent whenever the resolved client (with contact) changes.
+  useEffect(() => { if (onResolved) onResolved(picked); /* eslint-disable-next-line */ }, [picked]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -296,7 +305,7 @@ export default function ClientPicker({
         )}
       </div>
 
-      {picked?.primary_contact && (picked.primary_contact.first_name || picked.primary_contact.email) && (
+      {showContactDetails && picked?.primary_contact && (picked.primary_contact.first_name || picked.primary_contact.email) && (
         <div className="text-xs font-body text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5">
           <span className="flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
@@ -308,7 +317,7 @@ export default function ClientPicker({
         </div>
       )}
 
-      {showManageLink && (
+      {showContactDetails && showManageLink && (
         <Link
           to="/trade/clients"
           className="inline-flex items-center gap-1 text-[11px] font-body text-muted-foreground hover:text-foreground"
