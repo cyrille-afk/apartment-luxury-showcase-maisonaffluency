@@ -777,6 +777,111 @@ export type Database = {
         }
         Relationships: []
       }
+      board_invites: {
+        Row: {
+          accepted_user_id: string | null
+          board_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          last_seen_at: string | null
+          role: string
+          status: string
+          token_hash: string
+        }
+        Insert: {
+          accepted_user_id?: string | null
+          board_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          last_seen_at?: string | null
+          role: string
+          status?: string
+          token_hash: string
+        }
+        Update: {
+          accepted_user_id?: string | null
+          board_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          last_seen_at?: string | null
+          role?: string
+          status?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_invites_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_item_feedback: {
+        Row: {
+          board_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          invite_id: string | null
+          item_id: string
+          reaction: string | null
+          user_id: string | null
+        }
+        Insert: {
+          board_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          item_id: string
+          reaction?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          board_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          item_id?: string
+          reaction?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_item_feedback_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_item_feedback_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "board_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_item_feedback_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "client_board_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       board_recommendations: {
         Row: {
           board_id: string
@@ -5826,6 +5931,7 @@ export type Database = {
           last_name: string
           phone: string
           preferred_currency: string | null
+          referred_by_studio_id: string | null
           trade_status: string | null
           trade_tier: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents: number
@@ -5848,6 +5954,7 @@ export type Database = {
           last_name?: string
           phone?: string
           preferred_currency?: string | null
+          referred_by_studio_id?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
@@ -5872,6 +5979,7 @@ export type Database = {
           last_name?: string
           phone?: string
           preferred_currency?: string | null
+          referred_by_studio_id?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
@@ -5881,7 +5989,15 @@ export type Database = {
             | Database["public"]["Enums"]["trade_tier"]
             | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_studio_id_fkey"
+            columns: ["referred_by_studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -10717,6 +10833,28 @@ export type Database = {
       }
     }
     Functions: {
+      _board_invite_by_token: {
+        Args: { _token: string }
+        Returns: {
+          accepted_user_id: string | null
+          board_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          last_seen_at: string | null
+          role: string
+          status: string
+          token_hash: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "board_invites"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _hotspot_designer_public: {
         Args: { _designer_id: string; _designer_name: string }
         Returns: boolean
@@ -10788,6 +10926,7 @@ export type Database = {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
+      can_manage_board: { Args: { _board_id: string }; Returns: boolean }
       can_view_client_board: {
         Args: { _board_id: string; _user_id: string }
         Returns: boolean
@@ -10810,6 +10949,7 @@ export type Database = {
         Args: { _lead_id: string; _sender: string; _thread_message_id: string }
         Returns: boolean
       }
+      claim_board_invite: { Args: { _token: string }; Returns: Json }
       claim_prospect_enrichment: {
         Args: { batch_size?: number }
         Returns: {
@@ -10878,6 +11018,14 @@ export type Database = {
           allowed: boolean
           retry_in: number
         }[]
+      }
+      contractor_add_board_item: {
+        Args: { _product_id: string; _token: string }
+        Returns: string
+      }
+      create_board_invite: {
+        Args: { _board_id: string; _email: string; _role: string }
+        Returns: Json
       }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
@@ -11056,6 +11204,7 @@ export type Database = {
           status_code: number
         }[]
       }
+      get_shared_board: { Args: { _token: string }; Returns: Json }
       get_studio_contact_email: {
         Args: { _studio_id: string }
         Returns: string
@@ -11392,6 +11541,15 @@ export type Database = {
       studio_has_resale_cert_for_state: {
         Args: { _state: string; _studio_id: string }
         Returns: boolean
+      }
+      submit_board_feedback: {
+        Args: {
+          _comment: string
+          _item_id: string
+          _reaction: string
+          _token: string
+        }
+        Returns: undefined
       }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }

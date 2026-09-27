@@ -680,6 +680,13 @@
       "when": 1790466507220,
       "tag": "0096_restrict_suppliers_read",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1790481224542,
+      "tag": "0097_collaborative_procurement_board",
+      "breakpoints": true
     }
   ]
 }
