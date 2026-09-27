@@ -305,7 +305,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
       fetchPublicMicMacPins(),
     ]).then(([{ data }, special]) => {
-      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: null, dimensions: null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))));
+      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: pin.materials ?? null, dimensions: pin.dimensions ?? null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))));
       setHotspotsReady(true);
     });
   }, []);
@@ -388,6 +388,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       title: hotspot.product_name,
       image_url: hotspot.product_image_url,
       brand_name: hotspot.designer_name || "Maison Affluency",
+      dimensions: hotspot.dimensions ?? null,
+      materials: hotspot.materials ?? null,
+      description: hotspot.materials ?? null,
       is_catalog_item: false,
       restricted_gallery_pin: true,
     } : null;
