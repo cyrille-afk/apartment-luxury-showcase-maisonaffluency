@@ -4,7 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
+import { fetchPublicMicMacPins, isVisibleGalleryPin, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -236,13 +236,14 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
 
   // Filter hotspots by designer when opened from a designer card
   const displayHotspots = useMemo(() => {
-    if (!filterDesigner || !hotspots.length) return hotspots;
+     const visiblePins = onAddToQuote || editMode ? hotspots : hotspots.filter(h => isVisibleGalleryPin({ image_identifier: imageIdentifier, product_name: h.product_name }));
+     if (!filterDesigner || !visiblePins.length) return visiblePins;
     const filterLower = filterDesigner.toLowerCase();
     // Extract meaningful tokens: split on " - ", " for ", commas, then check overlap
     const extractTokens = (s: string) =>
       s.split(/\s[-–—]\s|\sfor\s|,\s*/).map(t => t.trim().toLowerCase()).filter(Boolean);
     const filterTokens = extractTokens(filterLower);
-    const filtered = hotspots.filter(h => {
+     const filtered = visiblePins.filter(h => {
       if (!h.designer_name) return false;
       const dLower = h.designer_name.toLowerCase();
       // Direct substring match
@@ -251,8 +252,8 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       const hotspotTokens = extractTokens(dLower);
       return filterTokens.some(ft => hotspotTokens.some(ht => ht.includes(ft) || ft.includes(ht)));
     });
-    return filtered.length > 0 ? filtered : hotspots;
-  }, [hotspots, filterDesigner]);
+     return filtered.length > 0 ? filtered : visiblePins;
+   }, [hotspots, filterDesigner, imageIdentifier, onAddToQuote, editMode]);
 
 
   useEffect(() => {

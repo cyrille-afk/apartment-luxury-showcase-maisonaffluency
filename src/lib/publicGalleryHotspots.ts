@@ -24,3 +24,8 @@ export function mergeGalleryPins<T extends { id: string }>(regular: T[], special
   special.forEach((pin) => { if (!byId.has(pin.id)) byId.set(pin.id, pin); });
   return [...byId.values()];
 }
+
+/** Hide the incense burner from the public Living Room scene without deleting its shared editor record. */
+export function isVisibleGalleryPin(pin: { image_identifier: string; product_name: string }): boolean {
+  return !(pin.image_identifier === "A Sun Lit Reading Corner" && pin.product_name === "Monster Gold-Tone Incense Burner");
+}

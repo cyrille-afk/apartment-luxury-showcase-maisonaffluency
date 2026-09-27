@@ -14,7 +14,7 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { attachMilestoneTracking, trackVideoEvent } from "@/lib/videoTracking";
-import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
+import { fetchPublicMicMacPins, isVisibleGalleryPin, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { curatingTeam } from "@/components/CuratingTeam";
 
 type Scene = { title: string; id: string };
@@ -117,6 +117,7 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "An Artistic Statement:Eggshell DOT Side Table": "right",
   "A Workspace of Distinction:Bernt Petersen 4-Drawer Desk": "right",
   "Refined Details:Bernt Petersen 4-Drawer Desk": "right",
+  "A Sun Lit Reading Corner:AB Chair": "left",
 };
 const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:Astra Dining Table",
@@ -305,7 +306,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
       fetchPublicMicMacPins(),
     ]).then(([{ data }, special]) => {
-      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: pin.materials ?? null, dimensions: pin.dimensions ?? null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))));
+      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: pin.materials ?? null, dimensions: pin.dimensions ?? null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))).filter(isVisibleGalleryPin));
       setHotspotsReady(true);
     });
   }, []);
