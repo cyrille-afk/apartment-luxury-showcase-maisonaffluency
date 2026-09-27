@@ -28,8 +28,9 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
-export default function ProcurementBoardPanel({ boardId, items }: {
+export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {} }: {
   boardId: string;
+  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
@@ -73,6 +74,7 @@ export default function ProcurementBoardPanel({ boardId, items }: {
 
   const rows: Row[] = items.map((i) => {
     const p = pricing.get(i.product_id) || {};
+    const fo = finishOverrides[i.id];
     const lead = p.lead_time || (p.lead_time_weeks_min ? `${p.lead_time_weeks_min}–${p.lead_time_weeks_max ?? p.lead_time_weeks_min} wks` : null);
     return {
       id: i.id,
@@ -80,8 +82,8 @@ export default function ProcurementBoardPanel({ boardId, items }: {
       approval_status: statusOverride[i.id] ?? i.approval_status ?? "pending",
       product_name: i.product?.product_name || "Selected piece",
       brand_name: i.product?.brand_name || null,
-      image_url: i.product?.image_url || null,
-      msrp_cents: p.trade_price_cents || null,
+      image_url: fo?.image_url || i.product?.image_url || null,
+      msrp_cents: fo?.price_cents ?? (p.trade_price_cents || null),
       currency: p.currency || "EUR",
       lead_time: lead,
       ship_mode: p.default_ship_mode || null,
