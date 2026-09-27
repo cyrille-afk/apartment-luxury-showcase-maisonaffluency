@@ -42,7 +42,7 @@ export function GlobalCanonical() {
       );
 
       // 404 surfaces must not publish a canonical for a dead URL.
-      if (document.documentElement.dataset.routeStatus === "404") {
+      if (document.documentElement.dataset.routeStatus === "404" || pathname.startsWith("/shared/")) {
         links.forEach((l) => l.remove());
         return;
       }
@@ -75,13 +75,14 @@ export function GlobalCanonical() {
     });
 
     return () => observer.disconnect();
-  }, [canonical]);
+  }, [canonical, pathname]);
 
   const isNotFound =
     typeof document !== "undefined" &&
     document.documentElement.dataset.routeStatus === "404";
 
-  if (isNotFound) return null;
+  // Private shared boards (noindex, may be white-labelled) publish no canonical.
+  if (isNotFound || pathname.startsWith("/shared/")) return null;
 
   return (
     <Helmet>
