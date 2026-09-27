@@ -1,3 +1,4 @@
+import { ensureSampleBoard } from "@/lib/sampleBoard";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
