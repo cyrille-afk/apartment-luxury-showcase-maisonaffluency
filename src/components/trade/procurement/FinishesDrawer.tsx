@@ -51,6 +51,7 @@ export default function FinishesDrawer({
   useEffect(() => {
     if (!open) return;
     setPreview(null);
+    setPicked({});
     let alive = true;
     setLoading(true);
     (async () => {
