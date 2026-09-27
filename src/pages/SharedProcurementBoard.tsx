@@ -57,6 +57,29 @@ export default function SharedProcurementBoard() {
     });
   }, [user, data, token, load]);
 
+  // White-label: strip every platform-branded node (static head metadata,
+  // JSON-LD, canonical, static hero, noscript fallback) and keep stripping
+  // anything re-injected later; swap the favicon for the studio logo.
+  const whiteLabel = !!data && data.role === "client" && data.hide_maison_branding;
+  useEffect(() => {
+    if (!whiteLabel || !data) return;
+    const brand = /affluency/i;
+    const scrub = () => {
+      document.querySelectorAll("#static-hero, #static-designers-hero, noscript").forEach((n) => n.remove());
+      document.head.querySelectorAll("meta, link:not([rel='stylesheet']):not([rel='modulepreload']), script[type='application/ld+json']")
+        .forEach((n) => { if (brand.test(n.outerHTML)) n.remove(); });
+    };
+    scrub();
+    if (data.studio_logo_url) {
+      const icon = document.createElement("link");
+      icon.rel = "icon"; icon.href = data.studio_logo_url;
+      document.head.appendChild(icon);
+    }
+    const obs = new MutationObserver(scrub);
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+    return () => obs.disconnect();
+  }, [whiteLabel, data]);
+
   const react = async (item: Item, reaction: "up" | "down" | "heart") => {
     const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: reaction, _comment: null });
     if (error) { toast({ title: "Could not save", variant: "destructive" }); return; }
