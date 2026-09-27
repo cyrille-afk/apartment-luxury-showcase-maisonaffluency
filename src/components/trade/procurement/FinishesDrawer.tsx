@@ -96,6 +96,17 @@ export default function FinishesDrawer({
     return null;
   };
 
+  // Resolve a variant's top/base material names to their pre-cropped swatch
+  // assets (same product_fabric_swatches_public source as Felix Chat).
+  const swatchFor = (name?: string) => {
+    if (!name) return null;
+    return (
+      swatches.find((s) => norm(s.name) === norm(name)) ||
+      swatches.find((s) => norm(name).includes(norm(s.name)) || norm(s.name).includes(norm(name))) ||
+      null
+    );
+  };
+
   const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? variants[0] ?? null;
   const trade = activeVariant?.price_cents ? Math.round(activeVariant.price_cents * (1 - discount / 100)) : null;
   const glb = useMemo(() => {
