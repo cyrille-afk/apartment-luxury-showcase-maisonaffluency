@@ -105,6 +105,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
     const ch = supabase
       .channel(`board-feedback-${boardId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "board_item_feedback", filter: `board_id=eq.${boardId}` }, () => loadCollab())
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "board_item_feedback" }, () => loadCollab())
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "client_board_items", filter: `board_id=eq.${boardId}` }, (p: any) => {
         if (p.new?.id && p.new?.approval_status) setStatusOverride((s) => ({ ...s, [p.new.id]: p.new.approval_status }));
       })
@@ -200,7 +201,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                       <td className="truncate px-2">{r.lead_time ?? "—"}</td>
                       <td className="truncate px-2 capitalize">{r.ship_mode ?? "—"}</td>
                       <td className="px-2">
-                        <select value={r.approval_status} onChange={(e) => setStatus(r.id, e.target.value)} className={`h-6 w-full border px-1 text-[10px] capitalize ${r.approval_status === "approved" ? "border-primary bg-primary/10 font-semibold text-primary" : r.approval_status === "rejected" ? "border-destructive/50 text-destructive" : "border-border/60 bg-background"}`} aria-label={`Status for ${r.product_name}`}>
+                        <select value={r.approval_status} onChange={(e) => setStatus(r.id, e.target.value)} className={`h-6 w-full border px-1 text-[10px] capitalize ${r.approval_status === "approved" ? "border-emerald-700 bg-emerald-600 font-semibold text-white" : r.approval_status === "rejected" ? "border-destructive bg-destructive font-semibold text-destructive-foreground" : "border-border/60 bg-background"}`} aria-label={`Status for ${r.product_name}`}>
                           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </td>

@@ -100,9 +100,12 @@ export default function SharedProcurementBoard() {
   }, [whiteLabel, data]);
 
   const react = async (item: Item, reaction: "up" | "down" | "heart") => {
+    const clearing = item.my_reaction === reaction;
+    // Optimistic toggle so the icon fills instantly.
+    setData((d: any) => d ? { ...d, items: d.items.map((x: Item) => x.id === item.id ? { ...x, my_reaction: clearing ? null : reaction } : x) } : d);
     const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: reaction, _comment: null });
-    if (error) { toast({ title: "Could not save", variant: "destructive" }); return; }
-    toast({ title: reaction === "heart" ? `${item.product_name} approved` : "Feedback shared with your designer" });
+    if (error) { toast({ title: "Could not save", variant: "destructive" }); load(); return; }
+    toast({ title: clearing ? "Reaction cleared" : reaction === "down" ? "Feedback shared with your designer" : `${item.product_name} approved` });
     if (!user) setMicroPrompt(true);
     load();
   };
@@ -238,14 +241,14 @@ export default function SharedProcurementBoard() {
 
             <div className="mt-4 flex items-center gap-1" data-allow-guest={data.role === "client" ? "" : undefined}>
               <FeedbackButton label="Heart to approve" active={item.my_reaction === "heart"} onClick={() => react(item, "heart")}><Heart className={`h-4 w-4 ${item.my_reaction === "heart" ? "fill-current" : ""}`} /></FeedbackButton>
-              <FeedbackButton label="Like" active={item.my_reaction === "up"} onClick={() => react(item, "up")}><ThumbsUp className="h-4 w-4" /></FeedbackButton>
-              <FeedbackButton label="Dislike" active={item.my_reaction === "down"} onClick={() => react(item, "down")}><ThumbsDown className="h-4 w-4" /></FeedbackButton>
+              <FeedbackButton label="Like" active={item.my_reaction === "up"} onClick={() => react(item, "up")}><ThumbsUp className={`h-4 w-4 ${item.my_reaction === "up" ? "fill-current" : ""}`} /></FeedbackButton>
+              <FeedbackButton label="Dislike" active={item.my_reaction === "down"} onClick={() => react(item, "down")}><ThumbsDown className={`h-4 w-4 ${item.my_reaction === "down" ? "fill-current" : ""}`} /></FeedbackButton>
               <FeedbackButton label="Comment" active={commentFor === item.id} onClick={() => setCommentFor(commentFor === item.id ? null : item.id)}><MessageSquare className="h-4 w-4" /></FeedbackButton>
             </div>
             <AnimatePresence>
               {commentFor === item.id && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden" data-allow-guest="">
-                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={1000} placeholder="Share a thought with your designer" className="mt-3 rounded-none text-sm" />
+                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendComment(item.id); } }} autoFocus maxLength={1000} placeholder="Share a thought with your designer — press Enter to send" className="mt-3 rounded-none text-sm" />
                   <Button size="sm" className="mt-2 rounded-none" onClick={() => sendComment(item.id)}>Send</Button>
                 </motion.div>
               )}
