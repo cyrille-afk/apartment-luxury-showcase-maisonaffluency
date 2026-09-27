@@ -42,7 +42,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
       return;
     }
     const { id, token } = data as { id: string; token: string };
-    const url = `${window.location.origin}/shared/board/${token}`;
+    const url = `${SHARE_ORIGIN}/shared/board/${token}`;
     setLink(url);
     const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
       body: { templateName: "board-collaborator-invite", recipientEmail: parsed.data, idempotencyKey: `board-invite-${id}`, templateData: { token } },
