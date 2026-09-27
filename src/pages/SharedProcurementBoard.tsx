@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
+import { Box, Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,10 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { formatMoneyIn } from "@/lib/displayMoney";
+import FinishesDrawer, { resolveFinishFrom, type FinishSelection, type PreloadedFinishes } from "@/components/trade/procurement/FinishesDrawer";
+import { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 
 type Item = {
-  id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
+  id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
   lead_time: string | null; finish: string | null; approval_status: string; my_reaction: string | null;
+  variant_label: string | null; fabric_label: string | null; wood_label: string | null; my_finish: string | null;
 };
 type Shared = {
   board_title: string; client_name: string | null; studio_name: string; studio_logo_url: string | null;
@@ -38,6 +41,9 @@ export default function SharedProcurementBoard() {
   const [microPrompt, setMicroPrompt] = useState(false);
   const [commentFor, setCommentFor] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [catalog, setCatalog] = useState<Record<string, PreloadedFinishes> | null>(null);
+  const [picks, setPicks] = useState<Record<string, FinishSelection>>({});
+  const [drawerFor, setDrawerFor] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoadError(false);
@@ -99,6 +105,42 @@ export default function SharedProcurementBoard() {
     if (!user) setMicroPrompt(true);
   };
 
+  // Catalogue finish data (variants, cropped swatches, 3D models) via the invite token.
+  useEffect(() => {
+    if (!data) return;
+    supabase.rpc("get_shared_board_finishes" as any, { _token: token }).then(({ data: c }) => setCatalog((c as any) || {}));
+  }, [data, token]);
+
+  // Card state: the client's own request wins over the designer's saved finish.
+  const resolved = useMemo(() => {
+    const out: Record<string, FinishSelection> = {};
+    if (!data || !catalog) return out;
+    for (const it of data.items) {
+      const c = catalog[it.product_id];
+      if (!c) continue;
+      if (picks[it.id]) { out[it.id] = picks[it.id]; continue; }
+      const [mt, mb] = (it.my_finish || "").split(" / ");
+      const src = it.my_finish ? { fabric_label: mt || null, wood_label: mb || null } : it;
+      if (!(src.fabric_label || src.wood_label || (src as any).variant_label)) continue;
+      out[it.id] = resolveFinishFrom(src, c, c.swatches || []);
+    }
+    return out;
+  }, [data, catalog, picks]);
+
+  const sendTimers = useRef<Record<string, number>>({});
+  const chooseFinish = (item: Item, sel: FinishSelection) => {
+    setPicks((p) => ({ ...p, [item.id]: sel }));
+    window.clearTimeout(sendTimers.current[item.id]);
+    sendTimers.current[item.id] = window.setTimeout(async () => {
+      const text = `Finish request: ${[sel.top, sel.base].filter(Boolean).join(" / ") || sel.label}`;
+      const { error } = await supabase.rpc("submit_board_feedback" as any, { _token: token, _item_id: item.id, _reaction: null, _comment: text });
+      if (error) { toast({ title: "Could not send your finish choice", variant: "destructive" }); return; }
+      toast({ title: `Finish choice sent to ${data?.studio_name ?? "your designer"}` });
+      if (!user) setMicroPrompt(true);
+    }, 1500);
+  };
+
+  const drawerItem = data?.items.find((i) => i.id === drawerFor) ?? null;
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
   if (data === undefined) return <div className="min-h-screen bg-background" />;
