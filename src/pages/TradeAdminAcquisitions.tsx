@@ -235,18 +235,18 @@ const TradeAdminAcquisitions = () => {
   const [calibrating, setCalibrating] = useState(false);
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
   const [b2bLeadId, setB2bLeadId] = useState<string | null>(null);
-  const markDmSent = async (id: string) => {
+  const markDmSent = async (id: string, status = "dm_sent") => {
     const sentAt = new Date().toISOString();
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
       prev?.map((lead) =>
         lead.id === id
-          ? { ...lead, instagram_outreach_status: "dm_sent", instagram_dm_sent_at: sentAt }
+          ? { ...lead, instagram_outreach_status: status, instagram_dm_sent_at: sentAt }
           : lead,
       ),
     );
     const { error } = await supabase
       .from("acquisition_leads")
-      .update({ instagram_outreach_status: "dm_sent", instagram_dm_sent_at: sentAt })
+      .update({ instagram_outreach_status: status, instagram_dm_sent_at: sentAt })
       .eq("id", id);
     if (error) {
       await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
