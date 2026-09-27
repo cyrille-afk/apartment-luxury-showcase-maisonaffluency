@@ -17,6 +17,12 @@ const SHARE_ORIGIN = window.location.hostname === "localhost" || window.location
   ? window.location.origin
   : "https://www.maisonaffluency.com";
 
+/** Masked display alias — never shows the raw token. */
+function maskLink(url: string) {
+  try { return `://${new URL(url).hostname}…`; } catch { return "://…"; }
+}
+
+
 export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
