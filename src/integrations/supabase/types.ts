@@ -780,6 +780,10 @@ export type Database = {
       board_invites: {
         Row: {
           accepted_user_id: string | null
+          access_code_attempts: number
+          access_code_expires_at: string | null
+          access_code_hash: string | null
+          access_code_sent_at: string | null
           board_id: string
           created_at: string
           email: string
@@ -793,6 +797,10 @@ export type Database = {
         }
         Insert: {
           accepted_user_id?: string | null
+          access_code_attempts?: number
+          access_code_expires_at?: string | null
+          access_code_hash?: string | null
+          access_code_sent_at?: string | null
           board_id: string
           created_at?: string
           email: string
@@ -806,6 +814,10 @@ export type Database = {
         }
         Update: {
           accepted_user_id?: string | null
+          access_code_attempts?: number
+          access_code_expires_at?: string | null
+          access_code_hash?: string | null
+          access_code_sent_at?: string | null
           board_id?: string
           created_at?: string
           email?: string
@@ -10837,6 +10849,10 @@ export type Database = {
         Args: { _token: string }
         Returns: {
           accepted_user_id: string | null
+          access_code_attempts: number
+          access_code_expires_at: string | null
+          access_code_hash: string | null
+          access_code_sent_at: string | null
           board_id: string
           created_at: string
           email: string
@@ -10855,6 +10871,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _board_slug: { Args: { _board_id: string }; Returns: string }
       _hotspot_designer_public: {
         Args: { _designer_id: string; _designer_name: string }
         Returns: boolean
@@ -10918,6 +10935,16 @@ export type Database = {
         Args: { _quote_id: string }
         Returns: number
       }
+      board_access_request: {
+        Args: { _email: string; _slug: string }
+        Returns: Json
+      }
+      board_access_verify: {
+        Args: { _code: string; _email: string; _slug: string }
+        Returns: string
+      }
+      board_share_slug: { Args: { _board_id: string }; Returns: string }
+      board_slugify: { Args: { _t: string }; Returns: string }
       can_edit_project: {
         Args: { _project_id: string; _user_id: string }
         Returns: boolean

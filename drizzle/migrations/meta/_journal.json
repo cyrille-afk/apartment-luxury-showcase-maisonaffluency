@@ -708,6 +708,13 @@
       "when": 1790500767969,
       "tag": "0100_shared_board_finishes",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1790507617540,
+      "tag": "0101_board_slug_otp_notifications",
+      "breakpoints": true
     }
   ]
 }
