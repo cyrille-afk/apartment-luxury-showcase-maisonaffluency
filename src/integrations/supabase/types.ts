@@ -11205,6 +11205,7 @@ export type Database = {
         }[]
       }
       get_shared_board: { Args: { _token: string }; Returns: Json }
+      get_shared_board_finishes: { Args: { _token: string }; Returns: Json }
       get_studio_contact_email: {
         Args: { _studio_id: string }
         Returns: string
