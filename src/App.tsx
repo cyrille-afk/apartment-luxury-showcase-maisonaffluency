@@ -775,6 +775,7 @@ const App = () => {
                   <Route path="/pay/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><GuestPayPage /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
                   <Route path="/shared/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedProcurementBoard /></Suspense>} />
+                  <Route path="/shared/board/:token/:board" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedProcurementBoard /></Suspense>} />
                   <Route path="/new-in" element={<Suspense fallback={<PageLoadingSkeleton />}><NewIn /></Suspense>} />
                   <Route path="/designer-upload/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><DesignerUpload /></Suspense>} />
 
