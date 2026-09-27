@@ -160,14 +160,6 @@ export default function FinishesDrawer({
   const imageFor = (v: Variant | null) => {
     if (!v) return null;
     return variantImage(v, imgMap, gallery);
-
-    const keys = [
-      [norm(v.base), norm(v.top), norm(v.label)].join("|"),
-      [norm(v.base), norm(v.top)].join("|"),
-      norm(v.top), norm(v.base),
-    ];
-    for (const k of keys) if (k in imgMap && gallery[imgMap[k]]) return gallery[imgMap[k]];
-    return null;
   };
 
   // Resolve a variant's top/base material names to their pre-cropped swatch

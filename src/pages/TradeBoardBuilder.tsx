@@ -41,7 +41,7 @@ import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import ProcurementBoardPanel from "@/components/trade/procurement/ProcurementBoardPanel";
-import FinishesDrawer, { type FinishSelection } from "@/components/trade/procurement/FinishesDrawer";
+import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 interface Board {
@@ -146,8 +146,10 @@ const TradeBoardBuilder = () => {
   const { clientSafe } = useClientSafeMode();
   const applyFinish = async (item: BoardItem, sel: FinishSelection) => {
     setFinishes((f) => ({ ...f, [item.id]: sel }));
-    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, variant_label: sel.label } : i)));
-    await supabase.from("client_board_items").update({ variant_label: sel.label } as any).eq("id", item.id);
+    const patch = { variant_label: sel.label, fabric_label: sel.top ?? null, wood_label: sel.base ?? null };
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, ...patch } : i)));
+    setFinishItem((f) => (f && f.id === item.id ? { ...f, ...patch } : f));
+    await supabase.from("client_board_items").update(patch as any).eq("id", item.id);
   };
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
@@ -241,6 +243,7 @@ const TradeBoardBuilder = () => {
       }
 
       setItems(hydratedItems);
+      resolveSavedFinishes(hydratedItems).then((m) => setFinishes(m)).catch(() => {});
       setAddedIds(new Set(itemsData.map((i: any) => i.product_id)));
     } else {
       setItems([]);
@@ -898,6 +901,8 @@ const TradeBoardBuilder = () => {
             baseImage={finishItem.product?.image_url ?? null}
             clientMode={clientSafe}
             current={finishes[finishItem.id]?.label ?? finishItem.variant_label}
+            initialTop={finishes[finishItem.id]?.top ?? finishItem.fabric_label ?? null}
+            initialBase={finishes[finishItem.id]?.base ?? finishItem.wood_label ?? null}
             onSelect={(sel) => applyFinish(finishItem, sel)}
           />
         )}
