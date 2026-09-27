@@ -137,6 +137,9 @@ const CURATED_SIDE_PICK_ORDER = [
   "A Sun Lit Reading Corner:Japanese Cranes Wallcover",
   "A Sun Lit Reading Corner:Blue Glazed Vallauris Floor Lamp",
   "A Sun Lit Reading Corner:AB Chair",
+  "An Artistic Statement:Martell Wall Lamp",
+  "An Artistic Statement:Lantern Table Lamp",
+  "An Artistic Statement:Eggshell DOT Side Table",
 ];
 
 type Hotspot = {
