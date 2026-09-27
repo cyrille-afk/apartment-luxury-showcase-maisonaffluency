@@ -107,7 +107,7 @@ const FELIX_STEPS: FelixStep[] = [
   },
   {
     id: "white-label",
-    title: "Enforcing White-Label Premium Value",
+    title: "Turn on studio branding",
     target: "branding-whitelabel",
     route: "board",
     pulse: true,
@@ -117,7 +117,7 @@ const FELIX_STEPS: FelixStep[] = [
     },
     done: () => switchOn("#hide-maison"),
     dialogue:
-      "**Pro Tip:** Flip this switch to **ON**. This instantly strips all Maison Affluency watermarks, logos, and platform traces from the external guest interface. Upload your own studio logo here to pitch multi-million dollar projects completely under your own elite agency brand.",
+      "Switch on **Use studio branding only** below to remove Maison Affluency branding from your client's board. You can add your studio name and logo above.",
   },
   {
     id: "invite",
@@ -450,11 +450,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
 
-          {!stepDone && !isPaused && (
-            <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
-              ● Action required — use the highlighted control to continue
-            </p>
-          )}
+           {!stepDone && !isPaused && (
+             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
+               <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
+               <p className="font-body text-sm font-semibold leading-snug">
+                 {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+               </p>
+             </div>
+           )}
 
           {isPaused && (
             <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
