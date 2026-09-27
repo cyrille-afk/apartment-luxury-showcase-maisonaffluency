@@ -177,61 +177,85 @@ export default function FinishesDrawer({
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
         ) : (
           <>
-            {/* Swatch sections — the exact linked finish list from the product
-                sheet (product_fabric_swatches_public), with name labels and
-                pre-cropped images. Falls back to variant-axis names only when
-                a section has no linked swatches. */}
-            {([
-              { key: "top" as const, title: "Upholstery" },
-              { key: "base" as const, title: "Frame Finish" },
-            ]).map(({ key, title }) => {
-              const linked = swatches.filter((s) => (key === "top" ? roleOf(s.category) === "fabric" : roleOf(s.category) === "base"));
-              const axisOpts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
-              if (!linked.length && !axisOpts.length) return null;
-              return (
-                <div key={key} className="border-b border-border/60 px-6 py-5">
-                  <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {title} <span className="normal-case tracking-normal">({linked.length || axisOpts.length})</span>
-                  </p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {(linked.length ? linked : axisOpts.map((name) => ({ name, image_url: swatchFor(name)?.image_url || null, category: null }))).map((sw) => {
-                      const isActive = norm(picked[key]?.name) === norm(sw.name) || (!picked[key] && norm(activeVariant?.[key]) === norm(sw.name));
-                      return (
-                        <button
-                          key={sw.name}
-                          type="button"
-                          onClick={() => {
-                            setPicked((p) => ({ ...p, [key]: sw }));
-                            const other = key === "top" ? "base" : "top";
-                            const v =
-                              variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(activeVariant?.[other])) ||
-                              variants.find((x) => norm(x[key]) === norm(sw.name));
-                            if (v) {
-                              setPreview(v);
-                              onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
-                            } else if (activeVariant) {
-                              const merged = { ...activeVariant, [key]: sw.name };
-                              setPreview(merged);
-                              onSelect({ label: finishLabel(merged), price_cents: merged.price_cents ?? null, image_url: imageFor(merged) });
-                            }
-                          }}
-                          className="text-left"
-                        >
-                          <span className={`block aspect-square overflow-hidden border transition-all ${isActive ? "border-primary ring-1 ring-primary ring-offset-1 ring-offset-background" : "border-border/60 hover:border-foreground/40"}`}>
-                            {sw.image_url ? (
-                              <img src={sw.image_url} alt={sw.name} className="h-full w-full object-cover" loading="lazy" />
-                            ) : (
-                              <span className="flex h-full w-full items-center justify-center bg-muted/40 px-1 text-center font-body text-[9px] text-muted-foreground">{sw.name}</span>
-                            )}
-                          </span>
-                          <span className={`mt-1.5 block font-body text-[11px] leading-tight ${isActive ? "text-foreground font-medium" : "text-muted-foreground"}`}>{sw.name}</span>
-                        </button>
-                      );
-                    })}
+            {/* Compact dropdowns — same linked finish list as the product
+                sheet (product_fabric_swatches_public), one dropdown per axis.
+                Falls back to variant-axis names when no swatches are linked. */}
+            <div className="border-b border-border/60 px-6 py-5 space-y-4">
+              {([
+                { key: "top" as const, title: "Upholstery" },
+                { key: "base" as const, title: "Frame Finish" },
+              ]).map(({ key, title }) => {
+                const linked = swatches.filter((s) => (key === "top" ? roleOf(s.category) === "fabric" : roleOf(s.category) === "base"));
+                const axisOpts = Array.from(new Map(variants.filter((v) => v[key]).map((v) => [norm(v[key]), v[key] as string])).values());
+                const opts: Swatch[] = linked.length ? linked : axisOpts.map((name) => ({ name, image_url: swatchFor(name)?.image_url || null, category: null }));
+                if (!opts.length) return null;
+                const selected = picked[key] || opts.find((o) => norm(o.name) === norm(activeVariant?.[key])) || null;
+                const isOpen = openAxis === key;
+                const choose = (sw: Swatch) => {
+                  setPicked((p) => ({ ...p, [key]: sw }));
+                  setOpenAxis(null);
+                  const other = key === "top" ? "base" : "top";
+                  const v =
+                    variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(activeVariant?.[other])) ||
+                    variants.find((x) => norm(x[key]) === norm(sw.name));
+                  if (v) {
+                    setPreview(v);
+                    onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                  } else if (activeVariant) {
+                    const merged = { ...activeVariant, [key]: sw.name };
+                    setPreview(merged);
+                    onSelect({ label: finishLabel(merged), price_cents: merged.price_cents ?? null, image_url: imageFor(merged) });
+                  }
+                };
+                return (
+                  <div key={key} className="relative">
+                    <p className="mb-1.5 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {title} <span className="normal-case tracking-normal">({opts.length})</span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setOpenAxis(isOpen ? null : key)}
+                      className="flex w-full items-center gap-3 border border-border/60 bg-background px-3 py-2 text-left transition-colors hover:border-foreground/40"
+                    >
+                      <span className="h-8 w-8 shrink-0 overflow-hidden border border-border/40">
+                        {selected?.image_url ? (
+                          <img src={selected.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <span className="block h-full w-full bg-muted/40" />
+                        )}
+                      </span>
+                      <span className="flex-1 truncate font-body text-xs text-foreground">{selected?.name || "Select…"}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {isOpen && (
+                      <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto border border-border bg-background shadow-lg">
+                        {opts.map((sw) => {
+                          const isActive = norm(selected?.name) === norm(sw.name);
+                          return (
+                            <button
+                              key={sw.name}
+                              type="button"
+                              onClick={() => choose(sw)}
+                              className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${isActive ? "bg-muted/60" : "hover:bg-muted/40"}`}
+                            >
+                              <span className="h-8 w-8 shrink-0 overflow-hidden border border-border/40">
+                                {sw.image_url ? (
+                                  <img src={sw.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                                ) : (
+                                  <span className="block h-full w-full bg-muted/40" />
+                                )}
+                              </span>
+                              <span className={`flex-1 truncate font-body text-xs ${isActive ? "font-medium text-foreground" : "text-muted-foreground"}`}>{sw.name}</span>
+                              {isActive && <Check className="h-3.5 w-3.5 shrink-0 text-primary" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
 
 
             {/* Single state-driven metadata card */}
