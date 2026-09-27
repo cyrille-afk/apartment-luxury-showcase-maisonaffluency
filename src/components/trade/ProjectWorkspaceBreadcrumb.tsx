@@ -42,7 +42,7 @@ export default function ProjectWorkspaceBreadcrumb() {
       includeProjectsRoot
       project={project ?? undefined}
       current={boardId ? "Folders & Drafts" : tab ? ({ boards: "Folders & Drafts", quotes: "Quotes", tearsheets: "Tearsheets", shipping: "Shipping", ffe: "FF&E" }[tab] ?? undefined) : undefined}
-      currentTo={boardId ? `/trade/projects?view=folders${project ? `&project=${project.id}` : ""}` : undefined}
+      currentTo={boardId ? (project ? `/trade/projects/${project.id}?tab=boards` : "/trade/projects?view=folders") : tab ? `${pathname}${search}` : undefined}
       extraSegments={boardId && board ? [{ kind: "link", label: board.title, to: `/trade/boards/${board.id}${project ? `?project=${project.id}` : ""}` }] : []}
       className="mb-0"
     />
