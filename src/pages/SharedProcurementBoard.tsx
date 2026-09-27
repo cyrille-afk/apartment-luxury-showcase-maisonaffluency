@@ -33,8 +33,9 @@ const signupSchema = z.object({
 });
 
 export default function SharedProcurementBoard() {
-  const { token: first = "", board: second } = useParams();
-  const param = second ? `${first}/${second}` : first;
+  const { token: first = "", projectSlug, boardSlug } = useParams();
+  const second = boardSlug;
+  const param = second ? `${projectSlug}/${second}` : first;
   const isLegacy = !second && /^[0-9a-f]{48}$/.test(first);
   const [token, setToken] = useState<string>(() => (isLegacy ? first : readSession(param)));
   const { user } = useAuth();
