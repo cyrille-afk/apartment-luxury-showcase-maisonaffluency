@@ -30,6 +30,26 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
+/** Small cropped finish swatch chips (fabric + wood) with label tooltips. */
+function FinishChips({ fo, size = "h-5 w-5" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null } | null; size?: string }) {
+  if (!fo) return null;
+  const chips = [
+    { name: fo.top, img: fo.top_image },
+    { name: fo.base, img: fo.base_image },
+  ].filter((c) => c.name || c.img);
+  if (!chips.length) return null;
+  return (
+    <span className="inline-flex items-center gap-1">
+      {chips.map((c, i) => (
+        <span key={i} title={c.name ?? undefined} aria-label={c.name ?? undefined}
+          className={`${size} shrink-0 overflow-hidden rounded-full border border-border/60 bg-[hsl(var(--product-canvas))]`}>
+          {c.img ? <img src={c.img} alt="" className="h-full w-full object-cover" loading="lazy" /> : <span className="block h-full w-full bg-muted" />}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
   onOpenFinishes?: (itemId: string) => void;
