@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 import { cn } from "@/lib/utils";
+import { useProjects, pushRecentProject } from "@/hooks/useProjects";
+import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
@@ -35,6 +37,13 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   const navigate = useNavigate();
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile } = useAuth();
   const pendingInquiryCount = usePendingInquiryCount();
+  const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
+  useEffect(() => {
+    const current = activeProjects.find((project) => location.pathname.startsWith(`/trade/projects/${project.id}`) || projectBoards.some((board) => location.pathname === `/trade/boards/${board.id}` && board.project_id === project.id));
+    if (current) setExpandedProjects((ids) => ids.includes(current.id) ? ids : [...ids, current.id]);
+  }, [location.pathname, activeProjects, projectBoards]);
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
   const items = hasTradeAccess ? coreItems.filter((i) => i.url !== "/trade/me") : coreItems;
@@ -75,8 +84,8 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
           {items.map((item, idx) => {
             const active = isActive(item.url, item.end);
             return (
+              <Fragment key={item.url}>
               <button
-                key={item.url}
                 onClick={() => handleNav(item.url)}
                 className={cn(
                   "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0",
@@ -90,6 +99,28 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
+              {item.url === "/trade/projects" && activeProjects.length > 0 && (
+                <div className="ml-7 border-l border-border pl-3 pb-2 font-body text-xs text-muted-foreground">
+                  {activeProjects.map((project) => {
+                    const expanded = expandedProjects.includes(project.id);
+                    return <div key={project.id}>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
+                          <ChevronRight className={`h-3 w-3 ${expanded ? "rotate-90" : ""}`} />
+                        </Button>
+                        <Button variant="ghost" className="min-w-0 flex-1 justify-start truncate text-xs font-normal" onClick={() => { pushRecentProject(project.id); handleNav(projectDefaultUrl(project.id, projectBoards)); }}>{project.name}</Button>
+                      </div>
+                      {expanded && <div className="ml-4 border-l border-border pl-4">
+                        <Button variant="ghost" className="block h-8 w-full truncate text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=boards`)}>Folders & Drafts</Button>
+                        {projectBoards.filter((board) => board.project_id === project.id).map((board) => <Button key={board.id} variant="ghost" className="block h-8 w-full truncate pl-6 text-left text-xs font-normal" onClick={() => handleNav(`/trade/boards/${board.id}?project=${project.id}`)}>{board.title}</Button>)}
+                        <Button variant="ghost" className="block h-8 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}?tab=tearsheets`)}>Tearsheets</Button>
+                        <Button variant="ghost" className="block h-8 w-full text-left text-xs font-normal" onClick={() => handleNav(`/trade/projects/${project.id}/studio`)}>Project Studio</Button>
+                      </div>}
+                    </div>;
+                  })}
+                </div>
+              )}
+              </Fragment>
             );
           })}
 
