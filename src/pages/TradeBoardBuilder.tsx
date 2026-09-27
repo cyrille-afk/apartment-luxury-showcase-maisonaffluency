@@ -585,7 +585,7 @@ const TradeBoardBuilder = () => {
   return (
     <>
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
-      <div className="max-w-5xl">
+      <div className="md:-mx-2 lg:-mx-6">
         {/* Header */}
         <TradeBreadcrumb
           current="Boards"
