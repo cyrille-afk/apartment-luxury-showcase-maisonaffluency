@@ -157,6 +157,8 @@ const TradeBoardBuilder = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [copyButtonLabel, setCopyButtonLabel] = useState("Copy Current Link");
+  const studioNameFocusRef = useRef<string | null>(null);
+  const studioLogoFocusRef = useRef<string | null>(null);
   const [rotatingLink, setRotatingLink] = useState(false);
 
   // Sub-folder state
