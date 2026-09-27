@@ -118,7 +118,7 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Workspace of Distinction:Bernt Petersen 4-Drawer Desk": "right",
   "Refined Details:Bernt Petersen 4-Drawer Desk": "right",
   "A Sun Lit Reading Corner:Japanese Cranes Wallcover": "left",
-  "A Sun Lit Reading Corner:Vallauris Floor Lamp": "left",
+  "A Sun Lit Reading Corner:Blue Glazed Vallauris Floor Lamp": "left",
   "A Sun Lit Reading Corner:AB Chair": "left",
   "A Sun Lit Reading Corner:Monster Gold-Tone Incense Burner": "right",
 };
@@ -134,7 +134,7 @@ const CURATED_SIDE_PICK_ORDER = [
   "A Masterful Suite:Crystalline Blue Vessel Volume 5",
   "A Masterful Suite:Giudecca Rug (Custom)",
   "A Sun Lit Reading Corner:Japanese Cranes Wallcover",
-  "A Sun Lit Reading Corner:Vallauris Floor Lamp",
+  "A Sun Lit Reading Corner:Blue Glazed Vallauris Floor Lamp",
   "A Sun Lit Reading Corner:AB Chair",
 ];
 
