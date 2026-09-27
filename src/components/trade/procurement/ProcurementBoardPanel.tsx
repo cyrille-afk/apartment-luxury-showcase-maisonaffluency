@@ -31,7 +31,7 @@ type Feedback = { id: string; item_id: string; reaction: string | null; comment:
 const STATUSES = ["pending", "approved", "rejected"] as const;
 
 /** Small cropped finish swatch chips (fabric + wood) with label tooltips. */
-export function FinishChips({ fo, size = "h-5 w-5" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null } | null; size?: string }) {
+export function FinishChips({ fo, size = "h-8 w-8" }: { fo?: { top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null } | null; size?: string }) {
   if (!fo) return null;
   const chips = [
     { name: fo.top, img: fo.top_image },
@@ -189,7 +189,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
                       <td className="px-2 py-1">{r.image_url ? <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-8 w-8 bg-muted" />}</td>
-                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-3.5 w-3.5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
+                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-5 w-5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
                       <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
                       <td className="px-2 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
