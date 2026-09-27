@@ -67,3 +67,14 @@ export async function triggerSimilarWebScrape() {
   if (error) throw error;
   return data;
 }
+
+export async function fetchLatestIntelRun() {
+  const { data, error } = await supabase
+    .from("competitor_intel_runs")
+    .select("id, started_at, finished_at, status, pause_reason, summary, highlights")
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}

@@ -23,6 +23,7 @@ import {
   fetchCompetitorTraffic,
   upsertTrafficEntry,
   triggerCompetitorScrape,
+  fetchLatestIntelRun,
   triggerSimilarWebScrape,
 } from "@/lib/api/competitors";
 import {
@@ -615,15 +616,18 @@ export default function CompetitiveAnalysis() {
   const [scraping, setScraping] = useState(false);
   const [scrapingSW, setScrapingSW] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [intel, setIntel] = useState<any>(null);
 
   const loadData = async () => {
     try {
-      const [g, d, a, t] = await Promise.all([
+      const [g, d, a, t, i] = await Promise.all([
         fetchCompetitorGalleries(),
         fetchCompetitorDesigners(),
         fetchAuctionBenchmarks(),
         fetchCompetitorTraffic(),
+        fetchLatestIntelRun().catch(() => null),
       ]);
+      setIntel(i);
       setGalleries(g as Gallery[]);
       setDesigners(d as Designer[]);
       setAuctions(a as AuctionLot[]);
@@ -649,7 +653,8 @@ export default function CompetitiveAnalysis() {
       await loadData();
     } catch (err) {
       console.error("Scrape failed:", err);
-      toast.error("Scraping failed — check Firecrawl connection");
+      toast.error(err instanceof Error && err.message ? err.message : "Scan failed");
+      await loadData();
     } finally {
       setScraping(false);
     }
@@ -717,6 +722,29 @@ export default function CompetitiveAnalysis() {
           {scraping ? "Scraping…" : "Run Scrape"}
         </Button>
       </div>
+
+      {intel && (
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-xs uppercase tracking-wider text-foreground">Weekly Market Brief</h3>
+            <span className="font-body text-[10px] text-muted-foreground">
+              {intel.status === "completed" ? new Date(intel.finished_at || intel.started_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : intel.status === "running" ? "Scan in progress…" : `Scan ${intel.status}`}
+            </span>
+          </div>
+          {intel.status === "completed" && intel.summary ? (
+            <>
+              <p className="font-body text-sm leading-relaxed text-foreground">{intel.summary}</p>
+              {Array.isArray(intel.highlights) && intel.highlights.length > 0 && (
+                <ul className="list-disc pl-5 space-y-1 font-body text-xs text-muted-foreground">
+                  {intel.highlights.map((h: string, idx: number) => <li key={idx}>{h}</li>)}
+                </ul>
+              )}
+            </>
+          ) : intel.pause_reason ? (
+            <p className="font-body text-xs text-destructive">{intel.pause_reason}</p>
+          ) : null}
+        </Card>
+      )}
 
       {/* Overview Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
