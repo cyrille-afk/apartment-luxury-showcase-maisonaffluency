@@ -238,6 +238,41 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_outreach_events: {
+        Row: {
+          agent_id: string | null
+          channel: string
+          created_at: string
+          hook: string | null
+          id: string
+          lead_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          channel: string
+          created_at?: string
+          hook?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          channel?: string
+          created_at?: string
+          hook?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_outreach_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_test_mode: {
         Row: {
           enabled: boolean

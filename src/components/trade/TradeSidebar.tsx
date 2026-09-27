@@ -3,7 +3,7 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
-  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, ChevronDown, ChevronRight, FolderOpen,
+  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -406,6 +406,18 @@ export function TradeSidebar() {
                     >
                       <Target className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>Client Acquisitions</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to="/trade/admin/kpi-ledger"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                    >
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Acquisition KPI Ledger</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -237,7 +237,8 @@ const TradeAdminAcquisitions = () => {
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
   const [b2bLeadId, setB2bLeadId] = useState<string | null>(null);
   const [liLeadId, setLiLeadId] = useState<string | null>(null);
-  const markDmSent = async (id: string, status = "dm_sent") => {
+  const markDmSent = async (id: string, status = "dm_sent", channel: "instagram" | "linkedin" = "instagram", hook: "A" | "B" | null = null) => {
+    void supabase.from("acquisition_outreach_events").insert({ lead_id: id, channel, hook, agent_id: user?.id }).then(({ error }) => { if (error) console.warn("outreach log failed", error.message); });
     const sentAt = new Date().toISOString();
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
       prev?.map((lead) =>
@@ -989,7 +990,7 @@ const TradeAdminAcquisitions = () => {
             studioName={l.studio_name}
             founderName={l.founder_name}
             linkedinUrl={l.linkedin_url}
-            onLaunched={() => markDmSent(l.id, "LinkedIn Message Sent")}
+            onLaunched={(hook) => markDmSent(l.id, "LinkedIn Message Sent", "linkedin", hook)}
           />
         );
       })()}
@@ -1006,7 +1007,7 @@ const TradeAdminAcquisitions = () => {
             instagramHandle={l.instagram_handle}
             linkedinUrl={l.linkedin_url}
             onInstagramLaunched={(hook) =>
-              markDmSent(l.id, hook === "B" ? "DM Sent - White-Label" : "DM Sent - AI Procurement")
+              markDmSent(l.id, hook === "B" ? "DM Sent - White-Label" : "DM Sent - AI Procurement", "instagram", hook)
             }
           />
         );

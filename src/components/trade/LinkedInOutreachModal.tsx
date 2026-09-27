@@ -14,7 +14,7 @@ type Props = {
   studioName: string;
   founderName: string | null;
   linkedinUrl: string | null;
-  onLaunched?: () => void;
+  onLaunched?: (hook: "A" | "B") => void;
 };
 
 const buildScript = (tab: "A" | "B", name: string | null, company: string) => {
@@ -42,7 +42,7 @@ const LinkedInOutreachModal = ({ open, onOpenChange, studioName, founderName, li
   const launch = () => {
     if (!linkedinUrl) return;
     window.open(linkedinUrl, "_blank", "noopener,noreferrer");
-    onLaunched?.();
+    onLaunched?.(tab);
   };
 
   return (
