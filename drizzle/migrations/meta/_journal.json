@@ -750,6 +750,13 @@
       "when": 1790510369249,
       "tag": "0106_allow_linkedin_message_sent",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1790510610919,
+      "tag": "0107_board_feedback_toggle_reactions",
+      "breakpoints": true
     }
   ]
 }
