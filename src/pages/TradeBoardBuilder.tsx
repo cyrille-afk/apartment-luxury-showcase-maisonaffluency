@@ -556,7 +556,12 @@ const TradeBoardBuilder = () => {
           {item.product?.product_name}
         </button>
         <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
-        {finishes[item.id] && <p className="font-body text-[11px] text-foreground mt-1 truncate">{finishes[item.id].label}</p>}
+        {finishes[item.id] && (
+          <p className="font-body text-[11px] text-muted-foreground mt-1 flex items-center gap-1.5">
+            <FinishChips fo={finishes[item.id]} size="h-4 w-4" />
+            <span className="truncate">{finishes[item.id].label}</span>
+          </p>
+        )}
         {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
         {isEditable && (
           <div className="flex items-center gap-1 mt-2">
