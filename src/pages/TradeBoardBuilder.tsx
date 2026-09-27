@@ -761,6 +761,8 @@ const TradeBoardBuilder = () => {
             </Link>
           </div>
         </div>
+
+        {/* Concierge hand-off: Next stage CTA */}
         {isEditable && items.length > 0 && (
           <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-start gap-3">
