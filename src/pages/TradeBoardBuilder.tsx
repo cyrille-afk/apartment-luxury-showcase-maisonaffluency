@@ -304,6 +304,16 @@ const TradeBoardBuilder = () => {
 
   useEffect(() => { if (addOpen) searchProducts(search); }, [addOpen, search, searchProducts]);
 
+  const groupedProducts = useMemo(() => {
+    const map = new Map<string, Product[]>();
+    for (const p of products) {
+      const key = p.brand_name || "";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(p);
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [products]);
+
   const addProduct = async (productId: string) => {
     if (!id) return;
     const { error } = await supabase
