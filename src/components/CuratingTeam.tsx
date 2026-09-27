@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Linkedin } from "lucide-react";
