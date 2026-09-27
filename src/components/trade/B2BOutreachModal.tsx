@@ -16,7 +16,7 @@ type Props = {
   founderName: string | null;
   instagramHandle: string | null;
   linkedinUrl: string | null;
-  onInstagramLaunched?: () => void;
+  onInstagramLaunched?: (hook: "A" | "B") => void;
 };
 
 const buildScript = (tab: "A" | "B", name: string | null, company: string) => {
@@ -45,9 +45,10 @@ const B2BOutreachModal = ({ open, onOpenChange, studioName, founderName, instagr
   const launch = () => {
     if (handle) {
       window.open(`https://instagram.com/${handle}`, "_blank", "noopener,noreferrer");
-      onInstagramLaunched?.();
+      onInstagramLaunched?.(tab);
     } else if (linkedinUrl) {
       window.open(linkedinUrl, "_blank", "noopener,noreferrer");
+      onInstagramLaunched?.(tab);
     }
   };
 
