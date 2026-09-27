@@ -236,13 +236,13 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
 
   // Filter hotspots by designer when opened from a designer card
   const displayHotspots = useMemo(() => {
-    if (!filterDesigner || !hotspots.length) return hotspots;
+     if (!filterDesigner || !hotspots.length) return hotspots;
     const filterLower = filterDesigner.toLowerCase();
     // Extract meaningful tokens: split on " - ", " for ", commas, then check overlap
     const extractTokens = (s: string) =>
       s.split(/\s[-–—]\s|\sfor\s|,\s*/).map(t => t.trim().toLowerCase()).filter(Boolean);
     const filterTokens = extractTokens(filterLower);
-    const filtered = hotspots.filter(h => {
+     const filtered = hotspots.filter(h => {
       if (!h.designer_name) return false;
       const dLower = h.designer_name.toLowerCase();
       // Direct substring match
@@ -251,8 +251,8 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       const hotspotTokens = extractTokens(dLower);
       return filterTokens.some(ft => hotspotTokens.some(ht => ht.includes(ft) || ft.includes(ht)));
     });
-    return filtered.length > 0 ? filtered : hotspots;
-  }, [hotspots, filterDesigner]);
+     return filtered.length > 0 ? filtered : hotspots;
+   }, [hotspots, filterDesigner]);
 
 
   useEffect(() => {

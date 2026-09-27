@@ -94,6 +94,7 @@ const LIVING_ROOM_NIKO_PHOTO = "https://res.cloudinary.com/dif1oamtj/image/uploa
 const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set([
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003",
   "A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier",
+  "A Sun Lit Reading Corner:Monster Gold-Tone Incense Burner",
 ]);
 // Honor the previously curated placements on the first photo of these rooms.
 const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
@@ -117,6 +118,7 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "An Artistic Statement:Eggshell DOT Side Table": "right",
   "A Workspace of Distinction:Bernt Petersen 4-Drawer Desk": "right",
   "Refined Details:Bernt Petersen 4-Drawer Desk": "right",
+  "A Sun Lit Reading Corner:AB Chair": "left",
 };
 const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:Astra Dining Table",
@@ -378,7 +380,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   }, [manifest]);
 
   const hotspotsForScene = useCallback(
-    (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title)),
+    (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title) && !(hotspot.image_identifier === "A Sun Lit Reading Corner" && hotspot.product_name === "Monster Gold-Tone Incense Burner")),
     [hotspots],
   );
 

@@ -683,7 +683,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       if (data || special.length) {
         const counts: Record<string, number> = {};
           const positions: Record<string, GalleryHotspotPosition[]> = {};
-        for (const row of mergeGalleryPins(data || [], special.map((pin) => ({ ...pin, link_url: null, mapped_pick_id: null })))) {
+         for (const row of mergeGalleryPins(data || [], special.map((pin) => ({ ...pin, link_url: null, mapped_pick_id: null })))) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
           positions[row.image_identifier].push({
