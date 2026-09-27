@@ -1,3 +1,4 @@
+import { ensureSampleBoard } from "@/lib/sampleBoard";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
@@ -179,12 +180,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (BOARD_PATH.test(location.pathname)) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("client_boards")
-        .select("id, project_id")
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const data = await ensureSampleBoard();
       if (cancelled) return;
       if (data?.id) navigate(`/trade/boards/${data.id}${data.project_id ? `?project=${data.project_id}` : ""}`);
       else navigate("/trade/boards");
