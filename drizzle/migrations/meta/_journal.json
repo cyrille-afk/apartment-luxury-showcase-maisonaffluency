@@ -722,6 +722,13 @@
       "when": 1790507657574,
       "tag": "0102_fix_submit_board_feedback_cols",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1790507756834,
+      "tag": "0103_grant_board_slug_service",
+      "breakpoints": true
     }
   ]
 }
