@@ -136,7 +136,7 @@ export function useSalesFunnel(days: number) {
       const emailResponseStatuses = new Set(["replied_interested", "portal_activated"]);
       const sentEmails = acquisitions.filter((lead) => emailSentStatuses.has(lead.campaign_status));
       const sentDMs = acquisitions.filter(
-        (lead) => lead.instagram_outreach_status === "dm_sent" || /^dm sent/i.test(lead.instagram_outreach_status ?? ""),
+        (lead) => lead.instagram_outreach_status === "dm_sent" || /^(dm sent|linkedin message sent)/i.test(lead.instagram_outreach_status ?? ""),
       );
       const emailResponses = sentEmails.filter((lead) => emailResponseStatuses.has(lead.campaign_status));
       const dmResponses = sentDMs.filter((lead) => emailResponseStatuses.has(lead.campaign_status));

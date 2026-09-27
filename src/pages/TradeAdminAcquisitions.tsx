@@ -22,7 +22,8 @@ import AestheticProfileInput from "@/components/trade/AestheticProfileInput";
 import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import B2BOutreachModal from "@/components/trade/B2BOutreachModal";
-import { Briefcase, ExternalLink, Instagram, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+import LinkedInOutreachModal from "@/components/trade/LinkedInOutreachModal";
+import { Briefcase, ExternalLink, Instagram, Linkedin, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -235,6 +236,7 @@ const TradeAdminAcquisitions = () => {
   const [calibrating, setCalibrating] = useState(false);
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
   const [b2bLeadId, setB2bLeadId] = useState<string | null>(null);
+  const [liLeadId, setLiLeadId] = useState<string | null>(null);
   const markDmSent = async (id: string, status = "dm_sent") => {
     const sentAt = new Date().toISOString();
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
@@ -250,7 +252,7 @@ const TradeAdminAcquisitions = () => {
       .eq("id", id);
     if (error) {
       await queryClient.invalidateQueries({ queryKey: ["acquisition-leads", "enriched"] });
-      toast.error("Instagram outreach status could not be saved.");
+      toast.error("Outreach status could not be saved.");
     }
   };
   // Rows whose automated portal key just landed — briefly pulsed in the grid.
@@ -853,6 +855,15 @@ const TradeAdminAcquisitions = () => {
                       >
                         <Briefcase className="h-4 w-4" />
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setLiLeadId(lead.id)}
+                        title="LinkedIn premium outreach workspace"
+                        aria-label={`Open LinkedIn outreach workspace for ${lead.studio_name}`}
+                        className="inline-flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:bg-foreground hover:text-background"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                      </button>
                       {lead.instagram_handle && (
                         <button
                           type="button"
@@ -967,6 +978,21 @@ const TradeAdminAcquisitions = () => {
           </table>
         </div>
       </div>
+
+      {(() => {
+        const l = filtered.find((x) => x.id === liLeadId);
+        if (!l) return null;
+        return (
+          <LinkedInOutreachModal
+            open
+            onOpenChange={(o) => !o && setLiLeadId(null)}
+            studioName={l.studio_name}
+            founderName={l.founder_name}
+            linkedinUrl={l.linkedin_url}
+            onLaunched={() => markDmSent(l.id, "LinkedIn Message Sent")}
+          />
+        );
+      })()}
 
       {(() => {
         const l = filtered.find((x) => x.id === b2bLeadId);

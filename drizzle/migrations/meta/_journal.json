@@ -743,6 +743,13 @@
       "when": 1790510144985,
       "tag": "0105_dm_status_hook_labels",
       "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1790510369249,
+      "tag": "0106_allow_linkedin_message_sent",
+      "breakpoints": true
     }
   ]
 }

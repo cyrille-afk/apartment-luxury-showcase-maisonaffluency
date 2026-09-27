@@ -1,0 +1,2 @@
+ALTER TABLE public.acquisition_leads DROP CONSTRAINT acquisition_leads_instagram_outreach_status_check;
+ALTER TABLE public.acquisition_leads ADD CONSTRAINT acquisition_leads_instagram_outreach_status_check CHECK (instagram_outreach_status = ANY (ARRAY['untouched','dm_sent','DM Sent - AI Procurement','DM Sent - White-Label','LinkedIn Message Sent']));
