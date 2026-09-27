@@ -3,6 +3,17 @@ import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { formatMoneyIn } from "@/lib/displayMoney";
+import Product3DViewer from "@/components/trade/Product3DViewer";
+
+type Glb = { variant_label: string; glb_url: string; is_default: boolean; material_roles: any };
+type Swatch = { name: string; image_url: string | null; category: string | null };
+const roleOf = (cat: string | null) => {
+  const c = (cat || "").toLowerCase();
+  if (/fabric|leather|upholster|rug/.test(c)) return "fabric";
+  if (/stone|marble|glass|ceramic/.test(c)) return "top";
+  if (/wood|metal/.test(c)) return "base";
+  return null;
+};
 
 export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null };
 
@@ -31,9 +42,13 @@ export default function FinishesDrawer({
   const [lead, setLead] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [glbs, setGlbs] = useState<Glb[]>([]);
+  const [swatches, setSwatches] = useState<Swatch[]>([]);
+  const [preview, setPreview] = useState<Variant | null>(null);
 
   useEffect(() => {
     if (!open) return;
+    setPreview(null);
     let alive = true;
     setLoading(true);
     (async () => {
@@ -51,6 +66,11 @@ export default function FinishesDrawer({
           .select("size_variants, variant_image_map, gallery_images")
           .eq("id", t.source_pick_id)
           .maybeSingle();
+        const [{ data: g }, { data: sw }] = await Promise.all([
+          supabase.from("trade_product_glb_variants").select("variant_label, glb_url, is_default, material_roles").eq("product_id", productId),
+          supabase.from("product_fabric_swatches_public").select("name, image_url, category").eq("pick_id", t.source_pick_id),
+        ]);
+        if (alive) { setGlbs((g as Glb[]) || []); setSwatches((sw as Swatch[]) || []); }
         const p: any = pick || {};
         if (!alive) return;
         setVariants(Array.isArray(p.size_variants) ? p.size_variants.filter((v: Variant) => v.top || v.base) : []);
@@ -76,6 +96,24 @@ export default function FinishesDrawer({
     return null;
   };
 
+  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? null;
+  const glb = useMemo(() => {
+    if (!glbs.length) return null;
+    const lbl = norm(activeVariant?.label);
+    return (lbl && glbs.find((g) => norm(g.variant_label) === lbl)) || glbs.find((g) => g.is_default) || glbs[0];
+  }, [glbs, activeVariant]);
+  const textures = useMemo(() => {
+    const out: { fabric?: string; base?: string; top?: string } = {};
+    [activeVariant?.top, activeVariant?.base].forEach((m, i) => {
+      if (!m) return;
+      const sw = swatches.find((s) => norm(s.name) === norm(m)) || swatches.find((s) => norm(m).includes(norm(s.name)) || norm(s.name).includes(norm(m)));
+      if (!sw?.image_url) return;
+      const r = roleOf(sw.category) || (i === 0 ? "top" : "base");
+      (out as any)[r] = sw.image_url;
+    });
+    return out;
+  }, [activeVariant, swatches]);
+
   const materials = useMemo(() => {
     const set = new Map<string, string | null>();
     variants.forEach((v) => [v.top, v.base].forEach((m) => m && !set.has(m) && set.set(m, imageFor(v))));
@@ -94,6 +132,21 @@ export default function FinishesDrawer({
           </SheetDescription>
         </SheetHeader>
 
+        {glb && (
+          <div className="border-b border-border/60 bg-[hsl(var(--product-canvas))]">
+            <Product3DViewer
+              key={glb.glb_url}
+              url={glb.glb_url}
+              alt={productName}
+              poster={baseImage}
+              fabricTextureUrl={textures.fabric ?? null}
+              baseTextureUrl={textures.base ?? null}
+              topTextureUrl={textures.top ?? null}
+              materialRoles={glb.material_roles || undefined}
+              autoOpen
+            />
+          </div>
+        )}
         {loading ? (
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">Loading finishes…</p>
         ) : variants.length === 0 ? (
@@ -114,13 +167,13 @@ export default function FinishesDrawer({
               {variants.map((v, idx) => {
                 const label = finishLabel(v);
                 const img = imageFor(v) || baseImage;
-                const active = current === label;
+                const active = (preview ? finishLabel(preview) : current) === label;
                 const trade = v.price_cents ? Math.round(v.price_cents * (1 - discount / 100)) : null;
                 return (
                   <li key={idx}>
                     <button
                       type="button"
-                      onClick={() => { onSelect({ label, price_cents: v.price_cents ?? null, image_url: imageFor(v) }); onOpenChange(false); }}
+                      onClick={() => { setPreview(v); onSelect({ label, price_cents: v.price_cents ?? null, image_url: imageFor(v) }); }}
                       className={`flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 ${active ? "bg-muted/50" : ""}`}
                     >
                       <div className="h-16 w-16 shrink-0 bg-[hsl(var(--product-canvas))]">
