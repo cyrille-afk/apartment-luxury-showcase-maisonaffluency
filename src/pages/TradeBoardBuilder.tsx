@@ -868,7 +868,7 @@ const TradeBoardBuilder = () => {
               <p className="font-body text-xs text-muted-foreground">
                  Your studio identity is shown by default. Turn on Maison Affluency branding only when you want it included.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-felix-target="branding-whitelabel">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="studio-name" className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">
                     Studio name
