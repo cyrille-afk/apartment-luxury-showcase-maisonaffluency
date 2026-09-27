@@ -183,8 +183,26 @@ export default function SharedProcurementBoard() {
               )}
             </AnimatePresence>
           </motion.article>
-        ))}
+          );
+        })}
       </main>
+
+      {drawerItem && catalog?.[drawerItem.product_id] && (
+        <div data-allow-guest="">
+          <FinishesDrawer
+            open={!!drawerFor}
+            onOpenChange={(o) => !o && setDrawerFor(null)}
+            productId={drawerItem.product_id}
+            productName={drawerItem.product_name}
+            baseImage={drawerItem.image_url}
+            clientMode
+            initialTop={resolved[drawerItem.id]?.top}
+            initialBase={resolved[drawerItem.id]?.base}
+            preloaded={catalog[drawerItem.product_id]}
+            onSelect={(sel) => chooseFinish(drawerItem, sel)}
+          />
+        </div>
+      )}
 
       <AnimatePresence>
         {microPrompt && !user && !signupOpen && (
