@@ -36,6 +36,10 @@ type Props = {
   disabled?: boolean;
   /** Show a small "manage" link next to the field. */
   showManageLink?: boolean;
+  /** Render the inline contact details + manage link (default true). Set false when the parent renders its own card. */
+  showContactDetails?: boolean;
+  /** Fires whenever the resolved client (with primary contact) changes, including on initial load. */
+  onResolved?: (client: PickedClient | null) => void;
   className?: string;
 };
 
