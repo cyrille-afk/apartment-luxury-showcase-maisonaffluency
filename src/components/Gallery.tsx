@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
-import { fetchPublicMicMacPins, isVisibleGalleryPin, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
@@ -683,7 +683,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       if (data || special.length) {
         const counts: Record<string, number> = {};
           const positions: Record<string, GalleryHotspotPosition[]> = {};
-         for (const row of mergeGalleryPins(data || [], special.map((pin) => ({ ...pin, link_url: null, mapped_pick_id: null }))).filter(row => !(row.image_identifier === "A Sun Lit Reading Corner" && !isVisibleGalleryPin(row)))) {
+         for (const row of mergeGalleryPins(data || [], special.map((pin) => ({ ...pin, link_url: null, mapped_pick_id: null })))) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
           positions[row.image_identifier].push({

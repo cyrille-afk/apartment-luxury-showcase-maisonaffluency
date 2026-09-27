@@ -14,7 +14,7 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { attachMilestoneTracking, trackVideoEvent } from "@/lib/videoTracking";
-import { fetchPublicMicMacPins, isVisibleGalleryPin, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
+import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { curatingTeam } from "@/components/CuratingTeam";
 
 type Scene = { title: string; id: string };
@@ -94,6 +94,7 @@ const LIVING_ROOM_NIKO_PHOTO = "https://res.cloudinary.com/dif1oamtj/image/uploa
 const EXCLUDED_SIDE_PICK_HOTSPOTS = new Set([
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003",
   "A Sophisticated Boudoir:Custom Saint-Just Glass Chandelier",
+  "A Sun Lit Reading Corner:Monster Gold-Tone Incense Burner",
 ]);
 // Honor the previously curated placements on the first photo of these rooms.
 const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
@@ -306,7 +307,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
       supabase.from("gallery_hotspots").select("id, image_identifier, x_percent, y_percent, product_name, designer_name, product_image_url, materials, dimensions, link_url, mapped_pick_id"),
       fetchPublicMicMacPins(),
     ]).then(([{ data }, special]) => {
-      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: pin.materials ?? null, dimensions: pin.dimensions ?? null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))).filter(isVisibleGalleryPin));
+      setHotspots(mergeGalleryPins((data as Hotspot[]) || [], special.map((pin): Hotspot => ({ ...pin, materials: pin.materials ?? null, dimensions: pin.dimensions ?? null, link_url: null, mapped_pick_id: null, restricted_gallery_pin: true }))));
       setHotspotsReady(true);
     });
   }, []);
@@ -379,7 +380,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   }, [manifest]);
 
   const hotspotsForScene = useCallback(
-    (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title)),
+    (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title) && !(hotspot.image_identifier === "A Sun Lit Reading Corner" && hotspot.product_name === "Monster Gold-Tone Incense Burner")),
     [hotspots],
   );
 

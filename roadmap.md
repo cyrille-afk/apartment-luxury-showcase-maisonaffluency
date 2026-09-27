@@ -1,6 +1,6 @@
 # Roadmap
 
-- [x] Move the AB Chair side pick to the left and hide the Monster Gold-Tone Incense Burner pin from Living Room photo 4/4 without deleting the shared record.
+- [x] Move the AB Chair side pick to the left and hide the Monster Gold-Tone Incense Burner from the desktop Living Room photo 4/4 without changing mobile or the shared record.
 - [x] Show the approved MicMac Chandelier photo in the Master Suite side picks on photos 1/4 and 3/4, without exposing its trade-only catalogue entry.
 - [x] Place the Office desk side pick on the right in photos 1/4 and 2/4.
 - [x] Reveal gallery photos and their hotspots together after both are ready, on desktop and mobile.
