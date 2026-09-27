@@ -40,7 +40,7 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
-import ProcurementBoardPanel from "@/components/trade/procurement/ProcurementBoardPanel";
+import ProcurementBoardPanel, { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 import FinishesDrawer, { type FinishSelection, resolveSavedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 
