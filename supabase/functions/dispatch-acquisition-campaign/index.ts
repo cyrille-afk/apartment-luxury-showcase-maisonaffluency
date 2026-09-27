@@ -80,23 +80,37 @@ function shell(paragraphs: string[]): string {
   </div>`;
 }
 
-/** Maison Affluency priority trade invitation. */
-function renderTemplateA(lead: Lead, designers: string): string {
+/** Private Briefing — Digital Sourcing Sovereign Ledger (founder letter). */
+function briefingLink(lead: Lead, agentId: string | null, variant: string): string {
+  const p = new URLSearchParams({ utm_source: "em", utm_medium: "outreach", hook: variant.toLowerCase(), lead: lead.id });
+  if (agentId) p.set("agent", agentId);
+  return `${SITE}/trade-program?${p.toString()}`;
+}
+
+function renderTemplateA(lead: Lead, _designers: string, link = `${SITE}/trade-program`): string {
   const studio = esc(lead.studio_name);
+  const li = 'style="font-family:Georgia,serif;font-size:15px;line-height:1.85;color:#1A1A1A;margin:0 0 12px;"';
   return shell([
     `Dear ${salutation(lead)},`,
-    `I have been closely following your studio&rsquo;s footprint, particularly your focus on sourcing exceptional pieces for your portfolio.`,
-    `We recently launched Maison Affluency&mdash;a dedicated, technology-first sourcing platform built strictly for elite interior architects. Our focus is eliminating the slow, manual paper quoting legacy networks rely on, replacing it with instant global net pricing and dedicated curatorial advisory tailored to your project workspaces.`,
-    `We have unified over 170 master furniture and lighting designers under a single architecture. Given the caliber of your work, we have already indexed direct access to pieces from creators like ${designers} specifically aligned with your aesthetic.`,
-    `We would love to extend full international trade status and seamless global invoicing privileges to your firm.`,
-    `If you are open to it, I would be delighted to host a brief 5-minute walkthrough of the portal for your principal team, or I can send over our private credential key directly to this email.`,
-    `Warm regards,<br />Cyrille Delval<br />Founder, Maison Affluency`,
+    `In managing a global design portfolio of ${studio}&rsquo;s caliber, the primary bottlenecks in scaling your project pipelines rarely stem from creative vision&mdash;they lie heavily in the friction of administrative procurement.`,
+    `Between volatile international manufacturer lead times, cross-border logistics calculations, and the operational vulnerability of exposing trade margins during live client presentations, elite firms have long lacked a unified, enterprise-grade operating ledger.`,
+    `Today, we are formally extending a private, verified Trade credential to your executive partners for the global launch of the Maison Affluency Trade Program.`,
+    `We have centralized premium net pricing structures, cross-border shipping configurations, and dynamic lead-time telemetry for the world&rsquo;s most distinguished artisan workshops and collectible design houses into a single, automated curatorial architecture.`,
+    `For ${studio}, this provides an immediate operational shift:</p><ol style="margin:0 0 18px;padding-left:22px;">` +
+      `<li ${li}><strong>Executive White-Label Control:</strong> With a single toggle, completely strip our platform identity and embed your own studio logo across the entire workspace interface, allowing you to pitch major architectural proposals entirely under your own agency&rsquo;s visual authority.</li>` +
+      `<li ${li}><strong>Isolated Client Presentations:</strong> Invite high-net-worth clients to explore fluid 3D material libraries and configure finishes in real time via a secure, read-only portal that completely sanitizes and hides your wholesale trade costs, internal markups, and vendor origins.</li>` +
+      `<li ${li}><strong>Automated Sourcing Integrity:</strong> Type complex project criteria directly into our specialized curatorial engine to instantly generate fully itemized, contract-ready specification matrices in seconds.</li></ol><p ${P}>` +
+      `Because we enforce absolute structural data accuracy and dedicated server performance for our partner firms, initial enterprise allocations are restricted to 20 anchor global studios.`,
+    `Your studio&rsquo;s unique onboarding token and priority access gateway have been initialized here:`,
+    `<a href="${esc(link)}" style="display:inline-block;padding:13px 26px;background:#1A1A1A;color:#FAF9F6;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Bespoke Onboarding Access Key</a>`,
+    `We look forward to establishing an elite procurement standard for your global teams.`,
+    `Warm regards,<br />Cyrille Delval<br />Founder &amp; Managing Director, Maison Affluency<br />Singapore, District 9 | <a href="mailto:concierge@myaffluency.com" style="color:#1A1A1A;">concierge@myaffluency.com</a>`,
   ]);
 }
 
 /** Template B — personal savant override (hand-curated triage). */
-function renderTemplateB(lead: Lead, designers: string): string {
-  return renderTemplateA(lead, designers);
+function renderTemplateB(lead: Lead, designers: string, link?: string): string {
+  return renderTemplateA(lead, designers, link);
 }
 
 function renderLegacyInvitation(lead: Lead, roster: Map<string, string>): string {
@@ -251,11 +265,13 @@ serve(async (req) => {
         ? vetted
         : [row.business_email];
 
+    const agentId = String((auth.claims as { sub?: unknown }).sub ?? "") || null;
+    const link = briefingLink(row, agentId, variant);
     const html =
       variant === "B"
-        ? renderTemplateB(row, designers)
-        : renderTemplateA(row, designers);
-    const baseSubject = `Priority trade access for ${row.studio_name} / Maison Affluency`;
+        ? renderTemplateB(row, designers, link)
+        : renderTemplateA(row, designers, link);
+    const baseSubject = `Private Briefing: Digital Sourcing Sovereign Ledger for ${row.studio_name}`;
     const subject = testMode ? `[TEST-MODE] ${baseSubject}` : baseSubject;
 
     const outcome = await sendLovableEmail(
@@ -297,6 +313,9 @@ serve(async (req) => {
             ),
           })
           .eq("id", row.id);
+        await supabase.from("acquisition_outreach_events").insert({
+          lead_id: row.id, channel: "email", hook: variant, agent_id: agentId,
+        });
       }
       results.push({
         id: row.id,
