@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { formatMoneyIn } from "@/lib/displayMoney";
@@ -86,7 +85,8 @@ export default function FinishesDrawer({
     return () => { alive = false; };
   }, [open, productId, clientMode]);
 
-  const imageFor = (v: Variant) => {
+  const imageFor = (v: Variant | null) => {
+    if (!v) return null;
     const keys = [
       [norm(v.base), norm(v.top), norm(v.label)].join("|"),
       [norm(v.base), norm(v.top)].join("|"),
@@ -96,7 +96,8 @@ export default function FinishesDrawer({
     return null;
   };
 
-  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? null;
+  const activeVariant = preview ?? variants.find((v) => finishLabel(v) === current) ?? variants[0] ?? null;
+  const trade = activeVariant?.price_cents ? Math.round(activeVariant.price_cents * (1 - discount / 100)) : null;
   const glb = useMemo(() => {
     if (!glbs.length) return null;
     const lbl = norm(activeVariant?.label);
@@ -114,25 +115,19 @@ export default function FinishesDrawer({
     return out;
   }, [activeVariant, swatches]);
 
-  const materials = useMemo(() => {
-    const set = new Map<string, string | null>();
-    variants.forEach((v) => [v.top, v.base].forEach((m) => m && !set.has(m) && set.set(m, imageFor(v))));
-    return Array.from(set.entries());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variants, imgMap, gallery]);
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto rounded-none border-l border-border/60 bg-background p-0 sm:max-w-md">
         <SheetHeader className="border-b border-border/60 px-6 py-6 text-left">
-          <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Materials &amp; Finishes Library</p>
+          <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Materials & Finishes Library</p>
           <SheetTitle className="font-display text-xl font-normal">{productName}</SheetTitle>
           <SheetDescription className="font-body text-xs">
             {clientMode ? "Select a finish to preview it on this piece." : "Swapping a finish updates cost, margin and lead time in the matrix."}
           </SheetDescription>
         </SheetHeader>
 
-        {glb && (
+        {/* Top half — single preview workspace (3D model when available, else high-res image) */}
+        {glb ? (
           <div className="border-b border-border/60 bg-[hsl(var(--product-canvas))]">
             <Product3DViewer
               key={glb.glb_url}
@@ -146,73 +141,96 @@ export default function FinishesDrawer({
               autoOpen
             />
           </div>
+        ) : (
+          <div className="border-b border-border/60 bg-[hsl(var(--product-canvas))]">
+            <div className="aspect-[4/3] w-full flex items-center justify-center">
+              {(imageFor(activeVariant) || baseImage) ? (
+                <img src={imageFor(activeVariant) || baseImage || ""} alt={productName} className="h-full w-full object-contain p-4" />
+              ) : (
+                <span className="font-body text-xs text-muted-foreground">No image available</span>
+              )}
+            </div>
+          </div>
         )}
+
         {loading ? (
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">Loading finishes…</p>
         ) : variants.length === 0 ? (
           <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
         ) : (
           <>
-            {materials.length > 0 && (
-              <div className="border-b border-border/60 px-6 py-5">
-                <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
-                <div className="flex flex-wrap gap-2">
-                  {materials.map(([m]) => (
-                    <span key={m} className="border border-border/60 px-2.5 py-1 font-body text-[11px] text-foreground">{m}</span>
-                  ))}
+            {/* PALETTE — clickable chip cloud */}
+            <div className="border-b border-border/60 px-6 py-5">
+              <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
+              <div className="flex flex-wrap gap-2">
+                {variants.map((v, idx) => {
+                  const chipLabel = finishLabel(v);
+                  const isActive = !!activeVariant && finishLabel(activeVariant) === finishLabel(v);
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setPreview(v);
+                        onSelect({ label: finishLabel(v), price_cents: v.price_cents ?? null, image_url: imageFor(v) });
+                      }}
+                      className={`border px-3 py-1.5 font-body text-[11px] tracking-[0.04em] transition-colors ${
+                        isActive
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/60 text-foreground hover:bg-muted/40"
+                      }`}
+                    >
+                      {chipLabel}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Single state-driven metadata card */}
+            {activeVariant && (
+              <div className="px-6 py-6">
+                {/* Identity layer */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-12 w-12 shrink-0 bg-[hsl(var(--product-canvas))]">
+                    {(imageFor(activeVariant) || baseImage) && (
+                      <img src={imageFor(activeVariant) || baseImage || ""} alt="" className="h-full w-full object-contain p-1" loading="lazy" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-display text-sm font-semibold text-foreground leading-tight">
+                      {[activeVariant.top, activeVariant.base].filter(Boolean).join(" / ")}
+                    </p>
+                    {activeVariant.label && (
+                      <p className="mt-0.5 font-body text-[11px] text-muted-foreground">{activeVariant.label}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Price & Logistics Breakdown Grid */}
+                <div className={`grid gap-x-4 gap-y-3 ${clientMode ? "grid-cols-1" : "grid-cols-3"}`}>
+                  <div>
+                    <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Client Price</p>
+                    <p className="font-display text-base tabular-nums text-primary">
+                      {formatMoneyIn(activeVariant.price_cents ?? null, currency, "Price upon Request")}
+                    </p>
+                  </div>
+                  {!clientMode && (
+                    <>
+                      <div>
+                        <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
+                        <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
+                        <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
+                      </div>
+                      <div>
+                        <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
+                        <p className="font-body text-sm text-foreground">{activeVariant.lead_time || lead || "—"}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
-            <ul className="divide-y divide-border/60 pb-8">
-              {variants.map((v, idx) => {
-                const label = finishLabel(v);
-                const img = imageFor(v) || baseImage;
-                const active = (preview ? finishLabel(preview) : current) === label;
-                const trade = v.price_cents ? Math.round(v.price_cents * (1 - discount / 100)) : null;
-                return (
-                  <li key={idx}>
-                    <button
-                      type="button"
-                      onClick={() => { setPreview(v); onSelect({ label, price_cents: v.price_cents ?? null, image_url: imageFor(v) }); }}
-                      className={`flex w-full items-start gap-4 px-6 py-5 text-left transition-colors hover:bg-muted/40 ${active ? "bg-muted/50" : ""}`}
-                    >
-                      <div className="h-16 w-16 shrink-0 bg-[hsl(var(--product-canvas))]">
-                        {img && <img src={img} alt="" className="h-full w-full object-contain p-1" loading="lazy" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        {/* Identity Layer */}
-                        <p className="font-body text-sm font-medium text-foreground">{[v.top, v.base].filter(Boolean).join(" / ")}</p>
-                        {v.label && <p className="mt-0.5 font-body text-[11px] text-muted-foreground">{v.label}</p>}
-
-                        {/* Price & Logistics Breakdown Grid */}
-                        <div className={`mt-4 grid gap-x-4 gap-y-1 ${clientMode ? "grid-cols-1" : "grid-cols-3"}`}>
-                          <div>
-                            <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Client Price</p>
-                            <p className="font-display text-sm tabular-nums text-foreground">
-                              {formatMoneyIn(v.price_cents ?? null, currency, "Price upon Request")}
-                            </p>
-                          </div>
-                          {!clientMode && (
-                            <>
-                              <div>
-                                <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
-                                <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
-                                <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
-                              </div>
-                              <div>
-                                <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
-                                <p className="font-body text-sm text-foreground">{v.lead_time || lead || "—"}</p>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {active && <Check className="h-4 w-4 shrink-0 self-start text-primary" />}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
           </>
         )}
       </SheetContent>
