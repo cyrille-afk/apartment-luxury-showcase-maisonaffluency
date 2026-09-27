@@ -533,19 +533,21 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
-      <img
-        src={image}
-        alt={hotspot.product_name}
-        loading="lazy"
-        onError={(event) => {
-          if (hotspot.product_image_url && event.currentTarget.src !== hotspot.product_image_url) {
-            event.currentTarget.src = hotspot.product_image_url;
-          }
-        }}
-        className={`block aspect-square w-full border border-border/60 bg-background ${hotspot.product_name === "Astra Dining Table" ? "object-cover" : "object-contain"}`}
-      />
-      <span className="mt-1.5 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{product.id.startsWith("hotspot-") ? hotspot.product_name : product.title}</span>
-      <span className="mt-1 block w-full whitespace-normal break-words font-body text-[9px] font-light uppercase leading-tight tracking-wider text-muted-foreground">{product.brand_name}</span>
+      <div className="w-full bg-[hsl(var(--collection-card-canvas))] p-3 lg:p-4">
+        <img
+          src={image}
+          alt={hotspot.product_name}
+          loading="lazy"
+          onError={(event) => {
+            if (hotspot.product_image_url && event.currentTarget.src !== hotspot.product_image_url) {
+              event.currentTarget.src = hotspot.product_image_url;
+            }
+          }}
+          className={`block aspect-square w-full ${hotspot.product_name === "Astra Dining Table" ? "object-cover" : "object-contain"}`}
+        />
+        <span className="mt-2 block w-full whitespace-normal break-words font-display text-xs font-light leading-tight text-foreground lg:text-sm">{product.id.startsWith("hotspot-") ? hotspot.product_name : product.title}</span>
+        <span className="mt-1 block w-full whitespace-normal break-words font-body text-[9px] font-light uppercase leading-tight tracking-wider text-muted-foreground">{product.brand_name}</span>
+      </div>
     </Button>
   );
 
