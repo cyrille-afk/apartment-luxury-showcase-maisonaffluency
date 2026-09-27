@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette } from "lucide-react";
+import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box } from "lucide-react";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -41,6 +41,8 @@ import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import ProcurementBoardPanel from "@/components/trade/procurement/ProcurementBoardPanel";
+import FinishesDrawer, { type FinishSelection } from "@/components/trade/procurement/FinishesDrawer";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 interface Board {
   id: string;
@@ -138,6 +140,14 @@ const TradeBoardBuilder = () => {
 
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
+  const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
+  const [finishItem, setFinishItem] = useState<BoardItem | null>(null);
+  const { clientSafe } = useClientSafeMode();
+  const applyFinish = async (item: BoardItem, sel: FinishSelection) => {
+    setFinishes((f) => ({ ...f, [item.id]: sel }));
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, variant_label: sel.label } : i)));
+    await supabase.from("client_board_items").update({ variant_label: sel.label } as any).eq("id", item.id);
+  };
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -508,11 +518,21 @@ const TradeBoardBuilder = () => {
         aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
       >
         {item.product?.image_url ? (
-          <img src={item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+          <img src={finishes[item.id]?.image_url || item.product.image_url} alt={item.product?.product_name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body text-xs">No image</div>
         )}
         {item.product?.image_from_hotspot && <HotspotImageBadge />}
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={`Materials and finishes for ${item.product?.product_name ?? "product"}`}
+          onClick={(e) => { e.stopPropagation(); setFinishItem(item); }}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setFinishItem(item); } }}
+          className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 border border-border/60 bg-background/85 px-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm transition-colors hover:bg-background"
+        >
+          <Box className="h-3.5 w-3.5" strokeWidth={1.5} /> 3D View
+        </span>
         {item.approval_status === "approved" && (
           <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
             <Check className="h-4 w-4 text-white" />
@@ -533,6 +553,7 @@ const TradeBoardBuilder = () => {
           {item.product?.product_name}
         </button>
         <p className="font-body text-xs text-muted-foreground">{item.product?.brand_name}</p>
+        {finishes[item.id] && <p className="font-body text-[11px] text-foreground mt-1 truncate">{finishes[item.id].label}</p>}
         {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
         {isEditable && (
           <div className="flex items-center gap-1 mt-2">
@@ -811,7 +832,19 @@ const TradeBoardBuilder = () => {
           </details>
         )}
 
-        <ProcurementBoardPanel boardId={board.id} items={items} />
+        <ProcurementBoardPanel boardId={board.id} items={items} finishOverrides={finishes} />
+        {finishItem && (
+          <FinishesDrawer
+            open={!!finishItem}
+            onOpenChange={(o) => !o && setFinishItem(null)}
+            productId={finishItem.product_id}
+            productName={finishItem.product?.product_name ?? "Selected piece"}
+            baseImage={finishItem.product?.image_url ?? null}
+            clientMode={clientSafe}
+            current={finishes[finishItem.id]?.label ?? finishItem.variant_label}
+            onSelect={(sel) => applyFinish(finishItem, sel)}
+          />
+        )}
 
         {/* Items grouped by sub-folder */}
         {items.length === 0 ? (
