@@ -122,6 +122,8 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Sun Lit Reading Corner:Blue Glazed Vallauris Floor Lamp": "left",
   "A Sun Lit Reading Corner:AB Chair": "left",
   "A Sun Lit Reading Corner:Monster Gold-Tone Incense Burner": "right",
+  "The Details Make The Design:Unknow N.83 Cotissi Vessel": "right",
+  "The Details Make The Design:Corteza Console Table": "right",
 };
 const CURATED_SIDE_PICK_ORDER = [
   "A Dreamy Tuscan Landscape:Astra Dining Table",
