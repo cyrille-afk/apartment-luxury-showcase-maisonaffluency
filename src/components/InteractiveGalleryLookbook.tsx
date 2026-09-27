@@ -112,6 +112,7 @@ const SIDE_PICK_OVERRIDES: Record<string, "left" | "right"> = {
   "A Masterful Suite:Brunelleschi Perspective Wallcover": "right",
   "A Masterful Suite:Crystalline Blue Vessel Volume 5": "right",
   "A Masterful Suite:Giudecca Rug (Custom)": "right",
+  "A Venitian Cocoon:Bronze MicMac Chandelier": "left",
   "An Artistic Statement:Martell Wall Lamp": "left",
   "An Artistic Statement:Lantern Table Lamp": "left",
   "An Artistic Statement:Eggshell DOT Side Table": "right",
