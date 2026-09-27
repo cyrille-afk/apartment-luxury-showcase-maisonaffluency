@@ -135,6 +135,9 @@ export default function ClientPicker({
     return () => { cancelled = true; };
   }, [value, clients, primaries]);
 
+  // Notify parent whenever the resolved client (with contact) changes.
+  useEffect(() => { if (onResolved) onResolved(picked); /* eslint-disable-next-line */ }, [picked]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return clients;
