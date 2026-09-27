@@ -1,5 +1,5 @@
 import { ensureSampleBoard } from "@/lib/sampleBoard";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -139,8 +139,12 @@ const renderBold = (text: string) =>
 const SEEN_KEY = "felix_dashboard_tour_seen_v1";
 const BOARD_PATH = /^\/trade\/boards\/[0-9a-f-]{36}/i;
 const PAD = 10;
+const SPOTLIGHT_EASE = "all 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
 
 type Rect = { top: number; left: number; width: number; height: number };
+const sameRect = (a: Rect, b: Rect) =>
+  Math.abs(a.top - b.top) < 0.5 && Math.abs(a.left - b.left) < 0.5 &&
+  Math.abs(a.width - b.width) < 0.5 && Math.abs(a.height - b.height) < 0.5;
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
@@ -152,26 +156,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [isPaused, setIsPaused] = useState(false);
   const [rect, setRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
+  const [settled, setSettled] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const transitionTimer = useRef<number | null>(null);
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
 
   const measure = useCallback(() => {
-    setViewport({ w: window.innerWidth, h: window.innerHeight });
     const s = FELIX_STEPS[currentStep];
-    s.onEnter?.();
     setStepDone(s.done ? s.done() : true);
-    const elements = Array.from(document.querySelectorAll(`[data-felix-target="${FELIX_STEPS[currentStep].target}"]`));
-    if (elements.length === 0) {
-      setRect(null);
-      return;
-    }
-    const rects = elements.map((element) => element.getBoundingClientRect());
-    const top = Math.min(...rects.map((r) => r.top));
-    const left = Math.min(...rects.map((r) => r.left));
-    const right = Math.max(...rects.map((r) => r.right));
-    const bottom = Math.max(...rects.map((r) => r.bottom));
-    setRect({ top, left, width: right - left, height: bottom - top });
   }, [currentStep]);
 
   useEffect(() => {
@@ -189,15 +183,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, open, step.route]);
 
-  // Bring the highlighted control into view on each step.
-  useEffect(() => {
-    if (!open) return;
-    const t = window.setTimeout(() => {
-      document.querySelector(`[data-felix-target="${step.target}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }, 600);
-    return () => window.clearTimeout(t);
-  }, [open, step.target, location.pathname]);
-
   // Action-required steps: re-check on any click; invite click ends the tour.
   useEffect(() => {
     if (!open) return;
@@ -213,18 +198,82 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   useLayoutEffect(() => {
     if (!open) return;
-    measure();
-    const onChange = () => measure();
-    const observer = new MutationObserver(onChange);
-    observer.observe(document.body, { childList: true, subtree: true });
+    setSettled(false);
+    setStepDone(false);
+    const current = FELIX_STEPS[currentStep];
+    const routeReady = current.route === "board"
+      ? BOARD_PATH.test(location.pathname)
+      : location.pathname === current.route;
+    let frame = 0;
+    let last: Rect | null = null;
+    let stableSince = 0;
+    let ready = false;
+    let didEnter = false;
+    let didScroll = false;
+    let watched: Element[] = [];
+    const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
+    const onChange = () => { stableSince = 0; };
+    const tick = (now: number) => {
+      const elements = routeReady
+        ? Array.from(document.querySelectorAll(`[data-felix-target="${current.target}"]`))
+        : [];
+      if (elements.length && !didEnter) {
+        didEnter = true;
+        current.onEnter?.();
+      }
+      if (elements.length && !didScroll) {
+        didScroll = true;
+        elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      }
+      const watchedNow = [...elements, ...elements.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
+      if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
+        resizeObserver.disconnect();
+        watchedNow.forEach((el) => resizeObserver.observe(el));
+        watched = watchedNow;
+        stableSince = 0;
+      }
+      const boxes = elements.map((el) => el.getBoundingClientRect());
+      const next = boxes.length ? {
+        top: Math.min(...boxes.map((r) => r.top)),
+        left: Math.min(...boxes.map((r) => r.left)),
+        width: Math.max(...boxes.map((r) => r.right)) - Math.min(...boxes.map((r) => r.left)),
+        height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
+      } : null;
+      if (!next || next.width < 1 || next.height < 1) {
+        last = null;
+        stableSince = 0;
+        ready = false;
+        setSettled(false);
+      } else if (!last || !sameRect(last, next)) {
+        last = next;
+        stableSince = now;
+        if (!ready) setSettled(false);
+      } else if (now - stableSince >= 160) {
+        setRect((previous) => previous && sameRect(previous, next) ? previous : next);
+        setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
+          ? previous : { w: window.innerWidth, h: window.innerHeight });
+        setStepDone(current.done ? current.done() : true);
+        ready = true;
+        setSettled(true);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    // The frame loop discovers async targets; ResizeObserver watches only their layout.
+    // Unrelated page mutations must not postpone this step forever.
+    frame = requestAnimationFrame(tick);
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, true);
     return () => {
-      observer.disconnect();
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
-  }, [open, measure]);
+  }, [open, currentStep, location.pathname]);
+
+  useEffect(() => () => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+  }, []);
 
   // Auto-open once for first-time trade members, unless the page tour is running.
   useEffect(() => {
@@ -250,23 +299,37 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, []);
 
   const close = useCallback((completed: boolean) => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+    transitionTimer.current = null;
     setOpen(false);
     setIsPaused(false);
+    setTransitioning(false);
     if (completed) {
       try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
     }
   }, []);
 
+  const changeStep = (direction: number) => {
+    if (transitioning) return;
+    setTransitioning(true);
+    transitionTimer.current = window.setTimeout(() => {
+      setIsPaused(false);
+      setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
+      transitionTimer.current = null;
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
+  };
   const next = () => {
-    if (!stepDone) return;
+    if (!stepDone || !settled || transitioning) return;
     if (isLast) { close(true); return; }
-    setIsPaused(false);
-    setCurrentStep((s) => Math.min(s + 1, FELIX_STEPS.length - 1));
+    changeStep(1);
   };
   const back = () => {
-    setIsPaused(false);
-    setCurrentStep((s) => Math.max(s - 1, 0));
+    changeStep(-1);
   };
+
+  useEffect(() => {
+    if (settled && transitioning && transitionTimer.current === null) setTransitioning(false);
+  }, [settled, transitioning]);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -300,59 +363,38 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const ring = rect && !isPaused && (
     <div
       aria-hidden="true"
-      className={cn("pointer-events-none fixed z-[131] rounded-md border-2 border-accent transition-all duration-300 ease-out", step.pulse && "animate-pulse")}
+      data-felix-spotlight
+      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent motion-reduce:!transition-none"
       style={{
-        top: rect.top - PAD,
-        left: rect.left - PAD,
+        top: 0,
+        left: 0,
+        transform: `translate3d(${rect.left - PAD}px, ${rect.top - PAD}px, 0)`,
         width: rect.width + PAD * 2,
         height: rect.height + PAD * 2,
-        boxShadow: "0 0 0 4px hsl(var(--accent) / 0.15), 0 0 24px hsl(var(--accent) / 0.35)",
+        opacity: settled && !transitioning ? 1 : 0,
+        transition: SPOTLIGHT_EASE,
+        boxShadow: "0 0 0 100vmax hsl(var(--foreground) / 0.4), 0 0 24px hsl(var(--accent) / 0.35)",
       }}
-    />
+    >{step.pulse && <span className="absolute inset-0 rounded-md border-2 border-accent animate-pulse motion-reduce:animate-none" />}</div>
   );
 
   return createPortal(
     <>
       {/* Dimmed backdrop with a clear window around the target */}
-      {!isPaused && (
-        <div className="pointer-events-none fixed inset-0 z-[130] print:hidden [&>div]:pointer-events-auto" onClick={() => close(false)}>
-          {rect ? (
-            <>
-              <div className="absolute inset-x-0 top-0 bg-foreground/40" style={{ height: Math.max(rect.top - PAD, 0) }} />
-              <div
-                className="absolute inset-x-0 bg-foreground/40"
-                style={{ top: rect.top + rect.height + PAD, bottom: 0 }}
-              />
-              <div
-                className="absolute bg-foreground/40"
-                style={{ top: rect.top - PAD, left: 0, width: Math.max(rect.left - PAD, 0), height: rect.height + PAD * 2 }}
-              />
-              <div
-                className="absolute bg-foreground/40"
-                style={{
-                  top: rect.top - PAD,
-                  left: rect.left + rect.width + PAD,
-                  right: 0,
-                  height: rect.height + PAD * 2,
-                }}
-              />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-foreground/40" />
-          )}
-        </div>
-      )}
-      {ring}
+      {!isPaused && <div className="pointer-events-none fixed inset-0 z-[130] overflow-hidden print:hidden">
+        {(!rect || !settled || transitioning) && <div className="absolute inset-0 bg-foreground/40" />}
+        {ring}
+      </div>}
 
       {/* Felix card */}
       <div
         role="dialog"
         aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-300",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
-        style={{ width: cardW, left: cardLeft, top: cardTop }}
+        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
         <div className="p-5">
           {/* Header */}
@@ -424,7 +466,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           <div className="mt-4 flex items-center justify-between gap-2">
             <button
               onClick={back}
-              disabled={currentStep === 0}
+               disabled={currentStep === 0 || transitioning}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowLeft className="h-3 w-3" />
@@ -440,7 +482,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </button>
             <button
               onClick={next}
-              disabled={!stepDone}
+               disabled={!stepDone || !settled || transitioning}
               className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90"
             >
               {step.cta ?? (isLast ? "Finish" : "Next")}
