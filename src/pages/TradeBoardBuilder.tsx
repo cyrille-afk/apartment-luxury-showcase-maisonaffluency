@@ -140,7 +140,7 @@ const TradeBoardBuilder = () => {
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
   const [finishes, setFinishes] = useState<Record<string, FinishSelection>>({});
-  const [finishItem, setFinishItem] = useState<BoardItem | null>(null);
+  const [resolvedClient, setResolvedClient] = useState<PickedClient | null>(null);
   const { clientSafe } = useClientSafeMode();
   const applyFinish = async (item: BoardItem, sel: FinishSelection) => {
     setFinishes((f) => ({ ...f, [item.id]: sel }));
