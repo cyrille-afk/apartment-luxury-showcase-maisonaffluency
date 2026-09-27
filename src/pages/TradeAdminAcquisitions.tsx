@@ -23,7 +23,8 @@ import LeadContactsEditor from "@/components/trade/LeadContactsEditor";
 import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import B2BOutreachModal from "@/components/trade/B2BOutreachModal";
 import LinkedInOutreachModal from "@/components/trade/LinkedInOutreachModal";
-import { Briefcase, ExternalLink, Instagram, Linkedin, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
+import EmailBriefingModal from "@/components/trade/EmailBriefingModal";
+import { Briefcase, ExternalLink, Instagram, Linkedin, Mail, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -237,6 +238,11 @@ const TradeAdminAcquisitions = () => {
   const [igLeadId, setIgLeadId] = useState<string | null>(null);
   const [b2bLeadId, setB2bLeadId] = useState<string | null>(null);
   const [liLeadId, setLiLeadId] = useState<string | null>(null);
+  const [emLeadId, setEmLeadId] = useState<string | null>(null);
+  const logEmailSent = (id: string) => {
+    void supabase.from("acquisition_outreach_events").insert({ lead_id: id, channel: "email", hook: "A", agent_id: user?.id })
+      .then(({ error }) => { if (error) toast.error("Email send could not be logged."); });
+  };
   const markDmSent = async (id: string, status = "dm_sent", channel: "instagram" | "linkedin" = "instagram", hook: "A" | "B" | null = null) => {
     void supabase.from("acquisition_outreach_events").insert({ lead_id: id, channel, hook, agent_id: user?.id }).then(({ error }) => { if (error) console.warn("outreach log failed", error.message); });
     const sentAt = new Date().toISOString();
@@ -865,6 +871,15 @@ const TradeAdminAcquisitions = () => {
                       >
                         <Linkedin className="h-4 w-4" />
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setEmLeadId(lead.id)}
+                        title="Private briefing email workspace"
+                        aria-label={`Open private briefing email for ${lead.studio_name}`}
+                        className="inline-flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:bg-foreground hover:text-background"
+                      >
+                        <Mail className="h-4 w-4" />
+                      </button>
                       {lead.instagram_handle && (
                         <button
                           type="button"
@@ -992,6 +1007,22 @@ const TradeAdminAcquisitions = () => {
             founderName={l.founder_name}
             linkedinUrl={l.linkedin_url}
             onLaunched={(hook) => markDmSent(l.id, "LinkedIn Message Sent", "linkedin", hook)}
+          />
+        );
+      })()}
+
+      {(() => {
+        const l = filtered.find((x) => x.id === emLeadId);
+        if (!l) return null;
+        return (
+          <EmailBriefingModal
+            open
+            onOpenChange={(o) => !o && setEmLeadId(null)}
+            leadId={l.id}
+            studioName={l.studio_name}
+            founderName={l.founder_name}
+            email={l.business_email}
+            onSent={() => logEmailSent(l.id)}
           />
         );
       })()}
