@@ -3,7 +3,6 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box } from "lucide-react";
-import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -587,33 +586,6 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="md:-mx-2 lg:-mx-6">
         {/* Header */}
-        {false && <TradeBreadcrumb
-          current="Boards"
-          currentTo={`/trade/boards${board.project_id ? `?project=${board.project_id}` : ""}`}
-          extraSegments={[
-            {
-              kind: "current",
-              label: board.title || "Untitled board",
-            },
-            {
-              kind: "dropdown",
-              label: focusedSubfolder ?? "Top of board",
-              items: [
-                {
-                  label: "Top of board",
-                  active: focusedSubfolder === null,
-                  onSelect: () => jumpToSection(null),
-                },
-                ...subfolders.map((sf) => ({
-                  label: sf,
-                  active: focusedSubfolder === sf,
-                  onSelect: () => jumpToSection(sf),
-                })),
-              ],
-              emptyLabel: "No sub-folders yet",
-            },
-          ]}
-        />}
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders

@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2, Scan } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ export default function TradeProjects() {
   const { user } = useAuth();
   const { currentStudio, canEdit, isAdmin } = useStudio();
   const { projects, loading, refresh } = useProjects();
+  const boardLinks = useProjectBoardTree(projects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") === "folders" ? "folders" : "projects";
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
@@ -256,7 +258,7 @@ export default function TradeProjects() {
               key={p.id}
               className="group relative border border-border rounded-md overflow-hidden bg-background hover:shadow-md transition-shadow"
             >
-              <Link to={`/trade/projects/${p.id}`} className="block">
+              <Link to={projectDefaultUrl(p.id, boardLinks)} className="block">
                 <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                   {p.cover_image_url ? (
                     <img

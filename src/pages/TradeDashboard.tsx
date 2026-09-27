@@ -18,6 +18,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useProjects } from "@/hooks/useProjects";
+import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
@@ -85,6 +86,7 @@ const TradeDashboard = () => {
   const { tierLabel } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -294,7 +296,7 @@ const TradeDashboard = () => {
             {activeProjects.slice(0, 4).map((project, index) => (
               <Link
                 key={project.id}
-                to={`/trade/projects/${project.id}`}
+                 to={projectDefaultUrl(project.id, projectBoards)}
                 className="shrink-0 transition-colors hover:text-foreground"
               >
                 {String(index + 1).padStart(2, "0")} // {project.name} (Active)
