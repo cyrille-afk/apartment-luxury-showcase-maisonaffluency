@@ -7,9 +7,12 @@ import { Check, Copy, ExternalLink, Linkedin } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { resolveGreeting } from "./InstagramOutreachModal";
+import { useAuth } from "@/hooks/useAuth";
+import { buildOutreachLink } from "@/lib/outreachLink";
 
 type Props = {
   open: boolean;
+  leadId?: string;
   onOpenChange: (open: boolean) => void;
   studioName: string;
   founderName: string | null;
@@ -24,15 +27,21 @@ const buildScript = (tab: "A" | "B", name: string | null, company: string) => {
     : `${hi} exceptional portfolio curation. I wanted to briefly introduce the Maison Affluency Trade Program, engineered specifically to elevate client presentation workflows for leading studios like ${company}. \n\nThe architecture allows your team to manage fluid project grids and instantly toggle on a pristine, fully white-labeled Client Presentation Mode. This seamlessly embeds your custom studio logo and assets while completely locking away and protecting your internal trade costs, wholesale margins, and manufacturer data from external guests. \n\nWe would love to set up a private, secure sandbox credential for your design partners. Should I pass an onboarding token to your inbox?`;
 };
 
-const LinkedInOutreachModal = ({ open, onOpenChange, studioName, founderName, linkedinUrl, onLaunched }: Props) => {
+const LinkedInOutreachModal = ({ open, leadId, onOpenChange, studioName, founderName, linkedinUrl, onLaunched }: Props) => {
   const [tab, setTab] = useState<"A" | "B">("A");
   const [copied, setCopied] = useState(false);
   const { greetingName } = useMemo(() => resolveGreeting(founderName, studioName), [founderName, studioName]);
   const script = useMemo(() => buildScript(tab, greetingName, studioName), [tab, greetingName, studioName]);
+  const { user } = useAuth();
+  const trackedLink = useMemo(
+    () => buildOutreachLink({ channel: "linkedin" as const, hook: tab, agentId: user?.id, leadId }),
+    [tab, user?.id, leadId],
+  );
+  const fullText = `${script}\n\n${trackedLink}`;
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(script); } catch {
-      const ta = document.createElement("textarea"); ta.value = script; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+    try { await navigator.clipboard.writeText(fullText); } catch {
+      const ta = document.createElement("textarea"); ta.value = fullText; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
     }
     setCopied(true);
     toast.success("Personalised message copied to clipboard.");
@@ -78,7 +87,7 @@ const LinkedInOutreachModal = ({ open, onOpenChange, studioName, founderName, li
           </p>
         </div>
 
-        <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">{script}</div>
+        <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">{fullText}</div>
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button type="button" onClick={copy} className="h-11 gap-2">

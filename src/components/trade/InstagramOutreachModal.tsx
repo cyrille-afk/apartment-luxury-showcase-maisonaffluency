@@ -6,6 +6,8 @@
  */
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { buildOutreachLink } from "@/lib/outreachLink";
 import { Check, Copy, ExternalLink, Instagram } from "lucide-react";
 import {
   Dialog,
@@ -18,6 +20,7 @@ import { Button } from "@/components/ui/button";
 
 type Props = {
   open: boolean;
+  leadId?: string;
   onOpenChange: (open: boolean) => void;
   studioName: string;
   founderName: string | null;
@@ -103,6 +106,7 @@ const InstagramOutreachModal = ({
   instagramHandle,
   designerMatches,
   onLaunched,
+  leadId,
 }: Props) => {
   const [variation, setVariation] = useState<"A" | "B">("A");
   const [copied, setCopied] = useState(false);
@@ -117,13 +121,19 @@ const InstagramOutreachModal = ({
     () => buildScript(variation, greetingName, studioName, designerBrands),
     [variation, greetingName, studioName, designerBrands],
   );
+  const { user } = useAuth();
+  const trackedLink = useMemo(
+    () => buildOutreachLink({ channel: "instagram" as const, hook: variation, agentId: user?.id, leadId }),
+    [variation, user?.id, leadId],
+  );
+  const fullText = `${script}\n\n${trackedLink}`;
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(script);
+      await navigator.clipboard.writeText(fullText);
     } catch {
       const ta = document.createElement("textarea");
-      ta.value = script;
+      ta.value = fullText;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
@@ -198,7 +208,7 @@ const InstagramOutreachModal = ({
         </div>
 
         <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">
-          {script}
+          {fullText}
         </div>
 
         <div className="grid gap-2 sm:grid-cols-2">

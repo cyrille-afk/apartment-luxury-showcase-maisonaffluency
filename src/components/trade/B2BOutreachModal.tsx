@@ -8,9 +8,12 @@ import { Check, Copy, ExternalLink, Instagram, Linkedin } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { resolveGreeting } from "./InstagramOutreachModal";
+import { useAuth } from "@/hooks/useAuth";
+import { buildOutreachLink } from "@/lib/outreachLink";
 
 type Props = {
   open: boolean;
+  leadId?: string;
   onOpenChange: (open: boolean) => void;
   studioName: string;
   founderName: string | null;
@@ -26,16 +29,22 @@ const buildScript = (tab: "A" | "B", name: string | null, company: string) => {
     : `${hi} exceptional portfolio curation. We recently launched the Maison Affluency Trade Program, engineered specifically to streamline client presentations for enterprise firms like ${company}. The platform allows your team to curate fluid 3D material boards and instantly switch on a pristine Client Mode—fully white-labeling the interface with your own studio logo while completely locking away your trade costs and margins from external guests. We'd love to set up a private sandbox credential for your design partners. Should I pass an onboarding token to your inbox?`;
 };
 
-const B2BOutreachModal = ({ open, onOpenChange, studioName, founderName, instagramHandle, linkedinUrl, onInstagramLaunched }: Props) => {
+const B2BOutreachModal = ({ open, leadId, onOpenChange, studioName, founderName, instagramHandle, linkedinUrl, onInstagramLaunched }: Props) => {
   const [tab, setTab] = useState<"A" | "B">("A");
   const [copied, setCopied] = useState(false);
   const handle = (instagramHandle ?? "").replace(/^@+/, "").trim();
   const { greetingName } = useMemo(() => resolveGreeting(founderName, studioName), [founderName, studioName]);
   const script = useMemo(() => buildScript(tab, greetingName, studioName), [tab, greetingName, studioName]);
+  const { user } = useAuth();
+  const trackedLink = useMemo(
+    () => buildOutreachLink({ channel: (handle ? "instagram" : "linkedin") as "instagram" | "linkedin", hook: tab, agentId: user?.id, leadId }),
+    [tab, user?.id, leadId, handle],
+  );
+  const fullText = `${script}\n\n${trackedLink}`;
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(script); } catch {
-      const ta = document.createElement("textarea"); ta.value = script; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+    try { await navigator.clipboard.writeText(fullText); } catch {
+      const ta = document.createElement("textarea"); ta.value = fullText; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
     }
     setCopied(true);
     toast.success("Personalised message copied to clipboard.");
@@ -87,7 +96,7 @@ const B2BOutreachModal = ({ open, onOpenChange, studioName, founderName, instagr
           </p>
         </div>
 
-        <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">{script}</div>
+        <div className="whitespace-pre-wrap border border-border bg-muted/20 p-5 text-sm leading-relaxed text-foreground">{fullText}</div>
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Button type="button" onClick={copy} className="h-11 gap-2">

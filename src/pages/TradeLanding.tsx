@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { captureOutreachClick } from "@/lib/outreachLink";
 import { motion } from "framer-motion";
 import { LoaderCircle, Quote, Sparkles, Upload } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -392,6 +393,7 @@ const HeroJoinForm = ({
 };
 
 const TradeLanding = () => {
+  useEffect(() => { captureOutreachClick(); }, []);
   useEffect(() => {
     setImageIosChrome(TRADE_PROGRAM_HERO_IMAGE);
     return () => clearDarkIosChrome();
