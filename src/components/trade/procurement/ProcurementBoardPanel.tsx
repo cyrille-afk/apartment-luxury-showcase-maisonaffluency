@@ -145,7 +145,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
     <section className="mb-10 border border-border/60 bg-card">
       {/* Master toggle + collaborators */}
       <div className="flex flex-col gap-4 border-b border-border/60 px-5 py-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-felix-target="client-view-toggle">
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${!clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Studio Internal Matrix</span>
           <Switch checked={clientSafe} onCheckedChange={setClientSafe} aria-label="Toggle client editorial presentation" />
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Client Editorial Presentation</span>
@@ -158,7 +158,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
               <button onClick={() => revoke(inv.id)} aria-label={`Revoke ${inv.email}`} className="ml-1 opacity-60 hover:opacity-100"><X className="h-3 w-3" /></button>
             </Badge>
           ))}
-          <Button size="sm" variant="outline" className="gap-1.5 rounded-none" onClick={() => setInviteOpen(true)}>
+          <Button size="sm" variant="outline" className="gap-1.5 rounded-none" data-felix-target="invite-collaborator" onClick={() => setInviteOpen(true)}>
             <UserPlus className="h-3.5 w-3.5" /> Invite Collaborator
           </Button>
         </div>

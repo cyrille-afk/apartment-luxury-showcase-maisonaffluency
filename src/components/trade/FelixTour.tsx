@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 
@@ -10,8 +11,19 @@ type FelixStep = {
   title: string;
   target: string; // data-felix-target selector value
   dialogue: string;
-  route: string;
+  route: string; // "board" = user's most recent board
+  /** Step is complete only when this returns true (user action required). */
+  done?: () => boolean;
+  /** Runs on enter / each re-measure (e.g. auto-expand a panel). */
+  onEnter?: () => void;
+  pulse?: boolean;
+  /** Clicking the highlighted element finishes the tour. */
+  clickFinishes?: boolean;
+  cta?: string;
 };
+
+const switchOn = (sel: string) =>
+  document.querySelector(sel)?.getAttribute("data-state") === "checked";
 
 const FELIX_STEPS: FelixStep[] = [
   {
@@ -68,11 +80,63 @@ const FELIX_STEPS: FelixStep[] = [
     target: "felix-chat",
     route: "/trade",
     dialogue:
-      "Finally, whenever you need real-time design assistance, look up here. Launch the {name} Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
+      "Whenever you need real-time design assistance, look up here. Launch the {name} Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
+  },
+  {
+    id: "client-view",
+    title: "The Transition to Collaboration",
+    target: "client-view-toggle",
+    route: "board",
+    done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
+    dialogue:
+      "Incredible sourcing begins with smart AI curation, but enterprise victory lies in client presentation. Let's look at how you will pitch this board to your high-net-worth clients. Click **Client View** to hide internal trade calculations.",
+  },
+  {
+    id: "branding-panel",
+    title: "Unlocking Client Portal Branding",
+    target: "branding-panel",
+    route: "board",
+    pulse: true,
+    onEnter: () => {
+      const d = document.querySelector<HTMLDetailsElement>('[data-felix-target="branding-panel"]');
+      if (d && !d.open) d.open = true;
+    },
+    dialogue:
+      "Maison Affluency acts as your secret operating system. Open the **Client Portal Branding** dashboard to control what your external clients and contractors experience.",
+  },
+  {
+    id: "white-label",
+    title: "Enforcing White-Label Premium Value",
+    target: "branding-whitelabel",
+    route: "board",
+    pulse: true,
+    onEnter: () => {
+      const d = document.querySelector<HTMLDetailsElement>('[data-felix-target="branding-panel"]');
+      if (d && !d.open) d.open = true;
+    },
+    done: () => switchOn("#hide-maison"),
+    dialogue:
+      "**Pro Tip:** Flip this switch to **ON**. This instantly strips all Maison Affluency watermarks, logos, and platform traces from the external guest interface. Upload your own studio logo here to pitch multi-million dollar projects completely under your own elite agency brand.",
+  },
+  {
+    id: "invite",
+    title: "Activating the Viral Loop",
+    target: "invite-collaborator",
+    route: "board",
+    clickFinishes: true,
+    cta: "Enter My Workspace",
+    dialogue:
+      "Your custom branded workspace is ready. Click **Invite Collaborator** to send a secure, 30-day interactive portal link to your client or external contractors. When they drop feedback or swap 3D fabric finishes, their choices sync live to your master ledger.",
   },
 ];
 
+const renderBold = (text: string) =>
+  text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part,
+  );
+
 const SEEN_KEY = "felix_dashboard_tour_seen_v1";
+const BOARD_PATH = /^\/trade\/boards\/[0-9a-f-]{36}/i;
 const PAD = 10;
 
 type Rect = { top: number; left: number; width: number; height: number };
@@ -80,6 +144,8 @@ type Rect = { top: number; left: number; width: number; height: number };
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [stepDone, setStepDone] = useState(true);
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -91,6 +157,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const measure = useCallback(() => {
     setViewport({ w: window.innerWidth, h: window.innerHeight });
+    const s = FELIX_STEPS[currentStep];
+    s.onEnter?.();
+    setStepDone(s.done ? s.done() : true);
     const elements = Array.from(document.querySelectorAll(`[data-felix-target="${FELIX_STEPS[currentStep].target}"]`));
     if (elements.length === 0) {
       setRect(null);
@@ -106,8 +175,45 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   useEffect(() => {
     if (!open) return;
-    navigate(step.route);
+    if (step.route !== "board") { navigate(step.route); return; }
+    if (BOARD_PATH.test(location.pathname)) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("client_boards")
+        .select("id, project_id")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data?.id) navigate(`/trade/boards/${data.id}${data.project_id ? `?project=${data.project_id}` : ""}`);
+      else navigate("/trade/boards");
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, open, step.route]);
+
+  // Bring the highlighted control into view on each step.
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => {
+      document.querySelector(`[data-felix-target="${step.target}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [open, step.target, location.pathname]);
+
+  // Action-required steps: re-check on any click; invite click ends the tour.
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${step.target}"]`);
+      if (el && step.clickFinishes) { close(true); return; }
+      window.setTimeout(() => measure(), 150);
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, step, measure]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -156,6 +262,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, []);
 
   const next = () => {
+    if (!stepDone) return;
     if (isLast) { close(true); return; }
     setIsPaused(false);
     setCurrentStep((s) => Math.min(s + 1, FELIX_STEPS.length - 1));
@@ -197,7 +304,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const ring = rect && !isPaused && (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent transition-all duration-300 ease-out"
+      className={cn("pointer-events-none fixed z-[131] rounded-md border-2 border-accent transition-all duration-300 ease-out", step.pulse && "animate-pulse")}
       style={{
         top: rect.top - PAD,
         left: rect.left - PAD,
@@ -212,7 +319,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     <>
       {/* Dimmed backdrop with a clear window around the target */}
       {!isPaused && (
-        <div className="fixed inset-0 z-[130] print:hidden" onClick={() => close(false)}>
+        <div className="pointer-events-none fixed inset-0 z-[130] print:hidden [&>div]:pointer-events-auto" onClick={() => close(false)}>
           {rect ? (
             <>
               <div className="absolute inset-x-0 top-0 bg-foreground/40" style={{ height: Math.max(rect.top - PAD, 0) }} />
@@ -302,8 +409,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{step.dialogue.replace(/\{name\}/g, guideName)}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
+
+          {!stepDone && !isPaused && (
+            <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
+              ● Action required — use the highlighted control to continue
+            </p>
+          )}
 
           {isPaused && (
             <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
@@ -331,9 +444,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </button>
             <button
               onClick={next}
-              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90"
+              disabled={!stepDone}
+              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90"
             >
-              {isLast ? "Finish" : "Next"}
+              {step.cta ?? (isLast ? "Finish" : "Next")}
               {isLast ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
             </button>
           </div>
