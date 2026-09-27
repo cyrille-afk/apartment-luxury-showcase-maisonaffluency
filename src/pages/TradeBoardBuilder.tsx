@@ -154,7 +154,6 @@ const TradeBoardBuilder = () => {
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [collapsedBrands, setCollapsedBrands] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [copyButtonLabel, setCopyButtonLabel] = useState("Copy Current Link");
