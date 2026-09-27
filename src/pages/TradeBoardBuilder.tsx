@@ -925,7 +925,7 @@ const TradeBoardBuilder = () => {
                   <img
                     src={board.studio_logo_url}
                     alt="Logo preview"
-                    className="max-h-24 w-auto max-w-[320px] object-contain"
+                    className="max-h-48 w-auto max-w-[480px] object-contain"
                     onError={(e) => { e.currentTarget.style.display = "none"; }}
                     onLoad={(e) => { e.currentTarget.style.display = ""; }}
                   />
@@ -951,7 +951,7 @@ const TradeBoardBuilder = () => {
                       <img
                         src={board.studio_logo_url}
                         alt=""
-                        className="mx-auto mb-4 h-10 object-contain"
+                        className="mx-auto mb-4 h-20 object-contain"
                         onError={(e) => { e.currentTarget.style.display = "none"; }}
                         onLoad={(e) => { e.currentTarget.style.display = ""; }}
                       />
