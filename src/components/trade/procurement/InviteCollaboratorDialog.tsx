@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link2 as LinkIcon } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +16,12 @@ const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const SHARE_ORIGIN = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
   ? window.location.origin
   : "https://www.maisonaffluency.com";
+
+/** Masked display alias — never shows the raw token. */
+function maskLink(url: string) {
+  try { return `://${new URL(url).hostname}…`; } catch { return "://…"; }
+}
+
 
 export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited }: {
   open: boolean;
@@ -77,11 +84,13 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
           </div>
         ) : (
           <div className="space-y-4 pt-2">
-            <p className="break-all border border-border/60 bg-muted/40 p-3 font-body text-xs">{link}</p>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 rounded-none" onClick={async () => { await copyTextToClipboard(link); toast({ title: "Link copied" }); }}>Copy Link</Button>
-              <Button className="flex-1 rounded-none" onClick={reset}>Invite Another</Button>
+            <div className="flex items-stretch gap-2">
+              <Input readOnly value={maskLink(link)} aria-label="Secure invitation link" className="rounded-none font-body text-xs text-muted-foreground" />
+              <Button variant="outline" className="rounded-none whitespace-nowrap" onClick={async () => { await copyTextToClipboard(link); toast({ title: "Secure invitation link copied to clipboard" }); }}>
+                <LinkIcon className="h-3.5 w-3.5" /> Copy Link
+              </Button>
             </div>
+            <Button className="w-full rounded-none" onClick={reset}>Invite Another</Button>
           </div>
         )}
       </DialogContent>
