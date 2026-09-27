@@ -281,7 +281,7 @@ export default function FinishesDrawer({
                 </div>
 
                 {/* Price & Logistics Breakdown Grid */}
-                <div className={`grid gap-x-4 gap-y-3 ${clientMode ? "grid-cols-1" : "grid-cols-3"}`}>
+                <div className={`grid gap-x-4 gap-y-3 ${clientMode ? "grid-cols-2" : "grid-cols-3"}`}>
                   <div>
                     <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Client Price</p>
                     <p className="font-display text-base tabular-nums text-primary">
@@ -289,18 +289,16 @@ export default function FinishesDrawer({
                     </p>
                   </div>
                   {!clientMode && (
-                    <>
-                      <div>
-                        <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
-                        <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
-                        <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
-                      </div>
-                      <div>
-                        <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
-                        <p className="font-body text-sm text-foreground">{activeVariant.lead_time || lead || "—"}</p>
-                      </div>
-                    </>
+                    <div>
+                      <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
+                      <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
+                      <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
+                    </div>
                   )}
+                  <div>
+                    <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
+                    <p className="font-body text-sm text-foreground">{activeVariant.lead_time || lead || "—"}</p>
+                  </div>
                 </div>
               </div>
             )}
