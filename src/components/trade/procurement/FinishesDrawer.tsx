@@ -1,0 +1,152 @@
+import { useEffect, useMemo, useState } from "react";
+import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { formatMoneyIn } from "@/lib/displayMoney";
+
+export type FinishSelection = { label: string; price_cents: number | null; image_url: string | null };
+
+type Variant = { top?: string; base?: string; label?: string; price_cents?: number; lead_time?: string };
+
+const norm = (s?: string) => (s || "").toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "");
+export const finishLabel = (v: Variant) =>
+  [v.top, v.base].filter(Boolean).join(" / ") + (v.label ? ` · ${v.label}` : "");
+
+export default function FinishesDrawer({
+  open, onOpenChange, productId, productName, baseImage, clientMode, current, onSelect,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  productId: string;
+  productName: string;
+  baseImage: string | null;
+  clientMode: boolean;
+  current?: string | null;
+  onSelect: (sel: FinishSelection) => void;
+}) {
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [gallery, setGallery] = useState<string[]>([]);
+  const [imgMap, setImgMap] = useState<Record<string, number>>({});
+  const [currency, setCurrency] = useState("EUR");
+  const [lead, setLead] = useState<string | null>(null);
+  const [discount, setDiscount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    setLoading(true);
+    (async () => {
+      const { data: tp } = await supabase
+        .from("trade_products")
+        .select("source_pick_id, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max")
+        .eq("id", productId)
+        .maybeSingle();
+      const t: any = tp || {};
+      setCurrency(t.currency || "EUR");
+      setLead(t.lead_time || (t.lead_time_weeks_min ? `${t.lead_time_weeks_min}–${t.lead_time_weeks_max ?? t.lead_time_weeks_min} wks` : null));
+      if (t.source_pick_id) {
+        const { data: pick } = await supabase
+          .from("designer_curator_picks")
+          .select("size_variants, variant_image_map, gallery_images")
+          .eq("id", t.source_pick_id)
+          .maybeSingle();
+        const p: any = pick || {};
+        if (!alive) return;
+        setVariants(Array.isArray(p.size_variants) ? p.size_variants.filter((v: Variant) => v.top || v.base) : []);
+        setImgMap(p.variant_image_map || {});
+        setGallery(p.gallery_images || []);
+      } else setVariants([]);
+      if (!clientMode) {
+        const { data } = await supabase.rpc("current_trade_discount_pct" as any);
+        setDiscount(Number(data) || 0);
+      }
+      if (alive) setLoading(false);
+    })();
+    return () => { alive = false; };
+  }, [open, productId, clientMode]);
+
+  const imageFor = (v: Variant) => {
+    const keys = [
+      [norm(v.base), norm(v.top), norm(v.label)].join("|"),
+      [norm(v.base), norm(v.top)].join("|"),
+      norm(v.top), norm(v.base),
+    ];
+    for (const k of keys) if (k in imgMap && gallery[imgMap[k]]) return gallery[imgMap[k]];
+    return null;
+  };
+
+  const materials = useMemo(() => {
+    const set = new Map<string, string | null>();
+    variants.forEach((v) => [v.top, v.base].forEach((m) => m && !set.has(m) && set.set(m, imageFor(v))));
+    return Array.from(set.entries());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variants, imgMap, gallery]);
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full overflow-y-auto rounded-none border-l border-border/60 bg-background p-0 sm:max-w-md">
+        <SheetHeader className="border-b border-border/60 px-6 py-6 text-left">
+          <p className="font-body text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Materials &amp; Finishes Library</p>
+          <SheetTitle className="font-display text-xl font-normal">{productName}</SheetTitle>
+          <SheetDescription className="font-body text-xs">
+            {clientMode ? "Select a finish to preview it on this piece." : "Swapping a finish updates cost, margin and lead time in the matrix."}
+          </SheetDescription>
+        </SheetHeader>
+
+        {loading ? (
+          <p className="px-6 py-10 font-body text-xs text-muted-foreground">Loading finishes…</p>
+        ) : variants.length === 0 ? (
+          <p className="px-6 py-10 font-body text-xs text-muted-foreground">No alternative finishes are catalogued for this piece.</p>
+        ) : (
+          <>
+            {materials.length > 0 && (
+              <div className="border-b border-border/60 px-6 py-5">
+                <p className="mb-3 font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
+                <div className="flex flex-wrap gap-2">
+                  {materials.map(([m]) => (
+                    <span key={m} className="border border-border/60 px-2.5 py-1 font-body text-[11px] text-foreground">{m}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <ul className="divide-y divide-border/60">
+              {variants.map((v, idx) => {
+                const label = finishLabel(v);
+                const img = imageFor(v) || baseImage;
+                const active = current === label;
+                const trade = v.price_cents ? Math.round(v.price_cents * (1 - discount / 100)) : null;
+                return (
+                  <li key={idx}>
+                    <button
+                      type="button"
+                      onClick={() => { onSelect({ label, price_cents: v.price_cents ?? null, image_url: imageFor(v) }); onOpenChange(false); }}
+                      className={`flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-muted/40 ${active ? "bg-muted/50" : ""}`}
+                    >
+                      <div className="h-16 w-16 shrink-0 bg-[hsl(var(--product-canvas))]">
+                        {img && <img src={img} alt="" className="h-full w-full object-contain p-1" loading="lazy" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body text-sm text-foreground">{[v.top, v.base].filter(Boolean).join(" / ")}</p>
+                        {v.label && <p className="truncate font-body text-[11px] text-muted-foreground">{v.label}</p>}
+                        <p className="mt-1 font-body text-xs tabular-nums text-foreground">
+                          {formatMoneyIn(v.price_cents ?? null, currency, "Price upon Request")}
+                        </p>
+                        {!clientMode && (
+                          <p className="font-body text-[11px] tabular-nums text-muted-foreground">
+                            Trade {formatMoneyIn(trade, currency, "—")} · Margin {discount}% · Lead {v.lead_time || lead || "—"}
+                          </p>
+                        )}
+                      </div>
+                      {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
