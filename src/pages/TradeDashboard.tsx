@@ -8,6 +8,7 @@ import {
   Clock, FileDown, MapPin, Box, Users, Sparkles,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/FelixTour";
+import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
