@@ -54,7 +54,7 @@ type ContactRow = {
 
 export default function ClientPicker({
   value, onChange, size = "md", placeholder = "Select a client…",
-  disabled, showManageLink = true, className,
+  disabled, showManageLink = true, showContactDetails = true, onResolved, className,
 }: Props) {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
