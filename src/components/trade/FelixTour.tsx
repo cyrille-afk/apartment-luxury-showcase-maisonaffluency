@@ -371,7 +371,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         transform: `translate3d(${rect.left - PAD}px, ${rect.top - PAD}px, 0)`,
         width: rect.width + PAD * 2,
         height: rect.height + PAD * 2,
-        opacity: 1,
+        opacity: settled && !transitioning ? 1 : 0,
         transition: SPOTLIGHT_EASE,
         boxShadow: "0 0 0 100vmax hsl(var(--foreground) / 0.4), 0 0 24px hsl(var(--accent) / 0.35)",
       }}
@@ -382,7 +382,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     <>
       {/* Dimmed backdrop with a clear window around the target */}
       {!isPaused && <div className="pointer-events-none fixed inset-0 z-[130] overflow-hidden print:hidden">
-        {!rect && <div className="absolute inset-0 bg-foreground/40" />}
+        {(!rect || !settled || transitioning) && <div className="absolute inset-0 bg-foreground/40" />}
         {ring}
       </div>}
 
