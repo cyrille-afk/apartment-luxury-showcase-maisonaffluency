@@ -26,14 +26,15 @@ const useLedger = (range: Range, enabled: boolean) =>
       const from = since(range);
       const ev = supabase.from("acquisition_outreach_events").select("lead_id, channel, hook, agent_id, created_at").limit(10000);
       const clicks = supabase.from("email_click_log").select("recipient_email, clicked_at").in("template_name", ACQ_TEMPLATES).limit(10000);
+      const linkClicks = supabase.from("acquisition_link_clicks").select("channel").limit(10000);
       const sends = supabase.from("email_send_log").select("id", { count: "exact", head: true }).in("template_name", ACQ_TEMPLATES).eq("status", "sent");
       const invites = supabase.from("board_invites").select("id", { count: "exact", head: true });
       const apps = supabase.from("trade_applications").select("reviewed_by, reviewed_at, status").eq("status", "approved");
-      if (from) { ev.gte("created_at", from); clicks.gte("clicked_at", from); invites.gte("created_at", from); sends.gte("created_at", from); apps.gte("reviewed_at", from); }
-      const [e, c, i, a, l, s] = await Promise.all([
+      if (from) { ev.gte("created_at", from); clicks.gte("clicked_at", from); invites.gte("created_at", from); sends.gte("created_at", from); linkClicks.gte("created_at", from); apps.gte("reviewed_at", from); }
+      const [e, c, i, a, l, s, lc] = await Promise.all([
         ev, clicks, invites, apps,
         supabase.from("acquisition_leads").select("id, reply_received_at, reply_intent, portal_activated_at").limit(10000),
-        sends,
+        sends, linkClicks,
       ]);
       const err = e.error || c.error || i.error || a.error || l.error;
       if (err) throw err;
@@ -41,7 +42,7 @@ const useLedger = (range: Range, enabled: boolean) =>
       const { data: profiles } = agentIds.length
         ? await supabase.from("profiles").select("id, first_name, last_name, email").in("id", agentIds)
         : { data: [] as { id: string; first_name: string | null; last_name: string | null; email: string | null }[] };
-      return { from, events: e.data ?? [], clicks: c.data ?? [], viral: i.count ?? 0, emailSends: s.count ?? 0, apps: a.data ?? [], leads: l.data ?? [], profiles: profiles ?? [] };
+      return { from, events: e.data ?? [], clicks: c.data ?? [], viral: i.count ?? 0, linkClicks: lc.data ?? [], emailSends: s.count ?? 0, apps: a.data ?? [], leads: l.data ?? [], profiles: profiles ?? [] };
     },
   });
 
@@ -67,7 +68,8 @@ export default function TradeAdminKpiLedger() {
 
   const k = useMemo(() => {
     if (!data) return null;
-    const { from, events, leads, apps, clicks, emailSends } = data;
+    const { from, events, leads, apps, clicks, emailSends, linkClicks } = data;
+    const lcBy = (ch: string) => linkClicks.filter((x) => x.channel === ch).length;
     const leadMap = new Map(leads.map((l) => [l.id, l]));
     const converted = (id: string | null) => {
       const l = id ? leadMap.get(id) : undefined;
@@ -104,9 +106,9 @@ export default function TradeAdminKpiLedger() {
     const outbound = ig.length + li.length + emSent;
     return {
       outbound, conversions, rate: pct(conversions, outbound),
-      ig: { sent: ig.length, replies: replied(ig) },
-      li: { sent: li.length, replies: replied(li) },
-      em: { sent: emSent, replies: replied(em), clicks: clicks.length },
+      ig: { sent: ig.length, clicks: lcBy("instagram"), replies: replied(ig) },
+      li: { sent: li.length, clicks: lcBy("linkedin"), replies: replied(li) },
+      em: { sent: emSent, replies: replied(em), clicks: clicks.length + lcBy("email") },
       A: hook("A"), B: hook("B"),
       agents: [...agents.values()].sort((x, y) => y.ig + y.li + y.em - (x.ig + x.li + x.em)),
     };
@@ -143,8 +145,8 @@ export default function TradeAdminKpiLedger() {
 
           <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {[
-              { icon: Instagram, title: "Instagram Studio Hub", rows: [["DMs sent", k.ig.sent], ["Profile click-through", "—", true], ["Responses", k.ig.replies]] },
-              { icon: Linkedin, title: "LinkedIn Executive Desk", rows: [["Pitches sent", k.li.sent], ["Connection acceptance", "—", true], ["Warm responses", k.li.replies]] },
+              { icon: Instagram, title: "Instagram Studio Hub", rows: [["DMs sent", k.ig.sent], ["Profile click-through", k.ig.sent ? `${pct(k.ig.clicks, k.ig.sent)} (${k.ig.clicks})` : k.ig.clicks], ["Responses", k.ig.replies]] },
+              { icon: Linkedin, title: "LinkedIn Executive Desk", rows: [["Pitches sent", k.li.sent], ["Profile click-through", k.li.sent ? `${pct(k.li.clicks, k.li.sent)} (${k.li.clicks})` : k.li.clicks], ["Connection acceptance", "—", true], ["Warm responses", k.li.replies]] },
               { icon: Mail, title: "Direct Procurement Email", rows: [["Emails sent", k.em.sent], ["Open rate", "—", true], ["Signup link clicks", k.em.clicks]] },
             ].map(({ icon: Icon, title, rows }) => (
               <div key={title} className="border border-border bg-card px-4 py-3">
