@@ -587,7 +587,7 @@ const TradeBoardBuilder = () => {
       <Helmet><title>{board.title} — Project Folder — Maison Affluency</title></Helmet>
       <div className="md:-mx-2 lg:-mx-6">
         {/* Header */}
-        <TradeBreadcrumb
+        {false && <TradeBreadcrumb
           current="Boards"
           currentTo={`/trade/boards${board.project_id ? `?project=${board.project_id}` : ""}`}
           extraSegments={[
@@ -613,7 +613,7 @@ const TradeBoardBuilder = () => {
               emptyLabel: "No sub-folders yet",
             },
           ]}
-        />
+        />}
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/trade/boards")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" /> Folders
