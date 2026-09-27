@@ -6,7 +6,7 @@ import { formatMoneyIn } from "@/lib/displayMoney";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 
 type Glb = { variant_label: string; glb_url: string; is_default: boolean; material_roles: any };
-type Swatch = { name: string; image_url: string | null; category: string | null };
+type Swatch = { name: string; image_url: string | null; category: string | null; price_tier_label?: string | null };
 const roleOf = (cat: string | null) => {
   const c = (cat || "").toLowerCase();
   if (/fabric|leather|upholster|rug/.test(c)) return "fabric";
@@ -29,6 +29,20 @@ const variantImage = (v: any, imgMap: Record<string, number>, gallery: string[])
   return null;
 };
 
+/** Map a real fabric name (e.g. "Aries Pietra", "Safire-2 0006") or its
+ *  price tier to the priced variant category ("Fabric Cat. Aries"). */
+export const categoryKey = (top?: string | null) => normKey(top).replace(/^(fabric|leather)cat/, "");
+export const matchTopVariant = <V extends { top?: string; base?: string }>(variants: V[], fabric?: string | null, base?: string | null, tier?: string | null): V | null => {
+  if (!fabric && !tier) return null;
+  const f = normKey(fabric), t = normKey(tier);
+  const pool = base ? variants.filter((v) => normKey(v.base) === normKey(base)) : variants;
+  const scored = (pool.length ? pool : variants)
+    .map((v) => ({ v, k: categoryKey(v.top) }))
+    .filter(({ v, k }) => k && (normKey(v.top) === f || (t && (normKey(v.top) === t || categoryKey(tier) === k)) || f.startsWith(k)))
+    .sort((a, b) => b.k.length - a.k.length);
+  return scored[0]?.v ?? null;
+};
+
 /** Resolve each board item's saved finish (variant_label + fabric/wood labels)
  *  to the same price & image the drawer shows, so cards match on load. */
 export async function resolveSavedFinishes(
@@ -42,7 +56,7 @@ export async function resolveSavedFinishes(
   if (!pickIds.length) return {};
   const [{ data: picks }, { data: sws }] = await Promise.all([
     supabase.from("designer_curator_picks").select("id, size_variants, variant_image_map, gallery_images").in("id", pickIds),
-    supabase.from("product_fabric_swatches_public").select("pick_id, name, image_url, category").in("pick_id", pickIds),
+    supabase.from("product_fabric_swatches_public").select("pick_id, name, image_url, category, price_tier_label").in("pick_id", pickIds),
   ]);
   const pickMap = new Map((picks || []).map((p: any) => [p.id, p]));
   const out: Record<string, FinishSelection> = {};
@@ -56,9 +70,11 @@ export async function resolveSavedFinishes(
     const [lt, lb] = (pair || "").split(" / ");
     const top = it.fabric_label || lt || null;
     const base = it.wood_label || lb || null;
+    const sw: any = (sws || []).find((x: any) => x.pick_id === pid && normKey(x.name) === normKey(top));
     const v =
-      variants.find((x) => finishLabel(x) === lbl) ||
       variants.find((x) => normKey(x.top) === normKey(top) && normKey(x.base) === normKey(base)) ||
+      matchTopVariant(variants, top, base, sw?.price_tier_label) ||
+      variants.find((x) => finishLabel(x) === lbl) ||
       variants.find((x) => normKey(x.top) === normKey(lt) && normKey(x.base) === normKey(lb)) ||
       variants.find((x) => normKey(x.base) === normKey(base)) ||
       null;
@@ -133,7 +149,7 @@ export default function FinishesDrawer({
           .maybeSingle();
         const [{ data: g }, { data: sw }] = await Promise.all([
           supabase.from("trade_product_glb_variants").select("variant_label, glb_url, is_default, material_roles").eq("product_id", productId),
-          supabase.from("product_fabric_swatches_public").select("name, image_url, category").eq("pick_id", t.source_pick_id),
+          supabase.from("product_fabric_swatches_public").select("name, image_url, category, price_tier_label").eq("pick_id", t.source_pick_id),
         ]);
         if (alive) {
           const list = (sw as Swatch[]) || [];
@@ -179,7 +195,7 @@ export default function FinishesDrawer({
       const [pair] = (current || "").split(" · ");
       const [ct, cb] = pair.split(" / ");
       const t = initialTop || ct, b = initialBase || cb;
-      const hit = variants.find((v) => norm(v.top) === norm(t) && norm(v.base) === norm(b)) || variants.find((v) => norm(v.base) === norm(b));
+      const hit = variants.find((v) => norm(v.top) === norm(t) && norm(v.base) === norm(b)) || matchTopVariant(variants, t, b) || variants.find((v) => norm(v.base) === norm(b));
       return hit ? { ...hit, top: t || hit.top, base: b || hit.base } : null;
     })()
     ?? variants[0] ?? null;
@@ -266,8 +282,13 @@ export default function FinishesDrawer({
                   setPicked((p) => ({ ...p, [key]: sw }));
                   setOpenAxis(null);
                   const other = key === "top" ? "base" : "top";
+                  const otherName = picked[other]?.name || activeVariant?.[other];
+                  const fabricName = key === "top" ? sw.name : picked.top?.name || activeVariant?.top;
+                  const tier = key === "top" ? sw.price_tier_label : picked.top?.price_tier_label;
+                  const baseName = key === "base" ? sw.name : otherName;
                   const v =
-                    variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(activeVariant?.[other])) ||
+                    variants.find((x) => norm(x[key]) === norm(sw.name) && norm(x[other]) === norm(otherName)) ||
+                    matchTopVariant(variants, fabricName, baseName, tier) ||
                     variants.find((x) => norm(x[key]) === norm(sw.name));
                   if (v) {
                     const shown = { ...v, [key]: sw.name, [other]: (picked[other]?.name) || v[other] };
