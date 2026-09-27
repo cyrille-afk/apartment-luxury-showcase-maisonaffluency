@@ -12,7 +12,6 @@ const corsHeaders = {
 
 const AUCTION_HOUSES = ["Phillips", "Christie's", "Piasa", "Sotheby's"];
 const OWN_SITE = /maisonaffluency\.com/i;
-const BANNED_NAME = /invisible collection/i; // never name this competitor in generated copy
 const MAX_MD = 40_000;
 const SEARCH_RESULTS_PER_HOUSE = 3;
 
@@ -79,7 +78,7 @@ async function astra<T>(prompt: string, name: string, schema: Record<string, unk
   throw new Error("unreachable");
 }
 
-async function firecrawl(apiKey: string, path: "scrape" | "search", body: unknown) {
+async function firecrawl(apiKey: string, path: "scrape" | "search" | "map", body: unknown) {
   const res = await fetch(`https://api.firecrawl.dev/v1/${path}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -303,11 +302,11 @@ Deno.serve(async (req) => {
       `${l.auction_house} | ${l.designer_name} | ${l.piece_title} | est ${l.estimate_low_usd ?? "?"}-${l.estimate_high_usd ?? "?"} | sold ${l.sold_price_usd ?? "?"} USD`).join("\n");
 
     const brief = await astra<{ summary: string; highlights: string[] }>(
-      `You are the market-intelligence analyst for Maison Affluency, a collectible-design trade platform with ${ourBrandList.length} brands. Write a concise weekly brief for the founders: roster movements at competing galleries, designers we share with them, notable auction prices and what they imply for our pricing and sourcing. Do not name "The Invisible Collection" — refer to it as "a Paris online gallery". Plain text, no markdown. Summary max 120 words; 3-6 highlights, each max 25 words.\n\nRoster data (JSON):\n${JSON.stringify(results.map(({ gallery, designers_found, overlap, status }) => ({ gallery, designers_found, overlap, status })))}\n\nChanges since last week (JSON, empty arrays mean first run or no change):\n${JSON.stringify(changes)}\n\nNew auction lots:\n${lotDigest || "(none)"}`,
+      `You are the market-intelligence analyst for Maison Affluency, a collectible-design trade platform with ${ourBrandList.length} brands. Write a concise weekly brief for the founders: roster movements at competing galleries, designers we share with them, notable auction prices and what they imply for our pricing and sourcing. Plain text, no markdown. Summary max 120 words; 3-6 highlights, each max 25 words.\n\nRoster data (JSON):\n${JSON.stringify(results.map(({ gallery, designers_found, overlap, status }) => ({ gallery, designers_found, overlap, status })))}\n\nChanges since last week (JSON, empty arrays mean first run or no change):\n${JSON.stringify(changes)}\n\nNew auction lots:\n${lotDigest || "(none)"}`,
       "brief",
       { type: "object", additionalProperties: false, required: ["summary", "highlights"], properties: { summary: { type: "string" }, highlights: { type: "array", items: { type: "string" } } } },
     );
-    const scrub = (s: string) => s.replace(/the invisible collection/gi, "a Paris online gallery");
+    const scrub = (s: string) => s;
     const summary = scrub(brief.summary);
     const highlights = brief.highlights.map(scrub);
 
@@ -321,7 +320,7 @@ Deno.serve(async (req) => {
 
     // ---- Email + in-app notification ----
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
-    const displayName = (n: string) => (BANNED_NAME.test(n) ? "Paris online gallery" : n);
+    const displayName = (n: string) => n;
     const rows = results.map((r) =>
       `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;">${esc(displayName(r.gallery))}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;text-align:center;">${r.designers_found ?? "—"}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;text-align:center;">${r.overlap ?? "—"}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e5e5;text-align:center;color:${r.status === "success" ? "#2d6a4f" : "#c1121f"};">${r.status}</td></tr>`).join("");
     const html = `
