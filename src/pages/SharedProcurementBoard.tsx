@@ -443,7 +443,11 @@ function AccessGate({ slug, onVerified }: { slug: string; onVerified: (token: st
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(null);
-    const parsed = z.string().trim().email().max(255).safeParse(email);
+    // Read the live DOM value too: browser autofill can fill the field without firing onChange.
+    const domEmail = (e.currentTarget as HTMLFormElement).querySelector<HTMLInputElement>('input[type="email"]')?.value;
+    const raw = (domEmail || email || "").trim();
+    if (raw !== email) setEmail(raw);
+    const parsed = z.string().trim().email().max(255).safeParse(raw);
     if (!parsed.success) { setErr("Enter a valid email"); return; }
     setBusy(true);
     try {
@@ -468,7 +472,7 @@ function AccessGate({ slug, onVerified }: { slug: string; onVerified: (token: st
         </p>
         <div className="mt-6 space-y-3 text-left">
           {step === "email" ? (
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} placeholder="name@example.com" className="rounded-none" autoComplete="email" autoFocus />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} placeholder="name@example.com" className="rounded-none" autoComplete="email" name="email" onInput={(e) => setEmail((e.target as HTMLInputElement).value)} autoFocus />
           ) : (
             <Input inputMode="numeric" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" className="rounded-none text-center tracking-[0.5em]" autoComplete="one-time-code" autoFocus />
           )}
