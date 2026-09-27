@@ -11319,8 +11319,10 @@ export type Database = {
         Args: never
         Returns: {
           designer_name: string
+          dimensions: string
           id: string
           image_identifier: string
+          materials: string
           product_image_url: string
           product_name: string
           x_percent: number
