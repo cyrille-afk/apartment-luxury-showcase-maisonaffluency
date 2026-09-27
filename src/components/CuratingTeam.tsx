@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Linkedin } from "lucide-react";
@@ -10,7 +10,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 const cyrilleDelvalImg = cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 800, quality: "auto", crop: "fill" });
 const elsaLemarignierImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 800, quality: "auto", crop: "fill" });
 
-export const curatingTeam = [
+export const curatingTeam: { id: number; name: string; role: string; image: string; bio: ReactNode; linkedin: string }[] = [
   {
     id: 1,
     name: "Cyrille Delval",
@@ -24,7 +24,11 @@ export const curatingTeam = [
     name: "Elsa Lemarignier",
     role: "Co-Founder and CPO",
     image: elsaLemarignierImg,
-    bio: "After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
+    bio: (
+      <>
+        After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad, whose comprehensive monograph <em className="font-bold italic">Ron Arad Architecture: Projects & Realisations</em> she co-authored and contributed to. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.
+      </>
+    ),
     linkedin: "https://www.linkedin.com/in/elsa-lemarignier-4b50b119/",
   },
 ];
