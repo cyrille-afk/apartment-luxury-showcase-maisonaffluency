@@ -33,7 +33,7 @@ const STATUSES = ["pending", "approved", "rejected"] as const;
 export default function ProcurementBoardPanel({ boardId, items, finishOverrides = {}, onOpenFinishes }: {
   boardId: string;
   onOpenFinishes?: (itemId: string) => void;
-  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null }>;
+  finishOverrides?: Record<string, { label: string; price_cents: number | null; image_url: string | null; top?: string | null; base?: string | null; top_image?: string | null; base_image?: string | null }>;
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
