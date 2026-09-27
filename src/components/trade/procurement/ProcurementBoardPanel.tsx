@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
@@ -40,6 +42,20 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [statusOverride, setStatusOverride] = useState<Record<string, string>>({});
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    supabase.from("client_board_items").select("id, notes").eq("board_id", boardId)
+      .then(({ data }) => setNotes(Object.fromEntries((data || []).map((d: any) => [d.id, d.notes || ""]))));
+  }, [boardId, items.length]);
+
+  const saveNote = async (id: string, value: string) => {
+    const v = value.trim().slice(0, 2000);
+    setNotes((n) => ({ ...n, [id]: v }));
+    const { error } = await supabase.from("client_board_items").update({ notes: v || null }).eq("id", id);
+    if (error) toast({ title: "Could not save note", variant: "destructive" });
+  };
 
   const productIds = useMemo(() => items.map((i) => i.product_id).join(","), [items]);
 
@@ -130,15 +146,15 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
       <AnimatePresence mode="wait">
         {!clientSafe ? (
           <motion.div key="matrix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
-            <table className="w-full min-w-[980px] table-fixed font-body text-xs">
+            <table className="w-full table-fixed font-body text-[11px] leading-tight">
               <colgroup>
-                <col className="w-16" /><col className="w-[20%]" /><col className="w-[13%]" /><col /><col /><col /><col /><col /><col className="w-[12%]" /><col className="w-[14%]" />
+                <col className="w-11" /><col className="w-[18%]" /><col className="w-[10%]" /><col className="w-[7%]" /><col className="w-[5%]" /><col className="w-[7%]" /><col className="w-[8%]" /><col className="w-[6%]" /><col className="w-[8%]" /><col />
               </colgroup>
-              <thead className="border-b border-border/60 text-left text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <thead className="border-b border-border/60 text-left text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2.5" /><th className="px-3">Product</th><th className="px-3">Manufacturer</th>
-                  <th className="px-3 text-right">Trade Price</th><th className="px-3 text-right">Margin</th><th className="px-3 text-right">Client Price</th>
-                  <th className="px-3">Lead Time</th><th className="px-3">Shipping</th><th className="px-3">Status</th><th className="px-3">Feedback</th>
+                  <th className="px-2 py-1.5" /><th className="px-2">Product</th><th className="px-2">Manufacturer</th>
+                  <th className="px-2 text-right">Trade Price</th><th className="px-2 text-right">Margin</th><th className="px-2 text-right">Client Price</th>
+                  <th className="px-2">Lead Time</th><th className="px-2">Shipping</th><th className="px-2">Status</th><th className="px-2">Feedback</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,31 +167,53 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   const comments = fb.filter((f) => f.comment);
                   return (
                     <tr key={r.id} className="border-b border-border/40 align-middle">
-                      <td className="px-3 py-2">{r.image_url ? <img src={r.image_url} alt="" className="h-10 w-10 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-10 w-10 bg-muted" />}</td>
-                      <td className="truncate px-3 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="block truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span>}</td>
-                      <td className="truncate px-3 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
-                      <td className="px-3 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
-                      <td className="px-3 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
-                      <td className="px-3 text-right tabular-nums">{formatMoneyIn(r.msrp_cents, r.currency, "On request")}</td>
-                      <td className="truncate px-3">{r.lead_time ?? "—"}</td>
-                      <td className="truncate px-3 capitalize">{r.ship_mode ?? "—"}</td>
-                      <td className="px-3">
-                        <select value={r.approval_status} onChange={(e) => setStatus(r.id, e.target.value)} className="h-7 w-full border border-border/60 bg-background px-1.5 text-[11px] capitalize" aria-label={`Status for ${r.product_name}`}>
+                      <td className="px-2 py-1">{r.image_url ? <img src={r.image_url} alt="" className="h-8 w-8 bg-[hsl(var(--product-canvas))] object-contain" loading="lazy" /> : <div className="h-8 w-8 bg-muted" />}</td>
+                      <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="block truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span>}</td>
+                      <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
+                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
+                      <td className="px-2 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
+                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(r.msrp_cents, r.currency, "On request")}</td>
+                      <td className="truncate px-2">{r.lead_time ?? "—"}</td>
+                      <td className="truncate px-2 capitalize">{r.ship_mode ?? "—"}</td>
+                      <td className="px-2">
+                        <select value={r.approval_status} onChange={(e) => setStatus(r.id, e.target.value)} className="h-6 w-full border border-border/60 bg-background px-1 text-[10px] capitalize" aria-label={`Status for ${r.product_name}`}>
                           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </td>
-                      <td className="px-3 text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          {hearts > 0 && <span className="flex items-center gap-0.5"><Heart className="h-3 w-3 fill-current text-primary" />{hearts}</span>}
-                          {ups > 0 && <span className="flex items-center gap-0.5"><ThumbsUp className="h-3 w-3" />{ups}</span>}
-                          {downs > 0 && <span className="flex items-center gap-0.5"><ThumbsDown className="h-3 w-3" />{downs}</span>}
-                          {comments.length > 0 && (
-                            <span className="flex items-center gap-0.5" title={comments.map((c) => `${inviteEmail(c.invite_id)}: ${c.comment}`).join("\n")}>
-                              <MessageSquare className="h-3 w-3" />{comments.length}
-                            </span>
-                          )}
-                          {!fb.length && "—"}
-                        </div>
+                      <td className="px-2 text-muted-foreground">
+                        <Popover onOpenChange={(o) => o && setDraft(notes[r.id] || "")}>
+                          <PopoverTrigger asChild>
+                            <button type="button" aria-label={`Feedback and notes for ${r.product_name}`} className="group flex h-7 w-full items-center gap-2 border border-transparent px-1.5 text-left transition-colors hover:border-border/60 hover:bg-muted/30 focus:border-border focus:outline-none">
+                              {hearts > 0 && <span className="flex shrink-0 items-center gap-0.5"><Heart className="h-3 w-3 fill-current text-primary" />{hearts}</span>}
+                              {ups > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsUp className="h-3 w-3" />{ups}</span>}
+                              {downs > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsDown className="h-3 w-3" />{downs}</span>}
+                              <span className="min-w-0 flex-1 truncate">
+                                {comments[0] ? <span className="text-foreground">“{comments[0].comment}”</span> : notes[r.id] ? <span className="italic">{notes[r.id]}</span> : <span className="opacity-0 transition-opacity group-hover:opacity-60">Add note…</span>}
+                              </span>
+                              {comments.length > 1 && <span className="flex shrink-0 items-center gap-0.5"><MessageSquare className="h-3 w-3" />{comments.length}</span>}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent align="end" className="w-80 rounded-none p-0">
+                            {comments.length > 0 && (
+                              <div className="max-h-48 overflow-y-auto border-b border-border/60 px-4 py-3">
+                                <p className="mb-2 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Client feedback</p>
+                                {comments.map((c) => (
+                                  <div key={c.id} className="mb-2 last:mb-0">
+                                    <p className="font-body text-xs text-foreground">{c.comment}</p>
+                                    <p className="font-body text-[10px] text-muted-foreground">{inviteEmail(c.invite_id)} · {new Date(c.created_at).toLocaleString()}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <div className="px-4 py-3">
+                              <p className="mb-2 font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Internal note · studio only</p>
+                              <Textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={2000} rows={3} placeholder="Procurement notes, flags, client summary…" className="rounded-none font-body text-xs" />
+                              <div className="mt-2 flex justify-end">
+                                <Button size="sm" className="h-7 rounded-none text-[11px]" onClick={() => saveNote(r.id, draft)}>Save note</Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       </td>
                     </tr>
                   );
