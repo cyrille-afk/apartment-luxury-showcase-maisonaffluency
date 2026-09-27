@@ -291,7 +291,7 @@ export default function FinishesDrawer({
                     matchTopVariant(variants, fabricName, baseName, tier) ||
                     variants.find((x) => norm(x[key]) === norm(sw.name));
                   if (v) {
-                    const shown = { ...v, [key]: sw.name, [other]: (picked[other]?.name) || v[other] };
+                    const shown = { ...v, [key]: sw.name, [other]: otherName || v[other] };
                     setPreview(shown);
                     onSelect({ label: [shown.top, shown.base].filter(Boolean).join(" / "), price_cents: v.price_cents ?? null, image_url: imageFor(v), top: shown.top ?? null, base: shown.base ?? null });
                   } else if (activeVariant) {
