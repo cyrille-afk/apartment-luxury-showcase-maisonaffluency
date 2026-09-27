@@ -5,4 +5,5 @@
 - Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
 - Gallery hotspot product details use the shared centered `PublicProductLightbox` in a body portal, including over expanded photos, so long specifications remain visible without clipping or displacing the gallery canvas.
 - Fetch the two approved MicMac gallery pins through a narrowly scoped public RPC and use that presentation data for both pins and desktop side photos rather than widening trade-only designer access; only the pin's presentation data is public.
-- Reveal gallery photos and their hotspot pins only after both the photo and pin data are ready (and catalog data on desktop); this prevents mismatched entrance timing on desktop, expanded, and mobile scenes.- Board collaborator guests access boards only through token-hashed security-definer RPCs (get_shared_board etc.); why: guests never touch tables directly and never receive trade price or manufacturer.
+- Reveal gallery photo with pins/catalog only when ready; prevents mismatched timing. Board guests use token-hashed RPCs, never tables; prevents trade-data leaks.
+- Project shortcuts use latest RLS-visible board or hub fallback; avoids dead landings. Trade layout owns breadcrumbs; avoids duplicate trails.

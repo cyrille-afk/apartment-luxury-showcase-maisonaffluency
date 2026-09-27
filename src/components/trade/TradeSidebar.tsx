@@ -3,10 +3,10 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
-  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target,
+  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,6 +18,8 @@ import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
 import { useStudio } from "@/hooks/useStudio";
 import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
 import { pushRecentProject, useProjects } from "@/hooks/useProjects";
+import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
+import { Button } from "@/components/ui/button";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 
@@ -43,6 +45,7 @@ export function TradeSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
@@ -59,7 +62,13 @@ export function TradeSidebar() {
   const { currentStudio } = useStudio();
   const { count: clientUpgradeCount } = useClientTierUpgrades(currentStudio?.id);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
-  const recentActiveProjects = activeProjects.slice(0, 2);
+  const boards = useProjectBoardTree(activeProjects.map((project) => project.id));
+  const [expandedProjects, setExpandedProjects] = useState<string[]>([]);
+  const currentBoard = location.pathname.match(/^\/trade\/boards\/([^/]+)/)?.[1];
+  const currentProject = activeProjects.find((project) => location.pathname.startsWith(`/trade/projects/${project.id}`) || boards.some((board) => board.id === currentBoard && board.project_id === project.id));
+  useEffect(() => {
+    if (currentProject) setExpandedProjects((ids) => ids.includes(currentProject.id) ? ids : [...ids, currentProject.id]);
+  }, [currentProject?.id]);
   const pendingInquiryCount = usePendingInquiryCount();
 
 
@@ -214,23 +223,33 @@ export function TradeSidebar() {
                         )}
                       </NavLink>
                     </SidebarMenuButton>
-                    {isProjects && !collapsed && recentActiveProjects.length > 0 && (
+                     {isProjects && !collapsed && activeProjects.length > 0 && (
                       <ul
-                        aria-label="Recent active project workspaces"
-                        className="ml-10 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-3"
+                         aria-label="Active project workspaces"
+                         className="ml-8 mr-2 mt-0.5 mb-2 space-y-0.5 border-l border-border pl-2"
                       >
-                        {recentActiveProjects.map((project) => (
-                          <li key={project.id}>
-                            <NavLink
-                              to={`/trade/projects/${project.id}/studio`}
-                              onClick={() => pushRecentProject(project.id)}
-                              className="block py-1.5 font-body text-[10px] leading-relaxed text-muted-foreground transition-colors hover:text-foreground"
-                              activeClassName="text-foreground"
-                            >
-                              {project.name}
-                            </NavLink>
-                          </li>
-                        ))}
+                         {activeProjects.map((project) => {
+                           const expanded = expandedProjects.includes(project.id);
+                           const projectBoards = boards.filter((board) => board.project_id === project.id);
+                           return (
+                             <li key={project.id}>
+                               <div className="flex min-w-0 items-center">
+                                 <Button type="button" variant="ghost" size="icon" className="h-7 w-6 shrink-0" aria-label={`${expanded ? "Collapse" : "Expand"} ${project.name}`} aria-expanded={expanded} onClick={() => setExpandedProjects((ids) => expanded ? ids.filter((id) => id !== project.id) : [...ids, project.id])}>
+                                   {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                                 </Button>
+                                 <NavLink to={projectDefaultUrl(project.id, boards)} onClick={() => { pushRecentProject(project.id); setExpandedProjects((ids) => ids.includes(project.id) ? ids : [...ids, project.id]); }} className="block min-w-0 truncate py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:text-foreground" activeClassName="text-foreground font-medium" title={project.name}>{project.name}</NavLink>
+                               </div>
+                               {expanded && (
+                                 <ul className="ml-4 border-l border-border/70 pl-3 font-body text-[10px] text-muted-foreground">
+                                   <li><NavLink to={`/trade/projects/${project.id}?tab=boards`} className="flex items-center gap-2 py-1.5 hover:text-foreground"><FolderOpen className="h-3 w-3 shrink-0" /> Folders & Drafts</NavLink></li>
+                                   {projectBoards.map((board) => <li key={board.id} className="ml-2 border-l border-border/60 pl-3"><NavLink to={`/trade/boards/${board.id}?project=${project.id}`} className="block truncate py-1.5 hover:text-foreground" activeClassName="text-foreground font-medium" title={board.title}>{board.title}</NavLink></li>)}
+                                   <li><NavLink to={`/trade/projects/${project.id}?tab=tearsheets`} className="block py-1.5 hover:text-foreground">Tearsheets</NavLink></li>
+                                   <li><NavLink to={`/trade/projects/${project.id}/studio`} className="block py-1.5 hover:text-foreground">Project Studio</NavLink></li>
+                                 </ul>
+                               )}
+                             </li>
+                           );
+                         })}
                       </ul>
                     )}
                   </SidebarMenuItem>

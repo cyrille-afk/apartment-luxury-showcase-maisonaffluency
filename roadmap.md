@@ -53,3 +53,4 @@
 - [x] Add vertical breathing room between gallery side photos and keep both columns inset between their boundary lines.
 
 - [x] Collaborative Procurement Board: studio matrix/client editorial toggle, invites with email, guest feedback, contractor sign-up referral.
+- [x] Expand project navigation into boards, folders, tearsheets, and Project Studio; show linked project breadcrumbs at the top of the workspace; open the latest linked board from project cards and names.

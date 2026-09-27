@@ -126,10 +126,10 @@ export default function TradeBreadcrumb({
         <>
           <ChevronRight className="h-3 w-3 opacity-60" />
           {projectIsLeaf ? (
-            <span className={leafCls} aria-current="page">
+            <Link to={`/trade/projects/${projectId}`} className={leafCls} aria-current="page">
               <FolderKanban className="h-3 w-3" />
               {projectName}
-            </span>
+            </Link>
           ) : (
             <Link to={`/trade/projects/${projectId}`} className={linkCls}>
               <FolderKanban className="h-3 w-3" />

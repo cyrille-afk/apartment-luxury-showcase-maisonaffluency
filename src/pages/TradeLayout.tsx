@@ -11,6 +11,7 @@ import { TradeSidebar } from "@/components/trade/TradeSidebar";
 import { FelixTour } from "@/components/trade/FelixTour";
 import { TradeMobileMenu } from "@/components/trade/TradeMobileMenu";
 import ToolsBreadcrumb, { ToolsBreadcrumbProvider } from "@/components/trade/ToolsBreadcrumb";
+import ProjectWorkspaceBreadcrumb from "@/components/trade/ProjectWorkspaceBreadcrumb";
 
 import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -494,6 +495,7 @@ const TradeLayout = () => {
               {!fullBleed && (
                 <div className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
                   <ToolsBreadcrumb className="mb-0" />
+                  <ProjectWorkspaceBreadcrumb />
                 </div>
               )}
               <Suspense fallback={
