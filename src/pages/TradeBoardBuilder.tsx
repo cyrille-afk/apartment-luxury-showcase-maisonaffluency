@@ -1039,29 +1039,53 @@ const TradeBoardBuilder = () => {
             </DialogTitle>
           </DialogHeader>
           <Input value={search} onChange={e => { setSearch(e.target.value); searchProducts(e.target.value); }} placeholder="Search products…" className="mb-3" />
-          <div className="flex-1 overflow-y-auto space-y-1 min-h-0">
-            {products.map(p => (
-              <button
-                key={p.id}
-                disabled={addedIds.has(p.id)}
-                onClick={() => addProduct(p.id)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
-              >
-                <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
-                  {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
-                  {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {groupedProducts.map(([brand, prods]) => {
+              const collapsed = !search.trim() && collapsedBrands.has(brand);
+              return (
+                <div key={brand} className="mb-1">
+                  <button
+                    type="button"
+                    onClick={() => setCollapsedBrands(prev => {
+                      const next = new Set(prev);
+                      if (next.has(brand)) next.delete(brand); else next.add(brand);
+                      return next;
+                    })}
+                    className="w-full flex items-center gap-2 px-1 py-2 text-left sticky top-0 bg-popover z-10"
+                  >
+                    {collapsed ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <span className="font-body text-xs uppercase tracking-[0.15em] text-muted-foreground">{brand || "Unknown designer"}</span>
+                    <span className="font-body text-[10px] text-muted-foreground/60">({prods.length})</span>
+                  </button>
+                  {!collapsed && (
+                    <div className="space-y-1">
+                      {prods.map(p => (
+                        <button
+                          key={p.id}
+                          disabled={addedIds.has(p.id)}
+                          onClick={() => addProduct(p.id)}
+                          className="w-full flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors text-left disabled:opacity-40"
+                        >
+                          <div className="w-12 h-12 rounded bg-muted shrink-0 overflow-hidden relative">
+                            {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : null}
+                            {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
+                            <p className="font-body text-xs text-muted-foreground">{p.category}</p>
+                          </div>
+                          {addedIds.has(p.id) ? (
+                            <Check className="h-4 w-4 text-green-500 shrink-0" />
+                          ) : (
+                            <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
-                  <p className="font-body text-xs text-muted-foreground">{p.brand_name}</p>
-                </div>
-                {addedIds.has(p.id) ? (
-                  <Check className="h-4 w-4 text-green-500 shrink-0" />
-                ) : (
-                  <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
-                )}
-              </button>
-            ))}
+              );
+            })}
             {products.length === 0 && (
               <p className="text-center text-muted-foreground text-sm py-8">
                 {search.trim() ? "No matching favorites found" : "No saved favorites yet — save items from the showroom first"}
