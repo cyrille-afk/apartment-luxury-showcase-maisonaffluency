@@ -280,6 +280,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
+      if (lookupRetryTimerRef.current) window.clearTimeout(lookupRetryTimerRef.current);
       subscription.unsubscribe();
     };
   }, [sbClient, fetchUserData]);
