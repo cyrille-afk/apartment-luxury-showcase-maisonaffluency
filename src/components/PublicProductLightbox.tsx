@@ -994,7 +994,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Curator Notes — immediate context below the product details */}
-          {!product.restricted_gallery_pin && <motion.div
+          <motion.div
             key={`curator-notes-${product.id}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
