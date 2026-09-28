@@ -305,7 +305,6 @@ export default function Studios() {
           </h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-sm">
             <li><Link to="/designers" className="text-foreground hover:underline">Represented designers A–Z</Link> <span className="text-muted-foreground">— atelier-level makers we represent.</span></li>
-            <li><Link to="/collectibles" className="text-foreground hover:underline">Collectible furniture</Link> <span className="text-muted-foreground">— curated edit of signed pieces.</span></li>
             <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link> <span className="text-muted-foreground">— latest additions to the catalogue.</span></li>
             <li><Link to="/gallery" className="text-foreground hover:underline">Showroom gallery</Link> <span className="text-muted-foreground">— pieces in situ.</span></li>
             <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link> <span className="text-muted-foreground">— essays on craft and provenance.</span></li>
