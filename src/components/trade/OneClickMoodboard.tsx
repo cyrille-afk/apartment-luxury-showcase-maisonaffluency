@@ -266,7 +266,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
         <>
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3 border-b border-moodboard-ink/10 pb-4">
             <div><p className="font-body text-[11px] uppercase tracking-[0.2em] text-moodboard-teal">The edit</p><h3 className="mt-1 font-display text-xl text-moodboard-ink">Selected for your brief</h3></div>
-            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (embedded ? `${Math.min(matches.length, 2)} verified · ${Math.max(0, 3 - Math.min(matches.length, 2))} pending` : `${matches.length} pieces · Curated collection`) : `${Math.min(matches.length, embedded ? 2 : matches.length)} pieces · Curated from your reference`}</span>
+            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (embedded ? `${Math.min(matches.length, 2)} verified · ${Math.max(0, 3 - Math.min(matches.length, 2))} pending` : `${matches.length} pieces · Curated collection`) : `${Math.min(matches.length, embedded ? 2 : matches.length)} pieces · Curated from your source`}</span>
           </div>
           {submitted.mode === "reference" && (isImageReference(submitted.value)
             ? <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>
