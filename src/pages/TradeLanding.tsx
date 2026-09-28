@@ -616,7 +616,7 @@ const TradeLanding = () => {
             <img
               src={TRADE_PROGRAM_HERO_IMAGE}
               alt="Maison Affluency Trade Program"
-              className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-center md:object-contain md:object-center"
+              className="pointer-events-none absolute inset-0 h-full w-full touch-none object-cover object-center md:object-contain md:object-center md:-translate-x-5"
               data-pin-nopin="true"
             />
 
