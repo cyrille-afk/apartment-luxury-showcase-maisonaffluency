@@ -47,7 +47,19 @@ export default function OneClickMoodboard() {
       const score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
       return { item, index, score };
     }).sort((a, b) => b.score - a.score || a.index - b.index);
-    return ranked.slice(0, 9).map(({ item }) => item);
+    // Dedupe parent-house/designer twins (e.g. "Vega B Chair" vs "Vega B Chair by Anthony Guerrée")
+    const seen = new Set<string>();
+    const unique: typeof catalog = [];
+    for (const { item } of ranked) {
+      const key = item.pick.title.toLowerCase().replace(/\s+by\s+.+$/, "").replace(/[^a-z0-9]/g, "");
+      const imgKey = (item.pick.image || "").split("?")[0];
+      if (seen.has(key) || (imgKey && seen.has(imgKey))) continue;
+      seen.add(key);
+      if (imgKey) seen.add(imgKey);
+      unique.push(item);
+      if (unique.length === 9) break;
+    }
+    return unique;
   }, [catalog, submitted]);
   const { data: rrpMap = {} } = usePublicRrpMap(matches.map(({ pick }) => pick.id));
 
