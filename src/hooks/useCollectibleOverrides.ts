@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { collectibleDesigners } from "@/components/Collectibles";
+import { useCollectibleDesigners, type CollectibleDesigner } from "@/lib/collectibleRoster";
 
 export type CollectibleOverride = { slug: string; trade_only: boolean };
 
@@ -132,7 +132,7 @@ export function useAtelierGallery(): Map<string, AtelierGalleryItem[]> {
   return map;
 }
 
-function applyOverride<T extends (typeof collectibleDesigners)[number]>(
+function applyOverride<T extends CollectibleDesigner>(
   d: T,
   ov: AtelierOverride | undefined
 ): T {
@@ -158,7 +158,8 @@ function applyOverride<T extends (typeof collectibleDesigners)[number]>(
 }
 
 /** Filters trade-only entries for public viewers AND merges admin overrides. */
-export function useVisibleCollectibleDesigners(): typeof collectibleDesigners {
+export function useVisibleCollectibleDesigners(): CollectibleDesigner[] {
+  const collectibleDesigners = useCollectibleDesigners();
   const tradeOnly = useCollectibleTradeOnlySlugs();
   const overrides = useAtelierOverrides();
   const { isTradeUser, isAdmin } = useAuth();

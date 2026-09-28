@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { collectibleDesigners } from "@/components/Collectibles";
+import { useCollectibleDesigners } from "@/lib/collectibleRoster";
 import {
   invalidateCollectibleOverrides,
   type AtelierOverride,
@@ -96,6 +96,7 @@ export default function TradeCollectiblesAdmin() {
     })();
   }, [isAdmin]);
 
+  const collectibleDesigners = useCollectibleDesigners();
   const rows: Row[] = useMemo(
     () =>
       collectibleDesigners
@@ -111,7 +112,7 @@ export default function TradeCollectiblesAdmin() {
           };
         })
         .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" })),
-    [tradeOnly, overrides]
+    [tradeOnly, overrides, collectibleDesigners]
   );
 
   const filtered = useMemo(() => {

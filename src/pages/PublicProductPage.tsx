@@ -69,7 +69,7 @@ import {
 } from "@/lib/finishDuplication";
 import { useAuth } from "@/hooks/useAuth";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
-import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
+import { useCollectibleSlugGate, collectibleGateRedirect } from "@/lib/collectibleGate";
 import {
   PublicSpecTable,
   TradeExclusiveCard,
@@ -1573,6 +1573,8 @@ const PublicProductPageContent: React.FC = () => {
     });
   };
 
+  const collectibleGate = useCollectibleSlugGate();
+
   // Data-driven finish → gallery image index mapping (shared with TradeProductPage).
   // MUST be declared before any early returns to keep React hook order stable.
   const productFinishMap = React.useMemo(
@@ -1581,11 +1583,12 @@ const PublicProductPageContent: React.FC = () => {
   );
 
   // Trade-only visibility for individual collectible product pages.
-  if (isCollectibleSlug(designerSlug) && !authLoading && !isTradeUser) {
+  const isGatedCollectible = collectibleGate ? collectibleGate(designerSlug) : false;
+  if (isGatedCollectible && !authLoading && !isTradeUser) {
     return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
   }
 
-  if (isLoading) {
+  if (isLoading || (!collectibleGate && !isTradeUser)) {
     return (
       <div className="min-h-[100dvh] bg-background">
         <Navigation />
