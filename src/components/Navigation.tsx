@@ -232,6 +232,37 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+
+  // Align the desktop TRADE utility link's left edge with the JOURNAL nav
+  // link's left edge. The nav row is centered while the utility cluster is
+  // right-anchored, so the exact offset is measured and applied on
+  // mount, resize and after web fonts settle.
+  useEffect(() => {
+    const align = () => {
+      const tradeEl = utilityClusterRef.current?.querySelector<HTMLElement>("[data-utility-trade]");
+      const journalEl = document.querySelector<HTMLElement>("[data-nav-journal]");
+      if (!tradeEl || !journalEl || !tradeEl.offsetWidth || !journalEl.offsetWidth) {
+        setUtilityAlignOffset(0);
+        return;
+      }
+      const delta = tradeEl.getBoundingClientRect().left - journalEl.getBoundingClientRect().left;
+      setUtilityAlignOffset((prev) => {
+        const currentShift = tradeEl.getBoundingClientRect().left - delta - journalEl.getBoundingClientRect().left;
+        return Math.round((prev + delta) * 100) / 100;
+      });
+      void delta;
+    };
+    align();
+    window.addEventListener("resize", align);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => align()).catch(() => {});
+    }
+    const t = window.setTimeout(align, 400);
+    return () => {
+      window.removeEventListener("resize", align);
+      window.clearTimeout(t);
+    };
+  }, []);
   const roomMenuCloseTimer = useRef<number | null>(null);
   // featuredDoc removed — AD free-download flow discontinued.
 
