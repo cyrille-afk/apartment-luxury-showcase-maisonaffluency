@@ -30,7 +30,6 @@ const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBann
 
 const InteractiveGalleryLookbook = lazyRetry(() => import("@/components/InteractiveGalleryLookbook"));
 const Gallery = lazyRetry(() => import("@/components/Gallery"));
-const OneClickMoodboard = lazyRetry(() => import("@/components/trade/OneClickMoodboard"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
@@ -474,12 +473,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
                 <Suspense fallback={<SectionFallback />}>
                   {isMobile ? <Gallery /> : <InteractiveGalleryLookbook initialView="living-room" />}
                 </Suspense>
-              </LazyOnVisible>
-            )}
-
-            {!routeIsCategory && (
-              <LazyOnVisible className="home-deferred-section" minHeight="520px" rootMargin="400px 0px">
-                <Suspense fallback={<SectionFallback />}><OneClickMoodboard /></Suspense>
               </LazyOnVisible>
             )}
 

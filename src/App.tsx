@@ -196,7 +196,6 @@ const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
 const SpecSheetRedirect = lazy(() => import("./pages/SpecSheetRedirect"));
 const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const PublicGallery = lazy(() => import("./pages/PublicGallery"));
-const MoodboardPage = lazy(() => import("./pages/MoodboardPage"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const CartPage = lazy(() => import("./pages/Cart"));
@@ -756,7 +755,7 @@ const App = () => {
                   <Route path="/favorites" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicFavorites /></Suspense>} />
                   <Route path="/collectibles" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicCollectibles /></Suspense>} />
 <Route path="/gallery" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicGallery /></Suspense>} />
-                  <Route path="/moodboard" element={<Suspense fallback={<PageLoadingSkeleton />}><MoodboardPage /></Suspense>} />
+                  <Route path="/moodboard" element={<Navigate to="/trade-program" replace />} />
                   <Route path="/designers-hero-lock" element={<Suspense fallback={<PageLoadingSkeleton />}><ScreenshotGallery /></Suspense>} />
                   <Route path="/curators-picks-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><CuratorsPicksDemo /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
