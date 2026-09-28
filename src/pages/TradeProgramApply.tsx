@@ -25,7 +25,7 @@ export default function TradeProgramApply() {
     if (!e.currentTarget.reportValidity()) return;
     setBusy(true);
     sessionStorage.setItem("trade_apply_prefill", JSON.stringify({ email, company, country, registration, taxId }));
-    window.location.assign(`/trade-program?apply=1&email=${encodeURIComponent(email)}`);
+    window.location.assign(`/trade-program?email=${encodeURIComponent(email)}&firm=${encodeURIComponent(company)}`);
   };
 
   const field = "h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink focus-visible:ring-moodboard-teal";
