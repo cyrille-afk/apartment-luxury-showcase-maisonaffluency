@@ -94,7 +94,7 @@ export default function OneClickMoodboard() {
         <p className="mt-1 truncate text-xs text-moodboard-ink/60">{locked ? "Materials hidden" : pick.materials || "Mixed materials"}</p>
       </div>
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-moodboard-ink/10 pt-3 text-xs">
-        <span className="shrink-0 text-moodboard-ink/50">{locked ? "Sourcing ID" : `ID ${sourcingId(pick.id)}`}</span>
+        <span className="shrink-0 text-moodboard-ink/50">{locked ? "Sourcing ID" : `ID ${sourcingId(pick.id ?? pick.title)}`}</span>
         <span className="truncate font-medium text-moodboard-teal">{locked ? "Locked" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
       </div>
     </div>
