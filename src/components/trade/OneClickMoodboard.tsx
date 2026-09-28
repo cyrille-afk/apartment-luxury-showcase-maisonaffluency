@@ -30,6 +30,28 @@ const PINNED_KAVEHOME = [
 ];
 const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 
+// Lighting intent: these words force the edit into lighting fixtures only.
+const LIGHTING_TERMS = new Set(["pendant", "pendants", "chandelier", "chandeliers", "lamp", "lamps", "lighting", "sconce", "sconces", "ceiling light", "ceiling lights"]);
+
+function isLightingQuery(terms: string[]) {
+  return terms.some((term) => LIGHTING_TERMS.has(term));
+}
+
+function isLightingItem(title: string, category: string | undefined, subcategory: string | undefined, materials: string | undefined) {
+  const text = `${title} ${category || ""} ${subcategory || ""} ${materials || ""}`.toLowerCase();
+  return /\blights?\b|\blamps?\b|\bpendants?\b|\bchandeliers?\b|\bsconces?\b|\blighting\b/.test(text);
+}
+
+// Rank lighting matches: pendants/chandeliers first, then lamps, then the
+// broader lighting category. Weighting stays 2:1 (fixture type : wording).
+function lightingScore(title: string, category: string | undefined, subcategory: string | undefined, materials: string | undefined) {
+  const text = `${title} ${materials || ""}`.toLowerCase();
+  const type = `${category || ""} ${subcategory || ""}`.toLowerCase();
+  const fixture = /\bpendants?\b/.test(text) ? 2 : /\bchandeliers?\b/.test(text) ? 2 : /\blamps?\b/.test(text) ? 1.6 : /\bsconces?\b/.test(text) ? 1.4 : 1;
+  const wording = /\bpendants?\b/.test(text) || /\bchandeliers?\b/.test(text) || /\blamps?\b/.test(text) ? 1 : /\blights?\b|\blighting\b/.test(text) ? 0.6 : 0.3;
+  return 2 * fixture + wording + (/\blights?\b|\blighting\b/.test(type) ? 0.5 : 0);
+}
+
 function isAshDiningChair(materials: string | undefined, title: string, category: string | undefined, subcategory: string | undefined) {
   const material = (materials || "").toLowerCase();
   const type = `${title} ${category || ""} ${subcategory || ""}`.toLowerCase();
