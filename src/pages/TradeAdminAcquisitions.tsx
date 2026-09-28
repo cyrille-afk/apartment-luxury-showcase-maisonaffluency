@@ -25,6 +25,7 @@ import B2BOutreachModal from "@/components/trade/B2BOutreachModal";
 import LinkedInOutreachModal from "@/components/trade/LinkedInOutreachModal";
 import EmailBriefingModal from "@/components/trade/EmailBriefingModal";
 import InboundLeadTemplates from "@/components/trade/InboundLeadTemplates";
+import DemoBookingTracker from "@/components/trade/DemoBookingTracker";
 import { Briefcase, ExternalLink, Instagram, Linkedin, Mail, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -688,7 +689,8 @@ const TradeAdminAcquisitions = () => {
           </div>
         </header>
 
-        <InboundLeadTemplates leads={rows} />
+        <DemoBookingTracker leads={rows} onOpenChecklist={() => setChecklistSignal((n) => n + 1)} />
+        <InboundLeadTemplates leads={rows} openSignal={checklistSignal} />
 
         {/* Country tabs */}
         <nav className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pt-8" aria-label="Filter by country">
