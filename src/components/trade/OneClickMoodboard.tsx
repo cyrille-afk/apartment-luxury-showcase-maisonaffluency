@@ -117,8 +117,8 @@ export default function OneClickMoodboard() {
                     </article>
                   ))}
                 </div>
-                {!unlocked && <div className="pointer-events-none absolute inset-x-0 top-12 z-10 flex justify-center px-3 sm:sticky sm:bottom-6 sm:-mt-64 sm:pb-6">
-                  <div className="pointer-events-auto w-full max-w-lg border border-border bg-card p-6 shadow-elegant md:p-8">
+                {!unlocked && <div className="pointer-events-none absolute inset-0 z-10 flex justify-center px-3">
+                  <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg border border-border bg-card p-6 shadow-elegant md:p-8">
                     <LockKeyhole className="mb-4 size-5 text-primary" aria-hidden="true" />
                     <h4 className="font-display text-xl leading-snug text-card-foreground">Unlock the Full Astra 6 Sourcing List.</h4>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Create a free account to reveal all remaining matching items, direct supplier links, and custom dimensions.</p>
