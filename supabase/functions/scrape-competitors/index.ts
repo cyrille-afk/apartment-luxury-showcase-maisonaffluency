@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
           };
           for (const idx of [`${origin}/sitemap_index.xml`, `${origin}/sitemap.xml`]) {
             try {
-              const all = (await locs(idx)).filter((u) => /designer|artist|maker/i.test(u) && /\.xml/i.test(u) && !/clubroom/i.test(u));
+              const all = (await locs(idx)).filter((u) => /designer|artist|maker/i.test(u) && /\.xml/i.test(u) && !/clubroom|work|exhibition|press/i.test(u));
               // Prefer the product-designer taxonomy (the shoppable roster) over editorial portraits.
               const pref = all.filter((u) => /product[_-]?designer/i.test(u));
               const subs = pref.length ? pref : all;
