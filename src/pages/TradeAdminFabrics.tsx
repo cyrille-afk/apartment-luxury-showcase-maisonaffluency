@@ -209,14 +209,8 @@ export default function TradeAdminFabrics() {
   const { data: fabrics = [], isLoading } = useQuery({
     queryKey: ["admin-fabrics"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fabrics")
-        .select("*")
-        .order("category")
-        .order("sort_order")
-        .order("name");
-      if (error) throw error;
-      return (data as Fabric[]) || [];
+      const { fetchAllFabrics } = await import("@/lib/fetchAllFabrics");
+      return fetchAllFabrics<Fabric>("*");
     },
     enabled: isAdmin,
   });

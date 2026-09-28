@@ -160,14 +160,8 @@ export default function ProductFabricsPanel({
   const { data: allFabrics = EMPTY_FABRICS } = useQuery({
     queryKey: ["all-fabrics-for-panel"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fabrics")
-        .select("*")
-        .eq("is_active", true)
-        .order("category")
-        .order("name");
-      if (error) throw error;
-      return (data as Fabric[]) || [];
+      const { fetchAllFabrics } = await import("@/lib/fetchAllFabrics");
+      return fetchAllFabrics<Fabric>("*", { activeOnly: true });
     },
     enabled: adding,
   });
