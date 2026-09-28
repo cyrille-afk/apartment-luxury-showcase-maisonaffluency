@@ -86,7 +86,7 @@ export default function OneClickMoodboard() {
       active ? "border-moodboard-teal text-moodboard-teal" : "border-transparent text-moodboard-ink/50 hover:text-moodboard-ink"
     }`;
 
-  const cardBody = (pick: { id: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
+  const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
     <div className="flex min-h-32 flex-col justify-between p-4">
       <div>
         <p className="truncate text-[10px] uppercase tracking-wider text-moodboard-teal">{locked ? "More from the collection" : designerName}</p>
