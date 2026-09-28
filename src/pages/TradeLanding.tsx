@@ -685,7 +685,7 @@ const TradeLanding = () => {
 
         {/* ─── What You Unlock — Felix sourcing preview (controls left · output right) ─── */}
         <div className="w-full bg-moodboard-cream border-y border-border">
-          <div className="max-w-6xl mx-auto px-8 lg:px-12 py-14 md:py-20">
+          <div className="max-w-[1500px] mx-auto px-6 py-14 md:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
@@ -717,7 +717,7 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: 0.15 }}
-                className="min-w-0 lg:col-span-2 rounded-[4px] border border-border/60 bg-card p-5 md:p-8"
+                className="min-w-0 lg:col-span-2 rounded-[4px] border border-border/60 bg-card p-4 md:p-6"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent">
