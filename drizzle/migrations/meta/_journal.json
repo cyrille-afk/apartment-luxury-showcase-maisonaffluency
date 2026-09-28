@@ -785,6 +785,13 @@
       "when": 1790582138794,
       "tag": "0111_allow_followup_hook_c",
       "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "7",
+      "when": 1790582154531,
+      "tag": "0112_log_outreach_click_hook_c",
+      "breakpoints": true
     }
   ]
 }
