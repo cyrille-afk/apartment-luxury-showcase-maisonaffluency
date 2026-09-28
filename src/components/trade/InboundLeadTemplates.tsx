@@ -20,60 +20,31 @@ type Template = { key: string; title: string; stage: string; body: string };
 
 const TEMPLATES: Template[] = [
   {
-    key: "demo_request_ack",
-    title: "Demo Request — First Reply",
-    stage: "Inbound",
+    key: "demo_direct",
+    title: "Option 1 — Direct & Action-Oriented",
+    stage: "Targeted focus",
     body: `Hi [First Name],
 
-Thank you for reaching out on behalf of [Studio Name]. We'd be delighted to walk your team through the Maison Affluency Trade Program live.
+Thanks for reaching out! I’d be glad to walk you through a live platform demo and show you how we handle high-throughput Trade ID generation for studios like [Studio Name].
 
-In 30 minutes we'll cover interactive material boards, live client feedback on the canvas, and White-Label Presentation mode with your own branding.
+Let's get something on the books. You can pick a time that works best for you directly via my scheduling link here: [Booking Link].
 
-Please choose a slot that suits you here: [Booking Link]
+To ensure we tailor the demo specifically to your studio's setup, could you share a quick detail ahead of time? Are your current operations primarily focused on [Focus Area]?
 
-Warm regards,
-[Your Name]`,
-  },
-  {
-    key: "demo_confirmed",
-    title: "Demo Confirmed",
-    stage: "Booked",
-    body: `Hi [First Name],
-
-Your live demo for [Studio Name] is confirmed for [Demo Date]. 
-
-To make the session specific to your pipeline, feel free to share one current project brief — we'll build a sample board around it.
-
-To fast-track your trade account, please have your company registration number ready; we verify Trade IDs before workspace activation.
-
-See you then,
-[Your Name]`,
-  },
-  {
-    key: "demo_reschedule",
-    title: "Reschedule / No-Show",
-    stage: "Follow-up",
-    body: `Hi [First Name],
-
-We missed each other for the [Studio Name] demo — no problem at all. Here is a fresh link to pick a time that works better: [Booking Link]
-
-Your reserved trade allocation remains on hold for 7 days.
+Looking forward to connecting!
 
 Best,
 [Your Name]`,
   },
   {
-    key: "post_demo",
-    title: "Post-Demo — Activation",
-    stage: "Converted",
-    body: `Hi [First Name],
+    key: "demo_conversational",
+    title: "Option 2 — Short & Conversational",
+    stage: "High-friction pre-screen",
+    body: `Hi [First Name], great to connect! I'd love to set up a live demo for the team at [Studio Name].
 
-Thank you for the time today. As discussed, [Studio Name]'s trade workspace is being prepared.
+You can grab a convenient spot on my calendar here: [Booking Link].
 
-Our team is completing a short Trade ID verification; you'll receive your access credentials as soon as it clears, typically within one business day.
-
-Kind regards,
-[Your Name]`,
+If you have 60 seconds to spare before we meet, dropping your corporate email and current platform setup in our quick intake form ([Intake Link]) will help us customize the sandbox environment for your demo. See you soon!`,
   },
 ];
 
@@ -123,6 +94,7 @@ export default function InboundLeadTemplates({ leads }: { leads: LeadLite[] }) {
   const auto: Record<string, string> = {
     "First Name": lead?.founder_name?.split(" ")[0] ?? "",
     "Studio Name": lead?.studio_name ?? "",
+    "Focus Area": "cross-border trading infrastructure",
     "Demo Date": demoAt ? new Date(demoAt).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" }) : "",
   };
   const merged = { ...auto, ...Object.fromEntries(Object.entries(vals).filter(([, v]) => v)) };
@@ -249,6 +221,10 @@ export default function InboundLeadTemplates({ leads }: { leads: LeadLite[] }) {
               </label>
             ))}
           </div>
+
+          <p className="lg:col-span-3 rounded-md border border-border bg-muted/40 p-4 text-sm text-foreground">
+            <span className="font-medium">Downstream operations hook:</span> once {auto["First Name"] || "the lead"} books a demo, press “Log demo booked” to register {auto["Studio Name"] || "the studio"} into Phase 1 (Intake) of the Trade ID Audit checklist below.
+          </p>
 
           <div className="lg:col-span-3">
             <h3 className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-foreground">
