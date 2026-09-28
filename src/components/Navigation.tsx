@@ -115,7 +115,7 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   dining: { src: intimateDiningAmbient, alt: "Intimate dining setting with collectible furniture" },
   bedroom: { src: calmingBedroomAmbient, alt: "Calming bedroom with layered natural materials" },
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
-  decor: { src: livingRoomAmbient, alt: "Decorative objects in an architectural living room" },
+  decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
 };
 
 const leftNavItems = [{
@@ -1150,31 +1150,40 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                           to { opacity: 1; transform: translateY(0); }
                         }
                       `}</style>
-                      <div className="px-9 py-8">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => navigateFromMegaMenu("Décor")}
-                          className="mb-4 flex h-8 w-auto justify-start rounded-none p-0 font-body text-[13px] font-semibold tracking-normal text-foreground hover:bg-transparent hover:text-foreground"
-                        >
-                          Décor Collections
-                        </Button>
-                        <div className="grid grid-cols-3 gap-x-10">
-                          {DECOR_COLUMNS.map((col, ci) => (
-                            <div key={ci} className="flex flex-col">
-                              {col.map((subcategory) => (
-                                <Button
-                                  key={subcategory}
-                                  type="button"
-                                  variant="ghost"
-                                  onClick={() => navigateFromMegaMenu("Décor", subcategory)}
-                                  className="mb-3 block h-auto w-full whitespace-normal rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                >
-                                  {subcategory}
-                                </Button>
-                              ))}
-                            </div>
-                          ))}
+                      <div className="flex min-h-96 items-stretch overflow-hidden">
+                        <div className="min-h-full w-2/3 shrink-0 border-r border-border/60 px-9 py-8">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => navigateFromMegaMenu("Décor")}
+                            className="mb-4 flex h-8 w-auto justify-start rounded-none p-0 font-body text-[13px] font-semibold tracking-normal text-foreground hover:bg-transparent hover:text-foreground"
+                          >
+                            Décor Collections
+                          </Button>
+                          <div className="grid grid-cols-2 gap-x-10">
+                            {DECOR_COLUMNS.map((col, ci) => (
+                              <div key={ci} className="flex flex-col">
+                                {col.map((subcategory) => (
+                                  <Button
+                                    key={subcategory}
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => navigateFromMegaMenu("Décor", subcategory)}
+                                    className="mb-3 block h-auto w-full whitespace-normal rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                  >
+                                    {subcategory}
+                                  </Button>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="relative min-h-full w-1/3 shrink-0 overflow-hidden bg-[hsl(var(--collection-card-canvas))] p-6">
+                          <img
+                            src={roomAmbientImages.decor.src}
+                            alt={roomAmbientImages.decor.alt}
+                            className="size-full object-contain object-center"
+                          />
                         </div>
                       </div>
                     </div>
