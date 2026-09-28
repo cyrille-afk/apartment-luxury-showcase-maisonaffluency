@@ -5,7 +5,6 @@ import { ChevronUp } from "lucide-react";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import OneClickMoodboard from "@/components/trade/OneClickMoodboard";
 import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import Gallery from "@/components/Gallery";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -76,8 +75,6 @@ const PublicGallery = () => {
         >
           {isMobile ? <Gallery /> : <InteractiveGalleryLookbook />}
         </div>
-
-        <OneClickMoodboard />
 
         <Footer />
         

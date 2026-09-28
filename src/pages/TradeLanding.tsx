@@ -19,6 +19,7 @@ import Navigation from "@/components/Navigation";
 import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
+import OneClickMoodboard from "@/components/trade/OneClickMoodboard";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
@@ -681,9 +682,9 @@ const TradeLanding = () => {
         </motion.div>
 
         {/* ─── What You Unlock ─── */}
-        <div className="w-full bg-muted/30 border-y border-border">
+        <div className="w-full bg-moodboard-cream border-y border-border">
           <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] gap-10 lg:gap-12 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -706,7 +707,7 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: 0.15 }}
-              className="rounded-[4px] border border-border/60 bg-cream p-6 md:p-8"
+              className="min-w-0 rounded-[4px] border border-border/60 bg-card p-5 md:p-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent">
@@ -725,6 +726,7 @@ const TradeLanding = () => {
                 <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify mt-3">
                   Tailor your studio experience: Felix can be renamed to whatever suits your firm's culture.
                 </p>
+                <OneClickMoodboard embedded />
               </motion.div>
             </div>
           </div>
