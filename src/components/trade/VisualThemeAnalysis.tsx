@@ -313,11 +313,15 @@ export default function VisualThemeAnalysis({ dna, accountId, onSaved }: { dna: 
             <span className="shrink-0 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{images.length}/6 assets</span>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-1.5 md:gap-2">
-            {Array.from({ length: 6 }, (_, index) => (
-              <EvidenceImage key={images[index] ?? `empty-${index}`} src={images[index]} index={index} />
-            ))}
-          </div>
+          {images.length === 0 ? (
+            <p className="mt-5 font-body text-xs text-muted-foreground">No portfolio images were captured for this analysis.</p>
+          ) : (
+            <div className="mt-5 grid grid-cols-3 gap-1.5 md:gap-2">
+              {images.map((src, index) => (
+                <EvidenceImage key={src} src={src} index={index} />
+              ))}
+            </div>
+          )}
 
           <div className="mt-6 border-t border-border pt-4">
             <p className="font-body text-[10px] font-semibold uppercase tracking-[0.24em] text-foreground">Derived Palette</p>
