@@ -238,8 +238,8 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
 
   // Embedded preview always keeps a 3-card row: verified matches first, then
   // "Further sourcing pending" placeholders for any remaining slots — for
-  // every prompt, not just the default ash-chairs query.
-  const ashPending = embedded && submitted?.mode === "prompt";
+  // every input mode (prompt edits AND website/reference URLs).
+  const showPending = embedded;
   // A website URL (like the studio's own homepage) is matched by its readable
   // words — only image or Pinterest links carry the image-matching disclaimer.
   const isImageReference = (value: string) => {
@@ -274,8 +274,8 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
           {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
-          {!isLoading && !isError && matches.length === 0 && !ashPending && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
-          {(matches.length > 0 || ashPending) && <>
+          {!isLoading && !isError && matches.length === 0 && !showPending && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
+          {(matches.length > 0 || showPending) && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
               {matches.slice(0, embedded ? 2 : 3).map(({ pick, designerName }) => (
                 <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
@@ -283,7 +283,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
                   {cardBody(pick, designerName, false)}
                 </article>
               ))}
-              {ashPending && Array.from({ length: Math.max(0, 3 - Math.min(matches.length, 2)) }, (_, index) => (
+              {showPending && Array.from({ length: Math.max(0, 3 - Math.min(matches.length, 2)) }, (_, index) => (
                 <article key={`pending-${index}`} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
                   <div className="aspect-square bg-moodboard-ink/5" aria-hidden="true" />
                   <div className="p-2.5"><p className="font-display text-sm text-moodboard-ink">Further sourcing pending</p><p className="mt-1 text-xs text-moodboard-ink/60">Material verification required</p><p className="mt-3 border-t border-moodboard-ink/10 pt-2 text-xs text-moodboard-teal">Price upon Request</p></div>
