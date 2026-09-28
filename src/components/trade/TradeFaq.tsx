@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-/* Extracted from TradeLanding — FAQ column shared by the /trade-program page. */
-const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const FAQ_ITEMS = TRADE_FAQ_ITEMS;
+/* Extracted from TradeLanding — FAQ column shared by the /trade-program page.
+   TRADE_FAQ_ITEMS is exported so the trade sign-in page renders the exact same
+   dataset in its accordion. */
+export const TRADE_FAQ_ITEMS = [
     { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
     { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
     { q: "How does trade pricing work?", a: "Once approved, you'll see exclusive trade pricing when signed in. You can also request bespoke multi-product quotations with all prices listed at a glance, including GST where applicable." },
@@ -20,6 +19,11 @@ const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
     { q: "Can I use my own freight forwarder or logistics provider?", a: "Yes. While our automated portal provides instant DDP and DAP quotes through our consolidated white-glove partners, you can easily select 'Ex-Works' during checkout to have your preferred global logistics firm coordinate collection directly from our European ateliers." },
     { q: "Do you offer physical material swatches for project mood boards?", a: "Absolutely. Verified trade members can request physical samples, wood finishes, and textile swatches directly through their project folders dashboard. Most standard textile and leather swatches are dispatched internationally within 48 hours." },
   ];
+
+const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const FAQ_ITEMS = TRADE_FAQ_ITEMS;
 
   return (
     <div className="flex-1">
