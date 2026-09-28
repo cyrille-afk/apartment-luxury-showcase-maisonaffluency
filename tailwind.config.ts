@@ -73,6 +73,7 @@ export default {
           cream: "hsl(var(--moodboard-cream))",
           teal: "hsl(var(--moodboard-teal))",
           "teal-foreground": "hsl(var(--moodboard-teal-foreground))",
+          ink: "hsl(var(--moodboard-ink))",
         },
         "visualiser-canvas": "hsl(var(--visualiser-canvas))",
         "visual-evidence": "hsl(var(--visual-evidence))",
