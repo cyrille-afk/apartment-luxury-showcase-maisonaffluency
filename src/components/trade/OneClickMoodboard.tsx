@@ -5,8 +5,9 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
 
@@ -20,18 +21,43 @@ function sourcingId(id: string) {
   return `MA-${(hash % 90000 + 10000).toString()}`;
 }
 
+const DEFAULT_REFERENCE = "https://kavehome.sg";
+// Curated first row for the showcase reference link.
+const PINNED_KAVEHOME = [
+  { title: /^medallion chair/i, designer: /dagmar/i },
+  { title: /^vega b chair/i, designer: /de la espada/i },
+  { title: /^entre bench/i, designer: /dagmar/i },
+];
+
 export default function OneClickMoodboard() {
-  const [mode, setMode] = useState<"prompt" | "reference">("prompt");
+  const [mode, setMode] = useState<"prompt" | "reference">("reference");
   const [prompt, setPrompt] = useState("");
-  const [reference, setReference] = useState("");
-  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>(null);
+  const [reference, setReference] = useState(DEFAULT_REFERENCE);
+  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>({ value: DEFAULT_REFERENCE, mode: "reference" });
   const [generating, setGenerating] = useState(false);
+  // Unlock is driven ONLY by the server-verified trade/admin role — never by local form state.
   const { isTradeUser, isAdmin } = useAuth();
   const unlocked = isTradeUser || isAdmin;
+  const [email, setEmail] = useState("");
+  const [capturing, setCapturing] = useState(false);
+  const [captureError, setCaptureError] = useState("");
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const generateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: catalog = [], isLoading, isError } = useDbCuratorPicks();
   const destination = useShippingDestination();
+
+  const captureLead = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!event.currentTarget.reportValidity()) return;
+    setCapturing(true);
+    setCaptureError("");
+    const value = email.trim().toLowerCase();
+    const { error: rpcError } = await supabase.rpc("moodboard_capture_lead", { _email: value, _reference: submitted?.value ?? null });
+    setCapturing(false);
+    if (rpcError) { setCaptureError("We couldn't record your request. Please try again."); return; }
+    navigate(`/trade-program/apply?email=${encodeURIComponent(value)}`);
+  };
 
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
 
@@ -44,9 +70,12 @@ export default function OneClickMoodboard() {
       } catch { return submitted.value; }
     })() : submitted.value;
     const terms = keywords(search);
+    const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
     const ranked = catalog.map((item, index) => {
       const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
-      const score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+      let score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+      const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
+      if (pinIndex >= 0) score = 10000 - pinIndex;
       return { item, index, score };
     }).sort((a, b) => b.score - a.score || a.index - b.index);
     // Dedupe parent-house/designer twins (e.g. "Vega B Chair" vs "Vega B Chair by Anthony Guerrée")
@@ -177,11 +206,14 @@ export default function OneClickMoodboard() {
                   <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
                     <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
                     <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
-                    <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Reserved for verified trade members. Apply for a professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
-                    <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                      <Button asChild className="h-11 flex-1 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90"><Link to="/trade-program">Apply for Trade Access <ArrowRight aria-hidden="true" /></Link></Button>
-                      <Button asChild variant="outline" className="h-11 rounded-none border-moodboard-ink/20 px-5 text-xs uppercase tracking-[0.18em] text-moodboard-ink"><Link to="/trade/login">Sign in</Link></Button>
-                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
+                    <form onSubmit={captureLead} className="mt-5 flex flex-col gap-2 sm:flex-row">
+                      <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
+                      <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
+                      <Button type="submit" disabled={capturing} className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">{capturing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <>Unlock <ArrowRight aria-hidden="true" /></>}</Button>
+                    </form>
+                    {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
+                    <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
                   </div>
                 </div>}
               </div>}
