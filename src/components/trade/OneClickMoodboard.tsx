@@ -56,7 +56,7 @@ export default function OneClickMoodboard() {
     const { error: rpcError } = await supabase.rpc("moodboard_capture_lead", { _email: value, _reference: submitted?.value ?? null });
     setCapturing(false);
     if (rpcError) { setCaptureError("We couldn't record your request. Please try again."); return; }
-    navigate(`/trade-program/apply?email=${encodeURIComponent(value)}`);
+    navigate(`/trade-program?email=${encodeURIComponent(value)}&source=moodboard`);
   };
 
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
