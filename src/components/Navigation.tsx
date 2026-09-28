@@ -222,6 +222,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
   const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
@@ -722,48 +723,24 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   )}
                 </div>
 
-                {/* Trade Program — separated */}
+                {/* Trade — expandable accordion */}
                 <div
                   className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
                   style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
                 >
-                  {rightNavItems.map((item) => (
-                    <button
-                      key={item.href}
-                      onClick={() => handleNavClick(item.href)}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-accent-foreground hover:bg-accent/80 font-bold bg-accent px-3 rounded-lg"
-                    >
-                      {item.label}
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Contact Us — separate section */}
-                <div
-                  className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 4) * 120}ms`, animationFillMode: 'forwards' }}
-                >
                   <button
-                    onClick={() => setContactExpanded(!contactExpanded)}
+                    onClick={() => setMobileTradeExpanded((o) => !o)}
+                    aria-expanded={mobileTradeExpanded}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
                   >
-                    Contact Us
-                    <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${contactExpanded ? "rotate-90" : ""}`} />
+                    Trade
+                    <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${mobileTradeExpanded ? "rotate-90" : ""}`} />
                   </button>
-                  {contactExpanded && (
-                    <div className="ml-4 mb-1 space-y-0 border-l border-border/30 pl-4">
-                      {contactOptions.map((option) => (
-                        <button
-                          key={option.label}
-                          onTouchEnd={undefined}
-                          onClick={() => { closeMobileMenu(); option.action(); }}
-                          className="flex items-center gap-3 text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-1.5 font-semibold"
-                        >
-                          <option.icon className="h-4 w-4 text-primary" />
-                          <span>{option.label}</span>
-                        </button>
-                      ))}
+                  {mobileTradeExpanded && (
+                    <div className="ml-4 mb-1 border-l border-border/30 pl-4 flex flex-col">
+                      <button onClick={() => { closeMobileMenu(); handleNavClick("/trade/login"); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Sign-In</button>
+                      <button onClick={() => { closeMobileMenu(); handleNavClick("/trade-program?intent=apply"); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Join</button>
+                      <button onClick={() => { closeMobileMenu(); setServicesOpen(true); }} className="text-left font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground hover:text-primary transition-colors py-2 font-semibold">Request Services</button>
                     </div>
                   )}
                 </div>
@@ -947,7 +924,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       </button>
                     </div>
                   </div>
-                  <TradeServicesRequestModal open={servicesOpen} onOpenChange={setServicesOpen} />
                 </div>
               )}
 
@@ -1339,6 +1315,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         </div>
       </div>
     </nav>
+    <TradeServicesRequestModal open={servicesOpen} onOpenChange={setServicesOpen} />
     {authGateMounted && (
       <React.Suspense fallback={null}>
         <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
