@@ -5,8 +5,9 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
 
@@ -20,18 +21,43 @@ function sourcingId(id: string) {
   return `MA-${(hash % 90000 + 10000).toString()}`;
 }
 
+const DEFAULT_REFERENCE = "https://kavehome.sg";
+// Curated first row for the showcase reference link.
+const PINNED_KAVEHOME = [
+  { title: /^medallion chair/i, designer: /dagmar/i },
+  { title: /^vega b chair/i, designer: /de la espada/i },
+  { title: /^entre bench/i, designer: /dagmar/i },
+];
+
 export default function OneClickMoodboard() {
-  const [mode, setMode] = useState<"prompt" | "reference">("prompt");
+  const [mode, setMode] = useState<"prompt" | "reference">("reference");
   const [prompt, setPrompt] = useState("");
-  const [reference, setReference] = useState("");
-  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>(null);
+  const [reference, setReference] = useState(DEFAULT_REFERENCE);
+  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>({ value: DEFAULT_REFERENCE, mode: "reference" });
   const [generating, setGenerating] = useState(false);
+  // Unlock is driven ONLY by the server-verified trade/admin role — never by local form state.
   const { isTradeUser, isAdmin } = useAuth();
   const unlocked = isTradeUser || isAdmin;
+  const [email, setEmail] = useState("");
+  const [capturing, setCapturing] = useState(false);
+  const [captureError, setCaptureError] = useState("");
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const generateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: catalog = [], isLoading, isError } = useDbCuratorPicks();
   const destination = useShippingDestination();
+
+  const captureLead = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!event.currentTarget.reportValidity()) return;
+    setCapturing(true);
+    setCaptureError("");
+    const value = email.trim().toLowerCase();
+    const { error: rpcError } = await supabase.rpc("moodboard_capture_lead", { _email: value, _reference: submitted?.value ?? null });
+    setCapturing(false);
+    if (rpcError) { setCaptureError("We couldn't record your request. Please try again."); return; }
+    navigate(`/trade-program/apply?email=${encodeURIComponent(value)}`);
+  };
 
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
 
@@ -44,9 +70,12 @@ export default function OneClickMoodboard() {
       } catch { return submitted.value; }
     })() : submitted.value;
     const terms = keywords(search);
+    const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
     const ranked = catalog.map((item, index) => {
       const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
-      const score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+      let score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+      const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
+      if (pinIndex >= 0) score = 10000 - pinIndex;
       return { item, index, score };
     }).sort((a, b) => b.score - a.score || a.index - b.index);
     // Dedupe parent-house/designer twins (e.g. "Vega B Chair" vs "Vega B Chair by Anthony Guerrée")
