@@ -223,7 +223,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
   const { submitted, generating, matches, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
 
   const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
-    <div className={`flex flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
+    <div className={`flex flex-1 flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
       <div>
         <p className="truncate text-[10px] uppercase tracking-wider text-moodboard-teal">{locked ? "More from the collection" : designerName}</p>
         <h4 className="mt-1 truncate font-display text-base text-moodboard-ink">{locked ? "Selection locked" : pick.title}</h4>
@@ -243,9 +243,9 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       {generating && (
         <div role="status" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Curating your edit">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="animate-pulse border border-moodboard-ink/10 bg-card">
-              <div className="aspect-[4/5] bg-moodboard-ink/5" />
-              <div className="space-y-2 p-4"><div className="h-2 w-1/3 bg-moodboard-ink/10" /><div className="h-3 w-2/3 bg-moodboard-ink/10" /><div className="h-2 w-1/2 bg-moodboard-ink/10" /></div>
+            <div key={i} className="flex h-full flex-col animate-pulse border border-moodboard-ink/10 bg-card">
+              <div className="aspect-square bg-moodboard-ink/5" />
+              <div className="flex-1 space-y-2 p-4"><div className="h-2 w-1/3 bg-moodboard-ink/10" /><div className="h-3 w-2/3 bg-moodboard-ink/10" /><div className="h-2 w-1/2 bg-moodboard-ink/10" /></div>
             </div>
           ))}
         </div>
@@ -265,14 +265,14 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
           {(matches.length > 0 || ashPending) && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
               {matches.slice(0, 3).map(({ pick, designerName }) => (
-                <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
-                  <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-contain" /></div>
+                <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                  <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
                   {cardBody(pick, designerName, false)}
                 </article>
               ))}
               {ashPending && Array.from({ length: Math.max(0, 3 - matches.length) }, (_, index) => (
-                <article key={`pending-${index}`} className="flex min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                  <div className="aspect-[4/5] bg-moodboard-ink/5" aria-hidden="true" />
+                <article key={`pending-${index}`} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                  <div className="aspect-square bg-moodboard-ink/5" aria-hidden="true" />
                   <div className="p-2.5"><p className="font-display text-sm text-moodboard-ink">Further sourcing pending</p><p className="mt-1 text-xs text-moodboard-ink/60">Material verification required</p><p className="mt-3 border-t border-moodboard-ink/10 pt-2 text-xs text-moodboard-teal">Price upon Request</p></div>
                 </article>
               ))}
@@ -291,15 +291,15 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
               </div> : <>
               <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
                 {matches.slice(3).map(({ pick, designerName }) => (
-                  <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover" /></div>
+                  <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                    <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
                     {cardBody(pick, designerName, !unlocked)}
                   </article>
                 ))}
                 {!unlocked && matches.length <= 3 && [0, 1, 2].map((index) => (
-                  <div key={`pending-${index}`} className="border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-[4/5] bg-moodboard-ink/5" />
-                    <div className="p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
+                  <div key={`pending-${index}`} className="flex h-full flex-col border border-moodboard-ink/10 bg-card">
+                    <div className="aspect-square bg-moodboard-ink/5" />
+                    <div className="flex-1 p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
                   </div>
                 ))}
               </div>
