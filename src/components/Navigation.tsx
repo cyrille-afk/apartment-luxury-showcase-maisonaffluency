@@ -91,9 +91,18 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
 // Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
 const DECOR_SUBCATEGORIES = SUBCATEGORY_MAP["Décor"] ?? [];
 const DECOR_COLUMNS: string[][] = (() => {
+  // Balanced 5 / 4 / 4 split for 13 items.
   const cols = 3;
-  const per = Math.ceil(DECOR_SUBCATEGORIES.length / cols);
-  return Array.from({ length: cols }, (_, i) => DECOR_SUBCATEGORIES.slice(i * per, (i + 1) * per));
+  const base = Math.floor(DECOR_SUBCATEGORIES.length / cols);
+  const extra = DECOR_SUBCATEGORIES.length % cols;
+  const out: string[][] = [];
+  let i = 0;
+  for (let c = 0; c < cols; c++) {
+    const n = base + (c < extra ? 1 : 0);
+    out.push(DECOR_SUBCATEGORIES.slice(i, i + n));
+    i += n;
+  }
+  return out;
 })();
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
@@ -1132,7 +1141,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="decor"
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      className="absolute left-1/2 -translate-x-1/2 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
                       style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
