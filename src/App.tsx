@@ -196,7 +196,6 @@ const ApartmentTour = lazy(() => import("./pages/ApartmentTour"));
 const SpecSheetRedirect = lazy(() => import("./pages/SpecSheetRedirect"));
 const PublicCollectibles = lazy(() => import("./pages/PublicCollectibles"));
 const PublicGallery = lazy(() => import("./pages/PublicGallery"));
-const MoodboardPage = lazy(() => import("./pages/MoodboardPage"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const CartPage = lazy(() => import("./pages/Cart"));
