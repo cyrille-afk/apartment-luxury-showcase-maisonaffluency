@@ -103,15 +103,23 @@ export function useMoodboardSourcing() {
     })() : submitted.value;
     const terms = keywords(search);
     const strictAshChair = submitted.mode === "prompt" && terms.includes("ash") && terms.some((term) => term === "chair" || term === "chairs");
+    // Lighting keywords ("pendants", "chandelier", "lamp", "lighting", …) force
+    // the edit into lighting fixtures — sofas/tables must never surface.
+    const lightingIntent = submitted.mode === "prompt" && isLightingQuery(terms);
     const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
     const eligible = strictAshChair
       ? catalog.filter(({ pick }) => isAshDiningChair(pick.materials, pick.title, pick.category, pick.subcategory))
+      : lightingIntent
+      ? catalog.filter(({ pick }) => isLightingItem(pick.title, pick.category, pick.subcategory, pick.materials))
       : catalog;
     const ranked = eligible.map((item, index) => {
       const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
       let score = strictAshChair
         ? ashDiningChairScore(item.pick.title, item.pick.category, item.pick.subcategory)
-        : terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+        : lightingIntent
+        ? lightingScore(item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials) +
+          terms.reduce((sum, term) => sum + (haystack.some((word) => word === term || word.replace(/s$/, "") === term.replace(/s$/, "")) ? 3 : 0), 0)
+        : terms.reduce((sum, term) => sum + (haystack.some((word) => word === term || word.replace(/s$/, "") === term.replace(/s$/, "")) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
       const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
       if (pinIndex >= 0) score = 10000 - pinIndex;
       return { item, index, score };
