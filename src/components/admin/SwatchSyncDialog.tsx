@@ -45,11 +45,9 @@ export default function SwatchSyncDialog({
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    supabase
-      .from("fabrics")
-      .select("id,name,supplier,category")
-      .eq("is_active", true)
-      .limit(1000)
+    import("@/lib/fetchAllFabrics")
+      .then(({ fetchAllFabrics }) => fetchAllFabrics("id,name,supplier,category", { activeOnly: true }))
+      .then((data) => ({ data, error: null as any }), (error) => ({ data: null as any[] | null, error }))
       .then(({ data, error }) => {
         if (error) {
           console.error("[SwatchSync] load failed", error);

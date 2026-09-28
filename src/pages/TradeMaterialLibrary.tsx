@@ -53,16 +53,11 @@ export default function TradeMaterialLibrary() {
   const { data: swatches = [], isLoading } = useQuery({
     queryKey: ["material-library-fabrics"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fabrics")
-        .select("id, name, description, image_url, category, supplier, sort_order, is_active")
-        .eq("is_active", true)
-        .order("category")
-        .order("supplier")
-        .order("sort_order")
-        .order("name");
-      if (error) throw error;
-      return (data as LibraryFabric[]) || [];
+      const { fetchAllFabrics } = await import("@/lib/fetchAllFabrics");
+      return fetchAllFabrics<LibraryFabric>(
+        "id, name, description, image_url, category, supplier, sort_order, is_active",
+        { activeOnly: true },
+      );
     },
   });
 
