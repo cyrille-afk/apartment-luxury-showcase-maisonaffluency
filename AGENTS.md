@@ -8,7 +8,7 @@
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
 - Felix tour spotlights await target sizes; keep prior rect while transitioning.
-- Felix split: one useMoodboardSourcing feeds Controls (left) + Results (right, col-span-2); container max-w-[1500px] px-6 (navbar rhythm — Felix edges must stay flush with the Navigation container; Benefits 50/50 split still uses max-w-6xl px-8 lg:px-12).
+- Felix + Trade Program Benefits: shared navbar rhythm container max-w-[1500px] px-6, edges flush with Navigation; Felix = Controls left + Results right (col-span-2), one useMoodboardSourcing; Benefits 50/50 split, left-aligned text, gap-8/lg:gap-12.
 <!-- LOVABLE:BEGIN -->
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->

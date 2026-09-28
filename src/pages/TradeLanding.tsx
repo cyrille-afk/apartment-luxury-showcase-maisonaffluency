@@ -741,16 +741,16 @@ const TradeLanding = () => {
         {/* Mobile accordion */}
         <MobileBenefitsCarousel benefits={benefits} />
 
-        {/* Desktop: alternating 50/50 split — narrower container */}
-        <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
+        {/* Desktop: alternating 50/50 split — same container rhythm as navbar + Felix section */}
+        <div className="hidden md:block max-w-[1500px] mx-auto px-6 py-8">
           {benefits.map((benefit, index) => {
             const isEven = index % 2 === 0;
             return (
               <div
                 key={index}
-                className={`flex ${isEven ? "flex-row" : "flex-row-reverse"} mb-12 last:mb-0 rounded-sm overflow-hidden`}
+                className={`flex ${isEven ? "flex-row" : "flex-row-reverse"} gap-8 lg:gap-12 mb-12 last:mb-0 rounded-sm overflow-hidden`}
               >
-                <div className="w-1/2 aspect-[4/3] overflow-hidden relative">
+                <div className="flex-1 min-w-0 aspect-[4/3] overflow-hidden relative">
                   <img
                     src={benefit.image}
                     alt={benefit.title}
@@ -765,7 +765,7 @@ const TradeLanding = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8 }}
-                  className="w-1/2 flex flex-col justify-center items-center text-center px-10 lg:px-16 py-12"
+                  className="flex-1 min-w-0 flex flex-col justify-center items-start text-left py-12"
                 >
                   <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-8">Trade Program Benefits</p>
                   <h2 className="font-display text-xl lg:text-2xl text-foreground mb-4">
