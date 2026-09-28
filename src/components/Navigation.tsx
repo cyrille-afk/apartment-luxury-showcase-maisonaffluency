@@ -1141,7 +1141,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="decor"
-                      className="absolute left-1/2 -translate-x-1/2 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      className="absolute right-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
                       style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
