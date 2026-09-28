@@ -245,12 +245,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         setUtilityAlignOffset(0);
         return;
       }
-      const delta = tradeEl.getBoundingClientRect().left - journalEl.getBoundingClientRect().left;
-      setUtilityAlignOffset((prev) => {
-        const currentShift = tradeEl.getBoundingClientRect().left - delta - journalEl.getBoundingClientRect().left;
-        return Math.round((prev + delta) * 100) / 100;
-      });
-      void delta;
+      const tradeLeft = tradeEl.getBoundingClientRect().left;
+      const journalLeft = journalEl.getBoundingClientRect().left;
+      setUtilityAlignOffset((prev) => Math.round((prev + (tradeLeft - journalLeft)) * 100) / 100);
     };
     align();
     window.addEventListener("resize", align);
