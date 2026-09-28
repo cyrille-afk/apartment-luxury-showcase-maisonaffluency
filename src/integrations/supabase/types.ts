@@ -1991,6 +1991,30 @@ export type Database = {
         }
         Relationships: []
       }
+      collectible_roster: {
+        Row: {
+          gated: boolean
+          payload: Json
+          roster_key: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          gated?: boolean
+          payload: Json
+          roster_key: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          gated?: boolean
+          payload?: Json
+          roster_key?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collector_applications: {
         Row: {
           collecting_interests: string | null
