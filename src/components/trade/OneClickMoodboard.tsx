@@ -35,7 +35,7 @@ function isAshDiningChair(materials: string | undefined, title: string, category
   const type = `${title} ${category || ""} ${subcategory || ""}`.toLowerCase();
   // Do not infer an ash finish from a generic wood listing or an oak/walnut alternative.
   return /\bash\b/.test(material) && !/\b(oak|walnut|mahogany|beech)\b/.test(material)
-    && /\bchair\b/.test(type) && !/\b(armchair|lounge|bar|stool)\b/.test(type);
+    && /\bchairs?\b/.test(type) && !/\b(armchairs?|lounge|bar|stools?)\b/.test(type);
 }
 
 export default function OneClickMoodboard() {
