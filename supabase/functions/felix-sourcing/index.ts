@@ -36,6 +36,20 @@ const PINNED_KAVEHOME = [
   { title: /^entre bench/i, designer: /dagmar/i },
 ];
 const LIGHTING_TERMS = new Set(["pendant", "pendants", "chandelier", "chandeliers", "lamp", "lamps", "lighting", "sconce", "sconces"]);
+const MATERIALS: Record<string, RegExp> = {
+  glass: /\b(glass|crystal|murano)\b/,
+  crystal: /\b(crystal|glass)\b/,
+  marble: /\bmarble\b/,
+  travertine: /\btravertine\b/,
+  stone: /\b(stone|marble|travertine|granite|onyx|limestone)\b/,
+  wood: /\b(wood|wooden|oak|walnut|ash|teak|beech|mahogany|timber|cedar|elm|maple|cherry)\b/,
+  wooden: /\b(wood|wooden|oak|walnut|ash|teak|beech|mahogany|timber|cedar|elm|maple|cherry)\b/,
+  oak: /\boak\b/, walnut: /\bwalnut\b/,
+  metal: /\b(metal|steel|brass|bronze|alumin(?:i)?um|iron|copper)\b/,
+  bronze: /\bbronze\b/, brass: /\bbrass\b/, steel: /\bsteel\b/,
+  leather: /\bleather\b/, rattan: /\brattan\b/, ceramic: /\b(ceramic|porcelain|stoneware)\b/,
+};
+const sing = (w: string) => w.replace(/(?<=[^s])s$/, "");
 
 type Item = { id: string; title: string; image: string; materials: string | null; category: string | null; subcategory: string | null; designerName: string };
 
@@ -84,13 +98,22 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   const strictAsh = mode === "prompt" && terms.includes("ash") && terms.some((t) => t === "chair" || t === "chairs");
   const lighting = mode === "prompt" && terms.some((t) => LIGHTING_TERMS.has(t));
   const pinned = /kavehome\.|pinterest\.com\/luxuryhomefurniture/i.test(value) ? PINNED_KAVEHOME : [];
-  const eligible = strictAsh ? catalog.filter(isAshDiningChair) : lighting ? catalog.filter(isLightingItem) : catalog;
+  // Generic material + type gate: "glass side table" → material must be glass AND type must be side table.
+  const matKeys = strictAsh ? [] : terms.filter((t) => MATERIALS[t]);
+  const typeWords = terms.filter((t) => !MATERIALS[t]).map(sing);
+  const strictMat = mode === "prompt" && matKeys.length > 0;
+  const matOk = (i: Item) => matKeys.every((k) => MATERIALS[k].test(`${i.title} ${i.materials ?? ""}`.toLowerCase()));
+  const typeOk = (i: Item) => { const ty = keywords(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""}`).map(sing); return typeWords.every((w) => ty.includes(w)); };
+  const eligible = strictAsh ? catalog.filter(isAshDiningChair)
+    : strictMat ? catalog.filter((i) => matOk(i) && typeOk(i) && (!lighting || isLightingItem(i)))
+    : lighting ? catalog.filter(isLightingItem) : catalog;
   const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
   const ranked = eligible.map((item, index) => {
     const hay = keywords([item.title, item.category, item.subcategory, item.materials, item.designerName].filter(Boolean).join(" "));
     let score = strictAsh ? ashScore(item)
       : lighting ? lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0)
-      : terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : hay.some((w) => w.includes(t)) ? 1 : 0), 0);
+      : terms.reduce((s, t) => s + (MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0)
+          + (hay.some((w) => same(w, t)) ? 3 : hay.some((w) => w.includes(t)) ? 1 : 0), 0);
     const pin = pinned.findIndex((p) => p.title.test(item.title) && p.designer.test(item.designerName));
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
