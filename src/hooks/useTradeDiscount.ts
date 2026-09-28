@@ -1,8 +1,8 @@
 /**
  * Returns the active trade discount for the signed-in user, based on their tier.
  * Discount % and spend thresholds are sourced from the `trade_tier_config` table
- * so admins can edit them without code changes. Falls back to sensible defaults
- * (silver 10%, gold 15%, platinum 20%) while loading or for unauthenticated users.
+ * so admins can edit them without code changes. Resolves to 0% (full price)
+ * while loading — no rates are bundled in client code.
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,27 +19,18 @@ export interface TierConfigRow {
   label: string;
 }
 
-const FALLBACK_CONFIG: Record<TradeTier, TierConfigRow> = {
-  silver:   { tier: "silver",   discount_pct: 0.10, min_spend_cents: 0,          label: "Silver" },
-  gold:     { tier: "gold",     discount_pct: 0.15, min_spend_cents: 5_000_000,  label: "Gold" },
-  platinum: { tier: "platinum", discount_pct: 0.20, min_spend_cents: 20_000_000, label: "Platinum" },
+// No discount percentages are bundled: until `trade_tier_config` loads, every
+// tier resolves to 0% (full price) so no rate is ever guessed client-side.
+const EMPTY_CONFIG: Record<TradeTier, TierConfigRow> = {
+  silver:   { tier: "silver",   discount_pct: 0, min_spend_cents: 0, label: "Silver" },
+  gold:     { tier: "gold",     discount_pct: 0, min_spend_cents: 0, label: "Gold" },
+  platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
 };
 
 export const TIER_LABEL: Record<TradeTier, string> = {
   silver: "Silver",
   gold: "Gold",
   platinum: "Platinum",
-};
-
-/**
- * Static fallback discount map. Real discount % comes from `trade_tier_config`
- * via `useTradeDiscount()` / `useTierConfig()`. Kept for legacy admin pages
- * that render a quick label without a live config lookup.
- */
-export const TIER_DISCOUNT: Record<TradeTier, number> = {
-  silver: 0.10,
-  gold: 0.15,
-  platinum: 0.20,
 };
 
 const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
@@ -67,7 +58,7 @@ export function useTierConfig() {
         .from("trade_tier_config")
         .select("tier, discount_pct, min_spend_cents, label");
       if (error) throw error;
-      const map = { ...FALLBACK_CONFIG };
+      const map = { ...EMPTY_CONFIG };
       (data || []).forEach((row: any) => {
         if (row.tier in map) {
           map[row.tier as TradeTier] = {
@@ -103,7 +94,7 @@ export function useTradeDiscount() {
   });
 
   const tier: TradeTier = data ?? "silver";
-  const cfg = config ?? FALLBACK_CONFIG;
+  const cfg = config ?? EMPTY_CONFIG;
   const discountPct = cfg[tier].discount_pct;
 
   return {

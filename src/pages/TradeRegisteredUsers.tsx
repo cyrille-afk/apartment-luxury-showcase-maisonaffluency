@@ -8,7 +8,7 @@ import { ArrowLeft, UserCheck, UserX, Clock, Search, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { TIER_LABEL, TIER_DISCOUNT, type TradeTier } from "@/hooks/useTradeDiscount";
+import { TIER_LABEL, useTierConfig, type TradeTier } from "@/hooks/useTradeDiscount";
 
 interface RegisteredUser {
   id: string;
@@ -56,6 +56,8 @@ export default function TradeRegisteredUsers() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const { data: tierConfig } = useTierConfig();
+  const tierPct = (t: TradeTier) => Math.round((tierConfig?.[t]?.discount_pct ?? 0) * 100);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-registered-users"],
@@ -129,7 +131,7 @@ export default function TradeRegisteredUsers() {
       toast({ title: "Failed to update tier", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: `Tier set to ${TIER_LABEL[tier]} (${Math.round(TIER_DISCOUNT[tier] * 100)}%)` });
+    toast({ title: `Tier set to ${TIER_LABEL[tier]} (${tierPct(tier)}%)` });
     qc.invalidateQueries({ queryKey: ["admin-registered-users"] });
     qc.invalidateQueries({ queryKey: ["trade-tier"] });
   };
@@ -211,7 +213,7 @@ export default function TradeRegisteredUsers() {
           {TIER_OPTIONS.map((t) => (
             <span key={t} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border ${tierBadgeClass(t)}`}>
               <span className="font-medium">{TIER_LABEL[t]}</span>
-              <span className="opacity-70">{Math.round(TIER_DISCOUNT[t] * 100)}%</span>
+              <span className="opacity-70">{tierPct(t)}%</span>
             </span>
           ))}
         </div>
@@ -260,7 +262,7 @@ export default function TradeRegisteredUsers() {
                         >
                           {TIER_OPTIONS.map((t) => (
                             <option key={t} value={t}>
-                              {TIER_LABEL[t]} — {Math.round(TIER_DISCOUNT[t] * 100)}%
+                              {TIER_LABEL[t]} — {tierPct(t)}%
                             </option>
                           ))}
                         </select>
