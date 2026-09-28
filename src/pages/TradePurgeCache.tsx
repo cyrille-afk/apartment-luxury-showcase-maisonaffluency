@@ -11,7 +11,6 @@ const DOMAIN = "https://www.maisonaffluency.com";
 const CORE_PATHS = [
   "/",
   "/designers",
-  "/collectibles",
   "/gallery",
   "/new-in",
   "/journal",

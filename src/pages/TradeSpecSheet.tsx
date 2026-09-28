@@ -273,7 +273,6 @@ export default function TradeSpecSheet() {
               <li><Link to="/trade-program" className="text-foreground hover:underline">Register for trade</Link></li>
               <li><Link to="/trade/login" className="text-foreground hover:underline">Trade sign in</Link></li>
               <li><Link to="/designers" className="text-foreground hover:underline">Designers A–Z</Link></li>
-              <li><Link to="/collectibles" className="text-foreground hover:underline">Collectibles</Link></li>
               <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link></li>
               <li><Link to="/gallery" className="text-foreground hover:underline">Showroom gallery</Link></li>
               <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link></li>

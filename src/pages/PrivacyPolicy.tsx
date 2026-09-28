@@ -153,7 +153,6 @@ const PrivacyPolicy = () => {
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm">
               <li><Link to="/" className="text-foreground hover:underline">Home</Link></li>
               <li><Link to="/designers" className="text-foreground hover:underline">Designers</Link></li>
-              <li><Link to="/collectibles" className="text-foreground hover:underline">Collectibles</Link></li>
               <li><Link to="/new-in" className="text-foreground hover:underline">New arrivals</Link></li>
               <li><Link to="/gallery" className="text-foreground hover:underline">Gallery</Link></li>
               <li><Link to="/journal" className="text-foreground hover:underline">Journal</Link></li>

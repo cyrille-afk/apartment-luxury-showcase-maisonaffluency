@@ -109,12 +109,7 @@ const leftNavItems = [{
   mobileLabel: "Our Gallery",
   href: "/gallery",
   icon: Image,
-}, {
-  label: "Collectibles",
-  mobileLabel: "Collectibles",
-  href: "/collectibles",
-  icon: Gem,
-}];
+}}];
 
 
 const rightNavItems = [{
@@ -160,10 +155,7 @@ interface NavigationProps {
 
 const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationProps) => {
   const { user, isTradeUser } = useAuth();
-  // Trade-only visibility: hide the "Collectibles" nav item from public visitors.
-  const visibleLeftNavItems = isTradeUser
-    ? leftNavItems
-    : leftNavItems.filter((item) => item.href !== "/collectibles");
+  const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
   const [authGateMounted, setAuthGateMounted] = useState(false);
@@ -307,7 +299,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
       gallery: "/gallery",
       "curating-team": "#overview",
       designers: "/designers",
-      collectibles: "/collectibles",
 
       details: "/trade-program",
       contact: "/trade-program",
