@@ -1,8 +1,8 @@
 /**
  * Returns the active trade discount for the signed-in user, based on their tier.
  * Discount % and spend thresholds are sourced from the `trade_tier_config` table
- * so admins can edit them without code changes. Falls back to sensible defaults
- * (silver 10%, gold 15%, platinum 20%) while loading or for unauthenticated users.
+ * so admins can edit them without code changes. Resolves to 0% (full price)
+ * while loading — no rates are bundled in client code.
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,7 +58,7 @@ export function useTierConfig() {
         .from("trade_tier_config")
         .select("tier, discount_pct, min_spend_cents, label");
       if (error) throw error;
-      const map = { ...FALLBACK_CONFIG };
+      const map = { ...EMPTY_CONFIG };
       (data || []).forEach((row: any) => {
         if (row.tier in map) {
           map[row.tier as TradeTier] = {
@@ -94,7 +94,7 @@ export function useTradeDiscount() {
   });
 
   const tier: TradeTier = data ?? "silver";
-  const cfg = config ?? FALLBACK_CONFIG;
+  const cfg = config ?? EMPTY_CONFIG;
   const discountPct = cfg[tier].discount_pct;
 
   return {
