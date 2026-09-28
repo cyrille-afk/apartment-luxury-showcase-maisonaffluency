@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const TradeFaq = ({ isUKVariant = false }: { isUKVariant?: boolean }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const FAQ_ITEMS = [
+  const FAQ_ITEMS = TRADE_FAQ_ITEMS;
     { q: "Who is eligible to join the Trade Program?", a: "The program is designed for architects, interior designers, decorators, and luxury hospitality professionals. We review each application based on company credentials and professional background." },
     { q: "Is there a minimum order or annual spend requirement?", a: "No. There is no minimum purchase or annual commitment required. You can place orders of any size through your trade account." },
     { q: "How does trade pricing work?", a: "Once approved, you'll see exclusive trade pricing when signed in. You can also request bespoke multi-product quotations with all prices listed at a glance, including GST where applicable." },
