@@ -1,4 +1,4 @@
-- Render the original `Gallery` experience on mobile for both the homepage and `/gallery`, while desktop uses `InteractiveGalleryLookbook`; this preserves the earlier mobile accordion, swipe gallery, and hotspot interactions without changing the desktop lookbook.
+- Mobile homepage and /gallery use the original `Gallery`; desktop uses `InteractiveGalleryLookbook`.
 - Derive desktop lookbook side picks from each photo's `gallery_hotspots` coordinates and resolve details against the public catalog with image-only fallback; this keeps slide picks synchronized with their visible objects without exposing trade-only catalog entries.
 - Desktop gallery chevrons traverse all four photos before moving to the next/previous room, wrapping across the seven rooms; this provides uninterrupted photo navigation while leaving the mobile accordion untouched.
 - Only the first Living Room photo hides desktop side product picks; all other photos keep vertical one-column picks, with explicitly curated first-scene order preserved, so the gallery entrance stays clean without changing hotspot pins.
@@ -6,8 +6,9 @@
 - Gallery hotspot product details use the shared centered `PublicProductLightbox` in a body portal, including over expanded photos, so long specifications remain visible without clipping or displacing the gallery canvas.
 - Fetch the two approved MicMac gallery pins through a narrowly scoped public RPC and use that presentation data for both pins and desktop side photos rather than widening trade-only designer access; only the pin's presentation data is public.
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
-- Project shortcuts use latest RLS-visible board or hub fallback; avoids dead landings. Trade layout owns breadcrumbs; avoids duplicate trails.
-- Felix tour spotlights wait for target and parent sizes to settle; retain prior rect while transitioning to avoid async layout jumps.
+- Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
+- Felix tour spotlights await target sizes; keep prior rect while transitioning.
+- Felix split: one useMoodboardSourcing feeds Controls (left) + Results (right, col-span-2); container max-w-6xl px-8 lg:px-12 (Benefits rhythm).
 <!-- LOVABLE:BEGIN -->
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
