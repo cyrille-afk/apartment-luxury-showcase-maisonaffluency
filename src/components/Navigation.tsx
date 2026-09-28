@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
+import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -219,6 +220,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
+  const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
   const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
@@ -915,12 +918,37 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </button>
               ) : (
-                <button
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/contact"); }}
-                  className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-                >
-                  Contact Us
-                </button>
+                <div className="relative group/trade">
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    onClick={() => setTradeMenuOpen((o) => !o)}
+                    className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
+                  >
+                    <span className="link-underline-grow">Trade</span>
+                  </button>
+                  <div
+                    role="menu"
+                    className={cn(
+                      "absolute right-0 top-full z-50 pt-3 transition-opacity duration-200",
+                      tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover/trade:opacity-100 group-hover/trade:visible"
+                    )}
+                    onMouseLeave={() => setTradeMenuOpen(false)}
+                  >
+                    <div className="w-[300px] border border-border bg-background py-6 px-8 shadow-lg flex flex-col gap-4">
+                      <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade/login"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
+                        Affluency Trade Program Sign-In
+                      </button>
+                      <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade-program#apply"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
+                        Join Affluency Trade Program
+                      </button>
+                      <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setServicesOpen(true); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
+                        Request Affluency Trade Services
+                      </button>
+                    </div>
+                  </div>
+                  <TradeServicesRequestModal open={servicesOpen} onOpenChange={setServicesOpen} />
+                </div>
               )}
 
               <DropdownMenu>
@@ -1305,16 +1333,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 )}
               >
                 <span className="link-underline-grow">Journal</span>
-              </button>
-
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
-                className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
-                  (activeSection === "/trade-program" || isRouteActive("/trade-program")) && "text-foreground"
-                )}
-              >
-                <span className="link-underline-grow">Trade Program</span>
               </button>
 
             </nav>
