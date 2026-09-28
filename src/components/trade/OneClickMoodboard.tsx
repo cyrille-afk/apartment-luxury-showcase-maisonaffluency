@@ -79,7 +79,6 @@ export default function OneClickMoodboard() {
       }
     }
     setError("");
-    setUnlocked(false);
     setGenerating(true);
     setSubmitted(null);
     if (generateTimer.current) clearTimeout(generateTimer.current);
