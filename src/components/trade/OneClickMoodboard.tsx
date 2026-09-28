@@ -158,9 +158,9 @@ export default function OneClickMoodboard({ embedded = false }: { embedded?: boo
         <h4 className="mt-1 truncate font-display text-base text-moodboard-ink">{locked ? "Selection locked" : pick.title}</h4>
         <p className="mt-1 truncate text-xs text-moodboard-ink/60">{locked ? "Materials hidden" : pick.materials || "Mixed materials"}</p>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-moodboard-ink/10 pt-3 text-xs">
+      <div className={`mt-3 gap-2 border-t border-moodboard-ink/10 pt-3 text-xs ${embedded ? "flex flex-col" : "flex items-center justify-between"}`}>
         <span className="shrink-0 text-moodboard-ink/50">{locked ? "Sourcing ID" : `ID ${sourcingId(pick.id ?? pick.title)}`}</span>
-        <span className="truncate font-medium text-moodboard-teal">{locked ? "Locked" : embedded ? "Price upon Request" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
+        <span className={`${embedded ? "leading-snug" : "truncate"} font-medium text-moodboard-teal`}>{locked ? "Locked" : embedded ? "Price upon Request" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
       </div>
     </div>
   );
@@ -181,7 +181,7 @@ export default function OneClickMoodboard({ embedded = false }: { embedded?: boo
             <Button type="button" variant="ghost" onClick={() => { setMode("prompt"); setError(""); }} aria-pressed={mode === "prompt"} className={tabClass(mode === "prompt")}>Source by object / piece</Button>
             <Button type="button" variant="ghost" onClick={() => { setMode("reference"); setError(""); }} aria-pressed={mode === "reference"} className={tabClass(mode === "reference")}><ImageIcon aria-hidden="true" className="mr-2 size-3.5" />Image / Pinterest URL</Button>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className={`flex flex-col gap-3 ${embedded ? "xl:flex-row" : "sm:flex-row"}`}>
             <label htmlFor="moodboard-input" className="sr-only">{mode === "prompt" ? "Object or piece to source" : "Image or Pinterest URL"}</label>
             <Input id="moodboard-input" key={mode} type={mode === "prompt" ? "text" : "url"} value={mode === "prompt" ? prompt : reference} onChange={(event) => { (mode === "prompt" ? setPrompt : setReference)(event.target.value); setError(""); }} required maxLength={500} placeholder={mode === "prompt" ? "E.g. Ash dining chairs" : "https://www.pinterest.com/pin/..."} className="h-12 flex-1 rounded-none border-moodboard-ink/20 bg-card px-4 text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal" />
             <Button type="submit" disabled={generating} className="h-12 shrink-0 rounded-none bg-moodboard-teal px-7 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">
@@ -214,7 +214,7 @@ export default function OneClickMoodboard({ embedded = false }: { embedded?: boo
             {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
             {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
             {(matches.length > 0 || (embedded && submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <>
-              <div className={embedded ? "grid grid-cols-2 gap-2 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+              <div className={embedded ? "grid grid-cols-1 gap-2 min-[420px]:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
                 {matches.slice(0, 3).map(({ pick, designerName }) => (
                   <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
                     <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-contain" /></div>
