@@ -5,6 +5,8 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
 
@@ -24,8 +26,8 @@ export default function OneClickMoodboard() {
   const [reference, setReference] = useState("");
   const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [email, setEmail] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
+  const { isTradeUser, isAdmin } = useAuth();
+  const unlocked = isTradeUser || isAdmin;
   const [error, setError] = useState("");
   const generateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: catalog = [], isLoading, isError } = useDbCuratorPicks();
@@ -77,7 +79,6 @@ export default function OneClickMoodboard() {
       }
     }
     setError("");
-    setUnlocked(false);
     setGenerating(true);
     setSubmitted(null);
     if (generateTimer.current) clearTimeout(generateTimer.current);
@@ -87,11 +88,6 @@ export default function OneClickMoodboard() {
     }, 900);
   };
 
-  const unlock = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!event.currentTarget.reportValidity()) return;
-    setUnlocked(true);
-  };
 
   const tabClass = (active: boolean) =>
     `rounded-none border-b-2 px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition-colors ${
@@ -181,17 +177,14 @@ export default function OneClickMoodboard() {
                   <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
                     <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
                     <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
-                    <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
-                    <form onSubmit={unlock} className="mt-5 flex flex-col gap-2 sm:flex-row">
-                      <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
-                      <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
-                      <Button type="submit" className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">Unlock <ArrowRight aria-hidden="true" /></Button>
-                    </form>
-                    <p className="mt-3 text-xs text-moodboard-ink/50">Preview only: this unlocks the edit on this page. No account is created or email sent.</p>
+                    <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Reserved for verified trade members. Apply for a professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                      <Button asChild className="h-11 flex-1 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90"><Link to="/trade-program">Apply for Trade Access <ArrowRight aria-hidden="true" /></Link></Button>
+                      <Button asChild variant="outline" className="h-11 rounded-none border-moodboard-ink/20 px-5 text-xs uppercase tracking-[0.18em] text-moodboard-ink"><Link to="/trade/login">Sign in</Link></Button>
+                    </div>
                   </div>
                 </div>}
               </div>}
-              {unlocked && <p role="status" className="mt-5 flex items-center gap-2 text-sm text-moodboard-teal"><Sparkles className="size-4" aria-hidden="true" />Full edit revealed. A real account was not created; supplier details and custom dimensions are not included in this preview.</p>}
             </>}
           </div>
         )}
