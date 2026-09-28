@@ -570,7 +570,7 @@ const TradeLanding = () => {
         <div aria-hidden className="h-24 md:h-[120px] pt-[env(safe-area-inset-top)]" />
 
         {/* ─── Split-screen Hero ─── */}
-        <div className="trade-program-split-section relative mx-auto flex min-h-[calc(100svh-6rem)] w-full max-w-[1200px] flex-col md:grid md:min-h-0 md:h-[calc(100vh-256px)] md:grid-cols-12 md:px-6">
+        <div className="relative flex min-h-[calc(100svh-6rem)] w-full flex-col md:grid md:grid-cols-12 md:h-[calc(100vh-256px)] md:min-h-0">
           {/* Debug 12-column overlay (desktop only) — add ?debug-grid to the URL to show */}
           {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug-grid") && (
             <div aria-hidden className="pointer-events-none absolute inset-0 z-[80] hidden md:grid md:grid-cols-12">
@@ -737,8 +737,8 @@ const TradeLanding = () => {
         {/* Mobile accordion */}
         <MobileBenefitsCarousel benefits={benefits} />
 
-        {/* Desktop: alternating 50/50 split — header-width container */}
-        <div className="hidden md:block w-full max-w-[1200px] mx-auto px-6 py-8">
+        {/* Desktop: alternating 50/50 split — narrower container */}
+        <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
           {benefits.map((benefit, index) => {
             const isEven = index % 2 === 0;
             return (
