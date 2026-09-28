@@ -937,7 +937,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     aria-haspopup="menu"
                     data-utility-trade
                     onClick={() => setTradeMenuOpen((o) => !o)}
-                    className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
+                    className="font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
                   >
                     <span className="link-underline-grow">Trade</span>
                   </button>
@@ -1036,7 +1036,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
                 )}
               >
@@ -1046,7 +1046,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
                 )}
               >
@@ -1068,7 +1068,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     onClick={() => openRoomMenu(room)}
                     aria-expanded={megaMenuOpen && activeRoomMenu === room}
                     className={cn(
-                      "group relative h-auto rounded-none p-0 font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
+                      "group relative h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
                       megaMenuOpen && activeRoomMenu === room && "text-foreground"
                     )}
                   >
@@ -1342,7 +1342,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 data-nav-journal
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
-                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/journal" || isRouteActive("/journal")) && "text-foreground"
                 )}
               >
