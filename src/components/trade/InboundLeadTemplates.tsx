@@ -4,7 +4,7 @@
  * "Log Demo Booked" hands the lead into the Trade ID Audit checklist
  * (acquisition_demo_bookings).
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,9 +79,19 @@ function Highlighted({ text }: { text: string }) {
   );
 }
 
-export default function InboundLeadTemplates({ leads }: { leads: LeadLite[] }) {
+export default function InboundLeadTemplates({ leads, openSignal }: { leads: LeadLite[]; openSignal?: number }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const checklistRef = useRef<HTMLDivElement>(null);
+
+  // External "Open checklist" links bump openSignal to expand the panel and
+  // scroll straight to the Trade ID Audit checklist.
+  useEffect(() => {
+    if (!openSignal) return;
+    setOpen(true);
+    const t = setTimeout(() => checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    return () => clearTimeout(t);
+  }, [openSignal]);
   const [active, setActive] = useState(TEMPLATES[0].key);
   const [leadId, setLeadId] = useState("");
   const [vals, setVals] = useState<Record<string, string>>({});
@@ -226,7 +236,7 @@ export default function InboundLeadTemplates({ leads }: { leads: LeadLite[] }) {
             <span className="font-medium">Downstream operations hook:</span> once {auto["First Name"] || "the lead"} books a demo, press “Log demo booked” to register {auto["Studio Name"] || "the studio"} into Phase 1 (Intake) of the Trade ID Audit checklist below.
           </p>
 
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3" ref={checklistRef}>
             <h3 className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-foreground">
               <ClipboardCheck className="h-4 w-4 text-primary" /> Internal Operations & Trade ID Audit Checklist
             </h3>
