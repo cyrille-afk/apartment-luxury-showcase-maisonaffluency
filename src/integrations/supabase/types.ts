@@ -10660,6 +10660,39 @@ export type Database = {
         }
         Relationships: []
       }
+      uptime_monitor_state: {
+        Row: {
+          alerted: boolean
+          consecutive_failures: number
+          label: string
+          last_checked_at: string | null
+          last_duration_ms: number | null
+          last_error: string | null
+          last_status: number | null
+          path: string
+        }
+        Insert: {
+          alerted?: boolean
+          consecutive_failures?: number
+          label: string
+          last_checked_at?: string | null
+          last_duration_ms?: number | null
+          last_error?: string | null
+          last_status?: number | null
+          path: string
+        }
+        Update: {
+          alerted?: boolean
+          consecutive_failures?: number
+          label?: string
+          last_checked_at?: string | null
+          last_duration_ms?: number | null
+          last_error?: string | null
+          last_status?: number | null
+          path?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
