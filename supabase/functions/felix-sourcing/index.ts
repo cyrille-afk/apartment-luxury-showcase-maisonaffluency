@@ -1,0 +1,108 @@
+// Felix sourcing engine: all catalogue matching rules live server-side so the
+// ranking "brain" is never shipped to the browser. Returns only final results.
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "npm:zod@3";
+
+const Body = z.object({
+  mode: z.enum(["prompt", "reference"]),
+  value: z.string().trim().min(1).max(500),
+});
+
+const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
+const keywords = (v: string) => Array.from(new Set(v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP_WORDS.has(w))));
+
+const PINNED_KAVEHOME = [
+  { title: /^medallion chair/i, designer: /dagmar/i },
+  { title: /^vega b chair/i, designer: /de la espada/i },
+  { title: /^entre bench/i, designer: /dagmar/i },
+];
+const LIGHTING_TERMS = new Set(["pendant", "pendants", "chandelier", "chandeliers", "lamp", "lamps", "lighting", "sconce", "sconces"]);
+
+type Item = { id: string; title: string; image: string; materials: string | null; category: string | null; subcategory: string | null; designerName: string };
+
+const isLightingItem = (i: Item) => /\blights?\b|\blamps?\b|\bpendants?\b|\bchandeliers?\b|\bsconces?\b|\blighting\b/.test(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""} ${i.materials ?? ""}`.toLowerCase());
+function lightingScore(i: Item) {
+  const text = `${i.title} ${i.materials ?? ""}`.toLowerCase();
+  const type = `${i.category ?? ""} ${i.subcategory ?? ""}`.toLowerCase();
+  const fixture = /\bpendants?\b|\bchandeliers?\b/.test(text) ? 2 : /\blamps?\b/.test(text) ? 1.6 : /\bsconces?\b/.test(text) ? 1.4 : 1;
+  const wording = /\bpendants?\b|\bchandeliers?\b|\blamps?\b/.test(text) ? 1 : /\blights?\b|\blighting\b/.test(text) ? 0.6 : 0.3;
+  return 2 * fixture + wording + (/\blights?\b|\blighting\b/.test(type) ? 0.5 : 0);
+}
+function isAshDiningChair(i: Item) {
+  const m = (i.materials ?? "").toLowerCase();
+  const t = `${i.title} ${i.category ?? ""} ${i.subcategory ?? ""}`.toLowerCase();
+  return /\bash\b/.test(m) && !/\b(oak|walnut|mahogany|beech)\b/.test(m) && /\bchairs?\b/.test(t) && !/\b(armchairs?|lounge|bar|stools?)\b/.test(t);
+}
+function ashScore(i: Item) {
+  const n = i.title.toLowerCase();
+  const t = `${i.category ?? ""} ${i.subcategory ?? ""}`.toLowerCase();
+  return 2 + (/\bdining chairs?\b/.test(n) ? 1 : /\bdining chairs?\b/.test(t) ? 0.9 : /\bchairs?\b/.test(n) ? 0.7 : /\bchairs?\b/.test(t) ? 0.5 : 0);
+}
+
+let cache: { at: number; items: Item[] } | null = null;
+async function loadCatalog(): Promise<Item[]> {
+  if (cache && Date.now() - cache.at < 5 * 60_000) return cache.items;
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+  const [{ data: designers }, { data: picks }] = await Promise.all([
+    sb.from("designers").select("id, name, display_name").eq("is_published", true).eq("trade_only", false),
+    sb.from("designer_curator_picks_public").select("id, title, image_url, materials, category, subcategory, tags, designer_id, sort_order").order("sort_order", { ascending: true }),
+  ]);
+  const dmap = new Map((designers ?? []).map((d: any) => [d.id, d.display_name || d.name]));
+  const items: Item[] = [];
+  for (const r of (picks ?? []) as any[]) {
+    const name = dmap.get(r.designer_id);
+    if (!name || !r.image_url || (r.tags || []).includes("profile-only")) continue;
+    items.push({ id: r.id, title: r.title || "", image: r.image_url, materials: r.materials, category: r.category, subcategory: r.subcategory, designerName: name });
+  }
+  cache = { at: Date.now(), items };
+  return items;
+}
+
+function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
+  let search = value;
+  if (mode === "reference") { try { search = decodeURIComponent(new URL(value).pathname); } catch { /* keep raw */ } }
+  const terms = keywords(search);
+  const strictAsh = mode === "prompt" && terms.includes("ash") && terms.some((t) => t === "chair" || t === "chairs");
+  const lighting = mode === "prompt" && terms.some((t) => LIGHTING_TERMS.has(t));
+  const pinned = /kavehome\./i.test(value) ? PINNED_KAVEHOME : [];
+  const eligible = strictAsh ? catalog.filter(isAshDiningChair) : lighting ? catalog.filter(isLightingItem) : catalog;
+  const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
+  const ranked = eligible.map((item, index) => {
+    const hay = keywords([item.title, item.category, item.subcategory, item.materials, item.designerName].filter(Boolean).join(" "));
+    let score = strictAsh ? ashScore(item)
+      : lighting ? lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0)
+      : terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : hay.some((w) => w.includes(t)) ? 1 : 0), 0);
+    const pin = pinned.findIndex((p) => p.title.test(item.title) && p.designer.test(item.designerName));
+    if (pin >= 0) score = 10000 - pin;
+    return { item, index, score };
+  }).sort((a, b) => b.score - a.score || a.index - b.index);
+  const seen = new Set<string>();
+  const out: Omit<Item, "category" | "subcategory">[] = [];
+  for (const { item } of ranked) {
+    const key = item.title.toLowerCase().replace(/\s+by\s+.+$/, "").replace(/[^a-z0-9]/g, "");
+    const img = item.image.split("?")[0];
+    if (seen.has(key) || seen.has(img)) continue;
+    seen.add(key); seen.add(img);
+    out.push({ id: item.id, title: item.title, image: item.image, materials: item.materials, designerName: item.designerName });
+    if (out.length === 9) break;
+  }
+  return out;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  try {
+    const parsed = Body.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400);
+    const { mode, value } = parsed.data;
+    if (mode === "reference") {
+      try { const u = new URL(value); if (!/^https?:$/.test(u.protocol)) throw 0; } catch { return json({ error: "Invalid link" }, 400); }
+    }
+    return json({ results: match(await loadCatalog(), mode, value) });
+  } catch (e) {
+    console.error("felix-sourcing", e);
+    return json({ error: "Sourcing unavailable" }, 500);
+  }
+});

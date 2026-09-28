@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, Image as ImageIcon, Loader2, LockKeyhole } from "lucide-react";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useQuery } from "@tanstack/react-query";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
-
-function keywords(value: string) {
-  return Array.from(new Set(value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter((word) => word.length > 2 && !STOP_WORDS.has(word))));
-}
-
 function sourcingId(id: string) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
@@ -22,58 +16,11 @@ function sourcingId(id: string) {
 }
 
 const DEFAULT_REFERENCE = "https://kavehome.sg";
-// Curated first row for the showcase reference link.
-const PINNED_KAVEHOME = [
-  { title: /^medallion chair/i, designer: /dagmar/i },
-  { title: /^vega b chair/i, designer: /de la espada/i },
-  { title: /^entre bench/i, designer: /dagmar/i },
-];
 const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 
-// Lighting intent: these words force the edit into lighting fixtures only.
-const LIGHTING_TERMS = new Set(["pendant", "pendants", "chandelier", "chandeliers", "lamp", "lamps", "lighting", "sconce", "sconces", "ceiling light", "ceiling lights"]);
-
-function isLightingQuery(terms: string[]) {
-  return terms.some((term) => LIGHTING_TERMS.has(term));
-}
-
-function isLightingItem(title: string, category: string | undefined, subcategory: string | undefined, materials: string | undefined) {
-  const text = `${title} ${category || ""} ${subcategory || ""} ${materials || ""}`.toLowerCase();
-  return /\blights?\b|\blamps?\b|\bpendants?\b|\bchandeliers?\b|\bsconces?\b|\blighting\b/.test(text);
-}
-
-// Rank lighting matches: pendants/chandeliers first, then lamps, then the
-// broader lighting category. Weighting stays 2:1 (fixture type : wording).
-function lightingScore(title: string, category: string | undefined, subcategory: string | undefined, materials: string | undefined) {
-  const text = `${title} ${materials || ""}`.toLowerCase();
-  const type = `${category || ""} ${subcategory || ""}`.toLowerCase();
-  const fixture = /\bpendants?\b/.test(text) ? 2 : /\bchandeliers?\b/.test(text) ? 2 : /\blamps?\b/.test(text) ? 1.6 : /\bsconces?\b/.test(text) ? 1.4 : 1;
-  const wording = /\bpendants?\b/.test(text) || /\bchandeliers?\b/.test(text) || /\blamps?\b/.test(text) ? 1 : /\blights?\b|\blighting\b/.test(text) ? 0.6 : 0.3;
-  return 2 * fixture + wording + (/\blights?\b|\blighting\b/.test(type) ? 0.5 : 0);
-}
-
-function isAshDiningChair(materials: string | undefined, title: string, category: string | undefined, subcategory: string | undefined) {
-  const material = (materials || "").toLowerCase();
-  const type = `${title} ${category || ""} ${subcategory || ""}`.toLowerCase();
-  // Do not infer an ash finish from a generic wood listing or an oak/walnut alternative.
-  return /\bash\b/.test(material) && !/\b(oak|walnut|mahogany|beech)\b/.test(material)
-    && /\bchairs?\b/.test(type) && !/\b(armchairs?|lounge|bar|stools?)\b/.test(type);
-}
-
-// Rank only published catalog picks: material is worth twice the object-type match.
-// This mirrors the proposed SQL weighting without querying an unrelated catalog or
-// relying on substring similarity (which would treat "ash" as part of "cashmere").
-function ashDiningChairScore(title: string, category: string | undefined, subcategory: string | undefined) {
-  const name = title.toLowerCase();
-  const type = `${category || ""} ${subcategory || ""}`.toLowerCase();
-  const objectSimilarity = /\bdining chairs?\b/.test(name) ? 1
-    : /\bdining chairs?\b/.test(type) ? 0.9
-    : /\bchairs?\b/.test(name) ? 0.7
-    : /\bchairs?\b/.test(type) ? 0.5 : 0;
-  return 2 * 1 + objectSimilarity;
-}
-
-type CatalogItem = Awaited<ReturnType<typeof useDbCuratorPicks>>["data"] extends infer T ? (T extends (infer U)[] | null | undefined ? U : never) : never;
+// Matching rules live in the `felix-sourcing` backend function; the client
+// only receives the final ranked results.
+type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string };
 
 export function useMoodboardSourcing() {
   const [mode, setMode] = useState<"prompt" | "reference">("prompt");
@@ -89,55 +36,20 @@ export function useMoodboardSourcing() {
   const [captureError, setCaptureError] = useState("");
   const [error, setError] = useState("");
   const generateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { data: catalog = [], isLoading, isError } = useDbCuratorPicks();
 
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
 
-  const matches = useMemo(() => {
-    if (!submitted) return [];
-    const search = submitted.mode === "reference" ? (() => {
-      try {
-        const url = new URL(submitted.value);
-        return decodeURIComponent(url.pathname);
-      } catch { return submitted.value; }
-    })() : submitted.value;
-    const terms = keywords(search);
-    const strictAshChair = submitted.mode === "prompt" && terms.includes("ash") && terms.some((term) => term === "chair" || term === "chairs");
-    // Lighting keywords ("pendants", "chandelier", "lamp", "lighting", …) force
-    // the edit into lighting fixtures — sofas/tables must never surface.
-    const lightingIntent = submitted.mode === "prompt" && isLightingQuery(terms);
-    const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
-    const eligible = strictAshChair
-      ? catalog.filter(({ pick }) => isAshDiningChair(pick.materials, pick.title, pick.category, pick.subcategory))
-      : lightingIntent
-      ? catalog.filter(({ pick }) => isLightingItem(pick.title, pick.category, pick.subcategory, pick.materials))
-      : catalog;
-    const ranked = eligible.map((item, index) => {
-      const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
-      let score = strictAshChair
-        ? ashDiningChairScore(item.pick.title, item.pick.category, item.pick.subcategory)
-        : lightingIntent
-        ? lightingScore(item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials) +
-          terms.reduce((sum, term) => sum + (haystack.some((word) => word === term || word.replace(/s$/, "") === term.replace(/s$/, "")) ? 3 : 0), 0)
-        : terms.reduce((sum, term) => sum + (haystack.some((word) => word === term || word.replace(/s$/, "") === term.replace(/s$/, "")) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
-      const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
-      if (pinIndex >= 0) score = 10000 - pinIndex;
-      return { item, index, score };
-    }).sort((a, b) => b.score - a.score || a.index - b.index);
-    // Dedupe parent-house/designer twins (e.g. "Vega B Chair" vs "Vega B Chair by Anthony Guerrée")
-    const seen = new Set<string>();
-    const unique: CatalogItem[] = [];
-    for (const { item } of ranked) {
-      const key = item.pick.title.toLowerCase().replace(/\s+by\s+.+$/, "").replace(/[^a-z0-9]/g, "");
-      const imgKey = (item.pick.image || "").split("?")[0];
-      if (seen.has(key) || (imgKey && seen.has(imgKey))) continue;
-      seen.add(key);
-      if (imgKey) seen.add(imgKey);
-      unique.push(item);
-      if (unique.length === 9) break;
-    }
-    return unique;
-  }, [catalog, submitted]);
+  const { data: matches = [], isLoading, isError } = useQuery({
+    queryKey: ["felix-sourcing", submitted?.mode, submitted?.value],
+    enabled: !!submitted,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<SourcedItem[]> => {
+      const { data, error: fnError } = await supabase.functions.invoke("felix-sourcing", { body: submitted });
+      if (fnError) throw fnError;
+      return ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
+        .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName }));
+    },
+  });
   const { data: rrpMap = {} } = usePublicRrpMap(matches.map(({ pick }) => pick.id));
   const destination = useShippingDestination();
 
