@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,16 +17,6 @@ const GoogleGlyph = ({ className }: { className?: string }) => (
 
 const TradeLogin = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  // "Back to Maison Affluency" must never point at the gated page the visitor
-  // was just bounced from (that would redirect straight back to this login).
-  // Only an explicit `back` param is honoured; otherwise go home.
-  const backHref = (() => {
-    const raw = searchParams.get("back") || "/";
-    // Only permit same-origin absolute paths to prevent open-redirect.
-    const safe = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
-    return safe.startsWith("/trade") ? "/" : safe;
-  })();
   const { toast } = useToast();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -115,11 +105,11 @@ const TradeLogin = () => {
           </span>
         </Link>
         <Link
-          to={backHref}
+          to="/"
           aria-label="Close"
-          className="text-foreground/70 hover:text-foreground transition-colors mt-1"
+          className="text-slate-500 hover:opacity-60 transition-opacity mt-1"
         >
-          <X className="w-6 h-6" strokeWidth={1.25} />
+          <X className="w-6 h-6" strokeWidth={1} />
         </Link>
       </header>
 
@@ -202,11 +192,6 @@ const TradeLogin = () => {
             </p>
           </div>
 
-          <p className="font-body text-xs text-muted-foreground mt-16 text-center">
-            <Link to={backHref} className="hover:text-foreground transition-colors">
-              ← Back to Maison Affluency
-            </Link>
-          </p>
         </div>
       </div>
 
