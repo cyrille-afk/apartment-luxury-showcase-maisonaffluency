@@ -19,6 +19,7 @@ import Navigation from "@/components/Navigation";
 import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
+import OneClickMoodboard from "@/components/trade/OneClickMoodboard";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
@@ -656,6 +657,8 @@ const TradeLanding = () => {
         </div>
 
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
+
+        <OneClickMoodboard />
 
         {/* Full Trade Program content */}
         <div className="bg-background">

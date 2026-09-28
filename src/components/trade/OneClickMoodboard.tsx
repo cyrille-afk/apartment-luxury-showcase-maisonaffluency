@@ -39,7 +39,7 @@ export default function OneClickMoodboard() {
     }).sort((a, b) => b.score - a.score || a.index - b.index);
     return ranked.slice(0, 9).map(({ item }) => item);
   }, [catalog, submitted]);
-  const { data: rrpMap = {} } = usePublicRrpMap(matches.map(({ item, pick }: any) => (item ?? pick)?.id));
+  const { data: rrpMap = {} } = usePublicRrpMap(matches.map(({ pick }) => pick.id));
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
