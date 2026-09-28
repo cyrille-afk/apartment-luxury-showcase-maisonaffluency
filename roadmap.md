@@ -58,3 +58,10 @@
 
 - [x] Collaborative Procurement Board: studio matrix/client editorial toggle, invites with email, guest feedback, contractor sign-up referral.
 - [x] Expand project navigation into boards, folders, tearsheets, and Project Studio; show linked project breadcrumbs at the top of the workspace; open the latest linked board from project cards and names.
+
+## Move built-in catalogue to database (approved: lists + tier fallback)
+- [x] Tier percentages load only from the database (no bundled 10/15/20% fallback)
+- [ ] Collectibles (collectibleGate, useCollectibleOverrides, CollectiblesHoverHero, PublicCollectibles, TradeCollectiblesAdmin) → designers/designer_curator_picks
+- [ ] ProductGrid, tradeProducts, curatorPicksCatalog, designerProfiles → database catalogue
+- [ ] BrandsAteliers atelierOnlyPicks → database
+- [ ] Delete bundled arrays in FeaturedDesigners / Collectibles / BrandsAteliers (~500 KB) after page-by-page live checks
