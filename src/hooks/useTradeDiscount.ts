@@ -19,27 +19,18 @@ export interface TierConfigRow {
   label: string;
 }
 
-const FALLBACK_CONFIG: Record<TradeTier, TierConfigRow> = {
-  silver:   { tier: "silver",   discount_pct: 0.10, min_spend_cents: 0,          label: "Silver" },
-  gold:     { tier: "gold",     discount_pct: 0.15, min_spend_cents: 5_000_000,  label: "Gold" },
-  platinum: { tier: "platinum", discount_pct: 0.20, min_spend_cents: 20_000_000, label: "Platinum" },
+// No discount percentages are bundled: until `trade_tier_config` loads, every
+// tier resolves to 0% (full price) so no rate is ever guessed client-side.
+const EMPTY_CONFIG: Record<TradeTier, TierConfigRow> = {
+  silver:   { tier: "silver",   discount_pct: 0, min_spend_cents: 0, label: "Silver" },
+  gold:     { tier: "gold",     discount_pct: 0, min_spend_cents: 0, label: "Gold" },
+  platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
 };
 
 export const TIER_LABEL: Record<TradeTier, string> = {
   silver: "Silver",
   gold: "Gold",
   platinum: "Platinum",
-};
-
-/**
- * Static fallback discount map. Real discount % comes from `trade_tier_config`
- * via `useTradeDiscount()` / `useTierConfig()`. Kept for legacy admin pages
- * that render a quick label without a live config lookup.
- */
-export const TIER_DISCOUNT: Record<TradeTier, number> = {
-  silver: 0.10,
-  gold: 0.15,
-  platinum: 0.20,
 };
 
 const normalize = (raw: TradeTierRaw | null | undefined): TradeTier => {
