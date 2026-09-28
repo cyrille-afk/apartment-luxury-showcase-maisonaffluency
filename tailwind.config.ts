@@ -69,6 +69,11 @@ export default {
           bright: "hsl(var(--gold-bright))",
         },
         cream: "hsl(var(--cream))",
+        moodboard: {
+          cream: "hsl(var(--moodboard-cream))",
+          teal: "hsl(var(--moodboard-teal))",
+          "teal-foreground": "hsl(var(--moodboard-teal-foreground))",
+        },
         "visualiser-canvas": "hsl(var(--visualiser-canvas))",
         "visual-evidence": "hsl(var(--visual-evidence))",
         "chip-affinity": "hsl(var(--chip-affinity))",

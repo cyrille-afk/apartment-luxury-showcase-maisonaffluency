@@ -67,6 +67,10 @@ All colors MUST be HSL.
     --gold: 36 55% 50%;
     /* Brighter bronze-gold used for text over dark hero imagery */
     --gold-bright: 38 70% 72%;
+    /* One-Click Moodboard palette: off-white editorial canvas + deep teal actions */
+    --moodboard-cream: 60 20% 98%;   /* #FBFBFA */
+    --moodboard-teal: 188 56% 23%;   /* #1A535C */
+    --moodboard-teal-foreground: 60 20% 98%;
     --cream: 32 20% 97%;
     --canvas: 0 0% 97.6%;
     --product-canvas: 42 33% 94%;
