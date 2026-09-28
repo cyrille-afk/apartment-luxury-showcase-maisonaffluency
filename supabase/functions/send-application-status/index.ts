@@ -144,8 +144,8 @@ const handler = async (req: Request): Promise<Response> => {
           ${bodyHtml}
           
           <p style="color: #333; line-height: 1.8; margin-top: 32px;">
-            Warm regards,<br>
-            <strong>The Maison Affluency Team</strong>
+            The Maison Affluency Concierge Team<br>
+            <span style="color: #888; font-size: 13px;">Singapore, District 9 | <a href="mailto:trade@maisonaffluency.com" style="color: #8B7355;">trade@maisonaffluency.com</a></span>
           </p>
           
           <hr style="border: none; border-top: 1px solid #e8e4de; margin: 40px 0 20px;" />
