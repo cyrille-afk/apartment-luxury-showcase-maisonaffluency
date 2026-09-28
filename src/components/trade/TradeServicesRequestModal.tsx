@@ -4,9 +4,9 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const COUNTRIES = ["Singapore", "United States", "United Kingdom", "France", "Germany", "Italy", "Switzerland", "United Arab Emirates", "Saudi Arabia", "Hong Kong", "Australia", "Other"];
+const COUNTRIES = ["Singapore", "Hong Kong", "Malaysia", "Thailand", "Indonesia", "Vietnam", "United Arab Emirates", "Saudi Arabia", "Qatar", "United Kingdom", "France", "Other"];
 const CONTACT = ["Email", "Phone", "WhatsApp"];
-const SERVICES = ["Product Sourcing", "Swatches & Samples", "Specification & FF&E", "Custom & Bespoke Pieces", "Project Quotation", "Logistics & Installation"];
+const SERVICES = ["Sourcing", "Swatches & Samples", "Specification & FF&E", "Bespoke", "Quotation", "Logistics & Installation"];
 
 const schema = z.object({
   first_name: z.string().trim().min(1, "Required").max(100),
@@ -67,7 +67,7 @@ export default function TradeServicesRequestModal({ open, onOpenChange }: { open
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl rounded-none border-none bg-background p-8 md:p-14 max-h-[92vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-3xl sm:w-[calc(100%-2rem)] rounded-none border-none bg-background px-6 pt-16 pb-8 md:p-14 max-h-[92vh] overflow-y-auto">
         <DialogTitle className="font-display text-2xl md:text-4xl font-light uppercase tracking-[0.04em] text-foreground">
           Affluency Trade Services Request
         </DialogTitle>
