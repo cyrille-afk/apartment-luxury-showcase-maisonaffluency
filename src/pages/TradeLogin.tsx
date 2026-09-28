@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
-import { TRADE_FAQ_ITEMS } from "@/components/trade/TradeFaq";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
 // stays charcoal/grayscale and reads as part of the brand, not a vendor badge.
@@ -36,7 +35,6 @@ const TradeLogin = () => {
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,11 +108,18 @@ const TradeLogin = () => {
       </Helmet>
 
       {/* Brand mark pinned to the upper-left corner, RH-style */}
-      <header className="px-6 pt-6 md:px-10 md:pt-8">
+      <header className="flex items-start justify-between px-6 pt-6 md:px-10 md:pt-8">
         <Link to="/" className="inline-block">
           <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground">
             Maison Affluency
           </span>
+        </Link>
+        <Link
+          to={backHref}
+          aria-label="Close"
+          className="text-foreground/70 hover:text-foreground transition-colors mt-1"
+        >
+          <X className="w-6 h-6" strokeWidth={1.25} />
         </Link>
       </header>
 
@@ -187,6 +192,14 @@ const TradeLogin = () => {
                 Forgot Password?
               </button>
             </p>
+            <p>
+              <Link
+                to="/trade-faq"
+                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                Trade FAQ
+              </Link>
+            </p>
           </div>
 
           <p className="font-body text-xs text-muted-foreground mt-16 text-center">
@@ -196,45 +209,6 @@ const TradeLogin = () => {
           </p>
         </div>
       </div>
-
-      {/* Trade FAQ accordion */}
-      <section className="w-full border-t border-border bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-16 md:py-20">
-          <h2 className="font-display text-xl md:text-2xl text-foreground tracking-[0.12em] uppercase text-center mb-12">
-            Trade FAQ
-          </h2>
-          <div className="border-t border-border">
-            {TRADE_FAQ_ITEMS.map((faq, i) => (
-              <div key={i} className="border-b border-border">
-                <button
-                  type="button"
-                  aria-expanded={openFaq === i}
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between gap-6 py-5 text-left group"
-                >
-                  <span className="font-body text-xs md:text-sm font-medium uppercase tracking-[0.14em] text-foreground group-hover:text-muted-foreground transition-colors">
-                    {faq.q}
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`}
-                    strokeWidth={1.5}
-                  />
-                </button>
-                <div
-                  className="grid transition-[grid-template-rows] duration-300 ease-out"
-                  style={{ gridTemplateRows: openFaq === i ? "1fr" : "0fr" }}
-                >
-                  <div className="overflow-hidden">
-                    <p className="font-body text-sm leading-relaxed text-muted-foreground pb-6 pr-10">
-                      {faq.a}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Forgot password modal */}
       {showForgot && (
