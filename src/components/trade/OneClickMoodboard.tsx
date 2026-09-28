@@ -79,7 +79,7 @@ export default function OneClickMoodboard() {
       } catch { return submitted.value; }
     })() : submitted.value;
     const terms = keywords(search);
-    const strictAshChair = submitted.mode === "prompt" && terms.includes("ash") && terms.includes("chair");
+    const strictAshChair = submitted.mode === "prompt" && terms.includes("ash") && terms.some((term) => term === "chair" || term === "chairs");
     const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
     const eligible = strictAshChair
       ? catalog.filter(({ pick }) => isAshDiningChair(pick.materials, pick.title, pick.category, pick.subcategory))
@@ -207,13 +207,19 @@ export default function OneClickMoodboard() {
                   </article>
                 ))}
               </div>
-              {matches.length > 3 && <div className="relative mt-4">
+              {(matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
                 <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
                   {matches.slice(3).map(({ pick, designerName }) => (
                     <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
                       <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover" /></div>
                       {cardBody(pick, designerName, !unlocked)}
                     </article>
+                  ))}
+                  {!unlocked && matches.length <= 3 && [0, 1, 2].map((index) => (
+                    <div key={`pending-${index}`} className="border border-moodboard-ink/10 bg-card">
+                      <div className="aspect-[4/5] bg-moodboard-ink/5" />
+                      <div className="p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
+                    </div>
                   ))}
                 </div>
                 {!unlocked && <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">
