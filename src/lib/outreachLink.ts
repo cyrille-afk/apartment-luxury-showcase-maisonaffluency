@@ -8,7 +8,7 @@ export type OutreachChannel = "instagram" | "linkedin" | "email";
 const SHORT: Record<OutreachChannel, string> = { instagram: "ig", linkedin: "li", email: "em" };
 const LONG: Record<string, OutreachChannel> = { ig: "instagram", li: "linkedin", em: "email" };
 
-export const buildOutreachLink = (o: { channel: OutreachChannel; hook: "A" | "B"; agentId?: string | null; leadId?: string | null }) => {
+export const buildOutreachLink = (o: { channel: OutreachChannel; hook: "A" | "B" | "C"; agentId?: string | null; leadId?: string | null }) => {
   const p = new URLSearchParams({ utm_source: SHORT[o.channel], utm_medium: "outreach", hook: o.hook.toLowerCase() });
   if (o.agentId) p.set("agent", o.agentId);
   if (o.leadId) p.set("lead", o.leadId);

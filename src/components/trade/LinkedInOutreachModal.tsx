@@ -31,7 +31,7 @@ const buildScript = (tab: "A" | "B" | "C", name: string | null, company: string)
 };
 
 const LinkedInOutreachModal = ({ open, leadId, onOpenChange, studioName, founderName, linkedinUrl, onLaunched }: Props) => {
-  const [tab, setTab] = useState<"A" | "B">("A");
+  const [tab, setTab] = useState<"A" | "B" | "C">("A");
   const [copied, setCopied] = useState(false);
   const { greetingName } = useMemo(() => resolveGreeting(founderName, studioName), [founderName, studioName]);
   const script = useMemo(() => buildScript(tab, greetingName, studioName), [tab, greetingName, studioName]);
@@ -66,11 +66,11 @@ const LinkedInOutreachModal = ({ open, leadId, onOpenChange, studioName, founder
         </DialogHeader>
 
         <div className="flex gap-2">
-          {(["A", "B"] as const).map((v) => (
+          {(["A", "B", "C"] as const).map((v) => (
             <button key={v} type="button" onClick={() => setTab(v)}
               className={`h-9 flex-1 border px-4 text-[10px] uppercase tracking-[0.18em] transition-colors ${
                 tab === v ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:bg-muted/40"}`}>
-              {v === "A" ? "A · System Speed Hook" : "B · Revenue Preservation Hook"}
+              {v === "A" ? "A · System Speed Hook" : v === "B" ? "B · Revenue Preservation Hook" : "C · Follow-Up"}
             </button>
           ))}
         </div>
