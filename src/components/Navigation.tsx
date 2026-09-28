@@ -1151,7 +1151,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         }
                       `}</style>
                       <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="min-h-full w-2/3 shrink-0 border-r border-border/60 px-9 py-8">
+                        <div className="min-h-full w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                           <Button
                             type="button"
                             variant="ghost"
@@ -1178,7 +1178,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                             ))}
                           </div>
                         </div>
-                        <div className="relative min-h-full w-1/3 shrink-0 overflow-hidden bg-[hsl(var(--collection-card-canvas))] p-6">
+                        <div className="relative min-h-full w-1/2 shrink-0 overflow-hidden bg-[hsl(var(--collection-card-canvas))] p-6">
                           <img
                             src={roomAmbientImages.decor.src}
                             alt={roomAmbientImages.decor.alt}
