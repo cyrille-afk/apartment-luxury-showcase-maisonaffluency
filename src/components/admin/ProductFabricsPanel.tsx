@@ -105,6 +105,7 @@ export default function ProductFabricsPanel({
   const qc = useQueryClient();
   const [drafts, setDrafts] = useState<Record<string, Drafts>>({});
   const [adding, setAdding] = useState(false);
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [search, setSearch] = useState("");
   const rangeSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
