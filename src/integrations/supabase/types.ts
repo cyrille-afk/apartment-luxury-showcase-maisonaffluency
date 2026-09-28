@@ -11669,6 +11669,10 @@ export type Database = {
           trade_price_cents: number
         }[]
       }
+      moodboard_capture_lead: {
+        Args: { _email: string; _reference?: string }
+        Returns: boolean
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
