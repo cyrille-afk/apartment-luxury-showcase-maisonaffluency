@@ -214,7 +214,7 @@ export default function OneClickMoodboard({ embedded = false }: { embedded?: boo
             {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
             {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
             {(matches.length > 0 || (embedded && submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <>
-              <div className={embedded ? "grid grid-cols-1 gap-2 min-[420px]:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+              <div className={embedded ? "grid grid-cols-1 gap-2 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
                 {matches.slice(0, 3).map(({ pick, designerName }) => (
                   <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
                     <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-contain" /></div>
