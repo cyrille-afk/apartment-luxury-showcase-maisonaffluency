@@ -42,6 +42,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Client Directory", description: "Studio address book — companies, billing addresses, staff contacts, and attached documents (NDA, T&Cs, counterparty forms)", url: "/trade/clients", icon: Users },
   { title: "Quote Request Inbox", description: "Every 'Request a Quote' submission — company, product, selected finish, and contact details", url: "/trade/admin/inquiries", icon: MessageSquare },
   { title: "WhatsApp Alert Log", description: "Delivery status of quote alerts sent to WhatsApp — sent, delivered, failed, with error codes", url: "/trade/admin/whatsapp-alerts", icon: Send },
+  { title: "Trade Services Requests", description: "Incoming 'Request Affluency Trade Services' submissions — review, contact, and set status", url: "/trade/admin/service-requests", icon: ClipboardList },
 ];
 
 const analyticsGroup: AdminCard[] = [
