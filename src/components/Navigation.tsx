@@ -918,7 +918,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
             <div
               ref={utilityClusterRef}
-              className="flex items-center gap-5 justify-self-end"
+              className="relative flex items-center gap-5 justify-self-end"
               style={utilityAlignOffset ? { marginRight: `${utilityAlignOffset}px` } : undefined}
             >
               {isContactRoute ? (
@@ -931,7 +931,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </button>
               ) : (
-                <div className="relative group/trade">
+                <div className="group/trade">
                   <button
                     type="button"
                     aria-haspopup="menu"
@@ -944,7 +944,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <div
                     role="menu"
                     className={cn(
-                      "absolute right-[-148px] top-full z-50 pt-3 transition-opacity duration-200",
+                      "absolute right-0 top-full z-50 pt-[61px] transition-opacity duration-200",
                       tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover/trade:opacity-100 group-hover/trade:visible"
                     )}
                     onMouseLeave={() => setTradeMenuOpen(false)}
