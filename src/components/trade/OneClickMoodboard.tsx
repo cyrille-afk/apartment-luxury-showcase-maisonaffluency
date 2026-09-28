@@ -15,7 +15,7 @@ function sourcingId(id: string) {
   return `MA-${(hash % 90000 + 10000).toString()}`;
 }
 
-const DEFAULT_REFERENCE = "https://kavehome.sg";
+const DEFAULT_REFERENCE = "https://www.pinterest.com/luxuryhomefurniture/";
 const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 
 // Matching rules live in the `felix-sourcing` backend function; the client

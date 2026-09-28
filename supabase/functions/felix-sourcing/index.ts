@@ -65,7 +65,7 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   const terms = keywords(search);
   const strictAsh = mode === "prompt" && terms.includes("ash") && terms.some((t) => t === "chair" || t === "chairs");
   const lighting = mode === "prompt" && terms.some((t) => LIGHTING_TERMS.has(t));
-  const pinned = /kavehome\./i.test(value) ? PINNED_KAVEHOME : [];
+  const pinned = /kavehome\.|pinterest\.com\/luxuryhomefurniture/i.test(value) ? PINNED_KAVEHOME : [];
   const eligible = strictAsh ? catalog.filter(isAshDiningChair) : lighting ? catalog.filter(isLightingItem) : catalog;
   const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
   const ranked = eligible.map((item, index) => {
