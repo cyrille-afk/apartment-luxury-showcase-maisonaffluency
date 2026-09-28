@@ -827,6 +827,13 @@
       "when": 1790613350422,
       "tag": "0117_trade_service_request_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1790619176307,
+      "tag": "0118_felix_usage_events",
+      "breakpoints": true
     }
   ]
 }
