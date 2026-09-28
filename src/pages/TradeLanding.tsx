@@ -683,8 +683,8 @@ const TradeLanding = () => {
 
         {/* ─── What You Unlock ─── */}
         <div className="w-full bg-moodboard-cream border-y border-border">
-          <div className="max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] gap-10 lg:gap-12 items-start">
+          <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-14 md:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-10 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
