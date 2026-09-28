@@ -19,7 +19,7 @@ import Navigation from "@/components/Navigation";
 import Turnstile from "@/components/Turnstile";
 
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-import OneClickMoodboard from "@/components/trade/OneClickMoodboard";
+import { MoodboardControls, MoodboardResults, useMoodboardSourcing } from "@/components/trade/OneClickMoodboard";
 import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeShareUrl";
 // Guarded share URL: falls back to the static OG bridge unless the clean route is
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
@@ -413,6 +413,8 @@ const TradeLanding = () => {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinCredentialFile, setJoinCredentialFile] = useState<File | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const moodboard = useMoodboardSourcing();
+
 
   // Clicking "Trade Program" in the navbar forces a clean, unsubmitted
   // application view — even when already on this page after a submission.
@@ -681,15 +683,16 @@ const TradeLanding = () => {
           </p>
         </motion.div>
 
-        {/* ─── What You Unlock ─── */}
+        {/* ─── What You Unlock — Felix sourcing preview (controls left · output right) ─── */}
         <div className="w-full bg-moodboard-cream border-y border-border">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-14 md:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-10 items-start">
+          <div className="max-w-6xl mx-auto px-8 lg:px-12 py-14 md:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8 }}
+                className="min-w-0"
               >
                 <p className="font-body text-xs tracking-[0.25em] uppercase text-accent mb-4">
                   What You Unlock
@@ -700,6 +703,13 @@ const TradeLanding = () => {
                 <p className="font-body text-sm md:text-base leading-relaxed text-muted-foreground text-justify">
                   Joining the Maison Affluency Trade Program gives you exclusive pricing, dedicated logistical support, and immediate access to Felix.
                 </p>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify mt-4">
+                  Felix is our proprietary AI curation copilot built natively into your trade dashboard. Upload a mood board, and Felix will instantly cross-reference our global inventory to source matching masterworks, calculate trade margins, and generate bespoke PDF client presentations in seconds.
+                </p>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify mt-3">
+                  Tailor your studio experience: Felix can be renamed to whatever suits your firm's culture.
+                </p>
+                <MoodboardControls mb={moodboard} embedded />
               </motion.div>
 
               <motion.div
@@ -707,7 +717,7 @@ const TradeLanding = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: 0.15 }}
-              className="min-w-0 rounded-[4px] border border-border/60 bg-card p-5 md:p-8"
+                className="min-w-0 lg:col-span-2 rounded-[4px] border border-border/60 bg-card p-5 md:p-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent">
@@ -717,16 +727,10 @@ const TradeLanding = () => {
                     Felix · AI Curatorial Guide
                   </p>
                 </div>
-                <h3 className="font-display text-xl md:text-2xl italic text-foreground mb-3">
+                <h3 className="font-display text-xl md:text-2xl italic text-foreground mb-5">
                   Meet Felix: Your Digital Studio Assistant
                 </h3>
-                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify">
-                  Felix is our proprietary AI curation copilot built natively into your trade dashboard. Upload a mood board, and Felix will instantly cross-reference our global inventory to source matching masterworks, calculate trade margins, and generate bespoke PDF client presentations in seconds.
-                </p>
-                <p className="font-body text-sm leading-relaxed text-muted-foreground text-justify mt-3">
-                  Tailor your studio experience: Felix can be renamed to whatever suits your firm's culture.
-                </p>
-                <OneClickMoodboard embedded />
+                <MoodboardResults mb={moodboard} embedded />
               </motion.div>
             </div>
           </div>
