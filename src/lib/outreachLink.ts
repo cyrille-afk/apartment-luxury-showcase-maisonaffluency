@@ -30,7 +30,7 @@ export const captureOutreachClick = () => {
     sessionStorage.setItem(key, "1");
     void supabase.rpc("log_outreach_click", {
       _channel: channel,
-      _hook: hookRaw === "A" || hookRaw === "B" ? hookRaw : null,
+      _hook: hookRaw === "A" || hookRaw === "B" || hookRaw === "C" ? hookRaw : null,
       _agent: agent && UUID.test(agent) ? agent : null,
       _lead: lead && UUID.test(lead) ? lead : null,
     } as never).then(({ error }) => { if (error) sessionStorage.removeItem(key); });

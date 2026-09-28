@@ -243,7 +243,7 @@ const TradeAdminAcquisitions = () => {
     void supabase.from("acquisition_outreach_events").insert({ lead_id: id, channel: "email", hook: "A", agent_id: user?.id })
       .then(({ error }) => { if (error) toast.error("Email send could not be logged."); });
   };
-  const markDmSent = async (id: string, status = "dm_sent", channel: "instagram" | "linkedin" = "instagram", hook: "A" | "B" | null = null) => {
+  const markDmSent = async (id: string, status = "dm_sent", channel: "instagram" | "linkedin" = "instagram", hook: "A" | "B" | "C" | null = null) => {
     void supabase.from("acquisition_outreach_events").insert({ lead_id: id, channel, hook, agent_id: user?.id }).then(({ error }) => { if (error) console.warn("outreach log failed", error.message); });
     const sentAt = new Date().toISOString();
     queryClient.setQueryData<Lead[]>(["acquisition-leads", "enriched"], (prev) =>
