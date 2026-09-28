@@ -17,16 +17,6 @@ const GoogleGlyph = ({ className }: { className?: string }) => (
 
 const TradeLogin = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  // "Back to Maison Affluency" must never point at the gated page the visitor
-  // was just bounced from (that would redirect straight back to this login).
-  // Only an explicit `back` param is honoured; otherwise go home.
-  const backHref = (() => {
-    const raw = searchParams.get("back") || "/";
-    // Only permit same-origin absolute paths to prevent open-redirect.
-    const safe = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
-    return safe.startsWith("/trade") ? "/" : safe;
-  })();
   const { toast } = useToast();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
