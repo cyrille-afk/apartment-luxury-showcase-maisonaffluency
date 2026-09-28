@@ -1588,7 +1588,7 @@ const PublicProductPageContent: React.FC = () => {
     return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
   }
 
-  if (isLoading) {
+  if (isLoading || (!collectibleGate && !isTradeUser)) {
     return (
       <div className="min-h-[100dvh] bg-background">
         <Navigation />

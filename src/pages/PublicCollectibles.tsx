@@ -6,7 +6,8 @@ import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import Collectibles, { collectibleDesigners } from "@/components/Collectibles";
+import Collectibles from "@/components/Collectibles";
+import { useCollectibleDesigners } from "@/lib/collectibleRoster";
 import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
 import { useAuth } from "@/hooks/useAuth";
 import { collectibleGateRedirect } from "@/lib/collectibleGate";
@@ -48,6 +49,7 @@ const PublicCollectibles = () => {
   // Trade-only visibility while Collectible Design is in soft launch.
   const { isTradeUser, loading } = useAuth();
   const location = useLocation();
+  const collectibleDesigners = useCollectibleDesigners();
 
   const { title, description, itemListLd, collectionLd } = useMemo(() => {
     const featured = collectibleDesigners
@@ -87,7 +89,7 @@ const PublicCollectibles = () => {
     };
 
     return { title: titleStr, description: descStr, itemListLd: itemList, collectionLd: collection };
-  }, []);
+  }, [collectibleDesigners]);
 
   if (loading) return null;
   if (!isTradeUser) {

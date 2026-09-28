@@ -25,6 +25,7 @@ import { formatDesignerName } from "@/lib/nameFormat";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
+import type { CollectibleDesigner, CollectiblePick } from "@/lib/collectibleRoster";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { Input } from "@/components/ui/input";
 // Accordion removed — now using card grid layout
@@ -396,12 +397,14 @@ const Collectibles = () => {
   const navigate = useNavigate();
   const ref = useRef(null);
   const visibleCollectibles = useVisibleCollectibleDesigners();
+  const rosterRef = useRef(visibleCollectibles);
+  rosterRef.current = visibleCollectibles;
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [selectedImage, setSelectedImage] = useState<{ name: string; image: string } | null>(null);
   const [openDesigners, setOpenDesigners] = useState<string[]>([]);
-  const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<typeof collectibleDesigners[0] | null>(null);
+  const [curatorPicksDesigner, setCuratorPicksDesigner] = useState<CollectibleDesigner | null>(null);
   const [curatorPickIndex, setCuratorPickIndex] = useState(0);
   const [picksHovered, setPicksHovered] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -414,7 +417,7 @@ const Collectibles = () => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.section !== "collectible") return;
-      const designer = collectibleDesigners.find(d => d.id === detail.id || d.name === detail.id);
+      const designer = rosterRef.current.find(d => d.id === detail.id || d.name === detail.id);
       if (designer) {
         const designerId = designer.id ?? designer.name;
         setOpenDesigners(prev => prev.includes(designerId) ? prev : [...prev, designerId]);
@@ -444,7 +447,7 @@ const Collectibles = () => {
         "atelier-demichelis-collectible": "atelier-demichelis",
       };
       const resolvedDesignerId = aliasToCollectibleId[designerId] ?? designerId;
-      const designer = collectibleDesigners.find(d => d.id === resolvedDesignerId);
+      const designer = rosterRef.current.find(d => d.id === resolvedDesignerId);
       if (designer && designer.curatorPicks?.length) {
         await warmCuratorPickSet(designer.curatorPicks, index);
         setCuratorPicksDesigner(designer);
@@ -621,7 +624,7 @@ const Collectibles = () => {
       "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
       "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
     };
-    const picks: { pick: typeof collectibleDesigners[0]["curatorPicks"][0]; designer: typeof collectibleDesigners[0]; pickIndex: number }[] = [];
+    const picks: { pick: CollectiblePick; designer: CollectibleDesigner; pickIndex: number }[] = [];
     const matchPick = (pick: any) => {
       if (selectedSubcategory) {
         const tags = SUB_TAGS[selectedSubcategory] || [selectedSubcategory];
@@ -673,7 +676,7 @@ const Collectibles = () => {
     };
   }, [selectedSubcategory, selectedCategory]);
 
-  const openCuratorPicks = (designer: typeof collectibleDesigners[0]) => {
+  const openCuratorPicks = (designer: CollectibleDesigner) => {
     if (designer.curatorPicks && designer.curatorPicks.length > 0) {
       // Show all picks but start at the first matching one
       setCuratorPicksDesigner(designer);
