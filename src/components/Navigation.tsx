@@ -91,8 +91,8 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
 // Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
 const DECOR_SUBCATEGORIES = SUBCATEGORY_MAP["Décor"] ?? [];
 const DECOR_COLUMNS: string[][] = (() => {
-  // Balanced 5 / 4 / 4 split for 13 items.
-  const cols = 3;
+  // Balanced 7 / 6 split for 13 items (2 columns beside the photo panel).
+  const cols = 2;
   const base = Math.floor(DECOR_SUBCATEGORIES.length / cols);
   const extra = DECOR_SUBCATEGORIES.length % cols;
   const out: string[][] = [];
