@@ -8,3 +8,6 @@
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts use latest RLS-visible board or hub fallback; avoids dead landings. Trade layout owns breadcrumbs; avoids duplicate trails.
 - Felix tour spotlights wait for target and parent sizes to settle; retain prior rect while transitioning to avoid async layout jumps.
+<!-- LOVABLE:BEGIN -->
+- Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
+<!-- LOVABLE:END -->
