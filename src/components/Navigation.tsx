@@ -109,7 +109,7 @@ const leftNavItems = [{
   mobileLabel: "Our Gallery",
   href: "/gallery",
   icon: Image,
-}}];
+}];
 
 
 const rightNavItems = [{
