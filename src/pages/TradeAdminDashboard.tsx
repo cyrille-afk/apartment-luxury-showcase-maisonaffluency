@@ -50,6 +50,7 @@ const analyticsGroup: AdminCard[] = [
   { title: "Downloads by Country", description: "Track catalogue and spec sheet downloads per country", url: "/trade/downloads-by-country", icon: Globe },
   // Magazine Funnel card removed — AD free-download flow discontinued.
   { title: "Client Profiles", description: "AI-powered taste profiles and engagement scores", url: "/trade/client-profiles", icon: Sparkles },
+  { title: "Felix Moodboard Usage", description: "One-Click Moodboard Generator submissions by day — keyword vs image/Pinterest link", url: "/trade/admin/felix-usage", icon: BarChart3 },
   { title: "Concierge Token Usage", description: "AI concierge token consumption per user (last 30 days) with cost estimate", url: "/trade/admin/concierge-usage", icon: Sparkles },
   { title: "AI Usage Dashboard", description: "Tokens, requests, and estimated cost by feature and day across all AI features", url: "/trade/admin/ai-usage", icon: BarChart3 },
   { title: "MCP Usage", description: "Public catalog MCP queries, clicks, and conversion analytics", url: "/trade/admin/mcp-usage", icon: Search },
