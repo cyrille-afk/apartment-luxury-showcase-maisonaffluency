@@ -4,26 +4,17 @@
 // profiles, and their product pages. Public visitors are redirected to the
 // trade login.
 //
-// Source of truth: the hardcoded `collectibleDesigners` array in
-// `src/components/Collectibles.tsx`. If a slug appears there, it's gated.
-import { collectibleDesigners } from "@/components/Collectibles";
+// Source of truth: `collectible_roster.gated` in the database.
+import { useCollectibleRoster } from "@/lib/collectibleRoster";
 
-/** Collectible designer slugs that are publicly accessible (exceptions to the gate). */
-export const PUBLIC_COLLECTIBLE_SLUGS: ReadonlySet<string> = new Set([
-  "pierre-bonnefille",
-  "christopher-boots",
-]);
-
-export const COLLECTIBLE_SLUGS: ReadonlySet<string> = new Set(
-  collectibleDesigners
-    .map((d) => (d as { id?: string })?.id)
-    .filter((id): id is string => typeof id === "string" && id.length > 0)
-    .filter((id) => !PUBLIC_COLLECTIBLE_SLUGS.has(id)),
-);
-
-export function isCollectibleSlug(slug: string | null | undefined): boolean {
-  if (!slug) return false;
-  return COLLECTIBLE_SLUGS.has(slug);
+/**
+ * Returns a checker for gated collectible slugs, or null while the roster
+ * is still loading (callers should wait rather than render gated content).
+ */
+export function useCollectibleSlugGate(): ((slug: string | null | undefined) => boolean) | null {
+  const roster = useCollectibleRoster();
+  if (!roster) return null;
+  return (slug) => !!slug && roster.gated.has(slug);
 }
 
 /** Path to redirect public visitors to when hitting a gated collectible route. */
