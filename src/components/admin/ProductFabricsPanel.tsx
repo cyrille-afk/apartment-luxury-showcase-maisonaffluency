@@ -183,11 +183,13 @@ export default function ProductFabricsPanel({
   const linkedIds = useMemo(() => new Set(rows.map((r) => r.fabric_id)), [rows]);
   const filteredFabrics = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const sq = supplierSearch.trim().toLowerCase();
     return allFabrics
       .filter((f) => !linkedIds.has(f.id))
-      .filter((f) => !q || f.name.toLowerCase().includes(q) || (f.supplier || "").toLowerCase().includes(q))
+      .filter((f) => !q || f.name.toLowerCase().includes(q))
+      .filter((f) => !sq || (f.supplier || "").toLowerCase().includes(sq))
       .slice(0, 30);
-  }, [allFabrics, linkedIds, search]);
+  }, [allFabrics, linkedIds, search, supplierSearch]);
 
   const saveRow = async (rowId: string) => {
     const d = drafts[rowId];
@@ -400,12 +402,20 @@ export default function ProductFabricsPanel({
 
       {adding && (
         <div className="mt-2 border-t border-border pt-2 space-y-1.5">
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={isRugPick ? "Search finishes by name or supplier…" : "Search fabrics by name or supplier…"}
-            className="text-xs h-8"
-          />
+          <div className="grid grid-cols-2 gap-1.5">
+            <Input
+              value={supplierSearch}
+              onChange={(e) => setSupplierSearch(e.target.value)}
+              placeholder={isRugPick ? "Designer / supplier…" : "Designer / supplier…"}
+              className="text-xs h-8"
+            />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={isRugPick ? "Finish name…" : "Fabric / finish name…"}
+              className="text-xs h-8"
+            />
+          </div>
           <div className="max-h-60 overflow-y-auto space-y-1">
             {filteredFabrics.map((f) => (
               <button
