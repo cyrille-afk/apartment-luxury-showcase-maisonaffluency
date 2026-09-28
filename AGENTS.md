@@ -13,3 +13,4 @@
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
 12. Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps the matching rules out of the browser bundle.
+13. Collectible Design roster and trade-only gate load from the `collectible_roster` table (src/lib/collectibleRoster.ts); the bundled array in Collectibles.tsx remains only until stage-2 consumers migrate — keeps collectible data out of page logic.

@@ -61,7 +61,7 @@
 
 ## Move built-in catalogue to database (approved: lists + tier fallback)
 - [x] Tier percentages load only from the database (no bundled 10/15/20% fallback)
-- [ ] Collectibles (collectibleGate, useCollectibleOverrides, CollectiblesHoverHero, PublicCollectibles, TradeCollectiblesAdmin) → designers/designer_curator_picks
+- [x] Collectibles (collectibleGate, useCollectibleOverrides, CollectiblesHoverHero, PublicCollectibles, TradeCollectiblesAdmin) → designers/designer_curator_picks
 - [ ] ProductGrid, tradeProducts, curatorPicksCatalog, designerProfiles → database catalogue
 - [ ] BrandsAteliers atelierOnlyPicks → database
 - [ ] Delete bundled arrays in FeaturedDesigners / Collectibles / BrandsAteliers (~500 KB) after page-by-page live checks
