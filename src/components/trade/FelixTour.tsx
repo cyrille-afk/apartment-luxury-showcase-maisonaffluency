@@ -343,6 +343,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (settled && transitioning && transitionTimer.current === null) setTransitioning(false);
   }, [settled, transitioning]);
 
+  // Escape always closes the tour.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, close]);
+
   if (!open || typeof document === "undefined") return null;
 
   // Card placement: centered on the target — right of it, else below, else above.
@@ -392,8 +400,11 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   return createPortal(
     <>
-      {/* Dimmed backdrop with a clear window around the target */}
-      {!isPaused && <div className="pointer-events-none fixed inset-0 z-[130] overflow-hidden print:hidden">
+      {/* Dimmed backdrop with a clear window around the target; tap dismisses when there is no spotlight */}
+      {!isPaused && <div
+        className={cn("fixed inset-0 z-[130] overflow-hidden print:hidden", rect ? "pointer-events-none" : "pointer-events-auto")}
+        onClick={rect ? undefined : () => close(false)}
+      >
         {(!rect || !settled || transitioning) && <div className="absolute inset-0 bg-foreground/40" />}
         {ring}
       </div>}
