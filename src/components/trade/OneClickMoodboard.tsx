@@ -28,12 +28,21 @@ const PINNED_KAVEHOME = [
   { title: /^vega b chair/i, designer: /de la espada/i },
   { title: /^entre bench/i, designer: /dagmar/i },
 ];
+const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
+
+function isAshDiningChair(materials: string | undefined, title: string, category: string | undefined, subcategory: string | undefined) {
+  const material = (materials || "").toLowerCase();
+  const type = `${title} ${category || ""} ${subcategory || ""}`.toLowerCase();
+  // Do not infer an ash finish from a generic wood listing or an oak/walnut alternative.
+  return /\bash\b/.test(material) && !/\b(oak|walnut|mahogany|beech)\b/.test(material)
+    && /\bchairs?\b/.test(type) && !/\b(armchairs?|lounge|bar|stools?)\b/.test(type);
+}
 
 export default function OneClickMoodboard() {
-  const [mode, setMode] = useState<"prompt" | "reference">("reference");
-  const [prompt, setPrompt] = useState("");
+  const [mode, setMode] = useState<"prompt" | "reference">("prompt");
+  const [prompt, setPrompt] = useState(DEFAULT_OBJECT_QUERY);
   const [reference, setReference] = useState(DEFAULT_REFERENCE);
-  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>({ value: DEFAULT_REFERENCE, mode: "reference" });
+  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>({ value: DEFAULT_OBJECT_QUERY, mode: "prompt" });
   const [generating, setGenerating] = useState(false);
   // Unlock is driven ONLY by the server-verified trade/admin role — never by local form state.
   const { isTradeUser, isAdmin } = useAuth();
@@ -70,8 +79,12 @@ export default function OneClickMoodboard() {
       } catch { return submitted.value; }
     })() : submitted.value;
     const terms = keywords(search);
+    const strictAshChair = submitted.mode === "prompt" && terms.includes("ash") && terms.some((term) => term === "chair" || term === "chairs");
     const pinned = /kavehome\./i.test(submitted.value) ? PINNED_KAVEHOME : [];
-    const ranked = catalog.map((item, index) => {
+    const eligible = strictAshChair
+      ? catalog.filter(({ pick }) => isAshDiningChair(pick.materials, pick.title, pick.category, pick.subcategory))
+      : catalog;
+    const ranked = eligible.map((item, index) => {
       const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
       let score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
       const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
@@ -145,17 +158,17 @@ export default function OneClickMoodboard() {
             <p className="mb-3 font-body text-xs uppercase tracking-[0.2em] text-moodboard-teal">Sourcing atelier / 01</p>
             <h2 id="moodboard-heading" className="max-w-2xl font-display text-3xl leading-tight text-moodboard-ink md:text-5xl">One-Click Moodboard Generator</h2>
           </div>
-          <p className="mt-5 max-w-sm font-body text-sm leading-relaxed text-moodboard-ink/60 md:mt-0">Start with a room idea or a reference link. Explore a quick edit from the Maison Affluency collection.</p>
+          <p className="mt-5 max-w-sm font-body text-sm leading-relaxed text-moodboard-ink/60 md:mt-0">Start with a piece or a reference link. Explore a precise edit from the Maison Affluency collection.</p>
         </div>
 
         <form onSubmit={submit} className="mb-10">
-          <div className="mb-5 flex gap-0 border-b border-moodboard-ink/10" role="group" aria-label="Moodboard input type">
-            <Button type="button" variant="ghost" onClick={() => { setMode("prompt"); setError(""); }} aria-pressed={mode === "prompt"} className={tabClass(mode === "prompt")}>Describe a space</Button>
+          <div className="mb-5 flex flex-col gap-0 border-b border-moodboard-ink/10 sm:flex-row" role="group" aria-label="Moodboard input type">
+            <Button type="button" variant="ghost" onClick={() => { setMode("prompt"); setError(""); }} aria-pressed={mode === "prompt"} className={tabClass(mode === "prompt")}>Source by object / piece</Button>
             <Button type="button" variant="ghost" onClick={() => { setMode("reference"); setError(""); }} aria-pressed={mode === "reference"} className={tabClass(mode === "reference")}><ImageIcon aria-hidden="true" className="mr-2 size-3.5" />Image / Pinterest URL</Button>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <label htmlFor="moodboard-input" className="sr-only">{mode === "prompt" ? "Describe your moodboard" : "Image or Pinterest URL"}</label>
-            <Input id="moodboard-input" key={mode} type={mode === "prompt" ? "text" : "url"} value={mode === "prompt" ? prompt : reference} onChange={(event) => { (mode === "prompt" ? setPrompt : setReference)(event.target.value); setError(""); }} required maxLength={500} placeholder={mode === "prompt" ? "E.g. Sculptural walnut seating and warm brass lighting" : "https://www.pinterest.com/pin/..."} className="h-12 flex-1 rounded-none border-moodboard-ink/20 bg-card px-4 text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal" />
+            <label htmlFor="moodboard-input" className="sr-only">{mode === "prompt" ? "Object or piece to source" : "Image or Pinterest URL"}</label>
+            <Input id="moodboard-input" key={mode} type={mode === "prompt" ? "text" : "url"} value={mode === "prompt" ? prompt : reference} onChange={(event) => { (mode === "prompt" ? setPrompt : setReference)(event.target.value); setError(""); }} required maxLength={500} placeholder={mode === "prompt" ? "E.g. Ash dining chairs" : "https://www.pinterest.com/pin/..."} className="h-12 flex-1 rounded-none border-moodboard-ink/20 bg-card px-4 text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal" />
             <Button type="submit" disabled={generating} className="h-12 shrink-0 rounded-none bg-moodboard-teal px-7 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">
               {generating ? <><Loader2 aria-hidden="true" className="animate-spin" /> Curating…</> : <>Generate edit <ArrowRight aria-hidden="true" /></>}
             </Button>
@@ -181,6 +194,7 @@ export default function OneClickMoodboard() {
               <span className="font-body text-xs text-moodboard-ink/50">{matches.length} pieces · Public collection</span>
             </div>
             {submitted.mode === "reference" && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>}
+            {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
             {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
             {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
             {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
@@ -193,13 +207,19 @@ export default function OneClickMoodboard() {
                   </article>
                 ))}
               </div>
-              {matches.length > 3 && <div className="relative mt-4">
+              {(matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
                 <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
                   {matches.slice(3).map(({ pick, designerName }) => (
                     <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
                       <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover" /></div>
                       {cardBody(pick, designerName, !unlocked)}
                     </article>
+                  ))}
+                  {!unlocked && matches.length <= 3 && [0, 1, 2].map((index) => (
+                    <div key={`pending-${index}`} className="border border-moodboard-ink/10 bg-card">
+                      <div className="aspect-[4/5] bg-moodboard-ink/5" />
+                      <div className="p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
+                    </div>
                   ))}
                 </div>
                 {!unlocked && <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">

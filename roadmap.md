@@ -1,6 +1,7 @@
 # Roadmap
 
-- [x] Add a public one-click moodboard preview to the homepage with prompt/reference input, public catalog matches, and a simulated email unlock.
+- [x] Add a public sourcing preview with catalog matches and a verified trade gate that forwards lead emails directly to the Trade Program form.
+- [ ] Source and verify the requested Monarch, Roku, and 交叉 ash chairs before featuring them; their stated designer/material combinations are not in the published catalog.
 
 - [x] Restore the Monster Gold-Tone Incense Burner pin and right-side pick on desktop Living Room photo 4/4; order left picks Japanese Cranes Wallcover, Vallauris Floor Lamp, AB Chair without changing mobile or shared records.
 - [x] Show the approved MicMac Chandelier photo in the Master Suite side picks on photos 1/4 and 3/4, without exposing its trade-only catalogue entry.
