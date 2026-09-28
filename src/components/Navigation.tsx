@@ -221,6 +221,10 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
+  // Keeps the desktop TRADE link's left edge flush with JOURNAL's left edge
+  // in the nav tier below (offset shifts the utility cluster horizontally).
+  const utilityClusterRef = useRef<HTMLDivElement>(null);
+  const [utilityAlignOffset, setUtilityAlignOffset] = useState(0);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
@@ -884,7 +888,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               </span>
             </button>
 
-            <div className="flex items-center gap-5 justify-self-end">
+            <div
+              ref={utilityClusterRef}
+              className="flex items-center gap-5 justify-self-end"
+              style={utilityAlignOffset ? { marginRight: `${utilityAlignOffset}px` } : undefined}
+            >
               {isContactRoute ? (
                 <button
                   type="button"
@@ -899,6 +907,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <button
                     type="button"
                     aria-haspopup="menu"
+                    data-utility-trade
                     onClick={() => setTradeMenuOpen((o) => !o)}
                     className="font-body text-[10px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
                   >
@@ -907,7 +916,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <div
                     role="menu"
                     className={cn(
-                      "absolute right-0 top-full z-50 pt-3 transition-opacity duration-200",
+                      "absolute right-[-148px] top-full z-50 pt-3 transition-opacity duration-200",
                       tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover/trade:opacity-100 group-hover/trade:visible"
                     )}
                     onMouseLeave={() => setTradeMenuOpen(false)}
@@ -917,7 +926,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                         Affluency Trade Program Sign-In
                       </button>
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade-program?intent=apply"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
-                        Join Affluency Trade Program
+                        Join The Affluency Trade Program
                       </button>
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setServicesOpen(true); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
                         Request Affluency Trade Services
@@ -1302,6 +1311,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               ))}
 
               <button
+                data-nav-journal
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
                   "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
