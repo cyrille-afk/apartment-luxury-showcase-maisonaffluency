@@ -162,7 +162,7 @@ export default function OneClickMoodboard() {
         </div>
 
         <form onSubmit={submit} className="mb-10">
-          <div className="mb-5 flex gap-0 border-b border-moodboard-ink/10" role="group" aria-label="Moodboard input type">
+          <div className="mb-5 flex flex-col gap-0 border-b border-moodboard-ink/10 sm:flex-row" role="group" aria-label="Moodboard input type">
             <Button type="button" variant="ghost" onClick={() => { setMode("prompt"); setError(""); }} aria-pressed={mode === "prompt"} className={tabClass(mode === "prompt")}>Source by object / piece</Button>
             <Button type="button" variant="ghost" onClick={() => { setMode("reference"); setError(""); }} aria-pressed={mode === "reference"} className={tabClass(mode === "reference")}><ImageIcon aria-hidden="true" className="mr-2 size-3.5" />Image / Pinterest URL</Button>
           </div>
