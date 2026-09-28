@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, Image as ImageIcon, Loader2, LockKeyhole } from "lucide-react";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useQuery } from "@tanstack/react-query";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
