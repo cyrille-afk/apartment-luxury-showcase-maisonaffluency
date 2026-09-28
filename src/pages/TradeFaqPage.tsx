@@ -23,7 +23,7 @@ const TradeFaqPage = () => {
       <Navigation />
 
       <main className="flex-1 w-full">
-        <div className="max-w-4xl mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-4xl mx-auto px-4 pt-40 md:pt-48 pb-16 md:pb-24">
           <h1 className="font-display text-xl md:text-2xl text-foreground tracking-[0.12em] uppercase text-center mb-12">
             Trade FAQ
           </h1>
