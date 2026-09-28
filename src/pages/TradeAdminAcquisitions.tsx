@@ -222,6 +222,7 @@ const TradeAdminAcquisitions = () => {
   const enabled = !!user && isAdmin;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [checklistSignal, setChecklistSignal] = useState(0);
   const [search, setSearch] = useState("");
   const [dispatching, setDispatching] = useState(false);
   const [testMode, setTestMode] = useState(() => {
