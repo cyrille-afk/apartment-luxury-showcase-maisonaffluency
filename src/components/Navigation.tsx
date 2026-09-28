@@ -44,7 +44,7 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-type RoomNavKey = "living" | "dining" | "bedroom" | "lighting";
+type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor";
 
 interface RoomNavCategory {
   label: string;
@@ -85,7 +85,16 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
     { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
   ],
+  decor: [],
 };
+
+// Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
+const DECOR_SUBCATEGORIES = SUBCATEGORY_MAP["Décor"] ?? [];
+const DECOR_COLUMNS: string[][] = (() => {
+  const cols = 3;
+  const per = Math.ceil(DECOR_SUBCATEGORIES.length / cols);
+  return Array.from({ length: cols }, (_, i) => DECOR_SUBCATEGORIES.slice(i * per, (i + 1) * per));
+})();
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
   dining: [{ label: "Dining", slug: "dining-room" }],
@@ -97,6 +106,7 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   dining: { src: intimateDiningAmbient, alt: "Intimate dining setting with collectible furniture" },
   bedroom: { src: calmingBedroomAmbient, alt: "Calming bedroom with layered natural materials" },
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
+  decor: { src: livingRoomAmbient, alt: "Decorative objects in an architectural living room" },
 };
 
 const leftNavItems = [{
@@ -1118,7 +1128,50 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </div>
                   )}
 
-                  {room !== "living" && megaMenuOpen && activeRoomMenu === room && (
+                  {room === "decor" && megaMenuOpen && activeRoomMenu === "decor" && (
+                    <div
+                      ref={megaMenuRef}
+                      data-room-menu="decor"
+                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                    >
+                      <style>{`
+                        @keyframes megaMenuReveal {
+                          from { opacity: 0; transform: translateY(-6px); }
+                          to { opacity: 1; transform: translateY(0); }
+                        }
+                      `}</style>
+                      <div className="px-9 py-8">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => navigateFromMegaMenu("Décor")}
+                          className="mb-4 flex h-8 w-auto justify-start rounded-none p-0 font-body text-[13px] font-semibold tracking-normal text-foreground hover:bg-transparent hover:text-foreground"
+                        >
+                          Décor Collections
+                        </Button>
+                        <div className="grid grid-cols-3 gap-x-10">
+                          {DECOR_COLUMNS.map((col, ci) => (
+                            <div key={ci} className="flex flex-col">
+                              {col.map((subcategory) => (
+                                <Button
+                                  key={subcategory}
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() => navigateFromMegaMenu("Décor", subcategory)}
+                                  className="mb-3 block h-auto w-full whitespace-normal rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
+                                >
+                                  {subcategory}
+                                </Button>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {room !== "living" && room !== "decor" && megaMenuOpen && activeRoomMenu === room && (
                     <div
                       ref={megaMenuRef}
                       data-room-menu={room}
