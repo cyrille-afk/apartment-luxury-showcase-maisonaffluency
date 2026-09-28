@@ -67,7 +67,7 @@ export default function TradeServicesRequestModal({ open, onOpenChange }: { open
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-3xl sm:w-[calc(100%-2rem)] rounded-none border-none bg-background p-8 md:p-14 max-h-[92vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-3xl sm:w-[calc(100%-2rem)] rounded-none border-none bg-background px-6 pt-16 pb-8 md:p-14 max-h-[92vh] overflow-y-auto">
         <DialogTitle className="font-display text-2xl md:text-4xl font-light uppercase tracking-[0.04em] text-foreground">
           Affluency Trade Services Request
         </DialogTitle>
