@@ -25,7 +25,7 @@ function toneClass(tone: string, index: number) {
   if (/green|jade|olive|sage|forest/.test(value)) return "bg-primary";
   if (/red|rust|clay|terracotta|coral|rose/.test(value)) return "bg-secondary";
   if (/gold|brass|ochre|yellow|amber/.test(value)) return "bg-accent";
-  if (/white|ivory|cream|sand|beige|stone|grey|gray|taupe/.test(value)) return "bg-muted";
+  if (/white|ivory|cream|sand|beige|stone|grey|gray|taupe|alabaster|linen|ecru|pearl|bone|chalk|off-?white/.test(value)) return "bg-muted";
   return paletteClasses[index % paletteClasses.length];
 }
 
