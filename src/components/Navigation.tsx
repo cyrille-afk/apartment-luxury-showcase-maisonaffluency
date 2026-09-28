@@ -944,7 +944,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <div
                     role="menu"
                     className={cn(
-                      "absolute right-0 top-full z-50 pt-[60px] transition-opacity duration-200",
+                      "absolute right-0 top-full z-50 pt-[61px] transition-opacity duration-200",
                       tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover/trade:opacity-100 group-hover/trade:visible"
                     )}
                     onMouseLeave={() => setTradeMenuOpen(false)}
