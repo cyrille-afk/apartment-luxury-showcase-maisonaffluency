@@ -10579,6 +10579,51 @@ export type Database = {
           },
         ]
       }
+      trade_service_requests: {
+        Row: {
+          company_name: string
+          country: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          postal_code: string
+          preferred_contact: string
+          service_type: string
+          status: string
+        }
+        Insert: {
+          company_name: string
+          country: string
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          postal_code: string
+          preferred_contact: string
+          service_type: string
+          status?: string
+        }
+        Update: {
+          company_name?: string
+          country?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          postal_code?: string
+          preferred_contact?: string
+          service_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       trade_tier_config: {
         Row: {
           discount_pct: number

@@ -33,9 +33,9 @@ const Footer = () => {
           <a href="/journal" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
             Journal
           </a>
-          <button onClick={() => scrollToSection("contact")} className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
-            Contact
-          </button>
+          <a href="/contact" className="font-body text-sm uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground">
+            Contact Us
+          </a>
           <InstallAppDialog />
         </div>
 
