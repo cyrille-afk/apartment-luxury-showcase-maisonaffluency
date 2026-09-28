@@ -17,18 +17,21 @@ type Props = {
   studioName: string;
   founderName: string | null;
   linkedinUrl: string | null;
-  onLaunched?: (hook: "A" | "B") => void;
+  onLaunched?: (hook: "A" | "B" | "C") => void;
 };
 
-const buildScript = (tab: "A" | "B", name: string | null, company: string) => {
+const buildScript = (tab: "A" | "B" | "C", name: string | null, company: string) => {
   const hi = name ? `Hi ${name},` : "Hi there,";
+  if (tab === "C") {
+    return `${hi} I sent a formal briefing to your inbox earlier this week regarding your studio's priority trade allocation for the global launch of the Maison Affluency Trade Program. \n\nRecognizing the scale of your current luxury residential and commercial pipelines at ${company}, we wanted to fast-track your design partners with verified international trade credentials. \n\nThe architecture completely streamlines the client presentation barrier: your teams can curate interactive 3D material boards, allow clients to drop live feedback directly on the canvas, and switch on a pristine White-Label Presentation mode—completely embedding your own logo while strictly isolating your internal trade costs and manufacturer data from external guests.\n\nWe have reserved ${company}'s secure access key. Should I pass your onboarding credentials and private sandbox token directly to your chat here?`;
+  }
   return tab === "A"
     ? `${hi} beautiful execution on your recent projects. I wanted to reach out as we recently launched the Maison Affluency Trade Program—an enterprise-grade digital sourcing architecture built explicitly to streamline procurement operations for elite firms like ${company}. \n\nWe have aggregated real-time catalog pricing, global manufacturer lead times, and cross-border logistics metrics for premier international artisan design houses into a single, automated ledger to eliminate manual quoting delays and administrative friction. \n\nWe would love to fast-track your studio partners with premium trade status. Would you be open to receiving a secure onboarding credential key to your team's inbox?`
     : `${hi} exceptional portfolio curation. I wanted to briefly introduce the Maison Affluency Trade Program, engineered specifically to elevate client presentation workflows for leading studios like ${company}. \n\nThe architecture allows your team to manage fluid project grids and instantly toggle on a pristine, fully white-labeled Client Presentation Mode. This seamlessly embeds your custom studio logo and assets while completely locking away and protecting your internal trade costs, wholesale margins, and manufacturer data from external guests. \n\nWe would love to set up a private, secure sandbox credential for your design partners. Should I pass an onboarding token to your inbox?`;
 };
 
 const LinkedInOutreachModal = ({ open, leadId, onOpenChange, studioName, founderName, linkedinUrl, onLaunched }: Props) => {
-  const [tab, setTab] = useState<"A" | "B">("A");
+  const [tab, setTab] = useState<"A" | "B" | "C">("A");
   const [copied, setCopied] = useState(false);
   const { greetingName } = useMemo(() => resolveGreeting(founderName, studioName), [founderName, studioName]);
   const script = useMemo(() => buildScript(tab, greetingName, studioName), [tab, greetingName, studioName]);
@@ -63,11 +66,11 @@ const LinkedInOutreachModal = ({ open, leadId, onOpenChange, studioName, founder
         </DialogHeader>
 
         <div className="flex gap-2">
-          {(["A", "B"] as const).map((v) => (
+          {(["A", "B", "C"] as const).map((v) => (
             <button key={v} type="button" onClick={() => setTab(v)}
               className={`h-9 flex-1 border px-4 text-[10px] uppercase tracking-[0.18em] transition-colors ${
                 tab === v ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:bg-muted/40"}`}>
-              {v === "A" ? "A · System Speed Hook" : "B · Revenue Preservation Hook"}
+              {v === "A" ? "A · System Speed Hook" : v === "B" ? "B · Revenue Preservation Hook" : "C · Follow-Up"}
             </button>
           ))}
         </div>
