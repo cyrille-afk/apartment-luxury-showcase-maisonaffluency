@@ -494,13 +494,13 @@ const TradeLanding = () => {
     });
   }, []);
 
-  // Legacy #apply/#register deep links scroll to the application form.
+  // ?intent=apply (and legacy #apply/#register) deep links scroll to the application form.
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash === "#register" || hash === "#apply") {
-      document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (hash === "#register" || hash === "#apply" || searchParams.get("intent") === "apply") {
+      setTimeout(() => document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
 
 

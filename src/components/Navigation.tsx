@@ -939,7 +939,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade/login"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
                         Affluency Trade Program Sign-In
                       </button>
-                      <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade-program#apply"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
+                      <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade-program?intent=apply"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
                         Join Affluency Trade Program
                       </button>
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setServicesOpen(true); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
