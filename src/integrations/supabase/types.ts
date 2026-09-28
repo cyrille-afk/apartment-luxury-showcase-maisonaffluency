@@ -68,6 +68,56 @@ export type Database = {
         }
         Relationships: []
       }
+      acquisition_demo_bookings: {
+        Row: {
+          audit_status: string
+          booking_link: string | null
+          created_at: string
+          created_by: string | null
+          demo_at: string | null
+          id: string
+          lead_id: string
+          notes: string | null
+          template_key: string
+          trade_id_audit: Json
+          updated_at: string
+        }
+        Insert: {
+          audit_status?: string
+          booking_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          demo_at?: string | null
+          id?: string
+          lead_id: string
+          notes?: string | null
+          template_key: string
+          trade_id_audit?: Json
+          updated_at?: string
+        }
+        Update: {
+          audit_status?: string
+          booking_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          demo_at?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          template_key?: string
+          trade_id_audit?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acquisition_demo_bookings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "acquisition_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       acquisition_inbound_events: {
         Row: {
           action: string | null

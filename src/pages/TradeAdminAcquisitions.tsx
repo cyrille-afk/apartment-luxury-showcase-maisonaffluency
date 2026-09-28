@@ -24,6 +24,7 @@ import InstagramOutreachModal from "@/components/trade/InstagramOutreachModal";
 import B2BOutreachModal from "@/components/trade/B2BOutreachModal";
 import LinkedInOutreachModal from "@/components/trade/LinkedInOutreachModal";
 import EmailBriefingModal from "@/components/trade/EmailBriefingModal";
+import InboundLeadTemplates from "@/components/trade/InboundLeadTemplates";
 import { Briefcase, ExternalLink, Instagram, Linkedin, Mail, Loader2, Send, ShieldAlert, Sparkles } from "lucide-react";
 
 type Lead = {
@@ -686,6 +687,8 @@ const TradeAdminAcquisitions = () => {
             </button>
           </div>
         </header>
+
+        <InboundLeadTemplates leads={rows} />
 
         {/* Country tabs */}
         <nav className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pt-8" aria-label="Filter by country">
