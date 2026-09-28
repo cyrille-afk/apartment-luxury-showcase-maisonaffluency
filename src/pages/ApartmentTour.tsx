@@ -208,10 +208,6 @@ const ApartmentTour = () => {
             opens net pricing, technical drawings and bespoke quoting. Private
             collectors can browse the same catalogue through our{" "}
             <Link to="/designers" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
-              collectibles edit
-            </Link>{" "}
-            and our{" "}
-            <Link to="/designers" className="text-[#d4bea0] hover:text-[#f5f0eb] underline underline-offset-4">
               represented designers
             </Link>
             .
