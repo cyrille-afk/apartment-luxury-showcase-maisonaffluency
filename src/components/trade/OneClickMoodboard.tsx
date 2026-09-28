@@ -51,7 +51,7 @@ function ashDiningChairScore(title: string, category: string | undefined, subcat
   return 2 * 1 + objectSimilarity;
 }
 
-export default function OneClickMoodboard() {
+export default function OneClickMoodboard({ embedded = false }: { embedded?: boolean }) {
   const [mode, setMode] = useState<"prompt" | "reference">("prompt");
   const [prompt, setPrompt] = useState(DEFAULT_OBJECT_QUERY);
   const [reference, setReference] = useState(DEFAULT_REFERENCE);
@@ -152,7 +152,7 @@ export default function OneClickMoodboard() {
     }`;
 
   const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
-    <div className="flex min-h-32 flex-col justify-between p-4">
+    <div className={`flex flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
       <div>
         <p className="truncate text-[10px] uppercase tracking-wider text-moodboard-teal">{locked ? "More from the collection" : designerName}</p>
         <h4 className="mt-1 truncate font-display text-base text-moodboard-ink">{locked ? "Selection locked" : pick.title}</h4>
@@ -160,23 +160,23 @@ export default function OneClickMoodboard() {
       </div>
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-moodboard-ink/10 pt-3 text-xs">
         <span className="shrink-0 text-moodboard-ink/50">{locked ? "Sourcing ID" : `ID ${sourcingId(pick.id ?? pick.title)}`}</span>
-        <span className="truncate font-medium text-moodboard-teal">{locked ? "Locked" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
+        <span className="truncate font-medium text-moodboard-teal">{locked ? "Locked" : embedded ? "Price upon Request" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
       </div>
     </div>
   );
 
   return (
-    <section aria-labelledby="moodboard-heading" className="bg-moodboard-cream py-16 md:py-24">
-      <div className="mx-auto max-w-6xl px-6 md:px-12">
-        <div className="mb-9 border-b border-moodboard-ink/10 pb-9 md:flex md:items-end md:justify-between md:gap-12">
+    <section aria-labelledby="moodboard-heading" className={embedded ? "mt-7 border-t border-moodboard-ink/10 pt-6 text-moodboard-ink" : "bg-moodboard-cream py-16 md:py-24"}>
+      <div className={embedded ? "min-w-0" : "mx-auto max-w-6xl px-6 md:px-12"}>
+        <div className={embedded ? "mb-5" : "mb-9 border-b border-moodboard-ink/10 pb-9 md:flex md:items-end md:justify-between md:gap-12"}>
           <div>
             <p className="mb-3 font-body text-xs uppercase tracking-[0.2em] text-moodboard-teal">Sourcing atelier / 01</p>
-            <h2 id="moodboard-heading" className="max-w-2xl font-display text-3xl leading-tight text-moodboard-ink md:text-5xl">One-Click Moodboard Generator</h2>
+            <h2 id="moodboard-heading" className={`max-w-2xl font-display leading-tight text-moodboard-ink ${embedded ? "text-xl md:text-2xl" : "text-3xl md:text-5xl"}`}>One-Click Moodboard Generator</h2>
           </div>
-          <p className="mt-5 max-w-sm font-body text-sm leading-relaxed text-moodboard-ink/60 md:mt-0">Start with a piece or a reference link. Explore a precise edit from the Maison Affluency collection.</p>
+          {!embedded && <p className="mt-5 max-w-sm font-body text-sm leading-relaxed text-moodboard-ink/60 md:mt-0">Start with a piece or a reference link. Explore a precise edit from the Maison Affluency collection.</p>}
         </div>
 
-        <form onSubmit={submit} className="mb-10">
+        <form onSubmit={submit} className={embedded ? "mb-6" : "mb-10"}>
           <div className="mb-5 flex flex-col gap-0 border-b border-moodboard-ink/10 sm:flex-row" role="group" aria-label="Moodboard input type">
             <Button type="button" variant="ghost" onClick={() => { setMode("prompt"); setError(""); }} aria-pressed={mode === "prompt"} className={tabClass(mode === "prompt")}>Source by object / piece</Button>
             <Button type="button" variant="ghost" onClick={() => { setMode("reference"); setError(""); }} aria-pressed={mode === "reference"} className={tabClass(mode === "reference")}><ImageIcon aria-hidden="true" className="mr-2 size-3.5" />Image / Pinterest URL</Button>
@@ -206,7 +206,7 @@ export default function OneClickMoodboard() {
           <div aria-live="polite">
             <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3 border-b border-moodboard-ink/10 pb-4">
               <div><p className="font-body text-[11px] uppercase tracking-[0.2em] text-moodboard-teal">The edit</p><h3 className="mt-1 font-display text-xl text-moodboard-ink">Selected for your brief</h3></div>
-              <span className="font-body text-xs text-moodboard-ink/50">{matches.length} pieces · Public collection</span>
+              <span className="font-body text-xs text-moodboard-ink/50">{embedded && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) ? `${matches.slice(0, 3).length} verified · ${Math.max(0, 3 - matches.length)} pending` : `${matches.length} pieces · Public collection`}</span>
             </div>
             {submitted.mode === "reference" && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>}
             {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
@@ -214,15 +214,32 @@ export default function OneClickMoodboard() {
             {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
             {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
             {matches.length > 0 && <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className={embedded ? "grid grid-cols-2 gap-2 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
                 {matches.slice(0, 3).map(({ pick, designerName }) => (
                   <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-cover" /></div>
+                    <div className="aspect-[4/5] overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-contain" /></div>
                     {cardBody(pick, designerName, false)}
                   </article>
                 ))}
+                {embedded && submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && Array.from({ length: Math.max(0, 3 - matches.length) }, (_, index) => (
+                  <article key={`pending-${index}`} className="flex min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                    <div className="aspect-[4/5] bg-moodboard-ink/5" aria-hidden="true" />
+                    <div className="p-2.5"><p className="font-display text-sm text-moodboard-ink">Further sourcing pending</p><p className="mt-1 text-xs text-moodboard-ink/60">Material verification required</p><p className="mt-3 border-t border-moodboard-ink/10 pt-2 text-xs text-moodboard-teal">Price upon Request</p></div>
+                  </article>
+                ))}
               </div>
-              {(matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
+              {(embedded || matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
+                {embedded ? <div className="relative overflow-hidden border border-moodboard-ink/10 bg-moodboard-cream p-4">
+                  <div aria-hidden="true" className="pointer-events-none select-none space-y-3 blur-md"><div className="flex justify-between border-b border-moodboard-ink/10 pb-3"><span>Supplier & atelier network</span><span>Availability</span></div><div className="flex justify-between"><span>Material specification · Lead times</span><span>Trade margin</span></div><div className="flex justify-between"><span>Project presentation · Client export</span><span>Locked</span></div></div>
+                  <div className="absolute inset-0 bg-moodboard-cream/35 backdrop-blur-sm" aria-hidden="true" />
+                  <div className="relative z-10 mx-auto max-w-md border-t-2 border-moodboard-teal bg-card p-5 shadow-elegant">
+                    <LockKeyhole className="mb-3 size-5 text-moodboard-teal" aria-hidden="true" />
+                    <h4 className="font-display text-lg leading-snug text-moodboard-ink">Unlock Felix's Complete Automated Sourcing Engine.</h4>
+                    <p className="mt-2 text-xs leading-relaxed text-moodboard-ink/70">Finish your Trade Program registration below to run unlimited image visual searches, calculate project margins instantly, and download white-label PDF client presentations.</p>
+                    <Button type="button" onClick={() => document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-4 w-full rounded-none bg-moodboard-teal text-moodboard-teal-foreground hover:bg-moodboard-teal/90">Continue registration <ArrowRight aria-hidden="true" className="ml-2 size-4" /></Button>
+                    <p className="mt-3 text-xs text-moodboard-ink/50">Access follows trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+                  </div>
+                </div> : <>
                 <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
                   {matches.slice(3).map(({ pick, designerName }) => (
                     <article key={pick.id} className="min-w-0 border border-moodboard-ink/10 bg-card">
@@ -251,6 +268,7 @@ export default function OneClickMoodboard() {
                     <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
                   </div>
                 </div>}
+                </>}
               </div>}
             </>}
           </div>
