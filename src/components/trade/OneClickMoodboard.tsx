@@ -38,6 +38,19 @@ function isAshDiningChair(materials: string | undefined, title: string, category
     && /\bchairs?\b/.test(type) && !/\b(armchairs?|lounge|bar|stools?)\b/.test(type);
 }
 
+// Rank only published catalog picks: material is worth twice the object-type match.
+// This mirrors the proposed SQL weighting without querying an unrelated catalog or
+// relying on substring similarity (which would treat "ash" as part of "cashmere").
+function ashDiningChairScore(title: string, category: string | undefined, subcategory: string | undefined) {
+  const name = title.toLowerCase();
+  const type = `${category || ""} ${subcategory || ""}`.toLowerCase();
+  const objectSimilarity = /\bdining chairs?\b/.test(name) ? 1
+    : /\bdining chairs?\b/.test(type) ? 0.9
+    : /\bchairs?\b/.test(name) ? 0.7
+    : /\bchairs?\b/.test(type) ? 0.5 : 0;
+  return 2 * 1 + objectSimilarity;
+}
+
 export default function OneClickMoodboard() {
   const [mode, setMode] = useState<"prompt" | "reference">("prompt");
   const [prompt, setPrompt] = useState(DEFAULT_OBJECT_QUERY);
@@ -86,7 +99,9 @@ export default function OneClickMoodboard() {
       : catalog;
     const ranked = eligible.map((item, index) => {
       const haystack = keywords([item.pick.title, item.pick.category, item.pick.subcategory, item.pick.materials, item.designerName].filter(Boolean).join(" "));
-      let score = terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
+      let score = strictAshChair
+        ? ashDiningChairScore(item.pick.title, item.pick.category, item.pick.subcategory)
+        : terms.reduce((sum, term) => sum + (haystack.some((word) => word === term) ? 3 : haystack.some((word) => word.includes(term)) ? 1 : 0), 0);
       const pinIndex = pinned.findIndex((p) => p.title.test(item.pick.title) && p.designer.test(item.designerName || ""));
       if (pinIndex >= 0) score = 10000 - pinIndex;
       return { item, index, score };
