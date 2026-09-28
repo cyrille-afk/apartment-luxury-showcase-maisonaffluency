@@ -46,7 +46,7 @@ const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 import LegacyTradeSignupRedirect from "./components/trade/LegacyTradeSignupRedirect";
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
-const TradeProgramApply = lazy(() => import("./pages/TradeProgramApply"));
+
 const TradeActivate = lazy(() => import("./pages/TradeActivate"));
 const TradeClientDashboard = lazy(() => import("./pages/TradeClientDashboard"));
 const TradeOnboarding = lazy(() => import("./pages/TradeOnboarding"));
@@ -730,7 +730,7 @@ const App = () => {
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
-                  <Route path="/trade-program/apply" element={<Suspense fallback={null}><TradeProgramApply /></Suspense>} />
+                  <Route path="/trade-program/apply" element={<TradeApplyRedirect />} />
                   <Route path="/trade/apply" element={<LegacyTradeSignupRedirect />} />
                   <Route path="/trade/processing" element={<LegacyTradeSignupRedirect />} />
                   <Route path="/trade/activate" element={<Suspense fallback={null}><TradeActivate /></Suspense>} />
@@ -992,3 +992,8 @@ const App = () => {
 };
 
 export default App;
+
+function TradeApplyRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/trade-program${search}`} replace />;
+}
