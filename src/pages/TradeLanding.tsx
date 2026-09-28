@@ -737,8 +737,8 @@ const TradeLanding = () => {
         {/* Mobile accordion */}
         <MobileBenefitsCarousel benefits={benefits} />
 
-        {/* Desktop: alternating 50/50 split — narrower container */}
-        <div className="hidden md:block max-w-6xl mx-auto px-8 lg:px-12 py-8">
+        {/* Desktop: alternating 50/50 split — header-width container */}
+        <div className="hidden md:block w-full max-w-[1200px] mx-auto px-6 py-8">
           {benefits.map((benefit, index) => {
             const isEven = index % 2 === 0;
             return (
