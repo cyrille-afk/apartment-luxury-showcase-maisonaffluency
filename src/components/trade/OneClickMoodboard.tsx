@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFelixEvent } from "@/lib/felixEvents";
 
 function sourcingId(id: string) {
   let hash = 0;
@@ -26,7 +27,7 @@ export function useMoodboardSourcing() {
   const [mode, setMode] = useState<"prompt" | "reference">("prompt");
   const [prompt, setPrompt] = useState(DEFAULT_OBJECT_QUERY);
   const [reference, setReference] = useState(DEFAULT_REFERENCE);
-  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference" } | null>({ value: DEFAULT_OBJECT_QUERY, mode: "prompt" });
+  const [submitted, setSubmitted] = useState<{ value: string; mode: "prompt" | "reference"; track?: number } | null>({ value: DEFAULT_OBJECT_QUERY, mode: "prompt" });
   const [generating, setGenerating] = useState(false);
   // Unlock is driven ONLY by the server-verified trade/admin role — never by local form state.
   const { isTradeUser, isAdmin } = useAuth();
@@ -40,12 +41,17 @@ export function useMoodboardSourcing() {
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
 
   const { data: matches = [], isLoading, isError } = useQuery({
-    queryKey: ["felix-sourcing", submitted?.mode, submitted?.value],
+    // `track` (a submission counter) is only set for real user submissions, so
+    // each click is logged once server-side while the default preview is not.
+    queryKey: ["felix-sourcing", submitted?.mode, submitted?.value, submitted?.track ?? 0],
     enabled: !!submitted,
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<SourcedItem[]> => {
-      const { data, error: fnError } = await supabase.functions.invoke("felix-sourcing", { body: submitted });
+      const { data, error: fnError } = await supabase.functions.invoke("felix-sourcing", {
+        body: { mode: submitted!.mode, value: submitted!.value, track: !!submitted!.track, path: window.location.pathname },
+      });
       if (fnError) throw fnError;
+      if (submitted!.track) trackFelixEvent("felix_generate_success", { mode: submitted!.mode, query: submitted!.value, result_count: data?.results?.length ?? 0 });
       return ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
         .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName }));
     },
@@ -79,11 +85,12 @@ export function useMoodboardSourcing() {
       }
     }
     setError("");
+    trackFelixEvent("felix_generate_submit", { mode, query: value });
     setGenerating(true);
     setSubmitted(null);
     if (generateTimer.current) clearTimeout(generateTimer.current);
     generateTimer.current = setTimeout(() => {
-      setSubmitted({ value, mode });
+      setSubmitted({ value, mode, track: Date.now() });
       setGenerating(false);
     }, 900);
   };

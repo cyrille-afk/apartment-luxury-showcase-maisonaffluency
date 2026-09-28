@@ -4050,6 +4050,36 @@ export type Database = {
         }
         Relationships: []
       }
+      felix_usage_events: {
+        Row: {
+          created_at: string
+          id: string
+          mode: string
+          page_path: string | null
+          query: string
+          result_count: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mode: string
+          page_path?: string | null
+          query: string
+          result_count?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mode?: string
+          page_path?: string | null
+          query?: string
+          result_count?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ffe_entitlements: {
         Row: {
           amount_cents: number

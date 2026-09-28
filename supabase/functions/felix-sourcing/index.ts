@@ -7,7 +7,25 @@ import { z } from "npm:zod@3";
 const Body = z.object({
   mode: z.enum(["prompt", "reference"]),
   value: z.string().trim().min(1).max(500),
+  track: z.boolean().optional(),
+  path: z.string().max(200).optional(),
 });
+
+// Usage metric: one row per user-initiated submission, written with the
+// service role so the client can never write or read the table directly.
+async function logUsage(req: Request, mode: string, value: string, count: number, path?: string) {
+  try {
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    let userId: string | null = null;
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    if (token) {
+      const { data } = await admin.auth.getClaims(token);
+      const sub = data?.claims?.sub;
+      if (sub && data?.claims?.role === "authenticated") userId = sub as string;
+    }
+    await admin.from("felix_usage_events").insert({ mode, query: value, result_count: count, user_id: userId, page_path: path ?? null });
+  } catch (e) { console.error("felix usage log", e); }
+}
 
 const STOP_WORDS = new Set(["a", "an", "and", "for", "in", "of", "the", "with", "room", "image", "pin", "pins", "www", "com", "https", "http"]);
 const keywords = (v: string) => Array.from(new Set(v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP_WORDS.has(w))));
@@ -96,11 +114,13 @@ Deno.serve(async (req) => {
   try {
     const parsed = Body.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400);
-    const { mode, value } = parsed.data;
+    const { mode, value, track, path } = parsed.data;
     if (mode === "reference") {
       try { const u = new URL(value); if (!/^https?:$/.test(u.protocol)) throw 0; } catch { return json({ error: "Invalid link" }, 400); }
     }
-    return json({ results: match(await loadCatalog(), mode, value) });
+    const results = match(await loadCatalog(), mode, value);
+    if (track) await logUsage(req, mode, value, results.length, path);
+    return json({ results });
   } catch (e) {
     console.error("felix-sourcing", e);
     return json({ error: "Sourcing unavailable" }, 500);
