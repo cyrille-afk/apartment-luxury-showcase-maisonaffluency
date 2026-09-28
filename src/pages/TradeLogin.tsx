@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
+import { TRADE_FAQ_ITEMS } from "@/components/trade/TradeFaq";
 
 const TradeLogin = () => {
   const navigate = useNavigate();
@@ -25,40 +26,7 @@ const TradeLogin = () => {
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    sessionStorage.setItem("maison:oauth-return-path", "/trade");
-
-    try {
-      ensureStorageHeadroom();
-      const result = await lovable.auth.signInWithOAuth("google", {
-        // OAuth must return to a public same-origin URL. Sending the provider
-        // directly to /trade lets the route guard run before the returned
-        // session has been restored, which can bounce the user back to login.
-        redirect_uri: window.location.origin,
-      });
-      if (result.redirected) return; // browser is navigating to Google
-      if (result.error) {
-        sessionStorage.removeItem("maison:oauth-return-path");
-        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
-        return;
-      }
-      // Session set — land on the trade workspace.
-      sessionStorage.removeItem("maison:oauth-return-path");
-      navigate("/trade");
-    } catch (err) {
-      sessionStorage.removeItem("maison:oauth-return-path");
-      toast({
-        title: "Google Sign-In Failed",
-        description: err instanceof Error ? err.message : "Unexpected OAuth error",
-        variant: "destructive",
-      });
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +55,7 @@ const TradeLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[hsl(var(--card))] flex flex-col">
       <Helmet>
         <title>Trade Account Sign In — Maison Affluency</title>
         <meta name="description" content="Sign in to the Maison Affluency Trade Portal. Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
@@ -103,165 +71,164 @@ const TradeLogin = () => {
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg" />
         <meta name="robots" content="index, follow" />
       </Helmet>
-      <div className="w-full max-w-md">
-        {/* Logo / Brand */}
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-block">
-            <h1 className="font-display text-2xl text-foreground tracking-wide">Trade Account Sign In</h1>
-          </Link>
-          <p className="font-body text-sm text-muted-foreground mt-2">Trade Portal</p>
-        </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="font-body text-sm text-foreground">Email</label>
+      {/* Centered credential portal */}
+      <div className="flex-1 flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-md">
+          {/* Brand / heading */}
+          <div className="text-center mb-12">
+            <Link to="/" className="inline-block">
+              <span className="font-display text-3xl tracking-[0.08em] text-foreground">Maison Affluency</span>
+            </Link>
+            <h1 className="font-display text-xl md:text-2xl text-foreground tracking-[0.12em] uppercase mt-8">
+              Trade Program Sign In
+            </h1>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-5">
             <input
               type="email"
               name="email"
               autoComplete="email"
               required
+              placeholder="Email Address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
             />
-          </div>
-          <div>
-            <label className="font-body text-sm text-foreground">Password</label>
             <input
               type="password"
               name="password"
               autoComplete="current-password"
               required
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
             />
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-foreground text-background font-body text-sm uppercase tracking-[0.2em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-
-          <div className="relative flex items-center gap-4 py-2">
-            <div className="flex-1 border-t border-border" />
-            <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">or</span>
-            <div className="flex-1 border-t border-border" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="w-full py-3 border border-border rounded-full font-body text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            {googleLoading ? "Connecting..." : "Continue with Google"}
-          </button>
-
-          <div className="text-right">
             <button
-              type="button"
-              onClick={() => setShowForgot(true)}
-              className="font-body text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 mt-2 bg-foreground text-background font-body text-xs uppercase tracking-[0.3em] rounded-none hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              Forgot password?
+              {loading ? "Signing In" : "Sign In"}
             </button>
-          </div>
-        </form>
+          </form>
 
-        {/* Forgot password modal */}
-        {showForgot && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={() => setShowForgot(false)}>
-            <div className="bg-background border border-border rounded-lg p-6 w-full max-w-sm shadow-lg" onClick={(e) => e.stopPropagation()}>
-              <h2 className="font-display text-lg text-foreground mb-2">Reset Password</h2>
-              <p className="font-body text-xs text-muted-foreground mb-5">
-                Enter your email and we'll send you a link to reset your password.
-              </p>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setResetLoading(true);
-                  const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-                    redirectTo: `${window.location.origin}/reset-password`,
-                  });
-                  setResetLoading(false);
-                  if (error) {
-                    toast({ title: "Error", description: error.message, variant: "destructive" });
-                    return;
-                  }
-                  toast({ title: "Check your email", description: "We've sent you a password reset link." });
-                  setShowForgot(false);
-                }}
-                className="space-y-4"
+          {/* Low-contrast links */}
+          <div className="mt-10 space-y-3">
+            <p>
+              <Link
+                to="/trade-program?intent=apply"
+                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
               >
-                <input
-                  type="email"
-                  required
-                  placeholder="your@email.com"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
-                />
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowForgot(false)}
-                    className="flex-1 py-2.5 font-body text-xs uppercase tracking-[0.15em] border border-border rounded-full hover:bg-muted transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={resetLoading}
-                    className="flex-1 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
-                  >
-                    {resetLoading ? "Sending..." : "Send Link"}
-                  </button>
-                </div>
-              </form>
-            </div>
+                Apply for a Trade Account
+              </Link>
+            </p>
+            <p>
+              <button
+                type="button"
+                onClick={() => setShowForgot(true)}
+                className="font-body text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </p>
           </div>
-        )}
 
-        <div className="text-center mt-8 space-y-3">
-          <p className="font-body text-sm md:text-xs text-muted-foreground">
-            Don't have a trade account?{" "}
-            <Link to="/trade-program" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
-              Apply here
-            </Link>
-          </p>
-          <div className="relative flex items-center gap-4 py-1">
-            <div className="flex-1 border-t border-border" />
-            <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">or</span>
-            <div className="flex-1 border-t border-border" />
-          </div>
-          <p className="font-body text-sm md:text-xs text-muted-foreground">
-            Not a design professional?{" "}
-            <Link to="/trade-program" className="text-foreground underline underline-offset-4 hover:opacity-70 font-medium">
-              Create a free account
-            </Link>
-          </p>
-          <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
-            Browse curators' picks, save favourites, download spec sheets, and request quotes.
-          </p>
-          <p className="font-body text-sm md:text-xs text-muted-foreground mt-2">
+          <p className="font-body text-xs text-muted-foreground mt-16 text-center">
             <Link to={backHref} className="hover:text-foreground transition-colors">
               ← Back to Maison Affluency
             </Link>
           </p>
-
         </div>
-
       </div>
+
+      {/* Trade FAQ accordion */}
+      <section className="w-full border-t border-border bg-background">
+        <div className="max-w-4xl mx-auto px-4 py-16 md:py-20">
+          <h2 className="font-display text-xl md:text-2xl text-foreground tracking-[0.12em] uppercase text-center mb-12">
+            Trade FAQ
+          </h2>
+          <div className="border-t border-border">
+            {TRADE_FAQ_ITEMS.map((faq, i) => (
+              <div key={i} className="border-b border-border">
+                <button
+                  type="button"
+                  aria-expanded={openFaq === i}
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between gap-6 py-5 text-left group"
+                >
+                  <span className="font-body text-xs md:text-sm font-medium uppercase tracking-[0.14em] text-foreground group-hover:text-muted-foreground transition-colors">
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`}
+                    strokeWidth={1.5}
+                  />
+                </button>
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-out"
+                  style={{ gridTemplateRows: openFaq === i ? "1fr" : "0fr" }}
+                >
+                  <div className="overflow-hidden">
+                    <p className="font-body text-sm leading-relaxed text-muted-foreground pb-6 pr-10">
+                      {faq.a}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Forgot password modal */}
+      {showForgot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={() => setShowForgot(false)}>
+          <div className="bg-background border border-border p-8 w-full max-w-sm shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <h2 className="font-display text-lg text-foreground tracking-wide mb-2">Reset Password</h2>
+            <p className="font-body text-xs text-muted-foreground mb-6">
+              Enter your email and we'll send you a link to reset your password.
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setResetLoading(true);
+                ensureStorageHeadroom();
+                const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                  redirectTo: `${window.location.origin}/reset-password`,
+                });
+                setResetLoading(false);
+                if (error) {
+                  toast({ title: "Error", description: error.message, variant: "destructive" });
+                  return;
+                }
+                toast({ title: "Check your email", description: "We've sent you a password reset link." });
+                setShowForgot(false);
+              }}
+              className="space-y-5"
+            >
+              <input
+                type="email"
+                required
+                placeholder="Email Address"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                className="w-full border border-border bg-transparent px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
+              />
+              <button
+                type="submit"
+                disabled={resetLoading}
+                className="w-full py-3.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.3em] rounded-none hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {resetLoading ? "Sending" : "Send Reset Link"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
