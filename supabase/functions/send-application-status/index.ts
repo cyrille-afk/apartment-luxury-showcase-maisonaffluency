@@ -80,25 +80,36 @@ const handler = async (req: Request): Promise<Response> => {
     const isApproved = status === "approved";
 
     const subject = isApproved
-      ? "Welcome to the Maison Affluency Trade Program"
+      ? "Credential Initialized: Welcome to the Maison Affluency Trade Program"
       : "Maison Affluency Trade Program — Application Update";
 
     const bodyHtml = isApproved
       ? `
         <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          We are pleased to inform you that your application${safeCompany ? ` for <strong>${safeCompany}</strong>` : ""} to the Maison Affluency Trade Program has been approved.
+          Your application for the Maison Affluency Trade Program has been verified and fully authenticated by our global network registry. ${safeCompany ? `<strong>${safeCompany}</strong> has` : "Your studio has"} been granted premium international trade status across our automated sourcing matrix.
         </p>
+        <p style="color: #333; line-height: 1.8; margin-bottom: 12px;">
+          Your Enterprise Corporate Tier credentials have initialized the following active capabilities:
+        </p>
+        <ul style="color: #333; line-height: 1.8; margin-bottom: 20px; padding-left: 20px;">
+          <li style="margin-bottom: 10px;"><strong>Global Ledger Access:</strong> Unlocked automated inbound/outbound real-time pricing and logistics tracking across our A–Z Index of master artisan collections.</li>
+          <li style="margin-bottom: 10px;"><strong>White-Label Status:</strong> Enabled. Custom logo uploads and domain-masked client portals can now be configured directly inside your Admin → Studio Settings tab.</li>
+          <li style="margin-bottom: 10px;"><strong>Multi-User Collaborative Seats:</strong> Your active workspace is now provisioned to host independent sub-contractors and client collaboration nodes concurrently.</li>
+        </ul>
         <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          You now have full access to exclusive trade pricing, our curated product library, branded quote builder, and dedicated concierge support.
+          To guide your design leads through their initial workspace customization, our interactive system manager, Felix, will launch a brief spatial alignment walkthrough immediately upon your first initialization.
         </p>
-        <div style="text-align: center; margin: 32px 0;">
+        <p style="color: #333; line-height: 1.8; margin-bottom: 8px;">
+          Enter your secure studio workspace to begin data curation:
+        </p>
+        <div style="text-align: center; margin: 24px 0 32px;">
           <a href="https://www.maisonaffluency.com/trade/login" 
              style="display: inline-block; padding: 14px 32px; background-color: #1a1a1a; color: #ffffff; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 24px;">
-            Access Your Trade Portal
+            Access My Corporate Workspace Ledger
           </a>
         </div>
         <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          A dedicated Client Advisor will reach out to you shortly to introduce themselves and discuss how we can best support your projects.
+          Welcome to the future of procurement velocity.
         </p>
       `
       : `
