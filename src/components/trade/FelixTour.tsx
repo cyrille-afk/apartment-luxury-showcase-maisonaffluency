@@ -211,6 +211,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let didEnter = false;
     let didScroll = false;
     let watched: Element[] = [];
+    const startedAt = performance.now();
     const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
     const onChange = () => { stableSince = 0; };
     const tick = (now: number) => {
@@ -242,8 +243,19 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
-        ready = false;
-        setSettled(false);
+        if (now - startedAt >= 2000) {
+          // Target unavailable (e.g. sidebar hidden on mobile): show the card
+          // centered without a spotlight instead of a dead dark screen.
+          setRect(null);
+          setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
+            ? previous : { w: window.innerWidth, h: window.innerHeight });
+          setStepDone(current.done ? current.done() : true);
+          ready = true;
+          setSettled(true);
+        } else {
+          ready = false;
+          setSettled(false);
+        }
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
