@@ -43,6 +43,7 @@ function ShowroomLegacyRedirect() {
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const TradeFaqPage = lazy(() => import("./pages/TradeFaqPage"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 import LegacyTradeSignupRedirect from "./components/trade/LegacyTradeSignupRedirect";
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
@@ -728,6 +729,7 @@ const App = () => {
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+                  <Route path="/trade-faq" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeFaqPage /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade-program/apply" element={<TradeApplyRedirect />} />
                   <Route path="/trade/apply" element={<LegacyTradeSignupRedirect />} />
