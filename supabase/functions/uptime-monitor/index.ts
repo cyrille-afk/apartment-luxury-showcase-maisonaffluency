@@ -145,12 +145,12 @@ serve(async (req) => {
         <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;">You will receive one recovery email per page once it loads again. Checks run every 5 minutes.</p>
       </div>`;
     for (const to of ADMIN_EMAILS) {
-      await sendLovableEmail(supabase, {
+      await sendLovableEmail({
         to,
         subject: `[Uptime] ${newlyDown.map((r) => r.label).join(", ")} not loading — maisonaffluency.com`,
         html,
-        category: "uptime-alert",
-      });
+        label: "uptime-alert",
+      }, supabase);
     }
   }
 
@@ -161,12 +161,12 @@ serve(async (req) => {
         <p style="font-family:Arial,sans-serif;font-size:14px;">${BASE}${r.path} responded with HTTP ${r.status} in ${r.durationMs}ms (checked ${checkedAt}).</p>
       </div>`;
     for (const to of ADMIN_EMAILS) {
-      await sendLovableEmail(supabase, {
+      await sendLovableEmail({
         to,
         subject: `[Uptime] Recovered: ${r.label} — maisonaffluency.com`,
         html,
-        category: "uptime-recovery",
-      });
+        label: "uptime-recovery",
+      }, supabase);
     }
   }
 
