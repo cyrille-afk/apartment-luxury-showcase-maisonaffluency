@@ -578,8 +578,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   );
 
   return (
-    <section aria-label="Interactive Gallery" className="bg-background pb-16 text-foreground">
-      <header className="flex min-h-20 items-center justify-center px-6 py-4 text-center md:min-h-24 md:py-5">
+    <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-6 md:pb-8" : "pb-16"}`}>
+      <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-14 py-3 md:min-h-16 md:py-4" : "min-h-20 py-4 md:min-h-24 md:py-5"}`}>
         <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
           {activeTitle}
         </h2>
@@ -599,7 +599,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
               <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
-              <div className="flex w-full items-center justify-between border-b border-border/60 px-4 py-3 md:px-0 md:py-4">
+              <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2 md:py-3" : "py-3 md:py-4"}`}>
                 <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
                   {activeCategory}
                 </span>
