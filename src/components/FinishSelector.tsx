@@ -154,6 +154,13 @@ interface FinishSelectorProps {
    * `topFilter` render in their own accordion below the base group.
    */
   topFilter?: (swatchName: string) => boolean;
+  /**
+   * When Base and Top legitimately share the same finish palette (e.g. a
+   * table whose base and top both come in the same woods), render the shared
+   * swatches in BOTH groups instead of giving Top exclusive ownership.
+   * Combination validity stays enforced by the size_variants matrix upstream.
+   */
+  sharedBaseTopSwatches?: boolean;
   /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
