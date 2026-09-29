@@ -2842,7 +2842,7 @@ const TradeProductPage: React.FC = () => {
                   text={dualLabelIsDim ? withImperialPerLine(dualSizeOptions.join("\n")) : dualSizeOptions.join("\n")}
                   secondaryText={null}
                   emphasized
-                  placeholder={dualLabelIsDim ? "Select Your Size" : ((product as any)?.wood_picker_label || "Select the Wood Finish")}
+                  placeholder={dualLabelIsDim ? "Select Your Size" : ((product as any)?.wood_label_override || "Select the Wood Finish")}
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
                   onChange={(idx) => {
                     if (idx < 0) {

@@ -1168,11 +1168,12 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     </p>
                   )}
                   {(pick.size_variants || []).length > 0 && (
-                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
                       <span className="text-center">Order</span>
-                      <span>Label / Size</span>
+                      <span>Label / Size / Wood</span>
                       <span>{pick.base_axis_label || "Base"}</span>
                       <span>{pick.top_axis_label || "Top"}</span>
+                      <span>Dimensions</span>
                       <span>Price ({pick.currency || "EUR"})</span>
                       <span>Image #</span>
                       <span></span>
@@ -1206,7 +1207,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
                     return (
                     <div key={idx} className="space-y-1">
-                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
                       <div className="flex flex-col items-center justify-center gap-0.5">
                         <Button
                           type="button"
@@ -1269,6 +1270,16 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                           updateField(pick.id, "size_variants", updated as any);
                         }}
                         placeholder="e.g. Carrara"
+                        className="text-xs h-8"
+                      />
+                      <Input
+                        value={(variant as any).dimensions || ""}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated[idx] = { ...variant, dimensions: e.target.value } as any;
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder="W 90 x D 77 x H 75 cm"
                         className="text-xs h-8"
                       />
                       {(() => {
