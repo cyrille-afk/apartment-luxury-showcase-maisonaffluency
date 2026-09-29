@@ -98,6 +98,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 import { addToCart, setQuantity as setCartQuantity } from "@/lib/cart";
 import { usePublicRrp, usePublicRrpMap, usePublicRrpDisplay, formatPublicRrp, formatPublicRrpForDestination, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { computeDisplayPrice } from "@/lib/productPricing";
 import { UserRoleProvider, useUserRole, DevRoleToggle, type UserRole } from "@/contexts/UserRoleContext";
@@ -1159,6 +1160,7 @@ const PublicProductPageContent: React.FC = () => {
     applicationStatus === "approved" ||
     isAdmin ||
     isSuperAdmin;
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
@@ -1264,6 +1266,19 @@ const PublicProductPageContent: React.FC = () => {
   const effectiveRole: UserRole = roleOverridden ? devRole : realRole;
   const isTradeVerifiedView = effectiveRole === "TRADE_VERIFIED";
   const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
+  const { data: protectedPricing } = useTradeProductPricing(data?.product?.id, !!user && hasTradeAccess);
+  const chosenFinishKeys = selectedFinishes.map((finish) => finish.trim().toLocaleLowerCase()).filter(Boolean);
+  const protectedVariantPrices = chosenFinishKeys.length
+    ? (protectedPricing?.size_variants || [])
+        .filter((variant) => {
+          const axes = [variant.base, variant.top, variant.label]
+            .map((axis) => (axis || "").trim().toLocaleLowerCase());
+          return chosenFinishKeys.every((finish) => axes.includes(finish));
+        })
+        .map((variant) => Number(variant.price_cents))
+        .filter((cents) => Number.isFinite(cents) && cents > 0)
+    : [];
+  const protectedVariantCents = protectedVariantPrices.length ? Math.min(...protectedVariantPrices) : null;
 
   // ---- Structured product data + reactive pricing math -------------------
   // Variant A is purely presentational: the numbers come from the container's
@@ -1276,14 +1291,16 @@ const PublicProductPageContent: React.FC = () => {
     // Base retail rate in minor units — the selected size/finish always wins so
     // the header tracks the same figure as the trade workspace block.
     baseRetailPriceCents:
+      (isTradeVerifiedView ? protectedVariantCents : null) ??
       (selectedVariantPrice?.cents && selectedVariantPrice.cents > 0
         ? selectedVariantPrice.cents
-        : selectedRrp?.cents) ?? (Number(publicRrpRow?.rrp_price_cents) || 0),
+        : selectedRrp?.cents) ??
+      (isTradeVerifiedView ? Number(protectedPricing?.rrp_price_cents) || 0 : Number(publicRrpRow?.rrp_price_cents) || 0),
     // Real assigned tier discount (trade_tier_config) — never a mock rate.
     tradeDiscountMultiplier: tierDiscountPct || 0,
   };
   const hasFromPrefix = /^From\s+/i.test(displayRrpLabel || "");
-  const priceCurrency = (publicRrpRow?.currency || "USD").toUpperCase();
+  const priceCurrency = (isTradeVerifiedView ? protectedPricing?.currency : publicRrpRow?.currency || protectedPricing?.currency || "USD").toUpperCase();
 
   // Publish the current selection's base rate + currency into the container so
   // both layout variants (and the quantity stepper) compute off one source.
@@ -1418,7 +1435,6 @@ const PublicProductPageContent: React.FC = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
-  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
   // Swatch names currently DISPLAYED in the finish accordions (colourways).
 
 
