@@ -834,6 +834,9 @@ const VariantDimensionsPanel: React.FC = () => {
     onMaterialChange,
   } = ctx;
 
+  const dualLabelsAreDimensions = dualSizeOptions.length > 0 && dualSizeOptions.every(looksLikeDimension);
+  const physicalDimensions = variantsList.find((v: { dimensions?: string | null }) => v.dimensions)?.dimensions || product.dimensions;
+
   return (
     <div className="flex flex-col gap-2">
       {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
@@ -862,11 +865,11 @@ const VariantDimensionsPanel: React.FC = () => {
         />
       ) : isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
-          icon={specIcon("📐")}
-          text={withImperialPerLine(dualSizeOptions.join("\n"))}
+          icon={specIcon(dualLabelsAreDimensions ? "📐" : "✦")}
+          text={dualLabelsAreDimensions ? withImperialPerLine(dualSizeOptions.join("\n")) : dualSizeOptions.join("\n")}
           secondaryText={null}
           emphasized
-          placeholder="Select Your Size"
+          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || "Select the Wood Finish")}
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
@@ -954,8 +957,8 @@ const VariantDimensionsPanel: React.FC = () => {
         <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
       )}
 
-      {hasVariants && isDualAxis && !baseAxisIsDim && !topAxisIsDim && (dualSizeOptions?.length ?? 0) === 0 && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
+      {hasVariants && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !dualLabelsAreDimensions && physicalDimensions && looksLikeDimension(physicalDimensions) && (
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(physicalDimensions)} />
       )}
 
       {hasVariants && isBaseOnly && !baseAxisIsDim
