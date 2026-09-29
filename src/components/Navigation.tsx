@@ -35,9 +35,12 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import previewConsole from "@/assets/details-console.jpg";
-import previewLamp from "@/assets/details-lamp.jpg";
-import previewChair from "@/assets/small-room-chair.jpeg";
+import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
+import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
+import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
+import lyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
+import presidentDesk from "@/assets/curators-picks/jmf-president-desk-1.jpg";
+import presidentDeskDetail from "@/assets/curators-picks/jmf-president-desk-2.jpg";
 import officeRoomAmbient from "@/assets/home-office-desk.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
@@ -133,17 +136,40 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
 };
 
-// An editorial illustration of the room discovery flow, not a live product result.
-const roomPreviewPieces = [
-  { src: previewConsole, alt: "Sculptural console detail" },
-  { src: previewLamp, alt: "Sculptural table lamp" },
-  { src: previewChair, alt: "Modern chair vignette" },
-];
+// Coordinates are percentages of the displayed, centre-cropped preview frame.
+// These are editorial menu previews, not live catalogue results.
+const roomPreviewScenes = {
+  "living-room": {
+    hotspot: { left: 35, top: 56, label: "Coffee table" },
+    highlightIndex: 2,
+    pieces: [
+      { src: woodCoffeeTable, alt: "Wood coffee table alternative" },
+      { src: sculpturalCoffeeTable, alt: "Sculptural coffee table alternative" },
+      { src: marbleCoffeeTable, alt: "Marble coffee table alternative" },
+    ],
+  },
+  office: {
+    hotspot: { left: 48, top: 43, label: "Desk" },
+    highlightIndex: 1,
+    pieces: [
+      { src: lyricDesk, alt: "Lyric writing desk alternative" },
+      { src: presidentDesk, alt: "President desk alternative" },
+      { src: presidentDeskDetail, alt: "President desk detail alternative" },
+    ],
+  },
+} as const;
+
+const defaultPreviewScene = {
+  hotspot: { left: 55, top: 47, label: "Featured piece" },
+  highlightIndex: 0,
+  pieces: roomPreviewScenes["living-room"].pieces,
+};
 
 const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const previewImage = selectedRoomSlug === "office" ? { src: officeRoomAmbient, alt: "Curated home office with collectible furnishings" } : roomAmbientImages[room];
+  const scene = selectedRoomSlug === "office" ? roomPreviewScenes.office : selectedRoomSlug === "living-room" ? roomPreviewScenes["living-room"] : defaultPreviewScene;
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
@@ -151,11 +177,12 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
           <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" aria-label="Shop this look; highlight curated alternatives" aria-expanded={open}
+             <Button type="button" variant="ghost" size="icon" aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
               onClick={() => { setSelected(true); setOpen(true); }}
-              className="group absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
+               style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
+               className="group absolute z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
               <span className="relative block size-6 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
                 <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
                 <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -167,9 +194,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-          <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
-          {roomPreviewPieces.map((piece, index) => (
-            <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === 0 ? "border-primary opacity-100" : "border-transparent opacity-80")}>
+           <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+           {scene.pieces.map((piece, index) => (
+             <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
               <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
             </div>
           ))}
@@ -234,7 +261,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         </div>
       </div>
     </div>
-    <RoomVisualPreview room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
+     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
   </div>
   );
 };
