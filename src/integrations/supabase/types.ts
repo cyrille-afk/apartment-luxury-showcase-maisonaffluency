@@ -6189,6 +6189,7 @@ export type Database = {
           phone: string
           preferred_currency: string | null
           referred_by_studio_id: string | null
+          trade_id: string | null
           trade_status: string | null
           trade_tier: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents: number
@@ -6212,6 +6213,7 @@ export type Database = {
           phone?: string
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
+          trade_id?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
@@ -6237,6 +6239,7 @@ export type Database = {
           phone?: string
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
+          trade_id?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
@@ -11893,6 +11896,7 @@ export type Database = {
       }
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
+      resolve_trade_email: { Args: { p_identifier: string }; Returns: string }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }

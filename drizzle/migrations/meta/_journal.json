@@ -841,6 +841,13 @@
       "when": 1790648429805,
       "tag": "0119_curator_pick_trade_only_resync",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1790657178092,
+      "tag": "0120_add_trade_id_and_resolver",
+      "breakpoints": true
     }
   ]
 }
