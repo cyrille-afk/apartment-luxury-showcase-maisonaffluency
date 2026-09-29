@@ -168,6 +168,13 @@ interface FinishSelectorProps {
    * Combination validity stays enforced by the size_variants matrix upstream.
    */
   sharedBaseTopSwatches?: boolean;
+  /**
+   * Swatch names in the Base group that are incompatible with the current
+   * Top-axis selection (and vice versa for `disabledTopNames`). Rendered
+   * greyed-out and non-clickable so Base ↔ Top pairing is bidirectional.
+   */
+  disabledBaseNames?: string[];
+  disabledTopNames?: string[];
   /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
@@ -283,7 +290,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -647,6 +654,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isSecondaryFabricGroup = kindOverride === "fabricSecondary";
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
+    const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup;
+    const normName = (s: string) => s.trim().toLowerCase();
+    const isDisabled = isTopGroup
+      ? !!disabledTopNames?.some((n) => normName(n) === normName(f.name))
+      : isBaseGroup
+      ? !!disabledBaseNames?.some((n) => normName(n) === normName(f.name))
+      : false;
     const isSelected = isRugGroup
       ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
       : isSecondaryFabricGroup
@@ -669,6 +683,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : setSelectedWoodId;
 
     const handlePick = () => {
+      if (isDisabled) return;
       if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
@@ -825,13 +840,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       <button
         type="button"
         onClick={handlePick}
-        onMouseEnter={hoverPreview}
-        onFocus={hoverPreview}
+        onMouseEnter={isDisabled ? undefined : hoverPreview}
+        onFocus={isDisabled ? undefined : hoverPreview}
+        disabled={isDisabled}
         className={cn(
           "group relative aspect-square w-full overflow-hidden rounded-luxury-micro bg-muted/30 ring-1 ring-border/60 transition",
+          isDisabled && "opacity-35 cursor-not-allowed",
           isSelected
             ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-            : "hover:ring-foreground/40"
+            : !isDisabled && "hover:ring-foreground/40"
         )}
         aria-label={`Select ${f.name}`}
         aria-pressed={isSelected}
@@ -888,7 +905,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         ) : (
           tileButton
         )}
-        <p className="font-body text-[12px] leading-snug text-foreground/85">
+        <p className={cn("font-body text-[12px] leading-snug text-foreground/85", isDisabled && "opacity-50")}>
           {f.name}
         </p>
         {tierCaption && (

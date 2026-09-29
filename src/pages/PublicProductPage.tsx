@@ -426,11 +426,13 @@ const VariantSelectorsProvider: React.FC<{
     (t == null || (v.top || "").trim() === t) &&
     (s == null || (v.label || "").trim() === s);
 
-  const disabledBaseIdx = isDualAxis && selDualSize
-    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, null, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  // Base ↔ Top pairing is bidirectional: a chosen base greys out incompatible
+  // tops, and a chosen top greys out incompatible bases (size also constrains).
+  const disabledBaseIdx = isDualAxis && (selDualSize || selTop)
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const disabledTopIdx = isDualAxis && selDualSize
-    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, null, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  const disabledTopIdx = isDualAxis && (selDualSize || selBase)
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
@@ -577,6 +579,24 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     linkedWoodFinishes,
   });
 
+  // Base ↔ Top pairing is bidirectional on the swatch accordions too: a
+  // chosen top greys out base swatches with no valid matrix row, and a
+  // chosen base greys out incompatible top swatches.
+  const namesForOptions = (opts: string[], filter: ((n: string) => boolean) | null) =>
+    filter ? linkedWoodFinishes.filter((n) => opts.some((o) => makeSwatchAxisFilter([o])(n))) : [];
+  const disabledBaseNames = isDualAxis && selTop && baseSwatchFilter
+    ? namesForOptions(
+        baseOptions.filter((b) => !variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize))),
+        baseSwatchFilter,
+      )
+    : [];
+  const disabledTopNames = isDualAxis && selBase && topSwatchFilter
+    ? namesForOptions(
+        topOptions.filter((t) => !variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize))),
+        topSwatchFilter,
+      )
+    : [];
+
   return (
     <div className="flex flex-col gap-2">
       {section !== "supplemental" && <FinishSelector
@@ -620,6 +640,8 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             : undefined
         }
         sharedBaseTopSwatches={axesShareFinishes}
+        disabledBaseNames={disabledBaseNames}
+        disabledTopNames={disabledTopNames}
         showUpholsterySection={
           isProductUpholstered(product)
           && (!isDualAxis || isUpholsteryAxisLabel(baseAxisLabelRaw) || isUpholsteryAxisLabel(topAxisLabelRaw))
