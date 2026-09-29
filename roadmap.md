@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Put room choices first in desktop menus, send room clicks to their product grid, and make preview hotspots reveal and highlight alternatives.
+- [x] Put room choices first in desktop menus, send room clicks to their product grid, and make preview hotspots reveal and highlight alternatives.
 
 - [x] Consolidate Living, Dining, and Bedroom dropdown destinations on the left and show a framed Alternative Universes visual preview on the right.
 
