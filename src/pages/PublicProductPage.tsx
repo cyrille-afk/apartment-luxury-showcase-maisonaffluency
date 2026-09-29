@@ -642,6 +642,8 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         sharedBaseTopSwatches={axesShareFinishes}
         disabledBaseNames={disabledBaseNames}
         disabledTopNames={disabledTopNames}
+        selectedBasePairing={selBase}
+        selectedTopPairing={selTop}
         showUpholsterySection={
           isProductUpholstered(product)
           && (!isDualAxis || isUpholsteryAxisLabel(baseAxisLabelRaw) || isUpholsteryAxisLabel(topAxisLabelRaw))
