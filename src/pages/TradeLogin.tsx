@@ -30,11 +30,24 @@ const TradeLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Accepts either the member's Trade ID or their email address; the
-    // credential call itself always resolves against the stored email.
-    const email = identifier.includes("@")
-      ? identifier.trim()
-      : identifier.trim();
+    // Accepts either the member's Trade ID or their email address. Trade IDs
+    // are resolved to the account email via a security-definer RPC before the
+    // credential call, which always authenticates against the stored email.
+    const raw = identifier.trim();
+    let email = raw;
+    if (!raw.includes("@")) {
+      const { data: resolved, error: resolveError } = await supabase.rpc("resolve_trade_email", { p_identifier: raw });
+      if (resolveError || !resolved) {
+        toast({
+          title: "Login Failed",
+          description: "Trade ID not recognised. Check your approval email, or sign in with your email address.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      email = resolved;
+    }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -62,6 +75,9 @@ const TradeLogin = () => {
     setGoogleLoading(true);
     try {
       ensureStorageHeadroom();
+      // Mark the intended destination so the full-page redirect flow returns
+      // the member to the trade portal instead of the public homepage.
+      sessionStorage.setItem("maison:oauth-return-path", "/trade");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
