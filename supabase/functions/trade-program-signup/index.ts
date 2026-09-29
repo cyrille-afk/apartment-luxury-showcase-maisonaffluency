@@ -293,6 +293,15 @@ Deno.serve(async (req) => {
         'Review in the Admin Dashboard.',
       ].join('\n')
 
+      // Already-approved members re-submitting the form are not new requests:
+      // they never appear in the pending queue, so don't page admins about them.
+      if (acct?.status === 'approved') {
+        await supabase.from('admin_alert_log').insert({
+          channel: 'twilio_whatsapp', event: 'trade_application_request', status: 'skipped_existing_member',
+          payload: { signup_id: signupId, email, trade_account_id: acct.id },
+        })
+        return
+      }
       try {
         const result = await sendTradeRequestWhatsApp({ body: waBody, studio, applicant: '', email, phone: clean(row?.phone_number) })
         await supabase.from('admin_alert_log').insert({
