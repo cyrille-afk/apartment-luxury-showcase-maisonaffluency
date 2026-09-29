@@ -604,8 +604,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   );
 
   return (
-    <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-6 md:pb-8" : "pb-16"}`}>
-      <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-14 py-3 md:min-h-16 md:py-4" : "min-h-20 py-4 md:min-h-24 md:py-5"}`}>
+    <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-12 md:pb-16" : "pb-16"}`}>
+      <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-16 py-5 md:min-h-24 md:py-7" : "min-h-20 py-4 md:min-h-24 md:py-5"}`}>
         <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
           {activeTitle}
         </h2>
@@ -684,14 +684,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
-                           {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                           <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-                             <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
-                               <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                               <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-                             </span>
-                           </Button>
-                         ))}
+                            {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={discoveryRoom} onOpen={() => openHotspot(hotspot)} />
+                            ))}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
                               <Button type="button" size="icon" variant="ghost" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="relative isolate h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]">
@@ -732,14 +727,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
           {expandedScene && (
             <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
                <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} onLoad={() => setExpandedLoadedScene(expandedScene.id)} className={`block max-h-[calc(100dvh-4rem)] max-w-full object-contain ${hotspotsReady && expandedLoadedScene === expandedScene.id ? "opacity-100" : "opacity-0"}`} />
-               {hotspotsReady && expandedLoadedScene === expandedScene.id && hotspotsForScene(expandedScene).map((hotspot) => (
-                <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={() => openHotspot(hotspot)} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-                  <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
-                    <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                    <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-                  </span>
-                </Button>
-              ))}
+                {hotspotsReady && expandedLoadedScene === expandedScene.id && hotspotsForScene(expandedScene).map((hotspot) => (
+                  <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={discoveryRoom} onOpen={() => openHotspot(hotspot)} />
+                ))}
             </div>
           )}
           {lightboxProduct && (
