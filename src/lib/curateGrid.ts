@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
  * 1. No more than two consecutive pieces from the same brand/designer.
  * 2. Never two dark (heavy, full-bleed) photos side by side — a light
  *    shot is slotted between them.
- * Greedy, order-preserving: the earliest valid candidate wins, and rules
- * are relaxed (tone first, then brand) only when nothing else fits.
+ * Keep catalogue order where possible, but schedule repeated brands across
+ * the whole grid so a late block cannot exhaust all its separators.
  */
 export type Tone = "dark" | "light";
 
@@ -18,6 +18,12 @@ export function curateGrid<T>(
 ): T[] {
   const rest = [...items];
   const out: T[] = [];
+  const totals = new Map<string, number>();
+  const placed = new Map<string, number>();
+  for (const item of items) {
+    const brand = brandOf(item);
+    totals.set(brand, (totals.get(brand) ?? 0) + 1);
+  }
   const brandOk = (c: T) => {
     if (out.length < maxRun) return true;
     const b = brandOf(c);
@@ -26,10 +32,30 @@ export function curateGrid<T>(
   const toneOk = (c: T) =>
     !(out.length && toneOf(out[out.length - 1]) === "dark" && toneOf(c) === "dark");
   while (rest.length) {
-    let i = rest.findIndex((c) => brandOk(c) && toneOk(c));
+    // A brand with three or more pieces gets evenly spaced opportunities,
+    // including when all its pieces arrived together at the end of the query.
+    const dueBrands = [...totals.entries()]
+      .filter(([brand, count]) => count > maxRun && (placed.get(brand) ?? 0) < count)
+      .map(([brand, count]) => ({
+        brand,
+        due: ((placed.get(brand) ?? 0) + 1) * (items.length + 1) / (count + 1),
+      }))
+      .filter(({ due }) => due <= out.length + 1)
+      .sort((a, b) => a.due - b.due);
+
+    let i = -1;
+    for (const { brand } of dueBrands) {
+      i = rest.findIndex((c) => brandOf(c) === brand && brandOk(c) && toneOk(c));
+      if (i >= 0) break;
+    }
+    if (i < 0) i = rest.findIndex((c) => brandOk(c) && toneOk(c));
+    // Keep the brand rule ahead of the tonal rule when the two conflict.
     if (i < 0) i = rest.findIndex(brandOk);
     if (i < 0) i = 0;
-    out.push(rest.splice(i, 1)[0]);
+    const next = rest.splice(i, 1)[0];
+    out.push(next);
+    const brand = brandOf(next);
+    placed.set(brand, (placed.get(brand) ?? 0) + 1);
   }
   return out;
 }
