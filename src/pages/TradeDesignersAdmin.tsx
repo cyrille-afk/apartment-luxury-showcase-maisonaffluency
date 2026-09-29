@@ -1058,16 +1058,28 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                             toast({ title: "Need at least 1 Base and 1 Top", description: "Add some rows with Base and Top filled in, then click Build matrix.", variant: "destructive" });
                             return;
                           }
-                          // Preserve any existing prices for matching combos
-                          const priceMap = new Map<string, number>();
-                          current.forEach((v) => {
-                            if (v.base && v.top) priceMap.set(`${v.base}|${v.top}`, v.price_cents || 0);
-                          });
-                          const matrix = bases.flatMap((b) =>
-                            tops.map((t) => ({ base: b, top: t, price_cents: priceMap.get(`${b}|${t}`) || 0 }))
-                          );
-                          updateField(pick.id, "size_variants", matrix as any);
-                          toast({ title: "Matrix built", description: `${bases.length} bases × ${tops.length} tops = ${matrix.length} rows` });
+                           // Label axis (size or wood finish) is a third dimension of the matrix.
+                           const labels = Array.from(new Set(current.map((v) => (v.label || "").trim()).filter(Boolean)));
+                           const labelAxis = labels.length ? labels : [""];
+                           const dimsByLabel = new Map<string, string>();
+                           current.forEach((v: any) => { if (v.dimensions) dimsByLabel.set((v.label || "").trim(), v.dimensions); });
+                           const fallbackDims = (current as any[]).find((v) => v.dimensions)?.dimensions || "";
+                           // Preserve any existing prices for matching combos
+                           const priceMap = new Map<string, number>();
+                           current.forEach((v) => {
+                             if (v.base && v.top) priceMap.set(`${v.base.trim()}|${v.top.trim()}|${(v.label || "").trim()}`, v.price_cents || 0);
+                           });
+                           const matrix = labelAxis.flatMap((l) => bases.flatMap((b) =>
+                             tops.map((t) => ({
+                               ...(l ? { label: l } : {}),
+                               base: b,
+                               top: t,
+                               ...((dimsByLabel.get(l) || fallbackDims) ? { dimensions: dimsByLabel.get(l) || fallbackDims } : {}),
+                               price_cents: priceMap.get(`${b}|${t}|${l}`) || 0,
+                             }))
+                           ));
+                           updateField(pick.id, "size_variants", matrix as any);
+                           toast({ title: "Matrix built", description: `${labelAxis.length} × ${bases.length} × ${tops.length} = ${matrix.length} rows — fill in prices for the new combinations` });
                         }}
                       >
                         Build matrix
@@ -1168,11 +1180,12 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     </p>
                   )}
                   {(pick.size_variants || []).length > 0 && (
-                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70">
                       <span className="text-center">Order</span>
-                      <span>Label / Size</span>
+                      <span>Label / Size / Wood</span>
                       <span>{pick.base_axis_label || "Base"}</span>
                       <span>{pick.top_axis_label || "Top"}</span>
+                      <span>Dimensions</span>
                       <span>Price ({pick.currency || "EUR"})</span>
                       <span>Image #</span>
                       <span></span>
@@ -1206,7 +1219,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     const currentImageNum = typeof currentImageIdx === "number" ? currentImageIdx + 1 : "";
                     return (
                     <div key={idx} className="space-y-1">
-                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
+                    <div className="grid grid-cols-[2.25rem_1fr_1fr_1fr_1fr_7rem_4rem_1.75rem] gap-1.5 items-center">
                       <div className="flex flex-col items-center justify-center gap-0.5">
                         <Button
                           type="button"
@@ -1269,6 +1282,16 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                           updateField(pick.id, "size_variants", updated as any);
                         }}
                         placeholder="e.g. Carrara"
+                        className="text-xs h-8"
+                      />
+                      <Input
+                        value={(variant as any).dimensions || ""}
+                        onChange={(e) => {
+                          const updated = [...(pick.size_variants || [])];
+                          updated[idx] = { ...variant, dimensions: e.target.value } as any;
+                          updateField(pick.id, "size_variants", updated as any);
+                        }}
+                        placeholder="W 90 x D 77 x H 75 cm"
                         className="text-xs h-8"
                       />
                       {(() => {
