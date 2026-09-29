@@ -1058,16 +1058,28 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                             toast({ title: "Need at least 1 Base and 1 Top", description: "Add some rows with Base and Top filled in, then click Build matrix.", variant: "destructive" });
                             return;
                           }
-                          // Preserve any existing prices for matching combos
-                          const priceMap = new Map<string, number>();
-                          current.forEach((v) => {
-                            if (v.base && v.top) priceMap.set(`${v.base}|${v.top}`, v.price_cents || 0);
-                          });
-                          const matrix = bases.flatMap((b) =>
-                            tops.map((t) => ({ base: b, top: t, price_cents: priceMap.get(`${b}|${t}`) || 0 }))
-                          );
-                          updateField(pick.id, "size_variants", matrix as any);
-                          toast({ title: "Matrix built", description: `${bases.length} bases × ${tops.length} tops = ${matrix.length} rows` });
+                           // Label axis (size or wood finish) is a third dimension of the matrix.
+                           const labels = Array.from(new Set(current.map((v) => (v.label || "").trim()).filter(Boolean)));
+                           const labelAxis = labels.length ? labels : [""];
+                           const dimsByLabel = new Map<string, string>();
+                           current.forEach((v: any) => { if (v.dimensions) dimsByLabel.set((v.label || "").trim(), v.dimensions); });
+                           const fallbackDims = (current as any[]).find((v) => v.dimensions)?.dimensions || "";
+                           // Preserve any existing prices for matching combos
+                           const priceMap = new Map<string, number>();
+                           current.forEach((v) => {
+                             if (v.base && v.top) priceMap.set(`${v.base.trim()}|${v.top.trim()}|${(v.label || "").trim()}`, v.price_cents || 0);
+                           });
+                           const matrix = labelAxis.flatMap((l) => bases.flatMap((b) =>
+                             tops.map((t) => ({
+                               ...(l ? { label: l } : {}),
+                               base: b,
+                               top: t,
+                               ...((dimsByLabel.get(l) || fallbackDims) ? { dimensions: dimsByLabel.get(l) || fallbackDims } : {}),
+                               price_cents: priceMap.get(`${b}|${t}|${l}`) || 0,
+                             }))
+                           ));
+                           updateField(pick.id, "size_variants", matrix as any);
+                           toast({ title: "Matrix built", description: `${labelAxis.length} × ${bases.length} × ${tops.length} = ${matrix.length} rows — fill in prices for the new combinations` });
                         }}
                       >
                         Build matrix
