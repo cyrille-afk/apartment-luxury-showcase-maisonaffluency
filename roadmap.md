@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add Emmanuel Levet Stenne's Dress Up Stone Collection 1 as six catalog pages with two stone finishes, cropped photos, supplied RRP, and French origin; leave lead time blank unless documented.
+
 - [x] Move the sourcing preview from the homepage and public gallery into the Trade Program Felix section, retaining the advisor and metrics.
 - [x] Add a public sourcing preview with catalog matches and a verified trade gate that forwards lead emails directly to the Trade Program form.
 - [ ] Source and verify the requested Monarch, Roku, and 交叉 ash chairs before featuring them; their stated designer/material combinations are not in the published catalog.
