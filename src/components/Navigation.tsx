@@ -949,7 +949,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               ) : (
                 <div
                   className="relative flex items-center"
-                  onMouseEnter={keepTradeMenuOpen}
+                  onMouseEnter={openTradeMenu}
                   onMouseLeave={scheduleTradeMenuClose}
                 >
                   <button
