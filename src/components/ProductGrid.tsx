@@ -319,7 +319,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; compactTop?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const queryClient = useQueryClient();
@@ -437,7 +437,7 @@ function singularizeSub(s: string): string {
 
     const matched = pool.filter(item => {
       if (roomSlug && !pickMatchesRoom(item.pick, roomSlug)) return false;
-      if (!pickMatchesFilter(item.pick, category, subcategory)) return false;
+      if (!pickMatchesFilter(item.pick, roomSlug ? roomCategory ?? null : category, roomSlug ? roomSubcategory ?? null : subcategory)) return false;
       if (!normalizedQuery) return true;
 
       const haystack = [
@@ -460,7 +460,7 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug]);
+  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory]);
 
   const itemTones = useImageTones(rawFiltered.map((i) => i.pick.image));
   const filtered = useMemo(
@@ -493,7 +493,7 @@ function singularizeSub(s: string): string {
 
   if (!isActive) return null;
 
-  const filterLabel = roomSlug ? ROOM_LABELS[roomSlug] : subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
+  const filterLabel = roomSlug ? `${ROOM_LABELS[roomSlug]}${roomSubcategory || roomCategory ? ` — ${roomSubcategory || roomCategory}` : ""}` : subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
   // Build breadcrumbs (Home → Category → Subcategory) when a category filter is active.
   const crumbs: Crumb[] = (() => {

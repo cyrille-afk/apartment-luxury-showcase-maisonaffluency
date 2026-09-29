@@ -13,6 +13,7 @@ import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -37,6 +38,7 @@ import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import previewConsole from "@/assets/details-console.jpg";
 import previewLamp from "@/assets/details-lamp.jpg";
 import previewChair from "@/assets/small-room-chair.jpeg";
+import officeRoomAmbient from "@/assets/home-office-desk.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -115,6 +117,14 @@ const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
 
+const officeNavigation: RoomNavCategory[] = [
+  { label: "Desks", category: "Tables", subcategories: ["Desks"] },
+  { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
+  { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
+  { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
+  { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
+];
+
 const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
   dining: { src: intimateDiningAmbient, alt: "Intimate dining setting with collectible furniture" },
@@ -130,24 +140,34 @@ const roomPreviewPieces = [
   { src: previewChair, alt: "Modern chair vignette" },
 ];
 
-const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => (
+const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(false);
+  const previewImage = selectedRoomSlug === "office" ? { src: officeRoomAmbient, alt: "Curated home office with collectible furnishings" } : roomAmbientImages[room];
+  return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
-      <div className="relative h-[190px] overflow-hidden bg-muted">
-        <img src={roomAmbientImages[room].src} alt={roomAmbientImages[room].alt} className="h-full w-full object-cover" />
-        <div className="absolute left-[55%] top-[47%] flex size-5 items-center justify-center rounded-full border border-primary-foreground bg-foreground text-primary-foreground shadow-sm" aria-hidden="true">
-          <span className="text-sm leading-none">+</span>
-        </div>
-        <div className="absolute bottom-3 left-3 border border-border/60 bg-background/95 px-3 py-2 shadow-sm" aria-hidden="true">
-          <span className="block font-body text-[9px] uppercase text-muted-foreground">Selected piece</span>
-          <span className="block font-serif text-xs text-foreground">Explore in dialogue</span>
-        </div>
+      <div className="relative h-[190px] bg-muted">
+          <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" aria-label="Shop this look; highlight curated alternatives" aria-expanded={open}
+              onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
+              onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
+              onClick={() => { setSelected(true); setOpen(true); }}
+              className="absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
+              <span className="absolute size-8 rounded-full border border-background/80 bg-foreground/20 motion-safe:animate-ping" aria-hidden="true" />
+              <span className="relative size-4 rounded-full border-2 border-background bg-foreground/60 shadow-sm" aria-hidden="true" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
+        </Popover>
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-        <div className="grid grid-cols-3 gap-2">
-          {roomPreviewPieces.map((piece) => (
-            <div key={piece.src} className="aspect-[4/3] overflow-hidden bg-muted">
+          <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+          {roomPreviewPieces.map((piece, index) => (
+            <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === 0 ? "border-primary opacity-100" : "border-transparent opacity-80")}>
               <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
             </div>
           ))}
@@ -159,26 +179,39 @@ const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => (
       Experience curated alternative compositions anchored by our spaces.
     </p>
   </div>
-);
+  );
+};
 
 interface RoomDropdownPanelProps {
   room: "living" | "dining" | "bedroom";
   activeCategory: number | null;
   onSelectCategory: (index: number) => void;
-  onCategoryNavigate: (category: string, subcategory?: string) => void;
+  onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
 }
 
-const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => (
+const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
+  const [selectedRoom, setSelectedRoom] = useState(0);
+  const categories = room === "living" && selectedRoom === 1 ? officeNavigation : roomNavigation[room];
+  return (
   <div className="flex min-h-[470px] items-stretch overflow-hidden">
     <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
       <div className="flex flex-col">
-        {roomNavigation[room].map((item, index) => (
+        <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
+        <div className="mt-3 flex flex-col gap-1">
+          {roomFlyouts[room]?.map((link, index) => (
+            <Button key={link.slug} type="button" variant="ghost" onMouseEnter={() => { setSelectedRoom(index); onSelectCategory(null); }} onFocus={() => { setSelectedRoom(index); onSelectCategory(null); }} onClick={() => onRoomNavigate(link.slug)} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 font-body text-[13px] hover:bg-transparent hover:text-foreground", selectedRoom === index ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>
+              <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
+            </Button>
+          ))}
+        </div>
+        <div className="mt-5 border-t border-border/60 pt-3">
+        {categories.map((item, index) => (
           <div key={item.label} onMouseEnter={() => onSelectCategory(index)}>
             <Button
               type="button" variant="ghost"
               onFocus={() => onSelectCategory(index)}
-              onClick={() => onCategoryNavigate(item.category)}
+              onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category)}
               aria-expanded={activeCategory === index}
               className={cn("flex h-9 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === index ? "text-foreground" : "text-muted-foreground")}
             >
@@ -188,7 +221,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             {activeCategory === index && (
               <div className="mb-2 flex flex-col border-l border-border pl-4">
                 {item.subcategories.map((subcategory) => (
-                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
+                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
                     {subcategory}
                   </Button>
                 ))}
@@ -196,21 +229,13 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             )}
           </div>
         ))}
-        <div className="mt-5 border-t border-border/60 pt-4" onMouseEnter={() => onSelectCategory(null)}>
-          <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
-          <div className="mt-2 flex flex-col gap-1 pl-3">
-            {roomFlyouts[room]?.map((link) => (
-              <Button key={link.slug} type="button" variant="ghost" onClick={() => onRoomNavigate(link.slug)} className="h-7 w-full justify-start gap-2 rounded-none px-0 font-body text-xs font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
-                <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
-              </Button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
-    <RoomVisualPreview room={room} />
+    <RoomVisualPreview room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
   </div>
-);
+  );
+};
 
 const leftNavItems = [{
   label: "Designers",
@@ -683,7 +708,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const navigateToRoom = (room: string) => {
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
-    navigate(`/search?room=${room}`);
+    navigate(`/search?room=${room}&view=grid`);
+  };
+
+  const navigateToRoomCategory = (room: string, category: string, subcategory?: string) => {
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    const params = new URLSearchParams({ room, view: "grid", category });
+    if (subcategory) params.set("subcategory", subcategory);
+    navigate(`/search?${params.toString()}`);
   };
 
   const scheduleRoomMenuClose = () => {
@@ -1207,7 +1240,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
                     <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateFromMegaMenu} onRoomNavigate={navigateToRoom} />
+                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
 

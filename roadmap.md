@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Put room choices first in desktop menus, send room clicks to their product grid, and make preview hotspots reveal and highlight alternatives.
+
 - [x] Consolidate Living, Dining, and Bedroom dropdown destinations on the left and show a framed Alternative Universes visual preview on the right.
 
 - [x] Add branded app recovery for blank pages after edge failures, with a visitor-controlled retry that preserves the current address.
