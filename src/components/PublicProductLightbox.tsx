@@ -433,10 +433,21 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       const pool = allPicks.filter((p) => p.id !== product.id && p.image_url && !p.restricted_gallery_pin);
       let same = sub ? pool.filter((p) => normSub(p.subcategory) === sub) : [];
       if (same.length === 0 && cat) same = pool.filter((p) => normSub(p.category) === cat);
+      // Form & Materiality ranking: organic/rounded silhouettes rank above
+      // strictly linear/rectangular/angular pieces so the visible row matches
+      // the curved language of the room vignettes.
+      const ORGANIC = /\b(round|rounded|curve[ds]?|curvilinear|organic|biomorphic|oval|ellipse|elliptical|drum|arc|arch|sphere|spherical|pebble|cloud|wave|wavy|blob|sculptural|fluid|soft[- ]edged|circular|cylinder|cylindrical|moon|orb)\b/i;
+      const ANGULAR = /\b(rectangular|rectangle|square|linear|sharp[- ]angled|sharp|geometric|block|cube|cubic|grid|rigid|angular|straight[- ]edged|slab)\b/i;
+      const formScore = (p: PublicLightboxItem) => {
+        const text = [p.title, p.subtitle, p.description, p.materials].filter(Boolean).join(" ");
+        if (ORGANIC.test(text)) return 2;
+        if (ANGULAR.test(text)) return -2;
+        return 0;
+      };
       const score = (p: PublicLightboxItem) => {
         let n = 0;
         materialTokens(p).forEach((t) => { if (heroMat.has(t)) n++; });
-        return n;
+        return n + formScore(p);
       };
       return same
         .map((p, i) => ({ p, s: score(p), i }))
