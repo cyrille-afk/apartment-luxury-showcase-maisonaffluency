@@ -203,9 +203,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
         </div>
       </div>
     </div>
-    <div className="mt-5 text-center font-serif text-sm font-bold text-foreground">Alternative Universes</div>
-    <p className="mt-1 max-w-[320px] text-center font-body text-xs leading-relaxed text-muted-foreground">
-      Experience curated alternative compositions anchored by our spaces.
+    <h3 className="mt-6 text-center font-serif text-xl font-bold tracking-wide text-foreground md:text-2xl">Elevate Your Projects with Unrivaled Curation</h3>
+    <p className="mx-auto mt-2 max-w-2xl text-center font-body text-sm leading-relaxed tracking-wide text-muted-foreground">
+      Leverage our elite global gallery network and masterfully curated individual pieces to push the boundaries of your spaces. Whether you are expanding a junior portfolio or executing a senior-level vision, Maison Affluency equips you with the distinct knowledge and high-end sourcing required to elevate your design game—and deliver unforgettable environments for your clients.
     </p>
   </div>
   );
