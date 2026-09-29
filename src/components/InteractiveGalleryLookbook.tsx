@@ -310,7 +310,10 @@ function HotspotPin({ hotspot, editorial, onOpen }: { hotspot: Hotspot; editoria
   const flipLabel = hotspot.x_percent > 72;
   return (
     <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-      <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background/70 bg-white/5 shadow-[0_1px_6px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:scale-110 group-hover:border-background/90 group-hover:animate-hotspot-pulse group-focus-visible:border-background/90 md:size-6" />
+      <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background/70 bg-white/5 shadow-[0_1px_6px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:scale-110 group-hover:border-background/90 group-hover:animate-hotspot-pulse group-focus-visible:border-background/90 md:size-6">
+        <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+        <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+      </span>
       <span aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-20 hidden -translate-y-1/2 flex-col items-start whitespace-nowrap rounded-md border border-background/40 bg-background/95 px-4 py-2.5 opacity-0 shadow-[0_12px_32px_rgba(20,20,20,0.16)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 md:flex ${flipLabel ? "right-full mr-3 translate-x-1 group-hover:translate-x-0" : "left-full ml-3 -translate-x-1 group-hover:translate-x-0"}`}>
         <span className="font-display text-[13px] font-normal leading-snug text-foreground">{hotspot.product_name}</span>
         {hotspot.designer_name && (
