@@ -28,6 +28,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategor
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { useShippingDestination } from "@/lib/shippingDestination";
+import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type PublicRrpRow } from "@/hooks/usePublicRrp";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
@@ -1647,7 +1648,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // In "products" mode, when a filter is active we switch to a product grid view.
   // In "designers" mode (default, used on /designers), filteredPicks is always
   // null — the alphabetical designer cards remain and are narrowed via filteredItems.
-  const filteredPicks = useMemo<PickItem[] | null>(() => {
+  const rawFilteredPicks = useMemo<PickItem[] | null>(() => {
     if (mode !== "products") return null;
     if (!selectedCategory && !selectedSubcategory && !facetCountry && !facetFinish) return null;
     let base = fullPicks;
@@ -1662,6 +1663,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     }
     return base;
   }, [selectedCategory, selectedSubcategory, fullPicks, facetCountry, facetFinish, finishMap, mode]);
+
+  const pickTones = useImageTones(rawFilteredPicks?.map((p) => p.image_url) ?? []);
+  const filteredPicks = useMemo<PickItem[] | null>(
+    () => rawFilteredPicks && curateGrid(rawFilteredPicks, (p) => p.designer_id, (p) => pickTones[p.image_url]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawFilteredPicks, pickTones, Object.keys(pickTones).length],
+  );
 
   // (Product pages handle detail view — no lightbox needed here)
 
