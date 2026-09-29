@@ -193,7 +193,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
           {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
-          {!isLoading && !isError && matches.length === 0 && !showPending && <p className="py-10 text-sm text-moodboard-ink/60">No pieces are available right now. Please try again later.</p>}
+          {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">{submitted?.value ? `No pieces in our collection match “${submitted.value}” exactly. Try a different colour or material.` : "No pieces are available right now. Please try again later."}</p>}
           {(matches.length > 0 || showPending) && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
               {matches.slice(0, embedded ? 2 : 3).map(({ pick, designerName }) => (

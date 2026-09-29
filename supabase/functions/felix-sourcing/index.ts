@@ -49,6 +49,16 @@ const MATERIALS: Record<string, RegExp> = {
   bronze: /\bbronze\b/, brass: /\bbrass\b/, steel: /\bsteel\b/,
   leather: /\bleather\b/, rattan: /\brattan\b/, ceramic: /\b(ceramic|porcelain|stoneware)\b/,
 };
+// Colour attribute gate. Whole-word only: "greenery" / "green-certified" never count as green.
+const COLOR_WORDS: Record<string, string[]> = {
+  green: ["green", "emerald", "jade", "olive", "sage", "malachite", "verdigris", "forest"],
+  blue: ["blue", "navy", "cobalt", "azure", "indigo", "teal"], red: ["red", "crimson", "burgundy", "oxblood", "bordeaux"],
+  pink: ["pink", "rose", "blush"], yellow: ["yellow", "mustard", "ochre", "saffron"], orange: ["orange", "terracotta", "rust"],
+  black: ["black", "ebony", "noir"], white: ["white", "ivory", "alabaster"], grey: ["grey", "gray", "anthracite", "charcoal"],
+  gray: ["grey", "gray", "anthracite", "charcoal"], brown: ["brown", "chocolate", "cognac", "tobacco"],
+  beige: ["beige", "cream", "sand", "ecru"], gold: ["gold", "golden", "gilded", "gilt"], silver: ["silver", "chrome"], purple: ["purple", "violet", "aubergine", "plum"],
+};
+for (const [k, ws] of Object.entries(COLOR_WORDS)) MATERIALS[k] = new RegExp(`(?<![\\w-])(${ws.join("|")})(?![\\w-])`);
 const sing = (w: string) => w.length > 4 && w.endsWith("ies") ? w.slice(0, -3) + "y" : w.replace(/(?<=[^s])s$/, "");
 function lev(a: string, b: string) {
   if (Math.abs(a.length - b.length) > 1) return 2;
@@ -161,7 +171,7 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   // gallery priority (catalogue sort_order == ascending index order).
   if (strictMat) {
     const highWeight = ranked.filter((r) => r.score >= 8).length;
-    if (highWeight < 3) {
+    if (false && highWeight < 3) {
       const eligibleIds = new Set(eligible.map((i) => i.id));
       const fill = catalog
         .map((item, index) => ({ item, index }))
