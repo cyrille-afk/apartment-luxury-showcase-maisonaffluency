@@ -168,6 +168,13 @@ interface FinishSelectorProps {
    * Combination validity stays enforced by the size_variants matrix upstream.
    */
   sharedBaseTopSwatches?: boolean;
+  /**
+   * Swatch names in the Base group that are incompatible with the current
+   * Top-axis selection (and vice versa for `disabledTopNames`). Rendered
+   * greyed-out and non-clickable so Base ↔ Top pairing is bidirectional.
+   */
+  disabledBaseNames?: string[];
+  disabledTopNames?: string[];
   /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
