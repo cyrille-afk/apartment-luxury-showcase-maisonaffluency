@@ -113,8 +113,6 @@ export default function RoomSearch() {
         const el = head.querySelector<HTMLMetaElement>(`meta[${tag.attr}="${tag.key}"]`);
         captured.set(`${tag.attr}:${tag.key}`, el ? el.getAttribute("content") : null);
       }
-      const canonical = head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-      captured.set("canonical", canonical ? canonical.getAttribute("href") : null);
       originalHead.current = captured;
     }
 
