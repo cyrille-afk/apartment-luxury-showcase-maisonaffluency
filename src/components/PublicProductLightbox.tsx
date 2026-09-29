@@ -439,7 +439,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       const ORGANIC = /\b(round|rounded|curve[ds]?|curvilinear|organic|biomorphic|oval|ellipse|elliptical|drum|arc|arch|sphere|spherical|pebble|cloud|wave|wavy|blob|sculptural|fluid|soft[- ]edged|circular|cylinder|cylindrical|moon|orb)\b/i;
       const ANGULAR = /\b(rectangular|rectangle|square|linear|sharp[- ]angled|sharp|geometric|block|cube|cubic|grid|rigid|angular|straight[- ]edged|slab)\b/i;
       const formScore = (p: PublicLightboxItem) => {
-        const text = [p.name, p.subtitle, p.description, p.materials].filter(Boolean).join(" ");
+        const text = [p.title, p.subtitle, p.description, p.materials].filter(Boolean).join(" ");
         if (ORGANIC.test(text)) return 2;
         if (ANGULAR.test(text)) return -2;
         return 0;
