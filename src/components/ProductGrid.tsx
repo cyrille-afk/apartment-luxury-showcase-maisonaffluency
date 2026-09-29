@@ -319,7 +319,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug }) => {
+const ProductGrid = ({ sectionScope, roomSlug, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; compactTop?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const queryClient = useQueryClient();
@@ -519,12 +519,12 @@ function singularizeSub(s: string): string {
 
   return (
     <>
-    <section ref={gridRef} id="product-grid" className="py-12 md:py-16 bg-background scroll-header-offset">
+    <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop ? "pt-6 pb-12 md:pt-8 md:pb-16" : "py-12 md:py-16"}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className={`flex items-center justify-between ${compactTop ? "mb-4" : "mb-8"}`}>
           <div>
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}

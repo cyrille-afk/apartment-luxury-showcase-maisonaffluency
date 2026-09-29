@@ -190,7 +190,7 @@ export default function RoomSearch() {
         {room ? (
           <>
             <InteractiveGalleryLookbook discoveryRoom={room} />
-            <ProductGrid roomSlug={room} />
+            <ProductGrid roomSlug={room} compactTop />
           </>
         ) : (
           <div className="mx-auto max-w-7xl px-6 py-20">
