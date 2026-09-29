@@ -115,7 +115,7 @@ const TradeLogin = () => {
 
       {/* Brand mark pinned to the upper-left corner, RH-style */}
       <header className="flex items-start justify-between px-6 pt-6 md:px-10 md:pt-8">
-        <Link to="/" className="inline-block">
+        <Link to="/" className="inline-flex min-h-10 items-center">
           <span className="font-brand text-[1.4rem] font-bold tracking-widest text-foreground">
             Maison Affluency
           </span>
@@ -123,7 +123,7 @@ const TradeLogin = () => {
         <Link
           to="/"
           aria-label="Close"
-          className="text-slate-500 hover:opacity-60 transition-opacity mt-1"
+          className="inline-flex h-10 w-10 items-center justify-center text-muted-foreground hover:opacity-60 transition-opacity -mr-2"
         >
           <X className="w-6 h-6" strokeWidth={1} />
         </Link>
