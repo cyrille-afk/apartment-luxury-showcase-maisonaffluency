@@ -315,7 +315,10 @@ function HotspotPin({ hotspot, editorial, onOpen }: { hotspot: Hotspot; editoria
         <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
       </span>
       <span aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-20 hidden -translate-y-1/2 flex-col items-start whitespace-nowrap rounded-md border border-background/40 bg-background/95 px-4 py-2.5 opacity-0 shadow-[0_12px_32px_rgba(20,20,20,0.16)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 md:flex ${flipLabel ? "right-full mr-3 translate-x-1 group-hover:translate-x-0" : "left-full ml-3 -translate-x-1 group-hover:translate-x-0"}`}>
-        <span className="font-display text-[13px] font-normal leading-snug text-foreground">{hotspot.product_name}</span>
+        <span className="font-display text-[13px] font-normal leading-snug text-foreground">
+          {hotspot.product_name}
+          <span className="ml-2 whitespace-nowrap font-body text-[10px] font-light uppercase tracking-[0.16em] text-muted-foreground">— View Curated Alternatives →</span>
+        </span>
         {hotspot.designer_name && (
           <span className="mt-0.5 font-body text-[9px] font-light uppercase tracking-[0.22em] text-muted-foreground">by {hotspot.designer_name}</span>
         )}
@@ -608,10 +611,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   return (
     <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-12 md:pb-16" : "pb-16"}`}>
-      <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-16 py-5 md:min-h-24 md:py-7" : "min-h-20 py-4 md:min-h-24 md:py-5"}`}>
+      <header className={`flex px-6 text-center ${discoveryRoom ? "flex-col items-center justify-center min-h-16 py-5 md:min-h-24 md:py-7" : "items-center justify-center min-h-20 py-4 md:min-h-24 md:py-5"}`}>
         <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
           {activeTitle}
         </h2>
+        {discoveryRoom && (
+          <p className="mt-2.5 max-w-[64ch] font-body text-[11px] font-light leading-relaxed tracking-[0.06em] text-muted-foreground md:text-xs">
+            Interactive Curation: Select an item hotspot to source complementary and alternative gallery pieces in dialogue with this silhouette.
+          </p>
+        )}
       </header>
 
       {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
