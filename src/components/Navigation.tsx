@@ -38,6 +38,7 @@ import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import previewConsole from "@/assets/details-console.jpg";
 import previewLamp from "@/assets/details-lamp.jpg";
 import previewChair from "@/assets/small-room-chair.jpeg";
+import officeRoomAmbient from "@/assets/home-office-desk.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -139,20 +140,21 @@ const roomPreviewPieces = [
   { src: previewChair, alt: "Modern chair vignette" },
 ];
 
-const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => {
+const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState(false);
+  const previewImage = selectedRoomSlug === "office" ? { src: officeRoomAmbient, alt: "Curated home office with collectible furnishings" } : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
       <div className="relative h-[190px] bg-muted">
-        <img src={roomAmbientImages[room].src} alt={roomAmbientImages[room].alt} className="h-full w-full object-cover" />
+          <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button type="button" variant="ghost" size="icon" aria-label="Shop this look; highlight curated alternatives" aria-expanded={open}
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
-              onClick={(event) => { event.preventDefault(); setSelected((current) => current === null ? 0 : (current + 1) % roomPreviewPieces.length); setOpen(true); }}
+              onClick={() => { setSelected(true); setOpen(true); }}
               className="absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
               <span className="absolute size-8 rounded-full border border-background/80 bg-foreground/20 motion-safe:animate-ping" aria-hidden="true" />
               <span className="relative size-4 rounded-full border-2 border-background bg-foreground/60 shadow-sm" aria-hidden="true" />
@@ -163,9 +165,9 @@ const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => {
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-        <div className="grid grid-cols-3 gap-2">
+          <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
           {roomPreviewPieces.map((piece, index) => (
-            <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected === index ? "border-primary opacity-100" : "border-transparent opacity-80")}>
+            <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === 0 ? "border-primary opacity-100" : "border-transparent opacity-80")}>
               <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
             </div>
           ))}
@@ -230,7 +232,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         </div>
       </div>
     </div>
-    <RoomVisualPreview room={room} />
+    <RoomVisualPreview room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
   </div>
   );
 };
