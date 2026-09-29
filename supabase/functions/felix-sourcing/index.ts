@@ -167,7 +167,7 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
       ranked.push(...fill);
     }
   }
-  if (!strictAsh && ranked.some((r) => r.score >= 10)) {
+  if (!strictAsh && !strictMat && ranked.some((r) => r.score >= 10)) {
     // A category-level match exists: drop description-only hits so stylistic words can't pollute.
     const keep = ranked.filter((r) => r.score >= 5);
     ranked.length = 0; ranked.push(...keep);
