@@ -937,12 +937,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     ? []
     : woodFilter
     ? (() => {
+        // Shared palettes: the base group may reuse swatches also shown in
+        // the top group, but top-only finishes (e.g. stone tops) must not
+        // leak into the base group as orphans.
         const pool = sharedBaseTopSwatches
           ? allNonFabricTiles
           : allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
         const matched = pool.filter((f) => woodFilter(f.name));
         const matchedIds = new Set(matched.map((t) => t.id));
-        const orphans = pool.filter((f) => !matchedIds.has(f.id));
+        const orphanPool = sharedBaseTopSwatches
+          ? allNonFabricTiles.filter((f) => !topTileIds.has(f.id))
+          : pool;
+        const orphans = orphanPool.filter((f) => !matchedIds.has(f.id));
         return [...matched, ...orphans];
       })()
     : remainingNonFabric;
