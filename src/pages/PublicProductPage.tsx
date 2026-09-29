@@ -521,7 +521,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   const ctx = useVariantSelectorsContext();
   const {
     product,
-    axes: { isDualAxis, isBaseOnly, baseOptions, topOptions, hasSingleAxisSplit, singleMaterialOptions, singleAxisParsed },
+    axes: { isDualAxis, isBaseOnly, baseOptions, topOptions, dualSizeOptions, hasSingleAxisSplit, singleMaterialOptions, singleAxisParsed },
     selBase, setSelBase, selTop, setSelTop, selDualSize, setSelDualSize, selMat, setSelMat, selSize, setSelSize,
     hasLinkedFabrics, setHasLinkedFabrics, linkedWoodFinishes, setLinkedWoodFinishes,
     baseAxisIsDim, topAxisIsDim,
@@ -536,9 +536,13 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
 
   const isFinishAxis = isFinishAxisLabel;
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
+  // Some upholstery matrices use Base = seat, Top = backrest, Label = frame.
+  // Their linked wood swatches belong to the frame picker, not the Top picker.
+  const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
+    && isUpholsteryAxisLabel(topAxisLabelRaw) && dualSizeOptions.some((label) => !looksLikeDimension(label));
   // FinishSelector gives overlapping swatches to the Top group first, so only
   // swatches left over for the Base group can stand in for the Base dropdown.
-  const topSwatchFilter = isDualAxis && !baseAxisIsDim && topOptions.length >= 1 ? makeSwatchAxisFilter(topOptions) : null;
+  const topSwatchFilter = isDualAxis && !frameOnLabel && !baseAxisIsDim && topOptions.length >= 1 ? makeSwatchAxisFilter(topOptions) : null;
   const baseSwatchPool = topSwatchFilter ? linkedWoodFinishes.filter((n) => !topSwatchFilter(n)) : linkedWoodFinishes;
   const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, baseSwatchPool);
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
@@ -571,7 +575,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             topAxisLabel: product.top_axis_label,
             baseAxisIsDimension: baseAxisIsDim,
             isUpholstered: isProductUpholstered(product),
-            woodLabelOverride: (product as any).wood_label_override,
+            woodLabelOverride: product.wood_label_override || (frameOnLabel ? product.variant_placeholder : null),
           }).upholsteryLabel
         }
         woodLabel={
@@ -580,11 +584,11 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             topAxisLabel: product.top_axis_label,
             baseAxisIsDimension: baseAxisIsDim,
             isUpholstered: isProductUpholstered(product),
-            woodLabelOverride: (product as any).wood_label_override,
+            woodLabelOverride: product.wood_label_override || (frameOnLabel ? product.variant_placeholder : null),
           }).woodLabel
         }
         woodFilter={
-          isDualAxis && !baseAxisIsDim && baseOptions.length >= 1
+          isDualAxis && !frameOnLabel && !baseAxisIsDim && baseOptions.length >= 1
             ? makeSwatchAxisFilter(baseOptions)
             : undefined
         }
@@ -594,7 +598,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             : null
         }
         topFilter={
-          isDualAxis && !baseAxisIsDim && topOptions.length >= 1
+          isDualAxis && !frameOnLabel && !baseAxisIsDim && topOptions.length >= 1
             ? makeSwatchAxisFilter(topOptions)
             : undefined
         }
@@ -612,6 +616,21 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         currentGalleryIndex={galleryActiveIndex ?? 0}
         onWoodFinishChange={(woodName) => {
           if (!woodName) return;
+          if (frameOnLabel) {
+            const frame = dualSizeOptions.find((label) => makeSwatchAxisFilter([label])(woodName));
+            if (!frame) return;
+            setSelDualSize(frame);
+            let nextBase = selBase;
+            let nextTop = selTop;
+            if (!variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, frame))) {
+              nextBase = null;
+              nextTop = null;
+              setSelBase(null);
+              setSelTop(null);
+            }
+            onMaterialChange?.(frame, { base: nextBase, top: nextTop, size: frame, fromSwatch: true });
+            return;
+          }
           const norm = (s: string) => s.trim().toLowerCase();
           const nw = norm(woodName);
           const match =
@@ -829,6 +848,7 @@ const VariantDimensionsPanel: React.FC = () => {
     product,
     axes: { isDualAxis, isBaseOnly, hasSingleAxisSplit, hasVariants, baseOptions, topOptions, dualSizeOptions, singleSizeOptions, singleAxisParsed },
     selBase, setSelBase, selTop, setSelTop, selDualSize, setSelDualSize, selMat, setSelMat, selSize, setSelSize,
+    linkedWoodFinishes,
     baseAxisIsDim, topAxisIsDim,
     baseAxisLabelRaw, topAxisLabelRaw,
     baseOnlySizeOptions,
@@ -839,6 +859,9 @@ const VariantDimensionsPanel: React.FC = () => {
   } = ctx;
 
   const dualLabelsAreDimensions = dualSizeOptions.length > 0 && dualSizeOptions.every(looksLikeDimension);
+  const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
+    && isUpholsteryAxisLabel(topAxisLabelRaw) && !dualLabelsAreDimensions;
+  const frameSwatchesCoverLabels = frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes);
   const physicalDimensions = variantsList.find((v: { dimensions?: string | null }) => v.dimensions)?.dimensions || product.dimensions;
 
   return (
@@ -867,7 +890,7 @@ const VariantDimensionsPanel: React.FC = () => {
             onMaterialChange?.(s, { base: nextBase, top: null, size: s });
           }}
         />
-      ) : isDualAxis && dualSizeOptions.length > 0 ? (
+      ) : isDualAxis && dualSizeOptions.length > 0 && !frameSwatchesCoverLabels ? (
         <ExpandableSpec
           icon={specIcon(dualLabelsAreDimensions ? "📐" : "✦")}
           text={
@@ -880,7 +903,7 @@ const VariantDimensionsPanel: React.FC = () => {
           secondaryText={null}
           emphasized
           forceDropdown={!dualLabelsAreDimensions}
-          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || "Select the Wood Finish")}
+          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || product.variant_placeholder || "Select the Wood Finish")}
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
