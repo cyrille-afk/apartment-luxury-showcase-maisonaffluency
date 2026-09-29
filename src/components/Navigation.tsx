@@ -195,9 +195,17 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
            <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
-           {scene.pieces.map((piece, index) => (
-             <div key={piece.src} className={cn("aspect-[4/3] overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
-              <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+            {scene.pieces.map((piece, index) => (
+              <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
+               <div className="aspect-[4/3] overflow-hidden">
+                 <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+               </div>
+               {"name" in piece && (
+                 <div className="bg-background px-1.5 py-1.5">
+                   <div className="truncate font-body text-[10px] font-semibold leading-tight text-foreground">{piece.name}</div>
+                   <div className="truncate font-body text-[9px] leading-tight text-muted-foreground">{piece.designer}</div>
+                 </div>
+               )}
             </div>
           ))}
         </div>
