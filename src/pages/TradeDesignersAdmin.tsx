@@ -2069,19 +2069,20 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const [pubRes, allRes] = await Promise.all([
         supabase.from("designer_curator_picks_public").select("designer_id"),
-        supabase.from("designer_curator_picks").select("designer_id"),
+        supabase.from("designer_curator_picks").select("designer_id, trade_only"),
       ]);
       if (pubRes.error) throw pubRes.error;
       if (allRes.error) throw allRes.error;
-      const counts: Record<string, { public: number; total: number }> = {};
+      const counts: Record<string, { public: number; total: number; tradeOnly: number }> = {};
       (allRes.data || []).forEach((row) => {
         if (!row.designer_id) return;
-        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0, tradeOnly: 0 };
         counts[row.designer_id].total += 1;
+        if (row.trade_only) counts[row.designer_id].tradeOnly += 1;
       });
       (pubRes.data || []).forEach((row) => {
         if (!row.designer_id) return;
-        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0, tradeOnly: 0 };
         counts[row.designer_id].public += 1;
       });
       return counts;
