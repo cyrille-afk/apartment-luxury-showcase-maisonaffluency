@@ -1,10 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
+import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Room hero assets reused from the header mega-menu so the shared link
 // preview shows the same vignette the navigation pathway advertises.
