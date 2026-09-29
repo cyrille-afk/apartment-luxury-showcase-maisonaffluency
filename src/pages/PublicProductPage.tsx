@@ -540,6 +540,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   // Their linked wood swatches belong to the frame picker, not the Top picker.
   const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
     && isUpholsteryAxisLabel(topAxisLabelRaw) && dualSizeOptions.some((label) => !looksLikeDimension(label));
+  const framePickerLabel = frameOnLabel && product.variant_placeholder
+    ? product.variant_placeholder.replace(/^select your frame finish$/i, "Select Your Frame Finish")
+    : product.wood_label_override;
   // FinishSelector gives overlapping swatches to the Top group first, so only
   // swatches left over for the Base group can stand in for the Base dropdown.
   const topSwatchFilter = isDualAxis && !frameOnLabel && !baseAxisIsDim && topOptions.length >= 1 ? makeSwatchAxisFilter(topOptions) : null;
@@ -575,7 +578,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             topAxisLabel: product.top_axis_label,
             baseAxisIsDimension: baseAxisIsDim,
             isUpholstered: isProductUpholstered(product),
-            woodLabelOverride: product.wood_label_override || (frameOnLabel ? product.variant_placeholder : null),
+            woodLabelOverride: framePickerLabel,
           }).upholsteryLabel
         }
         woodLabel={
@@ -584,7 +587,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             topAxisLabel: product.top_axis_label,
             baseAxisIsDimension: baseAxisIsDim,
             isUpholstered: isProductUpholstered(product),
-            woodLabelOverride: product.wood_label_override || (frameOnLabel ? product.variant_placeholder : null),
+            woodLabelOverride: framePickerLabel,
           }).woodLabel
         }
         woodFilter={
@@ -722,7 +725,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
               }
             />
           )}
-          {!suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
+           {(frameOnLabel || (!suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim))) && (
             <ExpandableSpec
               icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
               text={withImperialPerLine(topOptions.join("\n"))}
