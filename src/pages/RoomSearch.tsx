@@ -121,7 +121,9 @@ export default function RoomSearch() {
     const universe = ROOM_UNIVERSES[room];
     const curated = ROOM_CURATED[room];
     const title = `${universe} | ${curated} | Maison Affluency`;
-    const description = `Explore a fully curated ${universe.toLowerCase()} designed for trade professionals. Source authentic collectible furniture, architectural seating, and premium centerpieces directly from our digital gallery portfolio.`;
+    // Drop the leading article so the sentence reads naturally.
+    const universePhrase = universe.toLowerCase().replace(/^(an?|the)\s+/, "");
+    const description = `Explore a fully curated ${universePhrase} designed for trade professionals. Source authentic collectible furniture, architectural seating, and premium centerpieces directly from our digital gallery portfolio.`;
     const roomUrl = `${SITE_ORIGIN}/search?room=${room}`;
 
     document.title = title;
@@ -134,21 +136,8 @@ export default function RoomSearch() {
 
     // Room vignette image — absolute URL for the share preview. Rooms without
     // a dedicated vignette keep the sitewide static og:image untouched.
-    const vignette = ROOM_VIGNETTES[room];
-    if (vignette) {
-      const absolute = new URL(vignette, window.location.origin).href;
-      upsertMeta("property", "og:image", absolute);
-      upsertMeta("name", "twitter:image", absolute);
-    }
-
-    // Self-referencing canonical so crawlers attribute this room URL.
-    let canonical = head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      head.appendChild(canonical);
-    }
-    canonical.href = roomUrl;
+    // Note: <link rel="canonical"> is owned by GlobalCanonical (pathname-based)
+    // and is deliberately not touched here.
   }, [room]);
 
   // Revert to default gallery meta on unmount so metadata never leaks
