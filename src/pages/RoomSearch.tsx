@@ -155,7 +155,7 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
       <section className="mx-auto w-full max-w-6xl px-6 pb-20 pt-4 text-center">
         <h3 className="font-serif text-xl font-bold tracking-wide text-foreground md:text-2xl">Elevate Your Projects with Unrivaled Curation</h3>
         <p className="mx-auto mt-3 max-w-2xl font-body text-sm leading-relaxed tracking-wide text-muted-foreground">
-          Leverage our elite global gallery network and masterfully curated individual pieces to push the boundaries of your spaces. Whether you are expanding a junior portfolio or executing a senior-level vision, Maison Affluency equips you with the distinct knowledge and high-end sourcing required to elevate your design game—and deliver unforgettable environments for your clients.
+          Leverage our elite global gallery network and high-end sourcing to elevate your portfolio. Maison Affluency equips interior architects and decorators with the distinct knowledge and curations needed to deliver unforgettable spaces for your clients.
         </p>
       </section>
     </div>
