@@ -3,7 +3,7 @@
 - Desktop gallery chevrons traverse all four photos before moving to the next/previous room, wrapping across the seven rooms; this provides uninterrupted photo navigation while leaving the mobile accordion untouched.
 - Only the first Living Room photo hides desktop side product picks; all other photos keep vertical one-column picks, with explicitly curated first-scene order preserved, so the gallery entrance stays clean without changing hotspot pins.
 - Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
-- Gallery hotspot details use centered `PublicProductLightbox` in a body portal, including over expanded photos, to prevent clipping.
+- Gallery hotspot and product finish dialogs use body portals above image galleries to avoid clipping and stacking traps.
 - Fetch the two approved MicMac pins and side photos via scoped public RPC; never widen trade-only designer access.
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
