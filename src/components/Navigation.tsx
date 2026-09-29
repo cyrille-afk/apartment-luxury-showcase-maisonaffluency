@@ -223,11 +223,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
   // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
   const tradeMenuCloseTimer = useRef<number | null>(null);
-  const keepTradeMenuOpen = () => {
+  const openTradeMenu = () => {
     if (tradeMenuCloseTimer.current !== null) {
       window.clearTimeout(tradeMenuCloseTimer.current);
       tradeMenuCloseTimer.current = null;
     }
+    setTradeMenuOpen(true);
   };
   const scheduleTradeMenuClose = () => {
     if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
