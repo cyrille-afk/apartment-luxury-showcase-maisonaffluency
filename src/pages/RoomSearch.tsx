@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
+import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
 
 // Room hero assets reused from the header mega-menu so the shared link
@@ -81,7 +82,7 @@ function upsertMeta(attr: "name" | "property", key: string, content: string): HT
   return el;
 }
 
-/** Shop By Room → clean, light product catalogue grid (no lookbook styling). */
+/** Shop By Room: the original hotspot gallery canvas precedes the filtered catalogue. */
 export default function RoomSearch() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -187,7 +188,10 @@ export default function RoomSearch() {
       <Navigation alwaysVisible />
       <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
-          <ProductGrid roomSlug={room} />
+          <>
+            <InteractiveGalleryLookbook discoveryRoom={room} />
+            <ProductGrid roomSlug={room} />
+          </>
         ) : (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>

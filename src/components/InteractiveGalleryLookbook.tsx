@@ -16,9 +16,12 @@ import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { attachMilestoneTracking, trackVideoEvent } from "@/lib/videoTracking";
 import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { curatingTeam } from "@/components/CuratingTeam";
+import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
+import type { RoomSlug } from "@/lib/roomCategories";
 
 type Scene = { title: string; id: string };
 type Space = { key: string; label: string; scenes: Scene[] };
+const roomSpace = (room: RoomSlug) => room === "dining-room" ? 1 : room === "bedroom" ? 3 : room === "office" ? 5 : room === "bath" ? 6 : 0;
 type GalleryState = { kind: "room"; spaceIndex: number } | { kind: "tour" } | { kind: "curators" };
 type GalleryPage = { scenes: Scene[]; title: string };
 
@@ -294,10 +297,12 @@ function CuratorsCanvas() {
 
 type InteractiveGalleryLookbookProps = {
   initialView?: "tour" | "living-room";
+  /** Shop by Room reuses the gallery canvas but opts into category-based related pieces. */
+  discoveryRoom?: RoomSlug;
 };
 
-export default function InteractiveGalleryLookbook({ initialView = "tour" }: InteractiveGalleryLookbookProps) {
-  const [galleryState, setGalleryState] = useState<GalleryState>(initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
+export default function InteractiveGalleryLookbook({ initialView = "tour", discoveryRoom }: InteractiveGalleryLookbookProps) {
+  const [galleryState, setGalleryState] = useState<GalleryState>(discoveryRoom ? { kind: "room", spaceIndex: roomSpace(discoveryRoom) } : initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -313,6 +318,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
   const space = SPACES[roomSpaceIndex];
   const galleryPages = useMemo(() => createGalleryPages(space), [space]);
   const activePage = galleryPages[sceneIdx];
+
+  useEffect(() => {
+    if (!discoveryRoom) return;
+    setGalleryState({ kind: "room", spaceIndex: roomSpace(discoveryRoom) });
+    setSceneIdx(0);
+    setLightboxProduct(null);
+  }, [discoveryRoom]);
 
   useEffect(() => {
     void Promise.all([
@@ -388,8 +400,15 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
     const merged = new Map<string, PublicLightboxItem>();
     staticPicks.forEach((pick) => merged.set(`${normalize(pick.brand_name)}:${normalize(pick.title)}`, pick));
     databasePicks.forEach((pick) => merged.set(`${normalize(pick.brand_name)}:${normalize(pick.title)}`, pick));
-    return [...merged.values()];
-  }, [manifest]);
+    return discoveryRoom ? databasePicks : [...merged.values()];
+  }, [manifest, discoveryRoom]);
+
+  const categoryDiscovery = useMemo(() => discoveryRoom ? {
+    heading: (item: PublicLightboxItem) => {
+      if ((parentOfSub(item.subcategory) || item.category) === "Seating") return "In Dialogue: Curated Seating";
+      return discoveryRoom === "living-room" ? "In Dialogue: Alternative Centerpieces" : "In Dialogue: Alternative Curations";
+    },
+  } : undefined, [discoveryRoom]);
 
   const hotspotsForScene = useCallback(
     (scene: Scene) => hotspots.filter((hotspot) => normalize(hotspot.image_identifier) === normalize(scene.title)),
@@ -566,7 +585,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
         </h2>
       </header>
 
-      <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
+      {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
         <div className="flex min-h-9 snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
           {ribbonItems.map((item) => (
             <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-9 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
@@ -574,7 +593,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
             </Button>
           ))}
         </div>
-      </nav>
+      </nav>}
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
@@ -596,9 +615,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
               {lightboxProduct && !expandedScene && (
                 <PublicProductLightbox
                   product={lightboxProduct}
-                  allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
+                  allPicks={discoveryRoom ? allPicks : allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
                   onClose={() => setLightboxProduct(null)}
                   onSelectRelated={setLightboxProduct}
+                  categoryDiscovery={categoryDiscovery}
                 />
               )}
                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
@@ -700,9 +720,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour" }: Int
             <PublicProductLightbox
               inline
               product={lightboxProduct}
-              allPicks={allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
+                allPicks={discoveryRoom ? allPicks : allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
               onClose={() => setLightboxProduct(null)}
               onSelectRelated={setLightboxProduct}
+                categoryDiscovery={categoryDiscovery}
             />
           )}
           {expandedScene && galleryPages.length > 1 && (
