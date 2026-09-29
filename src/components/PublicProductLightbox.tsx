@@ -95,7 +95,20 @@ interface Props {
   inline?: boolean;
   /** Gallery-only contextual presentation without a viewport backdrop. */
   contextualPanel?: boolean;
+  /** Opt-in category-discovery variant (Shop by Room). When set, the bottom
+   *  row lists pieces from the SAME subcategory (ranked by material affinity)
+   *  under this heading instead of "More from [Designer]". Omit to keep the
+   *  original designer-based behaviour used by Gallery / Designers. */
+  categoryDiscovery?: { heading: (item: PublicLightboxItem) => string };
 }
+
+const normSub = (s?: string | null) => (s || "").trim().toLowerCase().replace(/s\b/g, "");
+const materialTokens = (p: PublicLightboxItem) =>
+  new Set(
+    `${p.materials || ""} ${p.materials_description || ""}`
+      .toLowerCase()
+      .match(/[a-z]{4,}/g) || [],
+  );
 
 /* ------------------------------------------------------------------ */
 /*  Tiny localStorage-backed favorites (no auth needed)                */
@@ -217,7 +230,7 @@ const DimensionsButtonGrid = ({
 /* ------------------------------------------------------------------ */
 
 
-const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline, contextualPanel = false }: Props) => {
+const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, onSelectRelated, inline, contextualPanel = false, categoryDiscovery }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -413,6 +426,24 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
   const relatedProducts = useMemo(() => {
     if (!product || product.restricted_gallery_pin) return [];
+    if (categoryDiscovery) {
+      const sub = normSub(product.subcategory);
+      const cat = normSub(product.category);
+      const heroMat = materialTokens(product);
+      const pool = allPicks.filter((p) => p.id !== product.id && p.image_url && !p.restricted_gallery_pin);
+      let same = sub ? pool.filter((p) => normSub(p.subcategory) === sub) : [];
+      if (same.length === 0 && cat) same = pool.filter((p) => normSub(p.category) === cat);
+      const score = (p: PublicLightboxItem) => {
+        let n = 0;
+        materialTokens(p).forEach((t) => { if (heroMat.has(t)) n++; });
+        return n;
+      };
+      return same
+        .map((p, i) => ({ p, s: score(p), i }))
+        .sort((a, b) => b.s - a.s || a.i - b.i)
+        .slice(0, 8)
+        .map((x) => x.p);
+    }
     const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url);
     // Vary selection per product using a simple hash offset
     const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -422,7 +453,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       picked.push(candidates[(offset + i) % candidates.length]);
     }
     return picked;
-  }, [product?.id, allPicks]);
+  }, [product?.id, allPicks, categoryDiscovery]);
 
   if (!product) return null;
 
@@ -601,7 +632,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}
+                    {categoryDiscovery ? categoryDiscovery.heading(product) : <>More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}</>}
                   </p>
                   {relatedProducts.length > 4 && (
                     <div className="flex items-center gap-1">

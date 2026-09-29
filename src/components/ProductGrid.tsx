@@ -24,6 +24,37 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
+import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
+
+const toRoomLightboxItem = (item: ProductItem): PublicLightboxItem => {
+  const p = item.pick;
+  const sub = inferSubcategory(p.category, p.subcategory, `${p.title} ${p.subtitle || ""} ${(p.tags || []).join(" ")}`) || p.subcategory || null;
+  return {
+    id: p.id || `${item.designerId}-${p.title}`,
+    title: p.title,
+    subtitle: p.subtitle ?? null,
+    image_url: p.image || "",
+    hover_image_url: p.hoverImage ?? null,
+    brand_name: item.designerName,
+    materials: p.materials ?? null,
+    materials_description: p.materials_description ?? null,
+    dimensions: p.dimensions ?? null,
+    lead_time: p.lead_time ?? null,
+    origin: p.origin ?? null,
+    description: p.description ?? null,
+    category: p.category ?? null,
+    subcategory: sub,
+    designer_slug: designerSlugify(item.designerId || item.designerName),
+    size_variants: p.size_variants ?? null,
+    variant_placeholder: p.variant_placeholder ?? null,
+    base_axis_label: p.base_axis_label ?? null,
+    top_axis_label: p.top_axis_label ?? null,
+    gallery_images: p.gallery_images ?? null,
+    variant_image_map: p.variant_image_map ?? null,
+  };
+};
+
 
 const designerSlugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -306,6 +337,24 @@ const ProductGrid = ({ sectionScope, roomSlug }: { sectionScope?: "designers" | 
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
   const gridRef = useRef<HTMLElement>(null);
+  // Shop by Room: open the category-discovery lightbox variant instead of navigating.
+  const [roomLightbox, setRoomLightbox] = useState<PublicLightboxItem | null>(null);
+  const roomLightboxPool = useMemo(
+    () => (roomSlug ? allProducts.filter((i) => i.pick.image).map(toRoomLightboxItem) : []),
+    [roomSlug, allProducts],
+  );
+  const roomDiscovery = useMemo(() => roomSlug ? {
+    heading: (it: PublicLightboxItem) => {
+      const parent = parentOfSub(it.subcategory) || it.category;
+      if (parent === "Seating") return "In Dialogue: Curated Seating";
+      if (roomSlug === "living-room") return "In Dialogue: Alternative Centerpieces";
+      return "In Dialogue: Alternative Curations";
+    },
+  } : undefined, [roomSlug]);
+  const openItem = (item: ProductItem) => {
+    if (roomSlug) setRoomLightbox(toRoomLightboxItem(item));
+    else navigate(productHref(item.pick));
+  };
 
 /** Singularize a subcategory label: "Daybeds & Benches" → "Daybed & Bench" */
 function singularizeSub(s: string): string {
@@ -563,9 +612,9 @@ function singularizeSub(s: string): string {
               tabIndex={0}
               role="link"
               aria-label={`View ${item.pick.title} product details`}
-              onClick={() => navigate(productHref(item.pick))}
+              onClick={() => openItem(item)}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") navigate(productHref(item.pick));
+                if (event.key === "Enter" || event.key === " ") openItem(item);
               }}
               onMouseEnter={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
               onMouseLeave={() => setHoveredIdx((cur) => (cur === idx ? null : cur))}
@@ -680,6 +729,15 @@ function singularizeSub(s: string): string {
 
     </section>
     <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
+    {roomSlug && (
+      <PublicProductLightbox
+        product={roomLightbox}
+        allPicks={roomLightboxPool}
+        onClose={() => setRoomLightbox(null)}
+        onSelectRelated={(it) => setRoomLightbox(it)}
+        categoryDiscovery={roomDiscovery}
+      />
+    )}
     </>
   );
 };
