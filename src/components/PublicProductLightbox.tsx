@@ -450,8 +450,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         return n + formScore(p);
       };
       return same
-        .map((p, i) => ({ p, s: score(p), i }))
-        .sort((a, b) => b.s - a.s || a.i - b.i)
+        .map((p, i) => ({ p, s: score(p), f: formScore(p), i }))
+        // Tie-break on form score before catalogue order so a verified-organic
+        // piece always beats a neutral one at equal total score.
+        .sort((a, b) => b.s - a.s || b.f - a.f || a.i - b.i)
         .slice(0, 8)
         .map((x) => x.p);
     }
