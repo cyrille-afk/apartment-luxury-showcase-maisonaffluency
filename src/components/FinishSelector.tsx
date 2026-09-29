@@ -840,13 +840,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       <button
         type="button"
         onClick={handlePick}
-        onMouseEnter={hoverPreview}
-        onFocus={hoverPreview}
+        onMouseEnter={isDisabled ? undefined : hoverPreview}
+        onFocus={isDisabled ? undefined : hoverPreview}
+        disabled={isDisabled}
         className={cn(
           "group relative aspect-square w-full overflow-hidden rounded-luxury-micro bg-muted/30 ring-1 ring-border/60 transition",
+          isDisabled && "opacity-35 cursor-not-allowed",
           isSelected
             ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-            : "hover:ring-foreground/40"
+            : !isDisabled && "hover:ring-foreground/40"
         )}
         aria-label={`Select ${f.name}`}
         aria-pressed={isSelected}
