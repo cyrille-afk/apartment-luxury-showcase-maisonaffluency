@@ -276,7 +276,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -922,7 +922,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // from the product page.
   const topTilesRaw = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
   const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
-  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
+  // Shared-palette products (sharedBaseTopSwatches) keep the overlapping
+  // swatches available to the base group too — the variant matrix, not the
+  // grouping, decides which Base × Top pairings are valid.
+  const remainingNonFabric = sharedBaseTopSwatches
+    ? allNonFabricTiles
+    : allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
   // When the base accordion is suppressed (e.g. dual-axis with Size as the
   // Base axis), fold any swatch not matched by topFilter into the Top group
   // so no linked finish is silently dropped from the picker.
