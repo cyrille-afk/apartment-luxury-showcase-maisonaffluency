@@ -937,7 +937,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     ? []
     : woodFilter
     ? (() => {
-        const pool = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
+        const pool = sharedBaseTopSwatches
+          ? allNonFabricTiles
+          : allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
         const matched = pool.filter((f) => woodFilter(f.name));
         const matchedIds = new Set(matched.map((t) => t.id));
         const orphans = pool.filter((f) => !matchedIds.has(f.id));
