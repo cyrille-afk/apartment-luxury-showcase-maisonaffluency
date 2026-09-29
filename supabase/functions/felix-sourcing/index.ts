@@ -86,6 +86,21 @@ function normalizeTerms(terms: string[], vocab: Set<string>) {
 
 type Item = { id: string; title: string; image: string; materials: string | null; category: string | null; subcategory: string | null; designerName: string };
 
+const SUGGESTION_MATERIALS = [
+  { label: "Travertine", term: "travertine", test: /\btravertine\b/ },
+  { label: "Patinated Bronze", term: "bronze", test: /\bpatinated bronze\b/ },
+  { label: "Onyx", term: "onyx", test: /\bonyx\b/ },
+  { label: "Marble", term: "marble", test: /\bmarble\b/ },
+  { label: "Bronze", term: "bronze", test: /\bbronze\b/ },
+  { label: "Lacquer", term: "lacquer", test: /\blacquer(?:ed)?\b/ },
+  { label: "Glass", term: "glass", test: /\bglass\b/ },
+  { label: "Oak", term: "oak", test: /\boak\b/ },
+  { label: "Walnut", term: "walnut", test: /\bwalnut\b/ },
+  { label: "Brass", term: "brass", test: /\bbrass\b/ },
+  { label: "Leather", term: "leather", test: /\bleather\b/ },
+  { label: "Ceramic", term: "ceramic", test: /\bceramic\b/ },
+];
+
 const isLightingItem = (i: Item) => /\blights?\b|\blamps?\b|\bpendants?\b|\bchandeliers?\b|\bsconces?\b|\blighting\b/.test(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""} ${i.materials ?? ""}`.toLowerCase());
 function lightingScore(i: Item) {
   const text = `${i.title} ${i.materials ?? ""}`.toLowerCase();
@@ -198,6 +213,28 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   return out;
 }
 
+function suggestMaterials(catalog: Item[], value: string) {
+  const terms = normalizeTerms(keywords(value), vocabCache);
+  const typeWords = terms.filter((t) => !MATERIALS[t]).map(sing).filter((w) => typeVocab.has(w));
+  if (!terms.some((t) => MATERIALS[t]) || !typeWords.length) return [];
+  const category = typeWords.join(" ");
+  const typed = catalog.filter((item) => {
+    const words = keywords(`${item.title} ${item.category ?? ""} ${item.subcategory ?? ""}`).map(sing);
+    return typeWords.every((word) => words.includes(word));
+  });
+  const usedTerms = new Set(terms.filter((t) => MATERIALS[t]));
+  const suggestions: { label: string; query: string }[] = [];
+  for (const material of SUGGESTION_MATERIALS) {
+    if (usedTerms.has(material.term) || suggestions.some((s) => s.query === `${category} ${material.term}`)) continue;
+    if (!typed.some((item) => material.test.test(`${item.title} ${item.materials ?? ""}`.toLowerCase()))) continue;
+    const query = `${category} ${material.term}`;
+    // Never suggest a material unless the same strict search yields a published piece.
+    if (match(catalog, "prompt", query).length) suggestions.push({ label: material.label, query });
+    if (suggestions.length === 3) break;
+  }
+  return suggestions;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -208,9 +245,11 @@ Deno.serve(async (req) => {
     if (mode === "reference") {
       try { const u = new URL(value); if (!/^https?:$/.test(u.protocol)) throw 0; } catch { return json({ error: "Invalid link" }, 400); }
     }
-    const results = match(await loadCatalog(), mode, value);
+    const catalog = await loadCatalog();
+    const results = match(catalog, mode, value);
+    const suggestions = mode === "prompt" && results.length === 0 ? suggestMaterials(catalog, value) : [];
     if (track) await logUsage(req, mode, value, results.length, path);
-    return json({ results });
+    return json({ results, suggestions });
   } catch (e) {
     console.error("felix-sourcing", e);
     return json({ error: "Sourcing unavailable" }, 500);
