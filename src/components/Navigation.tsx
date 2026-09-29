@@ -155,9 +155,11 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
               onClick={() => { setSelected(true); setOpen(true); }}
-              className="absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
-              <span className="absolute size-8 rounded-full border border-background/80 bg-foreground/20 motion-safe:animate-ping" aria-hidden="true" />
-              <span className="relative size-4 rounded-full border-2 border-background bg-foreground/60 shadow-sm" aria-hidden="true" />
+              className="group absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
+              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
+                <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
