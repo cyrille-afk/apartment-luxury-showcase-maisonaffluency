@@ -668,16 +668,24 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         }}
         onUpholsteryTierChange={(rawTier) => {
           if (!rawTier) return;
-          const candidates = topOptions.filter(
+          const upholsteryOptions = frameOnLabel ? baseOptions : topOptions;
+          const candidates = upholsteryOptions.filter(
             (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
           );
           if (candidates.length === 0) return;
           const sized =
             (selDualSize &&
               candidates.find((t) =>
-                variantsList.some((x: any) => matchesDual(x, null, t, selDualSize)),
+                variantsList.some((x: any) => matchesDual(x, frameOnLabel ? t : null, frameOnLabel ? null : t, selDualSize)),
             )) ||
             candidates[0];
+          if (frameOnLabel) {
+            setSelBase(sized);
+            const nextTop = selTop && variantsList.some((x: any) => matchesDual(x, sized, selTop, selDualSize)) ? selTop : null;
+            if (nextTop !== selTop) setSelTop(nextTop);
+            onMaterialChange?.(sized, { base: sized, top: nextTop, size: selDualSize });
+            return;
+          }
           setSelTop(sized);
           let nextBase = selBase;
           if (selDualSize && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, sized, selDualSize))) {
