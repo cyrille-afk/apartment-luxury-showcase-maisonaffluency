@@ -309,8 +309,11 @@ const VariantSelectorsProvider: React.FC<{
     }
   })();
 
-  const [selBase, setSelBase] = useState<string | null>(stored?.base ?? null);
-  const [selTop, setSelTop] = useState<string | null>(stored?.top ?? null);
+  // A multi-pair product must arrive with both finish groups available to
+  // explore. A previous visit's saved pairing must not restrict its landing.
+  const requiresPairChoice = isDualAxis && (baseOptions.length > 1 || topOptions.length > 1);
+  const [selBase, setSelBase] = useState<string | null>(requiresPairChoice ? null : stored?.base ?? null);
+  const [selTop, setSelTop] = useState<string | null>(requiresPairChoice ? null : stored?.top ?? null);
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
   const [linkedWoodFinishes, setLinkedWoodFinishes] = useState<string[]>([]);
 
@@ -334,12 +337,12 @@ const VariantSelectorsProvider: React.FC<{
     try {
       sessionStorage.setItem(
         persistKey,
-        JSON.stringify({ base: selBase, top: selTop, dualSize: selDualSize, mat: selMat, size: selSize }),
+        JSON.stringify({ base: requiresPairChoice ? null : selBase, top: requiresPairChoice ? null : selTop, dualSize: selDualSize, mat: selMat, size: selSize }),
       );
     } catch {
       /* storage unavailable — selection simply isn't persisted */
     }
-  }, [persistKey, selBase, selTop, selDualSize, selMat, selSize]);
+  }, [persistKey, requiresPairChoice, selBase, selTop, selDualSize, selMat, selSize]);
 
 
   // Arm the gallery→finish link only after a genuine visitor gesture, so NO
@@ -427,11 +430,12 @@ const VariantSelectorsProvider: React.FC<{
     (s == null || (v.label || "").trim() === s);
 
   // Base ↔ Top pairing is bidirectional: a chosen base greys out incompatible
-  // tops, and a chosen top greys out incompatible bases (size also constrains).
-  const disabledBaseIdx = isDualAxis && (selDualSize || selTop)
+  // tops, and a chosen top greys out incompatible bases. No finish is
+  // restricted by size alone before either finish axis has been chosen.
+  const disabledBaseIdx = isDualAxis && selTop
     ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const disabledTopIdx = isDualAxis && (selDualSize || selBase)
+  const disabledTopIdx = isDualAxis && selBase
     ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
