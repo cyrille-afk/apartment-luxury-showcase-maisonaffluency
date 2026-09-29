@@ -579,6 +579,24 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     linkedWoodFinishes,
   });
 
+  // Base ↔ Top pairing is bidirectional on the swatch accordions too: a
+  // chosen top greys out base swatches with no valid matrix row, and a
+  // chosen base greys out incompatible top swatches.
+  const namesForOptions = (opts: string[], filter: ((n: string) => boolean) | null) =>
+    filter ? linkedWoodFinishes.filter((n) => opts.some((o) => makeSwatchAxisFilter([o])(n))) : [];
+  const disabledBaseNames = isDualAxis && selTop && baseSwatchFilter
+    ? namesForOptions(
+        baseOptions.filter((b) => !variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize))),
+        baseSwatchFilter,
+      )
+    : [];
+  const disabledTopNames = isDualAxis && selBase && topSwatchFilter
+    ? namesForOptions(
+        topOptions.filter((t) => !variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize))),
+        topSwatchFilter,
+      )
+    : [];
+
   return (
     <div className="flex flex-col gap-2">
       {section !== "supplemental" && <FinishSelector
