@@ -35,10 +35,7 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
-import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
-import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
-import officeRoomAmbient from "@/assets/home-office-desk.jpg";
+import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
