@@ -140,7 +140,7 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
 // These are editorial menu previews, not live catalogue results.
 const roomPreviewScenes = {
   "living-room": {
-    hotspot: { left: 35, top: 56, label: "Coffee table" },
+    hotspot: { left: 42, top: 87, label: "Coffee table" },
     highlightIndex: 2,
     pieces: [
       { src: woodCoffeeTable, alt: "Wood coffee table alternative" },
@@ -149,7 +149,7 @@ const roomPreviewScenes = {
     ],
   },
   office: {
-    hotspot: { left: 48, top: 43, label: "Desk" },
+    hotspot: { left: 43, top: 72, label: "Desk" },
     highlightIndex: 1,
     pieces: [
       { src: lyricDesk, alt: "Lyric writing desk alternative" },
