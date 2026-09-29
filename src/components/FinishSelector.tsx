@@ -119,6 +119,13 @@ interface FinishSelectorProps {
   /** Per-product override for the upholstery (fabric/leather) accordion label. */
   upholsteryLabel?: string | null;
   /**
+   * Optional second upholstery axis using the same linked sample library.
+   * Used when seat and backrest upholstery are selected independently.
+   */
+  secondaryUpholsteryLabel?: string | null;
+  /** Fires when a sample is selected for the second upholstery axis. */
+  onSecondaryUpholsteryTierChange?: (rawTier: string | null) => void;
+  /**
    * When false, the upholstery (fabric/leather + COM/COL) accordion is hidden
    * and only the wood/finish swatch picker is rendered. Used on non-upholstered
    * products (e.g. wood/rattan benches) that still have linked frame finishes.
@@ -276,7 +283,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -288,6 +295,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
+  const [selectedSecondaryFabricId, setSelectedSecondaryFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
   /**
    * Axes the user has explicitly clicked. The image-driven highlight below
@@ -627,7 +635,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const renderTile = (
     f: Fabric,
-    kindOverride?: "fabric" | "cover" | "base" | "top" | "rug",
+    kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug",
     rugComponent?: string,
     shape?: "tile" | "square",
   ) => {
@@ -636,10 +644,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isCol = f.id === "__col__";
     const isRugGroup = kindOverride === "rug";
     const isFabricGroup = kindOverride ? kindOverride === "fabric" : isFabricCategory(f);
+    const isSecondaryFabricGroup = kindOverride === "fabricSecondary";
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
     const isSelected = isRugGroup
       ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
+      : isSecondaryFabricGroup
+      ? selectedSecondaryFabricId === f.id
       : isFabricGroup
       ? selectedFabricId === f.id
       : isCoverGroup
@@ -647,7 +658,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
-    const setSelected = isFabricGroup
+    const setSelected = isSecondaryFabricGroup
+      ? setSelectedSecondaryFabricId
+      : isFabricGroup
       ? setSelectedFabricId
       : isCoverGroup
       ? setSelectedCoverId
@@ -662,7 +675,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else {
         setSelected(f.id);
         userPickedAxesRef.current[
-          isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
+          isSecondaryFabricGroup ? "fabricSecondary" : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
         ] = true;
       }
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
@@ -671,6 +684,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       if (isRugGroup) {
         // Rug component swatches are visual finish choices, not upholstery
         // fabric upcharges; keep quote pricing on the size + hardware matrix.
+      } else if (isSecondaryFabricGroup) {
+        onSecondaryUpholsteryTierChange?.(f.price_tier_label ?? null);
       } else if (isFabricGroup) {
         onUpholsteryTierChange?.(f.price_tier_label ?? null);
         // Emit pricing details so the product page can add the per-LM upcharge
@@ -997,7 +1012,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
-    tileKind?: "fabric" | "cover" | "base" | "top" | "rug";
+    tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug";
   }) => (
     <div className="border-t border-border/60">
       {isMobile ? (
@@ -1278,6 +1293,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         glyph: "fabric",
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
+      })}
+      {showUpholsterySection && secondaryUpholsteryLabel?.trim() && renderAccordion({
+        isOpen: openTop,
+        onToggle: () => setOpenTop((v) => !v),
+        label: secondaryUpholsteryLabel.trim(),
+        selectedName: selectedSecondaryFabricId === "__com__"
+          ? "COM — Customer's Own Material"
+          : selectedSecondaryFabricId === "__col__"
+          ? "COL — Customer's Own Leather"
+          : fabrics.find((f) => f.id === selectedSecondaryFabricId)?.name ?? null,
+        tiles: visibleFabricTiles,
+        glyph: "fabric",
+        tileKind: "fabricSecondary",
+        emptyNote:
+          "Full fabric library coming soon. Please request samples through your Maison Affluency concierge.",
       })}
       {showWoodSection && visibleWoodTiles.length > 0 && !showMobileBaseTopGrid &&
         renderAccordion({

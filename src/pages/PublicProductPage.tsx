@@ -584,7 +584,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         productTitle={product.title}
         productCategory={product.category}
         upholsteryLabel={
-          resolveFinishSectionLabels({
+          frameOnLabel
+            ? getBasePlaceholder(product)
+            : resolveFinishSectionLabels({
             baseAxisLabel: product.base_axis_label,
             topAxisLabel: product.top_axis_label,
             baseAxisIsDimension: baseAxisIsDim,
@@ -592,6 +594,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             woodLabelOverride: framePickerLabel,
           }).upholsteryLabel
         }
+        secondaryUpholsteryLabel={frameOnLabel ? getTopPlaceholder(product) : null}
         woodLabel={
           resolveFinishSectionLabels({
             baseAxisLabel: product.base_axis_label,
@@ -706,6 +709,23 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           }
           onMaterialChange?.(sized, { base: nextBase, top: sized, size: selDualSize });
         }}
+        onSecondaryUpholsteryTierChange={(rawTier) => {
+          if (!frameOnLabel || !rawTier) return;
+          const candidates = topOptions.filter(
+            (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
+          );
+          if (candidates.length === 0) return;
+          const selected =
+            (selDualSize && candidates.find((t) =>
+              variantsList.some((x: any) => matchesDual(x, selBase, t, selDualSize)),
+            )) || candidates[0];
+          setSelTop(selected);
+          const nextBase = selBase && variantsList.some((x: any) => matchesDual(x, selBase, selected, selDualSize))
+            ? selBase
+            : null;
+          if (nextBase !== selBase) setSelBase(nextBase);
+          onMaterialChange?.(selected, { base: nextBase, top: selected, size: selDualSize });
+        }}
       />}
 
       {section !== "primary" && <>{isDualAxis ? (
@@ -745,7 +765,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
               }
             />
           )}
-           {(frameOnLabel || (!suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim))) && (
+           {!frameOnLabel && !suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
             <ExpandableSpec
               icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
               text={withImperialPerLine(topOptions.join("\n"))}
