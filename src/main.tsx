@@ -12,6 +12,21 @@ import { ensureStorageHeadroom, installStorageQuotaGuard } from "./lib/storageRe
 const isTradeRoute = window.location.pathname.includes("/trade");
 document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
 
+// Transient backend failures (edge function 5xx/timeouts) from fire-and-forget
+// calls must never blank the page — log and swallow them.
+window.addEventListener("unhandledrejection", (e) => {
+  const r: any = e.reason;
+  const name = r?.name ?? "";
+  const msg = String(r?.message ?? r ?? "");
+  if (
+    /Functions(Http|Fetch|Relay)Error/.test(name) ||
+    /Edge function returned 5\d\d|IDLE_TIMEOUT|Failed to send a request to the Edge Function/i.test(msg)
+  ) {
+    console.warn("[backend] transient edge function failure ignored:", msg);
+    e.preventDefault();
+  }
+});
+
 // Keep room for the login session: a full browser store makes sign-in fail.
 installStorageQuotaGuard();
 ensureStorageHeadroom();
