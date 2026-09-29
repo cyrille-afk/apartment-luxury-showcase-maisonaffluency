@@ -426,11 +426,13 @@ const VariantSelectorsProvider: React.FC<{
     (t == null || (v.top || "").trim() === t) &&
     (s == null || (v.label || "").trim() === s);
 
-  const disabledBaseIdx = isDualAxis && selDualSize
-    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, null, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  // Base ↔ Top pairing is bidirectional: a chosen base greys out incompatible
+  // tops, and a chosen top greys out incompatible bases (size also constrains).
+  const disabledBaseIdx = isDualAxis && (selDualSize || selTop)
+    ? baseOptions.map((b, i) => (variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const disabledTopIdx = isDualAxis && selDualSize
-    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, null, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
+  const disabledTopIdx = isDualAxis && (selDualSize || selBase)
+    ? topOptions.map((t, i) => (variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
