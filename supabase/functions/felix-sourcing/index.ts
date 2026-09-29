@@ -95,8 +95,9 @@ function ashScore(i: Item) {
   return 2 + (/\bdining chairs?\b/.test(n) ? 1 : /\bdining chairs?\b/.test(t) ? 0.9 : /\bchairs?\b/.test(n) ? 0.7 : /\bchairs?\b/.test(t) ? 0.5 : 0);
 }
 
-let cache: { at: number; items: Item[]; vocab: Set<string> } | null = null;
+let cache: { at: number; items: Item[]; vocab: Set<string>; types?: Set<string> } | null = null;
 let vocabCache = new Set<string>();
+let typeVocab = new Set<string>();
 async function loadCatalog(): Promise<Item[]> {
   if (cache && Date.now() - cache.at < 5 * 60_000) { vocabCache = cache.vocab; return cache.items; }
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
@@ -115,6 +116,7 @@ async function loadCatalog(): Promise<Item[]> {
   for (const i of items) for (const w of keywords(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""} ${i.materials ?? ""}`)) vocab.add(sing(w));
   cache = { at: Date.now(), items, vocab };
   vocabCache = vocab;
+  typeVocab = new Set(items.flatMap((i) => keywords(`${i.category ?? ""} ${i.subcategory ?? ""}`).map(sing)));
   return items;
 }
 
@@ -127,7 +129,8 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   const pinned = /kavehome\.|pinterest\.com\/luxuryhomefurniture/i.test(value) ? PINNED_KAVEHOME : [];
   // Generic material + type gate: "glass side table" → material must be glass AND type must be side table.
   const matKeys = strictAsh ? [] : terms.filter((t) => MATERIALS[t]);
-  const typeWords = terms.filter((t) => !MATERIALS[t]).map(sing);
+  // Only real product-type words gate results; descriptors like "patinated" rank but never exclude.
+  const typeWords = terms.filter((t) => !MATERIALS[t]).map(sing).filter((w) => typeVocab.has(w));
   const strictMat = mode === "prompt" && matKeys.length > 0;
   const matOk = (i: Item) => matKeys.every((k) => MATERIALS[k].test(`${i.title} ${i.materials ?? ""}`.toLowerCase()));
   const typeOk = (i: Item) => { const ty = keywords(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""}`).map(sing); return typeWords.every((w) => ty.includes(w)); };
@@ -167,7 +170,7 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
       ranked.push(...fill);
     }
   }
-  if (!strictAsh && !strictMat && ranked.some((r) => r.score >= 10)) {
+  if (!strictAsh && !strictMat && ranked.some((r) => r.score >= 5)) {
     // A category-level match exists: drop description-only hits so stylistic words can't pollute.
     const keep = ranked.filter((r) => r.score >= 5);
     ranked.length = 0; ranked.push(...keep);
