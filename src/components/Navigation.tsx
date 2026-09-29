@@ -233,6 +233,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
     tradeMenuCloseTimer.current = window.setTimeout(() => setTradeMenuOpen(false), 200);
   };
+  useEffect(() => () => {
+    if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
+  }, []);
   // Keeps the desktop TRADE link's left edge flush with JOURNAL's left edge
   // in the nav tier below (offset shifts the utility cluster horizontally).
   const utilityClusterRef = useRef<HTMLDivElement>(null);
