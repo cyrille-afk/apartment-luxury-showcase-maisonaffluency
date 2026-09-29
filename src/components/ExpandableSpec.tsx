@@ -59,6 +59,12 @@ interface ExpandableSpecProps {
    * secondary menu). Only applies when there are multiple options.
    */
   swatchMode?: boolean;
+  /**
+   * Force the dropdown picker even when there is only one option (e.g. a
+   * frame finish awaiting its second choice). The option stays explicitly
+   * selectable instead of collapsing to a plain text row.
+   */
+  forceDropdown?: boolean;
 }
 
 
