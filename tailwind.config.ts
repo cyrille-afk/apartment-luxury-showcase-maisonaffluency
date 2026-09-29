@@ -226,6 +226,10 @@ export default {
           "0%": { transform: "translateX(-120%)" },
           "100%": { transform: "translateX(120%)" },
         },
+        "hotspot-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--background) / 0.45)" },
+          "70%": { boxShadow: "0 0 0 8px hsl(var(--background) / 0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -241,6 +245,7 @@ export default {
         "cta-shimmer": "cta-shimmer 1.2s ease-in-out both",
         "curator-sweep": "curator-sweep 2.2s ease-in-out infinite",
         "scroll-cue": "scroll-cue 3.2s cubic-bezier(0.4,0,0.2,1) infinite",
+        "hotspot-pulse": "hotspot-pulse 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
       },
     },
   },
