@@ -866,9 +866,16 @@ const VariantDimensionsPanel: React.FC = () => {
       ) : isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
           icon={specIcon(dualLabelsAreDimensions ? "📐" : "✦")}
-          text={dualLabelsAreDimensions ? withImperialPerLine(dualSizeOptions.join("\n")) : dualSizeOptions.join("\n")}
+          text={
+            dualLabelsAreDimensions
+              ? withImperialPerLine(dualSizeOptions.join("\n"))
+              : dualSizeOptions.length === 1
+              ? `${dualSizeOptions[0]} Frame`
+              : dualSizeOptions.join("\n")
+          }
           secondaryText={null}
           emphasized
+          forceDropdown={!dualLabelsAreDimensions}
           placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || "Select the Wood Finish")}
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {

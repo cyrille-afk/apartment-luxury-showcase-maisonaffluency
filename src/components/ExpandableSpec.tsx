@@ -59,6 +59,12 @@ interface ExpandableSpecProps {
    * secondary menu). Only applies when there are multiple options.
    */
   swatchMode?: boolean;
+  /**
+   * Force the dropdown picker even when there is only one option (e.g. a
+   * frame finish awaiting its second choice). The option stays explicitly
+   * selectable instead of collapsing to a plain text row.
+   */
+  forceDropdown?: boolean;
 }
 
 
@@ -83,6 +89,7 @@ export default function ExpandableSpec({
   helperText,
   singleValueLabel,
   swatchMode = false,
+  forceDropdown = false,
 }: ExpandableSpecProps) {
 
   const disabledSet = new Set(disabledIndices ?? []);
@@ -146,8 +153,8 @@ export default function ExpandableSpec({
     "flex items-center w-full py-2.5 md:py-4 border-b border-border/60";
 
 
-  // Single value → plain row
-  if (lines.length === 1) {
+  // Single value → plain row (unless forceDropdown keeps it an explicit picker)
+  if (lines.length === 1 && !forceDropdown) {
     const label = singleValueLabel?.trim();
     const display = label ? `${label}: ${lines[0]}` : lines[0];
     return (
