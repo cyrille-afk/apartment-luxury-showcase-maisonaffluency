@@ -999,7 +999,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       }}
                       className="group flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                     >
-                      View full product page
+                      Explore piece
                       <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
                     </button>
                   ) : (
