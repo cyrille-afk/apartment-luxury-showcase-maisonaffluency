@@ -536,11 +536,15 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
 
   const isFinishAxis = isFinishAxisLabel;
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
-  const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, linkedWoodFinishes);
+  // FinishSelector gives overlapping swatches to the Top group first, so only
+  // swatches left over for the Base group can stand in for the Base dropdown.
+  const topSwatchFilter = isDualAxis && !baseAxisIsDim && topOptions.length >= 1 ? makeSwatchAxisFilter(topOptions) : null;
+  const baseSwatchPool = topSwatchFilter ? linkedWoodFinishes.filter((n) => !topSwatchFilter(n)) : linkedWoodFinishes;
+  const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, baseSwatchPool);
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (
     allBasesHaveSwatches
-    || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw))
+    || (baseSwatchPool.length > 0 && isFinishAxis(baseAxisLabelRaw))
     || isUpholsteryAxisLabel(baseAxisLabelRaw)
   );
   const suppressTopAsFinish = !topAxisIsDim && (
