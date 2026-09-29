@@ -21,6 +21,7 @@ import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 
@@ -374,7 +375,7 @@ function singularizeSub(s: string): string {
     };
   }, []);
 
-  const filtered = useMemo(() => {
+  const rawFiltered = useMemo(() => {
     if (!category && !subcategory && !textQuery && !roomSlug) return [];
 
     // Scope results based on which section triggered the filter
@@ -412,6 +413,12 @@ function singularizeSub(s: string): string {
     });
   }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug]);
 
+  const itemTones = useImageTones(rawFiltered.map((i) => i.pick.image));
+  const filtered = useMemo(
+    () => curateGrid(rawFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rawFiltered, itemTones, Object.keys(itemTones).length],
+  );
   const { data: publicRrpMap = {} } = usePublicRrpMap(filtered.map((item) => item.pick.id));
   const isActive = Boolean(category || subcategory || textQuery || roomSlug);
 
