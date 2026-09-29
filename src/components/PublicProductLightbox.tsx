@@ -427,6 +427,23 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const relatedProducts = useMemo(() => {
     if (!product || product.restricted_gallery_pin) return [];
     if (categoryDiscovery) {
+      // Manual curation override: the Living Room Orsay MDS hero pairs with a
+      // fixed sequence of curved/organic coffee tables — bypass the algorithm.
+      const ORSAY_OVERRIDE: string[] = [
+        "3ce33be9-0069-494d-9f32-3798aaae7a8b", // Lady R low table — Luca Erba
+        "2b14f835-4e5a-4a94-b72b-f01cdbde622d", // IBO low table — Christophe Delcourt
+        "2725daad-9691-4490-8559-7feabc37407c", // Retrofuture Coffee Table
+        "4f8ff691-0e75-4fbc-b132-273169bf3a35", // Coral Coffee Table
+        "e7dc377b-1ab5-4280-ae46-ebac3da24088", // Quark Bronze Coffee Table
+        "a8e2a22c-4edf-412b-8a91-435a69d7a577", // Clash Coffee Table — Adam Court
+        "e0a1fb7d-33fe-4539-a075-24d4c9713e4a", // Borghese Coffee Table — Noé Duchaufour-Lawrance
+        "b843a391-8803-4a7d-b326-ccaf30b16214", // Anemos Coffee Table
+      ];
+      if (product.id === "dce5f7d0-fb49-41f7-8bc5-176ff32fceae") {
+        const byId = new Map(allPicks.map((p) => [p.id, p]));
+        const curated = ORSAY_OVERRIDE.map((id) => byId.get(id)).filter((p): p is PublicLightboxItem => !!p && !!p.image_url && !p.restricted_gallery_pin);
+        if (curated.length === ORSAY_OVERRIDE.length) return curated;
+      }
       const sub = normSub(product.subcategory);
       const cat = normSub(product.category);
       const heroMat = materialTokens(product);
