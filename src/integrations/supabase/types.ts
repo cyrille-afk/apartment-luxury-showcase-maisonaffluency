@@ -2962,6 +2962,7 @@ export type Database = {
           tags: string[] | null
           title: string
           top_axis_label: string | null
+          trade_only: boolean
           trade_price_cents: number | null
           variant_image_map: Json | null
           variant_placeholder: string | null
@@ -3037,6 +3038,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           top_axis_label?: string | null
+          trade_only?: boolean
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
@@ -3112,6 +3114,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           top_axis_label?: string | null
+          trade_only?: boolean
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
