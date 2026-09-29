@@ -1193,8 +1193,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               >
                                 {subcategory}
                               </Button>
-                            ))
-                          )}
+                            ))}
                             </div>}
                           </div>
                         </div>
