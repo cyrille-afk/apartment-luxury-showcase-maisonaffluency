@@ -89,6 +89,7 @@ export default function ExpandableSpec({
   helperText,
   singleValueLabel,
   swatchMode = false,
+  forceDropdown = false,
 }: ExpandableSpecProps) {
 
   const disabledSet = new Set(disabledIndices ?? []);
