@@ -95,7 +95,20 @@ interface Props {
   inline?: boolean;
   /** Gallery-only contextual presentation without a viewport backdrop. */
   contextualPanel?: boolean;
+  /** Opt-in category-discovery variant (Shop by Room). When set, the bottom
+   *  row lists pieces from the SAME subcategory (ranked by material affinity)
+   *  under this heading instead of "More from [Designer]". Omit to keep the
+   *  original designer-based behaviour used by Gallery / Designers. */
+  categoryDiscovery?: { heading: (item: PublicLightboxItem) => string };
 }
+
+const normSub = (s?: string | null) => (s || "").trim().toLowerCase().replace(/s\b/g, "");
+const materialTokens = (p: PublicLightboxItem) =>
+  new Set(
+    `${p.materials || ""} ${p.materials_description || ""}`
+      .toLowerCase()
+      .match(/[a-z]{4,}/g) || [],
+  );
 
 /* ------------------------------------------------------------------ */
 /*  Tiny localStorage-backed favorites (no auth needed)                */
