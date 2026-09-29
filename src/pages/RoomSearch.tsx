@@ -88,6 +88,7 @@ export default function RoomSearch() {
   const navigate = useNavigate();
   const roomParam = searchParams.get("room");
   const room = resolveRoomSlug(roomParam);
+  const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
 
   // Original head values captured at mount so unmount restores the
@@ -189,7 +190,7 @@ export default function RoomSearch() {
       <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
           <>
-            <InteractiveGalleryLookbook discoveryRoom={room} />
+            {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
             <ProductGrid roomSlug={room} compactTop />
           </>
         ) : (
