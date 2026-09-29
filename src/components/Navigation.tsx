@@ -221,6 +221,18 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
   const [tradeMenuOpen, setTradeMenuOpen] = useState(false);
+  // Delayed close so a stray cursor movement doesn't instantly kill the TRADE dropdown
+  const tradeMenuCloseTimer = useRef<number | null>(null);
+  const keepTradeMenuOpen = () => {
+    if (tradeMenuCloseTimer.current !== null) {
+      window.clearTimeout(tradeMenuCloseTimer.current);
+      tradeMenuCloseTimer.current = null;
+    }
+  };
+  const scheduleTradeMenuClose = () => {
+    if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
+    tradeMenuCloseTimer.current = window.setTimeout(() => setTradeMenuOpen(false), 200);
+  };
   // Keeps the desktop TRADE link's left edge flush with JOURNAL's left edge
   // in the nav tier below (offset shifts the utility cluster horizontally).
   const utilityClusterRef = useRef<HTMLDivElement>(null);
@@ -931,10 +943,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </button>
               ) : (
-                <div className="group/trade">
+                <div
+                  className="relative flex items-center"
+                  onMouseEnter={keepTradeMenuOpen}
+                  onMouseLeave={scheduleTradeMenuClose}
+                >
                   <button
                     type="button"
                     aria-haspopup="menu"
+                    aria-expanded={tradeMenuOpen}
                     data-utility-trade
                     onClick={() => setTradeMenuOpen((o) => !o)}
                     className="font-body text-[12px] uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap py-2"
@@ -944,10 +961,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <div
                     role="menu"
                     className={cn(
-                      "absolute right-0 top-full z-50 pt-[61px] transition-opacity duration-200",
-                      tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover/trade:opacity-100 group-hover/trade:visible"
+                      // Invisible hover bridge above the card keeps the menu open while the
+                      // cursor travels from the TRADE link down into the panel.
+                      "absolute right-0 top-full z-[60] pt-[61px] transition-opacity duration-200",
+                      "before:absolute before:-top-4 before:left-0 before:h-4 before:w-full before:content-['']",
+                      tradeMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
                     )}
-                    onMouseLeave={() => setTradeMenuOpen(false)}
                   >
                     <div className="w-[300px] border border-border bg-background py-6 px-8 shadow-lg flex flex-col gap-4">
                       <button role="menuitem" onClick={() => { setTradeMenuOpen(false); setMegaMenuOpen(false); handleNavClick("/trade/login"); }} className="text-left font-body text-sm text-foreground hover:text-muted-foreground transition-colors">
