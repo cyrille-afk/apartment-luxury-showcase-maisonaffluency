@@ -153,8 +153,8 @@ export default function ExpandableSpec({
     "flex items-center w-full py-2.5 md:py-4 border-b border-border/60";
 
 
-  // Single value → plain row
-  if (lines.length === 1) {
+  // Single value → plain row (unless forceDropdown keeps it an explicit picker)
+  if (lines.length === 1 && !forceDropdown) {
     const label = singleValueLabel?.trim();
     const display = label ? `${label}: ${lines[0]}` : lines[0];
     return (
