@@ -2063,17 +2063,26 @@ const TradeDesignersAdmin = () => {
     return () => window.clearTimeout(t);
   }, [designers.length, expandedId]);
 
-  // Fetch public picks count per designer for debug counter
+  // Fetch public vs total picks count per designer for debug counter
   const { data: picksCountMap = {} } = useQuery({
     queryKey: ["admin-public-picks-counts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("designer_curator_picks_public")
-        .select("designer_id");
-      if (error) throw error;
-      const counts: Record<string, number> = {};
-      (data || []).forEach((row) => {
-        if (row.designer_id) counts[row.designer_id] = (counts[row.designer_id] || 0) + 1;
+      const [pubRes, allRes] = await Promise.all([
+        supabase.from("designer_curator_picks_public").select("designer_id"),
+        supabase.from("designer_curator_picks").select("designer_id"),
+      ]);
+      if (pubRes.error) throw pubRes.error;
+      if (allRes.error) throw allRes.error;
+      const counts: Record<string, { public: number; total: number }> = {};
+      (allRes.data || []).forEach((row) => {
+        if (!row.designer_id) return;
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id].total += 1;
+      });
+      (pubRes.data || []).forEach((row) => {
+        if (!row.designer_id) return;
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id].public += 1;
       });
       return counts;
     },
@@ -2515,9 +2524,11 @@ const TradeDesignersAdmin = () => {
                         <Badge variant={d.is_published ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
                           {d.is_published ? "Published" : "Draft"}
                         </Badge>
-                        {(picksCountMap[d.id] ?? 0) > 0 && (
+                        {(picksCountMap[d.id]?.total ?? 0) > 0 && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
-                            {picksCountMap[d.id]} picks
+                            {picksCountMap[d.id].public} public
+                            {picksCountMap[d.id].total - picksCountMap[d.id].public > 0 &&
+                              ` · ${picksCountMap[d.id].total - picksCountMap[d.id].public} trade-only`}
                           </Badge>
                         )}
                         {dirty && (
