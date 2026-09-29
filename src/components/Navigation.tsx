@@ -116,6 +116,14 @@ const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
 
+const officeNavigation: RoomNavCategory[] = [
+  { label: "Desks", category: "Tables", subcategories: ["Desks"] },
+  { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
+  { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
+  { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
+  { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
+];
+
 const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
   dining: { src: intimateDiningAmbient, alt: "Intimate dining setting with collectible furniture" },
@@ -144,7 +152,7 @@ const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => {
             <Button type="button" variant="ghost" size="icon" aria-label="Shop this look; highlight curated alternatives" aria-expanded={open}
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
-              onClick={() => { setSelected((current) => current === null ? 0 : (current + 1) % roomPreviewPieces.length); setOpen(true); }}
+              onClick={(event) => { event.preventDefault(); setSelected((current) => current === null ? 0 : (current + 1) % roomPreviewPieces.length); setOpen(true); }}
               className="absolute left-[55%] top-[47%] z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
               <span className="absolute size-8 rounded-full border border-background/80 bg-foreground/20 motion-safe:animate-ping" aria-hidden="true" />
               <span className="relative size-4 rounded-full border-2 border-background bg-foreground/60 shadow-sm" aria-hidden="true" />
@@ -182,6 +190,7 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
+  const categories = room === "living" && selectedRoom === 1 ? officeNavigation : roomNavigation[room];
   return (
   <div className="flex min-h-[470px] items-stretch overflow-hidden">
     <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
@@ -189,13 +198,13 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
         <div className="mt-3 flex flex-col gap-1">
           {roomFlyouts[room]?.map((link, index) => (
-            <Button key={link.slug} type="button" variant="ghost" onMouseEnter={() => { setSelectedRoom(index); onSelectCategory(null); }} onFocus={() => { setSelectedRoom(index); onSelectCategory(null); }} onClick={() => onRoomNavigate(link.slug)} aria-current={selectedRoom === index ? "true" : undefined} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 font-body text-[13px] hover:bg-transparent hover:text-foreground", selectedRoom === index ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>
+            <Button key={link.slug} type="button" variant="ghost" onMouseEnter={() => { setSelectedRoom(index); onSelectCategory(null); }} onFocus={() => { setSelectedRoom(index); onSelectCategory(null); }} onClick={() => onRoomNavigate(link.slug)} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 font-body text-[13px] hover:bg-transparent hover:text-foreground", selectedRoom === index ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>
               <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
             </Button>
           ))}
         </div>
         <div className="mt-5 border-t border-border/60 pt-3">
-        {roomNavigation[room].map((item, index) => (
+        {categories.map((item, index) => (
           <div key={item.label} onMouseEnter={() => onSelectCategory(index)}>
             <Button
               type="button" variant="ghost"
