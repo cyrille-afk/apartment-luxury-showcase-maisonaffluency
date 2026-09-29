@@ -1330,6 +1330,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                   ? "Shop By Room"
                                   : `${roomNavigation[room][activeRoomCategory]?.label} Collections`}
                               </div>
+                              {activeRoomCategory === -1 && (
+                                <p className="mb-4 font-body text-xs font-light tracking-wide text-muted-foreground">
+                                  Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
+                                </p>
+                              )}
                               {activeRoomCategory === -1
                                 ? roomFlyouts[room]?.map((roomLink) => (
                                     <Button
