@@ -175,6 +175,9 @@ interface FinishSelectorProps {
    */
   disabledBaseNames?: string[];
   disabledTopNames?: string[];
+  /** Selected opposite-axis finishes used to explain unavailable pairings. */
+  selectedBasePairing?: string | null;
+  selectedTopPairing?: string | null;
   /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
@@ -290,7 +293,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -661,6 +664,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : isBaseGroup
       ? !!disabledBaseNames?.some((n) => normName(n) === normName(f.name))
       : false;
+    const pairingExplanation = isDisabled
+      ? `Not available with the selected ${isTopGroup ? "base" : "top"} finish${(isTopGroup ? selectedBasePairing : selectedTopPairing) ? ` (${isTopGroup ? selectedBasePairing : selectedTopPairing})` : ""}. Choose a different ${isTopGroup ? "base" : "top"} finish to use this option.`
+      : null;
     const isSelected = isRugGroup
       ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
       : isSecondaryFabricGroup
@@ -810,15 +816,17 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           key={`c-${f.id}`}
           type="button"
           onClick={handlePick}
-          onMouseEnter={hoverPreview}
-          onFocus={hoverPreview}
-          aria-label={`Select ${f.name}`}
+          onMouseEnter={isDisabled ? undefined : hoverPreview}
+          onFocus={isDisabled ? undefined : hoverPreview}
+          aria-label={pairingExplanation ? `${f.name}. ${pairingExplanation}` : `Select ${f.name}`}
+          aria-disabled={isDisabled}
           aria-pressed={isSelected}
-          title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
+          title={pairingExplanation ?? (f.supplier ? `${f.supplier} — ${f.name}` : f.name)}
           className={cn(
             "relative flex shrink-0 appearance-none items-center justify-center overflow-hidden border-0 bg-transparent p-0 touch-manipulation",
             isMobile || isPwa ? "h-[54px] w-[54px]" : "h-[46px] w-[46px]",
-            isSelected ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60"
+            isSelected ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60",
+            isDisabled && "opacity-35 cursor-not-allowed"
           )}
         >
           <span className="block h-full w-full overflow-hidden bg-muted/40">
@@ -872,7 +880,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             {isCom ? "COM" : isCol ? "COL" : "—"}
           </div>
         )}
-        {f.image_url && !isMobile && !isPwa && (
+        {f.image_url && !isMobile && !isPwa && !isDisabled && (
           <span
             onClick={(e) => {
               e.stopPropagation();
@@ -893,7 +901,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     );
     return (
       <div key={f.id} className="flex flex-col gap-2">
-        {noImages ? (
+        {pairingExplanation ? (
+          <Tooltip delayDuration={150}>
+            <TooltipTrigger asChild>
+              <div tabIndex={0} aria-label={`${f.name}. ${pairingExplanation}`} className="outline-none focus-visible:ring-1 focus-visible:ring-foreground">
+                {tileButton}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-56 text-xs leading-snug">
+              {pairingExplanation}
+            </TooltipContent>
+          </Tooltip>
+        ) : noImages ? (
           <Tooltip delayDuration={150}>
             <TooltipTrigger asChild>
               {tileButton}
