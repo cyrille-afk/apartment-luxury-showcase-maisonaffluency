@@ -154,6 +154,13 @@ interface FinishSelectorProps {
    * `topFilter` render in their own accordion below the base group.
    */
   topFilter?: (swatchName: string) => boolean;
+  /**
+   * When Base and Top legitimately share the same finish palette (e.g. a
+   * table whose base and top both come in the same woods), render the shared
+   * swatches in BOTH groups instead of giving Top exclusive ownership.
+   * Combination validity stays enforced by the size_variants matrix upstream.
+   */
+  sharedBaseTopSwatches?: boolean;
   /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
@@ -269,7 +276,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -915,7 +922,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // from the product page.
   const topTilesRaw = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
   const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
-  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
+  // Shared-palette products (sharedBaseTopSwatches) keep the overlapping
+  // swatches available to the base group too — the variant matrix, not the
+  // grouping, decides which Base × Top pairings are valid.
+  const remainingNonFabric = sharedBaseTopSwatches
+    ? allNonFabricTiles
+    : allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
   // When the base accordion is suppressed (e.g. dual-axis with Size as the
   // Base axis), fold any swatch not matched by topFilter into the Top group
   // so no linked finish is silently dropped from the picker.
@@ -925,10 +937,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     ? []
     : woodFilter
     ? (() => {
-        const pool = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
+        // Shared palettes: the base group may reuse swatches also shown in
+        // the top group, but top-only finishes (e.g. stone tops) must not
+        // leak into the base group as orphans.
+        const pool = sharedBaseTopSwatches
+          ? allNonFabricTiles
+          : allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
         const matched = pool.filter((f) => woodFilter(f.name));
         const matchedIds = new Set(matched.map((t) => t.id));
-        const orphans = pool.filter((f) => !matchedIds.has(f.id));
+        const orphanPool = sharedBaseTopSwatches
+          ? allNonFabricTiles.filter((f) => !topTileIds.has(f.id))
+          : pool;
+        const orphans = orphanPool.filter((f) => !matchedIds.has(f.id));
         return [...matched, ...orphans];
       })()
     : remainingNonFabric;
