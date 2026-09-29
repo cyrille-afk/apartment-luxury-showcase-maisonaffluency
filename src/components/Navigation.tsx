@@ -1177,6 +1177,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                   Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
                                 </p>
                               )}
+                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                                Living Rooms
+                              </Button>
+                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("office")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                                Office
+                              </Button>
                             roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
                               <Button
                                 key={subcategory}
