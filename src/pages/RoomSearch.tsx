@@ -1,10 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
+import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Room hero assets reused from the header mega-menu so the shared link
 // preview shows the same vignette the navigation pathway advertises.
@@ -80,6 +84,82 @@ function upsertMeta(attr: "name" | "property", key: string, content: string): HT
   }
   el.setAttribute("content", content);
   return el;
+}
+
+/**
+ * Dedicated Room Experience page: full-width inspiration scene with the
+ * interactive "+" hotspot, a CURATED ALTERNATIVES row of real catalog pieces
+ * directly beneath, and the trade messaging block as the bottom anchor.
+ * No product grid is rendered on this landing.
+ */
+function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string }) {
+  const scene = getRoomPreviewScene(room);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(false);
+
+  return (
+    <div className="flex flex-col">
+      {/* 1. Full-width inspiration scene with interactive hotspot */}
+      <section className="relative w-full">
+        <div className="relative h-[52vh] min-h-[340px] w-full overflow-hidden md:h-[62vh]">
+          <img src={scene.previewImage.src} alt={scene.previewImage.alt} className="h-full w-full object-cover" />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`}
+                aria-expanded={open}
+                onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
+                onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
+                onClick={() => { setSelected(true); setOpen(true); }}
+                style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
+                className="group absolute z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="relative block size-6 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
+                  <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                  <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">
+              Shop this Look
+            </PopoverContent>
+          </Popover>
+        </div>
+      </section>
+
+      {/* 2. Curated alternatives row, directly beneath the scene */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-12">
+        <div className="mb-1 text-center font-body text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Curated Alternatives</div>
+        <h2 className="mb-8 text-center font-serif text-lg tracking-wide text-foreground">Shop the {scene.hotspot.label} in this {roomLabel}</h2>
+        <div className={cn("grid grid-cols-1 gap-6 transition-all duration-300 sm:grid-cols-3", selected && "ring-1 ring-primary ring-offset-4 ring-offset-background")}>
+          {scene.pieces.map((piece, index) => (
+            <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-90")}>
+              <div className="aspect-[4/3] overflow-hidden">
+                <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+              </div>
+              {piece.name && (
+                <div className="bg-background px-3 py-2.5">
+                  <div className="truncate font-body text-xs font-semibold leading-tight text-foreground">{piece.name}</div>
+                  <div className="truncate font-body text-[11px] leading-tight text-muted-foreground">{piece.designer}</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. Trade messaging block — centered footer anchor */}
+      <section className="mx-auto w-full max-w-6xl px-6 pb-20 pt-4 text-center">
+        <h3 className="font-serif text-xl font-bold tracking-wide text-foreground md:text-2xl">Elevate Your Projects with Unrivaled Curation</h3>
+        <p className="mx-auto mt-3 max-w-2xl font-body text-sm leading-relaxed tracking-wide text-muted-foreground">
+          Leverage our elite global gallery network and masterfully curated individual pieces to push the boundaries of your spaces. Whether you are expanding a junior portfolio or executing a senior-level vision, Maison Affluency equips you with the distinct knowledge and high-end sourcing required to elevate your design game—and deliver unforgettable environments for your clients.
+        </p>
+      </section>
+    </div>
+  );
 }
 
 /** Shop By Room: the original hotspot gallery canvas precedes the filtered catalogue. */
@@ -189,10 +269,14 @@ export default function RoomSearch() {
       <Navigation alwaysVisible />
       <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
-          <>
-            {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
-          </>
+          gridLanding && !searchParams.get("category") ? (
+            <RoomExperience room={room} roomLabel={roomLabel} />
+          ) : (
+            <>
+              {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
+              <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
+            </>
+          )
         ) : (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>

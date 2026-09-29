@@ -35,10 +35,7 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
-import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
-import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
-import officeRoomAmbient from "@/assets/home-office-desk.jpg";
+import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -134,39 +131,13 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
 };
 
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
-// These are editorial menu previews, not live catalogue results.
-const roomPreviewScenes = {
-  "living-room": {
-    hotspot: { left: 42, top: 87, label: "Coffee table" },
-    highlightIndex: 2,
-    pieces: [
-      { src: woodCoffeeTable, alt: "Wood coffee table alternative" },
-      { src: sculpturalCoffeeTable, alt: "Sculptural coffee table alternative" },
-      { src: marbleCoffeeTable, alt: "Marble coffee table alternative" },
-    ],
-  },
-  office: {
-    hotspot: { left: 43, top: 72, label: "Desk" },
-    highlightIndex: 1,
-    pieces: [
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780550235/Lyrique_Black-1_ozsq0k.jpg", alt: "Lyric Desk Oak by Atelier BdM", name: "Lyric Desk Oak", designer: "Atelier BdM" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428196/JMF_1932_Apartment_Desk__02_Portrait_BD_1_jhvb5g.jpg", alt: "Apartment Desk c. 1925 by Jean-Michel Frank", name: "Apartment Desk c. 1925", designer: "Jean-Michel Frank" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775507497/Screen_Shot_2026-04-07_at_4.29.53_AM_spljjl.png", alt: "Officium Desk by Pierre Augustin Rose", name: "Officium Desk", designer: "Pierre Augustin Rose" },
-    ],
-  },
-} as const;
-
-const defaultPreviewScene = {
-  hotspot: { left: 55, top: 47, label: "Featured piece" },
-  highlightIndex: 0,
-  pieces: roomPreviewScenes["living-room"].pieces,
-};
-
+// Scene data is shared with the Room Experience landing page via
+// src/lib/roomPreviewScenes.ts so menu and page never drift apart.
 const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
-  const previewImage = selectedRoomSlug === "office" ? { src: officeRoomAmbient, alt: "Curated home office with collectible furnishings" } : roomAmbientImages[room];
-  const scene = selectedRoomSlug === "office" ? roomPreviewScenes.office : selectedRoomSlug === "living-room" ? roomPreviewScenes["living-room"] : defaultPreviewScene;
+  const scene = getRoomPreviewScene(selectedRoomSlug);
+  const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
