@@ -118,6 +118,20 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
   }).sort((a, b) => b.score - a.score || a.index - b.index);
+  // Fallback: if a material-strict query yields fewer than 3 high-weight matches,
+  // fill the remaining slots with same-subcategory pieces ranked by manual
+  // gallery priority (catalogue sort_order == ascending index order).
+  if (strictMat) {
+    const highWeight = ranked.filter((r) => r.score >= 8).length;
+    if (highWeight < 3) {
+      const eligibleIds = new Set(eligible.map((i) => i.id));
+      const fill = catalog
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => !eligibleIds.has(item.id) && typeOk(item) && (!lighting || isLightingItem(item)))
+        .map(({ item, index }) => ({ item, index, score: -1 }));
+      ranked.push(...fill);
+    }
+  }
   const seen = new Set<string>();
   const out: Omit<Item, "category" | "subcategory">[] = [];
   for (const { item } of ranked) {
