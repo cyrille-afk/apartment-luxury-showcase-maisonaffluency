@@ -138,6 +138,12 @@ export default function RoomSearch() {
     // a dedicated vignette keep the sitewide static og:image untouched.
     // Note: <link rel="canonical"> is owned by GlobalCanonical (pathname-based)
     // and is deliberately not touched here.
+    const vignette = ROOM_VIGNETTES[room];
+    if (vignette) {
+      const absolute = new URL(vignette, window.location.origin).href;
+      upsertMeta("property", "og:image", absolute);
+      upsertMeta("name", "twitter:image", absolute);
+    }
   }, [room]);
 
   // Revert to default gallery meta on unmount so metadata never leaks
@@ -171,13 +177,7 @@ export default function RoomSearch() {
       // og:url: restore the sitewide default.
       const ogUrl = head.querySelector<HTMLMetaElement>('meta[property="og:url"]');
       if (ogUrl) ogUrl.setAttribute("content", `${SITE_ORIGIN}/`);
-      // Canonical: remove if we created it, restore otherwise.
-      const canonical = head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-      const originalCanonical = captured.get("canonical");
-      if (canonical) {
-        if (originalCanonical === null) canonical.remove();
-        else canonical.href = originalCanonical;
-      }
+      // Canonical is owned by GlobalCanonical — never touched here.
       originalHead.current = null;
     };
   }, []);
