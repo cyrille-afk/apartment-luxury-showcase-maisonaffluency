@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem, Lock, LockOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -219,7 +219,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     gallery_images: string[] | null;
     title: string; subtitle: string | null; category: string | null; subcategory: string | null;
     materials: string | null; materials_description: string | null; dimensions: string | null; description: string | null;
-    edition: string | null; photo_credit: string | null; pdf_url: string | null;
+    edition: string | null; photo_credit: string | null; pdf_url: string | null; trade_only: boolean;
     pdf_filename: string | null; pdf_urls: PdfEntry[] | null; currency: string; trade_price_cents: number | null;
     price_per_sqm_cents: number | null;
     price_prefix: string | null; sort_order: number; created_at: string;
@@ -601,6 +601,16 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                 className="text-muted-foreground hover:text-foreground transition-colors p-1"
               >
                 {(pick as any).is_hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={() => {
+                  updateField(pick.id, "trade_only", !pick.trade_only);
+                  queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+                }}
+                title={pick.trade_only ? "Trade-only — hidden from public (click to make public)" : "Public + Trade (click to make trade-only)"}
+                className={`transition-colors p-1 ${pick.trade_only ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {pick.trade_only ? <Lock className="w-3.5 h-3.5" /> : <LockOpen className="w-3 h-3" />}
               </button>
               <button
                 onClick={() => setExpandedPickId(expandedPickId === pick.id ? null : pick.id)}
