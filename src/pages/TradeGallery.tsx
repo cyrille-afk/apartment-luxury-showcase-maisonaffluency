@@ -27,6 +27,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
@@ -384,7 +385,7 @@ const TradeGallery = () => {
     }
   };
 
-  const filtered = useMemo(() => {
+  const matchedProducts = useMemo(() => {
     return allProducts.filter((p) => {
       if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
       const q = search.toLowerCase();
@@ -401,6 +402,12 @@ const TradeGallery = () => {
       return matchesSearch && matchesBrand && matchesCategory && matchesSub;
     });
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
+  const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
+  const filtered = useMemo(
+    () => curateGrid(matchedProducts, (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [matchedProducts, imageTones, Object.keys(imageTones).length],
+  );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
     pick: {
