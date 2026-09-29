@@ -191,7 +191,7 @@ export default function RoomSearch() {
         if (originalCanonical === null) canonical.remove();
         else canonical.href = originalCanonical;
       }
-goTo      originalHead.current = null;
+      originalHead.current = null;
     };
   }, []);
 
