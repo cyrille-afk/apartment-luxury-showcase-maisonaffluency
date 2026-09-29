@@ -178,9 +178,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // a backgrounded tab can't get stuck on an expired access token.
       const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
       refreshTimer = window.setTimeout(() => {
-        sbClient.auth.refreshSession().catch((error: unknown) => {
-          console.warn("Unable to refresh auth session; keeping current auth state.", error);
-        });
+        void (async () => {
+          try {
+            // Another consumer (another tab or autoRefreshToken) may have
+            // already rotated the refresh token — refreshing a consumed
+            // token poisons the stored session ("refresh_token_already_used").
+            // Only refresh when the session is genuinely near expiry.
+            const { data: { session: current } }: any = await sbClient.auth.getSession();
+            if (!current?.expires_at) return;
+            if (current.expires_at * 1000 - Date.now() > 60_000) {
+              scheduleTokenRefresh(current);
+              return;
+            }
+            const { error } = await sbClient.auth.refreshSession();
+            if (error) throw error;
+          } catch (error: any) {
+            const message = String(error?.message ?? error ?? "");
+            if (/refresh_token|already used|invalid|expired/i.test(message)) {
+              // The refresh token is definitively dead — purge it so the
+              // app cleanly falls back to anon (SIGNED_OUT) instead of
+              // retrying a consumed token and spraying 401s at edge calls.
+              await sbClient.auth.signOut().catch(() => {});
+              return;
+            }
+            console.warn("Unable to refresh auth session; keeping current auth state.", error);
+            scheduleTokenRefresh(sbClient.auth.session());
+          }
+        })();
       }, refreshInMs);
     };
 
