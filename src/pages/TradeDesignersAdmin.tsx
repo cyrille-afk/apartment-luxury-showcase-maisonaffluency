@@ -2524,9 +2524,11 @@ const TradeDesignersAdmin = () => {
                         <Badge variant={d.is_published ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
                           {d.is_published ? "Published" : "Draft"}
                         </Badge>
-                        {(picksCountMap[d.id] ?? 0) > 0 && (
+                        {(picksCountMap[d.id]?.total ?? 0) > 0 && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
-                            {picksCountMap[d.id]} picks
+                            {picksCountMap[d.id].public} public
+                            {picksCountMap[d.id].total - picksCountMap[d.id].public > 0 &&
+                              ` · ${picksCountMap[d.id].total - picksCountMap[d.id].public} trade-only`}
                           </Badge>
                         )}
                         {dirty && (
