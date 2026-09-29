@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -34,6 +34,9 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
+import previewConsole from "@/assets/details-console.jpg";
+import previewLamp from "@/assets/details-lamp.jpg";
+import previewChair from "@/assets/small-room-chair.jpeg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -107,6 +110,7 @@ const DECOR_COLUMNS: string[][] = (() => {
 })();
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
+  living: [{ label: "Living Rooms", slug: "living-room" }, { label: "Office", slug: "office" }],
   dining: [{ label: "Dining", slug: "dining-room" }],
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
@@ -118,6 +122,95 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
 };
+
+// An editorial illustration of the room discovery flow, not a live product result.
+const roomPreviewPieces = [
+  { src: previewConsole, alt: "Sculptural console detail" },
+  { src: previewLamp, alt: "Sculptural table lamp" },
+  { src: previewChair, alt: "Modern chair vignette" },
+];
+
+const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => (
+  <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
+    <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
+      <div className="relative h-[190px] overflow-hidden bg-muted">
+        <img src={roomAmbientImages[room].src} alt={roomAmbientImages[room].alt} className="h-full w-full object-cover" />
+        <div className="absolute left-[55%] top-[47%] flex size-5 items-center justify-center rounded-full border border-primary-foreground bg-foreground text-primary-foreground shadow-sm" aria-hidden="true">
+          <span className="text-sm leading-none">+</span>
+        </div>
+        <div className="absolute bottom-3 left-3 border border-border/60 bg-background/95 px-3 py-2 shadow-sm" aria-hidden="true">
+          <span className="block font-body text-[9px] uppercase text-muted-foreground">Selected piece</span>
+          <span className="block font-serif text-xs text-foreground">Explore in dialogue</span>
+        </div>
+      </div>
+      <div className="px-1 pb-1 pt-3">
+        <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
+        <div className="grid grid-cols-3 gap-2">
+          {roomPreviewPieces.map((piece) => (
+            <div key={piece.src} className="aspect-[4/3] overflow-hidden bg-muted">
+              <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="mt-5 text-center font-serif text-sm font-bold text-foreground">Alternative Universes</div>
+    <p className="mt-1 max-w-[320px] text-center font-body text-xs leading-relaxed text-muted-foreground">
+      Experience curated alternative compositions anchored by our spaces.
+    </p>
+  </div>
+);
+
+interface RoomDropdownPanelProps {
+  room: "living" | "dining" | "bedroom";
+  activeCategory: number | null;
+  onSelectCategory: (index: number) => void;
+  onCategoryNavigate: (category: string, subcategory?: string) => void;
+  onRoomNavigate: (slug: string) => void;
+}
+
+const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => (
+  <div className="flex min-h-[470px] items-stretch overflow-hidden">
+    <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
+      <div className="flex flex-col">
+        {roomNavigation[room].map((item, index) => (
+          <div key={item.label} onMouseEnter={() => onSelectCategory(index)}>
+            <Button
+              type="button" variant="ghost"
+              onFocus={() => onSelectCategory(index)}
+              onClick={() => onCategoryNavigate(item.category)}
+              aria-expanded={activeCategory === index}
+              className={cn("flex h-9 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === index ? "text-foreground" : "text-muted-foreground")}
+            >
+              {item.label}
+              <ChevronRight className={cn("size-3 transition-transform", activeCategory === index && "rotate-90")} strokeWidth={1.25} />
+            </Button>
+            {activeCategory === index && (
+              <div className="mb-2 flex flex-col border-l border-border pl-4">
+                {item.subcategories.map((subcategory) => (
+                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
+                    {subcategory}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        <div className="mt-5 border-t border-border/60 pt-4" onMouseEnter={() => onSelectCategory(null)}>
+          <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
+          <div className="mt-2 flex flex-col gap-1 pl-3">
+            {roomFlyouts[room]?.map((link) => (
+              <Button key={link.slug} type="button" variant="ghost" onClick={() => onRoomNavigate(link.slug)} className="h-7 w-full justify-start gap-2 rounded-none px-0 font-body text-xs font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+    <RoomVisualPreview room={room} />
+  </div>
+);
 
 const leftNavItems = [{
   label: "Designers",
@@ -245,9 +338,23 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
   const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
+  const [roomMenuOverflow, setRoomMenuOverflow] = useState(0);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!megaMenuOpen || !activeRoomMenu || !megaMenuRef.current) return;
+    const measure = () => {
+      const menu = megaMenuRef.current;
+      if (!menu) return;
+      // Undo the prior shift before measuring so switching between rooms never compounds it.
+      const naturalRight = menu.getBoundingClientRect().right + roomMenuOverflow;
+      setRoomMenuOverflow(Math.max(0, Math.ceil(naturalRight - window.innerWidth + 24)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [megaMenuOpen, activeRoomMenu, roomMenuOverflow]);
 
   // Align the desktop TRADE utility link's left edge with the JOURNAL nav
   // link's left edge. The nav row is centered while the utility cluster is
@@ -1098,106 +1205,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <span className="link-underline-grow">{room}</span>
                   </Button>
 
-                  {room === "living" && megaMenuOpen && activeRoomMenu === "living" && (
-                    <div
-                      ref={megaMenuRef}
-                      data-room-menu="living"
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(800px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
-                      style={{ animation: "livingMenuReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-                    >
-                      <style>{`
-                        @keyframes livingMenuReveal {
-                          from { opacity: 0; transform: translateY(-5px); }
-                          to { opacity: 1; transform: translateY(0); }
-                        }
-                      `}</style>
-                      <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="flex min-h-full w-[325px] shrink-0 flex-col border-r border-border/60 px-8 py-8">
-                          <div>
-                            {roomNavigation.living.map((item, index) => (
-                              <Button
-                                key={item.label}
-                                type="button"
-                                variant="ghost"
-                                onMouseEnter={() => setActiveRoomCategory(index)}
-                                onFocus={() => setActiveRoomCategory(index)}
-                                onClick={() => navigateFromMegaMenu(item.category)}
-                                className={cn(
-                                  "flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                                  activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
-                                )}
-                              >
-                                {item.label}
-                                <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
-                              </Button>
-                            ))}
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onMouseEnter={() => setActiveRoomCategory(-1)}
-                            onFocus={() => setActiveRoomCategory(-1)}
-                            className={cn(
-                              "mt-auto flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                              activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
-                            )}
-                          >
-                            Shop By Room
-                            <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
-                          </Button>
-                        </div>
-
-                        <div data-room-submenu className="relative min-h-full min-w-0 flex-1 overflow-hidden">
-                          <div
-                            className={cn(
-                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
-                              activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
-                            )}
-                          >
-                            <img
-                              src={roomAmbientImages.living.src}
-                              alt={roomAmbientImages.living.alt}
-                              className="size-full object-contain object-center"
-                            />
-                          </div>
-                          <div
-                            className={cn(
-                              "absolute inset-0 overflow-y-auto px-8 py-8 transition-opacity duration-300",
-                              activeRoomCategory === null ? "pointer-events-none opacity-0" : "opacity-100"
-                            )}
-                          >
-                            {activeRoomCategory !== null && <div>
-                              <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
-                                {activeRoomCategory === -1
-                                  ? "Shop By Room"
-                                  : `${roomNavigation.living[activeRoomCategory]?.label} Collections`}
-                              </div>
-                              {activeRoomCategory === -1 && (
-                                <p className="mb-4 font-body text-xs font-light tracking-wide text-muted-foreground">
-                                  Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
-                                </p>
-                              )}
-                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
-                                Living Rooms
-                              </Button>
-                              <Button type="button" variant="ghost" onClick={() => navigateToRoom("office")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
-                                Office
-                              </Button>
-                            {activeRoomCategory !== -1 && roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
-                              <Button
-                                key={subcategory}
-                                type="button"
-                                variant="ghost"
-                                onClick={() => navigateFromMegaMenu(roomNavigation.living[activeRoomCategory].category, subcategory)}
-                                className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                              >
-                                {subcategory}
-                              </Button>
-                            ))}
-                            </div>}
-                          </div>
-                        </div>
-                      </div>
+                  {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
+                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateFromMegaMenu} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
 
@@ -1253,112 +1263,16 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     </div>
                   )}
 
-                  {room !== "living" && room !== "decor" && megaMenuOpen && activeRoomMenu === room && (
-                    <div
-                      ref={megaMenuRef}
-                      data-room-menu={room}
-                      className="absolute left-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
-                      style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-                    >
-                      <style>{`
-                        @keyframes megaMenuReveal {
-                          from { opacity: 0; transform: translateY(-6px); }
-                          to { opacity: 1; transform: translateY(0); }
-                        }
-                      `}</style>
+                  {room === "lighting" && megaMenuOpen && activeRoomMenu === room && (
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl">
                       <div className="flex min-h-96 items-stretch overflow-hidden">
-                        <div className="flex min-h-full w-1/2 shrink-0 flex-col border-r border-border/60 px-9 py-8">
-                          <div>
-                            {roomNavigation[room].map((item, index) => (
-                              <Button
-                                key={item.label}
-                                type="button"
-                                variant="ghost"
-                                onMouseEnter={() => setActiveRoomCategory(index)}
-                                onFocus={() => setActiveRoomCategory(index)}
-                                onClick={() => navigateFromMegaMenu(item.category)}
-                                className={cn(
-                                  "flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                                  activeRoomCategory === index ? "text-foreground" : "text-muted-foreground"
-                                )}
-                              >
-                                {item.label}
-                                <ChevronRight className={cn("h-3 w-3 transition-opacity", activeRoomCategory === index ? "opacity-60" : "opacity-0")} strokeWidth={1.25} />
-                              </Button>
-                            ))}
-                          </div>
-                          {roomFlyouts[room] && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onMouseEnter={() => setActiveRoomCategory(-1)}
-                              onFocus={() => setActiveRoomCategory(-1)}
-                              className={cn(
-                                "mt-auto flex h-10 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal tracking-normal hover:bg-transparent hover:text-foreground",
-                                activeRoomCategory === -1 ? "text-foreground" : "text-muted-foreground"
-                              )}
-                            >
-                              Shop By Room
-                              <ChevronRight className="h-3 w-3 opacity-60" strokeWidth={1.25} />
-                            </Button>
-                          )}
+                        <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
+                          {roomNavigation.lighting.map((item) => (
+                            <Button key={item.label} type="button" variant="ghost" onClick={() => navigateFromMegaMenu(item.category, item.subcategories[0])} className="flex h-10 w-full justify-start rounded-none p-0 font-body text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">{item.label}</Button>
+                          ))}
                         </div>
-
-                        <div data-room-submenu className="relative min-h-full w-1/2 shrink-0 overflow-hidden">
-                          <div
-                            className={cn(
-                              "absolute inset-0 bg-[hsl(var(--collection-card-canvas))] p-6 transition-opacity duration-300",
-                              activeRoomCategory === null ? "opacity-100" : "pointer-events-none opacity-0"
-                            )}
-                          >
-                            <img
-                              src={roomAmbientImages[room].src}
-                              alt={roomAmbientImages[room].alt}
-                              className="size-full object-contain object-center"
-                            />
-                          </div>
-                          <div
-                            className={cn(
-                              "absolute inset-0 overflow-y-auto px-9 py-8 transition-opacity duration-300",
-                              activeRoomCategory === null ? "pointer-events-none opacity-0" : "opacity-100"
-                            )}
-                          >
-                            {activeRoomCategory !== null && <div>
-                              <div className="flex h-8 items-center font-body text-[13px] font-semibold tracking-normal text-foreground">
-                                {activeRoomCategory === -1
-                                  ? "Shop By Room"
-                                  : `${roomNavigation[room][activeRoomCategory]?.label} Collections`}
-                              </div>
-                              {activeRoomCategory === -1 && (
-                                <p className="mb-4 font-body text-xs font-light tracking-wide text-muted-foreground">
-                                  Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
-                                </p>
-                              )}
-                              {activeRoomCategory === -1
-                                ? roomFlyouts[room]?.map((roomLink) => (
-                                    <Button
-                                      key={roomLink.slug}
-                                      type="button"
-                                      variant="ghost"
-                                      onClick={() => navigateToRoom(roomLink.slug)}
-                                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                    >
-                                      {roomLink.label}
-                                    </Button>
-                                  ))
-                                : roomNavigation[room][activeRoomCategory]?.subcategories.map((subcategory) => (
-                                    <Button
-                                      key={subcategory}
-                                      type="button"
-                                      variant="ghost"
-                                      onClick={() => navigateFromMegaMenu(roomNavigation[room][activeRoomCategory].category, subcategory)}
-                                      className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                    >
-                                      {subcategory}
-                                    </Button>
-                                  ))}
-                            </div>}
-                          </div>
+                        <div className="min-w-0 flex-1 bg-[hsl(var(--collection-card-canvas))] p-6">
+                          <img src={roomAmbientImages.lighting.src} alt={roomAmbientImages.lighting.alt} className="size-full object-contain object-center" />
                         </div>
                       </div>
                     </div>

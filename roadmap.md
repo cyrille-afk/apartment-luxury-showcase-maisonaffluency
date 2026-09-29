@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Consolidate Living, Dining, and Bedroom dropdown destinations on the left and show a framed Alternative Universes visual preview on the right.
+
 - [x] Add branded app recovery for blank pages after edge failures, with a visitor-controlled retry that preserves the current address.
 
 - [x] Add live catalogue-backed material suggestions to Felix's strict-match empty state and make suggestions searchable with one click.
