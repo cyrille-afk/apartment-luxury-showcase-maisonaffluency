@@ -2069,19 +2069,20 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const [pubRes, allRes] = await Promise.all([
         supabase.from("designer_curator_picks_public").select("designer_id"),
-        supabase.from("designer_curator_picks").select("designer_id"),
+        supabase.from("designer_curator_picks").select("designer_id, trade_only"),
       ]);
       if (pubRes.error) throw pubRes.error;
       if (allRes.error) throw allRes.error;
-      const counts: Record<string, { public: number; total: number }> = {};
+      const counts: Record<string, { public: number; total: number; tradeOnly: number }> = {};
       (allRes.data || []).forEach((row) => {
         if (!row.designer_id) return;
-        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0, tradeOnly: 0 };
         counts[row.designer_id].total += 1;
+        if (row.trade_only) counts[row.designer_id].tradeOnly += 1;
       });
       (pubRes.data || []).forEach((row) => {
         if (!row.designer_id) return;
-        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0 };
+        counts[row.designer_id] = counts[row.designer_id] || { public: 0, total: 0, tradeOnly: 0 };
         counts[row.designer_id].public += 1;
       });
       return counts;
@@ -2527,8 +2528,8 @@ const TradeDesignersAdmin = () => {
                         {(picksCountMap[d.id]?.total ?? 0) > 0 && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
                             {picksCountMap[d.id].public} public
-                            {picksCountMap[d.id].total - picksCountMap[d.id].public > 0 &&
-                              ` · ${picksCountMap[d.id].total - picksCountMap[d.id].public} trade-only`}
+                            {(picksCountMap[d.id].tradeOnly ?? 0) > 0 &&
+                              ` · ${picksCountMap[d.id].tradeOnly} trade-only`}
                           </Badge>
                         )}
                         {dirty && (
