@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -338,9 +338,23 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
   const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
+  const [roomMenuOverflow, setRoomMenuOverflow] = useState(0);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!megaMenuOpen || !activeRoomMenu || !megaMenuRef.current) return;
+    const measure = () => {
+      const menu = megaMenuRef.current;
+      if (!menu) return;
+      // Undo the prior shift before measuring so switching between rooms never compounds it.
+      const naturalRight = menu.getBoundingClientRect().right + roomMenuOverflow;
+      setRoomMenuOverflow(Math.max(0, Math.ceil(naturalRight - window.innerWidth + 24)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [megaMenuOpen, activeRoomMenu, roomMenuOverflow]);
 
   // Align the desktop TRADE utility link's left edge with the JOURNAL nav
   // link's left edge. The nav row is centered while the utility cluster is
@@ -1192,7 +1206,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </Button>
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl">
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
                       <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateFromMegaMenu} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
