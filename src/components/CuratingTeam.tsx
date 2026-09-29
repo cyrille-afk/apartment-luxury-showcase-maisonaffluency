@@ -8,7 +8,7 @@ import { Search, Linkedin } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const cyrilleDelvalImg = cloudinaryUrl("IMG_2542_1_kc4fvs", { width: 800, quality: "auto", crop: "fill" });
-const elsaLemarignierImg = cloudinaryUrl("Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs", { width: 800, quality: "auto", crop: "fill" });
+const elsaLemarignierImg = cloudinaryUrl("v1790667442/WhatsApp_Image_2026-09-29_at_3.36.14_PM_cp9gae", { width: 800, quality: "auto", crop: "fill" });
 
 export const curatingTeam: { id: number; name: string; role: string; image: string; bio: ReactNode; linkedin: string }[] = [
   {
