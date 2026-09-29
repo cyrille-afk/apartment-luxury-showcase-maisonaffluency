@@ -2838,11 +2838,11 @@ const TradeProductPage: React.FC = () => {
 
               {!isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                  icon={specIcon(dualLabelIsDim ? "📐" : "✦")}
+                  text={dualLabelIsDim ? withImperialPerLine(dualSizeOptions.join("\n")) : dualSizeOptions.join("\n")}
                   secondaryText={null}
                   emphasized
-                  placeholder="Select Your Size"
+                  placeholder={dualLabelIsDim ? "Select Your Size" : ((product as any)?.wood_picker_label || "Select the Wood Finish")}
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
                   onChange={(idx) => {
                     if (idx < 0) {
