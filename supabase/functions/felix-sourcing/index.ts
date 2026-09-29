@@ -49,7 +49,30 @@ const MATERIALS: Record<string, RegExp> = {
   bronze: /\bbronze\b/, brass: /\bbrass\b/, steel: /\bsteel\b/,
   leather: /\bleather\b/, rattan: /\brattan\b/, ceramic: /\b(ceramic|porcelain|stoneware)\b/,
 };
-const sing = (w: string) => w.replace(/(?<=[^s])s$/, "");
+const sing = (w: string) => w.length > 4 && w.endsWith("ies") ? w.slice(0, -3) + "y" : w.replace(/(?<=[^s])s$/, "");
+function lev(a: string, b: string) {
+  if (Math.abs(a.length - b.length) > 1) return 2;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+// Lemmatize + typo-correct query terms against the live catalogue vocabulary
+// ("paintings" -> "painting", "lampa" -> "lamp") so near-misses never return nothing.
+function normalizeTerms(terms: string[], vocab: Set<string>) {
+  return Array.from(new Set(terms.map((t) => {
+    if (MATERIALS[t] || vocab.has(t)) return MATERIALS[t] ? t : sing(t);
+    const s = sing(t);
+    if (vocab.has(s) || MATERIALS[s]) return s;
+    if (t.length < 4) return s;
+    for (const v of vocab) if (v.length >= 3 && lev(t, v) <= 1) return v;
+    for (const v of vocab) if (v.length >= 3 && lev(s, v) <= 1) return v;
+    return s;
+  })));
+}
 
 type Item = { id: string; title: string; image: string; materials: string | null; category: string | null; subcategory: string | null; designerName: string };
 
@@ -72,9 +95,10 @@ function ashScore(i: Item) {
   return 2 + (/\bdining chairs?\b/.test(n) ? 1 : /\bdining chairs?\b/.test(t) ? 0.9 : /\bchairs?\b/.test(n) ? 0.7 : /\bchairs?\b/.test(t) ? 0.5 : 0);
 }
 
-let cache: { at: number; items: Item[] } | null = null;
+let cache: { at: number; items: Item[]; vocab: Set<string> } | null = null;
+let vocabCache = new Set<string>();
 async function loadCatalog(): Promise<Item[]> {
-  if (cache && Date.now() - cache.at < 5 * 60_000) return cache.items;
+  if (cache && Date.now() - cache.at < 5 * 60_000) { vocabCache = cache.vocab; return cache.items; }
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
   const [{ data: designers }, { data: picks }] = await Promise.all([
     sb.from("designers").select("id, name, display_name").eq("is_published", true).eq("trade_only", false),
@@ -87,14 +111,17 @@ async function loadCatalog(): Promise<Item[]> {
     if (!name || !r.image_url || (r.tags || []).includes("profile-only")) continue;
     items.push({ id: r.id, title: r.title || "", image: r.image_url, materials: r.materials, category: r.category, subcategory: r.subcategory, designerName: name });
   }
-  cache = { at: Date.now(), items };
+  const vocab = new Set<string>();
+  for (const i of items) for (const w of keywords(`${i.title} ${i.category ?? ""} ${i.subcategory ?? ""} ${i.materials ?? ""}`)) vocab.add(sing(w));
+  cache = { at: Date.now(), items, vocab };
+  vocabCache = vocab;
   return items;
 }
 
 function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   let search = value;
   if (mode === "reference") { try { search = decodeURIComponent(new URL(value).pathname); } catch { /* keep raw */ } }
-  const terms = keywords(search);
+  const terms = normalizeTerms(keywords(search), vocabCache);
   const strictAsh = mode === "prompt" && terms.includes("ash") && terms.some((t) => t === "chair" || t === "chairs");
   const lighting = mode === "prompt" && terms.some((t) => LIGHTING_TERMS.has(t));
   const pinned = /kavehome\.|pinterest\.com\/luxuryhomefurniture/i.test(value) ? PINNED_KAVEHOME : [];
@@ -110,10 +137,18 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
   const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
   const ranked = eligible.map((item, index) => {
     const hay = keywords([item.title, item.category, item.subcategory, item.materials, item.designerName].filter(Boolean).join(" "));
+    const catW = keywords(`${item.category ?? ""} ${item.subcategory ?? ""}`).map(sing);
+    const titleW = keywords(item.title).map(sing);
+    const descW = keywords(`${item.materials ?? ""} ${item.designerName}`).map(sing);
     let score = strictAsh ? ashScore(item)
       : lighting ? lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0)
-      : terms.reduce((s, t) => s + (MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0)
-          + (hay.some((w) => same(w, t)) ? 3 : hay.some((w) => w.includes(t)) ? 1 : 0), 0);
+      : terms.reduce((s, t) => {
+          // Field-priority weights: category/subcategory 10 > title 5 > description/materials 1.
+          const inCat = catW.some((w) => same(w, t)), inTitle = titleW.some((w) => same(w, t));
+          const inDesc = descW.some((w) => same(w, t)) || hay.some((w) => w.includes(t));
+          const mat = MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0;
+          return s + mat + (inCat ? 10 : 0) + (inTitle ? 5 : 0) + (!inCat && !inTitle && inDesc ? 1 : 0);
+        }, 0);
     const pin = pinned.findIndex((p) => p.title.test(item.title) && p.designer.test(item.designerName));
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
@@ -131,6 +166,11 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
         .map(({ item, index }) => ({ item, index, score: -1 }));
       ranked.push(...fill);
     }
+  }
+  if (!strictAsh && ranked.some((r) => r.score >= 10)) {
+    // A category-level match exists: drop description-only hits so stylistic words can't pollute.
+    const keep = ranked.filter((r) => r.score >= 5);
+    ranked.length = 0; ranked.push(...keep);
   }
   const seen = new Set<string>();
   const out: Omit<Item, "category" | "subcategory">[] = [];
