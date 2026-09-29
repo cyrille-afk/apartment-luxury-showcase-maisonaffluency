@@ -1578,7 +1578,7 @@ const TradeProductPage: React.FC = () => {
   const dualLabelIsDim = dualSizeOptions.length > 0 && dualSizeOptions.every((s: string) => looksLikeDimension(s));
   const dualRowDims: string | null =
     ((dualVariant as any)?.dimensions ||
-      (sizeVariants || []).find((v: any) => (v as any)?.dimensions)?.dimensions ||
+      ((sizeVariants || []).find((v: any) => v?.dimensions) as any)?.dimensions ||
       product?.dimensions ||
       null);
 
