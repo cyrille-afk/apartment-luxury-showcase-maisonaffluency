@@ -269,10 +269,14 @@ export default function RoomSearch() {
       <Navigation alwaysVisible />
       <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
-          <>
-            {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
-          </>
+          gridLanding && !searchParams.get("category") ? (
+            <RoomExperience room={room} roomLabel={roomLabel} />
+          ) : (
+            <>
+              {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
+              <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
+            </>
+          )
         ) : (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>
