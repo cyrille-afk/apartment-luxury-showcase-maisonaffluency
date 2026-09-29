@@ -3,8 +3,8 @@
 - Desktop gallery chevrons traverse all four photos before moving to the next/previous room, wrapping across the seven rooms; this provides uninterrupted photo navigation while leaving the mobile accordion untouched.
 - Only the first Living Room photo hides desktop side product picks; all other photos keep vertical one-column picks, with explicitly curated first-scene order preserved, so the gallery entrance stays clean without changing hotspot pins.
 - Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
-- Gallery hotspot product details use the shared centered `PublicProductLightbox` in a body portal, including over expanded photos, so long specifications remain visible without clipping or displacing the gallery canvas.
-- Fetch the two approved MicMac gallery pins through a narrowly scoped public RPC and use that presentation data for both pins and desktop side photos rather than widening trade-only designer access; only the pin's presentation data is public.
+- Gallery hotspot details use centered `PublicProductLightbox` in a body portal, including over expanded photos, to prevent clipping.
+- Fetch the two approved MicMac pins and side photos via scoped public RPC; never widen trade-only designer access.
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
 - Felix tour spotlights await target sizes; keep prior rect while transitioning.
@@ -14,3 +14,4 @@
 <!-- LOVABLE:END -->
 12. Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps the matching rules out of the browser bundle.
 13. No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers — one catalogue, one layout.
+14. Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view, to preserve price visibility.
