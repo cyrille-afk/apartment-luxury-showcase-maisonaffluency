@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, ZoomIn, X, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -1289,12 +1290,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         })}
 
 
-      {zoomed && (
+      {zoomed && createPortal(
         <div
           onClick={() => setZoomed(null)}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[200] bg-background/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-[10000] bg-background/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -1440,7 +1441,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
               })()}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
     </TooltipProvider>
