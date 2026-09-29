@@ -1300,7 +1300,7 @@ const PublicProductPageContent: React.FC = () => {
     tradeDiscountMultiplier: tierDiscountPct || 0,
   };
   const hasFromPrefix = /^From\s+/i.test(displayRrpLabel || "");
-  const priceCurrency = (isTradeVerifiedView ? protectedPricing?.currency : publicRrpRow?.currency || protectedPricing?.currency || "USD").toUpperCase();
+  const priceCurrency = (isTradeVerifiedView ? protectedPricing?.currency || publicRrpRow?.currency : publicRrpRow?.currency || protectedPricing?.currency || "USD")?.toUpperCase() || "USD";
 
   // Publish the current selection's base rate + currency into the container so
   // both layout variants (and the quantity stepper) compute off one source.
