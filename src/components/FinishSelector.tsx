@@ -654,6 +654,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isSecondaryFabricGroup = kindOverride === "fabricSecondary";
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
+    const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup;
+    const normName = (s: string) => s.trim().toLowerCase();
+    const isDisabled = isTopGroup
+      ? !!disabledTopNames?.some((n) => normName(n) === normName(f.name))
+      : isBaseGroup
+      ? !!disabledBaseNames?.some((n) => normName(n) === normName(f.name))
+      : false;
     const isSelected = isRugGroup
       ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
       : isSecondaryFabricGroup
