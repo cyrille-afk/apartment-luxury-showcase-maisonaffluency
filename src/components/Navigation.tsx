@@ -34,6 +34,9 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
+import previewConsole from "@/assets/details-console.jpg";
+import previewLamp from "@/assets/details-lamp.jpg";
+import previewChair from "@/assets/small-room-chair.jpeg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -107,6 +110,7 @@ const DECOR_COLUMNS: string[][] = (() => {
 })();
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
+  living: [{ label: "Living Rooms", slug: "living-room" }, { label: "Office", slug: "office" }],
   dining: [{ label: "Dining", slug: "dining-room" }],
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
@@ -118,6 +122,95 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
 };
+
+// An editorial illustration of the room discovery flow, not a live product result.
+const roomPreviewPieces = [
+  { src: previewConsole, alt: "Sculptural console detail" },
+  { src: previewLamp, alt: "Sculptural table lamp" },
+  { src: previewChair, alt: "Modern chair vignette" },
+];
+
+const RoomVisualPreview = ({ room }: { room: RoomNavKey }) => (
+  <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
+    <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
+      <div className="relative h-[190px] overflow-hidden bg-muted">
+        <img src={roomAmbientImages[room].src} alt={roomAmbientImages[room].alt} className="h-full w-full object-cover" />
+        <div className="absolute left-[55%] top-[47%] flex size-5 items-center justify-center rounded-full border border-primary-foreground bg-foreground text-primary-foreground shadow-sm" aria-hidden="true">
+          <span className="text-sm leading-none">+</span>
+        </div>
+        <div className="absolute bottom-3 left-3 border border-border/60 bg-background/95 px-3 py-2 shadow-sm" aria-hidden="true">
+          <span className="block font-body text-[9px] uppercase text-muted-foreground">Selected piece</span>
+          <span className="block font-serif text-xs text-foreground">Explore in dialogue</span>
+        </div>
+      </div>
+      <div className="px-1 pb-1 pt-3">
+        <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
+        <div className="grid grid-cols-3 gap-2">
+          {roomPreviewPieces.map((piece) => (
+            <div key={piece.src} className="aspect-[4/3] overflow-hidden bg-muted">
+              <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="mt-5 text-center font-serif text-sm font-bold text-foreground">Alternative Universes</div>
+    <p className="mt-1 max-w-[320px] text-center font-body text-xs leading-relaxed text-muted-foreground">
+      Experience curated alternative compositions anchored by our spaces.
+    </p>
+  </div>
+);
+
+interface RoomDropdownPanelProps {
+  room: "living" | "dining" | "bedroom";
+  activeCategory: number | null;
+  onSelectCategory: (index: number) => void;
+  onCategoryNavigate: (category: string, subcategory?: string) => void;
+  onRoomNavigate: (slug: string) => void;
+}
+
+const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => (
+  <div className="flex min-h-[470px] items-stretch overflow-hidden">
+    <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
+      <div className="flex flex-col">
+        {roomNavigation[room].map((item, index) => (
+          <div key={item.label} onMouseEnter={() => onSelectCategory(index)}>
+            <Button
+              type="button" variant="ghost"
+              onFocus={() => onSelectCategory(index)}
+              onClick={() => onCategoryNavigate(item.category)}
+              aria-expanded={activeCategory === index}
+              className={cn("flex h-9 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === index ? "text-foreground" : "text-muted-foreground")}
+            >
+              {item.label}
+              <ChevronRight className={cn("size-3 transition-transform", activeCategory === index && "rotate-90")} strokeWidth={1.25} />
+            </Button>
+            {activeCategory === index && (
+              <div className="mb-2 flex flex-col border-l border-border pl-4">
+                {item.subcategories.map((subcategory) => (
+                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
+                    {subcategory}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        <div className="mt-5 border-t border-border/60 pt-4" onMouseEnter={() => onSelectCategory(null)}>
+          <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
+          <div className="mt-2 flex flex-col gap-1 pl-3">
+            {roomFlyouts[room]?.map((link) => (
+              <Button key={link.slug} type="button" variant="ghost" onClick={() => onRoomNavigate(link.slug)} className="h-7 w-full justify-start gap-2 rounded-none px-0 font-body text-xs font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
+                <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+    <RoomVisualPreview room={room} />
+  </div>
+);
 
 const leftNavItems = [{
   label: "Designers",
