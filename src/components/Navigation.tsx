@@ -152,9 +152,9 @@ const roomPreviewScenes = {
     hotspot: { left: 43, top: 72, label: "Desk" },
     highlightIndex: 1,
     pieces: [
-      { src: lyricDesk, alt: "Lyric writing desk alternative" },
-      { src: presidentDesk, alt: "President desk alternative" },
-      { src: presidentDeskDetail, alt: "President desk detail alternative" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780550235/Lyrique_Black-1_ozsq0k.jpg", alt: "Lyric Desk Oak by Atelier BdM", name: "Lyric Desk Oak", designer: "Atelier BdM" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428196/JMF_1932_Apartment_Desk__02_Portrait_BD_1_jhvb5g.jpg", alt: "Apartment Desk c. 1925 by Jean-Michel Frank", name: "Apartment Desk c. 1925", designer: "Jean-Michel Frank" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775507497/Screen_Shot_2026-04-07_at_4.29.53_AM_spljjl.png", alt: "Officium Desk by Pierre Augustin Rose", name: "Officium Desk", designer: "Pierre Augustin Rose" },
     ],
   },
 } as const;
