@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add branded app recovery for blank pages after edge failures, with a visitor-controlled retry that preserves the current address.
+
 - [x] Add live catalogue-backed material suggestions to Felix's strict-match empty state and make suggestions searchable with one click.
 
 - [x] Add Emmanuel Levet Stenne's Dress Up Stone Collection 1 as six catalog pages with two stone finishes, cropped photos, supplied RRP, and French origin; leave lead time blank unless documented.

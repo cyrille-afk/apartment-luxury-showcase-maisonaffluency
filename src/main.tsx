@@ -8,6 +8,7 @@ import { loadOgBridgeIndex } from "./lib/ogBridgeResolver";
 import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
 import { bootIossRouting } from "./config/iossConfig";
 import { ensureStorageHeadroom, installStorageQuotaGuard } from "./lib/storageReclaim";
+import AppRecoveryBoundary from "./components/AppRecoveryBoundary";
 
 const isTradeRoute = window.location.pathname.includes("/trade");
 document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
@@ -140,10 +141,10 @@ document.documentElement.classList.add("css-ready");
 const rootElement = document.getElementById("root");
 if (rootElement) {
   createRoot(rootElement).render(
-    <>
+    <AppRecoveryBoundary>
       <App />
       <BuildUpdateBanner />
       <HmrStatusBanner />
-    </>
+    </AppRecoveryBoundary>
   );
 }
