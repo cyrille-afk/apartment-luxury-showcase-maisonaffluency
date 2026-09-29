@@ -46,6 +46,18 @@ serve(async (req) => {
     const userId = claimsData?.claims?.sub as string | undefined;
     if (claimsError || !userId) return json({ error: "Authentication required." }, 401);
 
+    // This endpoint returns confidential wholesale and finish-level prices.
+    // Authentication alone does not confer trade approval.
+    const [rolesResult, profileResult] = await Promise.all([
+      admin.from("user_roles").select("role").eq("user_id", userId),
+      admin.from("profiles").select("trade_status").eq("id", userId).maybeSingle(),
+    ]);
+    if (rolesResult.error || profileResult.error) return json({ error: "Unable to verify trade access." }, 503);
+    const roles = new Set((rolesResult.data ?? []).map((row) => row.role));
+    if (!roles.has("admin") && !roles.has("super_admin") && !roles.has("trade_user") && profileResult.data?.trade_status !== "approved") {
+      return json({ error: "Approved trade access required." }, 403);
+    }
+
     const body = await req.json().catch(() => ({}));
     const pickIds = Array.from(
       new Set(
