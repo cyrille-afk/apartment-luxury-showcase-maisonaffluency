@@ -524,7 +524,7 @@ function singularizeSub(s: string): string {
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className={`flex items-center justify-between ${compactTop ? "mb-4" : "mb-8"}`}>
           <div>
             <h2 className="font-display text-2xl md:text-3xl text-foreground">
               {filterLabel}
