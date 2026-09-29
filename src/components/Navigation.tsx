@@ -38,9 +38,6 @@ import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
 import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
 import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
-import lyricDesk from "@/assets/curators-picks/bruno-de-maistre-lyric-desk.jpg";
-import presidentDesk from "@/assets/curators-picks/jmf-president-desk-1.jpg";
-import presidentDeskDetail from "@/assets/curators-picks/jmf-president-desk-2.jpg";
 import officeRoomAmbient from "@/assets/home-office-desk.jpg";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
