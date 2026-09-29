@@ -1172,17 +1172,18 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                   ? "Shop By Room"
                                   : `${roomNavigation.living[activeRoomCategory]?.label} Collections`}
                               </div>
-                            {activeRoomCategory === -1 ? (
-                              <>
+                              {activeRoomCategory === -1 && (
+                                <p className="mb-4 font-body text-xs font-light tracking-wide text-muted-foreground">
+                                  Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
+                                </p>
+                              )}
                               <Button type="button" variant="ghost" onClick={() => navigateToRoom("living-room")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
                                 Living Rooms
                               </Button>
                               <Button type="button" variant="ghost" onClick={() => navigateToRoom("office")} className="mb-3 block h-auto w-full rounded-none p-0 text-left font-body text-[13px] font-normal tracking-normal text-muted-foreground hover:bg-transparent hover:text-foreground">
                                 Office
                               </Button>
-                              </>
-                          ) : (
-                            roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
+                            {activeRoomCategory !== -1 && roomNavigation.living[activeRoomCategory]?.subcategories.map((subcategory) => (
                               <Button
                                 key={subcategory}
                                 type="button"
@@ -1192,8 +1193,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                               >
                                 {subcategory}
                               </Button>
-                            ))
-                          )}
+                            ))}
                             </div>}
                           </div>
                         </div>
@@ -1329,6 +1329,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                                   ? "Shop By Room"
                                   : `${roomNavigation[room][activeRoomCategory]?.label} Collections`}
                               </div>
+                              {activeRoomCategory === -1 && (
+                                <p className="mb-4 font-body text-xs font-light tracking-wide text-muted-foreground">
+                                  Explore alternative furniture curations and compositions anchored by our signature gallery spaces.
+                                </p>
+                              )}
                               {activeRoomCategory === -1
                                 ? roomFlyouts[room]?.map((roomLink) => (
                                     <Button
