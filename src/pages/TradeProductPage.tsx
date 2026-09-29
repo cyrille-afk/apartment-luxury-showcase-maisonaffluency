@@ -1573,6 +1573,14 @@ const TradeProductPage: React.FC = () => {
         (!hasDualSize || (v.label || "").trim() === (selectedDualSize || ""))
       )
     : null;
+  // When the Label axis holds a finish (e.g. wood "Oak") rather than a size,
+  // dimensions come from the row's own `dimensions` field or the product.
+  const dualLabelIsDim = dualSizeOptions.length > 0 && dualSizeOptions.every((s: string) => looksLikeDimension(s));
+  const dualRowDims: string | null =
+    ((dualVariant as any)?.dimensions ||
+      (sizeVariants || []).find((v: any) => (v as any)?.dimensions)?.dimensions ||
+      product?.dimensions ||
+      null);
 
   const singleAxisActive = hasSingleAxisSplit
     ? singleAxisParsed.find((p) =>
@@ -2752,8 +2760,8 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
               )}
               {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
-              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
+              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && (!hasDualSize || !dualLabelIsDim) && dualRowDims && looksLikeDimension(dualRowDims) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(dualRowDims)} />
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
