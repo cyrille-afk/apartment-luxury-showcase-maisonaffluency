@@ -905,7 +905,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         ) : (
           tileButton
         )}
-        <p className="font-body text-[12px] leading-snug text-foreground/85">
+        <p className={cn("font-body text-[12px] leading-snug text-foreground/85", isDisabled && "opacity-50")}>
           {f.name}
         </p>
         {tierCaption && (
