@@ -683,6 +683,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : setSelectedWoodId;
 
     const handlePick = () => {
+      if (isDisabled) return;
       if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
