@@ -186,7 +186,7 @@ interface RoomDropdownPanelProps {
   room: "living" | "dining" | "bedroom";
   activeCategory: number | null;
   onSelectCategory: (index: number) => void;
-  onCategoryNavigate: (category: string, subcategory?: string) => void;
+  onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
 }
 
@@ -211,7 +211,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             <Button
               type="button" variant="ghost"
               onFocus={() => onSelectCategory(index)}
-              onClick={() => onCategoryNavigate(item.category)}
+              onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category)}
               aria-expanded={activeCategory === index}
               className={cn("flex h-9 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === index ? "text-foreground" : "text-muted-foreground")}
             >
@@ -221,7 +221,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             {activeCategory === index && (
               <div className="mb-2 flex flex-col border-l border-border pl-4">
                 {item.subcategories.map((subcategory) => (
-                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
+                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
                     {subcategory}
                   </Button>
                 ))}
@@ -709,6 +709,14 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
     navigate(`/search?room=${room}&view=grid`);
+  };
+
+  const navigateToRoomCategory = (room: string, category: string, subcategory?: string) => {
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    const params = new URLSearchParams({ room, view: "grid", category });
+    if (subcategory) params.set("subcategory", subcategory);
+    navigate(`/search?${params.toString()}`);
   };
 
   const scheduleRoomMenuClose = () => {
@@ -1232,7 +1240,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
                     <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateFromMegaMenu} onRoomNavigate={navigateToRoom} />
+                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
 

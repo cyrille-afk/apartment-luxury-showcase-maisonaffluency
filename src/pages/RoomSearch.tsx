@@ -191,7 +191,7 @@ export default function RoomSearch() {
         {room ? (
           <>
             {!gridLanding && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <ProductGrid roomSlug={room} compactTop />
+            <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
           </>
         ) : (
           <div className="mx-auto max-w-7xl px-6 py-20">
