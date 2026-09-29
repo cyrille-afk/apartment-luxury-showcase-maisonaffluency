@@ -125,8 +125,23 @@ export default function TradeWorkspace({
   // The selected size/finish always wins over the product's base RRP so the
   // workspace price tracks the configuration on screen.
   const baseRrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
-  const rrpCents = selectedVariantCents && selectedVariantCents > 0 ? selectedVariantCents : baseRrpCents;
-  const usingVariantPrice = !!(selectedVariantCents && selectedVariantCents > 0);
+  // The public pick view intentionally omits variant prices. Resolve the
+  // chosen finish from the protected pricing response, never from public data.
+  const chosenFinishes = selectedFinishes.map((s) => s.trim().toLocaleLowerCase()).filter(Boolean);
+  const protectedMatches = chosenFinishes.length
+    ? (pricing?.size_variants || []).filter((variant) => {
+        const axes = [variant.base, variant.top, variant.label]
+          .map((axis) => (axis || "").trim().toLocaleLowerCase());
+        return chosenFinishes.every((finish) => axes.includes(finish));
+      })
+    : [];
+  const protectedPrices = protectedMatches
+    .map((variant) => Number(variant.price_cents))
+    .filter((cents) => Number.isFinite(cents) && cents > 0);
+  const protectedVariantCents = protectedPrices.length ? Math.min(...protectedPrices) : null;
+  const rrpCents = protectedVariantCents ?? (selectedVariantCents && selectedVariantCents > 0 ? selectedVariantCents : baseRrpCents);
+  const usingVariantPrice = protectedVariantCents != null || !!(selectedVariantCents && selectedVariantCents > 0);
+  const variantPriceExact = protectedVariantCents != null ? protectedPrices.length === 1 : selectedVariantExact;
   const explicitNet =
     !usingVariantPrice && pricing?.trade_price_cents && baseRrpCents && pricing.trade_price_cents < baseRrpCents
       ? pricing.trade_price_cents
@@ -158,12 +173,12 @@ export default function TradeWorkspace({
       </span>
     ) : clientSafe ? (
       <span className="font-display text-2xl leading-none">
-        {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
+        {rrpLabel ? `${usingVariantPrice && !variantPriceExact ? "From " : ""}${rrpLabel}` : "Price upon Request"}
       </span>
     ) : netLabel ? (
       <span className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <span className="font-display text-2xl leading-none">
-          {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+          {usingVariantPrice && !variantPriceExact ? "From " : ""}
           {netLabel}
         </span>
         {rrpLabel && netCents !== rrpCents && (

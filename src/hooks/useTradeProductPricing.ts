@@ -5,6 +5,7 @@ export interface TradeProductPricingRow {
   id: string;
   trade_price_cents: number | null;
   rrp_price_cents: number | null;
+  size_variants?: Array<{ base?: string | null; top?: string | null; label?: string | null; price_cents?: number | null }> | null;
   currency: string | null;
   price_unit: string | null;
   price_prefix: string | null;
