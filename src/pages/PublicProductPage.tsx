@@ -545,8 +545,19 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     : product.wood_label_override;
   // FinishSelector gives overlapping swatches to the Top group first, so only
   // swatches left over for the Base group can stand in for the Base dropdown.
+  // Exception: when Base and Top legitimately share the same finish palette
+  // (e.g. Lady R — same woods on both axes), the swatches must render in BOTH
+  // groups; the size_variants matrix then restricts which Base × Top pairings
+  // are actually orderable.
   const topSwatchFilter = isDualAxis && !frameOnLabel && !baseAxisIsDim && topOptions.length >= 1 ? makeSwatchAxisFilter(topOptions) : null;
-  const baseSwatchPool = topSwatchFilter ? linkedWoodFinishes.filter((n) => !topSwatchFilter(n)) : linkedWoodFinishes;
+  const baseSwatchFilter = isDualAxis && !frameOnLabel && !baseAxisIsDim && baseOptions.length >= 1 ? makeSwatchAxisFilter(baseOptions) : null;
+  const axesShareFinishes = !!(
+    topSwatchFilter && baseSwatchFilter
+    && linkedWoodFinishes.some((n) => topSwatchFilter(n) && baseSwatchFilter(n))
+  );
+  const baseSwatchPool = topSwatchFilter && !axesShareFinishes
+    ? linkedWoodFinishes.filter((n) => !topSwatchFilter(n))
+    : linkedWoodFinishes;
   const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, baseSwatchPool);
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (
