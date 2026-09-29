@@ -2528,8 +2528,8 @@ const TradeDesignersAdmin = () => {
                         {(picksCountMap[d.id]?.total ?? 0) > 0 && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
                             {picksCountMap[d.id].public} public
-                            {picksCountMap[d.id].total - picksCountMap[d.id].public > 0 &&
-                              ` · ${picksCountMap[d.id].total - picksCountMap[d.id].public} trade-only`}
+                            {(picksCountMap[d.id].tradeOnly ?? 0) > 0 &&
+                              ` · ${picksCountMap[d.id].tradeOnly} trade-only`}
                           </Badge>
                         )}
                         {dirty && (
