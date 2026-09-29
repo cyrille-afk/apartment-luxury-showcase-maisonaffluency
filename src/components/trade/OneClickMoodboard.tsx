@@ -22,6 +22,7 @@ const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 // Matching rules live in the `felix-sourcing` backend function; the client
 // only receives the final ranked results.
 type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string };
+type SourcingSuggestion = { label: string; query: string };
 
 export function useMoodboardSourcing() {
   const [mode, setMode] = useState<"prompt" | "reference">("prompt");
@@ -40,22 +41,25 @@ export function useMoodboardSourcing() {
 
   useEffect(() => () => { if (generateTimer.current) clearTimeout(generateTimer.current); }, []);
 
-  const { data: matches = [], isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     // `track` (a submission counter) is only set for real user submissions, so
     // each click is logged once server-side while the default preview is not.
     queryKey: ["felix-sourcing", submitted?.mode, submitted?.value, submitted?.track ?? 0],
     enabled: !!submitted,
     staleTime: 5 * 60_000,
-    queryFn: async (): Promise<SourcedItem[]> => {
+    queryFn: async (): Promise<{ matches: SourcedItem[]; suggestions: SourcingSuggestion[] }> => {
       const { data, error: fnError } = await supabase.functions.invoke("felix-sourcing", {
         body: { mode: submitted!.mode, value: submitted!.value, track: !!submitted!.track, path: window.location.pathname },
       });
       if (fnError) throw fnError;
       if (submitted!.track) trackFelixEvent("felix_generate_success", { mode: submitted!.mode, query: submitted!.value, result_count: data?.results?.length ?? 0 });
-      return ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
+      const matches = ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
         .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName }));
+      return { matches, suggestions: (data?.suggestions ?? []) as SourcingSuggestion[] };
     },
   });
+  const matches = data?.matches ?? [];
+  const suggestions = data?.suggestions ?? [];
   const { data: rrpMap = {} } = usePublicRrpMap(matches.map(({ pick }) => pick.id));
   const destination = useShippingDestination();
 
@@ -95,10 +99,18 @@ export function useMoodboardSourcing() {
     }, 900);
   };
 
+  const chooseSuggestion = (query: string) => {
+    setMode("prompt");
+    setPrompt(query);
+    setError("");
+    trackFelixEvent("felix_generate_submit", { mode: "prompt", query });
+    setSubmitted({ value: query, mode: "prompt", track: Date.now() });
+  };
+
   return {
     mode, setMode, prompt, setPrompt, reference, setReference,
     submitted, generating, unlocked, error, setError,
-    matches, isLoading, isError, rrpMap, destination,
+    matches, suggestions, chooseSuggestion, isLoading, isError, rrpMap, destination,
     email, setEmail, capturing, captureError, captureLead, submit,
   };
 }
@@ -139,7 +151,7 @@ export function MoodboardControls({ mb, embedded = false }: { mb: MoodboardSourc
 
 /* ─── Output display: skeletons, the edit header, product grid, lock banner ─── */
 export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourcing; embedded?: boolean }) {
-  const { submitted, generating, matches, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
+  const { submitted, generating, matches, suggestions, chooseSuggestion, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
 
   const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
     <div className={`flex flex-1 flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
@@ -193,7 +205,15 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
           {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
-          {!isLoading && !isError && matches.length === 0 && <p className="py-10 text-sm text-moodboard-ink/60">{submitted?.value ? `No pieces in our collection match “${submitted.value}” exactly. Try a different colour or material.` : "No pieces are available right now. Please try again later."}</p>}
+          {!isLoading && !isError && matches.length === 0 && <div className="py-10">
+            <p className="font-display text-lg leading-relaxed text-moodboard-ink">{submitted?.value ? `No pieces in our collection match “${submitted.value}” exactly.` : "No pieces are available right now. Please try again later."}</p>
+            {suggestions.length > 0 ? <p className="mt-3 max-w-xl font-body text-sm leading-7 text-moodboard-ink/65">
+              However, you can explore our curated selections in {suggestions.map((suggestion, index) => <span key={suggestion.query}>
+                {index > 0 ? (index === suggestions.length - 1 ? ", or " : ", ") : ""}
+                <Button type="button" variant="link" onClick={() => chooseSuggestion(suggestion.query)} className="h-auto p-0 align-baseline font-display text-base text-moodboard-teal underline decoration-moodboard-teal/30 underline-offset-4 hover:decoration-moodboard-teal">{suggestion.label}</Button>
+              </span>)}.
+            </p> : submitted?.value && <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p>}
+          </div>}
           {(matches.length > 0 || showPending) && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
               {matches.slice(0, embedded ? 2 : 3).map(({ pick, designerName }) => (
