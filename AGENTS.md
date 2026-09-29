@@ -9,7 +9,7 @@
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
 - Felix tour spotlights await target sizes; keep prior rect while transitioning.
 - Felix/Benefits: max-w-[1500px] px-6; Felix controls left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
-- Room menus put room grids above contextual categories; preview pins highlight alternatives without leaving the menu.
+- Room menu previews use room-specific percent pins and alternatives.
 <!-- LOVABLE:BEGIN -->
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
