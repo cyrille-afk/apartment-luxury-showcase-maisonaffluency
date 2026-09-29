@@ -555,6 +555,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     linkedWoodFinishes,
   });
 
+  if (typeof window !== "undefined") console.log("[dbg-base]", JSON.stringify({suppressBaseAsFinish, allBasesHaveSwatches, linkedWoodFinishes, baseAxisLabelRaw, baseAxisIsDim, baseOptions, section}));
   return (
     <div className="flex flex-col gap-2">
       {section !== "supplemental" && <FinishSelector
