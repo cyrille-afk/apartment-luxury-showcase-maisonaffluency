@@ -594,7 +594,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   // Only Shop By Room replaces portrait side columns with a hotspot-driven dock.
   const portraitDock = !!discoveryRoom && activeSceneIsPortrait && !expandedScene;
   const selectedHotspot = portraitDock && activeScene && !dockDismissed
-    ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin)
+    ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) ?? hotspotsForScene(activeScene)[0]
     : undefined;
   const selectedProduct = selectedHotspot ? resolveHotspotProduct(selectedHotspot) : null;
   const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
