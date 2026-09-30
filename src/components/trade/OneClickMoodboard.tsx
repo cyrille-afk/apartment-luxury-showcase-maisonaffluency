@@ -194,7 +194,6 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       </form>
       {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
       <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
-      {unlockPanel}
     </div>
   );
 
