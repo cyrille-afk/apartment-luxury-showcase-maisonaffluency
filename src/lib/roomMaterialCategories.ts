@@ -26,9 +26,13 @@ export const ROOM_MATERIAL_CATEGORIES = [
 
 const word = (text: string, pattern: string) => new RegExp(`\\b(?:${pattern})\\b`, "i").test(text);
 
-export function roomMaterialCategories(materials?: string | null): string[] {
-  if (!materials?.trim()) return [];
-  const m = materials.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+export function roomMaterialCategories(materials?: string | null, title?: string | null): string[] {
+  // Classify on materials + title: mirrors/lighting often carry the material
+  // only in the name ("Hublot Mirror", "Shadow Drawings Mirror"), and some
+  // catalogued pieces have no materials text at all.
+  const combined = [materials, title].filter(Boolean).join(" \u2022 ");
+  if (!combined.trim()) return [];
+  const m = combined.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
   const glass = word(m, "glass");
   // "Mirror-polished steel" describes a finish, not an actual mirror.
   const mirror = word(m, "mirror(?:ed)?") && !/\bmirror[- ]polished\b/i.test(m);
