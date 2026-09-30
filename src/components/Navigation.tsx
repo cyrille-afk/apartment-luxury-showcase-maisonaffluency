@@ -1017,9 +1017,15 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <Button
                     type="button"
                     variant="ghost"
-                    onMouseEnter={() => openRoomMenu(room)}
-                    onFocus={() => openRoomMenu(room)}
-                    onClick={() => openRoomMenu(room)}
+                    onMouseEnter={room === "decor" || room === "lighting" ? () => openRoomMenu(room) : undefined}
+                    onFocus={room === "decor" || room === "lighting" ? () => openRoomMenu(room) : undefined}
+                    onClick={() => {
+                      if (room === "decor" || room === "lighting") openRoomMenu(room);
+                      else {
+                        setMegaMenuOpen(false);
+                        navigate(`/search?room=${room === "living" ? "living-room" : room === "dining" ? "dining-room" : "bedroom"}&view=grid`);
+                      }
+                    }}
                     aria-expanded={megaMenuOpen && activeRoomMenu === room}
                     className={cn(
                       "group relative h-auto rounded-none p-0 font-body text-[12px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground whitespace-nowrap",
