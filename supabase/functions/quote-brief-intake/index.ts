@@ -1,3 +1,4 @@
+import { safeOrigin } from "../_shared/safeOrigin.ts";
 // Frictionless quote/customisation intake for the public product modal.
 //
 // Actions:
@@ -71,13 +72,30 @@ Deno.serve(async (req) => {
     if (limited(`check:${ip}`, 30, 10 * 60 * 1000)) {
       return json({ error: "Too many requests" }, 429);
     }
+    // Only reveal account details to the signed-in owner of that email.
+    // Anonymous callers always get a neutral answer, so the endpoint can't
+    // be used to probe who is registered.
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
+    let callerId: string | null = null;
+    let callerEmail = "";
+    if (token) {
+      const { data: c } = await supabase.auth.getClaims(token);
+      if (c?.claims?.role === "authenticated" && typeof c.claims.sub === "string") {
+        callerId = c.claims.sub;
+        callerEmail = String(c.claims.email ?? "").toLowerCase();
+      }
+    }
+    if (!callerId || callerEmail !== email) {
+      return json({ exists: false, firstName: "", tier: "standard" });
+    }
     const { data, error } = await supabase
       .from("profiles")
       .select("id, first_name, trade_tier")
-      .ilike("email", email)
+      .eq("id", callerId)
       .limit(1);
     if (error) {
-      console.error("check_email failed", error);
+      console.error("check_email failed", error.message);
       return json({ exists: false });
     }
     const profile = data?.[0] ?? null;
@@ -216,7 +234,7 @@ Deno.serve(async (req) => {
     if ((existing?.length ?? 0) === 0) {
       const origin = (() => {
         try {
-          return pageUrl ? new URL(pageUrl).origin : "https://www.maisonaffluency.com";
+          return safeOrigin(pageUrl || null);
         } catch {
           return "https://www.maisonaffluency.com";
         }

@@ -1,3 +1,4 @@
+import { safeRequestOrigin } from "../_shared/safeOrigin.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
@@ -44,7 +45,7 @@ serve(async (req) => {
       if (customers.data.length) customerId = customers.data[0].id;
     }
 
-    const origin = req.headers.get("origin") || "https://apartment-luxury-showcase-maisonaffluency.lovable.app";
+    const origin = safeRequestOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

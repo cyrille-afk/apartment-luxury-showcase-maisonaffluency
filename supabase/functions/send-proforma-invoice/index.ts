@@ -45,7 +45,6 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const orderRef = str(body?.orderRef, 64);
-    const orderId = str(body?.orderId, 64);
     const recipientEmail = str(body?.recipientEmail, 200);
     const recipientName = str(body?.recipientName, 160);
     const currency = (str(body?.currency, 8) || "usd").toUpperCase();
@@ -60,11 +59,12 @@ serve(async (req) => {
     // Authorization: the caller must own the order, or hold an admin/trade role.
     const { data: orderRow } = await supabase
       .from("shop_orders")
-      .select("user_id")
+      .select("id, user_id, email")
       .eq("order_ref", orderRef)
       .maybeSingle();
     const isOwner = orderRow?.user_id != null && orderRow.user_id === userId;
     let isStaff = false;
+    let isAdmin = false;
     if (!isOwner) {
       const roleChecks = await Promise.all(
         (["admin", "super_admin", "trade_user"] as const).map((role) =>
@@ -75,9 +75,22 @@ serve(async (req) => {
         ),
       );
       isStaff = roleChecks.some(Boolean);
+      isAdmin = roleChecks[0] || roleChecks[1];
     }
     if (!isOwner && !isStaff) {
       return json({ error: "You are not authorized to invoice this order." }, 403);
+    }
+    if (!orderRow) {
+      return json({ error: "Order not found." }, 404);
+    }
+
+    // The invoice may only go to the order's own contact or the caller
+    // (admins may address it to anyone, e.g. an accounts department).
+    const callerEmail = String((claims?.claims as Record<string, unknown> | undefined)?.email ?? "").toLowerCase();
+    const wanted = recipientEmail.toLowerCase();
+    const orderEmail = String(orderRow.email ?? "").toLowerCase();
+    if (!isAdmin && wanted !== orderEmail && wanted !== callerEmail) {
+      return json({ error: "The invoice can only be sent to the order's contact email or your own." }, 403);
     }
 
     /* Store the PDF (best effort — never block the email on storage). */
@@ -96,9 +109,8 @@ serve(async (req) => {
           .createSignedUrl(path, 60 * 60 * 24 * 30);
         downloadUrl = signed?.signedUrl ?? null;
 
-        if (orderId) {
-          await supabase.from("shop_orders").update({ proforma_invoice_path: path }).eq("id", orderId);
-        }
+        // Always write to the authorized order itself; a body-supplied id is ignored.
+        await supabase.from("shop_orders").update({ proforma_invoice_path: path }).eq("id", orderRow.id);
       } catch (storageErr) {
         console.error("Pro-forma storage failed:", storageErr);
       }

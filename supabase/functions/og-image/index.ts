@@ -229,35 +229,14 @@ async function getOgData(path: string, reqUrl?: URL): Promise<OgData> {
   const presMatch = clean.match(/^\/trade\/presentations\/([^/]+)\/view$/);
   if (presMatch) {
     const id = presMatch[1];
-    const sb = supabaseAdmin();
-    const { data } = await sb
-      .from("presentations")
-      .select("title, description, client_name, project_name, is_published")
-      .eq("id", id)
-      .single();
-
-    if (data) {
-      const subtitle = [data.client_name, data.project_name]
-        .filter(Boolean)
-        .join(" · ");
-      const desc =
-        data.description ||
-        `Design presentation${subtitle ? ` — ${subtitle}` : ""} by Maison Affluency.`;
-
-      // Try to get the first slide image as the preview
-      const { data: slide } = await sb
-        .from("presentation_slides")
-        .select("image_url")
-        .eq("presentation_id", id)
-        .order("sort_order", { ascending: true })
-        .limit(1)
-        .single();
-
+    // Presentations are private trade documents (client and project names),
+    // so link previews stay generic and never read the presentation itself.
+    {
       return {
-        title: `${data.title}${subtitle ? ` — ${subtitle}` : ""} — Maison Affluency`,
-        description: desc.length > 160 ? desc.slice(0, 157) + "…" : desc,
-        image: slide ? ogImage(slide.image_url) : TRADE_IMAGE,
-        url: `${SITE_URL}/trade/presentations/${id}/view`,
+        title: "Design presentation — Maison Affluency",
+        description: "A private design presentation prepared by Maison Affluency for a trade client.",
+        image: TRADE_IMAGE,
+        url: `${SITE_URL}/trade/presentations/${encodeURIComponent(id)}/view`,
       };
     }
   }

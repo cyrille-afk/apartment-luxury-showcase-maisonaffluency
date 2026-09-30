@@ -1,3 +1,4 @@
+import { safeRequestOrigin } from "../_shared/safeOrigin.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
@@ -552,7 +553,7 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: buyerEmail, limit: 1 });
     if (customers.data.length) customerId = customers.data[0].id;
 
-    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
+    const origin = safeRequestOrigin(req);
 
     // One-off, session-scoped coupon carrying the exact discount shown in the
     // Order Summary — keeps line items at their displayed price.
