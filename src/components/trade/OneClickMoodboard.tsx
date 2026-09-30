@@ -173,6 +173,26 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
     </div>
   );
 
+  // A real card whose materials are still being confirmed: the card renders
+  // fully behind a soft blur, with a "further sourcing pending" overlay —
+  // never an empty placeholder box.
+  const sourcedCard = ({ pick, designerName }: SourcedItem, locked: boolean) => (
+    <article className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+      <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={locked ? "" : pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
+      {cardBody(pick, designerName, locked)}
+    </article>
+  );
+
+  const pendingWrapper = (key: string, card: ReactNode) => (
+    <div key={key} className="relative h-full">
+      <div aria-hidden="true" className="pointer-events-none h-full select-none opacity-60 blur-[6px]">{card}</div>
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-moodboard-cream/50 p-4 text-center backdrop-blur-[2px]">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-moodboard-ink">Further sourcing pending</p>
+        <p className="mt-1 text-[10px] text-moodboard-ink/60">Material verification required</p>
+      </div>
+    </div>
+  );
+
   // A website URL (like the studio's own homepage) is matched by its readable
   // words — only image or Pinterest links carry the image-matching disclaimer.
   const isImageReference = (value: string) => {
