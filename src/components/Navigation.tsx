@@ -190,10 +190,10 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
                   <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
                </div>
                {"name" in piece && (
-                 <div className="bg-background px-1.5 py-1.5">
-                   <div className="truncate font-body text-[10px] font-semibold leading-tight text-foreground">{piece.name}</div>
-                   <div className="truncate font-body text-[9px] leading-tight text-muted-foreground">{piece.designer}</div>
-                 </div>
+                  <div className="bg-background px-1.5 py-1.5">
+                    <div className="min-h-[2rem] font-body text-[11px] font-bold leading-tight text-foreground line-clamp-2">{piece.name}</div>
+                    <div className="mt-0.5 truncate font-body text-[10px] leading-tight text-muted-foreground">{piece.designer}</div>
+                  </div>
                )}
             </div>
           ))}
