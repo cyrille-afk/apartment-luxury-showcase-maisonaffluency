@@ -848,6 +848,13 @@
       "when": 1790657178092,
       "tag": "0120_add_trade_id_and_resolver",
       "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1790777836541,
+      "tag": "0121_wintrebert_cloud_filigrane_public_exception",
+      "breakpoints": true
     }
   ]
 }
