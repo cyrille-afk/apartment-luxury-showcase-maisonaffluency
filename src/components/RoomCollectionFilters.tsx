@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export type RoomFacet = "category" | "designer" | "leadTime" | "venue" | "handmade" | "material";
+export type RoomFacet = "category" | "designer" | "leadTime" | "handmade" | "material";
 export type RoomFacetValues = Record<RoomFacet, string | null>;
 export type RoomFacetOptions = Record<RoomFacet, { value: string; count: number }[]>;
 
@@ -13,7 +13,6 @@ const FACETS: { key: RoomFacet; label: string }[] = [
   { key: "category", label: "Categories" },
   { key: "designer", label: "Designers/Artists" },
   { key: "leadTime", label: "Lead Time" },
-  { key: "venue", label: "Exhibition Venues" },
   { key: "handmade", label: "Handmade" },
   { key: "material", label: "Materials" },
 ];
