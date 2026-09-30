@@ -299,14 +299,9 @@ serve(async (req) => {
           }, 0)
         : 0;
     const subtotal = grossSubtotal - discountCents;
-    // Shipping is "To be Quoted by Advisor" until an advisor confirms a rate.
-    // Only charge it when the client explicitly passes a confirmed amount.
-    const shippingConfirmed = body?.shippingConfirmed === true;
-    const rawShipping = Math.round(Number(body?.shippingCents) || 0);
-    const shipping =
-      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
-        ? Math.min(rawShipping, subtotal)
-        : 0;
+    // Shipping is "To be Quoted by Advisor": never charge a browser-supplied
+    // amount. Freight is invoiced separately once an advisor confirms it.
+    const shipping = 0;
     // Destination tax: one engine decides the rate, wording and registration.
     const shippingCountry =
       typeof body?.shippingCountry === "string" ? body.shippingCountry : "";
