@@ -306,7 +306,7 @@ function CuratorsCanvas() {
 }
 
 /** Editorial hotspot pin: fine-lined ring, quiet by default, label + pulse on hover (Shop by Room). */
-function HotspotPin({ hotspot, editorial, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; onOpen: () => void; onPreview?: () => void }) {
+function HotspotPin({ hotspot, editorial, active, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; onOpen: () => void; onPreview?: () => void }) {
   if (!editorial) {
     return (
       <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
@@ -319,10 +319,11 @@ function HotspotPin({ hotspot, editorial, onOpen, onPreview }: { hotspot: Hotspo
   }
   const flipLabel = hotspot.x_percent > 72;
   return (
-    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
-      <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background/70 bg-white/5 shadow-[0_1px_6px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:scale-110 group-hover:border-background/90 group-hover:animate-hotspot-pulse group-focus-visible:border-background/90 md:size-6">
-        <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-        <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+      {active && <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-background/60 opacity-75 md:size-6" />}
+      <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm backdrop-blur-[2px] transition-all duration-300 ease-out md:size-6 ${active ? "scale-110 border-background bg-background" : "border-muted-foreground/30 bg-foreground/85 group-hover:scale-110 group-hover:bg-foreground"}`}>
+        <span className={`absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
+        <span className={`absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
       </span>
       <span aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-20 hidden -translate-y-1/2 flex-col items-start whitespace-nowrap rounded-md border border-background/40 bg-background/95 px-4 py-2.5 opacity-0 shadow-[0_12px_32px_rgba(20,20,20,0.16)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 md:flex ${flipLabel ? "right-full mr-3 translate-x-1 group-hover:translate-x-0" : "left-full ml-3 -translate-x-1 group-hover:translate-x-0"}`}>
         <span className="font-display text-[13px] font-normal leading-snug text-foreground">
@@ -744,7 +745,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
                             ))}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
@@ -816,7 +817,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
             <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
                <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} onLoad={() => setExpandedLoadedScene(expandedScene.id)} className={`block max-h-[calc(100dvh-4rem)] max-w-full object-contain ${hotspotsReady && expandedLoadedScene === expandedScene.id ? "opacity-100" : "opacity-0"}`} />
                 {hotspotsReady && expandedLoadedScene === expandedScene.id && hotspotsForScene(expandedScene).map((hotspot) => (
-                  <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} />
+                  <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} />
                 ))}
             </div>
           )}
