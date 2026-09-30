@@ -238,8 +238,8 @@ function suggestMaterials(catalog: Item[], value: string) {
     if (usedTerms.has(material.term) || suggestions.some((s) => s.query === `${category} ${material.term}`)) continue;
     if (!typed.some((item) => material.test.test(`${item.title} ${item.materials ?? ""}`.toLowerCase()))) continue;
     const query = `${category} ${material.term}`;
-    // Never suggest a material unless the same strict search yields a published piece.
-    if (match(catalog, "prompt", query).length) suggestions.push({ label: material.label, query });
+    // Never suggest a material unless the same strict search verifies a published piece.
+    if (match(catalog, "prompt", query).some((r) => r.status === "verified")) suggestions.push({ label: material.label, query });
     if (suggestions.length === 3) break;
   }
   return suggestions;
@@ -257,7 +257,9 @@ Deno.serve(async (req) => {
     }
     const catalog = await loadCatalog();
     const results = match(catalog, mode, value);
-    const suggestions = mode === "prompt" && results.length === 0 ? suggestMaterials(catalog, value) : [];
+    // Suggest clickable materials whenever nothing verified matches — even
+    // though similar inventory is rendered in the meantime.
+    const suggestions = mode === "prompt" && !results.some((r) => r.status === "verified") ? suggestMaterials(catalog, value) : [];
     if (track) await logUsage(req, mode, value, results.length, path);
     return json({ results, suggestions });
   } catch (e) {
