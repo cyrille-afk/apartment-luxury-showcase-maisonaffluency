@@ -184,33 +184,40 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
   }).sort((a, b) => b.score - a.score || a.index - b.index);
-  // Fallback: if a material-strict query yields fewer than 3 high-weight matches,
-  // fill the remaining slots with same-subcategory pieces ranked by manual
-  // gallery priority (catalogue sort_order == ascending index order).
-  if (strictMat) {
-    const highWeight = ranked.filter((r) => r.score >= 8).length;
-    if (false && highWeight < 3) {
-      const eligibleIds = new Set(eligible.map((i) => i.id));
-      const fill = catalog
-        .map((item, index) => ({ item, index }))
-        .filter(({ item }) => !eligibleIds.has(item.id) && typeOk(item) && (!lighting || isLightingItem(item)))
-        .map(({ item, index }) => ({ item, index, score: -1 }));
-      ranked.push(...fill);
-    }
+  // Fallback: when a gated query verifies fewer than 3 pieces, backfill the
+  // remaining slots with same-typology "similar" inventory. The client renders
+  // these cards immediately while material verification continues.
+  const MIN_VERIFIED = 3;
+  const gated = strictAsh || strictMat || lighting;
+  const similar: { item: Item; index: number; score: number }[] = [];
+  if (gated && ranked.length < MIN_VERIFIED) {
+    const verifiedIds = new Set(ranked.map((r) => r.item.id));
+    similar.push(...catalog
+      .map((item, index) => ({ item, index, score: scoreItem(item) }))
+      .filter(({ item }) => !verifiedIds.has(item.id) && (!typeWords.length || typeOk(item)) && (!lighting || isLightingItem(item)))
+      .sort((a, b) => b.score - a.score || a.index - b.index)
+      .slice(0, MIN_VERIFIED - ranked.length));
   }
   if (!strictAsh && !strictMat && ranked.some((r) => r.score >= 5)) {
     // A category-level match exists: drop description-only hits so stylistic words can't pollute.
     const keep = ranked.filter((r) => r.score >= 5);
     ranked.length = 0; ranked.push(...keep);
   }
+  // Status per card: gate-passing (or strongly scored) results are "verified";
+  // everything else ships as "similar" — rendered while verification runs.
+  const hasStrong = ranked.some((r) => r.score >= 5);
+  const verifiedOut: { item: Item; status: "verified" | "similar" }[] = gated || hasStrong
+    ? ranked.map((r) => ({ item: r.item, status: "verified" as const }))
+    : ranked.map((r) => ({ item: r.item, status: "similar" as const }));
+  const similarOut: { item: Item; status: "verified" | "similar" }[] = similar.map((r) => ({ item: r.item, status: "similar" as const }));
   const seen = new Set<string>();
-  const out: Omit<Item, "category" | "subcategory">[] = [];
-  for (const { item } of ranked) {
+  const out: Array<Omit<Item, "category" | "subcategory"> & { status: "verified" | "similar" }> = [];
+  for (const { item, status } of [...verifiedOut, ...similarOut]) {
     const key = item.title.toLowerCase().replace(/\s+by\s+.+$/, "").replace(/[^a-z0-9]/g, "");
     const img = item.image.split("?")[0];
     if (seen.has(key) || seen.has(img)) continue;
     seen.add(key); seen.add(img);
-    out.push({ id: item.id, title: item.title, image: item.image, materials: item.materials, designerName: item.designerName });
+    out.push({ id: item.id, title: item.title, image: item.image, materials: item.materials, designerName: item.designerName, status });
     if (out.length === 9) break;
   }
   return out;
