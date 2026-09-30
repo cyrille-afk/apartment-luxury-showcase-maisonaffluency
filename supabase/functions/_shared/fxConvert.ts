@@ -1,23 +1,10 @@
 /**
- * Server-side FX conversion for settlement currencies.
- *
- * The shopper locks a destination + currency in the header modal (Singapore →
- * SGD). Catalogue prices are stored in their native currency (EUR, USD…), so
- * the order must be converted before it is recorded and invoiced.
- *
- * Rates come from the platform `currency_rates` table (refreshed twice daily
- * by the `sync-currency-rates` function), so checkout, quotes and the browser
- * all price from the same numbers. Cached in memory for 10 minutes; a
- * hardcoded table guarantees checkout is never blocked.
+ * Server-side FX conversion (shared). Rates from `currency_rates`, cached 10
+ * minutes, with a hardcoded fallback so pricing is never blocked.
+ * Mirrors create-cart-checkout/fxConvert.ts.
  */
-
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-export const SETTLEMENT_CURRENCIES = [
-  "usd", "eur", "gbp", "sgd", "chf", "aed", "hkd", "aud",
-] as const;
-
-/** Approximate cross rates — mirrors src/lib/fxRates.ts FALLBACK_RATES. */
 const FALLBACK: Record<string, number> = {
   EUR_USD: 1.1583, EUR_SGD: 1.473, EUR_GBP: 0.8589, EUR_CHF: 0.9421,
   EUR_AED: 4.2538, EUR_HKD: 9.02, EUR_AUD: 1.7527,
@@ -27,13 +14,11 @@ const FALLBACK: Record<string, number> = {
   SGD_USD: 0.7863, SGD_EUR: 0.6788, SGD_GBP: 0.5831,
 };
 
-type Cached = { rates: Record<string, number>; at: number };
-const cache = new Map<string, Cached>();
+const cache = new Map<string, { rates: Record<string, number>; at: number }>();
 const TTL_MS = 10 * 60 * 1000;
 
 async function ratesFor(base: string): Promise<Record<string, number>> {
-  const key = base.toUpperCase();
-  const hit = cache.get(key);
+  const hit = cache.get(base);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.rates;
   try {
     const supabase = createClient(
@@ -44,40 +29,26 @@ async function ratesFor(base: string): Promise<Record<string, number>> {
     const { data, error } = await supabase
       .from("currency_rates")
       .select("target_currency,rate")
-      .eq("base_currency", key);
+      .eq("base_currency", base);
     if (error) throw error;
-    if (data?.length) {
-      const rates: Record<string, number> = {};
-      for (const row of data) {
-        const r = Number(row.rate);
-        if (Number.isFinite(r) && r > 0) rates[row.target_currency] = r;
-      }
-      cache.set(key, { rates, at: Date.now() });
-      return rates;
+    const rates: Record<string, number> = {};
+    for (const row of data || []) {
+      const r = Number(row.rate);
+      if (Number.isFinite(r) && r > 0) rates[row.target_currency] = r;
     }
+    if (Object.keys(rates).length) cache.set(base, { rates, at: Date.now() });
+    return rates;
   } catch (e) {
-    console.error("[fxConvert] rate table lookup failed", key, String(e));
+    console.error("[fxConvert] rate lookup failed", base, String(e));
+    return {};
   }
-  return {};
 }
 
-/** 1 unit of `from` expressed in `to`. Always resolves to a usable number. */
-export async function getRate(from: string, to: string): Promise<number> {
+export async function convertCents(cents: number, from: string, to: string): Promise<number> {
   const src = (from || "usd").toUpperCase();
   const tgt = (to || "usd").toUpperCase();
-  if (src === tgt) return 1;
-  const live = await ratesFor(src);
-  const rate = Number(live[tgt]);
-  if (Number.isFinite(rate) && rate > 0) return rate;
-  return FALLBACK[`${src}_${tgt}`] ?? 1;
-}
-
-/** Convert a cent amount between currencies. */
-export async function convertCents(
-  cents: number,
-  from: string,
-  to: string,
-): Promise<number> {
-  const rate = await getRate(from, to);
+  if (src === tgt) return cents;
+  const live = Number((await ratesFor(src))[tgt]);
+  const rate = Number.isFinite(live) && live > 0 ? live : FALLBACK[`${src}_${tgt}`] ?? 1;
   return Math.round(cents * rate);
 }
