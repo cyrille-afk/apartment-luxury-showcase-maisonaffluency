@@ -231,22 +231,16 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
               </span>)}.
             </p> : submitted?.value && <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p>}
           </div>}
-          {(matches.length > 0 || showPending) && <>
+          {matches.length > 0 && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
-              {matches.slice(0, embedded ? 2 : 3).map(({ pick, designerName }) => (
+              {matches.slice(0, 3).map(({ pick, designerName }) => (
                 <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
                   <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
                   {cardBody(pick, designerName, false)}
                 </article>
               ))}
-              {showPending && Array.from({ length: Math.max(0, 3 - Math.min(matches.length, 2)) }, (_, index) => (
-                <article key={`pending-${index}`} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                  <div className="aspect-square bg-moodboard-ink/5" aria-hidden="true" />
-                  <div className="p-2.5"><p className="font-display text-sm text-moodboard-ink">Further sourcing pending</p><p className="mt-1 text-xs text-moodboard-ink/60">Material verification required</p><p className="mt-3 border-t border-moodboard-ink/10 pt-2 text-xs text-moodboard-teal">Price upon Request</p></div>
-                </article>
-              ))}
             </div>
-            {(embedded || matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
+            {(embedded || matches.length > 3 || (!unlocked && matches.length > 0)) && <div className="relative mt-4">
               {embedded ? <div className="relative overflow-hidden border border-moodboard-ink/10 bg-moodboard-cream p-4">
                 <div aria-hidden="true" className="pointer-events-none select-none space-y-3 blur-md"><div className="flex justify-between border-b border-moodboard-ink/10 pb-3"><span>Supplier & atelier network</span><span>Availability</span></div><div className="flex justify-between"><span>Material specification · Lead times</span><span>Trade margin</span></div><div className="flex justify-between"><span>Project presentation · Client export</span><span>Locked</span></div></div>
                 <div className="absolute inset-0 bg-moodboard-cream/35 backdrop-blur-sm" aria-hidden="true" />
