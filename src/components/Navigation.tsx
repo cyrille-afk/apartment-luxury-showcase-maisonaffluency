@@ -150,10 +150,10 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
               onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
               onClick={() => { setSelected(true); setOpen(true); }}
                style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
-               className="group absolute z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
-              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
-                <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
+               className="group absolute z-10 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
+               <span className="relative block size-3.5 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
+                 <span className="absolute left-1/2 top-1/2 h-px w-1.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
+                 <span className="absolute left-1/2 top-1/2 h-1.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
               </span>
             </Button>
           </PopoverTrigger>
@@ -179,7 +179,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
         </div>
       </div>
     </div>
-    <p className="mt-6 w-full max-w-[380px] text-justify font-body text-sm font-semibold leading-relaxed tracking-wide text-crimson-black">
+    <p className="mt-6 w-full max-w-[380px] text-justify font-body text-[13px] font-bold leading-relaxed text-foreground">
       Leverage our elite global gallery network and high-end sourcing to elevate your portfolio
     </p>
   </div>

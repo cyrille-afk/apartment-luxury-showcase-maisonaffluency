@@ -26,7 +26,7 @@ export interface RoomPreviewScene {
 export const ROOM_PREVIEW_SCENES: Record<"living-room" | "office", RoomPreviewScene> = {
   "living-room": {
     previewImage: { src: livingRoomHero, alt: "Sculptural furniture in an architectural living room" },
-    hotspot: { left: 42, top: 87, label: "Coffee table" },
+    hotspot: { left: 53, top: 85, label: "Coffee table" },
     highlightIndex: 2, // marble alternative
     pieces: [
       { src: woodCoffeeTable, alt: "Wood coffee table alternative", name: "Praia Da Granja", designer: "Man of Parts" },
