@@ -1060,21 +1060,23 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
-          {/* ROW 1 — fixed-height utility ribbon with centered brand lockup */}
-          <div className="grid min-h-16 grid-cols-3 items-center justify-items-center border-b border-neutral-100 py-3">
+          {/* ROW 1 — wordmark centered independently of its date badge */}
+          <div className="relative grid min-h-16 grid-cols-3 items-center justify-items-center border-b border-neutral-100 py-3">
             <div className="flex items-center justify-self-start">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
 
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap inline-flex items-center">
-              <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                MAISON AFFLUENCY
+            <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
+              <button onClick={scrollToTop} className="group cursor-pointer">
+                <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                  MAISON AFFLUENCY
+                </span>
+              </button>
+              <span className="absolute left-full top-1/2 ml-5 flex -translate-y-1/2 items-center gap-5 lg:ml-6 lg:gap-6">
+                <span aria-hidden="true" className="h-3.5 w-px bg-foreground/25" />
+                <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">Est. 2017</span>
               </span>
-              <span aria-hidden="true" className="mx-5 lg:mx-6 h-3.5 w-px bg-foreground/25" />
-              <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">
-                Est. 2017
-              </span>
-            </button>
+            </div>
 
             <div
               ref={utilityClusterRef}
