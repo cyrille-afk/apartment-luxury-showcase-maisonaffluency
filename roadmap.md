@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Match Shop by Room collection card image canvases and caption grids to the designer collection styling.
+
 - [x] Balance the room subtitle above its label and reduce the image-to-collection gap so the product breakdown is immediately visible.
 
 - [x] Match the Dining dropdown's three curated dining tables to published catalog photos, and restore the exact crimson-black tagline beneath the cards.
