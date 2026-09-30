@@ -1907,6 +1907,20 @@ type DesignerEditorDraft = {
 
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
+  // Escape hatch: ?fresh=1 opens the editor with nothing expanded (unsaved
+  // text edits in the draft buffer are kept) so a stuck restore can be bypassed.
+  try {
+    if (new URLSearchParams(window.location.search).get("fresh") === "1") {
+      localStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
+      sessionStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
+      Object.keys(sessionStorage)
+        .filter((k) => k.startsWith("designer_editor_expanded_pick_v1::"))
+        .forEach((k) => sessionStorage.removeItem(k));
+      const raw = localStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY) || sessionStorage.getItem(DESIGNER_EDITOR_DRAFT_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return { editBuffer: parsed.editBuffer ?? {} };
+    }
+  } catch { /* fall through to normal restore */ }
   let draft: Partial<DesignerEditorDraft> = {};
   try {
     // Prefer localStorage (survives tab close + hard reloads); fall back to

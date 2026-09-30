@@ -9,6 +9,10 @@ import { startEnvironmentIndexingGuard } from "./lib/environmentIndexingGuard";
 import { bootIossRouting } from "./config/iossConfig";
 import { ensureStorageHeadroom, installStorageQuotaGuard } from "./lib/storageReclaim";
 import AppRecoveryBoundary from "./components/AppRecoveryBoundary";
+import { installFunctionsAuthRetry } from "./lib/installFunctionsAuthRetry";
+
+// Refresh the sign-in and retry once whenever any backend function says 401.
+installFunctionsAuthRetry();
 
 const isTradeRoute = window.location.pathname.includes("/trade");
 document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
