@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
 import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
-import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
+import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,7 @@ function upsertMeta(attr: "name" | "property", key: string, content: string): HT
  * No product grid is rendered on this landing.
  */
 function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string }) {
-  const scene = getRoomPreviewScene(room);
+  const scene = useRoomPreviewScene(room);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
 
@@ -137,8 +137,8 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
         <div className={cn("grid grid-cols-1 gap-6 transition-all duration-300 sm:grid-cols-3", selected && "ring-1 ring-primary ring-offset-4 ring-offset-background")}>
           {scene.pieces.map((piece, index) => (
             <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-90")}>
-              <div className="aspect-[4/3] overflow-hidden">
-                <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+               <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
+                 <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
               </div>
               {piece.name && (
                 <div className="bg-background px-3 py-2.5">
