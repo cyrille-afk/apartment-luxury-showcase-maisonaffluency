@@ -163,51 +163,61 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
     : strictMat ? catalog.filter((i) => matOk(i) && typeOk(i) && (!lighting || isLightingItem(i)))
     : lighting ? catalog.filter(isLightingItem) : catalog;
   const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
-  const ranked = eligible.map((item, index) => {
+  const scoreItem = (item: Item) => {
     const hay = keywords([item.title, item.category, item.subcategory, item.materials, item.designerName].filter(Boolean).join(" "));
     const catW = keywords(`${item.category ?? ""} ${item.subcategory ?? ""}`).map(sing);
     const titleW = keywords(item.title).map(sing);
     const descW = keywords(`${item.materials ?? ""} ${item.designerName}`).map(sing);
-    let score = strictAsh ? ashScore(item)
-      : lighting ? lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0)
-      : terms.reduce((s, t) => {
-          // Field-priority weights: category/subcategory 10 > title 5 > description/materials 1.
-          const inCat = catW.some((w) => same(w, t)), inTitle = titleW.some((w) => same(w, t));
-          const inDesc = descW.some((w) => same(w, t)) || hay.some((w) => w.includes(t));
-          const mat = MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0;
-          return s + mat + (inCat ? 10 : 0) + (inTitle ? 5 : 0) + (!inCat && !inTitle && inDesc ? 1 : 0);
-        }, 0);
+    if (strictAsh) return ashScore(item);
+    if (lighting) return lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0);
+    return terms.reduce((s, t) => {
+      // Field-priority weights: category/subcategory 10 > title 5 > description/materials 1.
+      const inCat = catW.some((w) => same(w, t)), inTitle = titleW.some((w) => same(w, t));
+      const inDesc = descW.some((w) => same(w, t)) || hay.some((w) => w.includes(t));
+      const mat = MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0;
+      return s + mat + (inCat ? 10 : 0) + (inTitle ? 5 : 0) + (!inCat && !inTitle && inDesc ? 1 : 0);
+    }, 0);
+  };
+  const ranked = eligible.map((item, index) => {
+    let score = scoreItem(item);
     const pin = pinned.findIndex((p) => p.title.test(item.title) && p.designer.test(item.designerName));
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
   }).sort((a, b) => b.score - a.score || a.index - b.index);
-  // Fallback: if a material-strict query yields fewer than 3 high-weight matches,
-  // fill the remaining slots with same-subcategory pieces ranked by manual
-  // gallery priority (catalogue sort_order == ascending index order).
-  if (strictMat) {
-    const highWeight = ranked.filter((r) => r.score >= 8).length;
-    if (false && highWeight < 3) {
-      const eligibleIds = new Set(eligible.map((i) => i.id));
-      const fill = catalog
-        .map((item, index) => ({ item, index }))
-        .filter(({ item }) => !eligibleIds.has(item.id) && typeOk(item) && (!lighting || isLightingItem(item)))
-        .map(({ item, index }) => ({ item, index, score: -1 }));
-      ranked.push(...fill);
-    }
+  // Fallback: when a gated query verifies fewer than 3 pieces, backfill the
+  // remaining slots with same-typology "similar" inventory. The client renders
+  // these cards immediately while material verification continues.
+  const MIN_VERIFIED = 3;
+  const gated = strictAsh || strictMat || lighting;
+  const similar: { item: Item; index: number; score: number }[] = [];
+  if (gated && ranked.length < MIN_VERIFIED) {
+    const verifiedIds = new Set(ranked.map((r) => r.item.id));
+    similar.push(...catalog
+      .map((item, index) => ({ item, index, score: scoreItem(item) }))
+      .filter(({ item }) => !verifiedIds.has(item.id) && (!typeWords.length || typeOk(item)) && (!lighting || isLightingItem(item)))
+      .sort((a, b) => b.score - a.score || a.index - b.index)
+      .slice(0, MIN_VERIFIED - ranked.length));
   }
   if (!strictAsh && !strictMat && ranked.some((r) => r.score >= 5)) {
     // A category-level match exists: drop description-only hits so stylistic words can't pollute.
     const keep = ranked.filter((r) => r.score >= 5);
     ranked.length = 0; ranked.push(...keep);
   }
+  // Status per card: gate-passing (or strongly scored) results are "verified";
+  // everything else ships as "similar" — rendered while verification runs.
+  const hasStrong = ranked.some((r) => r.score >= 5);
+  const verifiedOut: { item: Item; status: "verified" | "similar" }[] = gated || hasStrong
+    ? ranked.map((r) => ({ item: r.item, status: "verified" as const }))
+    : ranked.map((r) => ({ item: r.item, status: "similar" as const }));
+  const similarOut: { item: Item; status: "verified" | "similar" }[] = similar.map((r) => ({ item: r.item, status: "similar" as const }));
   const seen = new Set<string>();
-  const out: Omit<Item, "category" | "subcategory">[] = [];
-  for (const { item } of ranked) {
+  const out: Array<Omit<Item, "category" | "subcategory"> & { status: "verified" | "similar" }> = [];
+  for (const { item, status } of [...verifiedOut, ...similarOut]) {
     const key = item.title.toLowerCase().replace(/\s+by\s+.+$/, "").replace(/[^a-z0-9]/g, "");
     const img = item.image.split("?")[0];
     if (seen.has(key) || seen.has(img)) continue;
     seen.add(key); seen.add(img);
-    out.push({ id: item.id, title: item.title, image: item.image, materials: item.materials, designerName: item.designerName });
+    out.push({ id: item.id, title: item.title, image: item.image, materials: item.materials, designerName: item.designerName, status });
     if (out.length === 9) break;
   }
   return out;
@@ -228,8 +238,8 @@ function suggestMaterials(catalog: Item[], value: string) {
     if (usedTerms.has(material.term) || suggestions.some((s) => s.query === `${category} ${material.term}`)) continue;
     if (!typed.some((item) => material.test.test(`${item.title} ${item.materials ?? ""}`.toLowerCase()))) continue;
     const query = `${category} ${material.term}`;
-    // Never suggest a material unless the same strict search yields a published piece.
-    if (match(catalog, "prompt", query).length) suggestions.push({ label: material.label, query });
+    // Never suggest a material unless the same strict search verifies a published piece.
+    if (match(catalog, "prompt", query).some((r) => r.status === "verified")) suggestions.push({ label: material.label, query });
     if (suggestions.length === 3) break;
   }
   return suggestions;
@@ -247,7 +257,9 @@ Deno.serve(async (req) => {
     }
     const catalog = await loadCatalog();
     const results = match(catalog, mode, value);
-    const suggestions = mode === "prompt" && results.length === 0 ? suggestMaterials(catalog, value) : [];
+    // Suggest clickable materials whenever nothing verified matches — even
+    // though similar inventory is rendered in the meantime.
+    const suggestions = mode === "prompt" && !results.some((r) => r.status === "verified") ? suggestMaterials(catalog, value) : [];
     if (track) await logUsage(req, mode, value, results.length, path);
     return json({ results, suggestions });
   } catch (e) {

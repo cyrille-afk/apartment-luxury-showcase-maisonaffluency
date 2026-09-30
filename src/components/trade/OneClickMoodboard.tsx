@@ -21,7 +21,7 @@ const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 
 // Matching rules live in the `felix-sourcing` backend function; the client
 // only receives the final ranked results.
-type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string };
+type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string; status: "verified" | "similar" };
 type SourcingSuggestion = { label: string; query: string };
 
 export function useMoodboardSourcing() {
@@ -53,8 +53,8 @@ export function useMoodboardSourcing() {
       });
       if (fnError) throw fnError;
       if (submitted!.track) trackFelixEvent("felix_generate_success", { mode: submitted!.mode, query: submitted!.value, result_count: data?.results?.length ?? 0 });
-      const matches = ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
-        .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName }));
+      const matches = ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string; status?: string }>)
+        .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName, status: r.status === "similar" ? "similar" as const : "verified" as const }));
       return { matches, suggestions: (data?.suggestions ?? []) as SourcingSuggestion[] };
     },
   });
@@ -153,6 +153,12 @@ export function MoodboardControls({ mb, embedded = false }: { mb: MoodboardSourc
 export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourcing; embedded?: boolean }) {
   const { submitted, generating, matches, suggestions, chooseSuggestion, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
 
+  // Gate-passing pieces are "verified"; the sourcing engine backfills the rest
+  // of the grid with "similar" inventory so the edit is never dotted with
+  // empty placeholders while material verification continues in the background.
+  const verifiedCount = matches.filter((m) => m.status !== "similar").length;
+  const similarCount = matches.length - verifiedCount;
+
   const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
     <div className={`flex flex-1 flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
       <div>
@@ -167,10 +173,6 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
     </div>
   );
 
-  // Embedded preview always keeps a 3-card row: verified matches first, then
-  // "Further sourcing pending" placeholders for any remaining slots — for
-  // every input mode (prompt edits AND website/reference URLs).
-  const showPending = embedded;
   // A website URL (like the studio's own homepage) is matched by its readable
   // words — only image or Pinterest links carry the image-matching disclaimer.
   const isImageReference = (value: string) => {
@@ -179,6 +181,30 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       return /(^|\.)pinterest\./i.test(url.hostname) || /\.(jpe?g|png|webp|avif|gif|bmp)$/i.test(url.pathname);
     } catch { return false; }
   };
+
+  const unlockPanel = (
+    <div className="border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
+      <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
+      <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
+      <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
+      <form onSubmit={captureLead} className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
+        <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
+        <Button type="submit" disabled={capturing} className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">{capturing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <>Unlock <ArrowRight aria-hidden="true" /></>}</Button>
+      </form>
+      {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
+      <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+    </div>
+  );
+
+  // Clickable material refinements: shown whenever nothing in the edit is
+  // verified yet — including alongside the similar-inventory cards.
+  const suggestionsLine = suggestions.length > 0 ? <p className="mt-3 max-w-xl font-body text-sm leading-7 text-moodboard-ink/65">
+    However, you can explore our curated selections in {suggestions.map((suggestion, index) => <span key={suggestion.query}>
+      {index > 0 ? (index === suggestions.length - 1 ? ", or " : ", ") : ""}
+      <Button type="button" variant="link" onClick={() => chooseSuggestion(suggestion.query)} className="h-auto p-0 align-baseline font-display text-base text-moodboard-teal underline decoration-moodboard-teal/30 underline-offset-4 hover:decoration-moodboard-teal">{suggestion.label}</Button>
+    </span>)}.
+  </p> : null;
 
   return (
     <div aria-live="polite">
@@ -197,39 +223,29 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
         <>
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3 border-b border-moodboard-ink/10 pb-4">
             <div><p className="font-body text-[11px] uppercase tracking-[0.2em] text-moodboard-teal">The edit</p><h3 className="mt-1 font-display text-xl text-moodboard-ink">Selected for your brief</h3></div>
-            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (embedded ? `${Math.min(matches.length, 2)} verified · ${Math.max(0, 3 - Math.min(matches.length, 2))} pending` : `${matches.length} pieces · Curated collection`) : `${Math.min(matches.length, embedded ? 2 : matches.length)} pieces · Curated from your source`}</span>
+            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (similarCount > 0 ? `${verifiedCount} verified · ${similarCount} in verification` : `${matches.length} pieces · Curated collection`) : `${matches.length} pieces · Curated from your source`}</span>
           </div>
           {submitted.mode === "reference" && (isImageReference(submitted.value)
             ? <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>
             : <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Analyzing website source for matching collection architecture…</p>)}
-          {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
+          {similarCount > 0 && !isLoading && !isError && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Verified pieces lead the edit. The remaining cards are similar collection pieces, shown while their materials are being confirmed.</p>}
+          {verifiedCount === 0 && similarCount > 0 && !isLoading && !isError && <div className="mb-5">{suggestionsLine}</div>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
           {!isLoading && !isError && matches.length === 0 && <div className="py-10">
             <p className="font-display text-lg leading-relaxed text-moodboard-ink">{submitted?.value ? `No pieces in our collection match “${submitted.value}” exactly.` : "No pieces are available right now. Please try again later."}</p>
-            {suggestions.length > 0 ? <p className="mt-3 max-w-xl font-body text-sm leading-7 text-moodboard-ink/65">
-              However, you can explore our curated selections in {suggestions.map((suggestion, index) => <span key={suggestion.query}>
-                {index > 0 ? (index === suggestions.length - 1 ? ", or " : ", ") : ""}
-                <Button type="button" variant="link" onClick={() => chooseSuggestion(suggestion.query)} className="h-auto p-0 align-baseline font-display text-base text-moodboard-teal underline decoration-moodboard-teal/30 underline-offset-4 hover:decoration-moodboard-teal">{suggestion.label}</Button>
-              </span>)}.
-            </p> : submitted?.value && <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p>}
+            {suggestionsLine ?? (submitted?.value ? <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p> : null)}
           </div>}
-          {(matches.length > 0 || showPending) && <>
+          {matches.length > 0 && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
-              {matches.slice(0, embedded ? 2 : 3).map(({ pick, designerName }) => (
+              {matches.slice(0, 3).map(({ pick, designerName }) => (
                 <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
                   <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
                   {cardBody(pick, designerName, false)}
                 </article>
               ))}
-              {showPending && Array.from({ length: Math.max(0, 3 - Math.min(matches.length, 2)) }, (_, index) => (
-                <article key={`pending-${index}`} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                  <div className="aspect-square bg-moodboard-ink/5" aria-hidden="true" />
-                  <div className="p-2.5"><p className="font-display text-sm text-moodboard-ink">Further sourcing pending</p><p className="mt-1 text-xs text-moodboard-ink/60">Material verification required</p><p className="mt-3 border-t border-moodboard-ink/10 pt-2 text-xs text-moodboard-teal">Price upon Request</p></div>
-                </article>
-              ))}
             </div>
-            {(embedded || matches.length > 3 || (submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value))) && <div className="relative mt-4">
+            {(embedded || matches.length > 3 || (!unlocked && matches.length > 0)) && <div className="relative mt-4">
               {embedded ? <div className="relative overflow-hidden border border-moodboard-ink/10 bg-moodboard-cream p-4">
                 <div aria-hidden="true" className="pointer-events-none select-none space-y-3 blur-md"><div className="flex justify-between border-b border-moodboard-ink/10 pb-3"><span>Supplier & atelier network</span><span>Availability</span></div><div className="flex justify-between"><span>Material specification · Lead times</span><span>Trade margin</span></div><div className="flex justify-between"><span>Project presentation · Client export</span><span>Locked</span></div></div>
                 <div className="absolute inset-0 bg-moodboard-cream/35 backdrop-blur-sm" aria-hidden="true" />
@@ -241,34 +257,21 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
                   <p className="mt-3 text-xs text-moodboard-ink/50">Access follows trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
                 </div>
               </div> : <>
-              <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
-                {matches.slice(3).map(({ pick, designerName }) => (
-                  <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
-                    {cardBody(pick, designerName, !unlocked)}
-                  </article>
-                ))}
-                {!unlocked && matches.length <= 3 && [0, 1, 2].map((index) => (
-                  <div key={`pending-${index}`} className="flex h-full flex-col border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-square bg-moodboard-ink/5" />
-                    <div className="flex-1 p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
-                  </div>
-                ))}
-              </div>
-              {!unlocked && <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">
-                <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
-                  <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
-                  <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
-                  <form onSubmit={captureLead} className="mt-5 flex flex-col gap-2 sm:flex-row">
-                    <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
-                    <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
-                    <Button type="submit" disabled={capturing} className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">{capturing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <>Unlock <ArrowRight aria-hidden="true" /></>}</Button>
-                  </form>
-                  {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
-                  <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+              {matches.slice(3).length > 0 && (
+                <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
+                  {matches.slice(3).map(({ pick, designerName }) => (
+                    <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                      <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
+                      {cardBody(pick, designerName, !unlocked)}
+                    </article>
+                  ))}
                 </div>
-              </div>}
+              )}
+              {!unlocked && (matches.slice(3).length > 0
+                ? <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">
+                    <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg">{unlockPanel}</div>
+                  </div>
+                : <div className="flex justify-center"><div className="mt-2 w-full max-w-lg">{unlockPanel}</div></div>)}
               </>}
             </div>}
           </>}
