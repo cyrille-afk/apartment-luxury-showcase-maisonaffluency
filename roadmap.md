@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Remove the floating Shop By Room panel; put room navigation, scene, alternatives, gallery, and grid in page flow.
+
 - [x] Restore full-width integrated desktop room menus, rename Man of Parts preview to Praia Da Granja, and leave only the justified crimson-black sourcing statement beneath the alternatives.
 
 - [x] Align Living coffee-table and Office desk preview pins with their furniture and highlight room-matched alternatives.
