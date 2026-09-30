@@ -296,7 +296,7 @@ function CuratorsCanvas() {
 }
 
 /** Editorial hotspot pin: fine-lined ring, quiet by default, label + pulse on hover (Shop by Room). */
-function HotspotPin({ hotspot, editorial, onOpen }: { hotspot: Hotspot; editorial?: boolean; onOpen: () => void }) {
+function HotspotPin({ hotspot, editorial, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; onOpen: () => void; onPreview?: () => void }) {
   if (!editorial) {
     return (
       <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
@@ -309,7 +309,7 @@ function HotspotPin({ hotspot, editorial, onOpen }: { hotspot: Hotspot; editoria
   }
   const flipLabel = hotspot.x_percent > 72;
   return (
-    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
       <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-background/70 bg-white/5 shadow-[0_1px_6px_rgba(0,0,0,0.18)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:scale-110 group-hover:border-background/90 group-hover:animate-hotspot-pulse group-focus-visible:border-background/90 md:size-6">
         <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
         <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -340,6 +340,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [hotspotsReady, setHotspotsReady] = useState(false);
   const [loadedScenes, setLoadedScenes] = useState<Set<string>>(() => new Set());
   const [activePin, setActivePin] = useState<string | null>(null);
+  const [dockDismissed, setDockDismissed] = useState(false);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
@@ -484,10 +485,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
     setActivePin(hotspot.id);
-    if (expandedScene || !portraitSceneIds.has(activePage.scenes[0]?.id ?? "")) {
+    setDockDismissed(false);
+    if (expandedScene || !discoveryRoom || !portraitSceneIds.has(activePage.scenes[0]?.id ?? "")) {
       setLightboxProduct(resolveHotspotProduct(hotspot));
     }
-  }, [resolveHotspotProduct, expandedScene, portraitSceneIds, activePage]);
+  }, [resolveHotspotProduct, expandedScene, discoveryRoom, portraitSceneIds, activePage]);
 
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
@@ -589,8 +591,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort(sortSidePicks);
   const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
-  const portraitDock = activeSceneIsPortrait && !expandedScene;
-  const selectedHotspot = portraitDock && activeScene ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) : undefined;
+  // Only Shop By Room replaces portrait side columns with a hotspot-driven dock.
+  const portraitDock = !!discoveryRoom && activeSceneIsPortrait && !expandedScene;
+  const selectedHotspot = portraitDock && activeScene && !dockDismissed
+    ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) ?? hotspotsForScene(activeScene)[0]
+    : undefined;
   const selectedProduct = selectedHotspot ? resolveHotspotProduct(selectedHotspot) : null;
   const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
     const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
@@ -702,7 +707,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
                             ))}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
@@ -740,7 +745,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                      >
                        <div className="mb-2 flex items-center justify-between gap-3">
                          <div className="min-w-0 truncate font-body text-[10px] font-semibold uppercase tracking-widest text-foreground">Curated alternatives · {selectedHotspot.product_name}</div>
-                         <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setActivePin(null)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setDockDismissed(true)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                        </div>
                        <div className="grid grid-cols-3 gap-2 md:gap-3">
                          {dockAlternatives.map((pick) => (
