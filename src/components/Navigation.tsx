@@ -139,9 +139,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
   const scene = getRoomPreviewScene(selectedRoomSlug);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" ? scene.previewImage : roomAmbientImages[room];
   return (
-  <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
-    <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
-      <div className="relative h-[190px] bg-muted">
+  <div data-room-preview className="flex min-w-0 flex-1 flex-col bg-background px-8 py-7">
+    <div className="w-full">
+      <div className="relative h-[260px] bg-muted">
           <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -160,18 +160,18 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
           <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
         </Popover>
       </div>
-      <div className="px-1 pb-1 pt-3">
-        <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-           <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+      <div className="pt-5">
+        <div className="mb-3 font-body text-[10px] uppercase text-muted-foreground">Curated alternatives</div>
+           <div className={cn("grid grid-cols-3 gap-4 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
-              <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
-               <div className="aspect-[4/3] overflow-hidden">
-                 <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+               <div key={piece.src} className={cn("min-w-0 overflow-hidden border-b-2 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-100")}>
+                <div className="h-[125px] overflow-hidden bg-muted">
+                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
                </div>
                {"name" in piece && (
-                 <div className="bg-background px-1.5 py-1.5">
-                   <div className="truncate font-body text-[10px] font-semibold leading-tight text-foreground">{piece.name}</div>
-                   <div className="truncate font-body text-[9px] leading-tight text-muted-foreground">{piece.designer}</div>
+                  <div className="py-2">
+                    <div className="font-body text-xs font-semibold leading-snug text-foreground">{piece.name}</div>
+                    <div className="font-body text-[11px] leading-snug text-muted-foreground">{piece.designer}</div>
                  </div>
                )}
             </div>
@@ -179,7 +179,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
         </div>
       </div>
     </div>
-    <p className="mt-2 max-w-2xl text-justify font-body text-sm font-semibold leading-relaxed tracking-wide text-crimson-black">
+    <p className="mt-6 w-full text-justify font-body text-sm font-semibold leading-relaxed text-crimson-black">
       Leverage our elite global gallery network and high-end sourcing to elevate your portfolio.
     </p>
   </div>
@@ -198,7 +198,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const [selectedRoom, setSelectedRoom] = useState(0);
   const categories = room === "living" && selectedRoom === 1 ? officeNavigation : roomNavigation[room];
   return (
-  <div className="flex min-h-[470px] items-stretch overflow-hidden">
+   <div className="flex min-h-[560px] items-stretch bg-background">
     <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
       <div className="flex flex-col">
         <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
@@ -1199,7 +1199,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
+          <nav className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
@@ -1223,7 +1223,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
                 <div
                   key={room}
-                  className="relative"
+                   className="static"
                   onMouseEnter={keepRoomMenuOpen}
                   onMouseLeave={scheduleRoomMenuClose}
                 >
@@ -1243,7 +1243,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </Button>
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute inset-x-0 top-full z-50 w-full border-t border-border/60 bg-background">
                       <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
