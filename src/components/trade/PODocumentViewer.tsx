@@ -249,7 +249,7 @@ export default function PODocumentViewer({ document: po, onOpenChange, onStatusC
       .join("");
     doc.open();
     doc.write(
-      `<!doctype html><html><head><title>${po?.po_number || "Purchase Order"}</title>${styles}` +
+      `<!doctype html><html><head><title>${String(po?.po_number || "Purchase Order").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string)}</title>${styles}` +
         `<style>@page{size:A4;margin:14mm}body{background:#fff;margin:0}</style></head>` +
         `<body>${node.outerHTML}</body></html>`,
     );
