@@ -1,3 +1,4 @@
+import { invokeWithAuthRetry } from "@/lib/invokeWithAuthRetry";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -101,11 +102,9 @@ export function BoardRecommendations() {
   const generateRecommendations = async (ids: string[]) => {
     setRefreshing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("board-recommendations", {
-        body: { product_ids: ids, source: "mood_board" },
-      });
+      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: ids, source: "mood_board" });
       if (error) {
-        console.error("Recommendation error:", error);
+        console.warn("Recommendations unavailable:", error.message);
         return;
       }
       if (data?.recommendations) {

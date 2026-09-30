@@ -18,8 +18,10 @@ const FACETS: { key: RoomFacet; label: string }[] = [
 ];
 
 export default function RoomCollectionFilters({
-  options, availableMaterials, catalogMaterials, values, onChange, onClear,
+  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange,
 }: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   options: RoomFacetOptions;
   availableMaterials: Set<string>;
   catalogMaterials: Set<string>;
@@ -27,7 +29,9 @@ export default function RoomCollectionFilters({
   onChange: (key: RoomFacet, value: string | null) => void;
   onClear: () => void;
 }) {
-  const [open, setOpen] = useState(true);
+  const [openState, setOpenState] = useState(true);
+  const open = openProp ?? openState;
+  const setOpen = (v: boolean) => { setOpenState(v); onOpenChange?.(v); };
   const [mobileOpen, setMobileOpen] = useState(false);
   const activeCount = Object.values(values).filter(Boolean).length;
 

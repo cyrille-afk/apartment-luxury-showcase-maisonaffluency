@@ -1,3 +1,4 @@
+import { invokeWithAuthRetry } from "@/lib/invokeWithAuthRetry";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -128,9 +129,7 @@ export function ProjectCuratorialGuide({
     const load = async () => {
       setLoading(true);
       setError(null);
-      const { data, error: invokeError } = await supabase.functions.invoke("board-recommendations", {
-        body: { product_ids: items.map((item) => item.product_id).slice(0, 20), source: "mood_board" },
-      });
+      const { data, error: invokeError } = await invokeWithAuthRetry("board-recommendations", { product_ids: items.map((item) => item.product_id).slice(0, 20), source: "mood_board" });
       if (cancelled) return;
       if (invokeError) {
         setError(invokeError.message || "Curation analysis is temporarily unavailable.");

@@ -1,3 +1,4 @@
+import { invokeWithAuthRetry } from "@/lib/invokeWithAuthRetry";
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
@@ -173,9 +174,7 @@ export default function TradeMoodBoards() {
     setRecLoading(true);
     setRecError(null);
     try {
-      const { data, error } = await supabase.functions.invoke("board-recommendations", {
-        body: { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId },
-      });
+      const { data, error } = await invokeWithAuthRetry("board-recommendations", { product_ids: productIds, source: projectId ? "project_tearsheet_mood_board" : "mood_board", project_id: projectId });
       if (error) throw error;
       if (data?.recommendations) {
         const recs: MoodRec[] = data.recommendations;
@@ -209,7 +208,7 @@ export default function TradeMoodBoards() {
         }
       }
     } catch (err: any) {
-      console.error("Mood board recommendations error:", err);
+      console.warn("Mood board recommendations unavailable:", err?.message);
       setRecError("Could not generate suggestions");
     } finally {
       setRecLoading(false);

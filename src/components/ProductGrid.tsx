@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Heart, X, Scale } from "lucide-react";
+import { Heart, X, Scale, Grid3X3, LayoutGrid } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
@@ -354,6 +354,7 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
+  const [roomFiltersOpen, setRoomFiltersOpen] = useState(true);
   const [roomFacets, setRoomFacets] = useState<RoomFacetValues>(EMPTY_ROOM_FACETS);
   const gridRef = useRef<HTMLElement>(null);
   // Shop by Room: open the category-discovery lightbox variant instead of navigating.
@@ -628,13 +629,28 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
+            {roomSlug ? (
+              <div className="hidden md:flex items-center gap-1 rounded-full border border-border bg-background/80 p-1 shadow-sm backdrop-blur-sm">
+                {([false, true] as const).map((dense) => {
+                  const active = (gridCols === 4) === dense;
+                  const Icon = dense ? LayoutGrid : Grid3X3;
+                  return (
+                    <button key={String(dense)} onClick={() => setGridCols(dense ? 4 : 3)} aria-label={dense ? "Denser grid" : "Standard grid"} aria-pressed={active}
+                      className={`rounded-full p-2 transition-all ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+                      <Icon size={15} strokeWidth={1.5} />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
             <button
-              onClick={roomSlug ? () => { window.location.href = "/designers"; } : handleClearFilter}
+              onClick={handleClearFilter}
               className="flex items-center gap-1.5 px-5 py-2 rounded-full border border-[hsl(var(--gold))] bg-white shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.15em] text-foreground transition-all duration-300"
             >
               <X className="h-3.5 w-3.5" />
-              {roomSlug ? "All Designers" : "Clear Filter"}
+              Clear Filter
             </button>
+            )}
           </div>
         </div>
 
@@ -646,13 +662,15 @@ function singularizeSub(s: string): string {
           values={roomFacets}
           onChange={(key, value) => setRoomFacets((current) => ({ ...current, [key]: value }))}
           onClear={() => setRoomFacets(EMPTY_ROOM_FACETS)}
+          open={roomFiltersOpen}
+          onOpenChange={setRoomFiltersOpen}
         />}
         {/* Product Grid */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? 'md:grid-cols-3' : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (roomFiltersOpen ? (gridCols === 4 ? 'md:grid-cols-3' : 'md:grid-cols-2') : (gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3')) : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
         >
           {filtered.map((item, idx) => (
             <motion.div
