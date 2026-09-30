@@ -163,20 +163,23 @@ function match(catalog: Item[], mode: "prompt" | "reference", value: string) {
     : strictMat ? catalog.filter((i) => matOk(i) && typeOk(i) && (!lighting || isLightingItem(i)))
     : lighting ? catalog.filter(isLightingItem) : catalog;
   const same = (w: string, t: string) => w === t || w.replace(/s$/, "") === t.replace(/s$/, "");
-  const ranked = eligible.map((item, index) => {
+  const scoreItem = (item: Item) => {
     const hay = keywords([item.title, item.category, item.subcategory, item.materials, item.designerName].filter(Boolean).join(" "));
     const catW = keywords(`${item.category ?? ""} ${item.subcategory ?? ""}`).map(sing);
     const titleW = keywords(item.title).map(sing);
     const descW = keywords(`${item.materials ?? ""} ${item.designerName}`).map(sing);
-    let score = strictAsh ? ashScore(item)
-      : lighting ? lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0)
-      : terms.reduce((s, t) => {
-          // Field-priority weights: category/subcategory 10 > title 5 > description/materials 1.
-          const inCat = catW.some((w) => same(w, t)), inTitle = titleW.some((w) => same(w, t));
-          const inDesc = descW.some((w) => same(w, t)) || hay.some((w) => w.includes(t));
-          const mat = MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0;
-          return s + mat + (inCat ? 10 : 0) + (inTitle ? 5 : 0) + (!inCat && !inTitle && inDesc ? 1 : 0);
-        }, 0);
+    if (strictAsh) return ashScore(item);
+    if (lighting) return lightingScore(item) + terms.reduce((s, t) => s + (hay.some((w) => same(w, t)) ? 3 : 0), 0);
+    return terms.reduce((s, t) => {
+      // Field-priority weights: category/subcategory 10 > title 5 > description/materials 1.
+      const inCat = catW.some((w) => same(w, t)), inTitle = titleW.some((w) => same(w, t));
+      const inDesc = descW.some((w) => same(w, t)) || hay.some((w) => w.includes(t));
+      const mat = MATERIALS[t] ? (MATERIALS[t].test((item.materials ?? "").toLowerCase()) ? 8 : MATERIALS[t].test(item.title.toLowerCase()) ? 6 : 0) : 0;
+      return s + mat + (inCat ? 10 : 0) + (inTitle ? 5 : 0) + (!inCat && !inTitle && inDesc ? 1 : 0);
+    }, 0);
+  };
+  const ranked = eligible.map((item, index) => {
+    let score = scoreItem(item);
     const pin = pinned.findIndex((p) => p.title.test(item.title) && p.designer.test(item.designerName));
     if (pin >= 0) score = 10000 - pin;
     return { item, index, score };
