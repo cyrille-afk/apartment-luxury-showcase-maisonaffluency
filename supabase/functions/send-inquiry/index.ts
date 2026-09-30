@@ -387,11 +387,29 @@ const handler = async (req: Request): Promise<Response> => {
     const idStem = crypto.randomUUID();
 
     // Build a signed link for any uploaded attachment so concierge can review it.
+    // Only honour paths matching the upload pattern for a file uploaded in the
+    // last hour, so a caller cannot obtain a link to someone else's older file.
     let attachmentUrl: string | null = null;
+    let verifiedAttachmentPath: string | null = null;
     if (attachmentPath) {
+      const m = /^([A-Za-z0-9_-]{1,80})\/(\d{13})-([0-9a-f]{8})\.([A-Za-z0-9]{1,10})$/.exec(attachmentPath);
+      if (m && Math.abs(Date.now() - Number(m[2])) < 60 * 60 * 1000) {
+        const fileName = attachmentPath.slice(m[1].length + 1);
+        const { data: listed } = await supabase.storage
+          .from("bespoke-attachments")
+          .list(m[1], { search: fileName, limit: 5 });
+        const obj = (listed || []).find((o: any) => o.name === fileName);
+        const createdMs = obj?.created_at ? Date.parse(obj.created_at) : NaN;
+        if (obj && Number.isFinite(createdMs) && Date.now() - createdMs < 60 * 60 * 1000) {
+          verifiedAttachmentPath = attachmentPath;
+        }
+      }
+      if (!verifiedAttachmentPath) console.warn("Rejected unverified attachment path");
+    }
+    if (verifiedAttachmentPath) {
       const { data: signedData, error: signedErr } = await supabase.storage
         .from("bespoke-attachments")
-        .createSignedUrl(attachmentPath, 60 * 60 * 24 * 7);
+        .createSignedUrl(verifiedAttachmentPath, 60 * 60 * 24 * 7);
       if (signedErr) {
         console.error("Failed to create signed URL for attachment:", signedErr);
       } else if (signedData) {
@@ -420,7 +438,7 @@ const handler = async (req: Request): Promise<Response> => {
       product_name: productName || null,
       designer_name: designerName || null,
       selected_finish: resolvedFinish || null,
-      attachment_path: attachmentPath || null,
+      attachment_path: verifiedAttachmentPath,
       status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
       user_agent: userAgent,
