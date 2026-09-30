@@ -7,24 +7,23 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 export type RoomFacet = "category" | "designer" | "leadTime" | "handmade" | "material";
 export type RoomFacetValues = Record<RoomFacet, string | null>;
-export type RoomFacetOptions = Record<RoomFacet, { value: string; count: number }[]>;
+export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
 const FACETS: { key: RoomFacet; label: string }[] = [
   { key: "category", label: "Categories" },
   { key: "designer", label: "Designers/Artists" },
   { key: "leadTime", label: "Lead Time" },
-  { key: "handmade", label: "Handmade" },
+  { key: "handmade", label: "Handcrafted in" },
   { key: "material", label: "Materials" },
 ];
 
 export default function RoomCollectionFilters({
-  options, values, onChange, onClear, count,
+  options, values, onChange, onClear,
 }: {
   options: RoomFacetOptions;
   values: RoomFacetValues;
   onChange: (key: RoomFacet, value: string | null) => void;
   onClear: () => void;
-  count: number;
 }) {
   const [open, setOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,7 +33,6 @@ export default function RoomCollectionFilters({
     <>
       <div className="flex items-center justify-between border-b border-border pb-3">
         <span className="font-body text-xs font-semibold uppercase tracking-wider text-foreground">Filters</span>
-        <span className="font-body text-xs tabular-nums text-muted-foreground">{count} pieces</span>
       </div>
       <Button variant="ghost" size="sm" onClick={onClear} disabled={!activeCount} className="my-2 h-8 justify-start px-0 font-body text-[10px] uppercase tracking-wider text-foreground disabled:opacity-40">
         <X className="size-3" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
@@ -46,11 +44,10 @@ export default function RoomCollectionFilters({
               {label}{values[key] && <span className="ml-auto mr-2 size-1.5 rounded-full bg-primary" />}
             </AccordionTrigger>
             <AccordionContent className="max-h-56 overflow-y-auto pb-2">
-              {options[key].length ? options[key].map(({ value, count: optionCount }) => (
+              {options[key].length ? options[key].map((value) => (
                 <label key={value} className="flex cursor-pointer items-start gap-2 py-1.5 font-body text-xs text-foreground">
                   <Checkbox checked={values[key] === value} onCheckedChange={() => onChange(key, values[key] === value ? null : value)} className="mt-0.5 size-4 rounded-none" />
                   <span className="min-w-0 flex-1 break-words">{value}</span>
-                  <span className="tabular-nums text-muted-foreground">{optionCount}</span>
                 </label>
               )) : <p className="py-2 font-body text-xs text-muted-foreground">No catalogued options</p>}
             </AccordionContent>

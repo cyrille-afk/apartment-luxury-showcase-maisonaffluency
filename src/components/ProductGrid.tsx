@@ -27,19 +27,19 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+import { originToCountries } from "@/lib/productOrigin";
 
 const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, handmade: null, material: null };
 const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "handmade", "material"];
 
 function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
   const pick = item.pick;
-  const tags = pick.tags || [];
   const category = inferSubcategory(pick.category, pick.subcategory, pick.title);
   return {
     category: category ? [category] : [],
     designer: [item.designerName],
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
-    handmade: tags.some((tag) => /^(handmade|handcrafted)$/i.test(tag)) ? ["Handmade"] : [],
+    handmade: originToCountries(pick.origin),
     material: (pick.materials || "").split(/[,;/]|\s+and\s+/i).map((part) => part.trim()).filter(Boolean),
   };
 }
@@ -483,13 +483,13 @@ function singularizeSub(s: string): string {
   const roomOptions = useMemo(() => {
     const options = {} as RoomFacetOptions;
     for (const key of ROOM_FACET_KEYS) {
-      const counts = new Map<string, number>();
+      const values = new Set<string>();
       for (const item of rawFiltered) {
         const facets = roomFacetValues(item);
         if (ROOM_FACET_KEYS.some((other) => other !== key && roomFacets[other] && !facets[other].includes(roomFacets[other]))) continue;
-        for (const value of new Set(facets[key])) counts.set(value, (counts.get(value) || 0) + 1);
+        for (const value of facets[key]) values.add(value);
       }
-      options[key] = [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value, "en", { sensitivity: "base", numeric: true }));
+      options[key] = [...values].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base", numeric: true }));
     }
     return options;
   }, [rawFiltered, roomFacets]);
@@ -637,7 +637,6 @@ function singularizeSub(s: string): string {
           values={roomFacets}
           onChange={(key, value) => setRoomFacets((current) => ({ ...current, [key]: value }))}
           onClear={() => setRoomFacets(EMPTY_ROOM_FACETS)}
-          count={filtered.length}
         />}
         {/* Product Grid */}
         <motion.div

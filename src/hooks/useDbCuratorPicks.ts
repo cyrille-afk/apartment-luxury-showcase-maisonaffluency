@@ -47,7 +47,7 @@ export function useDbCuratorPicks() {
             .from("designer_curator_picks_public" as any)
             // Slim listing fetch: no description / gallery_images / size_variants /
             // variant_* — those are lazily fetched on card open (lightbox / product page).
-            .select("id, slug, title, subtitle, image_url, hover_image_url, materials, dimensions, lead_time, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, materials, dimensions, lead_time, origin, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
         );
         picksRaw = data as any[] | null;
       }
@@ -86,6 +86,7 @@ export function useDbCuratorPicks() {
           tags: row.tags || undefined,
           materials: row.materials || undefined,
           lead_time: row.lead_time || undefined,
+          origin: row.origin || undefined,
           dimensions: row.dimensions || undefined,
           photoCredit: row.photo_credit || undefined,
           edition: row.edition || undefined,
