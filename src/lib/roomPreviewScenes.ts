@@ -5,6 +5,9 @@ import livingRoomHero from "@/assets/living-room-hero.jpg";
 import officeHero from "@/assets/home-office-desk.jpg";
 import diningRoomHero from "@/assets/intimate-dining.jpg";
 import bedroomHero from "@/assets/master-suite.jpg";
+import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
+import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
+import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
 
 export interface RoomScenePiece {
   src: string;
@@ -28,9 +31,9 @@ export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "bedroo
     hotspot: { left: 53, top: 85, label: "Coffee table" },
     highlightIndex: 2, // marble alternative
     pieces: [
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto,f_auto/man-of-parts-coffee-table.png", alt: "Wood coffee table alternative", name: "Praia Da Granja", designer: "Man of Parts" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto,f_auto/noe-mineral-flower-coffee-table.png", alt: "Sculptural coffee table alternative", name: "Mineral Flower Coffee Table", designer: "Noé Duchaufour-Lawrance" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,q_auto,f_auto/adam-courts-void-table.jpg", alt: "Marble coffee table alternative", name: "Void Table", designer: "OKHA by Adam Court" },
+      { src: woodCoffeeTable, alt: "Wood coffee table alternative", name: "Praia Da Granja", designer: "Man of Parts" },
+      { src: sculpturalCoffeeTable, alt: "Sculptural coffee table alternative", name: "Mineral Flower Coffee Table", designer: "Noé Duchaufour-Lawrance" },
+      { src: marbleCoffeeTable, alt: "Marble coffee table alternative", name: "Void Table", designer: "OKHA by Adam Court" },
     ],
   },
   "bedroom": {
@@ -78,5 +81,6 @@ export function getRoomPreviewScene(slug?: string | null): RoomPreviewScene {
   if (slug === "office") return ROOM_PREVIEW_SCENES.office;
   if (slug === "dining-room") return ROOM_PREVIEW_SCENES["dining-room"];
   if (slug === "living-room") return ROOM_PREVIEW_SCENES["living-room"];
+  if (slug === "bedroom") return ROOM_PREVIEW_SCENES["bedroom"];
   return DEFAULT_ROOM_SCENE;
 }
