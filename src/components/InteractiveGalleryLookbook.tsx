@@ -21,7 +21,17 @@ import type { RoomSlug } from "@/lib/roomCategories";
 
 type Scene = { title: string; id: string };
 type Space = { key: string; label: string; scenes: Scene[] };
-const roomSpace = (room: RoomSlug) => room === "dining-room" ? 1 : room === "bedroom" ? 3 : room === "office" ? 5 : room === "bath" ? 6 : 0;
+// Only rooms with a dedicated photoshoot scene get the lookbook hero;
+// every other room slug returns null so RoomSearch renders the grid alone
+// instead of a mismatched living-room scene.
+const ROOM_SPACE_INDEX: Partial<Record<RoomSlug, number>> = {
+  "living-room": 0,
+  "dining-room": 1,
+  bedroom: 3,
+  office: 5,
+};
+const roomSpace = (room: RoomSlug): number | null => ROOM_SPACE_INDEX[room] ?? null;
+export const roomHasLookbookScene = (room: RoomSlug): boolean => roomSpace(room) !== null;
 type GalleryState = { kind: "room"; spaceIndex: number } | { kind: "tour" } | { kind: "curators" };
 type GalleryPage = { scenes: Scene[]; title: string };
 
@@ -333,7 +343,7 @@ type InteractiveGalleryLookbookProps = {
 };
 
 export default function InteractiveGalleryLookbook({ initialView = "tour", discoveryRoom }: InteractiveGalleryLookbookProps) {
-  const [galleryState, setGalleryState] = useState<GalleryState>(discoveryRoom ? { kind: "room", spaceIndex: roomSpace(discoveryRoom) } : initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
+  const [galleryState, setGalleryState] = useState<GalleryState>(discoveryRoom ? { kind: "room", spaceIndex: roomSpace(discoveryRoom) ?? 0 } : initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -353,7 +363,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   useEffect(() => {
     if (!discoveryRoom) return;
-    setGalleryState({ kind: "room", spaceIndex: roomSpace(discoveryRoom) });
+    setGalleryState({ kind: "room", spaceIndex: roomSpace(discoveryRoom) ?? 0 });
     setSceneIdx(0);
     setLightboxProduct(null);
   }, [discoveryRoom]);

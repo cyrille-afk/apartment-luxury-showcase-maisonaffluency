@@ -75,34 +75,22 @@ Deno.serve(async (req) => {
         : {}),
     });
 
-    // Bounded, retried reads. The listing occasionally hit a Postgres
-    // statement timeout (SQLSTATE 57014) under load, which surfaced as a 500
-    // and an empty homepage grid. One short retry absorbs that transient case;
-    // the explicit range keeps the payload bounded.
-    const withRetry = async <T>(run: () => Promise<{ data: T | null; error: unknown }>) => {
-      let last: { data: T | null; error: unknown } = await run();
-      if (last.error) {
-        await new Promise((r) => setTimeout(r, 400));
-        last = await run();
-      }
-      return last;
-    };
-
+    // Single bounded reads — no retry. The old retry doubled database load
+    // exactly when Postgres was already timing out, and the repeated heavy
+    // catalogue scans were starving the auth service's own queries (sign-in
+    // 504s). On failure we return 500 with no-store and let the CDN's
+    // stale-while-revalidate copy keep serving visitors.
     const [picksRes, designersRes] = await Promise.all([
-      withRetry(() =>
-        supabase
-          .from("designer_curator_picks_public")
-          .select(PICK_COLUMNS)
-          .not("image_url", "is", null)
-          .range(0, 4999)
-      ),
-      withRetry(() =>
-        supabase
-          .from("designers")
-          .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
-          .eq("is_published", true)
-          .range(0, 4999)
-      ),
+      supabase
+        .from("designer_curator_picks_public")
+        .select(PICK_COLUMNS)
+        .not("image_url", "is", null)
+        .range(0, 1999),
+      supabase
+        .from("designers")
+        .select("id, name, slug, display_name, source, founder, era, country, is_published, trade_only")
+        .eq("is_published", true)
+        .range(0, 499),
     ]);
 
     if (picksRes.error) throw picksRes.error;
