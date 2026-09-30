@@ -499,6 +499,7 @@ function singularizeSub(s: string): string {
     return options;
   }, [rawFiltered, roomFacets]);
   const availableRoomMaterials = useMemo(() => new Set(rawFiltered.flatMap((item) => roomMaterialCategories(item.pick.materials))), [rawFiltered]);
+  const catalogMaterials = useMemo(() => new Set(allProducts.flatMap((item) => roomMaterialCategories(item.pick.materials))), [allProducts]);
   const facetFiltered = useMemo(() => roomSlug ? rawFiltered.filter((item) => {
     const facets = roomFacetValues(item);
     return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
@@ -641,6 +642,7 @@ function singularizeSub(s: string): string {
         {roomSlug && <RoomCollectionFilters
           options={roomOptions}
           availableMaterials={availableRoomMaterials}
+          catalogMaterials={catalogMaterials}
           values={roomFacets}
           onChange={(key, value) => setRoomFacets((current) => ({ ...current, [key]: value }))}
           onClear={() => setRoomFacets(EMPTY_ROOM_FACETS)}
