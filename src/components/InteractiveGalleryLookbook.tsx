@@ -484,8 +484,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
     setActivePin(hotspot.id);
-    setLightboxProduct(resolveHotspotProduct(hotspot));
-  }, [resolveHotspotProduct]);
+    if (expandedScene || !portraitSceneIds.has(activePage.scenes[0]?.id ?? "")) {
+      setLightboxProduct(resolveHotspotProduct(hotspot));
+    }
+  }, [resolveHotspotProduct, expandedScene, portraitSceneIds, activePage]);
 
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
@@ -587,6 +589,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort(sortSidePicks);
   const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
+  const portraitDock = activeSceneIsPortrait && !expandedScene;
+  const selectedHotspot = portraitDock ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) : undefined;
+  const selectedProduct = selectedHotspot ? resolveHotspotProduct(selectedHotspot) : null;
+  const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
+    const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
+    const pool = allPicks.filter((pick) => publicIds.has(pick.id) && pick.id !== selectedProduct.id && pick.image_url);
+    const sameSubcategory = pool.filter((pick) => selectedProduct.subcategory && normalize(pick.subcategory || "") === normalize(selectedProduct.subcategory));
+    const sameCategory = pool.filter((pick) => selectedProduct.category && normalize(pick.category || "") === normalize(selectedProduct.category));
+    return [...sameSubcategory, ...sameCategory.filter((pick) => !sameSubcategory.some((candidate) => candidate.id === pick.id))].slice(0, 3);
+  })() : [];
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
@@ -643,7 +655,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   </Button>
                 </div>
               </div>
-              {lightboxProduct && !expandedScene && (
+               {lightboxProduct && !expandedScene && (
                 <PublicProductLightbox
                   product={lightboxProduct}
                   allPicks={discoveryRoom ? allPicks : allPicks.filter((pick) => pick.brand_name === lightboxProduct.brand_name)}
@@ -652,8 +664,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-               <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
-                  {hasScenePicks && (
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
+                   {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
@@ -667,7 +679,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                          animate={{ opacity: 1 }}
                          exit={{ opacity: 0 }}
                          transition={{ duration: 0.45 }}
-                         className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
+                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
                           {(() => {
                             const sceneReady = hotspotsReady && catalogReady && loadedScenes.has(pageScene.id);
@@ -686,7 +698,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                              }}
-                              className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
@@ -710,11 +722,40 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                      ))}
                    </AnimatePresence>
                  </div>
-                  {hasScenePicks && (
+                   {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the right of this photo" className={`hidden w-40 shrink-0 content-center border-l border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
+                 <AnimatePresence mode="wait">
+                   {portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady && (
+                     <motion.aside
+                       key={selectedHotspot.id}
+                       aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
+                       initial={{ opacity: 0, y: 24 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       exit={{ opacity: 0, y: 24 }}
+                       transition={{ duration: 0.3, ease: "easeOut" }}
+                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-elegant backdrop-blur-md md:inset-x-6 md:p-4"
+                     >
+                       <div className="mb-2 flex items-center justify-between gap-3">
+                         <div className="min-w-0 truncate font-body text-[10px] font-semibold uppercase tracking-widest text-foreground">Curated alternatives · {selectedHotspot.product_name}</div>
+                         <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setActivePin(null)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                       </div>
+                       <div className="grid grid-cols-3 gap-2 md:gap-3">
+                         {dockAlternatives.map((pick) => (
+                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:gap-3 md:p-2">
+                             <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-16" loading="lazy" />
+                             <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-xs">
+                               <span className="line-clamp-2 block">{pick.title}</span>
+                               <span className="mt-1 hidden truncate font-body text-[9px] uppercase text-muted-foreground sm:block">{pick.brand_name}</span>
+                             </span>
+                           </Button>
+                         ))}
+                       </div>
+                     </motion.aside>
+                   )}
+                 </AnimatePresence>
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
