@@ -29,7 +29,7 @@ export const ROOM_PREVIEW_SCENES: Record<"living-room" | "office", RoomPreviewSc
     hotspot: { left: 42, top: 87, label: "Coffee table" },
     highlightIndex: 2, // marble alternative
     pieces: [
-      { src: woodCoffeeTable, alt: "Praia Da Granja by Man of Parts", name: "Praia Da Granja", designer: "Man of Parts" },
+      { src: woodCoffeeTable, alt: "Wood coffee table alternative", name: "Coffee Table", designer: "Man of Parts" },
       { src: sculpturalCoffeeTable, alt: "Sculptural coffee table alternative", name: "Mineral Flower Coffee Table", designer: "Noé Duchaufour-Lawrance" },
       { src: marbleCoffeeTable, alt: "Marble coffee table alternative", name: "Void Table", designer: "OKHA by Adam Court" },
     ],
