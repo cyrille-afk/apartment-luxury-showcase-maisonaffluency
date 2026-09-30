@@ -9,8 +9,8 @@ const isEdgeFailure = (reason: unknown) => {
   const error = reason as { name?: string; message?: string; context?: { status?: number } } | null;
   const message = String(error?.message ?? reason ?? "");
   return /Functions(Http|Fetch|Relay)Error/.test(error?.name ?? "") ||
-    /Edge function returned 5\d\d|IDLE_TIMEOUT|Failed to send a request to the Edge Function|edge function.*(?:timed? out|timeout)/i.test(message) ||
-    error?.context?.status === 504;
+    /Edge function returned (?:401|5\d\d)|IDLE_TIMEOUT|Failed to send a request to the Edge Function|edge function.*(?:timed? out|timeout)/i.test(message) ||
+    error?.context?.status === 401 || error?.context?.status === 504;
 };
 
 /** Keeps a failed React tree recoverable without interrupting healthy pages for background failures. */
