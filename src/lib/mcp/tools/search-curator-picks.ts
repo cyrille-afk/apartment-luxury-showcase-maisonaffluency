@@ -96,7 +96,7 @@ export default defineTool({
     if (input.subcategory) q = q.ilike("subcategory", input.subcategory);
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
-      const cleanQuery = input.query.replace(/[%_]/g, "").trim();
+      const cleanQuery = input.query.replace(/[%_,()."\\*:]/g, " ").replace(/\s+/g, " ").trim();
       const like = `%${cleanQuery}%`;
       // Brand resolution: match the FULL query and each significant token
       // against designer name + founder so "CC-Tapis rug", "Marta Sala coffee

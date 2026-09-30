@@ -68,7 +68,7 @@ var search_curator_picks_default = defineTool({
     if (input.subcategory) q = q.ilike("subcategory", input.subcategory);
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
-      const cleanQuery = input.query.replace(/[%_]/g, "").trim();
+      const cleanQuery = input.query.replace(/[%_,()."\\*:]/g, " ").replace(/\s+/g, " ").trim();
       const like = `%${cleanQuery}%`;
       const STOP = /* @__PURE__ */ new Set([
         "the",
