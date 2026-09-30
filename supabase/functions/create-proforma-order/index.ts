@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
+import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
+import { applyIossEnv } from "../_shared/iossConfig.ts";
+import { verifyVatNumber } from "../_shared/vatValidation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,24 +71,34 @@ serve(async (req) => {
     const rawLines = Array.isArray(body?.lines) ? body.lines.slice(0, 60) : [];
     if (rawLines.length === 0) return json({ error: "At least one line item is required." }, 400);
 
-    const lines = rawLines.map((l: Record<string, unknown>) => {
-      const quantity = Math.min(Math.max(int(l?.quantity) || 1, 1), 999);
-      const unit = int(l?.unitCents);
-      return {
-        title: str(l?.title, 200) || "Bespoke piece",
-        designer_name: str(l?.designer, 160) || null,
-        finish_label: str(l?.finishLabel, 250) || null,
-        quantity,
-        unit_price_cents: unit,
-        line_total_cents: unit * quantity,
-      };
-    });
+    const verified = await verifyCatalogLines(supabase, rawLines, currency);
+    if (!verified.ok) return json({ error: verified.error }, verified.status);
+    const lines = verified.lines.map(({ pick_id: _p, ...l }) => l);
 
-    // Server-side arithmetic — the client's totals are advisory only.
-    const subtotalCents = lines.reduce((n, l) => n + l.line_total_cents, 0);
-    const discountCents = Math.min(int(body?.discountCents), subtotalCents);
+    // Server-derived amounts: discount capped at the account tier + 1.5% bank
+    // concierge rate; tax recomputed from the destination rules.
+    const subtotalCents = verified.subtotalCents;
+    const { pct } = await resolveAccountDiscount(supabase, userId);
+    const maxDiscount = Math.round(subtotalCents * (pct + 0.015));
+    const discountCents = Math.min(int(body?.discountCents), maxDiscount);
     const shippingCents = int(body?.shippingCents);
-    const taxCents = int(body?.taxCents);
+    const buyerType = body?.buyerType === "business" ? "business" : "private";
+    const buyerTaxId = normaliseBuyerTaxId(str(body?.buyerTaxId, 40));
+    const taxCountry = str(body?.buyerTaxCountry, 2).toUpperCase();
+    const verification = buyerType === "business" && buyerTaxId
+      ? await verifyVatNumber(buyerTaxId, taxCountry)
+      : null;
+    applyIossEnv();
+    const treatment = resolveTaxTreatment({
+      country: taxCountry,
+      currency,
+      buyerType,
+      buyerTaxId,
+      buyerTaxIdVerified: verification?.valid === true,
+      goodsCents: subtotalCents - discountCents,
+      shippingCents,
+    });
+    const taxCents = treatment.taxCents;
     const totalCents = subtotalCents - discountCents + shippingCents + taxCents;
 
     const row = {
@@ -103,12 +118,12 @@ serve(async (req) => {
       discount_label: str(body?.discountLabel, 120) || null,
       shipping_cents: shippingCents,
       tax_cents: taxCents,
-      tax_label: str(body?.taxLabel, 160) || null,
-      tax_treatment: str(body?.taxTreatment, 40) || null,
-      tax_rate: Number.isFinite(Number(body?.taxRate)) ? Number(body?.taxRate) : null,
-      tax_statement: str(body?.taxStatement, 400) || null,
-      buyer_type: str(body?.buyerType, 20) || null,
-      buyer_tax_id: str(body?.buyerTaxId, 40) || null,
+      tax_label: treatment.label ?? null,
+      tax_treatment: treatment.treatment,
+      tax_rate: treatment.rate,
+      tax_statement: treatment.statement ?? null,
+      buyer_type: buyerType,
+      buyer_tax_id: buyerTaxId || null,
       buyer_tax_country: str(body?.buyerTaxCountry, 2) || null,
       total_cents: totalCents,
     };

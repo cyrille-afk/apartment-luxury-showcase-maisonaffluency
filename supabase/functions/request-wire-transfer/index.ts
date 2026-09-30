@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { sendLovableEmail } from "../_shared/lovableEmail.ts";
+import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,6 +67,26 @@ serve(async (req) => {
     if (!name || !email) return json({ error: "Name and email are required." }, 400);
     if (!Number.isFinite(amountCents) || amountCents <= 0) {
       return json({ error: "A valid amount is required." }, 400);
+    }
+
+    const supabaseVerify = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+    const orderCurrency = (typeof body?.currency === "string" ? body.currency : "usd").toLowerCase();
+    const rawItems = Array.isArray(body?.items) ? body.items.slice(0, 60) : [];
+    const verified = await verifyCatalogLines(
+      supabaseVerify,
+      rawItems.map((i: any) => ({ ...i, finishLabel: i?.finishLabel ?? i?.finish })),
+      orderCurrency,
+    );
+    if (!verified.ok) return json({ error: verified.error }, verified.status);
+    // Floor: verified goods less the account tier and 1.5% concierge discount.
+    // Shipping/tax may only add on top; an understated total is rejected.
+    const { pct } = await resolveAccountDiscount(supabaseVerify, userId);
+    const floorCents = Math.round(verified.subtotalCents * (1 - pct) * 0.985 * 0.99);
+    if (amountCents < floorCents) {
+      return json({ error: "The order total no longer matches the catalogue. Please refresh and try again." }, 409);
     }
 
     const reference = `WIRE-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
