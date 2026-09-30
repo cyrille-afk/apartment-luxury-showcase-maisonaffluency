@@ -610,9 +610,23 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
     const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
     const pool = allPicks.filter((pick) => publicIds.has(pick.id) && pick.id !== selectedProduct.id && pick.image_url);
-    const sameSubcategory = pool.filter((pick) => selectedProduct.subcategory && normalize(pick.subcategory || "") === normalize(selectedProduct.subcategory));
-    const sameCategory = pool.filter((pick) => selectedProduct.category && normalize(pick.category || "") === normalize(selectedProduct.category));
-    return [...sameSubcategory, ...sameCategory.filter((pick) => !sameSubcategory.some((candidate) => candidate.id === pick.id))].slice(0, 3);
+    // Strict type-gating: exact subcategory only (no broad category fallback).
+    let target = normalize(selectedProduct.subcategory || "");
+    if (!target) {
+      // Infer the subcategory from the product's type noun (e.g. "vase") via catalogue titles.
+      const words = normalize(`${selectedProduct.title || ""} ${selectedHotspot?.product_name || ""}`).split(/\s+/).filter((w) => w.length > 3);
+      const counts = new Map<string, number>();
+      allPicks.forEach((pick) => {
+        const sub = normalize(pick.subcategory || "");
+        if (!sub) return;
+        const title = normalize(pick.title || "");
+        if (words.some((w) => new RegExp(`\\b${w.replace(/s$/, "")}s?\\b`).test(title) && sub.includes(w.replace(/s$/, "")))) counts.set(sub, (counts.get(sub) || 0) + 1);
+      });
+      target = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+    }
+    if (!target) return [];
+    const selfTitle = normalize(selectedProduct.title || selectedHotspot?.product_name || "");
+    return pool.filter((pick) => normalize(pick.subcategory || "") === target && normalize(pick.title || "") !== selfTitle).slice(0, 3);
   })() : [];
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
