@@ -36,6 +36,7 @@ import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
+import { preloadImage } from "@/lib/curatorPickPreload";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -130,19 +131,39 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
 };
 
+// Download the three room photographs together, rather than waiting for each
+// dropdown to mount its own image after the visitor moves across the nav.
+const preloadRoomMenuPhotos = () => {
+  void Promise.all(
+    (["living", "dining", "bedroom"] as const).map((room) =>
+      preloadImage(roomAmbientImages[room].src, "low"),
+    ),
+  );
+};
+
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
 // Scene data is shared with the Room Experience landing page via
 // src/lib/roomPreviewScenes.ts so menu and page never drift apart.
 const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
+  const [photoReady, setPhotoReady] = useState(false);
   const scene = useRoomPreviewScene(selectedRoomSlug);
+  const pieceSources = scene.pieces.map((piece) => piece.src).join("|");
+  const [readyPieceSources, setReadyPieceSources] = useState("");
+  useEffect(() => {
+    let active = true;
+    void Promise.all(scene.pieces.map((piece) => preloadImage(piece.src, "auto"))).then(() => {
+      if (active) setReadyPieceSources(pieceSources);
+    });
+    return () => { active = false; };
+  }, [pieceSources]);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
       <div className="relative h-[190px] bg-muted">
-          <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
+          <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
              <Button type="button" variant="ghost" size="icon" aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
@@ -162,7 +183,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-           <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+            <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
               <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
                 <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
@@ -296,6 +317,17 @@ interface NavigationProps {
 }
 
 const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationProps) => {
+  useEffect(() => {
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    // Leave first paint to the page, then warm all three menu photos in parallel.
+    // Hover starts them immediately if the visitor reaches the nav first.
+    if (window.requestIdleCallback) {
+      const id = window.requestIdleCallback(preloadRoomMenuPhotos, { timeout: 1800 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(preloadRoomMenuPhotos, 400);
+    return () => window.clearTimeout(id);
+  }, []);
   const { user, isTradeUser } = useAuth();
   const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
@@ -1232,7 +1264,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <Button
                     type="button"
                     variant="ghost"
-                    onMouseEnter={() => openRoomMenu(room)}
+                     onMouseEnter={() => { if (room === "living" || room === "dining" || room === "bedroom") preloadRoomMenuPhotos(); openRoomMenu(room); }}
                     onFocus={() => openRoomMenu(room)}
                     onClick={() => openRoomMenu(room)}
                     aria-expanded={megaMenuOpen && activeRoomMenu === room}
