@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import InteractiveGalleryLookbook from "@/components/InteractiveGalleryLookbook";
+import InteractiveGalleryLookbook, { roomHasLookbookScene } from "@/components/InteractiveGalleryLookbook";
 import { resolveRoomSlug, ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
