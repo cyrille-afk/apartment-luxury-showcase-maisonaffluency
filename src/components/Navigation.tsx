@@ -183,17 +183,17 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-            <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+            <div className={cn("mt-1 grid w-full grid-cols-3 gap-3 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
-              <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
-                <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
-                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
+              <div key={piece.src} className={cn("flex flex-col rounded-sm border bg-background p-2.5 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary" : "border-border/40")}>
+                <div className="relative mb-2.5 aspect-square overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
+                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain mix-blend-multiply" />
                </div>
                {"name" in piece && (
-                  <div className="bg-background px-1.5 py-1.5">
-                    <div className="min-h-[2rem] font-body text-[11px] font-bold leading-tight text-foreground line-clamp-2">{piece.name}</div>
-                    <div className="mt-0.5 truncate font-body text-[10px] leading-tight text-muted-foreground">{piece.designer}</div>
-                  </div>
+                  <>
+                    <div className="mb-0.5 truncate font-body text-[10px] font-bold uppercase tracking-wider text-foreground">{piece.designer}</div>
+                    <h4 className="min-h-[2rem] font-body text-[11px] font-normal leading-tight text-muted-foreground line-clamp-2">{piece.name}</h4>
+                  </>
                )}
             </div>
           ))}
