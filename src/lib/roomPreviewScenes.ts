@@ -60,11 +60,11 @@ export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "bedroo
   office: {
     previewImage: { src: officeHero, alt: "Curated home office with collectible furnishings" },
     hotspot: { left: 43, top: 72, label: "Desk" },
-    highlightIndex: 1, // Apartment Desk
+    highlightIndex: 0, // Solare Desk
     pieces: [
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1780550235/Lyrique_Black-1_ozsq0k.jpg", alt: "Lyric Desk Oak by Atelier BdM", name: "Lyric Desk Oak", designer: "Atelier BdM" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428196/JMF_1932_Apartment_Desk__02_Portrait_BD_1_jhvb5g.jpg", alt: "Apartment Desk c. 1925 by Jean-Michel Frank", name: "Apartment Desk c. 1925", designer: "Jean-Michel Frank" },
-      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1775507497/Screen_Shot_2026-04-07_at_4.29.53_AM_spljjl.png", alt: "Officium Desk by Pierre Augustin Rose", name: "Officium Desk", designer: "Pierre Augustin Rose" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1787568568/maison%20affluency/curators-picks/Amelie%20Vermersch/sol-desk-02.jpg", alt: "Solare Desk by Amélie Vermersch", name: "Solare Desk", designer: "Amélie Vermersch" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1779896026/KalbB_5_pcc7b7.jpg", alt: "Kalb B Desk by Thierry Lemaire", name: "Kalb B Desk", designer: "Thierry Lemaire" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1776594006/Arbor-Desk_01_alexander-lamont_skrxig.jpg", alt: "Arbor Desk by Alexander Lamont", name: "Arbor Desk", designer: "Alexander Lamont" },
     ],
   },
 };
