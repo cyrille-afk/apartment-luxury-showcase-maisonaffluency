@@ -20,7 +20,9 @@ export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
 
     const subcategories = ROOM_SUBCATEGORIES[slug as RotatingRoom];
     const matches = catalog.filter(({ pick }) =>
-      pick.id && pick.image && subcategories.some((subcategory) =>
+      pick.id && pick.image &&
+      (slug !== "office" || /\bdesk\b/i.test(pick.title)) &&
+      subcategories.some((subcategory) =>
         pick.subcategory?.trim().toLowerCase() === subcategory.toLowerCase(),
       ),
     );
