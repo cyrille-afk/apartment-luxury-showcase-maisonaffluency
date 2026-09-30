@@ -29,8 +29,15 @@ Deno.serve(async (req) => {
     return json({ error: 'invalid_json' }, 400)
   }
 
-  const sessionId = str(body.sessionId, 80)
-  if (!sessionId) return json({ error: 'sessionId is required' }, 400)
+  // The browser keeps a random secret token; rows are keyed by its SHA-256
+  // hash, so knowing a stored session_id never lets anyone rewrite or delete
+  // that basket — only the browser holding the original token can.
+  const rawToken = str(body.sessionId, 80)
+  if (!rawToken || !/^[0-9a-f-]{32,64}$/i.test(rawToken)) {
+    return json({ error: 'sessionId is required' }, 400)
+  }
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`cart:${rawToken}`))
+  const sessionId = 'h_' + Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
 
   const status = ['active', 'ordered', 'dismissed'].includes(String(body.status))
     ? String(body.status)
@@ -52,6 +59,15 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
+  // Trust only the verified sign-in for user_id, never a body field.
+  let authUserId: string | null = null
+  const auth = req.headers.get('authorization') || ''
+  if (auth.toLowerCase().startsWith('bearer ')) {
+    const { data } = await supabase.auth.getClaims(auth.slice(7))
+    const sub = data?.claims?.sub
+    if (typeof sub === 'string' && data?.claims?.role === 'authenticated') authUserId = sub
+  }
+
   // Empty basket + no order => nothing worth keeping.
   if (items.length === 0 && status !== 'ordered') {
     await supabase.from('abandoned_carts').delete().eq('session_id', sessionId)
@@ -62,7 +78,7 @@ Deno.serve(async (req) => {
 
   const payload: Record<string, unknown> = {
     session_id: sessionId,
-    user_id: str(body.userId, 64),
+    user_id: authUserId,
     email: str(body.email, 200)?.toLowerCase() ?? null,
     name: str(body.name, 160),
     currency: str(body.currency, 8)?.toUpperCase() ?? null,
