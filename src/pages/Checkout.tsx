@@ -1847,6 +1847,7 @@ function WireForm({
             address,
           }}
           lines={lines.map((l) => ({
+            pickId: l.pickId ?? null,
             title: l.title,
             designer: l.designer || "",
             finishLabel: l.finishLabel || "",
