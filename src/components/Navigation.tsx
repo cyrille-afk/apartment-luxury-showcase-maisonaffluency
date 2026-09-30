@@ -1223,7 +1223,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
                 <div
                   key={room}
-                   className="static"
+                   className={room === "decor" || room === "lighting" ? "relative" : "static"}
                   onMouseEnter={keepRoomMenuOpen}
                   onMouseLeave={scheduleRoomMenuClose}
                 >
