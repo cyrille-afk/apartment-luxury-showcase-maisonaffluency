@@ -185,9 +185,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
         <div className="mb-3 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
             <div className={cn("grid w-full grid-cols-3 gap-4 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
-              <div key={piece.src} className={cn("flex flex-col rounded-sm border bg-[hsl(var(--collection-card-canvas))] p-3 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary" : "border-border/40")}>
-                <div className="relative mb-3 flex aspect-square items-center justify-center overflow-hidden bg-background">
-                  <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply" />
+              <div key={piece.src} className={cn("flex flex-col rounded-sm border bg-background p-3 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary" : "border-border/40")}>
+                <div className="relative mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-sm bg-[hsl(var(--collection-card-canvas))]">
+                  <img src={piece.src} alt={piece.alt} className="max-h-[85%] max-w-[85%] object-contain mix-blend-multiply" />
                </div>
                {"name" in piece && (
                   <>
