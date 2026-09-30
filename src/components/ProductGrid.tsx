@@ -41,7 +41,7 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
     designer: [item.designerName],
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
     handmade: originToCountries(pick.origin),
-    material: roomMaterialCategories(pick.materials),
+    material: roomMaterialCategories(pick.materials, pick.title),
   };
 }
 
@@ -499,8 +499,8 @@ function singularizeSub(s: string): string {
     }
     return options;
   }, [rawFiltered, roomFacets]);
-  const availableRoomMaterials = useMemo(() => new Set(rawFiltered.flatMap((item) => roomMaterialCategories(item.pick.materials))), [rawFiltered]);
-  const catalogMaterials = useMemo(() => new Set(allProducts.flatMap((item) => roomMaterialCategories(item.pick.materials))), [allProducts]);
+  const availableRoomMaterials = useMemo(() => new Set(rawFiltered.flatMap((item) => roomMaterialCategories(item.pick.materials, item.pick.title))), [rawFiltered]);
+  const catalogMaterials = useMemo(() => new Set(allProducts.flatMap((item) => roomMaterialCategories(item.pick.materials, item.pick.title))), [allProducts]);
   const facetFiltered = useMemo(() => roomSlug ? rawFiltered.filter((item) => {
     const facets = roomFacetValues(item);
     return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
