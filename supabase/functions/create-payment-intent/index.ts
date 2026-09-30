@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
+import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
@@ -85,6 +86,33 @@ serve(async (req) => {
       const item = parseItem(raw);
       if (!item) return json({ error: "A valid product title and price are required." }, 400);
       items.push(item);
+    }
+
+    // ---- Catalogue price verification (never trust client prices) ----
+    {
+      const verifyAdmin = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      );
+      const verified = await verifyCatalogLines(
+        verifyAdmin,
+        rawItems.map((raw: any, idx: number) => ({
+          pickId: raw?.pickId,
+          title: items[idx].title,
+          designer: items[idx].designer,
+          finishLabel: items[idx].finish,
+          variant: raw?.variant ?? null,
+          unitCents: items[idx].unitAmount,
+          quantity: items[idx].quantity,
+        })),
+        currency,
+        { maxQty: 20 },
+      );
+      if (!verified.ok) return json({ error: verified.error }, verified.status);
+      verified.lines.forEach((l, idx) => {
+        items[idx].unitAmount = l.unit_price_cents;
+        items[idx].quantity = l.quantity;
+      });
     }
 
     // ---- Account-level tier discount (re-derived server-side) ----
