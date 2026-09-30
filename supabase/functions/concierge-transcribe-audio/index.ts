@@ -3,6 +3,7 @@
 // to the Lovable AI Gateway transcription endpoint and stream the SSE back
 // to the browser. LOVABLE_API_KEY stays server-side.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/audio/transcriptions";
@@ -22,6 +23,18 @@ serve(async (req) => {
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "method_not_allowed" }), {
       status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Paid transcription: signed-in users only.
+  const authHeader = req.headers.get("authorization") || "";
+  const jwt = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
+  const authClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+  const { data: claimData } = jwt ? await authClient.auth.getClaims(jwt) : { data: null };
+  if (!claimData?.claims?.sub || claimData.claims.role !== "authenticated") {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
