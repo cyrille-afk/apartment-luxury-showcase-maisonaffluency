@@ -604,13 +604,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const hasScenePicks = scenePicks.length > 0;
   // Only Shop By Room replaces portrait side columns with a hotspot-driven dock.
   const portraitDock = !!discoveryRoom && activeSceneIsPortrait && !expandedScene;
-  const selectedHotspot = portraitDock && activeScene && !dockDismissed
-    ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) ?? hotspotsForScene(activeScene)[0]
-    : undefined;
-  const selectedProduct = selectedHotspot ? resolveHotspotProduct(selectedHotspot) : null;
-  const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
-    const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
-    const pool = allPicks.filter((pick) => publicIds.has(pick.id) && pick.id !== selectedProduct.id && pick.image_url);
+  const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
+  const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
+    const product = resolveHotspotProduct(hotspot);
+    if (!product || product.restricted_gallery_pin) return [];
+    const pool = allPicks.filter((pick) => publicPickIds.has(pick.id) && pick.id !== product.id && pick.image_url);
     // Strict type-gating. The hotspot's own object name wins (unmapped pins can
     // fuzzy-resolve to an unrelated pick); then the product's exact subcategory.
     const HOTSPOT_TYPES: Array<[RegExp, string[]]> = [
@@ -632,16 +630,24 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       [/\barmchair\b/, ["armchairs"]],
       [/\bchairs?\b/, ["chairs"]],
     ];
-    const hotspotName = normalize(selectedHotspot?.product_name || "");
+    const hotspotName = normalize(hotspot?.product_name || "");
     let targets = HOTSPOT_TYPES.find(([re]) => re.test(hotspotName))?.[1];
     if (!targets) {
-      const sub = normalize(selectedProduct.subcategory || "");
+      const sub = normalize(product.subcategory || "");
       targets = sub ? [sub] : [];
     }
     if (!targets.length) return [];
-    const selfTitle = normalize(selectedProduct.title || selectedHotspot?.product_name || "");
+    const selfTitle = normalize(product.title || hotspot?.product_name || "");
     return pool.filter((pick) => targets!.includes(normalize(pick.subcategory || "")) && normalize(pick.title || "") !== selfTitle && normalize(pick.title || "") !== hotspotName).slice(0, 3);
-  })() : [];
+  };
+  // Landing: default to the first pin that actually has alternatives, so the dock populates immediately.
+  const sceneHotspots = portraitDock && activeScene ? hotspotsForScene(activeScene) : [];
+  const selectedHotspot = portraitDock && activeScene && !dockDismissed
+    ? sceneHotspots.find((hotspot) => hotspot.id === activePin)
+      ?? sceneHotspots.find((hotspot) => alternativesFor(hotspot).length > 0)
+      ?? sceneHotspots[0]
+    : undefined;
+  const dockAlternatives = selectedHotspot ? alternativesFor(selectedHotspot) : [];
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
