@@ -1258,6 +1258,7 @@ function PurchaseOrderForm({
           requestKey,
           buyer: { email, name: buyerName, address: form.deliveryAddress },
           lines: lines.map((line) => ({
+            pickId: line.pickId ?? null,
             title: line.title,
             designer: line.designer,
             finishLabel: line.finishLabel,
@@ -1772,6 +1773,7 @@ function WireForm({
           quantity: lines.reduce((n, l) => n + lineQty(l), 0),
           amountCents: total,
           items: lines.map((l) => ({
+            pickId: l.pickId ?? null,
             title: l.title,
             designer: l.designer || "",
             finish: l.finishLabel || "",
@@ -2458,6 +2460,7 @@ export default function Checkout() {
           // … plus the full order, which the function charges when present.
           // Gross prices — the tier rate is re-derived server-side.
           items: grossLines.map((l) => ({
+            pickId: l.pickId ?? null,
             title: l.title,
             designer: l.designer || "",
             selectedFinish: l.finishLabel || "",
