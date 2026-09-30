@@ -149,14 +149,16 @@ export default function BuildUpdateBanner() {
       pending = false;
       stopRetry();
 
-      // Show at top-center so mobile/PWA users see it above the iOS home
+      // Top-right on desktop (just below the header, clear of the centered
+      // nav), top-center on mobile/PWA so it stays above the iOS home
       // indicator (default bottom-right sits under the system nav bar and is
       // effectively invisible on installed PWAs).
       const isNarrow = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
       toast("A new version is available", {
         description: "Refresh when you're ready.",
         duration: 20_000,
-        position: isNarrow ? "top-center" : "bottom-right",
+        position: isNarrow ? "top-center" : "top-right",
+        offset: isNarrow ? 16 : 24,
         action: {
           label: "Refresh now",
           onClick: (e) => {
