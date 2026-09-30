@@ -154,9 +154,7 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
       {/* 3. Trade messaging block — footer anchor */}
       <section className="mx-auto w-full max-w-6xl px-6 pb-20 pt-4">
         <p className="mx-auto mt-3 max-w-2xl text-center font-body text-sm font-semibold leading-relaxed tracking-wide text-crimson-black">
-          Leverage our elite global gallery network
-          <br />
-          and high-end sourcing to elevate your portfolio
+          Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects
         </p>
       </section>
     </div>
