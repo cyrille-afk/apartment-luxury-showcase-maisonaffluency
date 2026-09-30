@@ -180,8 +180,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
     </div>
     <h3 className="mt-6 text-center font-serif text-xl font-bold tracking-wide text-foreground md:text-2xl">Elevate Your Projects with Unrivaled Curation</h3>
-    <p className="mx-auto mt-2 max-w-2xl text-center font-body text-sm leading-relaxed tracking-wide text-muted-foreground">
-      Leverage our elite global gallery network and high-end sourcing to elevate your portfolio. Maison Affluency equips interior architects and decorators with the distinct knowledge and curations needed to deliver unforgettable spaces for your clients.
+    <p className="mx-auto mt-2 max-w-2xl text-center font-body text-sm font-semibold leading-relaxed tracking-wide text-muted-foreground">
+      Leverage our elite global gallery network and high-end sourcing to elevate your portfolio.
     </p>
   </div>
   );
