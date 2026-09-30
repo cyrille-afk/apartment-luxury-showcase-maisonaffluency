@@ -1,3 +1,4 @@
+import { safeOrigin } from "../_shared/safeOrigin.ts";
 // Frictionless quote/customisation intake for the public product modal.
 //
 // Actions:
@@ -216,7 +217,7 @@ Deno.serve(async (req) => {
     if ((existing?.length ?? 0) === 0) {
       const origin = (() => {
         try {
-          return pageUrl ? new URL(pageUrl).origin : "https://www.maisonaffluency.com";
+          return safeOrigin(pageUrl || null);
         } catch {
           return "https://www.maisonaffluency.com";
         }

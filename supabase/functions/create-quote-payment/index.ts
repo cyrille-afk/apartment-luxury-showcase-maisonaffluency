@@ -1,3 +1,4 @@
+import { safeRequestOrigin } from "../_shared/safeOrigin.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
@@ -189,7 +190,7 @@ serve(async (req) => {
     const customerId = customers.data[0]?.id;
 
     const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
-    const origin = req.headers.get("origin") || "";
+    const origin = safeRequestOrigin(req);
     const label = paymentType === "deposit" ? "60% Deposit" : "40% Balance";
 
     // Commission portion (only meaningful in agent mode). Pro-rate by the portion being charged now.

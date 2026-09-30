@@ -1,3 +1,4 @@
+import { safeRequestOrigin } from "../_shared/safeOrigin.ts";
 // Creates or refreshes a Stripe Connect Express account for a studio payout
 // account row and returns an onboarding link. The frontend opens the link in
 // a new tab; on return we re-poll the account to update status.
@@ -86,7 +87,7 @@ serve(async (req) => {
         .eq("id", account_id);
     }
 
-    const origin = req.headers.get("origin") ?? "";
+    const origin = safeRequestOrigin(req);
     const safePath = typeof return_path === "string" && return_path.startsWith("/")
       ? return_path
       : "/trade/studio-settings";

@@ -1,3 +1,4 @@
+import { safeRequestOrigin } from "../_shared/safeOrigin.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
@@ -71,7 +72,7 @@ serve(async (req) => {
 
     const { stripe } = await getStripe("auto");
 
-    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
+    const origin = safeRequestOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       customer_email: link.payer_email || undefined,
