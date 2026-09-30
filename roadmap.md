@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Restore full-width integrated desktop room menus, rename Man of Parts preview to Praia Da Granja, and leave only the justified crimson-black sourcing statement beneath the alternatives.
+
 - [x] Align Living coffee-table and Office desk preview pins with their furniture and highlight room-matched alternatives.
 
 - [x] Put room choices first in desktop menus, send room clicks to their product grid, and make preview hotspots reveal and highlight alternatives.
