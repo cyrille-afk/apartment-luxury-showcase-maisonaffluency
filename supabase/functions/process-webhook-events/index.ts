@@ -85,8 +85,39 @@ async function heartbeat(supabase: any, args: {
   }
 }
 
+// Only the database trigger/cron and the watchdog (all service-role callers)
+// may run this worker. A token is accepted if it is the configured service
+// key, or if the database itself accepts it as service role (PostgREST
+// verifies the signature; webhook_events is not readable by anon/users).
+async function isServiceCaller(req: Request): Promise<boolean> {
+  const h = req.headers.get("authorization") || "";
+  if (!h.toLowerCase().startsWith("bearer ")) return false;
+  const token = h.slice(7).trim();
+  if (!token) return false;
+  const envKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (envKey && token === envKey) return true;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload?.role !== "service_role") return false;
+    const probe = createClient(Deno.env.get("SUPABASE_URL")!, token, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { error } = await probe.from("webhook_events").select("id").limit(1);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  if (!(await isServiceCaller(req))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const url = new URL(req.url);
   const supabase = serviceClient();
