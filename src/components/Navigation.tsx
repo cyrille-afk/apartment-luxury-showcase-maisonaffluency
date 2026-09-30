@@ -180,7 +180,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
     </div>
     <p className="mt-6 w-full max-w-[380px] text-justify font-body text-[13px] font-bold leading-relaxed text-foreground">
-      Leverage our elite global gallery network and high-end sourcing to elevate your portfolio
+      Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects
     </p>
   </div>
   );
