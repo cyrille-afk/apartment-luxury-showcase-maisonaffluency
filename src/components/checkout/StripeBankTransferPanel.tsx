@@ -16,6 +16,7 @@ export type WireItem = {
   designer?: string;
   selectedFinish?: string;
   price: number; // major units
+  pickId?: string | null;
   quantity: number;
 };
 

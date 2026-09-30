@@ -4,6 +4,8 @@ import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
 import { isBuyerTaxIdValid, resolveTaxRule, resolveTaxTreatment } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
+import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import {
   evaluateCreditLimit,
   evaluateRegionalCompliance,
@@ -102,20 +104,12 @@ serve(async (req) => {
     if (!email.includes("@")) return json({ error: "A valid corporate email is required." }, 400);
     const rawLines = Array.isArray(body?.lines) ? body.lines.slice(0, 60) : [];
     if (!rawLines.length) return json({ error: "At least one line item is required." }, 400);
-    const lines: PurchaseOrderLine[] = rawLines.map((line: Record<string, unknown>) => {
-      const quantity = Math.min(Math.max(int(line.quantity) || 1, 1), 999);
-      const unitPrice = int(line.unitCents);
-      return {
-        title: str(line.title, 200) || "Bespoke piece",
-        designer_name: str(line.designer, 160) || null,
-        finish_label: str(line.finishLabel, 250) || null,
-        quantity,
-        unit_price_cents: unitPrice,
-        line_total_cents: unitPrice * quantity,
-      };
-    });
-    const subtotalCents = lines.reduce((sum, line) => sum + line.line_total_cents, 0);
-    const discountCents = Math.min(int(body?.discountCents), subtotalCents);
+    const verified = await verifyCatalogLines(admin, rawLines, currency, { allowTradeOnly: true });
+    if (!verified.ok) return json({ error: verified.error }, verified.status);
+    const lines: PurchaseOrderLine[] = verified.lines.map(({ pick_id: _p, ...l }) => l);
+    const subtotalCents = verified.subtotalCents;
+    const { pct: accountPct } = await resolveAccountDiscount(admin, userId);
+    const discountCents = Math.min(int(body?.discountCents), Math.round(subtotalCents * accountPct));
     const shippingCents = int(body?.shippingCents);
     applyIossEnv();
     const treatment = resolveTaxTreatment({
