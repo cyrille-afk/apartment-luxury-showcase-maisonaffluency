@@ -1676,7 +1676,7 @@ const TradeProductPage: React.FC = () => {
       return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
     });
   });
-  const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressBaseAsFinish = !baseAxisIsDim && (isFinishAxisLabel(baseAxisLabelRaw) || !baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxisLabel(topAxisLabelRaw)));
 
   // When the product has variants but the user hasn't picked one yet, fall back
