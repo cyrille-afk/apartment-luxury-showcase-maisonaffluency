@@ -26,6 +26,24 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
+import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
+
+const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, venue: null, handmade: null, material: null };
+const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "venue", "handmade", "material"];
+
+function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
+  const pick = item.pick;
+  const tags = pick.tags || [];
+  const category = inferSubcategory(pick.category, pick.subcategory, pick.title);
+  return {
+    category: category ? [category] : [],
+    designer: [item.designerName],
+    leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
+    venue: tags.filter((tag) => /^exhibition(?: venue)?:\s*/i.test(tag)).map((tag) => tag.replace(/^exhibition(?: venue)?:\s*/i, "").trim()),
+    handmade: tags.some((tag) => /^(handmade|handcrafted)$/i.test(tag)) ? ["Handmade"] : [],
+    material: (pick.materials || "").split(/[,;/]|\s+and\s+/i).map((part) => part.trim()).filter(Boolean),
+  };
+}
 
 const toRoomLightboxItem = (item: ProductItem): PublicLightboxItem => {
   const p = item.pick;
@@ -336,6 +354,7 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
+  const [roomFacets, setRoomFacets] = useState<RoomFacetValues>(EMPTY_ROOM_FACETS);
   const gridRef = useRef<HTMLElement>(null);
   // Shop by Room: open the category-discovery lightbox variant instead of navigating.
   const [roomLightbox, setRoomLightbox] = useState<PublicLightboxItem | null>(null);
@@ -462,11 +481,29 @@ function singularizeSub(s: string): string {
     });
   }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory]);
 
-  const itemTones = useImageTones(rawFiltered.map((i) => i.pick.image));
+  const roomOptions = useMemo(() => {
+    const options = {} as RoomFacetOptions;
+    for (const key of ROOM_FACET_KEYS) {
+      const counts = new Map<string, number>();
+      for (const item of rawFiltered) {
+        const facets = roomFacetValues(item);
+        if (ROOM_FACET_KEYS.some((other) => other !== key && roomFacets[other] && !facets[other].includes(roomFacets[other]))) continue;
+        for (const value of new Set(facets[key])) counts.set(value, (counts.get(value) || 0) + 1);
+      }
+      options[key] = [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value));
+    }
+    return options;
+  }, [rawFiltered, roomFacets]);
+  const facetFiltered = useMemo(() => roomSlug ? rawFiltered.filter((item) => {
+    const facets = roomFacetValues(item);
+    return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
+  }) : rawFiltered, [rawFiltered, roomSlug, roomFacets]);
+
+  const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image));
   const filtered = useMemo(
-    () => curateGrid(rawFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
+    () => curateGrid(facetFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rawFiltered, itemTones, Object.keys(itemTones).length],
+    [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
   const { data: publicRrpMap = {} } = usePublicRrpMap(filtered.map((item) => item.pick.id));
   const isActive = Boolean(category || subcategory || textQuery || roomSlug);
@@ -552,7 +589,7 @@ function singularizeSub(s: string): string {
           </div>
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
-            <div className="hidden md:block">
+            {!roomSlug && <div className="hidden md:block">
               <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -584,7 +621,7 @@ function singularizeSub(s: string): string {
                 </TooltipContent>
               </Tooltip>
               </TooltipProvider>
-            </div>
+            </div>}
             <button
               onClick={roomSlug ? () => { window.location.href = "/designers"; } : handleClearFilter}
               className="flex items-center gap-1.5 px-5 py-2 rounded-full border border-[hsl(var(--gold))] bg-white shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.15em] text-foreground transition-all duration-300"
@@ -595,12 +632,20 @@ function singularizeSub(s: string): string {
           </div>
         </div>
 
+        <div className={roomSlug ? "md:flex md:items-start md:gap-6 lg:gap-8" : ""}>
+        {roomSlug && <RoomCollectionFilters
+          options={roomOptions}
+          values={roomFacets}
+          onChange={(key, value) => setRoomFacets((current) => ({ ...current, [key]: value }))}
+          onClear={() => setRoomFacets(EMPTY_ROOM_FACETS)}
+          count={filtered.length}
+        />}
         {/* Product Grid */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid grid-cols-2 ${gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? 'md:grid-cols-3' : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
         >
           {filtered.map((item, idx) => (
             <motion.div
@@ -625,7 +670,7 @@ function singularizeSub(s: string): string {
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
-                    sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                     sizes: `(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`,
                   })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                    className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"} ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
@@ -637,7 +682,7 @@ function singularizeSub(s: string): string {
                   <img
                     {...cldResponsiveImg(item.pick.hoverImage, {
                       widths: [300, 400, 600, 800],
-                      sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
+                       sizes: `(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`,
                     })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
                      className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"}`}
@@ -720,6 +765,7 @@ function singularizeSub(s: string): string {
             </motion.div>
           ))}
         </motion.div>
+        </div>
         {!dbPicksLoading && filtered.length === 0 && (
           <p className="py-20 text-center font-body text-sm text-muted-foreground">
             No pieces are currently available for this room.

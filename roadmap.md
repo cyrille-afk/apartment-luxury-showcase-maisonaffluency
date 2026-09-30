@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Restore room collection sidebar filters and a fixed three-column desktop catalog without changing room dropdown previews.
+
 - [x] Preserve the full portrait room image and reveal compact horizontal alternatives in a bottom overlay when its hotspot is selected.
 
 - [x] Show uncropped alternatives, anchor the Bedroom hotspot on the left lamp base, and rotate three distinct public catalog pieces per room mount.
