@@ -8,7 +8,7 @@
  * rate drift between the browser and the server. Anything else is rejected —
  * a caller can never choose their own price.
  */
-import { convertCents } from "../create-cart-checkout/fxConvert.ts";
+import { convertCents } from "./fxConvert.ts";
 
 export interface ClaimedLine {
   pickId?: unknown;
