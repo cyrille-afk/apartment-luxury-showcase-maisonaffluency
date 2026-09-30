@@ -194,8 +194,18 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       </form>
       {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
       <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+      {unlockPanel}
     </div>
   );
+
+  // Clickable material refinements: shown whenever nothing in the edit is
+  // verified yet — including alongside the similar-inventory cards.
+  const suggestionsLine = suggestions.length > 0 ? <p className="mt-3 max-w-xl font-body text-sm leading-7 text-moodboard-ink/65">
+    However, you can explore our curated selections in {suggestions.map((suggestion, index) => <span key={suggestion.query}>
+      {index > 0 ? (index === suggestions.length - 1 ? ", or " : ", ") : ""}
+      <Button type="button" variant="link" onClick={() => chooseSuggestion(suggestion.query)} className="h-auto p-0 align-baseline font-display text-base text-moodboard-teal underline decoration-moodboard-teal/30 underline-offset-4 hover:decoration-moodboard-teal">{suggestion.label}</Button>
+    </span>)}.
+  </p> : null;
 
   return (
     <div aria-live="polite">
