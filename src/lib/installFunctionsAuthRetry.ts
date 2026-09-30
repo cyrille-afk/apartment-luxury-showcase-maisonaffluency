@@ -11,8 +11,10 @@ let installed = false;
 export function installFunctionsAuthRetry() {
   if (installed) return;
   installed = true;
-  const fns = supabase.functions as any;
-  const original = fns.invoke.bind(fns);
+  // `supabase.functions` is a getter that builds a fresh FunctionsClient on
+  // every access, so the wrapper must live on the shared prototype.
+  const proto = Object.getPrototypeOf(supabase.functions) as any;
+  const originalInvoke = proto.invoke;
   let refreshing: Promise<boolean> | null = null;
 
   const refreshOnce = () => {
@@ -28,8 +30,8 @@ export function installFunctionsAuthRetry() {
     return refreshing;
   };
 
-  fns.invoke = async (name: string, options?: any) => {
-    const first = await original(name, options);
+  proto.invoke = async function (this: any, name: string, options?: any) {
+    const first = await originalInvoke.call(this, name, options);
     const status = first?.error?.context?.status;
     if (status !== 401) return first;
     // Only retry when the caller didn't pin its own Authorization header.
@@ -38,6 +40,7 @@ export function installFunctionsAuthRetry() {
     if (pinned) return first;
     const ok = await refreshOnce();
     if (!ok) return first;
-    return original(name, options);
+    // Fresh client picks up the refreshed access token.
+    return originalInvoke.call(supabase.functions, name, options);
   };
 }
