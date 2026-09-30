@@ -176,8 +176,12 @@ export default function RoomSearch() {
   const originalHead = useRef<Map<string, string | null> | null>(null);
 
   useEffect(() => {
-    if (room && roomParam !== room) navigate(`/search?room=${room}`, { replace: true });
-  }, [navigate, room, roomParam]);
+    if (room && roomParam !== room) {
+      const params = new URLSearchParams(searchParams);
+      params.set("room", room);
+      navigate(`/search?${params.toString()}`, { replace: true });
+    }
+  }, [navigate, room, roomParam, searchParams]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
