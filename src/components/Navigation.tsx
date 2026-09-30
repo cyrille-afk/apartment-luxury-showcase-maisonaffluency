@@ -149,6 +149,15 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
   const [selected, setSelected] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
   const scene = useRoomPreviewScene(selectedRoomSlug);
+  const pieceSources = scene.pieces.map((piece) => piece.src).join("|");
+  const [readyPieceSources, setReadyPieceSources] = useState("");
+  useEffect(() => {
+    let active = true;
+    void Promise.all(scene.pieces.map((piece) => preloadImage(piece.src, "auto"))).then(() => {
+      if (active) setReadyPieceSources(pieceSources);
+    });
+    return () => { active = false; };
+  }, [pieceSources]);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
@@ -174,7 +183,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
       <div className="px-1 pb-1 pt-3">
         <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-           <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+            <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
               <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
                 <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
