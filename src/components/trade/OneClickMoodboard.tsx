@@ -21,7 +21,7 @@ const DEFAULT_OBJECT_QUERY = "Ash dining chairs";
 
 // Matching rules live in the `felix-sourcing` backend function; the client
 // only receives the final ranked results.
-type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string };
+type SourcedItem = { pick: { id: string; title: string; image: string; materials?: string }; designerName: string; status: "verified" | "similar" };
 type SourcingSuggestion = { label: string; query: string };
 
 export function useMoodboardSourcing() {
@@ -53,8 +53,8 @@ export function useMoodboardSourcing() {
       });
       if (fnError) throw fnError;
       if (submitted!.track) trackFelixEvent("felix_generate_success", { mode: submitted!.mode, query: submitted!.value, result_count: data?.results?.length ?? 0 });
-      const matches = ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string }>)
-        .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName }));
+      const matches = ((data?.results ?? []) as Array<{ id: string; title: string; image: string; materials: string | null; designerName: string; status?: string }>)
+        .map((r) => ({ pick: { id: r.id, title: r.title, image: r.image, materials: r.materials ?? undefined }, designerName: r.designerName, status: r.status === "similar" ? "similar" as const : "verified" as const }));
       return { matches, suggestions: (data?.suggestions ?? []) as SourcingSuggestion[] };
     },
   });
