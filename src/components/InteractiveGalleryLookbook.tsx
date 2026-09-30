@@ -343,7 +343,7 @@ type InteractiveGalleryLookbookProps = {
 };
 
 export default function InteractiveGalleryLookbook({ initialView = "tour", discoveryRoom }: InteractiveGalleryLookbookProps) {
-  const [galleryState, setGalleryState] = useState<GalleryState>(discoveryRoom ? { kind: "room", spaceIndex: roomSpace(discoveryRoom) } : initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
+  const [galleryState, setGalleryState] = useState<GalleryState>(discoveryRoom ? { kind: "room", spaceIndex: roomSpace(discoveryRoom) ?? 0 } : initialView === "living-room" ? { kind: "room", spaceIndex: 0 } : { kind: "tour" });
   const [sceneIdx, setSceneIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -363,7 +363,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   useEffect(() => {
     if (!discoveryRoom) return;
-    setGalleryState({ kind: "room", spaceIndex: roomSpace(discoveryRoom) });
+    setGalleryState({ kind: "room", spaceIndex: roomSpace(discoveryRoom) ?? 0 });
     setSceneIdx(0);
     setLightboxProduct(null);
   }, [discoveryRoom]);

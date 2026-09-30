@@ -273,7 +273,7 @@ export default function RoomSearch() {
       <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
           <>
-            {!searchParams.get("category") && <InteractiveGalleryLookbook discoveryRoom={room} />}
+            {!searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
             <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
           </>
         ) : (
