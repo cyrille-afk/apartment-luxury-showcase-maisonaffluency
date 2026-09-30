@@ -226,11 +226,11 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <div className="mt-3 flex flex-col gap-1">
           {roomFlyouts[room]?.map((link, index) => (
             <div key={link.slug}>
-              <Button type="button" variant="ghost" onMouseEnter={() => { if (selectedRoom !== index) { setSelectedRoom(index); onSelectCategory(null); } }} onFocus={() => { if (selectedRoom !== index) { setSelectedRoom(index); onSelectCategory(null); } }} onClick={() => onRoomNavigate(link.slug)} aria-expanded={selectedRoom === index} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 font-body text-[13px] hover:bg-transparent hover:text-foreground", selectedRoom === index ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>
+              <Button type="button" variant="ghost" onMouseEnter={() => { if (selectedRoom !== index) { setSelectedRoom(index); onSelectCategory(null); } }} onFocus={() => { if (selectedRoom !== index) { setSelectedRoom(index); onSelectCategory(null); } }} onClick={() => onRoomNavigate(link.slug)} aria-expanded={selectedRoom === index} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 py-1.5 font-body text-xs font-semibold uppercase tracking-widest transition-colors hover:bg-transparent hover:text-foreground", selectedRoom === index ? "text-foreground" : "text-muted-foreground")}>
                 <ChevronRight className={cn("size-3 shrink-0 transition-transform", selectedRoom === index && "rotate-90")} strokeWidth={1.25} />{link.label}
               </Button>
               {selectedRoom === index && (
-                <div className="ml-5 flex flex-col border-l border-border/60 pl-3">
+                <div className="mb-4 ml-1.5 mt-2 flex flex-col space-y-1 border-l border-border/60 pl-4">
                   {categories.map((item, categoryIndex) => (
                     <div key={item.label} onMouseEnter={() => onSelectCategory(categoryIndex)}>
                       <Button
@@ -238,10 +238,10 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                         onFocus={() => onSelectCategory(categoryIndex)}
                         onClick={() => onCategoryNavigate(link.slug, item.category)}
                         aria-expanded={activeCategory === categoryIndex}
-                        className={cn("flex min-h-8 h-auto w-full justify-between gap-2 whitespace-normal rounded-none px-0 py-1 text-left font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === categoryIndex ? "text-foreground" : "text-muted-foreground")}
+                        className={cn("group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs transition-all hover:bg-transparent hover:font-medium hover:text-foreground", activeCategory === categoryIndex ? "font-medium text-foreground" : "font-normal text-muted-foreground")}
                       >
                         {item.label}
-                        <ChevronRight className={cn("size-3 shrink-0 transition-transform", activeCategory === categoryIndex && "rotate-90")} strokeWidth={1.25} />
+                        <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-all", activeCategory === categoryIndex ? "rotate-90 opacity-100" : "opacity-0 group-hover:opacity-100")} strokeWidth={1.25} />
                       </Button>
                       {activeCategory === categoryIndex && (
                         <div className="mb-2 flex flex-col border-l border-border pl-3">
