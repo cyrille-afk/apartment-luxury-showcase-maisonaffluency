@@ -252,34 +252,21 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
                   <p className="mt-3 text-xs text-moodboard-ink/50">Access follows trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
                 </div>
               </div> : <>
-              <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
-                {matches.slice(3).map(({ pick, designerName }) => (
-                  <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
-                    {cardBody(pick, designerName, !unlocked)}
-                  </article>
-                ))}
-                {!unlocked && matches.length <= 3 && [0, 1, 2].map((index) => (
-                  <div key={`pending-${index}`} className="flex h-full flex-col border border-moodboard-ink/10 bg-card">
-                    <div className="aspect-square bg-moodboard-ink/5" />
-                    <div className="flex-1 p-4 font-display text-base text-moodboard-ink/50">Further sourcing pending verification</div>
-                  </div>
-                ))}
-              </div>
-              {!unlocked && <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">
-                <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
-                  <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
-                  <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
-                  <form onSubmit={captureLead} className="mt-5 flex flex-col gap-2 sm:flex-row">
-                    <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
-                    <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
-                    <Button type="submit" disabled={capturing} className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">{capturing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <>Unlock <ArrowRight aria-hidden="true" /></>}</Button>
-                  </form>
-                  {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
-                  <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+              {matches.slice(3).length > 0 && (
+                <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
+                  {matches.slice(3).map(({ pick, designerName }) => (
+                    <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+                      <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
+                      {cardBody(pick, designerName, !unlocked)}
+                    </article>
+                  ))}
                 </div>
-              </div>}
+              )}
+              {!unlocked && (matches.slice(3).length > 0
+                ? <div className="pointer-events-none absolute inset-0 z-10 flex justify-center bg-moodboard-cream/30 px-3 backdrop-blur-sm">
+                    <div className="pointer-events-auto sticky top-28 mt-8 h-fit w-full max-w-lg">{unlockPanel}</div>
+                  </div>
+                : <div className="flex justify-center"><div className="mt-2 w-full max-w-lg">{unlockPanel}</div></div>)}
               </>}
             </div>}
           </>}
