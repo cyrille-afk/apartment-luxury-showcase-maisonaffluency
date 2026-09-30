@@ -590,7 +590,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
   const portraitDock = activeSceneIsPortrait && !expandedScene;
-  const selectedHotspot = portraitDock ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) : undefined;
+  const selectedHotspot = portraitDock && activeScene ? hotspotsForScene(activeScene).find((hotspot) => hotspot.id === activePin) : undefined;
   const selectedProduct = selectedHotspot ? resolveHotspotProduct(selectedHotspot) : null;
   const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
     const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
@@ -736,7 +736,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                        animate={{ opacity: 1, y: 0 }}
                        exit={{ opacity: 0, y: 24 }}
                        transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-elegant backdrop-blur-md md:inset-x-6 md:p-4"
+                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:inset-x-6 md:p-4"
                      >
                        <div className="mb-2 flex items-center justify-between gap-3">
                          <div className="min-w-0 truncate font-body text-[10px] font-semibold uppercase tracking-widest text-foreground">Curated alternatives · {selectedHotspot.product_name}</div>
