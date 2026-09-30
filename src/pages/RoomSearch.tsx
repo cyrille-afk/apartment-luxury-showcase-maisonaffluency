@@ -244,7 +244,7 @@ export default function RoomSearch() {
               <RoomPageNavigation room={room} />
               <div className="min-w-0 flex-1">
                 {!searchParams.get("category") && <>
-                  <RoomCuration room={room} />
+                  {(room === "living-room" || room === "office") && <RoomCuration room={room} />}
                   <InteractiveGalleryLookbook discoveryRoom={room} />
                 </>}
                 <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />

@@ -47,6 +47,7 @@ const bedroom: Category[] = [
 export default function RoomPageNavigation({ room }: { room: RoomSlug }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const categories = room === "office" ? office : room === "dining-room" ? dining : room === "bedroom" ? bedroom : living;
   const navigateCategory = (category: string, subcategory?: string) => {
     const params = new URLSearchParams({ room, view: "grid", category });
@@ -63,7 +64,10 @@ export default function RoomPageNavigation({ room }: { room: RoomSlug }) {
           </Button>
         ))}
       </nav>
-      <nav aria-label="Room categories" className="mt-5 border-t border-border pt-3">
+      <Button type="button" variant="ghost" aria-expanded={categoriesOpen} onClick={() => setCategoriesOpen(!categoriesOpen)} className="mt-4 h-9 w-full justify-between rounded-none border-t border-border px-0 pt-2 font-body text-xs text-muted-foreground hover:bg-transparent md:hidden">
+        Categories <ChevronRight className={cn("size-3 transition-transform", categoriesOpen && "rotate-90")} />
+      </Button>
+      <nav aria-label="Room categories" className={cn("mt-5 border-t border-border pt-3 md:block", categoriesOpen ? "block" : "hidden")}>
         {categories.map((item) => (
           <div key={item.label}>
             <div className="flex items-center justify-between gap-1">
