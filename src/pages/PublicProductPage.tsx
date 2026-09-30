@@ -568,7 +568,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (
     allBasesHaveSwatches
-    || (baseSwatchPool.length > 0 && isFinishAxis(baseAxisLabelRaw))
+    || (baseSwatchPool.length > 0 && (isFinishAxis(baseAxisLabelRaw) || !baseAxisLabelRaw))
     || isUpholsteryAxisLabel(baseAxisLabelRaw)
   );
   const suppressTopAsFinish = !topAxisIsDim && (
