@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Show uncropped alternatives, anchor the Bedroom hotspot on the left lamp base, and rotate three distinct public catalog pieces per room mount.
+
 - [x] Replace Office dropdown alternatives with Solare, Kalb B, and Arbor desks; restore its exact justified tagline without changing other rooms.
 
 - [x] Match Shop by Room collection card image canvases and caption grids to the designer collection styling.

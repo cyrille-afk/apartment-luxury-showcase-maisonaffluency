@@ -35,7 +35,7 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
+import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -136,7 +136,7 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
 const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
-  const scene = getRoomPreviewScene(selectedRoomSlug);
+  const scene = useRoomPreviewScene(selectedRoomSlug);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
@@ -165,8 +165,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
            <div className={cn("grid grid-cols-3 gap-2 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
               <div key={piece.src} className={cn("overflow-hidden border-2 bg-muted transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-80")}>
-               <div className="aspect-[4/3] overflow-hidden">
-                 <img src={piece.src} alt={piece.alt} className="h-full w-full object-cover" />
+                <div className="aspect-[4/3] overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
+                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
                </div>
                {"name" in piece && (
                  <div className="bg-background px-1.5 py-1.5">

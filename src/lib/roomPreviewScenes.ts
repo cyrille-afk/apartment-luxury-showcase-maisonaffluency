@@ -38,8 +38,8 @@ export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "bedroo
   },
   "bedroom": {
     previewImage: { src: bedroomHero, alt: "Calming bedroom with layered natural materials" },
-    // Anchored on the illuminated table lamp on the right nightstand.
-    hotspot: { left: 80, top: 53, label: "Table lamp" },
+    // Base of the illuminated lamp on the left nightstand (centre-cropped frame).
+    hotspot: { left: 25, top: 75, label: "Table lamp" },
     highlightIndex: 0, // Volca Table Lamp
     pieces: [
       { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1782466723/Screenshot_2026-06-26_at_5.38.12_PM_u8u8dc.png", alt: "Volca Table Lamp by Sam Accoceberry", name: "Volca Table Lamp", designer: "Sam Accoceberry" },
