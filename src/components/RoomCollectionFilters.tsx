@@ -18,9 +18,11 @@ const FACETS: { key: RoomFacet; label: string }[] = [
 ];
 
 export default function RoomCollectionFilters({
-  options, values, onChange, onClear,
+  options, availableMaterials, catalogMaterials, values, onChange, onClear,
 }: {
   options: RoomFacetOptions;
+  availableMaterials: Set<string>;
+  catalogMaterials: Set<string>;
   values: RoomFacetValues;
   onChange: (key: RoomFacet, value: string | null) => void;
   onClear: () => void;
@@ -45,9 +47,10 @@ export default function RoomCollectionFilters({
             </AccordionTrigger>
             <AccordionContent className="max-h-56 overflow-y-auto pb-2">
               {options[key].length ? options[key].map((value) => (
-                <label key={value} className="flex cursor-pointer items-start gap-2 py-1.5 font-body text-xs text-foreground">
-                  <Checkbox checked={values[key] === value} onCheckedChange={() => onChange(key, values[key] === value ? null : value)} className="mt-0.5 size-4 rounded-none" />
+                <label key={value} className={`flex items-start gap-2 py-1.5 font-body text-xs ${key === "material" && !availableMaterials.has(value) ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer text-foreground"}`}>
+                  <Checkbox checked={values[key] === value} disabled={key === "material" && !availableMaterials.has(value)} onCheckedChange={() => onChange(key, values[key] === value ? null : value)} className="mt-0.5 size-4 rounded-none" />
                   <span className="min-w-0 flex-1 break-words">{value}</span>
+                  {key === "material" && !availableMaterials.has(value) && <span className="shrink-0 text-[9px] text-muted-foreground">{catalogMaterials.has(value) ? "None in this room" : "No pieces yet"}</span>}
                 </label>
               )) : <p className="py-2 font-body text-xs text-muted-foreground">No catalogued options</p>}
             </AccordionContent>

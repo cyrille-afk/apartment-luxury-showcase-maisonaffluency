@@ -13,17 +13,19 @@ import AppRecoveryBoundary from "./components/AppRecoveryBoundary";
 const isTradeRoute = window.location.pathname.includes("/trade");
 document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
 
-// Transient backend failures (edge function 5xx/timeouts) from fire-and-forget
-// calls must never blank the page — log and swallow them.
+// Background edge-function failures must never blank an otherwise healthy page.
+// The caller still receives its error and remains responsible for its own UI.
 window.addEventListener("unhandledrejection", (e) => {
   const r: any = e.reason;
   const name = r?.name ?? "";
   const msg = String(r?.message ?? r ?? "");
+  const status = r?.context?.status ?? r?.status;
   if (
     /Functions(Http|Fetch|Relay)Error/.test(name) ||
-    /Edge function returned 5\d\d|IDLE_TIMEOUT|Failed to send a request to the Edge Function/i.test(msg)
+    status === 401 ||
+    /Edge function returned (?:401|5\d\d)|IDLE_TIMEOUT|Failed to send a request to the Edge Function/i.test(msg)
   ) {
-    console.warn("[backend] transient edge function failure ignored:", msg);
+    console.warn("[backend] background edge function failure:", status ?? name);
     e.preventDefault();
   }
 });

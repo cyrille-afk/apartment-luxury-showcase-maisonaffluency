@@ -28,6 +28,7 @@ import PublicProductLightbox, { type PublicLightboxItem } from "@/components/Pub
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
 import { originToCountries } from "@/lib/productOrigin";
+import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
 
 const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, handmade: null, material: null };
 const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "handmade", "material"];
@@ -40,7 +41,7 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
     designer: [item.designerName],
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
     handmade: originToCountries(pick.origin),
-    material: (pick.materials || "").split(/[,;/]|\s+and\s+/i).map((part) => part.trim()).filter(Boolean),
+    material: roomMaterialCategories(pick.materials),
   };
 }
 
@@ -483,6 +484,10 @@ function singularizeSub(s: string): string {
   const roomOptions = useMemo(() => {
     const options = {} as RoomFacetOptions;
     for (const key of ROOM_FACET_KEYS) {
+      if (key === "material") {
+        options.material = [...ROOM_MATERIAL_CATEGORIES];
+        continue;
+      }
       const values = new Set<string>();
       for (const item of rawFiltered) {
         const facets = roomFacetValues(item);
@@ -493,6 +498,8 @@ function singularizeSub(s: string): string {
     }
     return options;
   }, [rawFiltered, roomFacets]);
+  const availableRoomMaterials = useMemo(() => new Set(rawFiltered.flatMap((item) => roomMaterialCategories(item.pick.materials))), [rawFiltered]);
+  const catalogMaterials = useMemo(() => new Set(allProducts.flatMap((item) => roomMaterialCategories(item.pick.materials))), [allProducts]);
   const facetFiltered = useMemo(() => roomSlug ? rawFiltered.filter((item) => {
     const facets = roomFacetValues(item);
     return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
@@ -634,6 +641,8 @@ function singularizeSub(s: string): string {
         <div className={roomSlug ? "md:flex md:items-start md:gap-6 lg:gap-8" : ""}>
         {roomSlug && <RoomCollectionFilters
           options={roomOptions}
+          availableMaterials={availableRoomMaterials}
+          catalogMaterials={catalogMaterials}
           values={roomFacets}
           onChange={(key, value) => setRoomFacets((current) => ({ ...current, [key]: value }))}
           onClear={() => setRoomFacets(EMPTY_ROOM_FACETS)}
