@@ -544,6 +544,8 @@ export default function ProductCommerceCta({
           </>
         ) : (
           <>
+            {isUnpriced && <PriceBlock rrpLabel={null} netLabel={null} trade={false} from={false} />}
+
             {/* Price-upon-Request pieces are quote-only: the Place Order CTA
                 and quantity stepper are unmounted entirely, and the bespoke
                 request becomes the single primary action. */}
