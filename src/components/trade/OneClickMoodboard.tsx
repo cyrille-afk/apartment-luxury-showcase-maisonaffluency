@@ -229,16 +229,12 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
             ? <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>
             : <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Analyzing website source for matching collection architecture…</p>)}
           {similarCount > 0 && !isLoading && !isError && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Verified pieces lead the edit. The remaining cards are similar collection pieces, shown while their materials are being confirmed.</p>}
+          {verifiedCount === 0 && similarCount > 0 && !isLoading && !isError && <div className="mb-5">{suggestionsLine}</div>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
           {!isLoading && !isError && matches.length === 0 && <div className="py-10">
             <p className="font-display text-lg leading-relaxed text-moodboard-ink">{submitted?.value ? `No pieces in our collection match “${submitted.value}” exactly.` : "No pieces are available right now. Please try again later."}</p>
-            {suggestions.length > 0 ? <p className="mt-3 max-w-xl font-body text-sm leading-7 text-moodboard-ink/65">
-              However, you can explore our curated selections in {suggestions.map((suggestion, index) => <span key={suggestion.query}>
-                {index > 0 ? (index === suggestions.length - 1 ? ", or " : ", ") : ""}
-                <Button type="button" variant="link" onClick={() => chooseSuggestion(suggestion.query)} className="h-auto p-0 align-baseline font-display text-base text-moodboard-teal underline decoration-moodboard-teal/30 underline-offset-4 hover:decoration-moodboard-teal">{suggestion.label}</Button>
-              </span>)}.
-            </p> : submitted?.value && <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p>}
+            {suggestionsLine ?? (submitted?.value ? <p className="mt-3 text-sm text-moodboard-ink/60">Try a different colour or material.</p> : null)}
           </div>}
           {matches.length > 0 && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
