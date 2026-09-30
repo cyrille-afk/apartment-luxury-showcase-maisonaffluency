@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
@@ -13,7 +13,6 @@ import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -35,7 +34,6 @@ import livingRoomAmbient from "@/assets/living-room-hero.jpg";
 import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
-import { getRoomPreviewScene } from "@/lib/roomPreviewScenes";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
 const AuthGateDialog = React.lazy(() => import("@/components/AuthGateDialog"));
@@ -48,79 +46,10 @@ import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor";
-
-interface RoomNavCategory {
-  label: string;
-  category: string;
-  subcategories: string[];
-}
-
-const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
-  living: [
-    { label: "Seating", category: "Seating", subcategories: ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools"] },
-    { label: "Tables", category: "Tables", subcategories: ["Coffee Tables", "Side Tables", "Consoles"] },
-    { label: "Storage", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bookcases", "Bars"] },
-    { label: "Lighting", category: "Lighting", subcategories: ["Floor Lights", "Table Lights", "Wall Lights", "Ceiling Lights"] },
-    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
-    { label: "Décor", category: "Décor", subcategories: ["Mirrors", "Decorative Objects", "Cushions & Throws", "Vases & Vessels"] },
-  ],
-  dining: [
-    { label: "Dining Tables", category: "Tables", subcategories: ["Dining Tables"] },
-    { label: "Dining Seating", category: "Seating", subcategories: ["Chairs", "Ottomans & Stools"] },
-    { label: "Sideboards & Bars", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bars"] },
-    { label: "Lighting", category: "Lighting", subcategories: ["Ceiling Lights", "Wall Lights", "Table Lights"] },
-    { label: "Tableware", category: "Décor", subcategories: ["Tableware & Linens", "Candle Holders", "Vases & Vessels"] },
-    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"] },
-  ],
-  bedroom: [
-    { label: "Beds", category: "Bedroom", subcategories: ["Beds", "Bedding", "Sofa-Beds"] },
-    { label: "Bedside Tables", category: "Bedroom", subcategories: ["Bedside Tables"] },
-    { label: "Bedroom Seating", category: "Seating", subcategories: ["Armchairs", "Daybeds & Benches", "Ottomans & Stools"] },
-    { label: "Storage", category: "Storage", subcategories: ["Buffets, Cabinets And Sideboards", "Bookcases"] },
-    { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Wall Lights", "Floor Lights"] },
-    { label: "Textiles & Décor", category: "Décor", subcategories: ["Cushions & Throws", "Mirrors", "Decorative Objects"] },
-  ],
-  lighting: [
-    { label: "Ceiling Lights", category: "Lighting", subcategories: ["Ceiling Lights"] },
-    { label: "Wall Lights", category: "Lighting", subcategories: ["Wall Lights"] },
-    { label: "Table Lights", category: "Lighting", subcategories: ["Table Lights"] },
-    { label: "Floor Lights", category: "Lighting", subcategories: ["Floor Lights"] },
-    { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
-    { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
-  ],
-  decor: [],
-};
-
-// Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
+const roomNavigation = { living: true, dining: true, bedroom: true, lighting: true, decor: true } as const;
 const DECOR_SUBCATEGORIES = SUBCATEGORY_MAP["Décor"] ?? [];
-const DECOR_COLUMNS: string[][] = (() => {
-  // Balanced 7 / 6 split for 13 items (2 columns beside the photo panel).
-  const cols = 2;
-  const base = Math.floor(DECOR_SUBCATEGORIES.length / cols);
-  const extra = DECOR_SUBCATEGORIES.length % cols;
-  const out: string[][] = [];
-  let i = 0;
-  for (let c = 0; c < cols; c++) {
-    const n = base + (c < extra ? 1 : 0);
-    out.push(DECOR_SUBCATEGORIES.slice(i, i + n));
-    i += n;
-  }
-  return out;
-})();
-
-const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
-  living: [{ label: "Living Rooms", slug: "living-room" }, { label: "Office", slug: "office" }],
-  dining: [{ label: "Dining", slug: "dining-room" }],
-  bedroom: [{ label: "Bedroom", slug: "bedroom" }],
-};
-
-const officeNavigation: RoomNavCategory[] = [
-  { label: "Desks", category: "Tables", subcategories: ["Desks"] },
-  { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
-  { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
-  { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
-  { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
-];
+const DECOR_COLUMNS: string[][] = [DECOR_SUBCATEGORIES.slice(0, 7), DECOR_SUBCATEGORIES.slice(7)];
+const lightingCategories = ["Ceiling Lights", "Wall Lights", "Table Lights", "Floor Lights", "Bathroom Lights", "Outdoor Lights"];
 
 const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
@@ -128,117 +57,6 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   bedroom: { src: calmingBedroomAmbient, alt: "Calming bedroom with layered natural materials" },
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
-};
-
-// Coordinates are percentages of the displayed, centre-cropped preview frame.
-// Scene data is shared with the Room Experience landing page via
-// src/lib/roomPreviewScenes.ts so menu and page never drift apart.
-const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(false);
-  const scene = getRoomPreviewScene(selectedRoomSlug);
-  const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" ? scene.previewImage : roomAmbientImages[room];
-  return (
-  <div data-room-preview className="flex min-w-0 flex-1 flex-col bg-background px-8 py-7">
-    <div className="w-full">
-      <div className="relative h-[260px] bg-muted">
-          <img src={previewImage.src} alt={previewImage.alt} className="h-full w-full object-cover" />
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-             <Button type="button" variant="ghost" size="icon" aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
-              onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
-              onPointerLeave={(event) => { if (event.pointerType === "mouse") setOpen(false); }}
-              onClick={() => { setSelected(true); setOpen(true); }}
-               style={{ left: `${scene.hotspot.left}%`, top: `${scene.hotspot.top}%` }}
-               className="group absolute z-10 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring">
-              <span className="relative block size-6 rounded-full border border-background/90 bg-foreground shadow-lg transition-transform group-hover:scale-110">
-                <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
-                <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
-              </span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
-        </Popover>
-      </div>
-      <div className="pt-5">
-        <div className="mb-3 font-body text-[10px] uppercase text-muted-foreground">Curated alternatives</div>
-           <div className={cn("grid grid-cols-3 gap-4 transition-all duration-300", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
-            {scene.pieces.map((piece, index) => (
-               <div key={piece.src} className={cn("min-w-0 overflow-hidden border-b-2 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary opacity-100" : "border-transparent opacity-100")}>
-                <div className="h-[125px] overflow-hidden bg-muted">
-                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain" />
-               </div>
-               {"name" in piece && (
-                  <div className="py-2">
-                    <div className="font-body text-xs font-semibold leading-snug text-foreground">{piece.name}</div>
-                    <div className="font-body text-[11px] leading-snug text-muted-foreground">{piece.designer}</div>
-                 </div>
-               )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-    <p className="mt-6 w-full text-justify font-body text-sm font-semibold leading-relaxed text-crimson-black">
-      Leverage our elite global gallery network and high-end sourcing to elevate your portfolio.
-    </p>
-  </div>
-  );
-};
-
-interface RoomDropdownPanelProps {
-  room: "living" | "dining" | "bedroom";
-  activeCategory: number | null;
-  onSelectCategory: (index: number) => void;
-  onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
-  onRoomNavigate: (slug: string) => void;
-}
-
-const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
-  const [selectedRoom, setSelectedRoom] = useState(0);
-  const categories = room === "living" && selectedRoom === 1 ? officeNavigation : roomNavigation[room];
-  return (
-   <div className="flex min-h-[560px] items-stretch bg-background">
-    <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
-      <div className="flex flex-col">
-        <div className="font-body text-[13px] font-bold text-foreground">Shop By Room</div>
-        <div className="mt-3 flex flex-col gap-1">
-          {roomFlyouts[room]?.map((link, index) => (
-            <Button key={link.slug} type="button" variant="ghost" onMouseEnter={() => { setSelectedRoom(index); onSelectCategory(null); }} onFocus={() => { setSelectedRoom(index); onSelectCategory(null); }} onClick={() => onRoomNavigate(link.slug)} className={cn("h-8 w-full justify-start gap-2 rounded-none px-0 font-body text-[13px] hover:bg-transparent hover:text-foreground", selectedRoom === index ? "font-semibold text-foreground" : "font-normal text-muted-foreground")}>
-              <ChevronRight className="size-3 shrink-0" strokeWidth={1.25} />{link.label}
-            </Button>
-          ))}
-        </div>
-        <div className="mt-5 border-t border-border/60 pt-3">
-        {categories.map((item, index) => (
-          <div key={item.label} onMouseEnter={() => onSelectCategory(index)}>
-            <Button
-              type="button" variant="ghost"
-              onFocus={() => onSelectCategory(index)}
-              onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category)}
-              aria-expanded={activeCategory === index}
-              className={cn("flex h-9 w-full justify-between rounded-none p-0 font-body text-[13px] font-normal hover:bg-transparent hover:text-foreground", activeCategory === index ? "text-foreground" : "text-muted-foreground")}
-            >
-              {item.label}
-              <ChevronRight className={cn("size-3 transition-transform", activeCategory === index && "rotate-90")} strokeWidth={1.25} />
-            </Button>
-            {activeCategory === index && (
-              <div className="mb-2 flex flex-col border-l border-border pl-4">
-                {item.subcategories.map((subcategory) => (
-                  <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(roomFlyouts[room]?.[selectedRoom]?.slug ?? "living-room", item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
-                    {subcategory}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-        </div>
-      </div>
-    </div>
-     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
-  </div>
-  );
 };
 
 const leftNavItems = [{
@@ -366,25 +184,9 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
-  const [activeRoomCategory, setActiveRoomCategory] = useState<number | null>(null);
-  const [roomMenuOverflow, setRoomMenuOverflow] = useState(0);
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    if (!megaMenuOpen || !activeRoomMenu || !megaMenuRef.current) return;
-    const measure = () => {
-      const menu = megaMenuRef.current;
-      if (!menu) return;
-      // Undo the prior shift before measuring so switching between rooms never compounds it.
-      const naturalRight = menu.getBoundingClientRect().right + roomMenuOverflow;
-      setRoomMenuOverflow(Math.max(0, Math.ceil(naturalRight - window.innerWidth + 24)));
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [megaMenuOpen, activeRoomMenu, roomMenuOverflow]);
-
   // Align the desktop TRADE utility link's left edge with the JOURNAL nav
   // link's left edge. The nav row is centered while the utility cluster is
   // right-anchored, so the exact offset is measured and applied on
@@ -704,23 +506,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
   const openRoomMenu = (room: RoomNavKey) => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
-    if (activeRoomMenu !== room || !megaMenuOpen) setActiveRoomCategory(null);
     setActiveRoomMenu(room);
     setMegaMenuOpen(true);
-  };
-
-  const navigateToRoom = (room: string) => {
-    setMegaMenuOpen(false);
-    setActiveRoomMenu(null);
-    navigate(`/search?room=${room}&view=grid`);
-  };
-
-  const navigateToRoomCategory = (room: string, category: string, subcategory?: string) => {
-    setMegaMenuOpen(false);
-    setActiveRoomMenu(null);
-    const params = new URLSearchParams({ room, view: "grid", category });
-    if (subcategory) params.set("subcategory", subcategory);
-    navigate(`/search?${params.toString()}`);
   };
 
   const scheduleRoomMenuClose = () => {
@@ -1242,12 +1029,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <span className="link-underline-grow">{room}</span>
                   </Button>
 
-                  {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute inset-x-0 top-full z-50 w-full border-t border-border/60 bg-background">
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
-                    </div>
-                  )}
-
                   {room === "decor" && megaMenuOpen && activeRoomMenu === "decor" && (
                     <div
                       ref={megaMenuRef}
@@ -1304,8 +1085,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl">
                       <div className="flex min-h-96 items-stretch overflow-hidden">
                         <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
-                          {roomNavigation.lighting.map((item) => (
-                            <Button key={item.label} type="button" variant="ghost" onClick={() => navigateFromMegaMenu(item.category, item.subcategories[0])} className="flex h-10 w-full justify-start rounded-none p-0 font-body text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">{item.label}</Button>
+                          {lightingCategories.map((label) => (
+                            <Button key={label} type="button" variant="ghost" onClick={() => navigateFromMegaMenu("Lighting", label)} className="flex h-10 w-full justify-start rounded-none p-0 font-body text-[13px] font-normal text-muted-foreground hover:bg-transparent hover:text-foreground">{label}</Button>
                           ))}
                         </div>
                         <div className="min-w-0 flex-1 bg-[hsl(var(--collection-card-canvas))] p-6">
