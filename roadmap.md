@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Balance the room subtitle above its label and reduce the image-to-collection gap so the product breakdown is immediately visible.
+
 - [x] Match the Dining dropdown's three curated dining tables to published catalog photos, and restore the exact crimson-black tagline beneath the cards.
 
 - [x] Align Living coffee-table and Office desk preview pins with their furniture and highlight room-matched alternatives.
