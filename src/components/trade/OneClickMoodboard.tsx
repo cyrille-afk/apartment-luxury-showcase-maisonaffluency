@@ -214,12 +214,12 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
         <>
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3 border-b border-moodboard-ink/10 pb-4">
             <div><p className="font-body text-[11px] uppercase tracking-[0.2em] text-moodboard-teal">The edit</p><h3 className="mt-1 font-display text-xl text-moodboard-ink">Selected for your brief</h3></div>
-            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (embedded ? `${Math.min(matches.length, 2)} verified · ${Math.max(0, 3 - Math.min(matches.length, 2))} pending` : `${matches.length} pieces · Curated collection`) : `${Math.min(matches.length, embedded ? 2 : matches.length)} pieces · Curated from your source`}</span>
+            <span className="font-body text-xs text-moodboard-ink/50">{submitted.mode === "prompt" ? (similarCount > 0 ? `${verifiedCount} verified · ${similarCount} in verification` : `${matches.length} pieces · Curated collection`) : `${matches.length} pieces · Curated from your source`}</span>
           </div>
           {submitted.mode === "reference" && (isImageReference(submitted.value)
             ? <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Reference links are matched by their readable words, not by analyzing the image. Describe its colors and materials for a more precise edit.</p>
             : <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Analyzing website source for matching collection architecture…</p>)}
-          {submitted.mode === "prompt" && /\bash\b/i.test(submitted.value) && /\bchairs?\b/i.test(submitted.value) && !isLoading && !isError && matches.length < 3 && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Only verified ash chair listings are shown. Further pieces await material confirmation.</p>}
+          {similarCount > 0 && !isLoading && !isError && <p className="mb-5 text-xs leading-relaxed text-moodboard-ink/60">Verified pieces lead the edit. The remaining cards are similar collection pieces, shown while their materials are being confirmed.</p>}
           {isLoading && <p className="py-10 text-sm text-moodboard-ink/60" role="status">Preparing the collection…</p>}
           {isError && <p className="py-10 text-sm text-destructive" role="alert">The collection could not load. Please try again.</p>}
           {!isLoading && !isError && matches.length === 0 && <div className="py-10">
