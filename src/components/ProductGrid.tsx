@@ -608,7 +608,7 @@ function singularizeSub(s: string): string {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
-              className="group flex h-full cursor-pointer flex-col justify-between"
+               className={`group flex h-full cursor-pointer flex-col ${roomSlug ? "" : "justify-between"}`}
               tabIndex={0}
               role="link"
               aria-label={`View ${item.pick.title} product details`}
@@ -621,14 +621,14 @@ function singularizeSub(s: string): string {
               onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title))}
             >
-              <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
+              <div className={`relative w-full aspect-square overflow-hidden ${roomSlug ? "bg-[hsl(var(--product-canvas))]" : "bg-[hsl(var(--collection-card-canvas))]"}`}>
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
                     sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                   })}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                   className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"} ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                   decoding="async"
                 />
@@ -640,7 +640,7 @@ function singularizeSub(s: string): string {
                       sizes: `(max-width: 768px) 50vw, ${gridCols === 4 ? '25vw' : '33vw'}`,
                     })}
                     alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                    className="absolute inset-0 m-auto max-w-[80%] max-h-[80%] object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                     className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"}`}
                     loading="lazy"
                     decoding="async"
                   />
@@ -692,28 +692,28 @@ function singularizeSub(s: string): string {
                 </button>
               </div>
               {(formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
-                <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+                 <p className={`${roomSlug ? "mt-3" : "mt-6"} px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased`}>
                   {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
                 </p>
               )}
-              <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+               <div className={`flex w-full justify-between px-1 ${roomSlug ? `${formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) ? "mt-2" : "mt-3"} items-baseline gap-1.5 md:gap-4` : "mt-3 h-12 items-start gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased hover:text-foreground/70 transition-colors"
+                     className={`block w-full font-body font-semibold uppercase text-foreground antialiased hover:text-foreground/70 transition-colors ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
                   >
                     {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                   </Link>
-                  <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
+                   <h3 className={`mt-0.5 font-body font-medium leading-snug text-muted-foreground antialiased ${roomSlug ? "line-clamp-2 text-[11px] md:text-xs" : "line-clamp-1 text-xs"}`}>
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
                       : item.pick.title}
                   </h3>
                 </div>
-                <div className="shrink-0 whitespace-nowrap text-right">
-                  <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
-                    {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon request"}
+                 <div className={`shrink-0 text-right ${roomSlug ? "max-w-[46%]" : "whitespace-nowrap"}`}>
+                   <p className={`font-body font-semibold text-foreground antialiased ${roomSlug ? "text-[9px] leading-tight md:text-xs" : "whitespace-nowrap text-xs"}`}>
+                     {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon Request"}
                   </p>
                 </div>
               </div>
