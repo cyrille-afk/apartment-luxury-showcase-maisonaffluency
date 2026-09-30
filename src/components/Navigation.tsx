@@ -161,9 +161,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
-    <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
-      <div className="relative h-[190px] bg-muted">
-          <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
+    <div className="w-full max-w-xl rounded-sm border border-border/40 bg-background p-5 shadow-sm xl:max-w-2xl">
+      <div className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-sm bg-muted">
+          <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
              <Button type="button" variant="ghost" size="icon" aria-label={`Shop this look: ${scene.hotspot.label}; highlight curated alternatives`} aria-expanded={open}
@@ -181,18 +181,18 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
           <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
         </Popover>
       </div>
-      <div className="px-1 pb-1 pt-3">
-        <div className="mb-2 font-body text-[9px] uppercase text-muted-foreground">Curated alternatives</div>
-            <div className={cn("mt-1 grid w-full grid-cols-3 gap-3 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
+      <div>
+        <div className="mb-3 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
+            <div className={cn("grid w-full grid-cols-3 gap-4 transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0", selected && "ring-1 ring-primary ring-offset-2 ring-offset-background")}>
             {scene.pieces.map((piece, index) => (
-              <div key={piece.src} className={cn("flex flex-col rounded-sm border bg-background p-2.5 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary" : "border-border/40")}>
-                <div className="relative mb-2.5 aspect-square overflow-hidden bg-[hsl(var(--collection-card-canvas))]">
-                  <img src={piece.src} alt={piece.alt} className="h-full w-full object-contain mix-blend-multiply" />
+              <div key={piece.src} className={cn("flex flex-col rounded-sm border bg-[hsl(var(--collection-card-canvas))] p-3 transition-all duration-300", selected && index === scene.highlightIndex ? "border-primary" : "border-border/40")}>
+                <div className="relative mb-3 flex aspect-square items-center justify-center overflow-hidden bg-background">
+                  <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply" />
                </div>
                {"name" in piece && (
                   <>
-                    <div className="mb-0.5 truncate font-body text-[10px] font-bold uppercase tracking-wider text-foreground">{piece.designer}</div>
-                    <h4 className="min-h-[2rem] font-body text-[11px] font-normal leading-tight text-muted-foreground line-clamp-2">{piece.name}</h4>
+                    <div className="min-h-[1.5rem] whitespace-normal break-words font-body text-[12px] font-bold uppercase leading-tight tracking-wider text-foreground">{piece.designer}</div>
+                    <h4 className="mt-0.5 min-h-[2.5rem] font-body text-[12px] font-light leading-snug text-muted-foreground line-clamp-2">{piece.name}</h4>
                   </>
                )}
             </div>
