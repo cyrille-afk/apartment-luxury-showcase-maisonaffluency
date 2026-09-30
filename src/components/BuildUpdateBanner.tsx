@@ -158,7 +158,6 @@ export default function BuildUpdateBanner() {
         description: "Refresh when you're ready.",
         duration: 20_000,
         position: isNarrow ? "top-center" : "top-right",
-        offset: isNarrow ? 16 : 24,
         action: {
           label: "Refresh now",
           onClick: (e) => {
