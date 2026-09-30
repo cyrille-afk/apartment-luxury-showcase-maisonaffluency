@@ -862,6 +862,13 @@
       "when": 1790777864995,
       "tag": "0122_public_trade_only_designer_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1790778155766,
+      "tag": "0123_wintrebert_cloud_filigrane_gallery_pin",
+      "breakpoints": true
     }
   ]
 }
