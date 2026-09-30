@@ -11841,6 +11841,15 @@ export type Database = {
           y_percent: number
         }[]
       }
+      public_trade_only_designer_credit: {
+        Args: { _slug: string }
+        Returns: {
+          display_name: string
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
       purge_rejected_trade_credentials_dispatch: {
         Args: never
         Returns: undefined

@@ -855,6 +855,13 @@
       "when": 1790777836541,
       "tag": "0121_wintrebert_cloud_filigrane_public_exception",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1790777864995,
+      "tag": "0122_public_trade_only_designer_credit",
+      "breakpoints": true
     }
   ]
 }
