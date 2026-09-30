@@ -608,7 +608,7 @@ function singularizeSub(s: string): string {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
-              className="group flex h-full cursor-pointer flex-col justify-between"
+               className={`group flex h-full cursor-pointer flex-col ${roomSlug ? "" : "justify-between"}`}
               tabIndex={0}
               role="link"
               aria-label={`View ${item.pick.title} product details`}
@@ -692,11 +692,11 @@ function singularizeSub(s: string): string {
                 </button>
               </div>
               {(formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
-                <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+                 <p className={`${roomSlug ? "mt-3" : "mt-6"} px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased`}>
                   {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
                 </p>
               )}
-               <div className={`mt-3 flex w-full justify-between px-1 ${roomSlug ? "items-baseline gap-1.5 md:gap-4" : "h-12 items-start gap-4"}`}>
+               <div className={`flex w-full justify-between px-1 ${roomSlug ? `${formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) ? "mt-2" : "mt-3"} items-baseline gap-1.5 md:gap-4` : "mt-3 h-12 items-start gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
