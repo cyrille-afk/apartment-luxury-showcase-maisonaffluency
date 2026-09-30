@@ -610,23 +610,36 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const dockAlternatives = selectedProduct && !selectedProduct.restricted_gallery_pin ? (() => {
     const publicIds = new Set((manifest?.picks || []).map((pick) => pick.id));
     const pool = allPicks.filter((pick) => publicIds.has(pick.id) && pick.id !== selectedProduct.id && pick.image_url);
-    // Strict type-gating: exact subcategory only (no broad category fallback).
-    let target = normalize(selectedProduct.subcategory || "");
-    if (!target) {
-      // Infer the subcategory from the product's type noun (e.g. "vase") via catalogue titles.
-      const words = normalize(`${selectedProduct.title || ""} ${selectedHotspot?.product_name || ""}`).split(/\s+/).filter((w) => w.length > 3);
-      const counts = new Map<string, number>();
-      allPicks.forEach((pick) => {
-        const sub = normalize(pick.subcategory || "");
-        if (!sub) return;
-        const title = normalize(pick.title || "");
-        if (words.some((w) => new RegExp(`\\b${w.replace(/s$/, "")}s?\\b`).test(title) && sub.includes(w.replace(/s$/, "")))) counts.set(sub, (counts.get(sub) || 0) + 1);
-      });
-      target = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+    // Strict type-gating. The hotspot's own object name wins (unmapped pins can
+    // fuzzy-resolve to an unrelated pick); then the product's exact subcategory.
+    const HOTSPOT_TYPES: Array<[RegExp, string[]]> = [
+      [/\b(wallcover\w*|wallpaper\w*|scenic|mural)\b/, ["wallcoverings"]],
+      [/\b(chandelier|pendant|suspension|ceiling)\b/, ["ceiling lights"]],
+      [/\b(table lamp|lamp)\b/, ["table lights", "table lamps", "table lamp"]],
+      [/\b(floor lamp|floor light)\b/, ["floor lights"]],
+      [/\b(sconce|wall light)\b/, ["wall lights"]],
+      [/\b(rug|carpet)\b/, ["hand knotted rugs", "hand tufted rugs"]],
+      [/\b(vase|vessel)s?\b/, ["vases vessels"]],
+      [/\bmirror\b/, ["mirrors"]],
+      [/\b(nightstand|bedside)\b/, ["bedside tables"]],
+      [/\bcoffee table\b/, ["coffee tables"]],
+      [/\bside table\b/, ["side tables", "side table"]],
+      [/\bdining table\b/, ["dining tables", "dining table"]],
+      [/\bdesk\b/, ["desks", "desk"]],
+      [/\bconsole\b/, ["consoles"]],
+      [/\bsofa\b/, ["sofas", "sofa"]],
+      [/\barmchair\b/, ["armchairs"]],
+      [/\bchairs?\b/, ["chairs"]],
+    ];
+    const hotspotName = normalize(selectedHotspot?.product_name || "");
+    let targets = HOTSPOT_TYPES.find(([re]) => re.test(hotspotName))?.[1];
+    if (!targets) {
+      const sub = normalize(selectedProduct.subcategory || "");
+      targets = sub ? [sub] : [];
     }
-    if (!target) return [];
+    if (!targets.length) return [];
     const selfTitle = normalize(selectedProduct.title || selectedHotspot?.product_name || "");
-    return pool.filter((pick) => normalize(pick.subcategory || "") === target && normalize(pick.title || "") !== selfTitle).slice(0, 3);
+    return pool.filter((pick) => targets!.includes(normalize(pick.subcategory || "")) && normalize(pick.title || "") !== selfTitle && normalize(pick.title || "") !== hotspotName).slice(0, 3);
   })() : [];
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
