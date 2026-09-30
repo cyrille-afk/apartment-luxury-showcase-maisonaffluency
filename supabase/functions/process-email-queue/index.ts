@@ -64,7 +64,7 @@ async function resolveUnsubscribeToken(
       .maybeSingle()
     return (stored?.token as string | undefined) ?? token
   } catch (err) {
-    console.error('Failed to resolve unsubscribe token', { email: normalized, error: err })
+    console.error('Failed to resolve unsubscribe token', { error: err })
     return undefined
   }
 }

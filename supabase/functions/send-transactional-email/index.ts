@@ -436,7 +436,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  console.log('Transactional email enqueued', { templateName, effectiveRecipient })
+  console.log('Transactional email enqueued', { templateName })
 
   return new Response(
     JSON.stringify({ success: true, queued: true }),
