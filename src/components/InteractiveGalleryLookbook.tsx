@@ -611,7 +611,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   return (
     <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-4" : "pb-16"}`}>
       <header className={`flex min-h-20 items-center justify-center px-6 text-center md:min-h-14 ${discoveryRoom ? "pb-4 pt-7 md:pb-1.5 md:pt-3.5" : "py-4 md:py-2"}`}>
-        <h2 className="font-body text-xs font-light uppercase tracking-[0.25em] text-foreground">
+        <h2 className={`font-body text-xs font-light uppercase tracking-[0.25em] text-foreground ${discoveryRoom ? "md:translate-y-px" : ""}`}>
           {activeTitle}
         </h2>
       </header>
