@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Match the Dining dropdown's three curated dining tables to published catalog photos, and restore the exact crimson-black tagline beneath the cards.
+
 - [x] Align Living coffee-table and Office desk preview pins with their furniture and highlight room-matched alternatives.
 
 - [x] Put room choices first in desktop menus, send room clicks to their product grid, and make preview hotspots reveal and highlight alternatives.
