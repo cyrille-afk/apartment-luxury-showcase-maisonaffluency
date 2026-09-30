@@ -745,7 +745,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
                             ))}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
@@ -817,7 +817,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
             <div className="relative max-h-[calc(100dvh-4rem)] max-w-full">
                <img src={large(expandedScene.id)} alt={`${space.label} — ${expandedScene.title}`} onLoad={() => setExpandedLoadedScene(expandedScene.id)} className={`block max-h-[calc(100dvh-4rem)] max-w-full object-contain ${hotspotsReady && expandedLoadedScene === expandedScene.id ? "opacity-100" : "opacity-0"}`} />
                 {hotspotsReady && expandedLoadedScene === expandedScene.id && hotspotsForScene(expandedScene).map((hotspot) => (
-                  <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} onOpen={() => openHotspot(hotspot)} />
+                  <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} />
                 ))}
             </div>
           )}
