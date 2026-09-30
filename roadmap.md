@@ -1,6 +1,7 @@
 # Roadmap
 
 - [x] Restore room collection sidebar filters and a fixed three-column desktop catalog without changing room dropdown previews.
+- [x] Match the reference material categories to public room pieces and mark categories with no matching pieces.
 
 - [x] Preserve the full portrait room image and reveal compact horizontal alternatives in a bottom overlay when its hotspot is selected.
 
