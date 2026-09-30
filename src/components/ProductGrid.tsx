@@ -696,12 +696,12 @@ function singularizeSub(s: string): string {
                   {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
                 </p>
               )}
-               <div className={`mt-3 flex w-full justify-between px-1 ${roomSlug ? "items-baseline gap-2 md:gap-4" : "h-12 items-start gap-4"}`}>
+               <div className={`mt-3 flex w-full justify-between px-1 ${roomSlug ? "items-baseline gap-1.5 md:gap-4" : "h-12 items-start gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                     className={`block w-full font-body font-semibold uppercase tracking-wider text-foreground antialiased hover:text-foreground/70 transition-colors ${roomSlug ? "break-words text-[9px] leading-tight md:text-[10px]" : "truncate whitespace-nowrap text-[10px]"}`}
+                     className={`block w-full font-body font-semibold uppercase text-foreground antialiased hover:text-foreground/70 transition-colors ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
                   >
                     {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
                   </Link>
@@ -711,8 +711,8 @@ function singularizeSub(s: string): string {
                       : item.pick.title}
                   </h3>
                 </div>
-                 <div className={`shrink-0 text-right ${roomSlug ? "max-w-[48%]" : "whitespace-nowrap"}`}>
-                   <p className={`font-body font-semibold text-foreground antialiased ${roomSlug ? "text-[10px] leading-tight md:text-xs" : "whitespace-nowrap text-xs"}`}>
+                 <div className={`shrink-0 text-right ${roomSlug ? "max-w-[46%]" : "whitespace-nowrap"}`}>
+                   <p className={`font-body font-semibold text-foreground antialiased ${roomSlug ? "text-[9px] leading-tight md:text-xs" : "whitespace-nowrap text-xs"}`}>
                      {formatPublicRrpForDestination(publicRrpMap[item.pick.id || ""], destination.currency) || "Price upon Request"}
                   </p>
                 </div>
