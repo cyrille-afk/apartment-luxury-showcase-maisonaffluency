@@ -153,6 +153,12 @@ export function MoodboardControls({ mb, embedded = false }: { mb: MoodboardSourc
 export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourcing; embedded?: boolean }) {
   const { submitted, generating, matches, suggestions, chooseSuggestion, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
 
+  // Gate-passing pieces are "verified"; the sourcing engine backfills the rest
+  // of the grid with "similar" inventory so the edit is never dotted with
+  // empty placeholders while material verification continues in the background.
+  const verifiedCount = matches.filter((m) => m.status !== "similar").length;
+  const similarCount = matches.length - verifiedCount;
+
   const cardBody = (pick: { id?: string; title: string; materials?: string | null }, designerName: string, locked: boolean) => (
     <div className={`flex flex-1 flex-col justify-between ${embedded ? "min-h-28 p-2.5" : "min-h-32 p-4"}`}>
       <div>
@@ -167,10 +173,6 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
     </div>
   );
 
-  // Embedded preview always keeps a 3-card row: verified matches first, then
-  // "Further sourcing pending" placeholders for any remaining slots — for
-  // every input mode (prompt edits AND website/reference URLs).
-  const showPending = embedded;
   // A website URL (like the studio's own homepage) is matched by its readable
   // words — only image or Pinterest links carry the image-matching disclaimer.
   const isImageReference = (value: string) => {
@@ -179,6 +181,21 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       return /(^|\.)pinterest\./i.test(url.hostname) || /\.(jpe?g|png|webp|avif|gif|bmp)$/i.test(url.pathname);
     } catch { return false; }
   };
+
+  const unlockPanel = (
+    <div className="border-t-2 border-moodboard-teal bg-card/90 p-6 shadow-elegant backdrop-blur-md md:p-8">
+      <LockKeyhole className="mb-4 size-5 text-moodboard-teal" aria-hidden="true" />
+      <h4 className="font-display text-xl leading-snug text-moodboard-ink">Unlock the Complete Sourcing Matrix.</h4>
+      <p className="mt-2 text-sm leading-relaxed text-moodboard-ink/60">Sign up for a free professional profile to reveal live pricing tiers, trade discounts, and global freight estimates.</p>
+      <form onSubmit={captureLead} className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <label htmlFor="moodboard-email" className="sr-only">Professional email address</label>
+        <Input id="moodboard-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your professional email" className="h-11 rounded-none border-moodboard-ink/20 bg-card text-moodboard-ink placeholder:text-moodboard-ink/40 focus-visible:ring-moodboard-teal sm:min-w-0 sm:flex-1" />
+        <Button type="submit" disabled={capturing} className="h-11 shrink-0 rounded-none bg-moodboard-teal px-5 text-xs uppercase tracking-[0.18em] text-moodboard-teal-foreground hover:bg-moodboard-teal/90">{capturing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <>Unlock <ArrowRight aria-hidden="true" /></>}</Button>
+      </form>
+      {captureError && <p role="alert" className="mt-2 text-xs text-destructive">{captureError}</p>}
+      <p className="mt-3 text-xs text-moodboard-ink/50">Access is granted after trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>
+    </div>
+  );
 
   return (
     <div aria-live="polite">
