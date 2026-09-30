@@ -9,9 +9,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
-      // Top toasts must clear the fixed header (~64-72px tall); bottom/left/right
-      // toasts keep the default 24px offset.
-      offset={{ top: 76 }}
+      // Top toasts must clear the fixed header (64px desktop, 80px mobile);
+      // bottom/left/right toasts keep the default 24px offset.
+      offset={{ top: typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? 88 : 76 }}
       toastOptions={{
         classNames: {
           toast:
