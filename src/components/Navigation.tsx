@@ -262,7 +262,8 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                   })}
                 </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
