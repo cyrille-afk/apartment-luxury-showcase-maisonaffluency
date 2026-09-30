@@ -519,7 +519,7 @@ function singularizeSub(s: string): string {
 
   return (
     <>
-    <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop ? "pt-6 pb-12 md:pt-8 md:pb-16" : "py-12 md:py-16"}`}>
+    <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop ? "pt-4 pb-12 md:pb-16" : "py-12 md:py-16"}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
