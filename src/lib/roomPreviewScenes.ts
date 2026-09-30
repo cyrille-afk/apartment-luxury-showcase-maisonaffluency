@@ -4,6 +4,7 @@
 import livingRoomHero from "@/assets/living-room-hero.jpg";
 import officeHero from "@/assets/home-office-desk.jpg";
 import diningRoomHero from "@/assets/intimate-dining.jpg";
+import bedroomHero from "@/assets/master-suite.jpg";
 import marbleCoffeeTable from "@/assets/curators-picks/adam-courts-void-table.jpg";
 import sculpturalCoffeeTable from "@/assets/curators-picks/noe-mineral-flower-coffee-table.png";
 import woodCoffeeTable from "@/assets/curators-picks/man-of-parts-coffee-table.png";
@@ -24,7 +25,7 @@ export interface RoomPreviewScene {
   pieces: RoomScenePiece[];
 }
 
-export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "office", RoomPreviewScene> = {
+export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "bedroom" | "office", RoomPreviewScene> = {
   "living-room": {
     previewImage: { src: livingRoomHero, alt: "Sculptural furniture in an architectural living room" },
     hotspot: { left: 53, top: 85, label: "Coffee table" },
@@ -33,6 +34,17 @@ export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "office
       { src: woodCoffeeTable, alt: "Wood coffee table alternative", name: "Praia Da Granja", designer: "Man of Parts" },
       { src: sculpturalCoffeeTable, alt: "Sculptural coffee table alternative", name: "Mineral Flower Coffee Table", designer: "Noé Duchaufour-Lawrance" },
       { src: marbleCoffeeTable, alt: "Marble coffee table alternative", name: "Void Table", designer: "OKHA by Adam Court" },
+    ],
+  },
+  "bedroom": {
+    previewImage: { src: bedroomHero, alt: "Calming bedroom with layered natural materials" },
+    // Anchored on the illuminated table lamp on the right nightstand.
+    hotspot: { left: 80, top: 53, label: "Table lamp" },
+    highlightIndex: 0, // Volca Table Lamp
+    pieces: [
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1782466723/Screenshot_2026-06-26_at_5.38.12_PM_u8u8dc.png", alt: "Volca Table Lamp by Sam Accoceberry", name: "Volca Table Lamp", designer: "Sam Accoceberry" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1779766884/Sorbet11_hhegzu.jpg", alt: "Sorbet Table Lamp by Humbert & Poyet", name: "Sorbet Table Lamp", designer: "Humbert & Poyet" },
+      { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1777342452/PAUL_LASZLO_1950_Avondale_Lamp_01_A4_1_ke4j5k.jpg", alt: "Avondale Lamp c. 1950 by Paul László", name: "Avondale Lamp c. 1950", designer: "Paul László" },
     ],
   },
   "dining-room": {
@@ -69,5 +81,6 @@ export function getRoomPreviewScene(slug?: string | null): RoomPreviewScene {
   if (slug === "office") return ROOM_PREVIEW_SCENES.office;
   if (slug === "dining-room") return ROOM_PREVIEW_SCENES["dining-room"];
   if (slug === "living-room") return ROOM_PREVIEW_SCENES["living-room"];
+  if (slug === "bedroom") return ROOM_PREVIEW_SCENES["bedroom"];
   return DEFAULT_ROOM_SCENE;
 }

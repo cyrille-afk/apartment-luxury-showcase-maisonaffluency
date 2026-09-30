@@ -137,7 +137,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const scene = getRoomPreviewScene(selectedRoomSlug);
-  const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" ? scene.previewImage : roomAmbientImages[room];
+  const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
     <div className="w-full max-w-[380px] border border-border/60 bg-background p-2 shadow-sm">
