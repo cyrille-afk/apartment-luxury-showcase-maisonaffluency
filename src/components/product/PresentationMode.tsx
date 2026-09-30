@@ -115,7 +115,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] flex h-[100dvh] flex-col overflow-hidden overscroll-none bg-foreground isolate"
+      className="fixed inset-0 z-[10000] flex h-[100dvh] flex-col overflow-hidden overscroll-none bg-foreground/95 isolate"
       role="dialog"
       aria-modal="true"
       aria-label={`${title || alt} — presentation`}
