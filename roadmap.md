@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Replace Office dropdown alternatives with Solare, Kalb B, and Arbor desks; restore its exact justified tagline without changing other rooms.
+
 - [x] Match Shop by Room collection card image canvases and caption grids to the designer collection styling.
 
 - [x] Balance the room subtitle above its label and reduce the image-to-collection gap so the product breakdown is immediately visible.

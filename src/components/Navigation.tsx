@@ -179,8 +179,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
         </div>
       </div>
     </div>
-    <p className="mt-6 w-full max-w-[354px] text-center font-body text-[13px] font-bold leading-relaxed text-crimson-black">
-      Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects
+    <p className={cn("mt-6 w-full max-w-[354px] font-body text-[13px] font-bold leading-relaxed text-crimson-black", selectedRoomSlug === "office" ? "text-justify" : "text-center")}>
+      {selectedRoomSlug === "office" ? "Leverage our elite global gallery network and high-end sourcing to elevate your portfolio" : "Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects"}
     </p>
   </div>
   );
