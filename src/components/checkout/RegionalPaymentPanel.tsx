@@ -321,6 +321,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
           currency="gbp"
           email={buyer.email}
           items={lines.map((l) => ({
+            pickId: l.pickId ?? null,
             title: l.title,
             designer: l.designer || undefined,
             selectedFinish: l.finishLabel || undefined,
