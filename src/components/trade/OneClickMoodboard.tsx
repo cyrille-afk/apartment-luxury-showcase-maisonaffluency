@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from "react";
 import { ArrowRight, Image as ImageIcon, Loader2, LockKeyhole } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
@@ -173,6 +173,26 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
     </div>
   );
 
+  // A real card whose materials are still being confirmed: the card renders
+  // fully behind a soft blur, with a "further sourcing pending" overlay —
+  // never an empty placeholder box.
+  const sourcedCard = ({ pick, designerName }: SourcedItem, locked: boolean) => (
+    <article className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
+      <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={locked ? "" : pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
+      {cardBody(pick, designerName, locked)}
+    </article>
+  );
+
+  const pendingWrapper = (key: string, card: ReactNode) => (
+    <div key={key} className="relative h-full">
+      <div aria-hidden="true" className="pointer-events-none h-full select-none opacity-60 blur-[6px]">{card}</div>
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-moodboard-cream/50 p-4 text-center backdrop-blur-[2px]">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-moodboard-ink">Further sourcing pending</p>
+        <p className="mt-1 text-[10px] text-moodboard-ink/60">Material verification required</p>
+      </div>
+    </div>
+  );
+
   // A website URL (like the studio's own homepage) is matched by its readable
   // words — only image or Pinterest links carry the image-matching disclaimer.
   const isImageReference = (value: string) => {
@@ -238,12 +258,11 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
           </div>}
           {matches.length > 0 && <>
             <div className={embedded ? "grid grid-cols-1 gap-3 sm:grid-cols-3" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
-              {matches.slice(0, 3).map(({ pick, designerName }) => (
-                <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                  <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={pick.title} loading="lazy" className="h-full w-full object-cover object-center" /></div>
-                  {cardBody(pick, designerName, false)}
-                </article>
-              ))}
+              {matches.slice(0, 3).map((match) =>
+                match.status === "verified"
+                  ? <Fragment key={match.pick.id}>{sourcedCard(match, false)}</Fragment>
+                  : pendingWrapper(match.pick.id, sourcedCard(match, false))
+              )}
             </div>
             {(embedded || matches.length > 3 || (!unlocked && matches.length > 0)) && <div className="relative mt-4">
               {embedded ? <div className="relative overflow-hidden border border-moodboard-ink/10 bg-moodboard-cream p-4">
@@ -259,12 +278,12 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
               </div> : <>
               {matches.slice(3).length > 0 && (
                 <div aria-hidden={!unlocked} className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${unlocked ? "" : "pointer-events-none select-none blur-md"}`}>
-                  {matches.slice(3).map(({ pick, designerName }) => (
-                    <article key={pick.id} className="flex h-full min-w-0 flex-col border border-moodboard-ink/10 bg-card">
-                      <div className="aspect-square overflow-hidden bg-moodboard-ink/5"><img src={pick.image} alt={unlocked ? pick.title : ""} loading="lazy" className="h-full w-full object-cover object-center" /></div>
-                      {cardBody(pick, designerName, !unlocked)}
-                    </article>
-                  ))}
+                  {matches.slice(3).map((match) => {
+                    if (!unlocked) return <Fragment key={match.pick.id}>{sourcedCard(match, true)}</Fragment>;
+                    return match.status === "verified"
+                      ? <Fragment key={match.pick.id}>{sourcedCard(match, false)}</Fragment>
+                      : pendingWrapper(match.pick.id, sourcedCard(match, false));
+                  })}
                 </div>
               )}
               {!unlocked && (matches.slice(3).length > 0
