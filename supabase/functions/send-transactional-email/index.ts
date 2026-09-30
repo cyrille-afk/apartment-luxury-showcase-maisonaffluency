@@ -228,8 +228,7 @@ Deno.serve(async (req) => {
 
   if (suppressionError) {
     console.error('Suppression check failed — refusing to send', {
-      error: suppressionError,
-      effectiveRecipient,
+      error: suppressionError
     })
     return new Response(
       JSON.stringify({ error: 'Failed to verify suppression status' }),
@@ -272,8 +271,7 @@ Deno.serve(async (req) => {
 
   if (tokenLookupError) {
     console.error('Token lookup failed', {
-      error: tokenLookupError,
-      email: normalizedEmail,
+      error: tokenLookupError
     })
     await supabase.from('email_send_log').insert({
       message_id: messageId,
@@ -306,8 +304,8 @@ Deno.serve(async (req) => {
 
     if (tokenError) {
       console.error('Failed to create unsubscribe token', {
-        error: tokenError,
-      })
+        error: tokenError
+    })
       await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
@@ -334,9 +332,8 @@ Deno.serve(async (req) => {
 
     if (reReadError || !storedToken) {
       console.error('Failed to read back unsubscribe token after upsert', {
-        error: reReadError,
-        email: normalizedEmail,
-      })
+        error: reReadError
+    })
       await supabase.from('email_send_log').insert({
         message_id: messageId,
         template_name: templateName,
@@ -357,7 +354,6 @@ Deno.serve(async (req) => {
     // Token exists but is already used — email should have been caught by suppression check above.
     // This is a safety fallback; log and skip sending.
     console.warn('Unsubscribe token already used but email not suppressed', {
-      email: normalizedEmail,
     })
     await supabase.from('email_send_log').insert({
       message_id: messageId,
@@ -423,8 +419,7 @@ Deno.serve(async (req) => {
   if (enqueueError) {
     console.error('Failed to enqueue email', {
       error: enqueueError,
-      templateName,
-      effectiveRecipient,
+      templateName
     })
 
     await supabase.from('email_send_log').insert({

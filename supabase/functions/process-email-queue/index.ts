@@ -237,8 +237,8 @@ Deno.serve(async (req) => {
       if (failedRowsError) {
         console.error('Failed to load failed-attempt counters', {
           queue,
-          error: failedRowsError,
-        })
+          error: failedRowsError
+    })
       } else {
         for (const row of failedRows ?? []) {
           const messageId = row?.message_id
@@ -285,8 +285,8 @@ Deno.serve(async (req) => {
             queue,
             msg_id: msg.msg_id,
             queued_at: payload.queued_at,
-            ttl_minutes: ttlMinutes[queue],
-          })
+            ttl_minutes: ttlMinutes[queue]
+    })
           await moveToDlq(supabase, queue, msg, `TTL exceeded (${ttlMinutes[queue]} minutes)`)
           continue
         }
@@ -311,8 +311,8 @@ Deno.serve(async (req) => {
           console.warn('Skipping duplicate send (already sent)', {
             queue,
             msg_id: msg.msg_id,
-            message_id: payload.message_id,
-          })
+            message_id: payload.message_id
+    })
           const { error: dupDelError } = await supabase.rpc('delete_email', {
             queue_name: queue,
             message_id: msg.msg_id,
@@ -372,8 +372,8 @@ Deno.serve(async (req) => {
           msg_id: msg.msg_id,
           read_ct: msg.read_ct,
           failed_attempts: failedAttempts,
-          error: errorMsg,
-        })
+          error: errorMsg
+    })
 
         if (isRateLimited(error)) {
           await supabase.from('email_send_log').insert({
