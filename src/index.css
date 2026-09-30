@@ -77,6 +77,7 @@ All colors MUST be HSL.
     --canvas: 0 0% 97.6%;
     --product-canvas: 42 33% 94%;
     --collection-card-canvas: 60 20% 98%;
+    --alternative-frame: 40 18% 95%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 40 20% 97.1%;
     --visual-evidence: 60 11% 98.2%;
@@ -176,6 +177,7 @@ All colors MUST be HSL.
     --warm-gray: 32 8% 60%;
     --product-canvas: 34 18% 18%;
     --collection-card-canvas: 34 18% 18%;
+    --alternative-frame: 34 18% 22%;
     --edition-foreground: 0 0% 0%;
     --visualiser-canvas: 168 12% 14%;
     --visual-evidence: 168 10% 18%;

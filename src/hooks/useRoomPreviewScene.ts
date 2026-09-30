@@ -19,13 +19,17 @@ export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
     if (!slug || !(slug in ROOM_SUBCATEGORIES) || !catalog) return base;
 
     const subcategories = ROOM_SUBCATEGORIES[slug as RotatingRoom];
-    const matches = catalog.filter(({ pick }) =>
-      pick.id && pick.image &&
-      (slug !== "office" || /\bdesk\b/i.test(pick.title)) &&
-      subcategories.some((subcategory) =>
-        pick.subcategory?.trim().toLowerCase() === subcategory.toLowerCase(),
-      ),
-    );
+    const seen = new Set<string>();
+    const matches = catalog.filter(({ pick }) => {
+      if (!pick.id || !pick.image) return false;
+      if (slug === "office" && !/\bdesk\b/i.test(pick.title)) return false;
+      if (!subcategories.some((subcategory) => pick.subcategory?.trim().toLowerCase() === subcategory.toLowerCase())) return false;
+      // Brand/designer twins share the same image or base title — keep one.
+      const titleKey = pick.title.toLowerCase().split(/\s+(?:by|for)\s+/)[0].trim();
+      if (seen.has(pick.image) || seen.has(titleKey)) return false;
+      seen.add(pick.image); seen.add(titleKey);
+      return true;
+    });
     if (matches.length < 3) return base;
 
     // Partial Fisher–Yates: exactly three unique indices, without sorting
