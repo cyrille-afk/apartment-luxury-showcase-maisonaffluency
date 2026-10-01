@@ -160,9 +160,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
   }, [pieceSources]);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
-  <div data-room-preview className="flex min-w-0 flex-1 flex-col items-center justify-center bg-[hsl(var(--collection-card-canvas))] px-7 py-7">
-    <div className="w-full max-w-xl rounded-sm border border-border/40 bg-background p-5 shadow-sm xl:max-w-2xl">
-      <div className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-sm bg-muted">
+  <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-6 py-6 transition-all duration-300">
+    <div className="w-full">
+      <div className="relative mb-6 aspect-[16/10] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
           <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -181,8 +181,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
           <PopoverContent side="top" align="center" sideOffset={2} onOpenAutoFocus={(event) => event.preventDefault()} className="pointer-events-none w-auto rounded-none border-border bg-background/95 px-3 py-1.5 font-body text-xs text-foreground shadow-sm">Shop this Look</PopoverContent>
         </Popover>
       </div>
-      <div>
-        <div className="mb-3 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
+      <div className="w-full border-t border-border/40 pt-6">
+        <div className="mb-4 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
             <div className={cn("grid w-full grid-cols-3 gap-x-4 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0")}>
             {scene.pieces.map((piece, index) => (
               <div key={piece.src} className="flex w-full flex-col">
@@ -220,8 +220,8 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   void activeCategory; void onSelectCategory;
   return (
-  <div className="flex min-h-[470px] items-stretch overflow-hidden">
-    <div className="w-[310px] shrink-0 border-r border-border/60 px-8 py-7">
+   <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
+     <div className="w-[310px] shrink-0 self-stretch border-r border-border/60 px-8 py-7">
       <div className="flex flex-col">
         <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
