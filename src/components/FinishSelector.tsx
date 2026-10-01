@@ -700,8 +700,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
-    if (!match) return;
-
+    if (!match && !photoLedFinishes) return;
     if (userPickedAxesRef.current.fabric || selectedFabricId === match?.id) return;
     if (match || photoLedFinishes) setSelectedFabricId(match?.id ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
