@@ -94,3 +94,4 @@
 - [ ] Delete bundled arrays in FeaturedDesigners / Collectibles / BrandsAteliers (~500 KB) after page-by-page live checks
 - [x] Show OOL Shelf suede leather samples under Drawer Finish on desktop and mobile, without changing their shared material category.
 - [x] Separate OOL 77 Mini bar finishes into frame (Cement Stuc/Glossy Lacquer), shelf (Wood), and drawer (Wood/Suède leather) across public and trade views.
+- [x] Group product finishes by variant matrix values (name, colourway prefix, generic "Wood"): OOL Night table shows only Frame + Drawer Finish on public and trade.
