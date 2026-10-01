@@ -1108,6 +1108,26 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       onSwatchImagesChange?.(null, { committed: true, swatchName: hero?.name ?? preset.name });
     }
   };
+
+  // Mini bar: the Shelf axis has a single value ("Wood"), so commit it
+  // automatically once the swatches load — no third dropdown is shown.
+  const shelfAutoCommittedRef = useRef(false);
+  useEffect(() => {
+    if (!isOolMinibar || shelfAutoCommittedRef.current || shelfTiles.length === 0) return;
+    shelfAutoCommittedRef.current = true;
+    const shelf = shelfTiles[0];
+    setSelectedWoodId(shelf.id);
+    userPickedAxesRef.current.wood = true;
+    onWoodFinishChange?.("Wood");
+    onWoodFinishPricingChange?.({
+      id: shelf.id,
+      name: shelf.name,
+      price_cents: (shelf.frame_price_cents && shelf.frame_price_cents > 0) ? shelf.frame_price_cents : 0,
+      currency: shelf.frame_price_currency || "EUR",
+      image_url: shelf.image_url ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOolMinibar, shelfTiles.length]);
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
