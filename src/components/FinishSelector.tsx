@@ -326,6 +326,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const userPickedAxesRef = useRef<Record<string, boolean>>({});
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [openFrame, setOpenFrame] = useState(false);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
   const [mobileBaseOpen, setMobileBaseOpen] = useState(false);
@@ -656,7 +657,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const renderTile = (
     f: Fabric,
-    kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug",
+    kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame",
     rugComponent?: string,
     shape?: "tile" | "square",
   ) => {
@@ -668,6 +669,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isSecondaryFabricGroup = kindOverride === "fabricSecondary";
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
+    const isFrameGroup = kindOverride === "frame";
     const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup;
     const normName = (s: string) => s.trim().toLowerCase();
     const isDisabled = isTopGroup
@@ -686,10 +688,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       ? selectedFabricId === f.id
       : isCoverGroup
       ? selectedCoverId === f.id
+      : isFrameGroup
+      ? selectedFrameId === f.id
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
-    const setSelected = isSecondaryFabricGroup
+    const setSelected = isFrameGroup
+      ? setSelectedFrameId
+      : isSecondaryFabricGroup
       ? setSelectedSecondaryFabricId
       : isFabricGroup
       ? setSelectedFabricId
@@ -707,7 +713,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else {
         setSelected(f.id);
         userPickedAxesRef.current[
-          isSecondaryFabricGroup ? "fabricSecondary" : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
+          isFrameGroup ? "frame" : isSecondaryFabricGroup ? "fabricSecondary" : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
         ] = true;
       }
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
@@ -737,6 +743,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else if (isCoverGroup) {
         // Cover (rattan/cane/wicker) is purely decorative — only update the
         // hero image; do not drive the Frame variant matrix or pricing.
+      } else if (isFrameGroup) {
+        const frame = frameOptions?.find((option) => f.name.toLowerCase().startsWith(option.toLowerCase()));
+        if (frame) onFrameFinishChange?.(frame);
       } else if (isTopGroup) {
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
@@ -960,6 +969,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       setOpen(true);
       setOpenWood(true);
       setOpenTop(true);
+      setOpenFrame(true);
       setOpenCover(true);
       setMobileBaseOpen(true);
       setMobileTopOpen(true);
@@ -1030,8 +1040,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // gallery images still render (with the ImageOff badge) so users can pick
   // them and request samples through the concierge.
   const visibleFabricTiles = fabricTiles;
-  const visibleWoodTiles   = woodTiles;
-  const visibleTopTiles    = topTiles;
+  const visibleWoodTiles   = isOolMinibar ? shelfTiles : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : topTiles;
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
@@ -1187,7 +1197,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (/\btable\b/.test(title)) return "Select Your Table Top Finish";
     return "Select Your Top Finish";
   })();
-  const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
+  const showMobileBaseTopGrid = !isOolMinibar && (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
 
   const renderInlineAxisCarousel = (
     options: Fabric[],
@@ -1288,6 +1298,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {isOolMinibar && frameTiles.length > 0 && renderAccordion({
+        isOpen: openFrame,
+        onToggle: () => setOpenFrame((v) => !v),
+        label: "Select Your Frame Finish",
+        selectedName: frameTiles.find((f) => f.id === selectedFrameId)?.name ?? null,
+        tiles: frameTiles,
+        glyph: "finish",
+        tileKind: "frame",
+      })}
       {showMobileBaseTopGrid && (
         <div className="border-t border-border/60">
           {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
