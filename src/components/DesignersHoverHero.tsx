@@ -2741,8 +2741,8 @@ const DesignersHoverHero = () => {
 
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
-            <div className="mx-auto hidden w-[min(34rem,calc(100vw-6rem))] shrink-0 border-t border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur lg:block">
-                <div className="flex w-full items-center justify-between py-4">
+            <div className="hidden w-full shrink-0 bg-[#0a0a0a]/95 px-4 backdrop-blur lg:block">
+                <div className="flex w-full items-center justify-between border-t border-white/10 py-3">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     const hasDesigners = availableLetters.has(letter);
@@ -2759,11 +2759,11 @@ const DesignersHoverHero = () => {
                           setActiveAccordionLetter(letter);
                         } : undefined}
                         className={cn(
-                          "font-body text-sm uppercase tracking-[0.35em] transition-colors",
+                          "flex-1 py-2 text-center font-body text-xs uppercase tracking-wider transition-colors duration-200",
                           !hasDesigners && "opacity-30 pointer-events-none cursor-default",
                           hasDesigners && (isActive
-                            ? "text-white underline underline-offset-8"
-                            : "text-white/50 hover:text-white")
+                            ? "font-bold text-white underline underline-offset-8"
+                            : "text-white/50 hover:font-bold hover:text-white")
                         )}
                         aria-label={hasDesigners ? `Show designers starting with ${letter}` : `No designers under ${letter}`}
                       >
