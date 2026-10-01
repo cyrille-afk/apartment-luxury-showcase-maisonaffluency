@@ -2759,7 +2759,7 @@ const DesignersHoverHero = () => {
                           setActiveAccordionLetter(letter);
                         } : undefined}
                         className={cn(
-                          "flex h-10 flex-1 items-center justify-center text-center font-body text-[13px] uppercase tracking-wider transition-all duration-150 ease-in-out",
+                          "flex h-10 flex-1 items-center justify-center text-center font-body text-[22px] leading-none uppercase tracking-wider transition-all duration-150 ease-in-out",
                           !hasDesigners && "opacity-30 pointer-events-none cursor-default",
                           hasDesigners && (isActive
                             ? "font-bold text-white underline underline-offset-8"

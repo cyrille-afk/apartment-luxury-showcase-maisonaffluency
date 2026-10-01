@@ -2157,9 +2157,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               <div className="h-px bg-border/60 mb-5" />
               <div
                 ref={letterBarRef}
-                /* Fixed row height: taller letters grow into the existing
-                   whitespace instead of pushing the card grid below downward. */
-                className="flex items-center justify-between h-5"
+                className="flex items-center justify-between h-11"
               >
                 {LETTERS.map((letter) => {
                   const isActive = activeLetters.has(letter);
