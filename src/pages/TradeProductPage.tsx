@@ -2000,8 +2000,8 @@ const TradeProductPage: React.FC = () => {
             />
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
-            {isOolMinibar && <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />}
-            <div className={cn("hidden md:border-0 md:shadow-none", !isOolMinibar && "md:block")}>
+            {designer.slug === "bieke-casteleyn" && <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} />}
+            <div className={cn("hidden md:border-0 md:shadow-none", designer.slug !== "bieke-casteleyn" && "md:block")}>
               <ActiveSwatchCaption
                 pickId={product.id}
                 activeIndex={galleryActiveIndex ?? 0}
@@ -2156,6 +2156,7 @@ const TradeProductPage: React.FC = () => {
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
+                  photoLedFinishes={designer.slug === "bieke-casteleyn"}
                   frameOptions={isOolMinibar ? dualSizeOptions : undefined}
                   onFrameFinishChange={isOolMinibar ? (frame) => {
                     setSelectedDualSize(frame);
