@@ -23,6 +23,7 @@ const TradeLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -89,6 +90,7 @@ const TradeLogin = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    setGoogleError(null);
     try {
       ensureStorageHeadroom();
       // Mark the intended destination so the full-page redirect flow returns
@@ -99,13 +101,13 @@ const TradeLogin = () => {
       });
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
-        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
+        setGoogleError(result.error.message || "Google sign-in could not be completed.");
         return;
       }
       // Popup flow: session is set — go straight into the trade portal.
       navigate("/trade");
     } catch (err) {
-      toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
+      setGoogleError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
       setGoogleLoading(false);
     }
@@ -194,6 +196,27 @@ const TradeLogin = () => {
             <GoogleGlyph className="w-4 h-4 text-foreground/80" />
             {googleLoading ? "Connecting" : "Continue with Google"}
           </button>
+
+          {/* Persistent Google sign-in error with retry — a toast alone
+              disappears and leaves the member with no way forward. */}
+          {googleError && (
+            <div role="alert" className="mt-4 border border-destructive/40 bg-destructive/5 px-4 py-3.5">
+              <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-destructive">
+                Google sign-in didn't complete
+              </p>
+              <p className="mt-1.5 font-body text-sm text-foreground/80">
+                {googleError}
+              </p>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className="mt-3 w-full py-3 border border-foreground/40 font-body text-xs uppercase tracking-[0.3em] text-foreground hover:bg-foreground/[0.03] transition-colors disabled:opacity-50"
+              >
+                {googleLoading ? "Retrying" : "Try Again"}
+              </button>
+            </div>
+          )}
 
           {/* Low-contrast links */}
           <div className="mt-10 space-y-3">
