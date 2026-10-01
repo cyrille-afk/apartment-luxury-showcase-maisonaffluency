@@ -2742,7 +2742,7 @@ const DesignersHoverHero = () => {
             {/* Desktop alphabet rail: anchored beneath the grid and directly
                 above the unified bottom search input. */}
             <div className="hidden w-full shrink-0 bg-[#0a0a0a]/95 px-4 backdrop-blur lg:block">
-                <div className="flex w-full items-center justify-between border-t border-white/10 py-3">
+                <div className="flex w-full items-center justify-between border-t border-white/10 py-4 min-h-[44px]">
                   {Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => {
                     const isActive = activeAccordionLetter === letter;
                     const hasDesigners = availableLetters.has(letter);
@@ -2759,7 +2759,7 @@ const DesignersHoverHero = () => {
                           setActiveAccordionLetter(letter);
                         } : undefined}
                         className={cn(
-                          "flex-1 py-2 text-center font-body text-xs uppercase tracking-wider transition-colors duration-200",
+                          "flex h-10 flex-1 items-center justify-center text-center font-body text-[13px] uppercase tracking-wider transition-all duration-150 ease-in-out",
                           !hasDesigners && "opacity-30 pointer-events-none cursor-default",
                           hasDesigners && (isActive
                             ? "font-bold text-white underline underline-offset-8"
