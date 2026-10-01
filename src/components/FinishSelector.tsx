@@ -229,6 +229,8 @@ interface FinishSelectorProps {
    * gallery on page load.
    */
   currentGalleryIndex?: number;
+  /** Scope first-photo finish highlighting to this designer's mapped photography. */
+  photoLedFinishes?: boolean;
   /** Optional swatch name to select on first load, used by trade deep links. */
   preselectFabricName?: string | null;
 }
@@ -358,7 +360,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, photoLedFinishes = false, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -692,7 +694,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (isRugProduct) return;
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
-    if (!galleryInteractedRef.current) return;
+    if (!galleryInteractedRef.current && !photoLedFinishes) return;
     const oneBased = currentGalleryIndex + 1;
     if (isSharedSlide(oneBased)) return;
     const match = fabrics.find(
@@ -700,10 +702,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     );
     if (!match) return;
 
-    if (selectedFabricId === match.id) return;
+    if (userPickedAxesRef.current.fabric || selectedFabricId === match.id) return;
     setSelectedFabricId(match.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fabrics, currentGalleryIndex]);
+  }, [fabrics, currentGalleryIndex, photoLedFinishes]);
 
 
   const getRugComponent = (name: string) => {
@@ -1244,7 +1246,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
-    if (!galleryInteractedRef.current && !isOolMinibar) return;
+    if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
     if (!isOolMinibar && isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
@@ -1263,7 +1265,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const coverHit = hit(visibleCoverTiles);
     if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGalleryIndex, fabrics, isOolMinibar, frameTiles.length, drawerTiles.length]);
+  }, [currentGalleryIndex, fabrics, isOolMinibar, photoLedFinishes, frameTiles.length, drawerTiles.length]);
 
 
 
