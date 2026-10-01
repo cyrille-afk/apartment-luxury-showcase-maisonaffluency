@@ -789,6 +789,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   };
 
   const anyDropdownOpen = megaMenuOpen || tradeMenuOpen || accountMenuOpen;
+  // Floating page overlays (e.g. the trade CTA) hide while a header menu is open.
+  useEffect(() => {
+    document.body.toggleAttribute("data-nav-dropdown-open", anyDropdownOpen);
+    return () => document.body.removeAttribute("data-nav-dropdown-open");
+  }, [anyDropdownOpen]);
 
   return <>
     {anyDropdownOpen && (
