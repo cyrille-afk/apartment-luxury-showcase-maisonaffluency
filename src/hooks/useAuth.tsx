@@ -8,6 +8,8 @@ interface AuthContextType {
   isTradeUser: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  /** Roles have been successfully read for the signed-in user. */
+  rolesLoaded: boolean;
   profile: { first_name: string; last_name: string; company: string; email: string; trade_status?: string | null; has_seen_trade_intro?: boolean | null; concierge_name?: string | null } | null;
   /** Vetting state from public.profiles.trade_status: approved | pending_review | rejected */
   tradeStatus: "approved" | "pending_review" | "rejected" | null;
@@ -37,6 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isTradeUser, setIsTradeUser] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  // True once roles were actually read for the current user. Admin gates must
+  // wait for this instead of treating "lookup failed / not yet run" as "not admin".
+  const [rolesLoaded, setRolesLoaded] = useState(false);
+  const explicitSignOutRef = useRef(false);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
   const [applicationStatus, setApplicationStatus] = useState<AuthContextType["applicationStatus"]>("none");
   const [tradeStatus, setTradeStatus] = useState<AuthContextType["tradeStatus"]>(null);
@@ -100,6 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsTradeUser(roles.includes("trade_user"));
       setIsSuperAdmin(roles.includes("super_admin"));
       setIsAdmin(roles.includes("admin") || roles.includes("super_admin"));
+      setRolesLoaded(true);
     }
 
     if (profileRes.data) {
@@ -266,9 +273,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      scheduleTokenRefresh(sess);
+      if (sess?.user) {
+        setSession(sess);
+        setUser(sess.user);
+        scheduleTokenRefresh(sess);
+      }
       if (sess?.user) {
         const sameUser = userIdRef.current === sess.user.id;
         // Only re-hydrate roles on an actual sign-in. TOKEN_REFRESHED fires
@@ -315,19 +324,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         return;
       } else {
-        setIsTradeUser(false);
-        setIsAdmin(false);
-        setIsSuperAdmin(false);
-        setProfile(null);
-        setTradeStatus(null);
-        setApplicationStatus("none");
-
-        if (event === "SIGNED_OUT") {
+        // SIGNED_OUT. On the preview the session is brokered across editor +
+        // preview surfaces, and a sibling surface rotating the refresh token
+        // can make this tab emit a spurious SIGNED_OUT while a valid session
+        // is still stored. Re-check (deferred — calling the SDK inside its
+        // own listener deadlocks its lock) before demoting the member.
+        const explicit = explicitSignOutRef.current;
+        explicitSignOutRef.current = false;
+        const finishSignOut = () => {
+          userIdRef.current = null;
+          setSession(null);
+          setUser(null);
+          setIsTradeUser(false);
+          setIsAdmin(false);
+          setIsSuperAdmin(false);
+          setRolesLoaded(false);
+          setProfile(null);
+          setTradeStatus(null);
+          setApplicationStatus("none");
+          setLoading(false);
           const path = window.location.pathname;
           if (path.startsWith("/trade") && path !== "/trade/login" && path !== "/trade-program") {
-            window.location.href = "/trade/login";
+            const next = `${path}${window.location.search}`;
+            window.location.href = `/trade/login?next=${encodeURIComponent(next)}`;
           }
+        };
+        if (explicit) {
+          finishSignOut();
+          return;
         }
+        setTimeout(async () => {
+          try {
+            const { data: { session: still } }: any = await sbClient.auth.getSession();
+            if (still?.user && still.expires_at && still.expires_at * 1000 > Date.now()) {
+              console.warn("Ignoring spurious SIGNED_OUT; a valid session is still stored.");
+              setSession(still);
+              setUser(still.user);
+              userIdRef.current = still.user.id;
+              scheduleTokenRefresh(still);
+              setLoading(false);
+              return;
+            }
+          } catch { /* fall through to sign-out */ }
+          finishSignOut();
+        }, 0);
+        return;
       }
       setLoading(false);
     });
@@ -340,6 +381,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [sbClient, fetchUserData]);
 
   const signOut = async () => {
+    explicitSignOutRef.current = true;
     if (sbClient) await sbClient.auth.signOut();
   };
 
@@ -348,7 +390,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, rolesLoaded, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
