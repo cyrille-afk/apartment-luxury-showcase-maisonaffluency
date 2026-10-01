@@ -195,6 +195,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (error: any) {
             const message = String(error?.message ?? error ?? "");
             if (/refresh_token|already used|invalid|expired/i.test(message)) {
+              // Another tab/preview surface may have rotated the token already
+              // and stored a valid session — keep it instead of signing out.
+              try {
+                const { data: { session: latest } }: any = await sbClient.auth.getSession();
+                if (latest?.expires_at && latest.expires_at * 1000 - Date.now() > 60_000) {
+                  scheduleTokenRefresh(latest);
+                  return;
+                }
+              } catch { /* fall through */ }
               // The refresh token is definitively dead — purge it so the
               // app cleanly falls back to anon (SIGNED_OUT) instead of
               // retrying a consumed token and spraying 401s at edge calls.
