@@ -217,7 +217,11 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
-  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
+    const first = roomNavigation[room]?.[0]?.label;
+    return first ? { [`0-${first}`]: true } : {};
+  });
+  const toggleCategory = (key: string) => setOpenCategories((prev) => ({ ...prev, [key]: !prev[key] }));
   void activeCategory; void onSelectCategory;
   return (
    <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -235,21 +239,21 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                 <div className="ml-1.5 mt-2 flex flex-col space-y-1 border-l border-border/60 pl-4">
                   {categories.map((item) => {
                     const key = `${index}-${item.label}`;
-                    const isOpen = openCategory === key;
+                    const hasItems = item.subcategories.length > 0;
+                    const isOpen = hasItems && !!openCategories[key];
                     return (
-                    <div key={item.label} onMouseEnter={() => { setSelectedRoom(index); setOpenCategory(key); }}>
+                    <div key={item.label} onMouseEnter={() => setSelectedRoom(index)}>
                       <Button
                         type="button" variant="ghost"
-                        onFocus={() => setOpenCategory(key)}
-                        onClick={() => onCategoryNavigate(link.slug, item.category)}
-                        aria-expanded={isOpen}
+                        onClick={() => hasItems ? toggleCategory(key) : onCategoryNavigate(link.slug, item.category)}
+                        aria-expanded={hasItems ? isOpen : undefined}
                         className={cn("group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs transition-all hover:bg-transparent hover:font-medium hover:text-foreground", isOpen ? "font-medium text-foreground" : "font-normal text-muted-foreground")}
                       >
                         {item.label}
-                        <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-all", isOpen ? "rotate-90 opacity-100" : "opacity-0 group-hover:opacity-100")} strokeWidth={1.25} />
+                        {hasItems && <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90 text-foreground")} strokeWidth={1.25} />}
                       </Button>
                       {isOpen && (
-                        <div className="mb-2 flex flex-col border-l border-border pl-3">
+                        <div className="mb-2 ml-2 mt-1 flex flex-col border-l border-border/40 pl-4 animate-fade-in">
                           {item.subcategories.map((subcategory) => (
                             <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(link.slug, item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
                               {subcategory}
