@@ -256,6 +256,11 @@ const queryClient = new QueryClient({
 const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
 let previewLocationRestored = false;
 
+/** Sign-in / recovery screens must never be remembered or restored on reload. */
+function isTransientAuthPath(path: string): boolean {
+  return /^\/(trade\/login|reset-password|auth|~oauth)(\/|$)/.test(path);
+}
+
 function getPreviewAnchorId(): string | undefined {
   if (typeof document === "undefined") return undefined;
   const probeY = Math.min(Math.max(window.innerHeight * 0.35, 120), window.innerHeight - 80);
@@ -446,6 +451,7 @@ function PreviewViewContinuity() {
 
     let timer: number | null = null;
     const save = () => {
+      if (isTransientAuthPath(location.pathname)) return;
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         try {
@@ -537,6 +543,13 @@ function restorePreviewLocationBeforeRouter() {
     currentSearch.delete("__lovable_token");
     const currentIsRoot = window.location.pathname === "/" && !currentSearch.toString() && !window.location.hash;
     const savedPath = saved.path || "/";
+
+    // Never bounce back onto a sign-in/recovery screen, and never hijack the
+    // root landing that an OAuth sign-in returns to — doing either traps the
+    // member on "Trade Program Sign In" after they have signed in.
+    let oauthPending = false;
+    try { oauthPending = !!sessionStorage.getItem("maison:oauth-return-path"); } catch { /* noop */ }
+    if (isTransientAuthPath(savedPath) || oauthPending) return;
 
     if (isFresh && currentIsRoot && savedPath !== "/") {
       const token = new URLSearchParams(window.location.search).get("__lovable_token");
