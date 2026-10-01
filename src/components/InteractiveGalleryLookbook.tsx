@@ -649,6 +649,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     if (ownSub) add(pool.filter((pick) => normalize(pick.subcategory || "") === ownSub));
     const ownCat = normalize(ownProduct?.category || "");
     if (ownCat) add(pool.filter((pick) => normalize(pick.category || "") === ownCat));
+    // Last resort: any public catalog piece, so a pin click never leads nowhere.
+    if (out.length === 0) add(pool);
     return out;
   };
   // Landing: default to the first pin that actually has alternatives, so the dock populates immediately.
