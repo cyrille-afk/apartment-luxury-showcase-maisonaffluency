@@ -619,8 +619,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       [/\b(floor lamp|floor light)\b/, ["floor lights"]],
       [/\b(sconce|wall light)\b/, ["wall lights"]],
       [/\b(rug|carpet)\b/, ["hand knotted rugs", "hand tufted rugs"]],
-      [/\b(vase|vessel|bowl|glass|geode|centerpiece)s?\b/, ["vases vessels", "decorative objects"]],
-      [/\b(diasec|print|painting|artwork|canvas|photograph|art)\b/, ["art", "artworks", "wall art", "wall decor", "decorative objects"]],
+      [/\b(vase|vessel|bowl|geode|centerpiece)s?\b/, ["vases vessels"]],
+      [/\b(diasec|painting|artwork|canvas|photograph)s?\b/, ["art", "artworks", "wall art"]],
       [/\b(flush mount|plafonnier|ceiling light|surface)\b/, ["ceiling lights"]],
       [/\bmirror\b/, ["mirrors"]],
       [/\b(nightstand|bedside)\b/, ["bedside tables"]],
@@ -643,14 +643,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     const notSelf = (pick: typeof pool[number]) => normalize(pick.title || "") !== selfTitle && normalize(pick.title || "") !== hotspotName;
     const out: typeof pool = [];
     const add = (list: typeof pool) => list.forEach((pick) => { if (out.length < 3 && notSelf(pick) && !out.some((o) => o.id === pick.id)) out.push(pick); });
-    // Fallback chain so the tray is never empty: hotspot type → product subcategory → product category.
+    // Strict, category-locked: hotspot type → product's exact subcategory. No loose
+    // category or catalogue-wide fallback — never leak unrelated pieces.
     if (targets.length) add(pool.filter((pick) => targets!.includes(normalize(pick.subcategory || ""))));
     const ownSub = normalize(ownProduct?.subcategory || "");
     if (ownSub) add(pool.filter((pick) => normalize(pick.subcategory || "") === ownSub));
-    const ownCat = normalize(ownProduct?.category || "");
-    if (ownCat) add(pool.filter((pick) => normalize(pick.category || "") === ownCat));
-    // Last resort: any public catalog piece, so a pin click never leads nowhere.
-    if (out.length === 0) add(pool);
     return out;
   };
   // Landing: default to the first pin that actually has alternatives, so the dock populates immediately.
