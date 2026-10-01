@@ -58,7 +58,7 @@ import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import LegendDisclosure from "@/components/LegendDisclosure";
-import FinishSelector from "@/components/FinishSelector";
+import FinishSelector, { OOL_MINIBAR_PICK_ID } from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
@@ -1566,6 +1566,7 @@ const TradeProductPage: React.FC = () => {
   // dual-axis variant shares one size label, material selection alone should
   // resolve the priced row (e.g. Soleil: Oak vs Straw Marquetry at Ø85).
   const hasDualSize = dualSizeOptions.length > 1;
+  const isOolMinibar = product.id === OOL_MINIBAR_PICK_ID;
   const dualVariant = isDualAxis
     ? sizeVariants!.find((v) =>
         (v.base || "").trim() === (selectedBase || "") &&
@@ -2153,6 +2154,11 @@ const TradeProductPage: React.FC = () => {
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
+                  frameOptions={isOolMinibar ? dualSizeOptions : undefined}
+                  onFrameFinishChange={isOolMinibar ? (frame) => {
+                    setSelectedDualSize(frame);
+                    handleMaterialChange(frame, { base: selectedBase, top: selectedTop, size: frame, fromSwatch: true });
+                  } : undefined}
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
@@ -2166,7 +2172,7 @@ const TradeProductPage: React.FC = () => {
                       woodLabelOverride: (product as any).wood_label_override,
                     }).upholsteryLabel
                   }
-                  woodLabel={
+                  woodLabel={isOolMinibar ? getBasePlaceholder(product) :
                     resolveFinishSectionLabels({
                       baseAxisLabel: product.base_axis_label,
                       topAxisLabel: product.top_axis_label,
@@ -2199,6 +2205,11 @@ const TradeProductPage: React.FC = () => {
 
                   onTopFinishChange={(topName) => {
                     if (!topName) { setSelectedTopDisplay(null); return; }
+                    if (isOolMinibar) {
+                      setSelectedTop(topName);
+                      handleMaterialChange(topName, { base: selectedBase, top: topName, size: selectedDualSize, fromSwatch: true });
+                      return;
+                    }
                     const norm = (s: string) => s.trim().toLowerCase();
                     const nw = norm(topName);
                     const match =
@@ -2248,6 +2259,11 @@ const TradeProductPage: React.FC = () => {
                   }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) { setSelectedBaseDisplay(null); return; }
+                    if (isOolMinibar) {
+                      setSelectedBase("Wood");
+                      handleMaterialChange("Wood", { base: "Wood", top: selectedTop, size: selectedDualSize, fromSwatch: true });
+                      return;
+                    }
                     // Match the swatch name to a Base axis value (case/space tolerant,
                     // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
                     const norm = (s: string) => s.trim().toLowerCase();
@@ -2368,7 +2384,7 @@ const TradeProductPage: React.FC = () => {
                 <>
                   {/* Dual-axis: always render Base picker so both axes are visible.
                       ExpandableSpec collapses single-option lists to a labeled row. */}
-                  {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
+                  {!isOolMinibar && !baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={withImperialPerLine(baseOptions.join("\n"))}
@@ -2402,7 +2418,7 @@ const TradeProductPage: React.FC = () => {
                     />
                   )}
                   {/* Dual-axis: always render Top picker. */}
-                  {!suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
+                  {!isOolMinibar && !suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
 
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
@@ -2836,7 +2852,7 @@ const TradeProductPage: React.FC = () => {
                 );
               })()}
 
-              {!isRugSqmActive && isDualAxis && hasDualSize && (
+              {!isOolMinibar && !isRugSqmActive && isDualAxis && hasDualSize && (
                 <ExpandableSpec
                   icon={specIcon(dualLabelIsDim ? "📐" : "✦")}
                   text={dualLabelIsDim ? withImperialPerLine(dualSizeOptions.join("\n")) : dualSizeOptions.join("\n")}
