@@ -82,6 +82,13 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Wall Lights", "Floor Lights"] },
     { label: "Textiles & Décor", category: "Décor", subcategories: ["Cushions & Throws", "Mirrors", "Decorative Objects"] },
   ],
+  office: [
+    { label: "Desks", category: "Tables", subcategories: ["Desks"] },
+    { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
+    { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
+    { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
+    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
+  ],
   lighting: [
     { label: "Ceiling Lights", category: "Lighting", subcategories: ["Ceiling Lights"] },
     { label: "Wall Lights", category: "Lighting", subcategories: ["Wall Lights"] },
@@ -89,13 +96,6 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Floor Lights", category: "Lighting", subcategories: ["Floor Lights"] },
     { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
     { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
-  ],
-  office: [
-    { label: "Desks", category: "Tables", subcategories: ["Desks"] },
-    { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
-    { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
-    { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
-    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
   ],
   decor: [],
 };
