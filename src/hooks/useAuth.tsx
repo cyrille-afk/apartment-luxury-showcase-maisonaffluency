@@ -300,6 +300,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             .catch(() => {
               /* basket merge is best-effort */
             });
+          setRolesLoaded(false);
           setLoading(true);
           setTimeout(async () => {
             userIdRef.current = sess.user.id;
