@@ -2285,7 +2285,7 @@ const PublicProductPageContent: React.FC = () => {
   };
 
   return (
-    <div className="product-configurator-canvas min-h-[100dvh] overflow-x-hidden motion-safe:animate-fade-in">
+    <div className="product-configurator-canvas min-h-[100dvh] overflow-x-hidden md:overflow-x-clip motion-safe:animate-fade-in">
       {(() => {
         const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(product.image_url || images[0] || null);
