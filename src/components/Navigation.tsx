@@ -233,13 +233,15 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             const categories = room === "living" && index === 1 ? officeNavigation : roomNavigation[room];
             const roomOpen = !!openRooms[index];
             return (
-            <div key={link.slug} className="mb-6 last:mb-0">
+            <div key={link.slug} className="group mb-6 last:mb-0">
               <div className="flex items-center justify-between gap-2">
-                <Button type="button" variant="ghost" onMouseEnter={() => setSelectedRoom(index)} onFocus={() => setSelectedRoom(index)} onClick={() => onRoomNavigate(link.slug)} className="h-auto min-h-8 w-full justify-start gap-2 rounded-none px-0 py-1.5 font-body text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-transparent">
-                  {link.label}
+                <Button type="button" variant="ghost" onMouseEnter={() => setSelectedRoom(index)} onFocus={() => setSelectedRoom(index)} onClick={() => onRoomNavigate(link.slug)} className="h-auto min-h-8 flex-1 justify-start gap-2 rounded-none px-0 py-1.5 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
+                  <span className={cn("size-1.5 shrink-0 rounded-full transition-all", selectedRoom === index ? "scale-100 bg-foreground" : "scale-0 bg-transparent")} />
+                  <span className={cn("hover:opacity-70", selectedRoom === index ? "font-extrabold text-foreground underline underline-offset-4" : "font-bold text-muted-foreground")}>{link.label}</span>
                 </Button>
-                <Button type="button" variant="ghost" aria-expanded={roomOpen} aria-label={`${roomOpen ? "Collapse" : "Expand"} ${link.label} categories`} onMouseEnter={() => setSelectedRoom(index)} onClick={() => setOpenRooms((prev) => ({ ...prev, [index]: !prev[index] }))} className="h-auto min-h-8 w-8 shrink-0 justify-center rounded-none p-0 hover:bg-transparent">
-                  <ChevronDown className={cn("size-3 shrink-0 text-muted-foreground transition-transform", roomOpen && "rotate-180")} strokeWidth={1.25} />
+                <Button type="button" variant="ghost" aria-expanded={roomOpen} aria-label={`${roomOpen ? "Collapse" : "Expand"} ${link.label} categories`} onMouseEnter={() => setSelectedRoom(index)} onClick={() => setOpenRooms((prev) => ({ ...prev, [index]: !prev[index] }))} className="h-auto min-h-8 shrink-0 gap-1.5 rounded-none py-0 pl-2 pr-0 uppercase text-muted-foreground hover:bg-transparent hover:text-foreground">
+                  <span className="text-[9px] font-medium tracking-wider opacity-0 transition-opacity duration-200 group-hover:opacity-100">{selectedRoom === index ? "Active" : "Explore"}</span>
+                  <ChevronDown className={cn("size-3 shrink-0 transition-transform duration-200", roomOpen && "rotate-180")} strokeWidth={1.25} />
                 </Button>
               </div>
               {roomOpen && (
