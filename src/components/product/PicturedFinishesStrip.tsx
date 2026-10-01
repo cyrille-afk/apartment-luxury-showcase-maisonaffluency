@@ -14,11 +14,13 @@ export default function PicturedFinishesStrip({
   activeIndex,
   baseLabel = "Frame",
   topLabel = "Drawer",
+  biekeLayout = false,
 }: {
   pickId: string;
   activeIndex: number | undefined;
   baseLabel?: string | null;
   topLabel?: string | null;
+  biekeLayout?: boolean;
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
@@ -43,7 +45,7 @@ export default function PicturedFinishesStrip({
 
   const oneBased = (activeIndex ?? 0) + 1;
   const shown = swatches.filter((s) => s.image_indices.includes(oneBased));
-  if (!shown.length) return null;
+  if (!shown.length || (swatches.length > 1 && shown.length === swatches.length)) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
@@ -53,9 +55,17 @@ export default function PicturedFinishesStrip({
   const firstMatch = (items: Swatch[]) => items.length
     ? [items.reduce((best, item) => item.image_indices.length < best.image_indices.length ? item : best)]
     : [];
-  const groups = topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
-    ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
-    : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }];
+  const groups = biekeLayout
+    ? topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
+      ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
+      : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }]
+    : shown.map((s) => ({
+        label: /^(fabric|leather|upholstery|fabric & leather)$/i.test(s.category || "") ? "Upholstery"
+          : /^(rug|rug finish)$/i.test(s.category || "") ? "Rug Finish"
+          : /^(cover|rattan|cane|wicker)$/i.test(s.category || "") ? "Cover"
+          : s.category && !/^(other)$/i.test(s.category) ? `${s.category} Finish` : "Finish",
+        items: [s],
+      }));
 
   const Item = ({ label, s }: { label: string; s: Swatch }) => (
     <span className="inline-flex items-center gap-1.5">

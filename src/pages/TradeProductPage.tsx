@@ -2000,18 +2000,7 @@ const TradeProductPage: React.FC = () => {
             />
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
-            {designer.slug === "bieke-casteleyn" && <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} />}
-            <div className={cn("hidden md:border-0 md:shadow-none", designer.slug !== "bieke-casteleyn" && "md:block")}>
-              <ActiveSwatchCaption
-                pickId={product.id}
-                activeIndex={galleryActiveIndex ?? 0}
-                selectedNames={[
-                  selectedFabric?.name,
-                  selectedBaseDisplay ?? selectedWoodPrice?.name ?? selectedSingleMaterial,
-                  selectedTopDisplay,
-                ]}
-              />
-            </div>
+            <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
 
             {/* Interactive 3D model — collapsed by default under the photo.
                 The finish selectors in the right column act as its legend. */}
@@ -2156,7 +2145,7 @@ const TradeProductPage: React.FC = () => {
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
-                  photoLedFinishes={designer.slug === "bieke-casteleyn"}
+                  photoLedFinishes
                   frameOptions={isOolMinibar ? dualSizeOptions : undefined}
                   onFrameFinishChange={isOolMinibar ? (frame) => {
                     setSelectedDualSize(frame);
