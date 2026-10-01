@@ -1080,7 +1080,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
-    tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug";
+    tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
   }) => (
     <div className="border-t border-border/60">
       {isMobile ? (
