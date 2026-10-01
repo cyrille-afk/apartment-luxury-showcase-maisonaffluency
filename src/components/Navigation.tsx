@@ -48,7 +48,7 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor";
+type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor" | "office";
 
 interface RoomNavCategory {
   label: string;
@@ -90,6 +90,13 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
   ],
   decor: [],
+  office: [
+    { label: "Desks", category: "Tables", subcategories: ["Desks"] },
+    { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
+    { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
+    { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
+    { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
+  ],
 };
 
 // Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
@@ -110,18 +117,12 @@ const DECOR_COLUMNS: string[][] = (() => {
 })();
 
 const roomFlyouts: Partial<Record<RoomNavKey, { label: string; slug: string }[]>> = {
-  living: [{ label: "Living Rooms", slug: "living-room" }, { label: "Office", slug: "office" }],
+  living: [{ label: "Living Rooms", slug: "living-room" }],
+  office: [{ label: "Office", slug: "office" }],
   dining: [{ label: "Dining", slug: "dining-room" }],
   bedroom: [{ label: "Bedroom", slug: "bedroom" }],
 };
 
-const officeNavigation: RoomNavCategory[] = [
-  { label: "Desks", category: "Tables", subcategories: ["Desks"] },
-  { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
-  { label: "Storage", category: "Storage", subcategories: ["Bookcases", "Buffets, Cabinets And Sideboards"] },
-  { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
-  { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
-];
 
 const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   living: { src: livingRoomAmbient, alt: "Sculptural furniture in an architectural living room" },
@@ -129,13 +130,14 @@ const roomAmbientImages: Record<RoomNavKey, { src: string; alt: string }> = {
   bedroom: { src: calmingBedroomAmbient, alt: "Calming bedroom with layered natural materials" },
   lighting: { src: diningRoomAmbient, alt: "Refined dining room with collectible furniture and sculptural lighting" },
   decor: { src: "https://res.cloudinary.com/dif1oamtj/image/upload/v1774842687/IMG_2397-resized_rufbef.jpg", alt: "Curated décor objects and wall art" },
+  office: ROOM_PREVIEW_SCENES.office.previewImage,
 };
 
 // Download the three room photographs together, rather than waiting for each
 // dropdown to mount its own image after the visitor moves across the nav.
 const preloadRoomMenuPhotos = () => {
   void Promise.all(
-    (["living", "dining", "bedroom"] as const).map((room) =>
+    (["living", "dining", "bedroom", "office"] as const).map((room) =>
       preloadImage(roomAmbientImages[room].src, "low"),
     ),
   );
@@ -230,8 +232,9 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
           {roomFlyouts[room]?.map((link, index) => {
-            const categories = room === "living" && index === 1 ? officeNavigation : roomNavigation[room];
-            const roomOpen = !!openRooms[index];
+            const categories = roomNavigation[room];
+            // Single-room menus keep their categories permanently open.
+            const roomOpen = (roomFlyouts[room]?.length ?? 0) <= 1 || !!openRooms[index];
             return (
             <div key={link.slug} className="group mb-6 last:mb-0">
               <div className="flex items-center justify-between gap-2">
@@ -1253,7 +1256,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   <Button
                     type="button"
                     variant="ghost"
-                     onMouseEnter={() => { if (room === "living" || room === "dining" || room === "bedroom") preloadRoomMenuPhotos(); openRoomMenu(room); }}
+                     onMouseEnter={() => { if (room === "living" || room === "dining" || room === "bedroom" || room === "office") preloadRoomMenuPhotos(); openRoomMenu(room); }}
                     onFocus={() => openRoomMenu(room)}
                     onClick={() => openRoomMenu(room)}
                     aria-expanded={megaMenuOpen && activeRoomMenu === room}
