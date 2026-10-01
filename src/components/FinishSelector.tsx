@@ -1125,7 +1125,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!isOolMinibar || sharedConfigAppliedRef.current) return;
     if (frameTiles.length === 0 || drawerTiles.length === 0) return;
     sharedConfigAppliedRef.current = true;
-    const decoded = decodeMinibarConfig(new URLSearchParams(window.location.search).get("c"));
+    const params = new URLSearchParams(window.location.search);
+    const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const frame = frameTiles.find((tile) => readableSlug(tile.name) === params.get("frame"));
+    const drawer = drawerTiles.find((tile) => readableSlug(tile.name) === params.get("drawer"));
+    const decoded = frame && drawer
+      ? { frame: frame.name, drawer: drawer.name }
+      : decodeMinibarConfig(params.get("c"));
     if (!decoded) return;
     applyPreset({ id: "shared", name: "Shared configuration", finishes: { frame: decoded.frame, shelf: shelfTiles[0]?.name ?? "Wood", drawer: decoded.drawer } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1137,8 +1143,17 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!frame || !drawer) return;
     const params = new URLSearchParams(window.location.search);
     const next = encodeMinibarConfig(frame, drawer);
-    if (params.get("c") === next) return;
-    params.set("c", next);
+    if (params.get("c") === next && !params.has("frame") && !params.has("drawer")) return;
+    if (params.has("frame") || params.has("drawer")) {
+      // Preserve the readable URL received by a visitor until they choose
+      // another finish; the share menu can still derive it from the picks.
+      const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      params.set("frame", readableSlug(frame));
+      params.set("drawer", readableSlug(drawer));
+      params.delete("c");
+    } else {
+      params.set("c", next);
+    }
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}`);
   }, [isOolMinibar, selectedFrameId, selectedTopId, frameTiles, drawerTiles]);
 
