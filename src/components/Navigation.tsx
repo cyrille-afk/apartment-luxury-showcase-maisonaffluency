@@ -211,7 +211,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
 };
 
 interface RoomDropdownPanelProps {
-  room: "living" | "dining" | "bedroom";
+  room: "living" | "dining" | "bedroom" | "office";
   activeCategory: number | null;
   onSelectCategory: (index: number) => void;
   onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
