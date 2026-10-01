@@ -217,9 +217,11 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  // Single active category: opening one closes any other (across all rooms).
+  const [openCategoryKey, setOpenCategoryKey] = useState<string | null>(null);
+  const openCategories: Record<string, boolean> = openCategoryKey ? { [openCategoryKey]: true } : {};
   const [openRooms, setOpenRooms] = useState<Record<number, boolean>>({});
-  const toggleCategory = (key: string) => setOpenCategories((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleCategory = (key: string) => setOpenCategoryKey((prev) => (prev === key ? null : key));
   void activeCategory; void onSelectCategory;
   return (
    <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
