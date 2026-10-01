@@ -217,70 +217,60 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
-  // Single active category: opening one closes any other (across all rooms).
-  const [openCategoryKey, setOpenCategoryKey] = useState<string | null>(null);
-  const openCategories: Record<string, boolean> = openCategoryKey ? { [openCategoryKey]: true } : {};
-  const [openRooms, setOpenRooms] = useState<Record<number, boolean>>({});
-  const toggleCategory = (key: string) => setOpenCategoryKey((prev) => (prev === key ? null : key));
+  const [activeCat, setActiveCat] = useState<string>("ALL");
   void activeCategory; void onSelectCategory;
+  const rooms = roomFlyouts[room] ?? [];
+  const link = rooms[selectedRoom];
+  const categories = room === "living" && selectedRoom === 1 ? officeNavigation : roomNavigation[room];
+  const current = categories.find((c) => c.label === activeCat);
   return (
-   <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
-     <div className="w-[310px] shrink-0 self-stretch border-r border-border/60 px-8 py-7">
-      <div className="flex flex-col">
-        <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
-        <div className="flex flex-col">
-          {roomFlyouts[room]?.map((link, index) => {
-            const categories = room === "living" && index === 1 ? officeNavigation : roomNavigation[room];
-            const roomOpen = !!openRooms[index];
-            return (
-            <div key={link.slug} className="group mb-6 last:mb-0">
-              <div className="flex items-center justify-between gap-2">
-                <Button type="button" variant="ghost" onClick={() => (selectedRoom === index ? onRoomNavigate(link.slug) : setSelectedRoom(index))} className="h-auto min-h-8 flex-1 select-none justify-start gap-3 rounded-none px-0 py-1 text-left font-body text-xs font-bold uppercase tracking-widest hover:bg-transparent">
-                  <span className={cn("h-px shrink-0 bg-foreground transition-all duration-300", selectedRoom === index ? "w-4" : "w-0")} />
-                  <span className={cn("transition-colors", selectedRoom === index ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>{link.label}</span>
-                </Button>
-                <Button type="button" variant="ghost" aria-expanded={roomOpen} aria-label={`${roomOpen ? "Collapse" : "Expand"} ${link.label} categories`} onClick={() => setOpenRooms((prev) => ({ ...prev, [index]: !prev[index] }))} className="h-auto min-h-8 shrink-0 rounded-none py-0 pl-2 pr-0 text-muted-foreground hover:bg-transparent hover:text-foreground">
-                  <ChevronDown className={cn("size-3 shrink-0 transition-transform duration-200", roomOpen && "rotate-180")} strokeWidth={1.25} />
-                </Button>
-              </div>
-              {roomOpen && (
-                <div className="ml-1.5 mt-2 flex flex-col space-y-1 border-l border-border/60 pl-4 animate-fade-in">
-                  {categories.map((item) => {
-                    const key = `${index}-${item.label}`;
-                    const hasItems = item.subcategories.length > 0;
-                    const isOpen = hasItems && !!openCategories[key];
-                    return (
-                    <div key={item.label}>
-                      <Button
-                        type="button" variant="ghost"
-                        onClick={() => hasItems ? toggleCategory(key) : onCategoryNavigate(link.slug, item.category)}
-                        aria-expanded={hasItems ? isOpen : undefined}
-                        className={cn("group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs transition-all hover:bg-transparent hover:font-medium hover:text-foreground", isOpen ? "font-medium text-foreground" : "font-normal text-muted-foreground")}
-                      >
-                        {item.label}
-                        {hasItems && <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90 text-foreground")} strokeWidth={1.25} />}
-                      </Button>
-                      {isOpen && (
-                        <div className="mb-2 ml-2 mt-1 flex flex-col border-l border-border/40 pl-4 animate-fade-in">
-                          {item.subcategories.map((subcategory) => (
-                            <Button key={subcategory} type="button" variant="ghost" onClick={() => onCategoryNavigate(link.slug, item.category, subcategory)} className="min-h-7 h-auto w-full justify-start whitespace-normal rounded-none px-0 py-1 text-left font-body text-xs font-normal leading-snug text-muted-foreground hover:bg-transparent hover:text-foreground">
-                              {subcategory}
-                            </Button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
+   <div className="relative flex select-none flex-col bg-[hsl(var(--collection-card-canvas))]">
+     <div className="flex w-full items-center justify-center border-b border-border/40 bg-background/60 py-3 backdrop-blur-sm">
+       <nav className="flex items-center gap-x-8 overflow-x-auto px-6">
+         {rooms.map((r, index) => {
+           const isActive = selectedRoom === index;
+           return (
+             <button key={r.slug} type="button" onClick={() => (isActive ? onRoomNavigate(r.slug) : (setSelectedRoom(index), setActiveCat("ALL")))}
+               className={cn("relative whitespace-nowrap py-1 font-body text-[10px] font-semibold uppercase tracking-widest transition-all", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+               {r.label}
+               {isActive && <span className="absolute bottom-0 left-0 h-px w-full bg-foreground animate-fade-in" />}
+             </button>
+           );
+         })}
+       </nav>
+     </div>
+     <div className="flex w-full items-center justify-center border-b border-border/20 bg-background/30 py-2.5">
+       <nav className="flex items-center gap-x-6 overflow-x-auto px-6">
+         {["ALL", ...categories.map((c) => c.label)].map((cat) => {
+           const isActive = activeCat === cat;
+           const item = categories.find((c) => c.label === cat);
+           return (
+             <button key={cat} type="button"
+               onClick={() => {
+                 if (!link) return;
+                 if (cat === "ALL") return isActive ? onRoomNavigate(link.slug) : setActiveCat("ALL");
+                 if (isActive || !item?.subcategories.length) return onCategoryNavigate(link.slug, item!.category);
+                 setActiveCat(cat);
+               }}
+               className={cn("rounded-sm px-2 py-0.5 font-body text-[9px] uppercase tracking-wider transition-all", isActive ? "bg-foreground font-semibold text-background" : "font-medium text-muted-foreground hover:text-foreground")}>
+               {cat}
+             </button>
+           );
+         })}
+       </nav>
+     </div>
+     {current && current.subcategories.length > 0 && link && (
+       <div className="flex w-full items-center justify-center border-b border-border/20 py-2 animate-fade-in">
+         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 px-6">
+           {current.subcategories.map((sub) => (
+             <button key={sub} type="button" onClick={() => onCategoryNavigate(link.slug, current.category, sub)} className="font-body text-[11px] text-muted-foreground transition-colors hover:text-foreground">{sub}</button>
+           ))}
+         </nav>
+       </div>
+     )}
+     <div className="mx-auto flex w-full max-w-5xl justify-center">
+       <RoomVisualPreview key={link?.slug ?? room} room={room} selectedRoomSlug={link?.slug} />
+     </div>
   </div>
   );
 };
