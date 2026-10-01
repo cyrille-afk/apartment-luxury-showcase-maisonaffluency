@@ -671,8 +671,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   return (
     <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-4" : "pb-16"}`}>
-      <header className={`flex min-h-20 items-center justify-center px-6 text-center md:min-h-14 ${discoveryRoom ? "pb-4 pt-7 md:pb-1.5 md:pt-3.5" : "py-4 md:py-2"}`}>
-        <h2 className={`font-body text-xs font-light uppercase tracking-[0.25em] text-foreground ${discoveryRoom ? "md:translate-y-px" : ""}`}>
+      <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-20 md:min-h-14 pb-4 pt-7 md:pb-1.5 md:pt-3.5" : "pt-6 pb-2 md:pt-5 md:pb-1.5"}`}>
+        <h2 className={`font-body text-[9px] font-medium uppercase tracking-[0.25em] text-muted-foreground ${discoveryRoom ? "md:translate-y-px" : ""}`}>
           {activeTitle}
         </h2>
       </header>
@@ -691,12 +691,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
           <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
               <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
-              <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2" : "py-3 md:py-2"}`}>
-                <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
+              <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2" : "mt-4 pb-2"}`}>
+                <h2 className="font-body text-[11px] font-bold uppercase tracking-widest text-foreground">
                   {activeCategory}
-                </span>
+                </h2>
                 <div className="flex items-center gap-3">
-                  <span className="font-body text-sm font-normal uppercase tracking-widest text-muted-foreground md:text-base">
+                  <span className="font-body text-[10px] font-light tracking-wider text-muted-foreground">
                     {sceneIdx + 1} / {galleryPages.length}
                   </span>
                   <Button type="button" size="icon" variant="ghost" aria-label="Open scene carousel" onClick={() => setDrawerOpen((open) => !open)} className="size-7 rounded-none p-0 text-muted-foreground hover:bg-muted hover:text-foreground">
