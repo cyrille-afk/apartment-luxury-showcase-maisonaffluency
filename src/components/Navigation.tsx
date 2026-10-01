@@ -90,7 +90,6 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
     { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
   ],
-  decor: [],
   office: [
     { label: "Desks", category: "Tables", subcategories: ["Desks"] },
     { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
@@ -98,6 +97,7 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
     { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
   ],
+  decor: [],
 };
 
 // Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
