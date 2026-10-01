@@ -274,8 +274,6 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
  * preset chips above the Frame/Shelf/Drawer accordions. Names must match
  * linked swatch names (accent- and dash-insensitive matching is applied).
  */
-const encodeMinibarConfig = (frame: string, drawer: string) =>
-  btoa(unescape(encodeURIComponent(`${frame}|${drawer}`))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const decodeMinibarConfig = (raw: string | null): { frame: string; drawer: string } | null => {
   if (!raw) return null;
   try {
