@@ -38,6 +38,14 @@ export function installFunctionsAuthRetry() {
     const headers = options?.headers ?? {};
     const pinned = Object.keys(headers).some((k) => k.toLowerCase() === "authorization");
     if (pinned) return first;
+    // A 401 with a still-valid token is a real "not allowed" answer from that
+    // function — refreshing then rotates the shared refresh token for nothing
+    // and can sign the member out mid-session. Only refresh genuinely stale tokens.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const exp = session?.expires_at ? session.expires_at * 1000 : 0;
+      if (!session || exp - Date.now() > 60_000) return first;
+    } catch { return first; }
     const ok = await refreshOnce();
     if (!ok) return first;
     // Fresh client picks up the refreshed access token.
