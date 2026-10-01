@@ -13,6 +13,7 @@ import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { formatProductSubtitleLine, isFinishSubtitle } from "@/lib/subtitleDisplay";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
+import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
@@ -2530,6 +2531,10 @@ const PublicProductPageContent: React.FC = () => {
                   );
                 })()}
               />
+              {product.id === OOL_MINIBAR_PICK_ID && (
+                <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex} />
+              )}
+
 
 
 
