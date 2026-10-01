@@ -1206,6 +1206,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
     const picked = userPickedAxesRef.current;
+    // Mini bar: the Frame dropdown follows the photographed frame finish too.
+    if (isOolMinibar) {
+      const frameHit = hit(frameTiles);
+      if (!picked.frame && frameHit && selectedFrameId !== frameHit.id) setSelectedFrameId(frameHit.id);
+    }
     const woodHit = hit(visibleWoodTiles);
     if (!picked.wood && woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
     const topHit = hit(visibleTopTiles);

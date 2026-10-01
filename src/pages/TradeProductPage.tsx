@@ -34,6 +34,7 @@ import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import FinishesPdfButton from "@/components/product/FinishesPdfButton";
 
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
+import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
@@ -1999,7 +2000,8 @@ const TradeProductPage: React.FC = () => {
             />
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
-            <div className="hidden md:block md:border-0 md:shadow-none">
+            {isOolMinibar && <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />}
+            <div className={cn("hidden md:border-0 md:shadow-none", !isOolMinibar && "md:block")}>
               <ActiveSwatchCaption
                 pickId={product.id}
                 activeIndex={galleryActiveIndex ?? 0}
