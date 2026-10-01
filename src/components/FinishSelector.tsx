@@ -182,6 +182,9 @@ interface FinishSelectorProps {
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
+  /** OOL 77: frame is the matrix Label axis, separate from Shelf (Base) and Drawer (Top). */
+  frameOptions?: string[];
+  onFrameFinishChange?: (name: string) => void;
   /**
    * Mirrors the swatch names currently DISPLAYED in the accordion headers —
    * including the display-only highlight driven by the hero gallery image.
@@ -249,8 +252,9 @@ const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCov
 // OOL Shelf's suede is a drawer finish, not upholstery. Keep the material's
 // library category intact; only place this product's swatches on its Top axis.
 const OOL_SHELF_PICK_ID = "4f0e7f97-024f-4fab-9ca5-e362ed4909b8";
+export const OOL_MINIBAR_PICK_ID = "9dc4c49b-68cd-400a-9159-8f26764560eb";
 const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
-  pickId === OOL_SHELF_PICK_ID && /^suede leather\s*[-—–]/i.test(name);
+  (pickId === OOL_SHELF_PICK_ID || pickId === OOL_MINIBAR_PICK_ID) && /^suede leather\s*[-—–]/i.test(name);
 
 /**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
@@ -299,7 +303,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -321,6 +325,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
    */
   const userPickedAxesRef = useRef<Record<string, boolean>>({});
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
   const [mobileBaseOpen, setMobileBaseOpen] = useState(false);
@@ -977,6 +982,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // surfaces that aren't priced as their own variant row) falls through into
   // the base/wood accordion so linked swatches are never silently dropped
   // from the product page.
+  const isOolMinibar = pickId === OOL_MINIBAR_PICK_ID;
+  const frameTiles = isOolMinibar
+    ? allNonFabricTiles.filter((f) => frameOptions?.some((option) => f.name.toLowerCase().startsWith(option.toLowerCase())))
+    : [];
+  const shelfTiles = isOolMinibar ? allNonFabricTiles.filter((f) => f.category === "Wood") : [];
+  const drawerTiles = isOolMinibar
+    ? allNonFabricTiles.filter((f) => f.category === "Wood" || isOolDrawerLeather(pickId, f.name))
+    : [];
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
