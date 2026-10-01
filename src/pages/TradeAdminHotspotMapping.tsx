@@ -49,7 +49,7 @@ function suggestPickId(hotspot: Hotspot, picks: (Pick & { _normTitle: string; _n
 }
 
 export default function TradeAdminHotspotMapping() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, rolesLoaded, user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -174,7 +174,7 @@ export default function TradeAdminHotspotMapping() {
     }
   };
 
-  if (loading) return null;
+  if (loading || (user && !rolesLoaded && !isAdmin)) return null;
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return (

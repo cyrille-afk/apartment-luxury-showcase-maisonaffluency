@@ -392,7 +392,7 @@ function renderAiUsagePdf(args: {
 }
 
 export default function TradeAiUsageDashboard() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, rolesLoaded } = useAuth();
   const [days, setDays] = useState(30);
 
   const range = useMemo(() => {
@@ -560,7 +560,7 @@ export default function TradeAiUsageDashboard() {
   );
 
 
-  if (loading) return null;
+  if (loading || (user && !rolesLoaded && !isAdmin)) return null;
   if (!user) return <Navigate to="/auth" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 

@@ -1954,12 +1954,12 @@ const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
 
 
 const TradeDesignersAdmin = () => {
-  const { isAdmin, isSuperAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading, rolesLoaded, user } = useAuth();
   // Tab focus re-fires auth events and flips `loading` briefly; never tear
   // down the editor (and all its pick state) once it has rendered.
   const didMountEditorRef = useRef(false);
   if (!loading) didMountEditorRef.current = true;
-  const showAuthCheck = loading && !didMountEditorRef.current;
+  const showAuthCheck = (loading && !didMountEditorRef.current) || (!!user && !rolesLoaded && !isAdmin);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
