@@ -492,7 +492,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       {
         const grouped = list.filter((f) => Array.isArray(f.image_indices) && f.image_indices.length > 1);
         const hasDefaultGroup = grouped.length >= 2 && grouped.some((f) => (f.image_indices || []).includes(1));
-        if (!hasDefaultGroup) onFinishGroupingResolved?.();
+        if (!hasDefaultGroup || photoLedFinishes) onFinishGroupingResolved?.();
       }
       onHasFabricsChange?.(isRugProduct ? list.some(isRugComponentSwatch) : list.some(isFabricCategory));
       onWoodFinishesAvailable?.(
@@ -637,7 +637,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // whole mixed reel. e.g. Clam Chair → Sheepskin Moonlight / Oiled Walnut.
   const defaultGroupAppliedRef = useRef(false);
   useEffect(() => {
-    if (defaultGroupAppliedRef.current) return;
+    if (defaultGroupAppliedRef.current || photoLedFinishes) return;
     if (fabrics.length === 0 || selectedFabricId || selectedWoodId || selectedTopId) return;
     const grouped = fabrics.filter(
       (f) => Array.isArray(f.image_indices) && f.image_indices.length > 1,
@@ -649,7 +649,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     lockedPreviewRef.current = { indices: first.image_indices!, name: first.name };
     onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name, jumpOnly: isRugProduct });
     onFinishGroupingResolved?.();
-  }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange]);
+  }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange, photoLedFinishes]);
 
   // Notify parent when the user has selected wood/top finishes that lack
   // mapped gallery images, so quote/bespoke messages can flag them.
@@ -696,7 +696,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     if (!galleryInteractedRef.current && !photoLedFinishes) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (!photoLedFinishes && isSharedSlide(oneBased)) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
@@ -1248,7 +1248,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (!isOolMinibar && isSharedSlide(oneBased)) return;
+    if (!photoLedFinishes && !isOolMinibar && isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
