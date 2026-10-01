@@ -613,7 +613,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     // Strict type-gating. The hotspot's own object name wins (unmapped pins can
     // fuzzy-resolve to an unrelated pick); then the product's exact subcategory.
     const HOTSPOT_TYPES: Array<[RegExp, string[]]> = [
-      [/\b(wallcover\w*|wallpaper\w*|scenic|mural)\b/, ["wallcoverings"]],
+      [/\b(wallcover\w*|wallpaper\w*|scenic|mural)\b/, ["wallcoverings", "wall decor", "wall décor"]],
       [/\b(chandelier|pendant|suspension|ceiling)\b/, ["ceiling lights"]],
       [/\b(table lamp|lamp)\b/, ["table lights", "table lamps", "table lamp"]],
       [/\b(floor lamp|floor light)\b/, ["floor lights"]],
@@ -621,7 +621,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       [/\b(rug|carpet)\b/, ["hand knotted rugs", "hand tufted rugs"]],
       [/\b(vase|vessel|bowl|glass|geode|centerpiece)s?\b/, ["vases vessels", "decorative objects"]],
       [/\b(diasec|print|painting|artwork|canvas|photograph|art)\b/, ["art", "artworks", "wall art", "wall decor", "decorative objects"]],
-      [/\b(flush mount|plafonnier|ceiling light)\b/, ["ceiling lights"]],
+      [/\b(flush mount|plafonnier|ceiling light|surface)\b/, ["ceiling lights"]],
       [/\bmirror\b/, ["mirrors"]],
       [/\b(nightstand|bedside)\b/, ["bedside tables"]],
       [/\bcoffee table\b/, ["coffee tables"]],
