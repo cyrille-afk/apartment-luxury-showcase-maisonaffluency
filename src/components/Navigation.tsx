@@ -445,7 +445,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
       const menu = megaMenuRef.current;
       if (!menu) return;
       // Undo the prior shift before measuring so switching between rooms never compounds it.
-      const naturalRight = menu.getBoundingClientRect().right + roomMenuOverflow;
+      const naturalRight = 0;
       setRoomMenuOverflow(Math.max(0, Math.ceil(naturalRight - window.innerWidth + 24)));
     };
     measure();
@@ -1263,7 +1263,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
+          <nav className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
@@ -1287,7 +1287,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               {(Object.keys(roomNavigation) as RoomNavKey[]).map((room) => (
                 <div
                   key={room}
-                  className="relative"
+                  className="static"
                   onMouseEnter={keepRoomMenuOpen}
                   onMouseLeave={scheduleRoomMenuClose}
                 >
@@ -1307,7 +1307,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </Button>
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
                       <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onPieceNavigate={navigateToPiece} />
                     </div>
                   )}
@@ -1316,8 +1316,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="decor"
-                      className="absolute right-0 top-full z-50 mt-3 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
-                      style={{ animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                      className="absolute left-1/2 top-full z-50 mt-1 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      style={{ translate: "-50% 0", animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
                         @keyframes megaMenuReveal {
@@ -1365,7 +1365,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   )}
 
                   {room === "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl">
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
                       <div className="flex min-h-96 items-stretch overflow-hidden">
                         <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                           {roomNavigation.lighting.map((item) => (
