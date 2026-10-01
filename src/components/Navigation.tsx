@@ -767,7 +767,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
   const closeAllDropdowns = () => {
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
-    if (tradeMenuCloseTimer?.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
+    if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
     setTradeMenuOpen(false);
@@ -1178,7 +1178,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                 </div>
               )}
 
-              <DropdownMenu>
+              <DropdownMenu onOpenChange={(o) => setAccountMenuOpen(o)}>
                 <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-none">
                   <span className="sr-only">Account menu</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
