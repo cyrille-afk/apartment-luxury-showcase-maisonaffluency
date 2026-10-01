@@ -270,6 +270,18 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
   (pickId === OOL_SHELF_PICK_ID || pickId === OOL_MINIBAR_PICK_ID) && /^suede leather\s*[-—–]/i.test(name);
 
 /**
+ * OOL 77 Mini bar — curator-defined finish combinations shown as one-tap
+ * preset chips above the Frame/Shelf/Drawer accordions. Names must match
+ * linked swatch names (accent- and dash-insensitive matching is applied).
+ */
+const OOL77_PRESETS: { id: string; name: string; finishes: { frame: string; shelf: string; drawer: string } }[] = [
+  { id: "preset-beige-wood", name: "Signature Beige & Wood", finishes: { frame: "Glossy Lacquer - Silky Beige", shelf: "Afrormosia", drawer: "Afrormosia" } },
+  { id: "preset-chalk-hazel", name: "Editorial Chalk & Hazel", finishes: { frame: "Cement Stuc - Light Grey", shelf: "Maple", drawer: "Suede Leather - Dark Hazel" } },
+  { id: "preset-charcoal-forest", name: "Moody Charcoal & Forest", finishes: { frame: "Cement Stuc - Black", shelf: "Afrormosia", drawer: "Suede Leather - Forest Green" } },
+  { id: "preset-plum-nude", name: "Plum & Nude Boudoir", finishes: { frame: "Cement Stuc - Charming Plum", shelf: "Maple", drawer: "Suede Leather - Soft Violet" } },
+];
+
+/**
  * Axis-driven grouping: a swatch belongs to a variant axis when its name IS
  * one of that axis's matrix values, is a colourway of it ("Cement Stuc - Hay"
  * for "Cement Stuc"), or the value is the generic material "Wood" and the
@@ -1033,6 +1045,69 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const drawerTiles = isOolMinibar
     ? allNonFabricTiles.filter((f) => f.category === "Wood" || isOolDrawerLeather(pickId, f.name))
     : [];
+
+  // OOL 77 Mini bar curated presets: one tap commits Frame + Shelf + Drawer.
+  const foldPresetName = (s: string) => foldAxisText(s).replace(/[—–]/g, "-");
+  const findPresetTile = (tiles: Fabric[], name: string) => {
+    const target = foldPresetName(name);
+    return (
+      tiles.find((t) => foldPresetName(t.name) === target) ??
+      tiles.find((t) => foldPresetName(t.name).startsWith(target)) ??
+      null
+    );
+  };
+  const presetTilesFor = (preset: (typeof OOL77_PRESETS)[number]) => ({
+    frame: findPresetTile(frameTiles, preset.finishes.frame),
+    shelf: findPresetTile(shelfTiles, preset.finishes.shelf),
+    drawer: findPresetTile(drawerTiles, preset.finishes.drawer),
+  });
+  const activePresetId = isOolMinibar
+    ? OOL77_PRESETS.find((p) => {
+        const t = presetTilesFor(p);
+        return t.frame && t.shelf && t.drawer
+          && selectedFrameId === t.frame.id
+          && selectedWoodId === t.shelf.id
+          && selectedTopId === t.drawer.id;
+      })?.id ?? null
+    : null;
+  const applyPreset = (preset: (typeof OOL77_PRESETS)[number]) => {
+    const { frame, shelf, drawer } = presetTilesFor(preset);
+    if (frame) {
+      setSelectedFrameId(frame.id);
+      userPickedAxesRef.current.frame = true;
+      const option = frameOptions?.find((o) => frame.name.toLowerCase().startsWith(o.toLowerCase()));
+      if (option) onFrameFinishChange?.(option);
+    }
+    if (shelf) {
+      setSelectedWoodId(shelf.id);
+      userPickedAxesRef.current.wood = true;
+      onWoodFinishChange?.("Wood");
+      onWoodFinishPricingChange?.({
+        id: shelf.id,
+        name: shelf.name,
+        price_cents: (shelf.frame_price_cents && shelf.frame_price_cents > 0) ? shelf.frame_price_cents : 0,
+        currency: shelf.frame_price_currency || "EUR",
+        image_url: shelf.image_url ?? null,
+      });
+    }
+    if (drawer) {
+      setSelectedTopId(drawer.id);
+      userPickedAxesRef.current.top = true;
+      onTopFinishChange?.(isOolDrawerLeather(pickId, drawer.name) ? "Suède leather" : "Wood");
+      onTopFinishSwatchChange?.({ name: drawer.name, image_url: drawer.image_url ?? null });
+    }
+    // Lock the gallery onto the drawer's photographs (the most distinctive
+    // finish of the trio); fall back to frame, then shelf.
+    const hero = drawer ?? frame ?? shelf;
+    const indices = hero && Array.isArray(hero.image_indices) && hero.image_indices.length > 0 ? hero.image_indices : null;
+    lockedPreviewRef.current = { indices, name: hero?.name ?? preset.name };
+    hoverActiveRef.current = false;
+    if (indices) {
+      setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: hero!.name }), 0);
+    } else {
+      onSwatchImagesChange?.(null, { committed: true, swatchName: hero?.name ?? preset.name });
+    }
+  };
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
@@ -1359,6 +1434,46 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {isOolMinibar && frameTiles.length > 0 && (
+        <div className="border-t border-border/60 py-4 space-y-3">
+          <p className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            Curated Combinations
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {OOL77_PRESETS.map((preset) => {
+              const tiles = presetTilesFor(preset);
+              const chips = [tiles.frame, tiles.shelf, tiles.drawer].filter(Boolean) as Fabric[];
+              const isActive = activePresetId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  aria-pressed={isActive}
+                  title={`${preset.name} — Frame: ${preset.finishes.frame}, Shelf: ${preset.finishes.shelf}, Drawer: ${preset.finishes.drawer}`}
+                  className={cn(
+                    "flex flex-col items-start gap-2 p-2 text-left transition-all",
+                    isActive ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60 hover:ring-border"
+                  )}
+                >
+                  <span className="flex gap-1">
+                    {chips.map((chip, i) => (
+                      <span
+                        key={`${chip.id}-${i}`}
+                        className="block w-6 h-6 bg-cover bg-center bg-muted/40 ring-1 ring-inset ring-border/40"
+                        style={{ backgroundImage: `url(${chip.image_url || ""})` }}
+                      />
+                    ))}
+                  </span>
+                  <span className="font-body text-[11px] leading-snug text-foreground/85">
+                    {preset.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {isOolMinibar && frameTiles.length > 0 && renderAccordion({
         isOpen: openFrame,
         onToggle: () => setOpenFrame((v) => !v),
