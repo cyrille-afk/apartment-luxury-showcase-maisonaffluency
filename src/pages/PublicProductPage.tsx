@@ -611,6 +611,11 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           setSelDualSize(frame);
           onMaterialChange?.(frame, { base: selBase, top: selTop, size: frame, fromSwatch: true });
         } : undefined}
+        axisBaseLabel={product.base_axis_label ? getBasePlaceholder({ base_axis_label: product.base_axis_label }) : null}
+        baseAxisOptions={isDualAxis && !frameOnLabel && !baseAxisIsDim ? baseOptions : undefined}
+        topAxisOptions={isDualAxis && !frameOnLabel && !topAxisIsDim ? topOptions : undefined}
+        disabledBaseOptions={isDualAxis && selTop ? baseOptions.filter((b) => !variantsList.some((v: any) => matchesDual(v, b, selTop, selDualSize))) : undefined}
+        disabledTopOptions={isDualAxis && selBase ? topOptions.filter((t) => !variantsList.some((v: any) => matchesDual(v, selBase, t, selDualSize))) : undefined}
         productTitle={product.title}
         productCategory={product.category}
         upholsteryLabel={

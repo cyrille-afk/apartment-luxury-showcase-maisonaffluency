@@ -186,6 +186,19 @@ interface FinishSelectorProps {
   frameOptions?: string[];
   onFrameFinishChange?: (name: string) => void;
   /**
+   * Variant-matrix values of the Base / Top axes. When every linked swatch
+   * maps onto one of them (name, colourway prefix or generic "Wood"), the
+   * selector renders exactly one accordion per axis and emits the matrix
+   * value on pick — no stray upholstery / duplicate accordions.
+   */
+  baseAxisOptions?: string[];
+  topAxisOptions?: string[];
+  /** Axis values with no valid matrix row for the opposite selection. */
+  disabledBaseOptions?: string[];
+  disabledTopOptions?: string[];
+  /** Base accordion title used when axis-driven grouping is active. */
+  axisBaseLabel?: string | null;
+  /**
    * Mirrors the swatch names currently DISPLAYED in the accordion headers —
    * including the display-only highlight driven by the hero gallery image.
    * Callers use it so the cart / quote line reads the same finish the shopper
@@ -257,6 +270,25 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
   (pickId === OOL_SHELF_PICK_ID || pickId === OOL_MINIBAR_PICK_ID) && /^suede leather\s*[-—–]/i.test(name);
 
 /**
+ * Axis-driven grouping: a swatch belongs to a variant axis when its name IS
+ * one of that axis's matrix values, is a colourway of it ("Cement Stuc - Hay"
+ * for "Cement Stuc"), or the value is the generic material "Wood" and the
+ * swatch is a wood species. Accent-insensitive ("Suède" = "Suede").
+ */
+const foldAxisText = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+const GENERIC_WOOD_OPTION = /^(wood|woods|timber|solid wood|natural wood|wood veneer|veneer)$/;
+const swatchMatchesAxisOption = (f: { name: string; category?: string | null }, option: string) => {
+  const o = foldAxisText(option);
+  const n = foldAxisText(f.name);
+  if (!o) return false;
+  if (n === o) return true;
+  if (n.startsWith(o) && /^[\s\-—–:,(/]/.test(n.slice(o.length))) return true;
+  if (GENERIC_WOOD_OPTION.test(o)) return normalizeFabricCategory(f.category) === "Wood";
+  return false;
+};
+
+/**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
  * Falls back to the label hint when category alone is ambiguous (e.g. a
  * "Rod Finish" group that mixes metal patinas, or a "Diffuser" group that
@@ -303,7 +335,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -674,9 +706,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup && !isFrameGroup;
     const normName = (s: string) => s.trim().toLowerCase();
     const isDisabled = isTopGroup
-      ? !!disabledTopNames?.some((n) => normName(n) === normName(f.name))
+      ? (axisModeActive ? axisTileDisabled(f, "top") : !!disabledTopNames?.some((n) => normName(n) === normName(f.name)))
       : isBaseGroup
-      ? !!disabledBaseNames?.some((n) => normName(n) === normName(f.name))
+      ? (axisModeActive ? axisTileDisabled(f, "base") : !!disabledBaseNames?.some((n) => normName(n) === normName(f.name)))
       : false;
     const pairingExplanation = isDisabled
       ? `Not available with the selected ${isTopGroup ? "base" : "top"} finish${(isTopGroup ? selectedBasePairing : selectedTopPairing) ? ` (${isTopGroup ? selectedBasePairing : selectedTopPairing})` : ""}. Choose a different ${isTopGroup ? "base" : "top"} finish to use this option.`
@@ -751,11 +783,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
         // retexture the top material.
-        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède leather" : isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
+        onTopFinishChange?.(axisModeActive ? axisValueFor(f, "top") : isOolDrawerLeather(pickId, f.name) ? "Suède leather" : isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
-        onWoodFinishChange?.(isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
+        onWoodFinishChange?.(axisModeActive ? axisValueFor(f, "base") : isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         // Emit the frame swatch selection so the product page can (a) show it
         // in the price caption, (b) persist wood_fabric_id on the quote line
         // (drives the swatch thumbnail), and (c) use frame_price_cents as the
@@ -1037,12 +1069,39 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     : remainingNonFabric;
   const coverTiles = grouped["Cover"] || [];
 
-  // Show all linked finishes on every breakpoint — swatches without mapped
-  // gallery images still render (with the ImageOff badge) so users can pick
-  // them and request samples through the concierge.
-  const visibleFabricTiles = fabricTiles;
-  const visibleWoodTiles   = isOolMinibar ? shelfTiles : woodTiles;
-  const visibleTopTiles    = isOolMinibar ? drawerTiles : topTiles;
+  // Axis-driven grouping (see swatchMatchesAxisOption): when every linked
+  // finish maps onto a Base or Top matrix value, render exactly one accordion
+  // per axis. Per-metre priced upholstery keeps the dedicated fabric picker.
+  const axisBaseOpts = (baseAxisOptions || []).filter((o) => o && o.trim());
+  const axisTopOpts = (topAxisOptions || []).filter((o) => o && o.trim());
+  const axisMatches = (f: Fabric, opts: string[]) => opts.filter((o) => swatchMatchesAxisOption(f, o));
+  const axisCandidates = isRugProduct
+    ? []
+    : [...fabricTiles.filter((f) => f.id !== "__com__" && f.id !== "__col__"), ...allNonFabricTiles];
+  const axisBaseTiles = axisCandidates.filter((f) => axisMatches(f, axisBaseOpts).length > 0);
+  const axisTopTiles = axisCandidates.filter((f) => axisMatches(f, axisTopOpts).length > 0);
+  const axisModeActive = !isOolMinibar && !isRugProduct && !hideBaseAccordion
+    && axisBaseTiles.length > 0 && axisTopTiles.length > 0
+    && axisCandidates.every((f) => axisMatches(f, axisBaseOpts).length > 0 || axisMatches(f, axisTopOpts).length > 0)
+    && axisCandidates.filter(isFabricCategory).every((f) => !f.price_per_lm_cents && (
+      !f.price_tier_label
+      || [...axisBaseOpts, ...axisTopOpts].some((o) => foldAxisText(o) === foldAxisText(f.price_tier_label as string))
+    ));
+  const axisValueFor = (f: Fabric, axis: "base" | "top") => {
+    const matches = axisMatches(f, axis === "base" ? axisBaseOpts : axisTopOpts);
+    const disabled = (axis === "base" ? disabledBaseOptions : disabledTopOptions) || [];
+    return matches.find((m) => !disabled.includes(m)) ?? matches[0] ?? f.name;
+  };
+  const axisTileDisabled = (f: Fabric, axis: "base" | "top") => {
+    const disabled = (axis === "base" ? disabledBaseOptions : disabledTopOptions) || [];
+    if (disabled.length === 0) return false;
+    const matches = axisMatches(f, axis === "base" ? axisBaseOpts : axisTopOpts);
+    return matches.length > 0 && matches.every((m) => disabled.includes(m));
+  };
+
+  const visibleFabricTiles = axisModeActive ? [] : fabricTiles;
+  const visibleWoodTiles   = isOolMinibar ? shelfTiles : axisModeActive ? axisBaseTiles : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : topTiles;
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
@@ -1178,6 +1237,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .join(" / ");
 
   const baseAxisLabel = (() => {
+    if (axisModeActive && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
     const isTable = !!productTitle && /\btable\b/i.test(productTitle);
     const cats = visibleWoodTiles.map((t) => (t.category || "").trim().toLowerCase());
@@ -1213,10 +1273,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const handleSelect = (option: Fabric) => {
       setSelected(option.id);
       if (axis === "Top") {
-        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède leather" : isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
+        onTopFinishChange?.(axisModeActive ? axisValueFor(option, "top") : isOolDrawerLeather(pickId, option.name) ? "Suède leather" : isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
       } else {
-        onWoodFinishChange?.(isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
+        onWoodFinishChange?.(axisModeActive ? axisValueFor(option, "base") : isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onWoodFinishPricingChange?.({
           id: option.id,
           name: option.name,
@@ -1357,7 +1417,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             </div>
           )}
         </div>
-      ) : (showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
+      ) : !axisModeActive && (showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: isRugProduct
@@ -1371,7 +1431,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
-      {showUpholsterySection && secondaryUpholsteryLabel?.trim() && renderAccordion({
+      {!axisModeActive && showUpholsterySection && secondaryUpholsteryLabel?.trim() && renderAccordion({
         isOpen: openTop,
         onToggle: () => setOpenTop((v) => !v),
         label: secondaryUpholsteryLabel.trim(),

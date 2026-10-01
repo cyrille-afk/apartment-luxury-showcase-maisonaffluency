@@ -2159,6 +2159,11 @@ const TradeProductPage: React.FC = () => {
                     setSelectedDualSize(frame);
                     handleMaterialChange(frame, { base: selectedBase, top: selectedTop, size: frame, fromSwatch: true });
                   } : undefined}
+                  axisBaseLabel={product.base_axis_label ? getBasePlaceholder({ base_axis_label: product.base_axis_label }) : null}
+                  baseAxisOptions={isDualAxis && !baseAxisIsDim ? baseOptions : undefined}
+                  topAxisOptions={isDualAxis && !topAxisIsDim ? topOptions : undefined}
+                  disabledBaseOptions={isDualAxis && selectedTop ? baseOptions.filter((b) => !variantsList.some((v: any) => matchesDual(v, b, selectedTop, selectedDualSize))) : undefined}
+                  disabledTopOptions={isDualAxis && selectedBase ? topOptions.filter((t) => !variantsList.some((v: any) => matchesDual(v, selectedBase, t, selectedDualSize))) : undefined}
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
