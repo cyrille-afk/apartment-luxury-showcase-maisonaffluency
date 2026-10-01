@@ -16,8 +16,9 @@ export interface DbProductItem {
  * Fetches all curator picks from the database and converts them
  * to ProductItem format compatible with ProductGrid filtering.
  */
-export function useDbCuratorPicks() {
+export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
   return useQuery({
+    enabled: options.enabled ?? true,
     queryKey: queryKeys.curatorPicksGrid(),
     queryFn: async (): Promise<DbProductItem[]> => {
       // Anonymous visitors read the CDN-cached catalogue manifest; signed-in

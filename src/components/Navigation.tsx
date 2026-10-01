@@ -37,6 +37,7 @@ import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
+import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { preloadImage } from "@/lib/curatorPickPreload";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
@@ -147,7 +148,7 @@ const preloadRoomMenuPhotos = () => {
 // Coordinates are percentages of the displayed, centre-cropped preview frame.
 // Scene data is shared with the Room Experience landing page via
 // src/lib/roomPreviewScenes.ts so menu and page never drift apart.
-const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selectedRoomSlug?: string }) => {
+const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: RoomNavKey; selectedRoomSlug?: string; onPieceNavigate: (href: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
@@ -186,19 +187,21 @@ const RoomVisualPreview = ({ room, selectedRoomSlug }: { room: RoomNavKey; selec
       </div>
       <div className="w-full border-t border-border/40 pt-6">
         <div className="mb-4 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
-            <div className={cn("grid w-full grid-cols-3 gap-x-4 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources ? "opacity-100" : "opacity-0")}>
+            <div className={cn("grid w-full grid-cols-3 gap-x-4 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources && !scene.pending ? "opacity-100" : "opacity-0")}>
             {scene.pieces.map((piece, index) => (
-              <div key={piece.src} className="flex w-full flex-col">
+              <a key={piece.src} href={piece.href} aria-disabled={!piece.href}
+                onClick={(event) => { if (!piece.href) { event.preventDefault(); return; } if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; event.preventDefault(); onPieceNavigate(piece.href); }}
+                className={cn("group/piece flex w-full flex-col rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", piece.href ? "cursor-pointer" : "pointer-events-none")}>
                 <div className={cn("relative mb-3 flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))] transition-shadow duration-300", selected && index === scene.highlightIndex && "ring-1 ring-primary")}>
-                  <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply" />
+                  <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply transition-transform duration-500 group-hover/piece:scale-105" />
                </div>
                {"name" in piece && (
                   <div className="flex w-full flex-col">
                     <div className="mb-1 whitespace-normal break-words font-body text-[12px] font-bold uppercase leading-tight tracking-wider text-foreground">{piece.designer}</div>
-                    <h4 className="whitespace-normal break-words font-body text-[12px] font-light leading-snug text-muted-foreground">{piece.name}</h4>
+                    <h4 className="whitespace-normal break-words font-body text-[12px] font-light leading-snug text-muted-foreground group-hover/piece:text-foreground group-hover/piece:underline underline-offset-4">{piece.name}</h4>
                   </div>
                )}
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -216,9 +219,10 @@ interface RoomDropdownPanelProps {
   onSelectCategory: (index: number) => void;
   onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
+  onPieceNavigate: (href: string) => void;
 }
 
-const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
+const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate, onPieceNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
   // Single active category: opening one closes any other (across all rooms).
   const [openCategoryKey, setOpenCategoryKey] = useState<string | null>(null);
@@ -285,7 +289,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         </div>
       </div>
     </div>
-     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} />
+     <RoomVisualPreview key={roomFlyouts[room]?.[selectedRoom]?.slug ?? room} room={room} selectedRoomSlug={roomFlyouts[room]?.[selectedRoom]?.slug} onPieceNavigate={onPieceNavigate} />
   </div>
   );
 };
@@ -356,6 +360,13 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     const id = window.setTimeout(preloadRoomMenuPhotos, 400);
     return () => window.clearTimeout(id);
   }, []);
+  const [catalogWarm, setCatalogWarm] = useState(false);
+  useEffect(() => {
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    const id = window.setTimeout(() => setCatalogWarm(true), 1500);
+    return () => window.clearTimeout(id);
+  }, []);
+  useDbCuratorPicks({ enabled: catalogWarm });
   const { user, isTradeUser } = useAuth();
   const visibleLeftNavItems = leftNavItems;
   const { items: pinItems, setIsComparing } = useCompare();
@@ -743,6 +754,12 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     setMegaMenuOpen(false);
     setActiveRoomMenu(null);
     navigate(`/search?room=${room}&view=grid`);
+  };
+
+  const navigateToPiece = (href: string) => {
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    navigate(href);
   };
 
   const navigateToRoomCategory = (room: string, category: string, subcategory?: string) => {
@@ -1291,7 +1308,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
                     <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
+                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onPieceNavigate={navigateToPiece} />
                     </div>
                   )}
 
