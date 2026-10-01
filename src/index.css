@@ -1062,3 +1062,10 @@ input, select, textarea {
   }
 }
 
+
+/* Freeze the header while the designer A–Z directory is open */
+body.designer-directory-open nav[data-site-header] {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
