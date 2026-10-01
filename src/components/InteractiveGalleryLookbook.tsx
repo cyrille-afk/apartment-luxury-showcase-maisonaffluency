@@ -497,7 +497,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const openHotspot = useCallback((hotspot: Hotspot) => {
     setActivePin(hotspot.id);
     setDockDismissed(false);
-    if (expandedScene || !discoveryRoom || !portraitSceneIds.has(activePage.scenes[0]?.id ?? "")) {
+    if (expandedScene || !discoveryRoom) {
       setLightboxProduct(resolveHotspotProduct(hotspot));
     }
   }, [resolveHotspotProduct, expandedScene, discoveryRoom, portraitSceneIds, activePage]);
@@ -603,7 +603,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
   // Only Shop By Room replaces portrait side columns with a hotspot-driven dock.
-  const portraitDock = !!discoveryRoom && activeSceneIsPortrait && !expandedScene;
+  const portraitDock = !!discoveryRoom && !expandedScene; void activeSceneIsPortrait;
   const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
   const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
     const product = resolveHotspotProduct(hotspot);
