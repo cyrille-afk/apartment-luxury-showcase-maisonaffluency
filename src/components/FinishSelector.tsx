@@ -274,8 +274,6 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
  * preset chips above the Frame/Shelf/Drawer accordions. Names must match
  * linked swatch names (accent- and dash-insensitive matching is applied).
  */
-const encodeMinibarConfig = (frame: string, drawer: string) =>
-  btoa(unescape(encodeURIComponent(`${frame}|${drawer}`))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const decodeMinibarConfig = (raw: string | null): { frame: string; drawer: string } | null => {
   if (!raw) return null;
   try {
@@ -1117,15 +1115,19 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     }
   };
 
-  // Mini bar shareable configuration: ?c=<base64url "frame|drawer"> restores
-  // the sender's Frame + Drawer picks on landing, and every pick updates ?c=
-  // so the Share menu forwards the exact build.
+  // Restore legacy ?c= links, while new links use readable frame/drawer names.
   const sharedConfigAppliedRef = useRef(false);
   useEffect(() => {
     if (!isOolMinibar || sharedConfigAppliedRef.current) return;
     if (frameTiles.length === 0 || drawerTiles.length === 0) return;
     sharedConfigAppliedRef.current = true;
-    const decoded = decodeMinibarConfig(new URLSearchParams(window.location.search).get("c"));
+    const params = new URLSearchParams(window.location.search);
+    const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const frame = frameTiles.find((tile) => readableSlug(tile.name) === params.get("frame"));
+    const drawer = drawerTiles.find((tile) => readableSlug(tile.name) === params.get("drawer"));
+    const decoded = frame && drawer
+      ? { frame: frame.name, drawer: drawer.name }
+      : decodeMinibarConfig(params.get("c"));
     if (!decoded) return;
     applyPreset({ id: "shared", name: "Shared configuration", finishes: { frame: decoded.frame, shelf: shelfTiles[0]?.name ?? "Wood", drawer: decoded.drawer } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1136,9 +1138,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const drawer = drawerTiles.find((t) => t.id === selectedTopId)?.name;
     if (!frame || !drawer) return;
     const params = new URLSearchParams(window.location.search);
-    const next = encodeMinibarConfig(frame, drawer);
-    if (params.get("c") === next) return;
-    params.set("c", next);
+    const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const frameSlug = readableSlug(frame);
+    const drawerSlug = readableSlug(drawer);
+    if (params.get("frame") === frameSlug && params.get("drawer") === drawerSlug && !params.has("c")) return;
+    params.set("frame", frameSlug);
+    params.set("drawer", drawerSlug);
+    params.delete("c");
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}`);
   }, [isOolMinibar, selectedFrameId, selectedTopId, frameTiles, drawerTiles]);
 

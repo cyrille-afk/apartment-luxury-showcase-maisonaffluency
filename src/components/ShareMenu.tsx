@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
+import { slugify } from "@/lib/whatsapp-share";
 
 const PinterestIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -96,11 +97,32 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
   }, [open, reposition]);
 
 
-  // Strip cache-busting query params for the human-readable share text.
-  // The full cache-busted url is still used for copy/link previews.
-  // Carry a shared finish configuration (?c=…) so the recipient lands on the same build.
+  // The Mini bar's bridge filename and opaque configuration are not customer-facing.
+  // Its public product address carries readable finish names instead; keep other
+  // share destinations unchanged, including their established OG bridges.
   const shareLink = () => {
-    const configParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("c") : null;
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const configParam = params.get("c");
+    if (url.includes("/share/og/bieke-casteleyn-ool-77-mini-bar-og.html")) {
+      const productUrl = new URL("https://maisonaffluency.com/designers/bieke-casteleyn/ool-77-mini-bar");
+      if (params.get("frame") && params.get("drawer")) {
+        productUrl.searchParams.set("frame", params.get("frame") ?? "");
+        productUrl.searchParams.set("drawer", params.get("drawer") ?? "");
+        return productUrl.toString();
+      }
+      if (configParam) {
+        try {
+          const base64 = configParam.replace(/-/g, "+").replace(/_/g, "/");
+          const decoded = decodeURIComponent(escape(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, "="))));
+          const [frame, drawer] = decoded.split("|");
+          if (frame && drawer) {
+            productUrl.searchParams.set("frame", slugify(frame));
+            productUrl.searchParams.set("drawer", slugify(drawer));
+          }
+        } catch { /* Invalid or old configuration: share the product itself. */ }
+      }
+      return productUrl.toString();
+    }
     return url.split("?")[0] + (configParam ? `?c=${encodeURIComponent(configParam)}` : "");
   };
 
