@@ -781,7 +781,11 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
   };
 
-  return <><nav className={cn(
+  return <>
+    {megaMenuOpen && activeRoomMenu && (
+      <div aria-hidden="true" onClick={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); }} className="fixed inset-0 z-40 hidden bg-foreground/15 backdrop-blur-[3px] animate-fade-in md:block" />
+    )}
+    <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       location.pathname === "/trade-program"
@@ -1291,7 +1295,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </Button>
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-0 top-full z-50 mt-3 max-h-[calc(100vh-140px)] w-[min(800px,calc(100vw-48px))] overflow-y-auto border-x border-b border-border/50 bg-background shadow-xl" style={{ translate: `-${roomMenuOverflow}px 0` }}>
                       <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} />
                     </div>
                   )}
