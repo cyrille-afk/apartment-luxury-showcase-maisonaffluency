@@ -49,7 +49,7 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor" | "office";
+type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "office" | "decor";
 
 interface RoomNavCategory {
   label: string;
@@ -90,7 +90,6 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Bathroom Lights", category: "Lighting", subcategories: ["Bathroom Lights"] },
     { label: "Outdoor Lights", category: "Lighting", subcategories: ["Outdoor Lights"] },
   ],
-  decor: [],
   office: [
     { label: "Desks", category: "Tables", subcategories: ["Desks"] },
     { label: "Office Seating", category: "Seating", subcategories: ["Office Chairs", "Armchairs"] },
@@ -98,6 +97,7 @@ const roomNavigation: Record<RoomNavKey, RoomNavCategory[]> = {
     { label: "Lighting", category: "Lighting", subcategories: ["Table Lights", "Floor Lights"] },
     { label: "Rugs", category: "Rugs", subcategories: ["Hand-Knotted Rugs", "Hand-Woven Rugs"] },
   ],
+  decor: [],
 };
 
 // Decor mega-menu reads the canonical Décor subcategories (13) from the shared taxonomy.
