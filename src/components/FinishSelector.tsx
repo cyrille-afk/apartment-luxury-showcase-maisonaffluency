@@ -182,6 +182,9 @@ interface FinishSelectorProps {
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
+  /** OOL 77: frame is the matrix Label axis, separate from Shelf (Base) and Drawer (Top). */
+  frameOptions?: string[];
+  onFrameFinishChange?: (name: string) => void;
   /**
    * Mirrors the swatch names currently DISPLAYED in the accordion headers —
    * including the display-only highlight driven by the hero gallery image.
@@ -249,8 +252,9 @@ const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCov
 // OOL Shelf's suede is a drawer finish, not upholstery. Keep the material's
 // library category intact; only place this product's swatches on its Top axis.
 const OOL_SHELF_PICK_ID = "4f0e7f97-024f-4fab-9ca5-e362ed4909b8";
+export const OOL_MINIBAR_PICK_ID = "9dc4c49b-68cd-400a-9159-8f26764560eb";
 const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
-  pickId === OOL_SHELF_PICK_ID && /^suede leather\s*[-—–]/i.test(name);
+  (pickId === OOL_SHELF_PICK_ID || pickId === OOL_MINIBAR_PICK_ID) && /^suede leather\s*[-—–]/i.test(name);
 
 /**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
@@ -299,7 +303,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -321,6 +325,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
    */
   const userPickedAxesRef = useRef<Record<string, boolean>>({});
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [openFrame, setOpenFrame] = useState(false);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
   const [mobileBaseOpen, setMobileBaseOpen] = useState(false);
@@ -531,6 +537,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
+  const selectedFrameItem = fabrics.find((f) => f.id === selectedFrameId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
   // Report the displayed swatch names upward (see onDisplayedFinishesChange).
@@ -592,13 +599,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   useEffect(() => {
     if (!onFinishesMissingImagesChange) return;
     const missing: string[] = [];
-    for (const item of [selectedWoodItem, selectedTopItem]) {
+    for (const item of [selectedWoodItem, selectedTopItem, selectedFrameItem]) {
       if (item && (!item.image_indices || item.image_indices.length === 0)) {
         missing.push(item.name);
       }
     }
     onFinishesMissingImagesChange(missing);
-  }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
+  }, [selectedWoodItem?.id, selectedTopItem?.id, selectedFrameItem?.id, onFinishesMissingImagesChange]);
 
   // Highlight the fabric/leather swatch whose mapped image_indices include
   // the image currently visible in the hero gallery. This is display-only:
@@ -651,7 +658,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const renderTile = (
     f: Fabric,
-    kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug",
+    kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame",
     rugComponent?: string,
     shape?: "tile" | "square",
   ) => {
@@ -663,7 +670,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const isSecondaryFabricGroup = kindOverride === "fabricSecondary";
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
-    const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup;
+    const isFrameGroup = kindOverride === "frame";
+    const isBaseGroup = !isRugGroup && !isSecondaryFabricGroup && !isFabricGroup && !isCoverGroup && !isTopGroup && !isFrameGroup;
     const normName = (s: string) => s.trim().toLowerCase();
     const isDisabled = isTopGroup
       ? !!disabledTopNames?.some((n) => normName(n) === normName(f.name))
@@ -681,10 +689,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       ? selectedFabricId === f.id
       : isCoverGroup
       ? selectedCoverId === f.id
+      : isFrameGroup
+      ? selectedFrameId === f.id
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
-    const setSelected = isSecondaryFabricGroup
+    const setSelected = isFrameGroup
+      ? setSelectedFrameId
+      : isSecondaryFabricGroup
       ? setSelectedSecondaryFabricId
       : isFabricGroup
       ? setSelectedFabricId
@@ -702,7 +714,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else {
         setSelected(f.id);
         userPickedAxesRef.current[
-          isSecondaryFabricGroup ? "fabricSecondary" : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
+          isFrameGroup ? "frame" : isSecondaryFabricGroup ? "fabricSecondary" : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isTopGroup ? "top" : "wood"
         ] = true;
       }
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
@@ -732,15 +744,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else if (isCoverGroup) {
         // Cover (rattan/cane/wicker) is purely decorative — only update the
         // hero image; do not drive the Frame variant matrix or pricing.
+      } else if (isFrameGroup) {
+        const frame = frameOptions?.find((option) => f.name.toLowerCase().startsWith(option.toLowerCase()));
+        if (frame) onFrameFinishChange?.(frame);
       } else if (isTopGroup) {
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
         // retexture the top material.
-        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède Leather" : f.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède leather" : isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
-        onWoodFinishChange?.(f.name);
+        onWoodFinishChange?.(isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         // Emit the frame swatch selection so the product page can (a) show it
         // in the price caption, (b) persist wood_fabric_id on the quote line
         // (drives the swatch thumbnail), and (c) use frame_price_cents as the
@@ -955,6 +970,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       setOpen(true);
       setOpenWood(true);
       setOpenTop(true);
+      setOpenFrame(true);
       setOpenCover(true);
       setMobileBaseOpen(true);
       setMobileTopOpen(true);
@@ -977,6 +993,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // surfaces that aren't priced as their own variant row) falls through into
   // the base/wood accordion so linked swatches are never silently dropped
   // from the product page.
+  const isOolMinibar = pickId === OOL_MINIBAR_PICK_ID;
+  const frameTiles = isOolMinibar
+    ? allNonFabricTiles.filter((f) => frameOptions?.some((option) => f.name.toLowerCase().startsWith(option.toLowerCase())))
+    : [];
+  const shelfTiles = isOolMinibar ? allNonFabricTiles.filter((f) => f.category === "Wood") : [];
+  const drawerTiles = isOolMinibar
+    ? allNonFabricTiles.filter((f) => f.category === "Wood" || isOolDrawerLeather(pickId, f.name))
+    : [];
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
@@ -1017,8 +1041,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // gallery images still render (with the ImageOff badge) so users can pick
   // them and request samples through the concierge.
   const visibleFabricTiles = fabricTiles;
-  const visibleWoodTiles   = woodTiles;
-  const visibleTopTiles    = topTiles;
+  const visibleWoodTiles   = isOolMinibar ? shelfTiles : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : topTiles;
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
@@ -1056,7 +1080,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
-    tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug";
+    tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
   }) => (
     <div className="border-t border-border/60">
       {isMobile ? (
@@ -1174,7 +1198,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (/\btable\b/.test(title)) return "Select Your Table Top Finish";
     return "Select Your Top Finish";
   })();
-  const showMobileBaseTopGrid = (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
+  const showMobileBaseTopGrid = !isOolMinibar && (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
 
   const renderInlineAxisCarousel = (
     options: Fabric[],
@@ -1189,10 +1213,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const handleSelect = (option: Fabric) => {
       setSelected(option.id);
       if (axis === "Top") {
-        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède Leather" : option.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède leather" : isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
       } else {
-        onWoodFinishChange?.(option.name);
+        onWoodFinishChange?.(isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onWoodFinishPricingChange?.({
           id: option.id,
           name: option.name,
@@ -1275,6 +1299,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {isOolMinibar && frameTiles.length > 0 && renderAccordion({
+        isOpen: openFrame,
+        onToggle: () => setOpenFrame((v) => !v),
+        label: "Select Your Frame Finish",
+        selectedName: frameTiles.find((f) => f.id === selectedFrameId)?.name ?? null,
+        tiles: frameTiles,
+        glyph: "finish",
+        tileKind: "frame",
+      })}
       {showMobileBaseTopGrid && (
         <div className="border-t border-border/60">
           {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}

@@ -42,7 +42,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, isUpholsteryAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
-import FinishSelector from "@/components/FinishSelector";
+import FinishSelector, { OOL_MINIBAR_PICK_ID } from "@/components/FinishSelector";
 import { composeOrderFinishLabel } from "@/lib/orderFinishLabel";
 import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
 import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
@@ -541,6 +541,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   } = ctx;
 
   const isFinishAxis = isFinishAxisLabel;
+  const isOolMinibar = product.id === OOL_MINIBAR_PICK_ID;
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
   // Some upholstery matrices use Base = seat, Top = backrest, Label = frame.
   // Their linked wood swatches belong to the frame picker, not the Top picker.
@@ -605,6 +606,11 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     <div className="flex flex-col gap-2">
       {section !== "supplemental" && <FinishSelector
         pickId={product.id}
+        frameOptions={isOolMinibar ? dualSizeOptions : undefined}
+        onFrameFinishChange={isOolMinibar ? (frame) => {
+          setSelDualSize(frame);
+          onMaterialChange?.(frame, { base: selBase, top: selTop, size: frame, fromSwatch: true });
+        } : undefined}
         productTitle={product.title}
         productCategory={product.category}
         upholsteryLabel={
@@ -619,7 +625,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           }).upholsteryLabel
         }
         secondaryUpholsteryLabel={frameOnLabel ? getTopPlaceholder(product) : null}
-        woodLabel={
+        woodLabel={isOolMinibar ? getBasePlaceholder(product) :
           resolveFinishSectionLabels({
             baseAxisLabel: product.base_axis_label,
             topAxisLabel: product.top_axis_label,
@@ -638,7 +644,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
             : null
         }
-        topFilter={
+         topFilter={
           isDualAxis && !frameOnLabel && !baseAxisIsDim && topOptions.length >= 1
             ? makeSwatchAxisFilter(topOptions)
             : undefined
@@ -662,6 +668,11 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         currentGalleryIndex={galleryActiveIndex ?? 0}
         onWoodFinishChange={(woodName) => {
           if (!woodName) return;
+          if (isOolMinibar) {
+            setSelBase("Wood");
+            onMaterialChange?.("Wood", { base: "Wood", top: selTop, size: selDualSize, fromSwatch: true });
+            return;
+          }
           if (frameOnLabel) {
             const frame = dualSizeOptions.find((label) => makeSwatchAxisFilter([label])(woodName));
             if (!frame) return;
@@ -694,6 +705,11 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         }}
         onTopFinishChange={(topName) => {
           if (!topName) return;
+          if (isOolMinibar) {
+            setSelTop(topName);
+            onMaterialChange?.(topName, { base: selBase, top: topName, size: selDualSize, fromSwatch: true });
+            return;
+          }
           const norm = (s: string) => s.trim().toLowerCase();
           const nw = norm(topName);
           const match =
@@ -756,9 +772,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         }}
       />}
 
-      {section !== "primary" && <>{isDualAxis ? (
+          {section !== "primary" && <>{isDualAxis ? (
         <>
-          {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
+          {!isOolMinibar && !baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
             <ExpandableSpec
               icon={specIcon("⬗")}
               text={withImperialPerLine(baseOptions.join("\n"))}
@@ -793,7 +809,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
               }
             />
           )}
-           {!frameOnLabel && !suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
+           {!isOolMinibar && !frameOnLabel && !suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
             <ExpandableSpec
               icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
               text={withImperialPerLine(topOptions.join("\n"))}
@@ -932,7 +948,7 @@ const VariantDimensionsPanel: React.FC = () => {
   const dualLabelsAreDimensions = dualSizeOptions.length > 0 && dualSizeOptions.every(looksLikeDimension);
   const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
     && isUpholsteryAxisLabel(topAxisLabelRaw) && !dualLabelsAreDimensions;
-  const frameSwatchesCoverLabels = frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes);
+  const frameSwatchesCoverLabels = product.id === OOL_MINIBAR_PICK_ID || (frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes));
   const physicalDimensions = variantsList.find((v: { dimensions?: string | null }) => v.dimensions)?.dimensions || product.dimensions;
 
   return (
