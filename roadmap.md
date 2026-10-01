@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Replace the OOL 77 Mini bar's technical bridge URL and opaque finish code in new shares with a readable public product address and finish names; retain legacy link support.
+
 - [x] Restore room collection sidebar filters and a fixed three-column desktop catalog without changing room dropdown previews.
 - [x] Match the reference material categories to public room pieces and mark categories with no matching pieces.
 

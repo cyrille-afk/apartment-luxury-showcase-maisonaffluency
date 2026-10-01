@@ -101,9 +101,15 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
   // Its public product address carries readable finish names instead; keep other
   // share destinations unchanged, including their established OG bridges.
   const shareLink = () => {
-    const configParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("c") : null;
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const configParam = params.get("c");
     if (url.includes("/share/og/bieke-casteleyn-ool-77-mini-bar-og.html")) {
       const productUrl = new URL("https://maisonaffluency.com/designers/bieke-casteleyn/ool-77-mini-bar");
+      if (params.get("frame") && params.get("drawer")) {
+        productUrl.searchParams.set("frame", params.get("frame") ?? "");
+        productUrl.searchParams.set("drawer", params.get("drawer") ?? "");
+        return productUrl.toString();
+      }
       if (configParam) {
         try {
           const base64 = configParam.replace(/-/g, "+").replace(/_/g, "/");

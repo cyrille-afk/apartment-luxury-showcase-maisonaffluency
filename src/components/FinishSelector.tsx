@@ -1117,9 +1117,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     }
   };
 
-  // Mini bar shareable configuration: ?c=<base64url "frame|drawer"> restores
-  // the sender's Frame + Drawer picks on landing, and every pick updates ?c=
-  // so the Share menu forwards the exact build.
+  // Restore legacy ?c= links, while new links use readable frame/drawer names.
   const sharedConfigAppliedRef = useRef(false);
   useEffect(() => {
     if (!isOolMinibar || sharedConfigAppliedRef.current) return;
@@ -1142,18 +1140,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const drawer = drawerTiles.find((t) => t.id === selectedTopId)?.name;
     if (!frame || !drawer) return;
     const params = new URLSearchParams(window.location.search);
-    const next = encodeMinibarConfig(frame, drawer);
-    if (params.get("c") === next && !params.has("frame") && !params.has("drawer")) return;
-    if (params.has("frame") || params.has("drawer")) {
-      // Preserve the readable URL received by a visitor until they choose
-      // another finish; the share menu can still derive it from the picks.
-      const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      params.set("frame", readableSlug(frame));
-      params.set("drawer", readableSlug(drawer));
-      params.delete("c");
-    } else {
-      params.set("c", next);
-    }
+    const readableSlug = (name: string) => foldAxisText(name).replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const frameSlug = readableSlug(frame);
+    const drawerSlug = readableSlug(drawer);
+    if (params.get("frame") === frameSlug && params.get("drawer") === drawerSlug && !params.has("c")) return;
+    params.set("frame", frameSlug);
+    params.set("drawer", drawerSlug);
+    params.delete("c");
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}`);
   }, [isOolMinibar, selectedFrameId, selectedTopId, frameTiles, drawerTiles]);
 
