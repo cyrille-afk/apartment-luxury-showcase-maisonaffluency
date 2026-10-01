@@ -696,7 +696,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     if (!galleryInteractedRef.current && !photoLedFinishes) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (isSharedSlide(oneBased) && pickId !== OOL_MINIBAR_PICK_ID) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
@@ -1247,7 +1247,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (isSharedSlide(oneBased) && !isOolMinibar) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 

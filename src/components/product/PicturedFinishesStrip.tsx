@@ -45,7 +45,7 @@ export default function PicturedFinishesStrip({
 
   const oneBased = (activeIndex ?? 0) + 1;
   const shown = swatches.filter((s) => s.image_indices.includes(oneBased));
-  if (!shown.length || (swatches.length > 1 && shown.length === swatches.length)) return null;
+  if (!shown.length || (!biekeLayout && swatches.length > 1 && shown.length === swatches.length)) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
