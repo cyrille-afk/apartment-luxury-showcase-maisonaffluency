@@ -424,6 +424,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     };
   }, [product, contextualPanel]);
 
+  const [relatedSlide, setRelatedSlide] = useState(0);
+  useEffect(() => { setRelatedSlide(0); }, [product?.id]);
   const relatedProducts = useMemo(() => {
     if (!product || product.restricted_gallery_pin) return [];
     if (categoryDiscovery) {
@@ -664,55 +666,42 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                     {categoryDiscovery ? categoryDiscovery.heading(product) : <>More from {product.designer_slug === "dagmar-london" && product.subtitle?.trim() === "Arnold Madsen" ? "Dagmar" : designerDisplay}</>}
                   </p>
-                  {relatedProducts.length > 4 && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(-1)}
-                        aria-label="Scroll left"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => scrollRelated(1)}
-                        aria-label="Scroll right"
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div
-                  ref={relatedScrollRef}
-                  className="grid grid-cols-4 gap-3 overflow-x-auto pb-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
-                >
-                  {relatedProducts.map((rp) => (
-                    <button
-                      key={rp.id}
-                      onClick={() => onSelectRelated?.(rp)}
-                      title={rp.title}
-                      className="min-w-0 w-full group snap-start"
-                    >
-                      <div className="relative">
-                        <FadeInImage
-                          wrapperClassName="aspect-square bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
-                          src={rp.image_url}
-                          alt={rp.title}
-                          className="object-cover"
-                          loading="lazy"
-                        />
-                        {/* Elegant fade-in label overlay on hover */}
-                        <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-background/0 px-1.5 pt-4 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="block font-body text-[9px] leading-tight text-foreground text-center">
-                            {rp.title}
-                          </span>
-                        </span>
+                  {relatedProducts.length > 4 && (() => {
+                    const maxSlide = relatedProducts.length - 4;
+                    const btn = (off: boolean) => cn("flex size-7 items-center justify-center rounded-full border transition-all", off ? "cursor-not-allowed border-border/40 text-muted-foreground/40" : "border-border text-foreground hover:bg-muted/40");
+                    return (
+                      <div className="flex items-center gap-1.5">
+                        <button type="button" onClick={() => setRelatedSlide((i) => Math.max(0, i - 1))} disabled={relatedSlide === 0} aria-label="Previous alternatives" className={btn(relatedSlide === 0)}>
+                          <ChevronLeft className="size-3.5" strokeWidth={1.5} />
+                        </button>
+                        <button type="button" onClick={() => setRelatedSlide((i) => Math.min(maxSlide, i + 1))} disabled={relatedSlide >= maxSlide} aria-label="Next alternatives" className={btn(relatedSlide >= maxSlide)}>
+                          <ChevronRight className="size-3.5" strokeWidth={1.5} />
+                        </button>
                       </div>
-                    </button>
-                  ))}
+                    );
+                  })()}
+                </div>
+                <div className="relative w-full overflow-hidden">
+                  <div
+                    className="flex gap-x-4 transition-transform duration-500 ease-out will-change-transform"
+                    style={{ transform: `translateX(calc(-${relatedSlide * 25}% - ${relatedSlide * 4}px))` }}
+                  >
+                    {relatedProducts.map((rp) => (
+                      <button
+                        key={rp.id}
+                        type="button"
+                        onClick={() => onSelectRelated?.(rp)}
+                        title={rp.title}
+                        className="group flex w-[calc(25%-12px)] shrink-0 flex-col text-left"
+                      >
+                        <div className="mb-3 flex aspect-[4/5] w-full items-center justify-center overflow-hidden bg-[hsl(var(--alternative-frame))]">
+                          <img src={rp.image_url} alt={rp.title} loading="lazy" className="max-h-[88%] max-w-[88%] object-contain mix-blend-multiply transition-transform group-hover:scale-[1.02]" />
+                        </div>
+                        <span className="mb-0.5 whitespace-normal break-words font-body text-[12px] font-bold uppercase leading-tight tracking-wider text-foreground">{rp.brand_name}</span>
+                        <span className="whitespace-normal break-words font-body text-[12px] font-light leading-snug text-muted-foreground">{rp.title}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : null
