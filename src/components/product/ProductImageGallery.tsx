@@ -506,9 +506,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <span
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute right-full top-1/2 mr-2.5 -translate-y-1/2 whitespace-nowrap",
-                  "rounded-full border border-border/40 bg-background/90 px-2.5 py-1 shadow-sm backdrop-blur-sm",
-                  "font-body text-[9px] uppercase tracking-[0.18em] text-foreground/70",
+                  "pointer-events-none absolute right-full top-1/2 isolate mr-2.5 -translate-y-1/2 whitespace-nowrap py-1",
+                  "font-body text-[10px] font-light uppercase tracking-[0.34em] text-primary-foreground drop-shadow-lg",
+                  "before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]",
                   "transition-opacity duration-700 ease-out",
                   galleryHintVisible ? "opacity-100" : "opacity-0",
                 )}
