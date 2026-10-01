@@ -239,22 +239,18 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
           {roomFlyouts[room]?.map((link, index) => {
             const categories = roomNavigation[room];
             // Single-room menus keep their categories permanently open.
-            const roomOpen = openRooms[index] ?? ((roomFlyouts[room]?.length ?? 0) <= 1);
+            const roomOpen = true; void openRooms; void setOpenRooms;
             return (
             <div key={link.slug} className="group mb-6 last:mb-0">
-              <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
-                <Button type="button" variant="ghost" onClick={() => (selectedRoom === index ? onRoomNavigate(link.slug) : setSelectedRoom(index))} className="group/btn h-auto min-h-8 flex-1 justify-start gap-2 rounded-none px-0 py-1 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
+              <div className="flex items-center gap-2.5 border-b border-border pb-2">
+                <Button type="button" variant="ghost" onClick={() => (selectedRoom === index ? onRoomNavigate(link.slug) : setSelectedRoom(index))} className="h-auto min-h-8 justify-start gap-2.5 rounded-none px-0 py-1 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
                   <span className={cn("size-1.5 shrink-0 rounded-full transition-all", selectedRoom === index ? "scale-100 bg-foreground" : "scale-0 bg-transparent")} />
-                  <span className={cn("hover:opacity-70", selectedRoom === index ? "font-extrabold text-foreground underline underline-offset-4" : "font-bold text-muted-foreground")}>{link.label}</span>
-                  <span className="ml-1 text-[8px] font-bold tracking-wider text-muted-foreground opacity-0 transition-opacity group-hover/btn:opacity-100">{selectedRoom === index ? "(Viewing)" : "· Switch view"}</span>
+                  <span className={cn("transition-opacity hover:opacity-80", selectedRoom === index ? "font-extrabold text-foreground underline underline-offset-4" : "font-bold text-muted-foreground")}>{link.label}</span>
                 </Button>
-                <Button type="button" variant="ghost" aria-expanded={roomOpen} aria-label={`${roomOpen ? "Collapse" : "Expand"} ${link.label} categories`} title={roomOpen ? "Collapse categories" : "Expand categories"} onClick={() => setOpenRooms((prev) => ({ ...prev, [index]: !roomOpen }))} className="h-auto min-h-7 shrink-0 gap-1 rounded-none border-l border-border/60 py-1 pl-3 pr-1 uppercase text-muted-foreground hover:bg-transparent hover:text-foreground">
-                  <span className="text-[9px] font-medium tracking-wider text-muted-foreground/60 group-hover:text-muted-foreground">Menu</span>
-                  <ChevronDown className={cn("size-3 shrink-0 transition-transform duration-200", roomOpen && "rotate-180")} strokeWidth={1.25} />
-                </Button>
+                {selectedRoom === index && <span className="text-[9px] font-bold lowercase tracking-wider text-muted-foreground">(viewing)</span>}
               </div>
               {roomOpen && (
-                <div className="ml-2 mt-3 flex flex-col space-y-1 border-l border-border/60 pl-4 animate-fade-in">
+                <div className="ml-1.5 flex flex-col space-y-1 border-l border-border/60 pl-4 pt-6">
                   {categories.map((item) => {
                     const key = `${index}-${item.label}`;
                     const hasItems = item.subcategories.length > 0;
