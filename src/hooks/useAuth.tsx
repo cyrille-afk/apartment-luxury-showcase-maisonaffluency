@@ -285,7 +285,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               const returnPath = sessionStorage.getItem("maison:oauth-return-path");
               if (returnPath === "/trade") {
                 sessionStorage.removeItem("maison:oauth-return-path");
-                if (window.location.pathname === "/" || window.location.pathname === "/trade/login") {
+                if (window.location.pathname === "/") {
                   window.location.replace(returnPath);
                 }
               }
