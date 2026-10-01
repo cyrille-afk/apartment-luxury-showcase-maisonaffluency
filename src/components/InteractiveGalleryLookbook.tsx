@@ -629,6 +629,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       [/\bdining table\b/, ["dining tables", "dining table"]],
       [/\bdesk\b/, ["desks", "desk"]],
       [/\bconsole\b/, ["consoles"]],
+      [/\b(credenza|sideboard|buffet|cabinet|enfilade|bahut)s?\b/, ["buffets cabinets and sideboards", "cabinets"]],
       [/\bsofa\b/, ["sofas", "sofa"]],
       [/\barmchair\b/, ["armchairs"]],
       [/\bchairs?\b/, ["chairs"]],
