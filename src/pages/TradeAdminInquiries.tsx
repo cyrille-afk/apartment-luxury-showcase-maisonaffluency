@@ -80,7 +80,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function TradeAdminInquiries() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, rolesLoaded } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -204,7 +204,7 @@ export default function TradeAdminInquiries() {
     onError: (err: any) => toast({ title: "Draft failed", description: err.message, variant: "destructive" }),
   });
 
-  if (loading) return <div className="p-8 text-muted-foreground">Loading…</div>;
+  if (loading || (user && !rolesLoaded && !isAdmin)) return <div className="p-8 text-muted-foreground">Loading…</div>;
   if (!user || !isAdmin) return <Navigate to="/" replace />;
 
   const unread = rows?.filter((r) => r.status === "new").length || 0;

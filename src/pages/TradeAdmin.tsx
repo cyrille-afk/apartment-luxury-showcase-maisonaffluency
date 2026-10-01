@@ -252,7 +252,7 @@ interface Application {
 }
 
 const TradeAdmin = () => {
-  const { isAdmin, isSuperAdmin, loading, user } = useAuth();
+  const { isAdmin, isSuperAdmin, loading, user, rolesLoaded } = useAuth();
   const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -351,6 +351,7 @@ const TradeAdmin = () => {
   };
 
   if (loading) return null;
+  if (!rolesLoaded && user) return null;
   if (!isAdmin) return <Navigate to="/trade" replace />;
 
   return (

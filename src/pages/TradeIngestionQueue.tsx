@@ -81,7 +81,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TradeIngestionQueue() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, rolesLoaded } = useAuth();
   const qc = useQueryClient();
   const [input, setInput] = useState("");
   const [batchSize, setBatchSize] = useState(20);
@@ -180,7 +180,7 @@ export default function TradeIngestionQueue() {
     },
   });
 
-  if (loading) return null;
+  if (loading || (user && !rolesLoaded && !isAdmin)) return null;
   if (!user) return <Navigate to="/trade/auth" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
