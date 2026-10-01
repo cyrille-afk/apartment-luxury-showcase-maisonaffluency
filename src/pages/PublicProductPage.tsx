@@ -225,6 +225,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
 type VariantSelectorsContextType = {
   product: any;
+  photoLedFinishes?: boolean;
   axes: ReturnType<typeof computeVariantAxes>;
   finishMap?: Record<string, number> | null;
   selBase: string | null;
@@ -274,6 +275,7 @@ function useVariantSelectorsContext() {
 
 const VariantSelectorsProvider: React.FC<{
   product: any;
+  photoLedFinishes?: boolean;
   onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
@@ -282,7 +284,7 @@ const VariantSelectorsProvider: React.FC<{
   onFinishGroupingResolved?: () => void;
   onDisplayedFinishesChange?: (names: { upholstery: string | null; base: string | null; top: string | null }) => void;
   children: React.ReactNode;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, onFinishGroupingResolved, onDisplayedFinishesChange, children }) => {
+}> = ({ product, photoLedFinishes, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, onFinishGroupingResolved, onDisplayedFinishesChange, children }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -462,6 +464,7 @@ const VariantSelectorsProvider: React.FC<{
 
   const value: VariantSelectorsContextType = {
     product,
+    photoLedFinishes,
     axes,
     finishMap,
     selBase,
@@ -607,6 +610,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     <div className="flex flex-col gap-2">
       {section !== "supplemental" && <FinishSelector
         pickId={product.id}
+        photoLedFinishes={ctx.photoLedFinishes}
         frameOptions={isOolMinibar ? dualSizeOptions : undefined}
         onFrameFinishChange={isOolMinibar ? (frame) => {
           setSelDualSize(frame);
@@ -2531,8 +2535,8 @@ const PublicProductPageContent: React.FC = () => {
                   );
                 })()}
               />
-              {product.id === OOL_MINIBAR_PICK_ID && (
-                <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex} />
+              {designer.slug === "bieke-casteleyn" && (
+                <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} />
               )}
 
 
@@ -2577,6 +2581,7 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Mobile/PWA: Trade-first flow with finish selector below image. */}
                   <VariantSelectorsProvider
+                    photoLedFinishes={designer.slug === "bieke-casteleyn"}
                     product={product}
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
@@ -2795,6 +2800,7 @@ const PublicProductPageContent: React.FC = () => {
                   </div>
 
                   <VariantSelectorsProvider
+                    photoLedFinishes={designer.slug === "bieke-casteleyn"}
                     product={product}
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
