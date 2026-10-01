@@ -1081,14 +1081,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (shelf) {
       setSelectedWoodId(shelf.id);
       userPickedAxesRef.current.wood = true;
+      // No onWoodFinishPricingChange here: the shelf swatch must not take
+      // over the "Frame:" caption in the price block.
       onWoodFinishChange?.("Wood");
-      onWoodFinishPricingChange?.({
-        id: shelf.id,
-        name: shelf.name,
-        price_cents: (shelf.frame_price_cents && shelf.frame_price_cents > 0) ? shelf.frame_price_cents : 0,
-        currency: shelf.frame_price_currency || "EUR",
-        image_url: shelf.image_url ?? null,
-      });
     }
     if (drawer) {
       setSelectedTopId(drawer.id);
@@ -1108,6 +1103,20 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       onSwatchImagesChange?.(null, { committed: true, swatchName: hero?.name ?? preset.name });
     }
   };
+
+  // Mini bar: the Shelf axis has a single value ("Wood"), so commit it
+  // automatically once the swatches load — no third dropdown is shown.
+  // Deliberately does NOT emit onWoodFinishPricingChange: the shelf swatch
+  // must not appear as the "Frame:" caption in the price block.
+  const shelfAutoCommittedRef = useRef(false);
+  useEffect(() => {
+    if (!isOolMinibar || shelfAutoCommittedRef.current || shelfTiles.length === 0) return;
+    shelfAutoCommittedRef.current = true;
+    setSelectedWoodId(shelfTiles[0].id);
+    userPickedAxesRef.current.wood = true;
+    onWoodFinishChange?.("Wood");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOolMinibar, shelfTiles.length]);
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
@@ -1175,7 +1184,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   };
 
   const visibleFabricTiles = axisModeActive ? [] : fabricTiles;
-  const visibleWoodTiles   = isOolMinibar ? shelfTiles : axisModeActive ? axisBaseTiles : woodTiles;
+  // OOL 77 Mini bar shows exactly two finish dropdowns (Frame + Drawer). Its
+  // Shelf axis has a single value ("Wood") so it is auto-committed below
+  // instead of rendering as a third accordion.
+  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : woodTiles;
   const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : topTiles;
   const visibleCoverTiles  = coverTiles;
 
