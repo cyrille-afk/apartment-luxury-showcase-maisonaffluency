@@ -90,6 +90,7 @@ const TradeLogin = () => {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
+    setGoogleError(null);
     try {
       ensureStorageHeadroom();
       // Mark the intended destination so the full-page redirect flow returns
@@ -100,13 +101,13 @@ const TradeLogin = () => {
       });
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
-        toast({ title: "Google Sign-In Failed", description: result.error.message, variant: "destructive" });
+        setGoogleError(result.error.message || "Google sign-in could not be completed.");
         return;
       }
       // Popup flow: session is set — go straight into the trade portal.
       navigate("/trade");
     } catch (err) {
-      toast({ title: "Google Sign-In Failed", description: err instanceof Error ? err.message : "Unexpected error", variant: "destructive" });
+      setGoogleError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
       setGoogleLoading(false);
     }
