@@ -165,7 +165,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
   <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-10 py-8 transition-all duration-300">
-    <div className="w-full">
+    <div className="mx-auto w-full max-w-4xl">
       <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
           <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
         <Popover open={open} onOpenChange={setOpen}>
