@@ -109,7 +109,7 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
 
   const openWhatsApp = () => {
     const waUrl = `https://wa.me/?text=${encodeURIComponent(`${bodyText} ${cleanUrl}`)}`;
-    window.location.href = waUrl;
+    window.open(waUrl, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 
