@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Apply the pictured-finish strip and photo-led selection to all products with mapped finish photos on public and Trade pages; preserve explicit choices and leave unlinked photos unselected.
+- [x] Apply the pictured-finish strip and photo-led selection to all products with mapped finish photos on public and Trade pages; preserve explicit choices and leave unlinked photos unselected.
 
 - [x] Replace the OOL 77 Mini bar's technical bridge URL and opaque finish code in new shares with a readable public product address and finish names; retain legacy link support.
 
