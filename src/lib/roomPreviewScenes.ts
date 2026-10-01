@@ -14,6 +14,8 @@ export interface RoomScenePiece {
   alt: string;
   name?: string;
   designer?: string;
+  /** Public product page for this piece, when resolved against the catalog. */
+  href?: string;
 }
 
 export interface RoomPreviewScene {
@@ -23,6 +25,8 @@ export interface RoomPreviewScene {
   /** Index into pieces that the hotspot highlights on interaction. */
   highlightIndex: number;
   pieces: RoomScenePiece[];
+  /** True while the live catalog trio is still loading (hide static fallback). */
+  pending?: boolean;
 }
 
 export const ROOM_PREVIEW_SCENES: Record<"living-room" | "dining-room" | "bedroom" | "office", RoomPreviewScene> = {

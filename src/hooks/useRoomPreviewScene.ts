@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useDbCuratorPicks, type DbProductItem } from "@/hooks/useDbCuratorPicks";
 import { getRoomPreviewScene, type RoomPreviewScene } from "@/lib/roomPreviewScenes";
 
 type RotatingRoom = "bedroom" | "living-room" | "dining-room" | "office";
@@ -11,12 +11,26 @@ const ROOM_SUBCATEGORIES: Record<RotatingRoom, string[]> = {
   office: ["Desks", "Desk"],
 };
 
+const productHref = ({ pick, designerId }: DbProductItem) =>
+  `/designers/${designerId}/${pick.slug || pick.id}`;
+
 /** A fresh, distinct public-catalog trio for each room mount, stable while it is open. */
 export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
-  const { data: catalog } = useDbCuratorPicks();
+  const { data: catalog, isLoading } = useDbCuratorPicks();
   return useMemo(() => {
     const base = getRoomPreviewScene(slug);
-    if (!slug || !(slug in ROOM_SUBCATEGORIES) || !catalog) return base;
+    if (!slug || !(slug in ROOM_SUBCATEGORIES)) return base;
+    if (!catalog) return isLoading ? { ...base, pending: true } : base;
+
+    // Static fallback pieces still link when their title exists in the public catalog.
+    const byTitle = new Map(catalog.map((item) => [item.pick.title.trim().toLowerCase(), item]));
+    const linkedBase = {
+      ...base,
+      pieces: base.pieces.map((piece) => {
+        const match = piece.name ? byTitle.get(piece.name.trim().toLowerCase()) : undefined;
+        return match ? { ...piece, href: productHref(match) } : piece;
+      }),
+    };
 
     const subcategories = ROOM_SUBCATEGORIES[slug as RotatingRoom];
     const seen = new Set<string>();
@@ -30,7 +44,7 @@ export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
       seen.add(pick.image); seen.add(titleKey);
       return true;
     });
-    if (matches.length < 3) return base;
+    if (matches.length < 3) return linkedBase;
 
     // Partial Fisher–Yates: exactly three unique indices, without sorting
     // randomly or mutating the query's shared catalog array.
@@ -38,15 +52,16 @@ export function useRoomPreviewScene(slug?: string | null): RoomPreviewScene {
     const pieces = Array.from({ length: 3 }, (_, index) => {
       const randomIndex = index + Math.floor(Math.random() * (pool.length - index));
       [pool[index], pool[randomIndex]] = [pool[randomIndex], pool[index]];
-      const { pick, designerName } = pool[index];
+      const item = pool[index];
       return {
-        src: pick.image || "",
-        alt: `${pick.title} by ${designerName}`,
-        name: pick.title,
-        designer: designerName,
+        src: item.pick.image || "",
+        alt: `${item.pick.title} by ${item.designerName}`,
+        name: item.pick.title,
+        designer: item.designerName,
+        href: productHref(item),
       };
     });
 
     return { ...base, pieces, highlightIndex: 0 };
-  }, [catalog, slug]);
+  }, [catalog, isLoading, slug]);
 }
