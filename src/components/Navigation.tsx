@@ -784,7 +784,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
       />
     )}
-    <nav className={cn(
+    <nav data-site-header className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       location.pathname === "/trade-program"

@@ -1444,6 +1444,12 @@ const DesignersHoverHero = () => {
   // keyboard opens as usual — no custom keyboard.
   useEffect(() => {
     if (!searchOpen) return;
+    document.body.classList.add("designer-directory-open");
+    return () => document.body.classList.remove("designer-directory-open");
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
     const bodyOverflow = document.body.style.overflow;
     const htmlOverflow = document.documentElement.style.overflow;
     const htmlOverscroll = document.documentElement.style.overscrollBehavior;
