@@ -279,6 +279,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setTimeout(async () => {
             await fetchUserData(sess.user.id, sbClient);
             setLoading(false);
+            // Google sign-in lands back on the site root; honour the
+            // destination the sign-in page asked for.
+            try {
+              const returnPath = sessionStorage.getItem("maison:oauth-return-path");
+              if (returnPath === "/trade") {
+                sessionStorage.removeItem("maison:oauth-return-path");
+                if (window.location.pathname === "/" || window.location.pathname === "/trade/login") {
+                  window.location.replace(returnPath);
+                }
+              }
+            } catch { /* noop */ }
           }, 0);
           return;
         }
