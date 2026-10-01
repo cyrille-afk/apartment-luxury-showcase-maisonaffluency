@@ -1175,7 +1175,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   };
 
   const visibleFabricTiles = axisModeActive ? [] : fabricTiles;
-  const visibleWoodTiles   = isOolMinibar ? shelfTiles : axisModeActive ? axisBaseTiles : woodTiles;
+  // OOL 77 Mini bar shows exactly two finish dropdowns (Frame + Drawer). Its
+  // Shelf axis has a single value ("Wood") so it is auto-committed below
+  // instead of rendering as a third accordion.
+  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : woodTiles;
   const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : topTiles;
   const visibleCoverTiles  = coverTiles;
 
