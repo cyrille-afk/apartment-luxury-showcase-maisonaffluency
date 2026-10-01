@@ -246,6 +246,12 @@ const isFabricCategory = (fabric: Fabric) => {
 const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
 const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCoverCategory(fabric);
 
+// OOL Shelf's suede is a drawer finish, not upholstery. Keep the material's
+// library category intact; only place this product's swatches on its Top axis.
+const OOL_SHELF_PICK_ID = "4f0e7f97-024f-4fab-9ca5-e362ed4909b8";
+const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
+  pickId === OOL_SHELF_PICK_ID && /^suede leather\s*[-—–]/i.test(name);
+
 /**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
  * Falls back to the label hint when category alone is ambiguous (e.g. a
@@ -407,7 +413,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           id: f.id,
           name: f.name,
           image_url: f.image_url,
-          category: normalizeFabricCategory(f.category),
+          category: isOolDrawerLeather(pickId, f.name) ? "Other" : normalizeFabricCategory(f.category),
           supplier: f.supplier,
           price_tier_label: f.price_tier_label ?? null,
           price_per_lm_cents: f.price_per_lm_cents ?? null,
@@ -730,7 +736,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
         // retexture the top material.
-        onTopFinishChange?.(f.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède Leather" : f.name);
         onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
@@ -971,7 +977,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // surfaces that aren't priced as their own variant row) falls through into
   // the base/wood accordion so linked swatches are never silently dropped
   // from the product page.
-  const topTilesRaw = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTilesRaw = topFilter
+    ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
+    : [];
   const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
   // Shared-palette products (sharedBaseTopSwatches) keep the overlapping
   // swatches available to the base group too — the variant matrix, not the
@@ -1181,7 +1189,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const handleSelect = (option: Fabric) => {
       setSelected(option.id);
       if (axis === "Top") {
-        onTopFinishChange?.(option.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède Leather" : option.name);
         onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
       } else {
         onWoodFinishChange?.(option.name);
