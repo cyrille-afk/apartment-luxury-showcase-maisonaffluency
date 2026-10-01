@@ -1938,7 +1938,7 @@ const TradeProductPage: React.FC = () => {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-          <div className="relative md:relative sticky top-[max(1rem,env(safe-area-inset-top))] md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
+          <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 lg:sticky lg:top-24 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
               images={visibleImages}
               alt={product.title}
