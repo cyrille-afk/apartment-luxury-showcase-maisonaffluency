@@ -1434,6 +1434,46 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
+      {isOolMinibar && frameTiles.length > 0 && (
+        <div className="border-t border-border/60 py-4 space-y-3">
+          <p className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            Curated Combinations
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {OOL77_PRESETS.map((preset) => {
+              const tiles = presetTilesFor(preset);
+              const chips = [tiles.frame, tiles.shelf, tiles.drawer].filter(Boolean) as Fabric[];
+              const isActive = activePresetId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  aria-pressed={isActive}
+                  title={`${preset.name} — Frame: ${preset.finishes.frame}, Shelf: ${preset.finishes.shelf}, Drawer: ${preset.finishes.drawer}`}
+                  className={cn(
+                    "flex flex-col items-start gap-2 p-2 text-left transition-all",
+                    isActive ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60 hover:ring-border"
+                  )}
+                >
+                  <span className="flex gap-1">
+                    {chips.map((chip, i) => (
+                      <span
+                        key={`${chip.id}-${i}`}
+                        className="block w-6 h-6 bg-cover bg-center bg-muted/40 ring-1 ring-inset ring-border/40"
+                        style={{ backgroundImage: `url(${chip.image_url || ""})` }}
+                      />
+                    ))}
+                  </span>
+                  <span className="font-body text-[11px] leading-snug text-foreground/85">
+                    {preset.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {isOolMinibar && frameTiles.length > 0 && renderAccordion({
         isOpen: openFrame,
         onToggle: () => setOpenFrame((v) => !v),
