@@ -684,7 +684,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (!isOolMinibar && isSharedSlide(oneBased)) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
@@ -1219,7 +1219,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const coverHit = hit(visibleCoverTiles);
     if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGalleryIndex, fabrics]);
+  }, [currentGalleryIndex, fabrics, isOolMinibar, frameTiles.length, drawerTiles.length]);
 
 
 
