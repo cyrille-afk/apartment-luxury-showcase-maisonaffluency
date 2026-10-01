@@ -225,13 +225,14 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const current = categories.find((c) => c.label === activeCat);
   return (
    <div className="relative flex select-none flex-col bg-[hsl(var(--collection-card-canvas))]">
-     <div className="flex w-full items-center justify-center border-b border-border/40 bg-background/60 py-3 backdrop-blur-sm">
+     <div className="flex w-full flex-col items-center border-b border-border/40 py-4">
+       <span className="mb-3 font-body text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</span>
        <nav className="flex items-center gap-x-8 overflow-x-auto px-6">
          {rooms.map((r, index) => {
            const isActive = selectedRoom === index;
            return (
              <button key={r.slug} type="button" onClick={() => (isActive ? onRoomNavigate(r.slug) : (setSelectedRoom(index), setActiveCat("ALL")))}
-               className={cn("relative whitespace-nowrap py-1 font-body text-[10px] font-semibold uppercase tracking-widest transition-all", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+               className={cn("relative whitespace-nowrap pb-1 font-body text-xs font-bold uppercase tracking-widest transition-all", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
                {r.label}
                {isActive && <span className="absolute bottom-0 left-0 h-px w-full bg-foreground animate-fade-in" />}
              </button>
