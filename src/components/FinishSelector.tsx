@@ -229,7 +229,7 @@ interface FinishSelectorProps {
    * gallery on page load.
    */
   currentGalleryIndex?: number;
-  /** Scope first-photo finish highlighting to this designer's mapped photography. */
+  /** Reflect only finishes mapped to the photo currently displayed. */
   photoLedFinishes?: boolean;
   /** Optional swatch name to select on first load, used by trade deep links. */
   preselectFabricName?: string | null;
@@ -696,7 +696,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     if (!galleryInteractedRef.current && !photoLedFinishes) return;
     const oneBased = currentGalleryIndex + 1;
-    if (!photoLedFinishes && isSharedSlide(oneBased)) return;
+    if (isSharedSlide(oneBased)) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
@@ -1247,7 +1247,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (!photoLedFinishes && !isOolMinibar && isSharedSlide(oneBased)) return;
+    if (isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
@@ -1255,14 +1255,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the Frame dropdown follows the photographed frame finish too.
     if (isOolMinibar) {
       const frameHit = hit(frameTiles);
-      if (!picked.frame && frameHit && selectedFrameId !== frameHit.id) setSelectedFrameId(frameHit.id);
+      if (!picked.frame && selectedFrameId !== frameHit?.id && (frameHit || photoLedFinishes)) setSelectedFrameId(frameHit?.id ?? null);
     }
     const woodHit = hit(visibleWoodTiles);
     if (!picked.wood && selectedWoodId !== woodHit?.id && (woodHit || photoLedFinishes)) setSelectedWoodId(woodHit?.id ?? null);
     const topHit = hit(visibleTopTiles);
     if (!picked.top && selectedTopId !== topHit?.id && (topHit || photoLedFinishes)) setSelectedTopId(topHit?.id ?? null);
     const coverHit = hit(visibleCoverTiles);
-    if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
+    if (!picked.cover && selectedCoverId !== coverHit?.id && (coverHit || photoLedFinishes)) setSelectedCoverId(coverHit?.id ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentGalleryIndex, fabrics, isOolMinibar, photoLedFinishes, frameTiles.length, drawerTiles.length]);
 
