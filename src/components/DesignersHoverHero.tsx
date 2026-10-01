@@ -2363,7 +2363,7 @@ const DesignersHoverHero = () => {
       })()}
 
       {/* Desktop directory launcher — compact width grouped above the white page floor. */}
-      <div className="absolute bottom-[56px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex">
+      <div className="absolute bottom-[56px] left-1/2 z-[73] hidden w-[min(34rem,calc(100vw-6rem))] -translate-x-1/2 flex-col items-center lg:flex [body[data-nav-dropdown-open]_&]:!hidden">
         <div
           className={cn(
             "flex h-10 w-full shrink-0 items-center rounded-md border px-4 backdrop-blur-[12px]",
