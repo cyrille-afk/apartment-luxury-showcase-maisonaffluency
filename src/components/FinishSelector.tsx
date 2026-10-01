@@ -1045,6 +1045,69 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const drawerTiles = isOolMinibar
     ? allNonFabricTiles.filter((f) => f.category === "Wood" || isOolDrawerLeather(pickId, f.name))
     : [];
+
+  // OOL 77 Mini bar curated presets: one tap commits Frame + Shelf + Drawer.
+  const foldPresetName = (s: string) => foldAxisText(s).replace(/[—–]/g, "-");
+  const findPresetTile = (tiles: Fabric[], name: string) => {
+    const target = foldPresetName(name);
+    return (
+      tiles.find((t) => foldPresetName(t.name) === target) ??
+      tiles.find((t) => foldPresetName(t.name).startsWith(target)) ??
+      null
+    );
+  };
+  const presetTilesFor = (preset: (typeof OOL77_PRESETS)[number]) => ({
+    frame: findPresetTile(frameTiles, preset.finishes.frame),
+    shelf: findPresetTile(shelfTiles, preset.finishes.shelf),
+    drawer: findPresetTile(drawerTiles, preset.finishes.drawer),
+  });
+  const activePresetId = isOolMinibar
+    ? OOL77_PRESETS.find((p) => {
+        const t = presetTilesFor(p);
+        return t.frame && t.shelf && t.drawer
+          && selectedFrameId === t.frame.id
+          && selectedWoodId === t.shelf.id
+          && selectedTopId === t.drawer.id;
+      })?.id ?? null
+    : null;
+  const applyPreset = (preset: (typeof OOL77_PRESETS)[number]) => {
+    const { frame, shelf, drawer } = presetTilesFor(preset);
+    if (frame) {
+      setSelectedFrameId(frame.id);
+      userPickedAxesRef.current.frame = true;
+      const option = frameOptions?.find((o) => frame.name.toLowerCase().startsWith(o.toLowerCase()));
+      if (option) onFrameFinishChange?.(option);
+    }
+    if (shelf) {
+      setSelectedWoodId(shelf.id);
+      userPickedAxesRef.current.wood = true;
+      onWoodFinishChange?.("Wood");
+      onWoodFinishPricingChange?.({
+        id: shelf.id,
+        name: shelf.name,
+        price_cents: (shelf.frame_price_cents && shelf.frame_price_cents > 0) ? shelf.frame_price_cents : 0,
+        currency: shelf.frame_price_currency || "EUR",
+        image_url: shelf.image_url ?? null,
+      });
+    }
+    if (drawer) {
+      setSelectedTopId(drawer.id);
+      userPickedAxesRef.current.top = true;
+      onTopFinishChange?.(isOolDrawerLeather(pickId, drawer.name) ? "Suède leather" : "Wood");
+      onTopFinishSwatchChange?.({ name: drawer.name, image_url: drawer.image_url ?? null });
+    }
+    // Lock the gallery onto the drawer's photographs (the most distinctive
+    // finish of the trio); fall back to frame, then shelf.
+    const hero = drawer ?? frame ?? shelf;
+    const indices = hero && Array.isArray(hero.image_indices) && hero.image_indices.length > 0 ? hero.image_indices : null;
+    lockedPreviewRef.current = { indices, name: hero?.name ?? preset.name };
+    hoverActiveRef.current = false;
+    if (indices) {
+      setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: hero!.name }), 0);
+    } else {
+      onSwatchImagesChange?.(null, { committed: true, swatchName: hero?.name ?? preset.name });
+    }
+  };
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
     : [];
