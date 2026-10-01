@@ -44,7 +44,9 @@ export default function PicturedFinishesStrip({
   const oneBased = (activeIndex ?? 0) + 1;
   const shown = swatches.filter((s) => s.image_indices.includes(oneBased));
   if (!shown.length) return null;
-  const base = shown.filter((s) => FRAME_RE.test(s.name) || (s.category || "").toLowerCase() === "wood" && !/wood pillars?/i.test(topLabel || ""));
+  const base = shown.filter((s) => FRAME_RE.test(s.name) || (
+    (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
+  ));
   const top = shown.filter((s) => !base.includes(s));
   const groups = topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
     ? [{ label: baseLabel, items: base }, { label: topLabel, items: top }]
