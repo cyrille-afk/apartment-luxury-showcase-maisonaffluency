@@ -220,6 +220,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setSession(resolved);
       setUser(resolved?.user ?? null);
+      userIdRef.current = resolved?.user?.id ?? null;
       scheduleTokenRefresh(resolved);
       if (resolved?.user) {
         // Await so role/profile/application state is populated BEFORE
@@ -230,8 +231,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const oauthReturnPath = sessionStorage.getItem("maison:oauth-return-path");
         if (oauthReturnPath === "/trade") {
           sessionStorage.removeItem("maison:oauth-return-path");
-          window.location.replace(oauthReturnPath);
-          return;
+          const p = window.location.pathname;
+          // Only redirect from the landing/sign-in screens — never yank a
+          // member out of a portal section they just opened.
+          if (p === "/" || p.startsWith("/trade/login")) {
+            window.location.replace(oauthReturnPath);
+            return;
+          }
         }
       }
       setLoading(false);
@@ -255,6 +261,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(sess?.user ?? null);
       scheduleTokenRefresh(sess);
       if (sess?.user) {
+        const sameUser = userIdRef.current === sess.user.id;
         // Only re-hydrate roles on an actual sign-in. TOKEN_REFRESHED fires
         // periodically (and on tab focus) — flipping `loading` there causes
         // gated routes (like the designer editor) to unmount mid-edit.
@@ -263,7 +270,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // another tab adopts/refreshes the shared session. If it's the same
           // user, re-hydrate silently — flipping `loading` here unmounts
           // gated routes (like the designer editor) mid-edit.
-          if (userIdRef.current === sess.user.id) {
+          if (sameUser) {
             void fetchUserData(sess.user.id, sbClient);
             setLoading(false);
             return;
@@ -277,6 +284,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
           setLoading(true);
           setTimeout(async () => {
+            userIdRef.current = sess.user.id;
             await fetchUserData(sess.user.id, sbClient);
             setLoading(false);
             // Google sign-in lands back on the site root; honour the
