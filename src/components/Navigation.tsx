@@ -217,10 +217,7 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
-    const first = roomNavigation[room]?.[0]?.label;
-    return first ? { [`0-${first}`]: true } : {};
-  });
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
   const toggleCategory = (key: string) => setOpenCategories((prev) => ({ ...prev, [key]: !prev[key] }));
   void activeCategory; void onSelectCategory;
   return (
