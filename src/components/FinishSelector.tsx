@@ -1081,14 +1081,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (shelf) {
       setSelectedWoodId(shelf.id);
       userPickedAxesRef.current.wood = true;
+      // No onWoodFinishPricingChange here: the shelf swatch must not take
+      // over the "Frame:" caption in the price block.
       onWoodFinishChange?.("Wood");
-      onWoodFinishPricingChange?.({
-        id: shelf.id,
-        name: shelf.name,
-        price_cents: (shelf.frame_price_cents && shelf.frame_price_cents > 0) ? shelf.frame_price_cents : 0,
-        currency: shelf.frame_price_currency || "EUR",
-        image_url: shelf.image_url ?? null,
-      });
     }
     if (drawer) {
       setSelectedTopId(drawer.id);
