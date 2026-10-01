@@ -164,9 +164,9 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
   }, [pieceSources]);
   const previewImage = selectedRoomSlug === "office" || selectedRoomSlug === "living-room" || selectedRoomSlug === "dining-room" || selectedRoomSlug === "bedroom" ? scene.previewImage : roomAmbientImages[room];
   return (
-  <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-6 py-6 transition-all duration-300">
-    <div className="w-full">
-      <div className="relative mb-6 aspect-[16/10] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
+  <div data-room-preview className="sticky top-6 flex min-w-0 flex-1 flex-col items-center self-start bg-[hsl(var(--collection-card-canvas))] px-10 py-8 transition-all duration-300">
+    <div className="mx-auto w-full max-w-4xl">
+      <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))]">
           <img src={previewImage.src} alt={previewImage.alt} onLoad={() => setPhotoReady(true)} className={cn("h-full w-full object-cover object-center transition-opacity duration-300", photoReady ? "opacity-100" : "opacity-0")} />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -186,8 +186,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
         </Popover>
       </div>
       <div className="w-full border-t border-border/40 pt-6">
-        <div className="mb-4 font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
-            <div className={cn("grid w-full grid-cols-3 gap-x-4 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources && !scene.pending ? "opacity-100" : "opacity-0")}>
+        <div className="mb-5 text-center font-body text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Curated alternatives</div>
+            <div className={cn("mx-auto grid w-full max-w-4xl grid-cols-3 gap-x-6 gap-y-6 bg-background transition-all duration-300", readyPieceSources === pieceSources && !scene.pending ? "opacity-100" : "opacity-0")}>
             {scene.pieces.map((piece, index) => (
               <a key={piece.src} href={piece.href} aria-disabled={!piece.href}
                 onClick={(event) => { if (!piece.href) { event.preventDefault(); return; } if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; event.preventDefault(); onPieceNavigate(piece.href); }}
@@ -196,8 +196,8 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
                   <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply transition-transform duration-500 group-hover/piece:scale-105" />
                </div>
                {"name" in piece && (
-                  <div className="flex w-full flex-col">
-                    <div className="mb-1 whitespace-normal break-words font-body text-[12px] font-bold uppercase leading-tight tracking-wider text-foreground">{piece.designer}</div>
+                  <div className="flex w-full flex-col text-center">
+                    <div className="mb-1 truncate whitespace-nowrap font-body text-[12px] font-bold uppercase leading-tight tracking-wider text-foreground">{piece.designer}</div>
                     <h4 className="whitespace-normal break-words font-body text-[12px] font-light leading-snug text-muted-foreground group-hover/piece:text-foreground group-hover/piece:underline underline-offset-4">{piece.name}</h4>
                   </div>
                )}
@@ -206,7 +206,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
         </div>
       </div>
     </div>
-    <p className="mt-6 w-full max-w-[354px] text-center font-body text-[13px] font-bold leading-relaxed text-crimson-black">
+    <p className="mt-8 w-full max-w-lg border-t border-border/40 pt-5 text-center font-body text-[13px] font-bold leading-relaxed text-crimson-black">
       Leverage our global designers network and sourcing capabilities to elevate your portfolio of projects
     </p>
   </div>
@@ -231,7 +231,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const toggleCategory = (key: string) => setOpenCategoryKey((prev) => (prev === key ? null : key));
   void activeCategory; void onSelectCategory;
   return (
-   <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
+   <div className="relative flex min-h-[470px] items-start gap-4 overflow-visible bg-[hsl(var(--collection-card-canvas))]">
      <div className="w-[310px] shrink-0 self-stretch border-r border-border/60 px-8 py-7">
       <div className="flex flex-col">
         <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
@@ -1309,7 +1309,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   </Button>
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(800px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(72rem,calc(100vw-48px))] xl:w-[min(80rem,calc(100vw-48px))] bg-background shadow-2xl" style={{ translate: "-50% 0" }}>
                       <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onPieceNavigate={navigateToPiece} />
                     </div>
                   )}
