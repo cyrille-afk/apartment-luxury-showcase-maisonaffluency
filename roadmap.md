@@ -92,3 +92,4 @@
 - [ ] ProductGrid, tradeProducts, curatorPicksCatalog, designerProfiles → database catalogue
 - [ ] BrandsAteliers atelierOnlyPicks → database
 - [ ] Delete bundled arrays in FeaturedDesigners / Collectibles / BrandsAteliers (~500 KB) after page-by-page live checks
+- [x] Show OOL Shelf suede leather samples under Drawer Finish on desktop and mobile, without changing their shared material category.
