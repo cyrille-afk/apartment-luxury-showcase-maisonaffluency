@@ -415,10 +415,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   useEffect(() => () => {
     if (tradeMenuCloseTimer.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
   }, []);
-  // Keeps the desktop TRADE link's left edge flush with JOURNAL's left edge
-  // in the nav tier below (offset shifts the utility cluster horizontally).
-  const utilityClusterRef = useRef<HTMLDivElement>(null);
-  const [utilityAlignOffset, setUtilityAlignOffset] = useState(0);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileTradeExpanded, setMobileTradeExpanded] = useState(false);
   const [activeRoomMenu, setActiveRoomMenu] = useState<RoomNavKey | null>(null);
@@ -441,33 +437,6 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     return () => window.removeEventListener("resize", measure);
   }, [megaMenuOpen, activeRoomMenu, roomMenuOverflow]);
 
-  // Align the desktop TRADE utility link's left edge with the JOURNAL nav
-  // link's left edge. The nav row is centered while the utility cluster is
-  // right-anchored, so the exact offset is measured and applied on
-  // mount, resize and after web fonts settle.
-  useEffect(() => {
-    const align = () => {
-      const tradeEl = utilityClusterRef.current?.querySelector<HTMLElement>("[data-utility-trade]");
-      const journalEl = document.querySelector<HTMLElement>("[data-nav-journal]");
-      if (!tradeEl || !journalEl || !tradeEl.offsetWidth || !journalEl.offsetWidth) {
-        setUtilityAlignOffset(0);
-        return;
-      }
-      const tradeLeft = tradeEl.getBoundingClientRect().left;
-      const journalLeft = journalEl.getBoundingClientRect().left;
-      setUtilityAlignOffset((prev) => Math.round((prev + (tradeLeft - journalLeft)) * 100) / 100);
-    };
-    align();
-    window.addEventListener("resize", align);
-    if (typeof document !== "undefined" && "fonts" in document) {
-      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => align()).catch(() => {});
-    }
-    const t = window.setTimeout(align, 400);
-    return () => {
-      window.removeEventListener("resize", align);
-      window.clearTimeout(t);
-    };
-  }, []);
   const roomMenuCloseTimer = useRef<number | null>(null);
   // featuredDoc removed — AD free-download flow discontinued.
 
@@ -1117,28 +1086,24 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
         {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch w-full">
           {/* ROW 1 — wordmark centered independently of its date badge */}
-          <div className="relative grid min-h-16 grid-cols-3 items-center justify-items-center border-b border-neutral-100 py-3">
-            <div className="flex items-center justify-self-start">
+          <div className="relative flex min-h-16 items-center justify-between border-b border-border/30 py-3">
+            <div className="flex items-center">
               <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
 
             <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
               <button onClick={scrollToTop} className="group cursor-pointer">
-                <span className="font-brand text-2xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                <span className="font-brand text-xl lg:text-3xl font-normal tracking-[0.18em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
                   MAISON AFFLUENCY
                 </span>
               </button>
-              <span className="absolute left-full top-1/2 ml-5 flex -translate-y-1/2 items-center gap-5 lg:ml-6 lg:gap-6">
+              <span className="absolute left-full top-1/2 ml-5 hidden -translate-y-1/2 items-center gap-5 xl:flex xl:ml-6 xl:gap-6">
                 <span aria-hidden="true" className="h-3.5 w-px bg-foreground/25" />
                 <span className="font-body text-[7px] uppercase tracking-[0.3em] font-light text-foreground">Est. 2017</span>
               </span>
             </div>
 
-            <div
-              ref={utilityClusterRef}
-              className="relative flex items-center gap-5 justify-self-end"
-              style={utilityAlignOffset ? { marginRight: `${utilityAlignOffset}px` } : undefined}
-            >
+            <div className="relative z-20 flex shrink-0 items-center gap-5">
               {isContactRoute ? (
                 <button
                   type="button"
