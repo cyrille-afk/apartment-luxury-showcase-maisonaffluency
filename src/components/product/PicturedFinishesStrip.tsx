@@ -48,8 +48,13 @@ export default function PicturedFinishesStrip({
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
   const top = shown.filter((s) => !base.includes(s));
+  // Some older photos overlap a broad colourway group and an exact single-photo
+  // swatch. The exact match is the same one the selector displays.
+  const firstMatch = (items: Swatch[]) => items.length
+    ? [items.reduce((best, item) => item.image_indices.length < best.image_indices.length ? item : best)]
+    : [];
   const groups = topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
-    ? [{ label: baseLabel, items: base }, { label: topLabel, items: top }]
+    ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
     : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }];
 
   const Item = ({ label, s }: { label: string; s: Swatch }) => (
