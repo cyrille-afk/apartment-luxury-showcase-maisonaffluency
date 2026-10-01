@@ -270,6 +270,18 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
   (pickId === OOL_SHELF_PICK_ID || pickId === OOL_MINIBAR_PICK_ID) && /^suede leather\s*[-—–]/i.test(name);
 
 /**
+ * OOL 77 Mini bar — curator-defined finish combinations shown as one-tap
+ * preset chips above the Frame/Shelf/Drawer accordions. Names must match
+ * linked swatch names (accent- and dash-insensitive matching is applied).
+ */
+const OOL77_PRESETS: { id: string; name: string; finishes: { frame: string; shelf: string; drawer: string } }[] = [
+  { id: "preset-beige-wood", name: "Signature Beige & Wood", finishes: { frame: "Glossy Lacquer - Silky Beige", shelf: "Afrormosia", drawer: "Afrormosia" } },
+  { id: "preset-chalk-hazel", name: "Editorial Chalk & Hazel", finishes: { frame: "Cement Stuc - Light Grey", shelf: "Maple", drawer: "Suede Leather - Dark Hazel" } },
+  { id: "preset-charcoal-forest", name: "Moody Charcoal & Forest", finishes: { frame: "Cement Stuc - Black", shelf: "Afrormosia", drawer: "Suede Leather - Forest Green" } },
+  { id: "preset-plum-nude", name: "Plum & Nude Boudoir", finishes: { frame: "Cement Stuc - Charming Plum", shelf: "Maple", drawer: "Suede Leather - Soft Violet" } },
+];
+
+/**
  * Axis-driven grouping: a swatch belongs to a variant axis when its name IS
  * one of that axis's matrix values, is a colourway of it ("Cement Stuc - Hay"
  * for "Cement Stuc"), or the value is the generic material "Wood" and the
