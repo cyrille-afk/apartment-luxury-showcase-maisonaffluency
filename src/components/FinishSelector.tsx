@@ -537,6 +537,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
+  const selectedFrameItem = fabrics.find((f) => f.id === selectedFrameId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
   // Report the displayed swatch names upward (see onDisplayedFinishesChange).
@@ -598,13 +599,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   useEffect(() => {
     if (!onFinishesMissingImagesChange) return;
     const missing: string[] = [];
-    for (const item of [selectedWoodItem, selectedTopItem]) {
+    for (const item of [selectedWoodItem, selectedTopItem, selectedFrameItem]) {
       if (item && (!item.image_indices || item.image_indices.length === 0)) {
         missing.push(item.name);
       }
     }
     onFinishesMissingImagesChange(missing);
-  }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
+  }, [selectedWoodItem?.id, selectedTopItem?.id, selectedFrameItem?.id, onFinishesMissingImagesChange]);
 
   // Highlight the fabric/leather swatch whose mapped image_indices include
   // the image currently visible in the hero gallery. This is display-only:
@@ -750,11 +751,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
         // retexture the top material.
-        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède Leather" : f.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, f.name) ? "Suède leather" : isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
-        onWoodFinishChange?.(f.name);
+        onWoodFinishChange?.(isOolMinibar && f.category === "Wood" ? "Wood" : f.name);
         // Emit the frame swatch selection so the product page can (a) show it
         // in the price caption, (b) persist wood_fabric_id on the quote line
         // (drives the swatch thumbnail), and (c) use frame_price_cents as the
@@ -1212,10 +1213,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const handleSelect = (option: Fabric) => {
       setSelected(option.id);
       if (axis === "Top") {
-        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède Leather" : option.name);
+        onTopFinishChange?.(isOolDrawerLeather(pickId, option.name) ? "Suède leather" : isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onTopFinishSwatchChange?.({ name: option.name, image_url: option.image_url ?? null });
       } else {
-        onWoodFinishChange?.(option.name);
+        onWoodFinishChange?.(isOolMinibar && option.category === "Wood" ? "Wood" : option.name);
         onWoodFinishPricingChange?.({
           id: option.id,
           name: option.name,
