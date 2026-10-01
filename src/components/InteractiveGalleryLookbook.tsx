@@ -607,8 +607,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
   const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
     const product = resolveHotspotProduct(hotspot);
-    if (!product || product.restricted_gallery_pin) return [];
-    const pool = allPicks.filter((pick) => publicPickIds.has(pick.id) && pick.id !== product.id && pick.image_url);
+    // Unmatched or trade-only pins still get public alternatives from the pin's own object type.
+    const ownProduct = product && !product.restricted_gallery_pin ? product : null;
+    const pool = allPicks.filter((pick) => publicPickIds.has(pick.id) && pick.id !== product?.id && pick.image_url);
     // Strict type-gating. The hotspot's own object name wins (unmapped pins can
     // fuzzy-resolve to an unrelated pick); then the product's exact subcategory.
     const HOTSPOT_TYPES: Array<[RegExp, string[]]> = [
@@ -635,18 +636,18 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     const hotspotName = normalize(hotspot?.product_name || "");
     let targets = HOTSPOT_TYPES.find(([re]) => re.test(hotspotName))?.[1];
     if (!targets) {
-      const sub = normalize(product.subcategory || "");
+      const sub = normalize(ownProduct?.subcategory || "");
       targets = sub ? [sub] : [];
     }
-    const selfTitle = normalize(product.title || hotspot?.product_name || "");
+    const selfTitle = normalize(ownProduct?.title || hotspot?.product_name || "");
     const notSelf = (pick: typeof pool[number]) => normalize(pick.title || "") !== selfTitle && normalize(pick.title || "") !== hotspotName;
     const out: typeof pool = [];
     const add = (list: typeof pool) => list.forEach((pick) => { if (out.length < 3 && notSelf(pick) && !out.some((o) => o.id === pick.id)) out.push(pick); });
     // Fallback chain so the tray is never empty: hotspot type → product subcategory → product category.
     if (targets.length) add(pool.filter((pick) => targets!.includes(normalize(pick.subcategory || ""))));
-    const ownSub = normalize(product.subcategory || "");
+    const ownSub = normalize(ownProduct?.subcategory || "");
     if (ownSub) add(pool.filter((pick) => normalize(pick.subcategory || "") === ownSub));
-    const ownCat = normalize(product.category || "");
+    const ownCat = normalize(ownProduct?.category || "");
     if (ownCat) add(pool.filter((pick) => normalize(pick.category || "") === ownCat));
     return out;
   };
