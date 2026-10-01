@@ -197,6 +197,27 @@ const TradeLogin = () => {
             {googleLoading ? "Connecting" : "Continue with Google"}
           </button>
 
+          {/* Persistent Google sign-in error with retry — a toast alone
+              disappears and leaves the member with no way forward. */}
+          {googleError && (
+            <div role="alert" className="mt-4 border border-destructive/40 bg-destructive/5 px-4 py-3.5">
+              <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-destructive">
+                Google sign-in didn't complete
+              </p>
+              <p className="mt-1.5 font-body text-sm text-foreground/80">
+                {googleError}
+              </p>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className="mt-3 w-full py-3 border border-foreground/40 font-body text-xs uppercase tracking-[0.3em] text-foreground hover:bg-foreground/[0.03] transition-colors disabled:opacity-50"
+              >
+                {googleLoading ? "Retrying" : "Try Again"}
+              </button>
+            </div>
+          )}
+
           {/* Low-contrast links */}
           <div className="mt-10 space-y-3">
             <p>
