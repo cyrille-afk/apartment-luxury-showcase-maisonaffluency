@@ -1199,9 +1199,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     noteGalleryIndex(currentGalleryIndex);
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
-    if (!galleryInteractedRef.current) return;
+    // Mini bar: the dropdowns always mirror the photo on screen, from first load.
+    if (!galleryInteractedRef.current && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (!isOolMinibar && isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
@@ -1218,7 +1219,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const coverHit = hit(visibleCoverTiles);
     if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGalleryIndex, fabrics]);
+  }, [currentGalleryIndex, fabrics, isOolMinibar, frameTiles.length, drawerTiles.length]);
 
 
 
@@ -1257,11 +1258,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
             {args.label}
           </span>
-          {args.selectedName && (
-            <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right mr-3">
-              {args.selectedName}
-            </span>
-          )}
+          {args.selectedName && (() => {
+            const chip = args.tiles.find((t) => t.name === args.selectedName)?.image_url;
+            return (
+              <span className="flex items-center gap-2 min-w-0 max-w-[55%] mr-3">
+                {chip && (
+                  <span
+                    className="block w-3.5 h-3.5 shrink-0 rounded-full bg-cover bg-center ring-1 ring-border/60"
+                    style={{ backgroundImage: `url(${chip})` }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="font-body text-sm text-foreground/85 truncate text-right">{args.selectedName}</span>
+              </span>
+            );
+          })()}
           <ChevronRight
             className={cn(
               "w-4 h-4 text-muted-foreground transition-transform shrink-0",
@@ -1451,46 +1462,6 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   return (
     <TooltipProvider>
       <div className={className} onMouseLeave={restoreLockedPreview}>
-      {isOolMinibar && frameTiles.length > 0 && (
-        <div className="border-t border-border/60 py-4 space-y-3">
-          <p className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-            Curated Combinations
-          </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {OOL77_PRESETS.map((preset) => {
-              const tiles = presetTilesFor(preset);
-              const chips = [tiles.frame, tiles.shelf, tiles.drawer].filter(Boolean) as Fabric[];
-              const isActive = activePresetId === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => applyPreset(preset)}
-                  aria-pressed={isActive}
-                  title={`${preset.name} — Frame: ${preset.finishes.frame}, Shelf: ${preset.finishes.shelf}, Drawer: ${preset.finishes.drawer}`}
-                  className={cn(
-                    "flex flex-col items-start gap-2 p-2 text-left transition-all",
-                    isActive ? "ring-1 ring-inset ring-foreground" : "ring-1 ring-inset ring-border/60 hover:ring-border"
-                  )}
-                >
-                  <span className="flex gap-1">
-                    {chips.map((chip, i) => (
-                      <span
-                        key={`${chip.id}-${i}`}
-                        className="block w-6 h-6 bg-cover bg-center bg-muted/40 ring-1 ring-inset ring-border/40"
-                        style={{ backgroundImage: `url(${chip.image_url || ""})` }}
-                      />
-                    ))}
-                  </span>
-                  <span className="font-body text-[11px] leading-snug text-foreground/85">
-                    {preset.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
       {isOolMinibar && frameTiles.length > 0 && renderAccordion({
         isOpen: openFrame,
         onToggle: () => setOpenFrame((v) => !v),
