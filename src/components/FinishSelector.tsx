@@ -681,10 +681,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (isRugProduct) return;
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
-    // Mini bar: the dropdowns always mirror the photo on screen, from first load.
-    if (!galleryInteractedRef.current && !isOolMinibar) return;
+    if (!galleryInteractedRef.current) return;
     const oneBased = currentGalleryIndex + 1;
-    if (!isOolMinibar && isSharedSlide(oneBased)) return;
+    if (isSharedSlide(oneBased)) return;
     const match = fabrics.find(
       (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
     );
@@ -1200,9 +1199,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     noteGalleryIndex(currentGalleryIndex);
     if (isRugProduct) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
-    if (!galleryInteractedRef.current) return;
+    // Mini bar: the dropdowns always mirror the photo on screen, from first load.
+    if (!galleryInteractedRef.current && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased)) return;
+    if (!isOolMinibar && isSharedSlide(oneBased)) return;
     const hit = (list: Fabric[]) =>
       list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
 
