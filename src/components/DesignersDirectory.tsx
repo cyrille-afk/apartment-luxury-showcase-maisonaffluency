@@ -2157,9 +2157,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               <div className="h-px bg-border/60 mb-5" />
               <div
                 ref={letterBarRef}
-                /* Fixed row height: taller letters grow into the existing
-                   whitespace instead of pushing the card grid below downward. */
-                className="flex items-center justify-between h-5"
+                className="flex items-center justify-between h-11"
               >
                 {LETTERS.map((letter) => {
                   const isActive = activeLetters.has(letter);
@@ -2170,7 +2168,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                       onClick={() => jumpToLetter(letter)}
                       disabled={!isActive}
                       aria-disabled={!isActive}
-                      className={`font-serif text-[26px] lg:text-[34px] leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/15 cursor-default"}`}
+                      className={`font-serif text-[13px] leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/15 cursor-default"}`}
                     >
                       {letter}
                     </button>
