@@ -274,6 +274,19 @@ const isOolDrawerLeather = (pickId: string | null | undefined, name: string) =>
  * preset chips above the Frame/Shelf/Drawer accordions. Names must match
  * linked swatch names (accent- and dash-insensitive matching is applied).
  */
+const encodeMinibarConfig = (frame: string, drawer: string) =>
+  btoa(unescape(encodeURIComponent(`${frame}|${drawer}`))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const decodeMinibarConfig = (raw: string | null): { frame: string; drawer: string } | null => {
+  if (!raw) return null;
+  try {
+    const b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
+    const [frame, drawer] = decodeURIComponent(escape(atob(b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=")))).split("|");
+    return frame && drawer ? { frame, drawer } : null;
+  } catch {
+    return null;
+  }
+};
+
 const OOL77_PRESETS: { id: string; name: string; finishes: { frame: string; shelf: string; drawer: string } }[] = [
   { id: "preset-beige-wood", name: "Signature Beige & Wood", finishes: { frame: "Glossy Lacquer - Silky Beige", shelf: "Afrormosia", drawer: "Afrormosia" } },
   { id: "preset-chalk-hazel", name: "Editorial Chalk & Hazel", finishes: { frame: "Cement Stuc - Light Grey", shelf: "Maple", drawer: "Suede Leather - Dark Hazel" } },
@@ -1103,6 +1116,31 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       onSwatchImagesChange?.(null, { committed: true, swatchName: hero?.name ?? preset.name });
     }
   };
+
+  // Mini bar shareable configuration: ?c=<base64url "frame|drawer"> restores
+  // the sender's Frame + Drawer picks on landing, and every pick updates ?c=
+  // so the Share menu forwards the exact build.
+  const sharedConfigAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!isOolMinibar || sharedConfigAppliedRef.current) return;
+    if (frameTiles.length === 0 || drawerTiles.length === 0) return;
+    sharedConfigAppliedRef.current = true;
+    const decoded = decodeMinibarConfig(new URLSearchParams(window.location.search).get("c"));
+    if (!decoded) return;
+    applyPreset({ id: "shared", name: "Shared configuration", finishes: { frame: decoded.frame, shelf: shelfTiles[0]?.name ?? "Wood", drawer: decoded.drawer } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOolMinibar, frameTiles.length, drawerTiles.length]);
+  useEffect(() => {
+    if (!isOolMinibar || !sharedConfigAppliedRef.current) return;
+    const frame = frameTiles.find((t) => t.id === selectedFrameId)?.name;
+    const drawer = drawerTiles.find((t) => t.id === selectedTopId)?.name;
+    if (!frame || !drawer) return;
+    const params = new URLSearchParams(window.location.search);
+    const next = encodeMinibarConfig(frame, drawer);
+    if (params.get("c") === next) return;
+    params.set("c", next);
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}`);
+  }, [isOolMinibar, selectedFrameId, selectedTopId, frameTiles, drawerTiles]);
 
   // Mini bar: the Shelf axis has a single value ("Wood"), so commit it
   // automatically once the swatches load — no third dropdown is shown.
