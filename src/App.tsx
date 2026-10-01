@@ -451,6 +451,7 @@ function PreviewViewContinuity() {
 
     let timer: number | null = null;
     const save = () => {
+      if (isTransientAuthPath(location.pathname)) return;
       if (timer) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         try {

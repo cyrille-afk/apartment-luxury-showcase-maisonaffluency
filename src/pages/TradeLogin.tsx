@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,21 @@ const TradeLogin = () => {
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+
+  // Already signed in (e.g. returning from Google, or a reload restored this
+  // screen) — step aside to the requested destination instead of trapping the
+  // member on the sign-in form.
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("next") || params.get("redirect") || "";
+    const safe = requested.startsWith("/") && !requested.startsWith("//") && !requested.startsWith("/trade/login")
+      ? requested
+      : "/trade";
+    try { sessionStorage.removeItem("maison:oauth-return-path"); } catch { /* noop */ }
+    navigate(safe, { replace: true });
+  }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
