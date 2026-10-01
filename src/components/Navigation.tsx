@@ -49,7 +49,7 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 import CartNavButton from "@/components/CartNavButton";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
-type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "decor" | "office";
+type RoomNavKey = "living" | "dining" | "bedroom" | "lighting" | "office" | "decor";
 
 interface RoomNavCategory {
   label: string;
