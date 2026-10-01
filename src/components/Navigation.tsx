@@ -217,10 +217,8 @@ interface RoomDropdownPanelProps {
 
 const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
-    const first = roomNavigation[room]?.[0]?.label;
-    return first ? { [`0-${first}`]: true } : {};
-  });
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [openRooms, setOpenRooms] = useState<Record<number, boolean>>({});
   const toggleCategory = (key: string) => setOpenCategories((prev) => ({ ...prev, [key]: !prev[key] }));
   void activeCategory; void onSelectCategory;
   return (
@@ -231,12 +229,19 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <div className="flex flex-col">
           {roomFlyouts[room]?.map((link, index) => {
             const categories = room === "living" && index === 1 ? officeNavigation : roomNavigation[room];
+            const roomOpen = !!openRooms[index];
             return (
             <div key={link.slug} className="mb-6 last:mb-0">
-              <Button type="button" variant="ghost" onMouseEnter={() => setSelectedRoom(index)} onFocus={() => setSelectedRoom(index)} onClick={() => onRoomNavigate(link.slug)} className="h-auto w-full justify-start gap-2 rounded-none px-0 py-1.5 font-body text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-transparent">
-                <ChevronDown className="size-3 shrink-0 text-muted-foreground" strokeWidth={1.25} />{link.label}
-              </Button>
-                <div className="ml-1.5 mt-2 flex flex-col space-y-1 border-l border-border/60 pl-4">
+              <div className="flex items-center justify-between gap-2">
+                <Button type="button" variant="ghost" onMouseEnter={() => setSelectedRoom(index)} onFocus={() => setSelectedRoom(index)} onClick={() => onRoomNavigate(link.slug)} className="h-auto min-h-8 w-full justify-start gap-2 rounded-none px-0 py-1.5 font-body text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-transparent">
+                  {link.label}
+                </Button>
+                <Button type="button" variant="ghost" aria-expanded={roomOpen} aria-label={`${roomOpen ? "Collapse" : "Expand"} ${link.label} categories`} onMouseEnter={() => setSelectedRoom(index)} onClick={() => setOpenRooms((prev) => ({ ...prev, [index]: !prev[index] }))} className="h-auto min-h-8 w-8 shrink-0 justify-center rounded-none p-0 hover:bg-transparent">
+                  <ChevronDown className={cn("size-3 shrink-0 text-muted-foreground transition-transform", roomOpen && "rotate-180")} strokeWidth={1.25} />
+                </Button>
+              </div>
+              {roomOpen && (
+                <div className="ml-1.5 mt-2 flex flex-col space-y-1 border-l border-border/60 pl-4 animate-fade-in">
                   {categories.map((item) => {
                     const key = `${index}-${item.label}`;
                     const hasItems = item.subcategories.length > 0;
@@ -265,6 +270,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                     );
                   })}
                 </div>
+              )}
             </div>
             );
           })}
