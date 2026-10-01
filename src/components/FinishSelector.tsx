@@ -702,8 +702,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     );
     if (!match) return;
 
-    if (userPickedAxesRef.current.fabric || selectedFabricId === match.id) return;
-    setSelectedFabricId(match.id);
+    if (userPickedAxesRef.current.fabric || selectedFabricId === match?.id) return;
+    if (match || photoLedFinishes) setSelectedFabricId(match?.id ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabrics, currentGalleryIndex, photoLedFinishes]);
 
@@ -1259,9 +1259,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       if (!picked.frame && frameHit && selectedFrameId !== frameHit.id) setSelectedFrameId(frameHit.id);
     }
     const woodHit = hit(visibleWoodTiles);
-    if (!picked.wood && woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
+    if (!picked.wood && selectedWoodId !== woodHit?.id && (woodHit || photoLedFinishes)) setSelectedWoodId(woodHit?.id ?? null);
     const topHit = hit(visibleTopTiles);
-    if (!picked.top && topHit && selectedTopId !== topHit.id) setSelectedTopId(topHit.id);
+    if (!picked.top && selectedTopId !== topHit?.id && (topHit || photoLedFinishes)) setSelectedTopId(topHit?.id ?? null);
     const coverHit = hit(visibleCoverTiles);
     if (!picked.cover && coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
