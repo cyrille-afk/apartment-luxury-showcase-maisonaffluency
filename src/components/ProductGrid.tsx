@@ -633,11 +633,10 @@ function singularizeSub(s: string): string {
               <div className="hidden md:flex items-center gap-1 rounded-full border border-border bg-background/80 p-1 shadow-sm backdrop-blur-sm">
                 {([false, true] as const).map((dense) => {
                   const active = (gridCols === 4) === dense;
-                  const Icon = dense ? LayoutGrid : Grid3X3;
                   return (
-                    <button key={String(dense)} onClick={() => setGridCols(dense ? 4 : 3)} aria-label={dense ? "Denser grid" : "Standard grid"} aria-pressed={active}
-                      className={`rounded-full p-2 transition-all ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-                      <Icon size={15} strokeWidth={1.5} />
+                    <button key={String(dense)} onClick={() => setGridCols(dense ? 4 : 3)} aria-label={dense ? "4 columns" : "3 columns"} aria-pressed={active}
+                      className={`rounded-full px-3 py-1 font-body text-[10px] uppercase tracking-widest transition-all ${active ? "bg-foreground font-medium text-background" : "text-muted-foreground hover:text-foreground"}`}>
+                      {dense ? "4 Col" : "3 Col"}
                     </button>
                   );
                 })}
@@ -670,7 +669,7 @@ function singularizeSub(s: string): string {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (roomFiltersOpen ? (gridCols === 4 ? 'md:grid-cols-3' : 'md:grid-cols-2') : (gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3')) : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (gridCols === 4 ? 'md:grid-cols-3 lg:grid-cols-4' : 'lg:grid-cols-3') : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
         >
           {filtered.map((item, idx) => (
             <motion.div
