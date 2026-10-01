@@ -2535,9 +2535,7 @@ const PublicProductPageContent: React.FC = () => {
                   );
                 })()}
               />
-              {designer.slug === "bieke-casteleyn" && (
-                <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} />
-              )}
+              <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
 
 
 
@@ -2581,7 +2579,7 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Mobile/PWA: Trade-first flow with finish selector below image. */}
                   <VariantSelectorsProvider
-                    photoLedFinishes={designer.slug === "bieke-casteleyn"}
+                    photoLedFinishes
                     product={product}
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
@@ -2800,7 +2798,7 @@ const PublicProductPageContent: React.FC = () => {
                   </div>
 
                   <VariantSelectorsProvider
-                    photoLedFinishes={designer.slug === "bieke-casteleyn"}
+                    photoLedFinishes
                     product={product}
                     onMaterialChange={handleMaterialChange}
                     galleryActiveIndex={galleryActiveIndex}
