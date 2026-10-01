@@ -399,6 +399,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [activeSection, setActiveSection] = useState("#home");
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categoryPanelOpen, setCategoryPanelOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [contactExpanded, setContactExpanded] = useState(false);
@@ -764,7 +765,26 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
     if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
   };
 
-  return <><nav className={cn(
+  const closeAllDropdowns = () => {
+    if (roomMenuCloseTimer.current !== null) window.clearTimeout(roomMenuCloseTimer.current);
+    if (tradeMenuCloseTimer?.current !== null) window.clearTimeout(tradeMenuCloseTimer.current);
+    setMegaMenuOpen(false);
+    setActiveRoomMenu(null);
+    setTradeMenuOpen(false);
+    setAccountMenuOpen(false);
+  };
+
+  const anyDropdownOpen = megaMenuOpen || tradeMenuOpen || accountMenuOpen;
+
+  return <>
+    {anyDropdownOpen && (
+      <div
+        aria-hidden="true"
+        onClick={closeAllDropdowns}
+        className="fixed inset-0 z-40 bg-background/25 backdrop-blur-[6px] animate-fade-in"
+      />
+    )}
+    <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
       location.pathname === "/trade-program"
