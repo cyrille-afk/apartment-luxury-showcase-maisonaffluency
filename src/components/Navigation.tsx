@@ -436,6 +436,26 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  const desktopRoomNavRef = useRef<HTMLElement>(null);
+  const lightingTriggerRef = useRef<HTMLButtonElement>(null);
+  const decorTriggerRef = useRef<HTMLButtonElement>(null);
+  const [lightingDecorCenter, setLightingDecorCenter] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const nav = desktopRoomNavRef.current;
+      const lighting = lightingTriggerRef.current;
+      const decor = decorTriggerRef.current;
+      if (!nav || !lighting || !decor) return;
+      const lightingRect = lighting.getBoundingClientRect();
+      const decorRect = decor.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+      setLightingDecorCenter((lightingRect.left + lightingRect.width / 2 + decorRect.left + decorRect.width / 2) / 2 - navRect.left);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    document.fonts.ready.then(measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
   useLayoutEffect(() => {
     if (!megaMenuOpen || !activeRoomMenu || !megaMenuRef.current) return;
     const measure = () => {
@@ -1265,7 +1285,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
           </div>
 
           {/* ROW 2 — primary navigation bar */}
-          <nav className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
+          <nav ref={desktopRoomNavRef} className="relative mx-auto flex min-h-12 w-full max-w-[1400px] items-center justify-center gap-10 px-2 py-2 lg:gap-14 lg:px-6 xl:gap-20 xl:px-0">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
@@ -1294,6 +1314,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   onMouseLeave={scheduleRoomMenuClose}
                 >
                   <Button
+                    ref={room === "lighting" ? lightingTriggerRef : room === "decor" ? decorTriggerRef : undefined}
                     type="button"
                     variant="ghost"
                      onMouseEnter={() => { if (room === "living" || room === "dining" || room === "bedroom" || room === "office") preloadRoomMenuPhotos(); openRoomMenu(room); }}
@@ -1318,8 +1339,8 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                     <div
                       ref={megaMenuRef}
                       data-room-menu="decor"
-                      className="absolute left-1/2 top-full z-50 mt-1 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
-                      style={{ translate: "-50% 0", animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                      className="absolute top-full z-50 mt-1 h-auto w-[min(650px,calc(100vw-48px))] overflow-visible bg-background shadow-xl"
+                      style={{ left: lightingDecorCenter ?? "50%", translate: "-50% 0", animation: "megaMenuReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
                     >
                       <style>{`
                         @keyframes megaMenuReveal {
@@ -1367,7 +1388,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   )}
 
                   {room === "lighting" && megaMenuOpen && activeRoomMenu === room && (
-                    <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
+                    <div ref={megaMenuRef} data-room-menu={room} className="absolute top-full z-50 mt-1 w-[min(650px,calc(100vw-48px))] bg-background shadow-xl" style={{ left: lightingDecorCenter ?? "50%", translate: "-50% 0" }}>
                       <div className="flex min-h-96 items-stretch overflow-hidden">
                         <div className="w-1/2 shrink-0 border-r border-border/60 px-9 py-8">
                           {roomNavigation.lighting.map((item) => (
