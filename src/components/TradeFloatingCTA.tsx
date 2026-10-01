@@ -31,7 +31,7 @@ const TradeFloatingCTA = () => {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block pointer-events-none"
+      className="fixed inset-x-0 bottom-0 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block pointer-events-none [body[data-nav-dropdown-open]_&]:hidden"
       role="banner"
     >
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24 relative h-0">
