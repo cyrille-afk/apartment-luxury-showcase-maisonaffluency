@@ -98,29 +98,33 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
 
   // Strip cache-busting query params for the human-readable share text.
   // The full cache-busted url is still used for copy/link previews.
-  const cleanUrl = url.split("?")[0];
+  // Carry a shared finish configuration (?c=…) so the recipient lands on the same build.
+  const shareLink = () => {
+    const configParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("c") : null;
+    return url.split("?")[0] + (configParam ? `?c=${encodeURIComponent(configParam)}` : "");
+  };
 
   // Extract a body line without the trailing URL so native share sheets don't
   // duplicate the link (iOS appends the separate `url` field to `text`).
   const bodyText = message
-    .replace(url, cleanUrl)
-    .replace(new RegExp(`\\s*[:—-]\\s*${cleanUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`), "")
+    .replace(url, url.split("?")[0])
+    .replace(new RegExp(`\\s*[:—-]\\s*${url.split("?")[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`), "")
     .trim();
 
   const openWhatsApp = () => {
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${bodyText} ${cleanUrl}`)}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${bodyText} ${shareLink()}`)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 
   const openPinterest = () => {
-    const pinUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(cleanUrl)}&description=${encodeURIComponent(bodyText)}`;
+    const pinUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(shareLink())}&description=${encodeURIComponent(bodyText)}`;
     window.open(pinUrl, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
 
   const openFacebook = () => {
-    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cleanUrl)}`;
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareLink())}`;
     window.open(fbUrl, "_blank", "noopener,noreferrer");
     setOpen(false);
   };
@@ -138,7 +142,7 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
           const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
           const file = new File([blob], `${(imageName || title).replace(/[^\w\-]+/g, "-")}.${ext}`, { type: blob.type });
           if (navigator.canShare?.({ files: [file] })) {
-            await navigator.share({ title, text: bodyText, url: cleanUrl, files: [file] });
+            await navigator.share({ title, text: bodyText, url: shareLink(), files: [file] });
             return;
           }
         } catch {
@@ -146,7 +150,7 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
         }
       }
       try {
-        await navigator.share({ title, text: bodyText, url: cleanUrl });
+        await navigator.share({ title, text: bodyText, url: shareLink() });
       } catch {}
     } else {
       setOpen(!open);
