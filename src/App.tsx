@@ -256,9 +256,12 @@ const queryClient = new QueryClient({
 const PREVIEW_VIEW_STATE_KEY = "ma:preview-view-state";
 let previewLocationRestored = false;
 
-/** Sign-in / recovery screens must never be remembered or restored on reload. */
+/** Sign-in / recovery screens must never be remembered or restored on reload.
+ *  /trade-program is included: its landing shows the sign-in gate to signed-out
+ *  visitors, so restoring it on refresh would trap members on "Trade Program
+ *  Sign In" instead of the page they chose. */
 function isTransientAuthPath(path: string): boolean {
-  return /^\/(trade\/login|reset-password|auth|~oauth)(\/|$)/.test(path);
+  return /^\/(trade\/login|trade-program|reset-password|auth|~oauth)(\/|$)/.test(path);
 }
 
 function getPreviewAnchorId(): string | undefined {
