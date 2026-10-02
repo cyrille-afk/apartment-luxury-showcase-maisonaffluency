@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import { GlobalCanonical } from "@/components/GlobalCanonical";
-import AnalyticsRouteTracker from "@/components/AnalyticsRouteTracker";
 import { BrowserRouter, Navigate, Routes, Route, useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -725,7 +724,6 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <GlobalCanonical />
-              <AnalyticsRouteTracker />
               <HomeRouteSync />
               <SameOriginLinkGuard />
               <RouteScrollLockFailsafe />

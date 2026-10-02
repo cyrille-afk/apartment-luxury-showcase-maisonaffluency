@@ -28,6 +28,10 @@
     "name": "Arredoluce"
   },
   {
+    "slug": "rowin-atelier",
+    "name": "RoWin' Atelier"
+  },
+  {
     "slug": "nicolas-aubagnac",
     "name": "Nicolas Aubagnac"
   },
@@ -184,10 +188,6 @@
     "name": "Jean-Michel Frank"
   },
   {
-    "slug": "kira",
-    "name": "Made in Kira - Roman Frankel"
-  },
-  {
     "slug": "poltrona-frau",
     "name": "Poltrona Frau"
   },
@@ -232,10 +232,6 @@
     "name": "Sebastian Herkner"
   },
   {
-    "slug": "rowin-atelier",
-    "name": "RoWin' Atelier — Rochette Frederic & Winkler Hervé"
-  },
-  {
     "slug": "iksel",
     "name": "Iksel"
   },
@@ -254,6 +250,10 @@
   {
     "slug": "kerstens",
     "name": "Kerstens"
+  },
+  {
+    "slug": "kira",
+    "name": "Made in Kira"
   },
   {
     "slug": "alexander-lamont",
@@ -478,10 +478,6 @@
   {
     "slug": "maarten-vrolijk",
     "name": "Maarten Vrolijk"
-  },
-  {
-    "slug": "jeremy-maxwell-wintrebert",
-    "name": "Jeremy Maxwell Wintrebert"
   },
   {
     "slug": "dan-yeffet",
