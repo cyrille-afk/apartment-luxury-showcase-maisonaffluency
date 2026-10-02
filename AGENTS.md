@@ -1,5 +1,5 @@
-- Mobile homepage and /gallery use the original `Gallery`; desktop uses `InteractiveGalleryLookbook`.
-- Derive desktop lookbook side picks from each photo's `gallery_hotspots` coordinates and resolve details against the public catalog with image-only fallback; this keeps slide picks synchronized with their visible objects without exposing trade-only catalog entries.
+- Mobile homepage and /gallery use `Gallery`; desktop uses `InteractiveGalleryLookbook`.
+- Derive desktop side picks from photo hotspot coordinates against the public catalog, with image fallback; never expose trade-only picks.
 - Desktop gallery chevrons cross four photos, then wrap through seven rooms; leave mobile accordion untouched.
 - Hide desktop side picks only on first Living photo; keep all other one-column picks and curated order; preserve pins.
 - Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
@@ -27,4 +27,5 @@
 - Curator Notes on public and Trade product pages stay in a vertical full-width list under the gallery with the lead note as a softly tinted panel; the product lightbox uses a separate three-column layout with only the lead header tinted — these are distinct presentation contexts.
 - Keep supplier PDFs labelled Fabric & Finishes in the finish-document menu, separate from general spec sheets, so adding a source PDF does not replace the generated swatch-selection PDF or mislabel it in the Trade workspace.
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
-- Room designer facets include own designer, parent house, and any published designer named exactly in the subtitle — credited makers stay filterable.
+- Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
+- Render edition labels via `editionLabel` and dedupe Ecart badges there — stale catalogue spellings must not leak into UI.
