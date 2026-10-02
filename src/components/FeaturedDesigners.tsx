@@ -1353,7 +1353,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         title: "Soleil Coffee Table c. 1930",
         subtitle: "1930",
         category: "Furniture",
-        tags: ["Re-edition", "Furniture", "Coffee Table"],
+        tags: ["REEDITION", "Furniture", "Coffee Table"],
         materials: "Straw Marquetry",
         dimensions: "Ø 85 × H 35 cm",
         description: "The Soleil Coffee Table, meticulously re-edited by Ecart Paris under the discerning eye of Andrée Putman, is a seminal piece of luxury furniture embodying Jean-Michel Frank's enduring philosophy of simplicity as the ultimate sophistication. Crafted in 1930, this iconic Art Deco coffee table is a testament to the unparalleled artistry of straw marquetry, one of Frank's most cherished materials. The sunburst pattern, a hallmark of his innovative aesthetic, radiates from the centre, transforming humble straw into a dazzling display of refined luxury. This collectible design is not merely a table—it is a piece of design history, reflecting Frank's pioneering spirit in creating a new lexicon for high-end interiors. Through Ecart Paris, this faithful re-edition allows discerning collectors to experience the quiet grandeur and meticulous craftsmanship that defined Jean-Michel Frank's unparalleled contribution to 20th-century design.",

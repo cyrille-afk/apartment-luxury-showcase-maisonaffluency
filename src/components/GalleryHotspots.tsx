@@ -6,6 +6,7 @@ import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSqua
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -189,13 +190,13 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     // Static data
     for (const p of getAllTradeProducts()) {
       const key = normalizeName(p.product_name);
-      if (p.edition) editions.set(key, p.edition);
+      if (p.edition) editions.set(key, formatEditionLabel(p) || p.edition);
       if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
     // DB data (overrides static)
     for (const p of dbPicks) {
       const key = normalizeName(p.title);
-      if (p.edition) editions.set(key, p.edition);
+      if (p.edition) editions.set(key, formatEditionLabel(p) || p.edition);
       if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
     return { editionLookup: editions, pdfLookup: pdfs };
