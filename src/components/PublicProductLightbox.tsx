@@ -1054,11 +1054,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
               Curator Notes
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
               <div className="flex gap-4">
-                <Award className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <Award className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
-                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                  <p className="mb-2.5 inline-flex items-center rounded-[1px] bg-muted px-3 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
                     Design Significance
                   </p>
                   <p className="font-body text-xs leading-normal text-foreground/85">
@@ -1068,9 +1068,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               <div className="flex gap-4">
-                <Compass className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <Compass className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
-                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                  <p className="mb-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     Spatial Calculation
                   </p>
                   <p className="font-body text-xs leading-normal text-foreground/85">
@@ -1080,9 +1080,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               </div>
 
               <div className="flex gap-4">
-                <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" strokeWidth={1.5} />
+                <FileText className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
-                  <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                  <p className="mb-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     Historical Provenance
                   </p>
                   <p className="font-body text-xs leading-normal text-foreground/85">
