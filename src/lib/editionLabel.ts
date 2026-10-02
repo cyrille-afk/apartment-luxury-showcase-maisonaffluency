@@ -103,5 +103,8 @@ export function getHouseEditionLabel(input: {
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
+  // On a child designer's own page the card already credits the house.
+  const page = normalizeHouseName(input.pageDesignerName);
+  if (page && page !== normalizeHouseName(house)) return ECART_REEDITION_LABEL;
   return /(?:^|\s)[ée]ditions?$/i.test(house) ? house : `${house} Edition`;
 }
