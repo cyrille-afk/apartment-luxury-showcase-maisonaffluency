@@ -2636,6 +2636,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
+                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="block mb-2 font-body text-[10px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--edition-foreground))]">{tags.join(" · ")}</span> : null; })()}
                       <div className="flex flex-col items-start">
                         <Link
                           to={`/designers/${designer.slug}`}
@@ -2655,16 +2656,6 @@ const PublicProductPageContent: React.FC = () => {
                             </span>
                           )}
                         </h1>
-                        {(() => {
-                          const editionLabel = formatEditionLabel(product as any);
-                          if (!editionLabel && !isEcartProduct) return null;
-                          return (
-                            <span className="flex flex-col items-end gap-1 shrink-0 pb-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
-                              {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
-                              {editionLabel && <span>{editionLabel}</span>}
-                            </span>
-                          );
-                        })()}
                       </div>
 
                       {isTradeVerifiedView && (
@@ -2738,6 +2729,7 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
+                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="block mb-2 font-body text-[10px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--edition-foreground))]">{tags.join(" · ")}</span> : null; })()}
                     <div className="flex flex-col items-start">
                       <Link
                         to={`/designers/${designer.slug}`}
@@ -2757,16 +2749,6 @@ const PublicProductPageContent: React.FC = () => {
                           </span>
                         )}
                       </h1>
-                      {(() => {
-                        const editionLabel = formatEditionLabel(product as any);
-                        if (!editionLabel && !isEcartProduct) return null;
-                        return (
-                          <span className="flex flex-col items-end gap-1 shrink-0 pb-1 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
-                            {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
-                            {editionLabel && <span>{editionLabel}</span>}
-                          </span>
-                        );
-                      })()}
                     </div>
 
                     {isTradeVerifiedView && (

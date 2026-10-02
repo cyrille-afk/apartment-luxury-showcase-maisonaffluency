@@ -2113,6 +2113,7 @@ const TradeProductPage: React.FC = () => {
           <div className="relative flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
+                {(() => { const ed = formatEditionLabel(product); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="block mb-2 font-body text-[10px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--edition-foreground))]">{tags.join(" · ")}</span> : null; })()}
                 <Link
                   to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
                   onClick={() => {
@@ -2131,16 +2132,6 @@ const TradeProductPage: React.FC = () => {
                       </span>
                     )}
                   </h1>
-                  {(() => {
-                    const editionLabel = formatEditionLabel(product);
-                    if (!editionLabel && !isEcartProduct) return null;
-                    return (
-                      <span className="flex flex-col items-end gap-1 shrink-0 pb-0.5 font-body text-[10px] font-normal uppercase tracking-[0.15em] text-foreground text-right">
-                        {isEcartProduct && <span>{ECART_REEDITION_LABEL}</span>}
-                        {editionLabel && <span>{editionLabel}</span>}
-                      </span>
-                    );
-                  })()}
                 </div>
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
