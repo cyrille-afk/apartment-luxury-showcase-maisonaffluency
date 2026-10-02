@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurationThread } from "@/hooks/useCurationThread";
+import { MessageResponse } from "@/components/ai-elements/message";
 import { FlashSkeleton, FrontierSkeleton } from "@/components/CuratorialGuideRouter";
 
 const QUICK_STARTS = [
@@ -175,7 +176,7 @@ export default function TradeConcierge() {
                       <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                         {m.route === "FLASH" ? "Swift answer" : "Deep curation"}
                       </p>
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{m.content}</div>
+                      <MessageResponse className="text-[15px] leading-relaxed text-foreground">{m.content}</MessageResponse>
                     </article>
                   ) : null,
                 )}
