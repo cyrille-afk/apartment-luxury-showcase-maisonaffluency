@@ -10,6 +10,7 @@ export interface DbProductItem {
   designerName: string;
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
+  reeditionBy?: string;
 }
 
 /**
@@ -111,6 +112,7 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
           designerName: designer.display_name || designer.name,
           designerId: designer.slug || designer.id,
           section,
+          reeditionBy: designer.founder || undefined,
         });
       }
 
