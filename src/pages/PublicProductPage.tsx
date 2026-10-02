@@ -2549,7 +2549,9 @@ const PublicProductPageContent: React.FC = () => {
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
                   <h2 className="mb-5 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  <div className="flex flex-col space-y-3.5">
+                  {/* Uniform 3-column grid; lead header carries the signature
+                      off-white chip, secondary headers share its baseline. */}
+                  <div className="grid grid-cols-3 gap-8">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
@@ -2557,24 +2559,26 @@ const PublicProductPageContent: React.FC = () => {
                     ].map(({ label, text, Icon }) => {
                       const isLead = label === "Design Significance";
                       return (
-                        <article
-                          key={label}
-                          className={cn(
-                            "group flex w-full flex-col",
-                            isLead
-                              ? "gap-2 rounded-r-md border-l-2 border-accent bg-accent/[0.04] px-4 py-3.5"
-                              : "gap-3 pb-3.5 last:pb-0"
-                          )}
-                        >
-                          <div className="flex items-center justify-start gap-2">
-                            <Icon className={cn(
-                              "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
-                              isLead ? "text-accent" : "text-muted-foreground/60"
-                            )} strokeWidth={1.25} />
-                            <h3 className={cn(
-                              "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
-                              isLead && "font-semibold"
-                            )}>
+                        <article key={label} className="group flex w-full flex-col">
+                          <div
+                            className={cn(
+                              "mb-3 flex items-center justify-start gap-2",
+                              isLead ? "rounded-[1px] bg-muted px-3 py-1.5" : "py-1.5"
+                            )}
+                          >
+                            <Icon
+                              className={cn(
+                                "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
+                                isLead ? "text-accent" : "text-muted-foreground/60"
+                              )}
+                              strokeWidth={1.25}
+                            />
+                            <h3
+                              className={cn(
+                                "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
+                                isLead && "font-semibold"
+                              )}
+                            >
                               {label}
                             </h3>
                           </div>
