@@ -17,6 +17,7 @@ import { attachMilestoneTracking, trackVideoEvent } from "@/lib/videoTracking";
 import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { curatingTeam } from "@/components/CuratingTeam";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
+import { galleryAlternatives } from "@/lib/galleryAlternatives";
 import type { RoomSlug } from "@/lib/roomCategories";
 
 type Scene = { title: string; id: string };
@@ -89,6 +90,8 @@ const createGalleryPages = (space: Space): GalleryPage[] =>
 
 // Keep the explicitly selected blue Toshiro finish when its Boudoir hotspot is shown.
 const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
+  "A Sophisticated Living Room:Orsay Abstract Diasec": "30dad248-9240-4d2f-815a-50b2a7d6ea9e",
+  "A Sophisticated Living Room:X Stool 1934": "e5f9dfaa-20d3-4a64-a3ff-e6c2edd40f45",
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003": "0302a3b6-1ebf-4c57-8886-935bc48f9dfd",
   "A Dreamy Tuscan Landscape:Astra Dining Table": "3b6f6177-adfa-4f23-8cf7-75396028fe95",
   "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "4b46af75-4c35-4a81-bea6-822810ae3422",
@@ -607,49 +610,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
   const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
     const product = resolveHotspotProduct(hotspot);
-    // Unmatched or trade-only pins still get public alternatives from the pin's own object type.
     const ownProduct = product && !product.restricted_gallery_pin ? product : null;
     const pool = allPicks.filter((pick) => publicPickIds.has(pick.id) && pick.id !== product?.id && pick.image_url);
-    // Strict type-gating. The hotspot's own object name wins (unmapped pins can
-    // fuzzy-resolve to an unrelated pick); then the product's exact subcategory.
-    const HOTSPOT_TYPES: Array<[RegExp, string[]]> = [
-      [/\b(wallcover\w*|wallpaper\w*|scenic|mural)\b/, ["wallcoverings", "wall decor", "wall décor"]],
-      [/\b(chandelier|pendant|suspension|ceiling)\b/, ["ceiling lights"]],
-      [/\b(table lamp|lamp)\b/, ["table lights", "table lamps", "table lamp"]],
-      [/\b(floor lamp|floor light)\b/, ["floor lights"]],
-      [/\b(sconce|wall light)\b/, ["wall lights"]],
-      [/\b(rug|carpet)\b/, ["hand knotted rugs", "hand tufted rugs"]],
-      [/\b(vase|vessel|bowl|geode|centerpiece)s?\b/, ["vases vessels"]],
-      [/\b(diasec|painting|artwork|canvas|photograph)s?\b/, ["art", "artworks", "wall art"]],
-      [/\b(flush mount|plafonnier|ceiling light|surface)\b/, ["ceiling lights"]],
-      [/\bmirror\b/, ["mirrors"]],
-      [/\b(nightstand|bedside)\b/, ["bedside tables"]],
-      [/\bcoffee table\b/, ["coffee tables"]],
-      [/\bside table\b/, ["side tables", "side table"]],
-      [/\bdining table\b/, ["dining tables", "dining table"]],
-      [/\bdesk\b/, ["desks", "desk"]],
-      [/\bconsole\b/, ["consoles"]],
-      [/\b(credenza|sideboard|buffet|cabinet|enfilade|bahut)s?\b/, ["buffets cabinets and sideboards", "cabinets"]],
-      [/\bsofa\b/, ["sofas", "sofa"]],
-      [/\barmchair\b/, ["armchairs"]],
-      [/\bchairs?\b/, ["chairs"]],
-    ];
-    const hotspotName = normalize(hotspot?.product_name || "");
-    let targets = HOTSPOT_TYPES.find(([re]) => re.test(hotspotName))?.[1];
-    if (!targets) {
-      const sub = normalize(ownProduct?.subcategory || "");
-      targets = sub ? [sub] : [];
-    }
-    const selfTitle = normalize(ownProduct?.title || hotspot?.product_name || "");
-    const notSelf = (pick: typeof pool[number]) => normalize(pick.title || "") !== selfTitle && normalize(pick.title || "") !== hotspotName;
-    const out: typeof pool = [];
-    const add = (list: typeof pool) => list.forEach((pick) => { if (out.length < 3 && notSelf(pick) && !out.some((o) => o.id === pick.id)) out.push(pick); });
-    // Strict, category-locked: hotspot type → product's exact subcategory. No loose
-    // category or catalogue-wide fallback — never leak unrelated pieces.
-    if (targets.length) add(pool.filter((pick) => targets!.includes(normalize(pick.subcategory || ""))));
-    const ownSub = normalize(ownProduct?.subcategory || "");
-    if (ownSub) add(pool.filter((pick) => normalize(pick.subcategory || "") === ownSub));
-    return out;
+    return galleryAlternatives(hotspot.product_name, ownProduct, pool);
   };
   // Landing: default to the first pin that actually has alternatives, so the dock populates immediately.
   const sceneHotspots = portraitDock && activeScene ? hotspotsForScene(activeScene) : [];
