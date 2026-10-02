@@ -2636,19 +2636,19 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
-                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="block mb-2 font-body text-[10px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--edition-foreground))]">{tags.join(" · ")}</span> : null; })()}
+                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-accent/[0.04] px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
                       <div className="flex flex-col items-start">
                         <Link
                           to={`/designers/${designer.slug}`}
                           onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                          className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                          className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                         >
                           {designerDisplay}
                         </Link>
                         <div className="mt-1 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                       </div>
                       <div className="flex items-baseline justify-between gap-4 mt-2">
-                        <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] leading-[1.15] tracking-[-0.01em]">
+                        <h1 className="font-display font-normal text-[28px] leading-[1.15] tracking-[-0.01em]">
                           {product.title}
                           {formatProductSubtitleLine(product.title, product.subtitle) && (
                             <span className="block mt-1 text-[0.8em] text-muted-foreground">
@@ -2729,19 +2729,19 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
-                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="block mb-2 font-body text-[10px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--edition-foreground))]">{tags.join(" · ")}</span> : null; })()}
+                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-accent/[0.04] px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
                     <div className="flex flex-col items-start">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-display text-[16px] md:text-[18px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                        className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                       >
                         {designerDisplay}
                       </Link>
-                      <div className="mt-2.5 w-10 md:w-12 h-px bg-foreground/20" aria-hidden="true" />
+                      <div className="mt-1 w-10 md:w-12 h-px bg-foreground/20" aria-hidden="true" />
                     </div>
-                    <div className="flex items-baseline justify-between gap-4 mt-5">
-                      <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] leading-[1.15] tracking-[-0.01em]">
+                    <div className="flex items-baseline justify-between gap-4 mt-3">
+                      <h1 className="font-display font-normal text-[28px] leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {formatProductSubtitleLine(product.title, product.subtitle) && (
                           <span className="block mt-1 text-[0.8em] text-muted-foreground">
@@ -3060,7 +3060,7 @@ const PublicProductPageContent: React.FC = () => {
                     <Link
                       to={`/designers/${designer.slug}`}
                       onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                      className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                      className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                     >
                       {designerDisplay}
                     </Link>
@@ -3244,7 +3244,7 @@ const PublicProductPageContent: React.FC = () => {
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-display text-[14px] md:text-[16px] uppercase tracking-[0.14em] text-foreground hover:text-foreground/80 transition-colors"
+                        className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                       >
                         {designerDisplay}
                       </Link>
