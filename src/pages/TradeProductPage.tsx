@@ -2070,23 +2070,42 @@ const TradeProductPage: React.FC = () => {
             })()}
 
             <section aria-label="Curator notes" className="hidden md:block mt-10 border-t border-border/50 pt-8">
-              <h2 className="mb-6 font-display text-2xl italic text-foreground">Curator Notes</h2>
-              <div className="flex flex-col space-y-6">
+              <h2 className="mb-5 font-display text-2xl italic text-foreground">Curator Notes</h2>
+              <div className="flex flex-col space-y-3.5">
                 {[
                   { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                   { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
                   { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                ].map(({ label, text, Icon }) => (
-                  <article key={label} className="group flex w-full flex-col gap-3 pb-6 last:pb-0">
-                    <div className="flex items-center justify-start gap-2">
-                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-colors duration-150 group-hover:text-foreground" strokeWidth={1.25} />
-                      <h3 className="font-body text-[10px] uppercase tracking-[0.2em] text-foreground">{label}</h3>
-                    </div>
-                    <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
-                      {text}
-                    </p>
-                  </article>
-                ))}
+                ].map(({ label, text, Icon }) => {
+                  const isLead = label === "Design Significance";
+                  return (
+                    <article
+                      key={label}
+                      className={cn(
+                        "group flex w-full flex-col",
+                        isLead
+                          ? "gap-2 rounded-r-md border-l-2 border-accent bg-accent/[0.04] px-4 py-3.5"
+                          : "gap-3 pb-3.5 last:pb-0"
+                      )}
+                    >
+                      <div className="flex items-center justify-start gap-2">
+                        <Icon className={cn(
+                          "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
+                          isLead ? "text-accent" : "text-muted-foreground/60"
+                        )} strokeWidth={1.25} />
+                        <h3 className={cn(
+                          "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
+                          isLead && "font-semibold"
+                        )}>
+                          {label}
+                        </h3>
+                      </div>
+                      <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
+                        {text}
+                      </p>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           </div>
