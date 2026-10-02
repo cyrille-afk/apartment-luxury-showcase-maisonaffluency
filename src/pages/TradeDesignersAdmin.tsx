@@ -1977,6 +1977,13 @@ const TradeDesignersAdmin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
+  // Clear the freeze-loop guard once the editor has stayed responsive.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try { sessionStorage.removeItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY); } catch { /* noop */ }
+    }, 5000);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Restore filter state (search + letter) AND the open designer accordion so a
   // refresh keeps the editor exactly where it was. The preview pane stays
