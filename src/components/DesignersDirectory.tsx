@@ -33,7 +33,7 @@ import { usePublicRrpMap, formatPublicRrp, formatPublicRrpForDestination, type P
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 import ShareMenu from "./ShareMenu";
 import { cldResponsiveImg } from "@/lib/cloudinary";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 
 import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -1446,9 +1446,9 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
         )}
 
 
-        {!pick.is_trade_only && (formatCuratorialEditionLine(pick) || isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder })) && (
+        {!pick.is_trade_only && (formatCuratorialEditionLine(pick) || getHouseEditionLabel({ designerName: pick.designer_name, founder: pick.designer_founder })) && (
           <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-            {formatCuratorialEditionLine(pick) || ECART_REEDITION_LABEL}
+            {formatCuratorialEditionLine(pick) || getHouseEditionLabel({ designerName: pick.designer_name, founder: pick.designer_founder })}
           </p>
         )}
       </div>

@@ -23,7 +23,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -263,7 +263,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
             || null;
-          const showReedition = isEcartReedition({
+          const houseEditionLabel = getHouseEditionLabel({
             designerName: designer.name,
             founder: designer.founder,
             parentBrand: brandLabelOverride,
@@ -311,9 +311,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                     />
                   </div>
                 )}
-                {(formatCuratorialEditionLine(pick) || showReedition) && (
+                {(formatCuratorialEditionLine(pick) || Boolean(houseEditionLabel)) && (
                   <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-                    {formatCuratorialEditionLine(pick) || ECART_REEDITION_LABEL}
+                    {formatCuratorialEditionLine(pick) || houseEditionLabel}
                   </p>
                 )}
               </div>

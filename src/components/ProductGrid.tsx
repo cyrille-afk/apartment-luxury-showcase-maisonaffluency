@@ -15,7 +15,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link, useNavigate } from "react-router-dom";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
 import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
@@ -760,9 +760,9 @@ function singularizeSub(s: string): string {
                 >
                   <Scale size={14} />
                 </button>
-                {(formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
+                {(formatCuratorialEditionLine(item.pick) || getHouseEditionLabel({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
                   <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-                    {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
+                    {formatCuratorialEditionLine(item.pick) || getHouseEditionLabel({ designerName: item.designerName, reeditionBy: item.reeditionBy })}
                   </p>
                 )}
               </div>
