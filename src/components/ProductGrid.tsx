@@ -632,18 +632,7 @@ function singularizeSub(s: string): string {
               </TooltipProvider>
             </div>}
             {roomSlug ? (
-              <div className="hidden md:flex items-center gap-1 rounded-full border border-border bg-background/80 p-1 shadow-sm backdrop-blur-sm">
-                {([false, true] as const).map((dense) => {
-                  const active = (gridCols === 4) === dense;
-                  const Icon = dense ? LayoutGrid : Grid3X3;
-                  return (
-                    <button key={String(dense)} onClick={() => setGridCols(dense ? 4 : 3)} aria-label={dense ? "Denser grid" : "Standard grid"} aria-pressed={active} title={dense ? "Display 4 columns" : "Display 3 columns"}
-                      className={`rounded-full p-2 transition-all ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-                      <Icon size={15} strokeWidth={1.5} />
-                    </button>
-                  );
-                })}
-              </div>
+              <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
             ) : (
             <button
               onClick={handleClearFilter}
