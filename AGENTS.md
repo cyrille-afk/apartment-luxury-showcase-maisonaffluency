@@ -17,10 +17,8 @@
 13. No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers — one catalogue, one layout.
 14. Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view, to preserve price visibility.
 - Finish accordions: when every linked swatch maps to a Base/Top matrix value (name, "Family - colour" prefix, generic "Wood" = wood species, accent-insensitive), `FinishSelector` renders one accordion per axis and emits the matrix value — prevents duplicate/mislabelled finish dropdowns without per-product IDs.
-- OOL 77 Mini bar shows exactly two finish dropdowns (Frame: Cement Stuc/Glossy Lacquer; Drawer: Wood species + Suede Leather). The single-value Shelf axis ("Wood") is auto-committed in FinishSelector without a third accordion, and the shelf swatch must never emit onWoodFinishPricingChange (it would hijack the "Frame:" price caption). Regression test: src/components/FinishSelector.ool-minibar.test.tsx.
-- OOL 77 Mini bar has no curated preset chips (removed at user request); its Frame/Drawer dropdowns mirror the finishes linked to the photo on screen from first load until the user picks one.
+- OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting, and auth redirects to /trade/login must carry `?next=`; a failed or pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked against getSession) must not demote a valid session.
-- OOL 77 Mini bar sharing uses a readable public product address with frame/drawer finish-name slugs; the selector restores those names and legacy `?c=` links so existing shares survive catalogue reordering.
 - Single-axis products whose linked finishes span exactly two stored categories render one FinishSelector dropdown per category (labelled like the Pictured Finishes strip), and a slide counts as non-specific only when more than two finishes map to every photo — keeps dropdowns and strip in agreement.
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the previous load never stayed responsive for 5s, open with nothing expanded — prevents a hung restore from re-freezing on every reload.
@@ -29,3 +27,4 @@
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
+- Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model — accuracy first.
