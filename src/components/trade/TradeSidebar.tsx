@@ -50,7 +50,9 @@ export function TradeSidebar() {
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
-  const visibleTopItems = hasTradeAccess ? topItems.filter((i) => i.url !== "/trade/me") : topItems;
+  const visibleTopItems = hasTradeAccess
+    ? topItems.filter((i) => i.url !== "/trade/me")
+    : topItems.filter((i) => i.url !== "/trade/concierge");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
