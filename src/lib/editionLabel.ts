@@ -80,5 +80,5 @@ export function getHouseEditionLabel(input: {
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
-  return /\b[ée]ditions?$/i.test(house) ? house : `${house} Edition`;
+  return /(?:^|\s)[ée]ditions?$/i.test(house) ? house : `${house} Edition`;
 }
