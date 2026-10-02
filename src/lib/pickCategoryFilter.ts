@@ -6,6 +6,11 @@ export interface FilterablePick {
   tags?: string[] | null;
 }
 
+/** Explicit slash-separated taxonomy values represent two real placements, not fallback tags. */
+function matchesExplicitPlacement(value: string | null | undefined, selected: string, normalize: (value?: string) => string | undefined): boolean {
+  return !!value?.split(/\s+\/\s+/).some((part) => normalize(part) === selected);
+}
+
 /**
  * Decide whether a curator pick belongs in the currently selected
  * category / subcategory filter.
@@ -27,7 +32,7 @@ export function pickMatchesCategoryFilter(
     const pickSub =
       normalizeSubcategory(pick.subcategory || undefined) ||
       normalizeSubcategory(pick.category || undefined);
-    if (pickSub === normSub) return true;
+    if (pickSub === normSub || (normSub && matchesExplicitPlacement(pick.subcategory, normSub, normalizeSubcategory))) return true;
     // Same guard as the category branch: don't let generic tags
     // ("Limited Edition", "Sculpture", …) drag a Seating/Tables/Lighting
     // pick into Décor → Decorative Objects via the tag fallback.
@@ -40,7 +45,7 @@ export function pickMatchesCategoryFilter(
     pick.category || undefined,
     pick.subcategory || undefined,
   );
-  if (pickCat === normCat) return true;
+  if (pickCat === normCat || (normCat && matchesExplicitPlacement(pick.category, normCat, normalizeCategory))) return true;
   if (pickCat) return false;
   return !!(pick.tags && pick.tags.some((t) => normalizeCategory(t) === normCat));
 }

@@ -57,3 +57,18 @@ describe("pickMatchesCategoryFilter — Limited Edition / Décor regression", ()
     expect(pickMatchesCategoryFilter(rcClubChair, null, null)).toBe(true);
   });
 });
+
+describe("pickMatchesCategoryFilter — explicitly dual-homed pieces", () => {
+  const griffe = { category: "Seating / Tables", subcategory: "Stools / Side Tables", tags: null };
+
+  it("lists Griffe under both intended subcategories and their parents", () => {
+    expect(pickMatchesCategoryFilter(griffe, "Seating", "Ottomans & Stools")).toBe(true);
+    expect(pickMatchesCategoryFilter(griffe, "Tables", "Side Tables")).toBe(true);
+    expect(pickMatchesCategoryFilter(griffe, "Seating", null)).toBe(true);
+    expect(pickMatchesCategoryFilter(griffe, "Tables", null)).toBe(true);
+  });
+
+  it("does not broaden placement into unrelated departments", () => {
+    expect(pickMatchesCategoryFilter(griffe, "Décor", "Decorative Objects")).toBe(false);
+  });
+});
