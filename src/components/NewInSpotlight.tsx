@@ -72,7 +72,7 @@ interface NewInSpotlightProps {
   pageDesignerName?: string | null;
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride, pageDesignerName }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const hasOverride = Array.isArray(picksOverride);
   const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
