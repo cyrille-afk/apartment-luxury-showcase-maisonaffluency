@@ -1912,14 +1912,22 @@ type DesignerEditorDraft = {
  * instead of re-entering the same stuck state.
  */
 const DESIGNER_EDITOR_RESTORE_GUARD_KEY = "ma-designer-editor-restore-guard-v1";
+// Decided once per page load (module scope), so StrictMode double-invokes and
+// remounts within the same load never mistake their own marker for a hang.
+let previousLoadHungDecision: boolean | null = null;
+const didPreviousLoadHang = (): boolean => {
+  if (previousLoadHungDecision !== null) return previousLoadHungDecision;
+  previousLoadHungDecision = false;
+  try {
+    previousLoadHungDecision = sessionStorage.getItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY) === "1";
+    sessionStorage.setItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY, "1");
+  } catch { /* storage unavailable */ }
+  return previousLoadHungDecision;
+};
 
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
-  let previousLoadHung = false;
-  try {
-    previousLoadHung = sessionStorage.getItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY) === "1";
-    sessionStorage.setItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY, "1");
-  } catch { /* storage unavailable */ }
+  const previousLoadHung = didPreviousLoadHang();
   // Escape hatch: ?fresh=1 (or a previous load that never became responsive)
   // opens the editor with nothing expanded (unsaved text edits in the draft
   // buffer are kept) so a stuck restore can be bypassed.
