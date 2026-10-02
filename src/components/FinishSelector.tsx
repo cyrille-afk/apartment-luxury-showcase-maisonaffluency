@@ -33,6 +33,8 @@ interface Fabric {
   frame_price_cents?: number | null;
   /** Currency of frame_price_cents. */
   frame_price_currency?: string | null;
+  /** Category exactly as stored (e.g. "Lacquer"), before UI normalisation. */
+  raw_category?: string | null;
 }
 
 export interface SelectedFinishInfo {
@@ -477,6 +479,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           name: f.name,
           image_url: f.image_url,
           category: isOolDrawerLeather(pickId, f.name) ? "Other" : normalizeFabricCategory(f.category),
+          raw_category: f.category ?? null,
           supplier: f.supplier,
           price_tier_label: f.price_tier_label ?? null,
           price_per_lm_cents: f.price_per_lm_cents ?? null,
@@ -1229,11 +1232,28 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   };
 
   const visibleFabricTiles = axisModeActive ? [] : fabricTiles;
+  // Single-axis products whose finishes span exactly two material groups
+  // (e.g. Wood + Lacquer on a combined "A & B" variant) get one dropdown per
+  // group, labelled like the Pictured Finishes strip, instead of one lumped list.
+  const categorySplit = (() => {
+    if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion || woodFilter || topFilter) return null;
+    if (topTiles.length > 0 || woodTiles.length < 2) return null;
+    const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
+    const order: string[] = [];
+    woodTiles.forEach((f) => { const k = keyOf(f); if (k && !order.includes(k)) order.push(k); });
+    if (order.length !== 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
+    return {
+      first: woodTiles.filter((f) => keyOf(f) === order[0]),
+      second: woodTiles.filter((f) => keyOf(f) === order[1]),
+      firstLabel: `Select Your ${order[0]} Finish`,
+      secondLabel: `Select Your ${order[1]} Finish`,
+    };
+  })();
   // OOL 77 Mini bar shows exactly two finish dropdowns (Frame + Drawer). Its
   // Shelf axis has a single value ("Wood") so it is auto-committed below
   // instead of rendering as a third accordion.
-  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : woodTiles;
-  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : topTiles;
+  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categorySplit ? categorySplit.first : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categorySplit ? categorySplit.second : topTiles;
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
