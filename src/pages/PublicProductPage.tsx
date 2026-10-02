@@ -2549,8 +2549,8 @@ const PublicProductPageContent: React.FC = () => {
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-7 border-t border-border/50 pt-5">
                   <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  {/* Product page: three notes in a horizontal row, with the lead note highlighted as a panel. */}
-                  <div className="grid grid-cols-3 gap-8">
+                  {/* Product page: notes read vertically beneath the gallery; only the lead note is highlighted. */}
+                  <div className="flex flex-col gap-4">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
