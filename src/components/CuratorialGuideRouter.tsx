@@ -12,7 +12,7 @@ const FRONTIER_STAGES = [
   "Composing your curatorial brief…",
 ];
 
-function FrontierSkeleton() {
+export function FrontierSkeleton() {
   const [stage, setStage] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setStage((s) => (s + 1) % FRONTIER_STAGES.length), 2400);
@@ -41,7 +41,7 @@ function FrontierSkeleton() {
   );
 }
 
-function FlashSkeleton() {
+export function FlashSkeleton() {
   return (
     <div role="status" aria-live="polite" className="space-y-2 py-2" aria-label="Preparing answer">
       <div className="h-2 w-8/12 animate-pulse rounded-full bg-foreground/[0.07]" />
