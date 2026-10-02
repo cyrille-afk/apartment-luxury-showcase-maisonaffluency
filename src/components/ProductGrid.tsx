@@ -760,13 +760,13 @@ function singularizeSub(s: string): string {
                 >
                   <Scale size={14} />
                 </button>
+                {(formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
+                  <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
+                    {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
+                  </p>
+                )}
               </div>
-              {(formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy })) && (
-                 <p className={`${roomSlug ? "mt-3" : "mt-6"} px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased`}>
-                  {formatCuratorialEditionLine(item.pick) || ECART_REEDITION_LABEL}
-                </p>
-              )}
-               <div className={`flex w-full justify-between px-1 ${roomSlug ? `${formatCuratorialEditionLine(item.pick) || isEcartReedition({ designerName: item.designerName, reeditionBy: item.reeditionBy }) ? "mt-2" : "mt-3"} items-baseline gap-1.5 md:gap-4` : "mt-3 h-12 items-start gap-4"}`}>
+               <div className={`flex w-full justify-between px-1 ${roomSlug ? "mt-3 items-baseline gap-1.5 md:gap-4" : "mt-3 h-12 items-start gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}

@@ -1446,13 +1446,13 @@ const PickCard = ({ pick, onFavorite, isFavorited, rrp, hideFavorite }: { pick: 
         )}
 
 
-      </div>
-      {/* Info below the card */}
         {!pick.is_trade_only && (formatCuratorialEditionLine(pick) || isEcartReedition({ designerName: pick.designer_name, founder: pick.designer_founder })) && (
-          <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
+          <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
             {formatCuratorialEditionLine(pick) || ECART_REEDITION_LABEL}
           </p>
         )}
+      </div>
+      {/* Info below the card */}
         <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
           <div className="flex min-w-0 flex-1 flex-col text-left">
             {pick.is_trade_only ? (
