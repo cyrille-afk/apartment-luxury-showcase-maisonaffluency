@@ -269,6 +269,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             designerName: designer.name,
             founder: designer.founder,
             parentBrand: brandLabelOverride,
+            pageDesignerName,
           });
 
           return (
