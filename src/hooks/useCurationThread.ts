@@ -29,7 +29,9 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
 
   useEffect(() => {
     let cancelled = false;
-    abortRef.current?.abort();
+    const prev = abortRef.current;
+    abortRef.current = null; // mark old stream as superseded so it can't touch the new thread's state
+    prev?.abort();
     setMessages([]); setError(null); setRoute(null);
     setLoadedFor(undefined);
     if (!threadId) { setPhase("idle"); return; }
@@ -56,16 +58,17 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
   const send = useCallback(async (raw: string, targetThreadId = threadId) => {
     const prompt = raw.trim();
     if (!prompt || !targetThreadId) return;
-    abortRef.current?.abort();
+    const prior = abortRef.current;
     const controller = new AbortController();
     abortRef.current = controller;
+    prior?.abort();
     setError(null);
     const assistantId = `a-${Date.now()}`;
     setMessages((m) => [...m, { id: `u-${Date.now()}`, role: "user", content: prompt, route: null }]);
     setPhase("routing");
 
     const decision = await classifyWithBudget(prompt);
-    if (controller.signal.aborted) { setPhase("idle"); return; }
+    if (controller.signal.aborted) { if (abortRef.current === controller) setPhase("idle"); return; }
     setRoute(decision.route); setFallback(decision.fallback);
     setMessages((m) => [...m, { id: assistantId, role: "assistant", content: "", route: decision.route }]);
     setPhase("streaming");
@@ -108,8 +111,9 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
       setPhase("idle");
     } catch (e) {
       if (frame) cancelAnimationFrame(frame);
-      flush();
-      if (controller.signal.aborted) { setPhase("idle"); }
+      if (controller.signal.aborted) {
+        if (abortRef.current === controller) { flush(); setPhase("idle"); }
+      }
       else {
         setMessages((m) => m.filter((x) => !(x.id === assistantId && !x.content)));
         setError((e as Error).message || "Something went wrong.");
