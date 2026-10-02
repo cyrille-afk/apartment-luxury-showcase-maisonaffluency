@@ -1447,14 +1447,14 @@ const PublicDesignerProfile = () => {
                   : fromDesignersHero
                     ? "/designers"
                   : (() => {
-                      const isChild = designer?.founder && designer.founder !== designer.name;
-                      const baseName = isChild ? designer.founder : designer?.name;
+                      // Return to the visitor's own designer letter (Felix Agostini → F),
+                      // not the parent house's letter.
+                      const baseName = designer?.name;
                       // A–Z buckets are keyed on the LAST name, so derive the
                       // letter with the same helper the directory groups with.
                       const initial = baseName ? lastNameInitial(baseName) : "A";
                       const letter = encodeURIComponent(/^[A-Z]$/.test(initial) ? initial : "A");
-                      const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
-                      return `/designers?letter=${letter}${expandParam}`;
+                      return `/designers?letter=${letter}`;
                     })()}
 
                 onClick={rememberDesignerAzLetter}
