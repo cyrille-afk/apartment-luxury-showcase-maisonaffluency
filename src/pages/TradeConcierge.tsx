@@ -45,15 +45,15 @@ export default function TradeConcierge() {
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
 
-  const { messages, phase, route, fallback, error, send, stop, busy } = useCurationThread(threadId, loadThreads);
+  const { loadedFor, messages, phase, route, fallback, error, send, stop, busy } = useCurationThread(threadId, loadThreads);
 
   // A prompt typed on the blank page creates a thread, navigates, then sends.
   useEffect(() => {
-    if (threadId && phase === "idle" && pendingRef.current) {
+    if (threadId && loadedFor === threadId && phase === "idle" && pendingRef.current) {
       const p = pendingRef.current; pendingRef.current = null;
       void send(p, threadId);
     }
-  }, [threadId, phase, send]);
+  }, [threadId, loadedFor, phase, send]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });

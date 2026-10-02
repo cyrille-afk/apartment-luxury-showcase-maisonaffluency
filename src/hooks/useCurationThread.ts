@@ -22,6 +22,7 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
   const [route, setRoute] = useState<CuratorialRoute | null>(null);
   const [fallback, setFallback] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadedFor, setLoadedFor] = useState<string | undefined>(undefined);
   const abortRef = useRef<AbortController | null>(null);
   const savedRef = useRef(onTurnSaved);
   savedRef.current = onTurnSaved;
@@ -30,6 +31,7 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
     let cancelled = false;
     abortRef.current?.abort();
     setMessages([]); setError(null); setRoute(null);
+    setLoadedFor(undefined);
     if (!threadId) { setPhase("idle"); return; }
     setPhase("loading");
     supabase.from("curation_messages").select("id, role, content, route")
@@ -42,6 +44,7 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
           route: r.route === "FLASH" || r.route === "FRONTIER" ? r.route : null,
         })));
         setPhase("idle");
+        setLoadedFor(threadId);
       });
     return () => { cancelled = true; };
   }, [threadId]);
@@ -118,5 +121,5 @@ export function useCurationThread(threadId: string | undefined, onTurnSaved?: ()
     }
   }, [threadId]);
 
-  return { messages, phase, route, fallback, error, send, stop, busy: phase === "routing" || phase === "streaming" };
+  return { loadedFor, messages, phase, route, fallback, error, send, stop, busy: phase === "routing" || phase === "streaming" };
 }
