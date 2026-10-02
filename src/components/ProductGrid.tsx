@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Heart, X, Scale, Grid3X3, LayoutGrid } from "lucide-react";
+import { Heart, X, Scale } from "lucide-react";
+import GridDensityToggle from "@/components/GridDensityToggle";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
 import { collectibleDesigners } from "@/components/Collectibles";
