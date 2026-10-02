@@ -2547,8 +2547,8 @@ const PublicProductPageContent: React.FC = () => {
 
 
               {!isMobileOrPwa && (
-                <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
-                  <h2 className="mb-5 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                <section aria-label="Curator notes" className="mt-7 border-t border-border/50 pt-5">
+                  <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
                   {/* Product page: three notes in a horizontal row, with the lead note highlighted as a panel. */}
                   <div className="grid grid-cols-3 gap-8">
                     {[
@@ -2558,13 +2558,13 @@ const PublicProductPageContent: React.FC = () => {
                     ].map(({ label, text, Icon }) => {
                       const isLead = label === "Design Significance";
                       return (
-                        <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-4")}>
+                        <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
                           <div
                             className={cn(
-                              "mb-3 flex items-center justify-start gap-2",
-                              "py-1.5"
+                              "mb-2 flex items-center justify-start gap-2"
                             )}
                           >
+
                             <Icon
                               className={cn(
                                 "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
@@ -2575,7 +2575,7 @@ const PublicProductPageContent: React.FC = () => {
                             <h3
                               className={cn(
                                 "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
-                                isLead && "font-semibold"
+                                isLead && "font-bold"
                               )}
                             >
                               {label}
