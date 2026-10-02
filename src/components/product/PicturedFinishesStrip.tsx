@@ -45,7 +45,10 @@ export default function PicturedFinishesStrip({
 
   const oneBased = (activeIndex ?? 0) + 1;
   const shown = swatches.filter((s) => s.image_indices.includes(oneBased));
-  if (!shown.length || (!biekeLayout && swatches.length > 1 && shown.length === swatches.length)) return null;
+  // A photo mapped to every finish is usually a brand logo/closing frame, so
+  // hide the strip on long finish lists — but with 2 or fewer finishes the
+  // mapping is real (e.g. both finishes photographed together), so show it.
+  if (!shown.length || (!biekeLayout && swatches.length > 2 && shown.length === swatches.length)) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
