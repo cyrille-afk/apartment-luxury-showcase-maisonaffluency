@@ -9,6 +9,9 @@ describe("Ecart re-edition labels", () => {
     expect(isEcartReedition({ designerName: "Eileen Gray", reeditionBy: "Ecart Paris" })).toBe(true);
     expect(ECART_REEDITION_LABEL).toBe("REEDITION");
     expect(getHouseEditionLabel({ designerName: "Ecart" })).toBe("Ecart REEDITION");
+    expect(getHouseEditionLabel({ designerName: "Ecart", pageDesignerName: "Ecart" })).toBe("Ecart REEDITION");
+    expect(getHouseEditionLabel({ designerName: "Jean-Michel Frank", founder: "Ecart", pageDesignerName: "Jean-Michel Frank" })).toBe("REEDITION");
+    expect(getHouseEditionLabel({ designerName: "Eileen Gray", founder: "Ecart", pageDesignerName: "Eileen Gray" })).toBe("REEDITION");
   });
 
   it("does not label unrelated designers", () => {

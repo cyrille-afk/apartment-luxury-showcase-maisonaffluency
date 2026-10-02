@@ -78,7 +78,8 @@ export function productEditionBadge(input: {
 
 /**
  * Card chip for pieces published by a parent house (designers.founder).
- * Ecart → "Ecart REEDITION" (including Ecart's own pieces); any other parent →
+ * Ecart → "Ecart REEDITION" (or plain "REEDITION" on a child designer's page,
+ * where the card already credits the house); any other parent →
  * "<House> Edition" (or the house name alone when it already ends in Edition(s)).
  * A house's own pieces get no chip — the house name is already on the card.
  */
