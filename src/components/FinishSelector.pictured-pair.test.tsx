@@ -44,5 +44,10 @@ describe("pictured finishes sharing one picker", () => {
     });
     expect(onWoodFinishChange).not.toHaveBeenCalledWith("Turquoise");
     expect(onWoodFinishPricingChange).not.toHaveBeenCalledWith(expect.objectContaining({ name: "Turquoise" }));
+    fireEvent.click(screen.getByRole("button", { name: "Select Turquoise" }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Select Green Blue" })).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByRole("button", { name: "Select Turquoise" })).toHaveAttribute("aria-pressed", "true");
+    });
   });
 });
