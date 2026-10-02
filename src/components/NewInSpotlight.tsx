@@ -198,13 +198,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
-    fullWidthDesktop = false,
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
-    fullWidthDesktop?: boolean;
   } = {}) => (
     <>
       <div className={barClassName}>
