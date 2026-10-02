@@ -172,6 +172,7 @@ const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const SharedProcurementBoard = lazy(() => import("./pages/SharedProcurementBoard"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
+const TradeConcierge = lazy(() => import("./pages/TradeConcierge"));
 const TradeDesignersAdmin = lazy(() => import("./pages/TradeDesignersAdmin"));
 const TradeAdminSuppliers = lazy(() => import("./pages/TradeAdminSuppliers"));
 const TradeCollectiblesAdmin = lazy(() => import("./pages/TradeCollectiblesAdmin"));
@@ -883,6 +884,8 @@ const App = () => {
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
                     {/* magazine-analytics route removed — AD free-download flow discontinued */}
+                    <Route path="concierge" element={<TradeConcierge />} />
+                    <Route path="concierge/:threadId" element={<TradeConcierge />} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="collectibles/admin" element={<TradeCollectiblesAdmin />} />
