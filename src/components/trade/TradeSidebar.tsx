@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
   TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -31,6 +31,7 @@ const topItems: NavItem[] = [
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Trade Concierge", url: "/trade/concierge", icon: Sparkles },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
@@ -49,7 +50,9 @@ export function TradeSidebar() {
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
-  const visibleTopItems = hasTradeAccess ? topItems.filter((i) => i.url !== "/trade/me") : topItems;
+  const visibleTopItems = hasTradeAccess
+    ? topItems.filter((i) => i.url !== "/trade/me")
+    : topItems.filter((i) => i.url !== "/trade/concierge");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);

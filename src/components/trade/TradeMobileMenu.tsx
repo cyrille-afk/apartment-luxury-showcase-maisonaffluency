@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderKanban, MapPin,
-  FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox,
+  FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox, Sparkles,
   TrendingDown,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -19,6 +19,7 @@ const coreItems = [
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "The Collection", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
+  { title: "Trade Concierge", url: "/trade/concierge", icon: Sparkles },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Clients", url: "/trade/client-management", icon: Users },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
@@ -46,7 +47,9 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   }, [location.pathname, activeProjects, projectBoards]);
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
-  const items = hasTradeAccess ? coreItems.filter((i) => i.url !== "/trade/me") : coreItems;
+  const items = hasTradeAccess
+    ? coreItems.filter((i) => i.url !== "/trade/me")
+    : coreItems.filter((i) => i.url !== "/trade/concierge");
 
   const isActive = (url: string, end?: boolean) =>
     end ? location.pathname === url : location.pathname.startsWith(url);
