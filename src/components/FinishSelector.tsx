@@ -705,7 +705,24 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   useEffect(() => {
     noteGalleryIndex(currentGalleryIndex);
-    if (isRugProduct) return;
+    if (isRugProduct) {
+      // Rugs: each Wool/Silk group mirrors the finish linked to the photo on
+      // screen until the visitor picks one in that group.
+      if (!photoLedFinishes || fabrics.length === 0 || currentGalleryIndex == null) return;
+      const oneBased = currentGalleryIndex + 1;
+      if (isSharedSlide(oneBased)) return;
+      setSelectedRugComponentIds((prev) => {
+        const next: Record<string, string> = {};
+        for (const f of fabrics.filter(isRugComponentSwatch)) {
+          const comp = getRugComponent(f.name);
+          if (userPickedAxesRef.current[`rug:${comp}`]) { if (prev[comp]) next[comp] = prev[comp]; continue; }
+          if (!next[comp] && f.image_indices?.includes(oneBased)) next[comp] = f.id;
+        }
+        for (const [comp, id] of Object.entries(prev)) if (userPickedAxesRef.current[`rug:${comp}`]) next[comp] = id;
+        return next;
+      });
+      return;
+    }
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     if (!galleryInteractedRef.current && !photoLedFinishes) return;
@@ -785,6 +802,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
+        userPickedAxesRef.current[`rug:${component}`] = true;
       } else {
         setSelected(f.id);
         userPickedAxesRef.current[
@@ -1281,7 +1299,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // "Shown in" caption on landing. No pricing/selection callbacks fire here.
   useEffect(() => {
     noteGalleryIndex(currentGalleryIndex);
-    if (isRugProduct) return;
+    if (isRugProduct && !photoLedFinishes) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
