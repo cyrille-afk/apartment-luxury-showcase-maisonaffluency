@@ -68,6 +68,8 @@ interface NewInSpotlightProps {
   pickDesignerSlugOverride?: string;
   /** Full sibling catalogue used only for the lightbox "More from" strip. */
   relatedPicksOverride?: DesignerCuratorPick[];
+  /** Name of the page this section is embedded on — scopes the edition chip (child pages show "REEDITION", not "Ecart REEDITION"). */
+  pageDesignerName?: string | null;
 }
 
 const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride }: NewInSpotlightProps) => {
