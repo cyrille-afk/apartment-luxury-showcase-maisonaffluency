@@ -1473,6 +1473,7 @@ const PublicDesignerProfile = () => {
                 designer={designer}
                 showEyebrow={false}
                 variant="underlaid"
+                pageDesignerName={designer?.name}
                 picksOverride={isArnoldMadsenProfile ? (picks as any) : undefined}
                 brandLabelOverride={isArnoldMadsenProfile ? "Dagmar" : undefined}
                 pickDesignerSlugOverride={isArnoldMadsenProfile ? "dagmar-london" : undefined}
