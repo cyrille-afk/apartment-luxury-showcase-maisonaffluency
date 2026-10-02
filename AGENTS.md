@@ -27,4 +27,4 @@
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
-- Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model — accuracy first.
+- Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns are persisted only by `curatorial-guide-stream` after an ownership check — accuracy first, no client-forged history.
