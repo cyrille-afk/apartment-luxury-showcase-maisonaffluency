@@ -2549,9 +2549,8 @@ const PublicProductPageContent: React.FC = () => {
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
                   <h2 className="mb-5 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  {/* Uniform 3-column grid; lead header carries the signature
-                      off-white chip, secondary headers share its baseline. */}
-                  <div className="grid grid-cols-3 gap-8">
+                  {/* Stacked notes; the lead note sits in a full-width off-white wrapper. */}
+                  <div className="flex flex-col gap-6">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
@@ -2559,11 +2558,11 @@ const PublicProductPageContent: React.FC = () => {
                     ].map(({ label, text, Icon }) => {
                       const isLead = label === "Design Significance";
                       return (
-                        <article key={label} className="group flex w-full flex-col">
+                        <article key={label} className={cn("group flex w-full flex-col", isLead && "rounded-[2px] bg-muted px-5 py-4")}>
                           <div
                             className={cn(
                               "mb-3 flex items-center justify-start gap-2",
-                              isLead ? "rounded-[1px] bg-muted px-3 py-1.5" : "py-1.5"
+                              "py-1.5"
                             )}
                           >
                             <Icon
