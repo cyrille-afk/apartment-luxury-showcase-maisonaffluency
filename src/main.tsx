@@ -132,6 +132,7 @@ pinStandaloneHomeLaunchToHero();
 const __deferBootWork = () => {
   void import("./lib/buildVersionWatcher").then((m) => m.startBuildVersionWatcher());
   void import("./lib/rum").then((m) => m.initRum());
+  void import("./lib/analytics").then((m) => m.initAnalytics());
 };
 if (typeof (window as any).requestIdleCallback === "function") {
   (window as any).requestIdleCallback(__deferBootWork, { timeout: 3000 });

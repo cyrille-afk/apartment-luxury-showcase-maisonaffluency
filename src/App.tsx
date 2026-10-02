@@ -724,6 +724,7 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <GlobalCanonical />
+              <AnalyticsRouteTracker />
               <HomeRouteSync />
               <SameOriginLinkGuard />
               <RouteScrollLockFailsafe />
