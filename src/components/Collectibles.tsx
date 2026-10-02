@@ -22,6 +22,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
+import { formatEditionLabel } from "@/lib/editionLabel";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
@@ -1296,7 +1297,7 @@ const Collectibles = () => {
                   {!isZoomed && curatorPicksDesigner.curatorPicks[curatorPickIndex]?.edition && (
                     <div className="flex items-center gap-2 mb-2">
                       <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-white/10 text-white/80 rounded-full border border-white/20">
-                        {curatorPicksDesigner.curatorPicks[curatorPickIndex].edition}
+                        {formatEditionLabel(curatorPicksDesigner.curatorPicks[curatorPickIndex])}
                       </span>
                     </div>
                   )}

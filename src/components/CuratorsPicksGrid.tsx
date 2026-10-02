@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { formatEditionLabel } from "@/lib/editionLabel";
 
 /**
  * CuratorsPicksGrid
@@ -150,7 +151,7 @@ const Card = memo(function Card({
         />
         {item.edition && (
           <p className="pointer-events-none absolute top-3 left-3 z-10 bg-transparent text-[10px] font-normal uppercase tracking-[0.15em] text-[hsl(var(--edition-foreground))]">
-            {item.edition}
+            {formatEditionLabel(item)}
           </p>
         )}
       </div>

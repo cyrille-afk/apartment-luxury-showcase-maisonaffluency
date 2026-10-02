@@ -2914,7 +2914,7 @@ const TradeDesignersAdmin = () => {
                         <Input
                           value={(editBuffer[d.id]?.parent_badge_label ?? d.parent_badge_label) || ""}
                           onChange={(e) => setField(d.id, "parent_badge_label", e.target.value || null)}
-                          placeholder='e.g. "Edition by MSE" or "Re-edition by Ecart" (leave blank for default)'
+                          placeholder='e.g. "Edition by MSE" or "REEDITION by Ecart" (leave blank for default)'
                           className="mt-1 text-sm"
                         />
                         <p className="text-[10px] text-muted-foreground mt-1">
