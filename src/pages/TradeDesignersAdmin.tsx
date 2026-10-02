@@ -1905,12 +1905,34 @@ type DesignerEditorDraft = {
   updatedAt: number;
 };
 
+/**
+ * Freeze-loop guard. Set before restoring the open designer and cleared once
+ * the editor has stayed responsive for a few seconds. If a load hangs (or is
+ * killed mid-restore), the marker survives, and the next load opens fresh
+ * instead of re-entering the same stuck state.
+ */
+const DESIGNER_EDITOR_RESTORE_GUARD_KEY = "ma-designer-editor-restore-guard-v1";
+// Decided once per page load (module scope), so StrictMode double-invokes and
+// remounts within the same load never mistake their own marker for a hang.
+let previousLoadHungDecision: boolean | null = null;
+const didPreviousLoadHang = (): boolean => {
+  if (previousLoadHungDecision !== null) return previousLoadHungDecision;
+  previousLoadHungDecision = false;
+  try {
+    previousLoadHungDecision = sessionStorage.getItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY) === "1";
+    sessionStorage.setItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY, "1");
+  } catch { /* storage unavailable */ }
+  return previousLoadHungDecision;
+};
+
 const readDesignerEditorDraft = (): Partial<DesignerEditorDraft> => {
   if (typeof window === "undefined") return {};
-  // Escape hatch: ?fresh=1 opens the editor with nothing expanded (unsaved
-  // text edits in the draft buffer are kept) so a stuck restore can be bypassed.
+  const previousLoadHung = didPreviousLoadHang();
+  // Escape hatch: ?fresh=1 (or a previous load that never became responsive)
+  // opens the editor with nothing expanded (unsaved text edits in the draft
+  // buffer are kept) so a stuck restore can be bypassed.
   try {
-    if (new URLSearchParams(window.location.search).get("fresh") === "1") {
+    if (previousLoadHung || new URLSearchParams(window.location.search).get("fresh") === "1") {
       localStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
       sessionStorage.removeItem(DESIGNER_EDITOR_NAV_KEY);
       Object.keys(sessionStorage)
@@ -1963,6 +1985,13 @@ const TradeDesignersAdmin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [initialDraft] = useState<Partial<DesignerEditorDraft>>(() => readDesignerEditorDraft());
+  // Clear the freeze-loop guard once the editor has stayed responsive.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try { sessionStorage.removeItem(DESIGNER_EDITOR_RESTORE_GUARD_KEY); } catch { /* noop */ }
+    }, 5000);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Restore filter state (search + letter) AND the open designer accordion so a
   // refresh keeps the editor exactly where it was. The preview pane stays
