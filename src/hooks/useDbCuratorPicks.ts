@@ -11,6 +11,8 @@ export interface DbProductItem {
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
   reeditionBy?: string;
+  /** Published designer credited in the pick subtitle (e.g. Dagmar's Clam pieces → Arnold Madsen). */
+  attributedDesigner?: string;
 }
 
 /**
@@ -67,6 +69,12 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
         designers.map((d) => [d.id, d])
       );
 
+      const designerByName = new Map<string, string>();
+      for (const d of designers) {
+        const label = d.display_name || d.name;
+        for (const n of [d.name, d.display_name]) if (n) designerByName.set(n.trim().toLowerCase(), label);
+      }
+
       const items: DbProductItem[] = [];
 
       for (const row of picks as any[]) {
@@ -113,6 +121,10 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
           designerId: designer.slug || designer.id,
           section,
           reeditionBy: designer.founder || undefined,
+          attributedDesigner: (() => {
+            const credited = designerByName.get(String(row.subtitle || "").trim().toLowerCase());
+            return credited && credited !== (designer.display_name || designer.name) ? credited : undefined;
+          })(),
         });
       }
 

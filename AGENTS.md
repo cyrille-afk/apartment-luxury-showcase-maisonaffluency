@@ -27,3 +27,4 @@
 - Curator Notes on public and Trade product pages stay in a vertical full-width list under the gallery with the lead note as a softly tinted panel; the product lightbox uses a separate three-column layout with only the lead header tinted — these are distinct presentation contexts.
 - Keep supplier PDFs labelled Fabric & Finishes in the finish-document menu, separate from general spec sheets, so adding a source PDF does not replace the generated swatch-selection PDF or mislabel it in the Trade workspace.
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
+- Room designer facets include own designer, parent house, and any published designer named exactly in the subtitle — credited makers stay filterable.

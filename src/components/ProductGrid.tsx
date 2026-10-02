@@ -38,9 +38,7 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
   const category = inferSubcategory(pick.category, pick.subcategory, pick.title);
   return {
     category: category ? [category] : [],
-    designer: item.reeditionBy && item.reeditionBy !== item.designerName
-      ? [item.designerName, item.reeditionBy]
-      : [item.designerName],
+    designer: Array.from(new Set([item.designerName, item.reeditionBy, item.attributedDesigner].filter(Boolean) as string[])),
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
     handmade: originToCountries(pick.origin),
     material: roomMaterialCategories(pick.materials, pick.title),
@@ -105,6 +103,7 @@ type ProductItem = {
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
   reeditionBy?: string;
+  attributedDesigner?: string;
 };
 
 // Import atelierOnlyPicks directly (it's now exported)
