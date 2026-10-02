@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
+import GridDensityToggle from "@/components/GridDensityToggle";
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import ShareMenu from "@/components/ShareMenu";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -197,13 +198,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
     titleClassName = "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground",
     mobileBadgeClassName = "px-4 py-1.5 rounded-full border border-foreground/20 bg-foreground/5 md:hidden",
     mobileTitleClassName = "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold",
-    fullWidthDesktop = false,
   }: {
     barClassName?: string;
     titleClassName?: string;
     mobileBadgeClassName?: string;
     mobileTitleClassName?: string;
-    fullWidthDesktop?: boolean;
   } = {}) => (
     <>
       <div className={barClassName}>
@@ -233,34 +232,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               )}
             </svg>
           </button>
-          {/* Desktop toggle */}
-          {!fullWidthDesktop && <button
-            onClick={() => setGridCols((prev) => (prev === 3 ? 4 : 3))}
-            className="hidden md:flex items-center p-1.5 rounded transition-all hover:opacity-70"
-            aria-label={`Switch to ${gridCols === 3 ? 4 : 3} column grid`}
-            title={gridCols === 3 ? "Display 4" : "Display 3"}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              {gridCols === 4 ? (
-                <>
-                  <rect x="2" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                  <rect x="10" y="3" width="6" height="18" rx="1" fill="currentColor" />
-                  <rect x="18" y="3" width="4" height="18" rx="1" fill="currentColor" />
-                </>
-              ) : (
-                <>
-                  <rect x="2" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="8" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="14" y="3" width="4.5" height="18" rx="1" fill="currentColor" />
-                  <rect x="20" y="3" width="2" height="18" rx="1" fill="currentColor" />
-                </>
-              )}
-            </svg>
-          </button>}
+          {/* Desktop toggle — pill style, matching the room category pages */}
+          <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
         </div>
       </div>
 
-      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", fullWidthDesktop ? "md:grid-cols-3" : gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
@@ -507,7 +484,6 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
               titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
               mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
               mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
-              fullWidthDesktop: true,
             })}
           </div>
         </section>
