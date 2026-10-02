@@ -235,13 +235,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             </svg>
           </button>
           {/* Desktop toggle — pill style, matching the room category pages */}
-          {!fullWidthDesktop && (
-            <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
-          )}
+          <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
         </div>
       </div>
 
-      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", fullWidthDesktop ? "md:grid-cols-3" : gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
+      <div className={cn("grid items-stretch gap-6 md:gap-8", mobileGridCols === 1 ? "grid-cols-1" : "grid-cols-2", gridCols === 4 ? "md:grid-cols-4" : "md:grid-cols-3")}>
         {picks.map((pick) => {
           const alternateImage = pick.hover_image_url
             || ((pick as any).gallery_images as string[] | null | undefined)?.find((url) => url && url !== pick.image_url)
