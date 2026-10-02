@@ -34,7 +34,9 @@ export function galleryAlternatives<T extends GalleryAlternative>(
   if (/\b(diasec|photograph|painting|artwork|canvas|wall art)\b/.test(name) || (source && isWallArt(source))) {
     const art = pool.filter(isWallArt);
     const sameArtist = pool.filter((pick) => sourceBrand && norm(pick.brand_name) === sourceBrand && (isWallArt(pick) || (norm(pick.category) === "decor" && sub === norm(pick.subcategory))));
-    return collect(sameArtist, art, pool.filter((pick) => matchesSub(pick, ["mirrors"])));
+    const mirrors = pool.filter((pick) => matchesSub(pick, ["mirrors"]));
+    // Mix one work by the artist with wall-mounted mirrors when both exist.
+    return sameArtist.length && mirrors.length ? collect(sameArtist.slice(0, 1), mirrors, art) : collect(sameArtist, art, mirrors);
   }
 
   const typeRules: Array<[RegExp, string[], (pick: T) => boolean]> = [
