@@ -32,7 +32,7 @@ import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
-import { ECART_REEDITION_LABEL, formatEditionLabel, isEcartReedition } from "@/lib/editionLabel";
+import { productEditionBadge, isEcartReedition } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
@@ -2650,7 +2650,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
-                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
+                      {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                       <div className="flex flex-col items-start">
                         <Link
                           to={`/designers/${designer.slug}`}
@@ -2743,7 +2743,7 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
-                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
+                    {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                     <div className="flex flex-col items-start">
                       <Link
                         to={`/designers/${designer.slug}`}

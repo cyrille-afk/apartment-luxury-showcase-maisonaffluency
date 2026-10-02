@@ -53,7 +53,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
-import { ECART_REEDITION_LABEL, formatEditionLabel, isEcartReedition } from "@/lib/editionLabel";
+import { productEditionBadge, isEcartReedition } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
@@ -2116,7 +2116,7 @@ const TradeProductPage: React.FC = () => {
           <div className="relative flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
-                {(() => { const ed = formatEditionLabel(product); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
+                {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                 <Link
                   to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
                   onClick={() => {

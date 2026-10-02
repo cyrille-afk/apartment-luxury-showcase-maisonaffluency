@@ -2,7 +2,7 @@
  * Compose the displayed edition badge for a curator pick.
  *
  * Priority:
- *   1. Manual `edition` text (override) — used verbatim when set.
+ *   1. Manual `edition` text (override) — normalised for REEDITION labels.
  *   2. Auto-compose from structured `edition_number` + `edition_signing`.
  *      e.g. number "1/8" + signing "Signed and dated by the artist"
  *           → "Edition 1/8 — Signed and dated by the artist"
@@ -16,7 +16,7 @@ export function formatEditionLabel(input: {
   edition_signing?: string | null;
 }): string | null {
   const manual = (input.edition ?? "").trim();
-  if (manual) return manual;
+  if (manual) return manual.replace(/re[ -]?edition/gi, "REEDITION");
 
   const number = (input.edition_number ?? "").trim();
   const signing = (input.edition_signing ?? "").trim();
@@ -62,11 +62,23 @@ export function isEcartReedition(input: {
     .some((value) => value === "ecart" || value === "ecart paris" || value.startsWith("ecart - "));
 }
 
-export const ECART_REEDITION_LABEL = "Reedition";
+export const ECART_REEDITION_LABEL = "REEDITION";
+
+/** Keep the Ecart header badge singular when the catalogue also calls it a re-edition. */
+export function productEditionBadge(input: {
+  edition?: string | null;
+  edition_number?: string | null;
+  edition_signing?: string | null;
+}, isEcartProduct: boolean): string | null {
+  const edition = formatEditionLabel(input);
+  if (!isEcartProduct) return edition;
+  if (!edition || edition === ECART_REEDITION_LABEL) return ECART_REEDITION_LABEL;
+  return `${ECART_REEDITION_LABEL} · ${edition}`;
+}
 
 /**
  * Card chip for pieces published by a parent house (designers.founder).
- * Ecart → "Ecart Reedition" (including Ecart's own pieces); any other parent →
+ * Ecart → "Ecart REEDITION" (including Ecart's own pieces); any other parent →
  * "<House> Edition" (or the house name alone when it already ends in Edition(s)).
  * A house's own pieces get no chip — the house name is already on the card.
  */
@@ -76,7 +88,7 @@ export function getHouseEditionLabel(input: {
   parentBrand?: string | null;
   reeditionBy?: string | null;
 }): string | null {
-  if (isEcartReedition(input)) return "Ecart Reedition";
+  if (isEcartReedition(input)) return "Ecart REEDITION";
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
