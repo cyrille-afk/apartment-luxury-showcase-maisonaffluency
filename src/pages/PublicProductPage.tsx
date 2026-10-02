@@ -2297,15 +2297,25 @@ const PublicProductPageContent: React.FC = () => {
               return allowed;
             }}
           />
-        ) : (
-          <FinishesPdfButton
-            pickId={product.id}
-            productName={product.title}
-            brandName={designerDisplay}
-            className={cn(utilityItem, "cursor-pointer")}
-            icon={<Layers size={12} strokeWidth={1.25} className={iconClass} />}
-          />
-        )}
+        ) : null}
+        <FinishesPdfButton
+          pickId={product.id}
+          productName={product.title}
+          brandName={designerDisplay}
+          documents={product.pdf_urls}
+          onBeforeDocumentOpen={() => {
+            if (tradeApprovedFooter) return true;
+            if (!user) {
+              requireAuth(() => {}, "open this fabric document");
+              return false;
+            }
+            let allowed = false;
+            requireAuth(() => { allowed = true; }, "download this fabric document");
+            return allowed;
+          }}
+          className={cn(utilityItem, "cursor-pointer")}
+          icon={<Layers size={12} strokeWidth={1.25} className={iconClass} />}
+        />
       </div>
     );
   };

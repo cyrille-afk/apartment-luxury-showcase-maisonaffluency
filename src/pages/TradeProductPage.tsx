@@ -2615,15 +2615,15 @@ const TradeProductPage: React.FC = () => {
                         className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
                         icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
                       />
-                    ) : (
-                      <FinishesPdfButton
-                        pickId={product.id}
-                        productName={product.title}
-                        brandName={designerDisplay}
-                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
-                        icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
-                      />
-                    )}
+                    ) : null}
+                    <FinishesPdfButton
+                      pickId={product.id}
+                      productName={product.title}
+                      brandName={designerDisplay}
+                      documents={product.pdf_urls}
+                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                      icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
+                    />
                   </div>
                 </div>
               </div>
