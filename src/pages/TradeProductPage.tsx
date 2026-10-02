@@ -2605,10 +2605,10 @@ const TradeProductPage: React.FC = () => {
                       {pinned ? "Pinned" : "Pin to Selection"}
                     </button>
 
-                    {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                    {(product.pdf_url || product.pdf_urls?.some((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label)) || pricing?.spec_sheet_url) ? (
                       <SpecSheetButton
                         pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                        pdfUrls={product.pdf_urls}
+                        pdfUrls={product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label))}
                         brandName={designerDisplay}
                         productName={product.title}
                         variant="button"

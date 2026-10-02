@@ -99,10 +99,13 @@ export default function FinishesPdfButton({
     }
   };
 
+  const finishDocuments = (documents || []).filter((entry) =>
+    entry.url && /^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label),
+  );
   const action = (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={finishDocuments.length ? undefined : handleClick}
       disabled={loading}
       className={className}
       aria-busy={loading}
@@ -123,9 +126,6 @@ export default function FinishesPdfButton({
     </button>
   );
 
-  const finishDocuments = (documents || []).filter((entry) =>
-    entry.url && /^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label),
-  );
   if (!finishDocuments.length) return action;
 
   return (
