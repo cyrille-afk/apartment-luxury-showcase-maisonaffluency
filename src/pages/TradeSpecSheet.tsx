@@ -35,6 +35,14 @@ const PdfFrame = memo(function PdfFrame({
 }) {
   const [loaded, setLoaded] = useState(false);
 
+  // Chromium's PDF viewer does not reliably fire the iframe load event.
+  // Reveal it after a brief fallback so a valid document is never hidden indefinitely.
+  useEffect(() => {
+    setLoaded(false);
+    const fallback = window.setTimeout(() => setLoaded(true), 2500);
+    return () => window.clearTimeout(fallback);
+  }, [src]);
+
   return (
     <div className={`relative w-full h-full bg-muted/20 ${className || ""}`}>
       {!loaded && (
