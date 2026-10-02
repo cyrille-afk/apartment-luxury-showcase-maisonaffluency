@@ -38,7 +38,8 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
   const category = inferSubcategory(pick.category, pick.subcategory, pick.title);
   return {
     category: category ? [category] : [],
-    designer: Array.from(new Set([item.designerName, item.reeditionBy, item.attributedDesigner].filter(Boolean) as string[])),
+    // Dagmar's founder owns the house; he is not a designer credit on its pieces.
+    designer: Array.from(new Set([item.designerName, item.reeditionBy === "Aaron Fitzgerald" ? undefined : item.reeditionBy, item.attributedDesigner].filter(Boolean) as string[])),
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
     handmade: originToCountries(pick.origin),
     material: roomMaterialCategories(pick.materials, pick.title),
