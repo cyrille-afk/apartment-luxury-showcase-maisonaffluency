@@ -685,7 +685,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // A photographed colourway can contain several finishes from the same
   // picker. Keep the single committed choice for pricing, but show every
   // linked finish in that photo until the visitor explicitly chooses one.
-  const picturedMatches = (tiles: Fabric[], axis: string, selectedId: string | null) => {
+  const picturedMatches = (tiles: Fabric[], axis: string) => {
     if (!photoLedFinishes || currentGalleryIndex == null || userPickedAxesRef.current[axis] || isSharedSlide(currentGalleryIndex + 1)) return [];
     return tiles.filter((f) => f.image_indices?.includes(currentGalleryIndex + 1));
   };
@@ -766,7 +766,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : selectedWoodId === f.id;
     const picturedAxis = isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isFrameGroup ? "frame" : isTopGroup ? "top" : "wood";
     const picturedTiles = isFabricGroup ? visibleFabricTiles : isCoverGroup ? visibleCoverTiles : isFrameGroup ? frameTiles : isTopGroup ? visibleTopTiles : visibleWoodTiles;
-    const picturedIds = picturedMatches(picturedTiles, picturedAxis, isFabricGroup ? selectedFabricId : isCoverGroup ? selectedCoverId : isFrameGroup ? selectedFrameId : isTopGroup ? selectedTopId : selectedWoodId);
+    const picturedIds = picturedMatches(picturedTiles, picturedAxis);
     const isSelected = picturedIds.length > 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
     const setSelected = isFrameGroup
       ? setSelectedFrameId
@@ -1319,8 +1319,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
   }) => {
     const axis = args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
-    const selectedId = axis === "fabric" ? selectedFabricId : axis === "cover" ? selectedCoverId : axis === "frame" ? selectedFrameId : axis === "top" ? selectedTopId : selectedWoodId;
-    const pictured = picturedMatches(args.tiles, axis, selectedId);
+    const pictured = picturedMatches(args.tiles, axis);
     const headerNames = pictured.length > 1 ? pictured.map((f) => f.name).join(" · ") : args.selectedName;
     return (
     <div className="border-t border-border/60">
