@@ -91,6 +91,7 @@ const createGalleryPages = (space: Space): GalleryPage[] =>
 // Keep the explicitly selected blue Toshiro finish when its Boudoir hotspot is shown.
 const FEATURED_HOTSPOT_PICK_IDS: Record<string, string> = {
   "A Sophisticated Living Room:Orsay Abstract Diasec": "30dad248-9240-4d2f-815a-50b2a7d6ea9e",
+  "A Sophisticated Living Room:X Stool 1934": "e5f9dfaa-20d3-4a64-a3ff-e6c2edd40f45",
   "An Inviting Lounge Area:Lounge Chair in UKIYO MONOGATARI 003": "0302a3b6-1ebf-4c57-8886-935bc48f9dfd",
   "A Dreamy Tuscan Landscape:Astra Dining Table": "3b6f6177-adfa-4f23-8cf7-75396028fe95",
   "A Dreamy Tuscan Landscape:Murano Cloud Bulle Pendants": "4b46af75-4c35-4a81-bea6-822810ae3422",
