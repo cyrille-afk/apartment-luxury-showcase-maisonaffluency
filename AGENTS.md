@@ -23,3 +23,4 @@
 - OOL 77 Mini bar sharing uses a readable public product address with frame/drawer finish-name slugs; the selector restores those names and legacy `?c=` links so existing shares survive catalogue reordering.
 - Single-axis products whose linked finishes span exactly two stored categories render one FinishSelector dropdown per category (labelled like the Pictured Finishes strip), and a slide counts as non-specific only when more than two finishes map to every photo — keeps dropdowns and strip in agreement.
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
+- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the previous load never stayed responsive for 5s, open with nothing expanded — prevents a hung restore from re-freezing on every reload.
