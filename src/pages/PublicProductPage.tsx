@@ -2549,8 +2549,8 @@ const PublicProductPageContent: React.FC = () => {
               {!isMobileOrPwa && (
                 <section aria-label="Curator notes" className="mt-10 border-t border-border/50 pt-8">
                   <h2 className="mb-5 font-display text-2xl italic text-foreground">Curator Notes</h2>
-                  {/* Stacked notes; the lead note sits in a full-width off-white wrapper. */}
-                  <div className="flex flex-col gap-6">
+                  {/* Product page: three notes in a horizontal row, with the lead note highlighted as a panel. */}
+                  <div className="grid grid-cols-3 gap-8">
                     {[
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
@@ -2558,7 +2558,7 @@ const PublicProductPageContent: React.FC = () => {
                     ].map(({ label, text, Icon }) => {
                       const isLead = label === "Design Significance";
                       return (
-                        <article key={label} className={cn("group flex w-full flex-col", isLead && "rounded-[2px] bg-muted px-5 py-4")}>
+                        <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-4")}>
                           <div
                             className={cn(
                               "mb-3 flex items-center justify-start gap-2",
