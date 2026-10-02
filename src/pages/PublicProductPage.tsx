@@ -2239,7 +2239,8 @@ const PublicProductPageContent: React.FC = () => {
   // compact standalone row on mobile.
   const renderUtilityLinks = (extraClass = "") => {
     const tradeApprovedFooter = !!user && hasTradeAccess;
-    const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+    const otherSheets = product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label));
+    const hasSheet = !!(product.pdf_url || (otherSheets && otherSheets.length > 0));
     const utilityItem =
       "inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-200 hover:text-foreground";
     const iconClass = "shrink-0 text-muted-foreground/70";
@@ -2280,7 +2281,7 @@ const PublicProductPageContent: React.FC = () => {
         {hasSheet ? (
           <SpecSheetButton
             pdfUrl={product.pdf_url}
-            pdfUrls={product.pdf_urls}
+            pdfUrls={otherSheets}
             brandName={designerDisplay}
             productName={product.title}
             variant="button"
@@ -2297,15 +2298,25 @@ const PublicProductPageContent: React.FC = () => {
               return allowed;
             }}
           />
-        ) : (
-          <FinishesPdfButton
-            pickId={product.id}
-            productName={product.title}
-            brandName={designerDisplay}
-            className={cn(utilityItem, "cursor-pointer")}
-            icon={<Layers size={12} strokeWidth={1.25} className={iconClass} />}
-          />
-        )}
+        ) : null}
+        <FinishesPdfButton
+          pickId={product.id}
+          productName={product.title}
+          brandName={designerDisplay}
+          documents={product.pdf_urls}
+          onBeforeDocumentOpen={() => {
+            if (tradeApprovedFooter) return true;
+            if (!user) {
+              requireAuth(() => {}, "open this fabric document");
+              return false;
+            }
+            let allowed = false;
+            requireAuth(() => { allowed = true; }, "download this fabric document");
+            return allowed;
+          }}
+          className={cn(utilityItem, "cursor-pointer")}
+          icon={<Layers size={12} strokeWidth={1.25} className={iconClass} />}
+        />
       </div>
     );
   };

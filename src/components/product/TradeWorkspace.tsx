@@ -154,7 +154,8 @@ export default function TradeWorkspace({
   const rrpLabel = formatCents(rrpCents, pricing?.currency, pricing?.price_unit);
   const netLabel = formatCents(netCents, pricing?.currency, pricing?.price_unit);
   const resolvedLead = pricing?.lead_time || leadTime || null;
-  const hasSpecSheet = !!(pdfUrl || (pdfUrls && pdfUrls.length > 0) || pricing?.spec_sheet_url);
+  const specDocuments = pdfUrls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry?.label || ""));
+  const hasSpecSheet = !!(pdfUrl || (specDocuments && specDocuments.length > 0) || pricing?.spec_sheet_url);
 
   const felixContext: FelixProductContext = {
     title,
@@ -287,7 +288,7 @@ export default function TradeWorkspace({
           {hasSpecSheet ? (
             <SpecSheetButton
               pdfUrl={pdfUrl || pricing?.spec_sheet_url || undefined}
-              pdfUrls={pdfUrls as any}
+              pdfUrls={specDocuments as any}
               brandName={designerDisplay}
               productName={title}
               variant="button"

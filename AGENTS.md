@@ -25,3 +25,4 @@
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the previous load never stayed responsive for 5s, open with nothing expanded — prevents a hung restore from re-freezing on every reload.
 - Curator Notes on public and Trade product pages stay in a vertical full-width list under the gallery with the lead note as a softly tinted panel; the product lightbox uses a separate three-column layout with only the lead header tinted — these are distinct presentation contexts.
+- Keep supplier PDFs labelled Fabric & Finishes in the finish-document menu, separate from general spec sheets, so adding a source PDF does not replace the generated swatch-selection PDF or mislabel it in the Trade workspace.

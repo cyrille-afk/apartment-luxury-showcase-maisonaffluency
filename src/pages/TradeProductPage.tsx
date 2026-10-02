@@ -2605,25 +2605,25 @@ const TradeProductPage: React.FC = () => {
                       {pinned ? "Pinned" : "Pin to Selection"}
                     </button>
 
-                    {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0) || pricing?.spec_sheet_url) ? (
+                    {(product.pdf_url || product.pdf_urls?.some((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label)) || pricing?.spec_sheet_url) ? (
                       <SpecSheetButton
                         pdfUrl={product.pdf_url || pricing?.spec_sheet_url || null}
-                        pdfUrls={product.pdf_urls}
+                        pdfUrls={product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label))}
                         brandName={designerDisplay}
                         productName={product.title}
                         variant="button"
                         className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
                         icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
                       />
-                    ) : (
-                      <FinishesPdfButton
-                        pickId={product.id}
-                        productName={product.title}
-                        brandName={designerDisplay}
-                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
-                        icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
-                      />
-                    )}
+                    ) : null}
+                    <FinishesPdfButton
+                      pickId={product.id}
+                      productName={product.title}
+                      brandName={designerDisplay}
+                      documents={product.pdf_urls}
+                      className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                      icon={<Layers size={12} strokeWidth={1.25} className="shrink-0" />}
+                    />
                   </div>
                 </div>
               </div>

@@ -3,6 +3,8 @@ import { Layers, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { FinishSwatch } from "@/lib/finishesSelectionPdf";
+import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // jsPDF stays out of the public product bundle — loaded on click only.
 const loadFinishesPdf = () => import("@/lib/finishesSelectionPdf");
@@ -16,6 +18,9 @@ interface Props {
   icon?: React.ReactNode;
   /** Return false to cancel (auth gates). */
   onBeforeOpen?: () => boolean;
+  /** Supplier documents labelled Fabric & Finishes; other spec sheets remain separate. */
+  documents?: { label: string; url: string }[] | null;
+  onBeforeDocumentOpen?: () => boolean;
 }
 
 /**
@@ -29,6 +34,8 @@ export default function FinishesPdfButton({
   className,
   icon,
   onBeforeOpen,
+  documents,
+  onBeforeDocumentOpen,
 }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -92,10 +99,13 @@ export default function FinishesPdfButton({
     }
   };
 
-  return (
+  const finishDocuments = (documents || []).filter((entry) =>
+    entry.url && /^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label),
+  );
+  const action = (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={finishDocuments.length ? undefined : handleClick}
       disabled={loading}
       className={className}
       aria-busy={loading}
@@ -114,5 +124,26 @@ export default function FinishesPdfButton({
         )}
       </span>
     </button>
+  );
+
+  if (!finishDocuments.length) return action;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>{action}</DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void handleClick(); }}>
+          Fabric &amp; Finishes Selection
+        </DropdownMenuItem>
+        {finishDocuments.map((entry) => (
+          <DropdownMenuItem key={entry.url} onSelect={() => {
+            if (onBeforeDocumentOpen && !onBeforeDocumentOpen()) return;
+            window.open(buildSpecSheetUrl(entry.url, brandName || "", productName, entry.label), "_blank", "noopener,noreferrer");
+          }}>
+            {entry.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
