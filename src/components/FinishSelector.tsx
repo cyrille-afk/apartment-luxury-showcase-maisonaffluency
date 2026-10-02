@@ -686,9 +686,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // picker. Keep the single committed choice for pricing, but show every
   // linked finish in that photo until the visitor explicitly chooses one.
   const picturedMatches = (tiles: Fabric[], axis: string, selectedId: string | null) => {
-    if (!photoLedFinishes || currentGalleryIndex == null || isSharedSlide(currentGalleryIndex + 1)) return [];
-    const matches = tiles.filter((f) => f.image_indices?.includes(currentGalleryIndex + 1));
-    return userPickedAxesRef.current[axis] && !matches.some((f) => f.id === selectedId) ? [] : matches;
+    if (!photoLedFinishes || currentGalleryIndex == null || userPickedAxesRef.current[axis] || isSharedSlide(currentGalleryIndex + 1)) return [];
+    return tiles.filter((f) => f.image_indices?.includes(currentGalleryIndex + 1));
   };
 
   // Landing must show NO pre-selected swatch — the gallery-driven highlight
