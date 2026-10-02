@@ -11,7 +11,7 @@ type GalleryAlternative = {
 const norm = (value?: string | null) => (value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 const matchesSub = (pick: GalleryAlternative, subs: string[]) => subs.includes(norm(pick.subcategory));
 const isBarHeight = (title: string) => /\b(bar\s?stool|bar\s?chair|bar|counter|high\s?stool)\b/.test(norm(title));
-const isWallArt = (pick: GalleryAlternative) =>
+  const isWallArt = (pick: GalleryAlternative) =>
   matchesSub(pick, ["wall decor", "wall art", "art", "artworks"])
   || (norm(pick.category) === "decor" && /\b(diasec|photograph|painting|artwork|canvas)\b/.test(norm(`${pick.title} ${pick.subtitle}`)));
 
