@@ -78,7 +78,8 @@ export function productEditionBadge(input: {
 
 /**
  * Card chip for pieces published by a parent house (designers.founder).
- * Ecart → "Ecart REEDITION" (including Ecart's own pieces); any other parent →
+ * Ecart → "Ecart REEDITION" (or plain "REEDITION" on a child designer's page,
+ * where the card already credits the house); any other parent →
  * "<House> Edition" (or the house name alone when it already ends in Edition(s)).
  * A house's own pieces get no chip — the house name is already on the card.
  */
@@ -87,8 +88,18 @@ export function getHouseEditionLabel(input: {
   founder?: string | null;
   parentBrand?: string | null;
   reeditionBy?: string | null;
+  /** Designer whose profile page the card sits on. On the house's own page
+   * the pieces are by different designers, so the full "Ecart REEDITION"
+   * identifies the house; on a child designer's page the card already shows
+   * the house, so "REEDITION" alone is enough. */
+  pageDesignerName?: string | null;
 }): string | null {
-  if (isEcartReedition(input)) return "Ecart REEDITION";
+  if (isEcartReedition(input)) {
+    const page = normalizeHouseName(input.pageDesignerName);
+    const pageIsEcartHouse =
+      !page || page === "ecart" || page === "ecart paris" || page.startsWith("ecart - ");
+    return pageIsEcartHouse ? `Ecart ${ECART_REEDITION_LABEL}` : ECART_REEDITION_LABEL;
+  }
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;

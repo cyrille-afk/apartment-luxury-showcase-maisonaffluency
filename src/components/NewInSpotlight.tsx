@@ -68,9 +68,11 @@ interface NewInSpotlightProps {
   pickDesignerSlugOverride?: string;
   /** Full sibling catalogue used only for the lightbox "More from" strip. */
   relatedPicksOverride?: DesignerCuratorPick[];
+  /** Name of the page this section is embedded on — scopes the edition chip (child pages show "REEDITION", not "Ecart REEDITION"). */
+  pageDesignerName?: string | null;
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride, pageDesignerName }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const hasOverride = Array.isArray(picksOverride);
   const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
@@ -267,6 +269,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
             designerName: designer.name,
             founder: designer.founder,
             parentBrand: brandLabelOverride,
+            pageDesignerName,
           });
 
           return (

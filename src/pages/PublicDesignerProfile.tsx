@@ -1473,6 +1473,7 @@ const PublicDesignerProfile = () => {
                 designer={designer}
                 showEyebrow={false}
                 variant="underlaid"
+                pageDesignerName={designer?.name}
                 picksOverride={isArnoldMadsenProfile ? (picks as any) : undefined}
                 brandLabelOverride={isArnoldMadsenProfile ? "Dagmar" : undefined}
                 pickDesignerSlugOverride={isArnoldMadsenProfile ? "dagmar-london" : undefined}
@@ -1484,7 +1485,7 @@ const PublicDesignerProfile = () => {
           <div className={cn(!useNewInSpotlightFormat && "md:hidden")}>
           {useNewInSpotlightFormat ? (
             <div className="w-full">
-              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" />
+              <NewInSpotlight designer={designer} showEyebrow={false} variant="underlaid" pageDesignerName={designer?.name} />
             </div>
           ) : newInFormat ? (
             newInSection
@@ -1956,6 +1957,7 @@ const PublicDesignerProfile = () => {
                     designerName: designerLabel || designer.name,
                     founder: designer.founder,
                     parentBrand: parentBrandName || (isParentBrandDesigner(designer) ? designer.name : null),
+                    pageDesignerName: designer.name,
                   });
                   const curatorialEditionLine = formatCuratorialEditionLine(pick);
 
