@@ -29,3 +29,4 @@
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
+- AI Curatorial Guide routing: `useCuratorialRouter` races the `curatorial-route` classifier against an 800ms budget and defaults to FRONTIER on timeout/failure; FLASH vs FRONTIER changes reasoning effort on the default model in `curatorial-guide-stream`, never the model — keeps accuracy first and model choice centralised.
