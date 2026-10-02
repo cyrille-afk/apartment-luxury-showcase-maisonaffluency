@@ -6,7 +6,7 @@ import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom"
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { ArrowLeft, Instagram, ExternalLink, Quote, Package, FileText, ShoppingCart, Check, Scale, Heart, Loader2, Maximize2, Tag } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import GridDensityToggle from "@/components/GridDensityToggle";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
