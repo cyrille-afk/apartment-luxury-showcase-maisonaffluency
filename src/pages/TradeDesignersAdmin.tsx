@@ -2043,20 +2043,14 @@ const TradeDesignersAdmin = () => {
     const persistTimer = window.setTimeout(persistDraft, 500);
     window.addEventListener("pagehide", persistDraft);
 
-    // Warn the user before any reload / tab close / navigation away while
-    // they have unsaved edits in the buffer. This catches the case where
-    // the build-update banner, an OS-level refresh, or a stray Cmd+R would
-    // otherwise wipe in-progress work (e.g. a bulk Instagram import).
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!hasUnsaved) return;
-      persistDraft();
-      e.preventDefault();
-      // Required for Chrome to actually show the prompt.
-      e.returnValue = "";
+    // Persist the draft on unload WITHOUT a blocking "Leave site?" prompt.
+    // The prompt froze the embedded preview on every reload (code updates
+    // reload the iframe, where the dialog can be invisible). Drafts are
+    // restored from sessionStorage on next load, so nothing is lost.
+    const onBeforeUnload = () => {
+      if (hasUnsaved) persistDraft();
     };
-    if (hasUnsaved) {
-      window.addEventListener("beforeunload", onBeforeUnload);
-    }
+    window.addEventListener("beforeunload", onBeforeUnload);
 
     return () => {
       window.clearTimeout(persistTimer);
