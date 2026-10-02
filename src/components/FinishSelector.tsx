@@ -806,6 +806,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else if (isFrameGroup) {
         const frame = frameOptions?.find((option) => f.name.toLowerCase().startsWith(option.toLowerCase()));
         if (frame) onFrameFinishChange?.(frame);
+      } else if (isTopGroup && categorySplit) {
+        // Category-split single-axis product: both dropdowns describe the same
+        // combined variant, so the second group drives the base axis too.
+        onWoodFinishChange?.(f.name);
       } else if (isTopGroup) {
         // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
         // — drive the Top axis + emit the image_url so the 3D viewer can
@@ -1405,6 +1409,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .join(" / ");
 
   const baseAxisLabel = (() => {
+    if (categorySplit) return categorySplit.firstLabel;
     if (axisModeActive && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
     const isTable = !!productTitle && /\btable\b/i.test(productTitle);
@@ -1416,6 +1421,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return "Select Your Finish";
   })();
   const topAxisLabel = (() => {
+    if (categorySplit) return categorySplit.secondLabel;
     if (topLabel && topLabel.trim()) return topLabel.trim();
     const title = (productTitle || "").toLowerCase();
     const m = title.match(/\b(console|dining|coffee|cocktail|side|writing|desk|bedside|conference)\s+table\b/);
