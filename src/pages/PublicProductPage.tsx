@@ -2640,7 +2640,7 @@ const PublicProductPageContent: React.FC = () => {
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
-                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-accent/[0.04] px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
+                      {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
                       <div className="flex flex-col items-start">
                         <Link
                           to={`/designers/${designer.slug}`}
@@ -2733,7 +2733,7 @@ const PublicProductPageContent: React.FC = () => {
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
-                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-accent/[0.04] px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
+                    {(() => { const ed = formatEditionLabel(product as any); const tags = [isEcartProduct ? ECART_REEDITION_LABEL : null, ed].filter(Boolean); return tags.length ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{tags.join(" · ")}</span> : null; })()}
                     <div className="flex flex-col items-start">
                       <Link
                         to={`/designers/${designer.slug}`}
