@@ -674,9 +674,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // gallery back to the first image.
   // A slide mapped to every finish (brand logo / closing frame) is not
   // finish-specific — never let it drive the highlighted swatch.
+  // Matches the Pictured Finishes strip: two finishes on every photo are both
+  // genuinely pictured (e.g. Wood + Lacquer); only longer all-photo lists are
+  // treated as non-specific.
   const isSharedSlide = (oneBased: number) => {
     const mapped = fabrics.filter((f) => Array.isArray(f.image_indices) && f.image_indices.length > 0);
-    return mapped.length > 1 && mapped.every((f) => f.image_indices!.includes(oneBased));
+    return mapped.length > 2 && mapped.every((f) => f.image_indices!.includes(oneBased));
   };
 
   // Landing must show NO pre-selected swatch — the gallery-driven highlight
