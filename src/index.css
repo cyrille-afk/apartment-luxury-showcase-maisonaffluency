@@ -338,6 +338,11 @@ All colors MUST be HSL.
   letter-spacing: 0;
 }
 
+/* Curator Notes lead header keeps its bold weight inside the trade shell */
+.trade-editorial-main h3.font-bold {
+  font-weight: 700;
+}
+
 .trade-portal-shell .trade-micro-label {
   font-size: 10px;
   line-height: 1.4;
