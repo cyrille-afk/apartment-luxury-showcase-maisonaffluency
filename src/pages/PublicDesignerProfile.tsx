@@ -1956,6 +1956,7 @@ const PublicDesignerProfile = () => {
                     designerName: designerLabel || designer.name,
                     founder: designer.founder,
                     parentBrand: parentBrandName || (isParentBrandDesigner(designer) ? designer.name : null),
+                    pageDesignerName: designer.name,
                   });
                   const curatorialEditionLine = formatCuratorialEditionLine(pick);
 

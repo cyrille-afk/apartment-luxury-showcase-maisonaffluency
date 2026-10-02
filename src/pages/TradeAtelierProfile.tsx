@@ -692,6 +692,7 @@ const TradeAtelierProfile = () => {
                       designerName: designerLabel || designer.name,
                       founder: designer.founder,
                       parentBrand: isParentBrand ? designer.name : null,
+                      pageDesignerName: designer.name,
                     });
                     const curatorialEditionLine = formatCuratorialEditionLine(pick);
                     const productPath = tradeProductPathForPick(pick, designerSlug || slug, designerLabel || designer.name);
