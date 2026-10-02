@@ -2129,15 +2129,14 @@ const PublicDesignerProfile = () => {
                           aria-hidden="true"
                           className="md:hidden pointer-events-none absolute bottom-0 right-0 z-20 h-10 w-10 bg-gradient-to-tl from-black/[0.05] via-black/[0.02] to-transparent opacity-80 transition-all duration-300 group-hover:h-12 group-hover:w-12 group-hover:from-black/[0.09] group-hover:via-black/[0.04]"
                         />
+                        {/* Edition / Reedition label — overlaid top-left of the card image */}
+                        {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                          <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
+                            {curatorialEditionLine || ECART_REEDITION_LABEL}
+                          </p>
+                        )}
                       </div>
 
-
-                      {/* Edition / Reedition label — isolated below image, clean spacing */}
-                      {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
-                        <p className="mt-6 px-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased">
-                          {curatorialEditionLine || ECART_REEDITION_LABEL}
-                        </p>
-                      )}
                       {/* Editorial text block — designer / product / price hierarchy */}
                       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
                         <div className="flex min-w-0 flex-1 flex-col text-left">
