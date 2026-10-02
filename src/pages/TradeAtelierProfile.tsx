@@ -33,7 +33,7 @@ import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -688,7 +688,7 @@ const TradeAtelierProfile = () => {
                     const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
                       ? ap.designer_name : undefined;
                     const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
-                    const showReedition = isEcartReedition({
+                    const houseEditionLabel = getHouseEditionLabel({
                       designerName: designerLabel || designer.name,
                       founder: designer.founder,
                       parentBrand: isParentBrand ? designer.name : null,
@@ -771,9 +771,9 @@ const TradeAtelierProfile = () => {
                             />
                           )}
                         </div>
-                        {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                        {(curatorialEditionLine || (Boolean(houseEditionLabel) && !curatorialEditionLine)) && (
                           <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-                            {curatorialEditionLine || ECART_REEDITION_LABEL}
+                            {curatorialEditionLine || houseEditionLabel}
                           </p>
                         )}
                       </div>

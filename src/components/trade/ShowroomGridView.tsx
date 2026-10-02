@@ -29,7 +29,7 @@ import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPic
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { ECART_REEDITION_LABEL, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 
 /** Local slugify — must match the one used by TradeProductPage / PublicProductPage */
 const slugifyForUrl = (s: string) =>
@@ -783,9 +783,9 @@ const ShowroomGridView = ({
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
-                  {isEcartReedition({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
+                  {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
                     <p className="pointer-events-none absolute top-3 left-3 z-10 text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
-                      {ECART_REEDITION_LABEL}
+                      {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by })}
                     </p>
                   )}
                   <button

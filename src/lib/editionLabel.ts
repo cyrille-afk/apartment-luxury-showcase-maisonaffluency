@@ -63,3 +63,22 @@ export function isEcartReedition(input: {
 }
 
 export const ECART_REEDITION_LABEL = "Reedition";
+
+/**
+ * Card chip for pieces published by a parent house (designers.founder).
+ * Ecart → "Ecart Reedition" (including Ecart's own pieces); any other parent →
+ * "<House> Edition" (or the house name alone when it already ends in Edition(s)).
+ * A house's own pieces get no chip — the house name is already on the card.
+ */
+export function getHouseEditionLabel(input: {
+  designerName?: string | null;
+  founder?: string | null;
+  parentBrand?: string | null;
+  reeditionBy?: string | null;
+}): string | null {
+  if (isEcartReedition(input)) return "Ecart Reedition";
+  const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
+  if (!house) return null;
+  if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
+  return /(?:^|\s)[ée]ditions?$/i.test(house) ? house : `${house} Edition`;
+}

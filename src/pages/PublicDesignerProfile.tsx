@@ -60,7 +60,7 @@ import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import NotFound from "@/pages/NotFound";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -1952,7 +1952,7 @@ const PublicDesignerProfile = () => {
                     !!designer.founder;
                   const parentBrandName = showParentBrand ? designer.founder! : undefined;
                   const parentBrandSlug = showParentBrand ? parentDesigner?.slug : undefined;
-                  const showReedition = isEcartReedition({
+                  const houseEditionLabel = getHouseEditionLabel({
                     designerName: designerLabel || designer.name,
                     founder: designer.founder,
                     parentBrand: parentBrandName || (isParentBrandDesigner(designer) ? designer.name : null),
@@ -2130,9 +2130,9 @@ const PublicDesignerProfile = () => {
                           className="md:hidden pointer-events-none absolute bottom-0 right-0 z-20 h-10 w-10 bg-gradient-to-tl from-black/[0.05] via-black/[0.02] to-transparent opacity-80 transition-all duration-300 group-hover:h-12 group-hover:w-12 group-hover:from-black/[0.09] group-hover:via-black/[0.04]"
                         />
                         {/* Edition / Reedition label — overlaid top-left of the card image */}
-                        {(curatorialEditionLine || (showReedition && !curatorialEditionLine)) && (
+                        {(curatorialEditionLine || (Boolean(houseEditionLabel) && !curatorialEditionLine)) && (
                           <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-                            {curatorialEditionLine || ECART_REEDITION_LABEL}
+                            {curatorialEditionLine || houseEditionLabel}
                           </p>
                         )}
                       </div>
