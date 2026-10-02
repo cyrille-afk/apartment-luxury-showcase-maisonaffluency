@@ -682,6 +682,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return mapped.length > 2 && mapped.every((f) => f.image_indices!.includes(oneBased));
   };
 
+  // A photographed colourway can contain several finishes from the same
+  // picker. Keep the single committed choice for pricing, but show every
+  // linked finish in that photo until the visitor explicitly chooses one.
+  const picturedMatches = (tiles: Fabric[], axis: string) => {
+    if (!photoLedFinishes || currentGalleryIndex == null || userPickedAxesRef.current[axis] || isSharedSlide(currentGalleryIndex + 1)) return [];
+    return tiles.filter((f) => f.image_indices?.includes(currentGalleryIndex + 1));
+  };
+
   // Landing must show NO pre-selected swatch — the gallery-driven highlight
   // only engages after the visitor actually swipes/navigates the gallery.
   const initialGalleryIndexRef = useRef<number | null>(null);
@@ -743,7 +751,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const pairingExplanation = isDisabled
       ? `Not available with the selected ${isTopGroup ? "base" : "top"} finish${(isTopGroup ? selectedBasePairing : selectedTopPairing) ? ` (${isTopGroup ? selectedBasePairing : selectedTopPairing})` : ""}. Choose a different ${isTopGroup ? "base" : "top"} finish to use this option.`
       : null;
-    const isSelected = isRugGroup
+    const selectedByChoice = isRugGroup
       ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
       : isSecondaryFabricGroup
       ? selectedSecondaryFabricId === f.id
@@ -756,6 +764,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
+    const picturedAxis = isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isFrameGroup ? "frame" : isTopGroup ? "top" : "wood";
+    const picturedTiles = isFabricGroup ? visibleFabricTiles : isCoverGroup ? visibleCoverTiles : isFrameGroup ? frameTiles : isTopGroup ? visibleTopTiles : visibleWoodTiles;
+    const picturedIds = picturedMatches(picturedTiles, picturedAxis);
+    const isSelected = picturedIds.length > 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
     const setSelected = isFrameGroup
       ? setSelectedFrameId
       : isSecondaryFabricGroup
@@ -1305,7 +1317,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     emptyNote?: string;
     glyph: string;
     tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
-  }) => (
+  }) => {
+    const axis = args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
+    const pictured = picturedMatches(args.tiles, axis);
+    const headerNames = pictured.length > 1 ? pictured.map((f) => f.name).join(" · ") : args.selectedName;
+    return (
     <div className="border-t border-border/60">
       {isMobile ? (
         /* Mobile/PWA: no dropdown — the swatch rail IS the picker. A compact
@@ -1314,9 +1330,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {args.label.replace(/^select (your|the)\s+/i, "")}
           </span>
-          {args.selectedName && (
+          {headerNames && (
             <span className="font-body text-[12px] text-foreground/85 truncate max-w-[55%] text-right">
-              {args.selectedName}
+              {headerNames}
             </span>
           )}
         </div>
@@ -1330,8 +1346,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
             {args.label}
           </span>
-          {args.selectedName && (() => {
-            const chip = args.tiles.find((t) => t.name === args.selectedName)?.image_url;
+          {headerNames && (() => {
+            const chip = pictured.length > 1 ? null : args.tiles.find((t) => t.name === headerNames)?.image_url;
             return (
               <span className="flex items-center gap-2 min-w-0 max-w-[55%] mr-3">
                 {chip && (
@@ -1341,7 +1357,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                     aria-hidden="true"
                   />
                 )}
-                <span className="font-body text-sm text-foreground/85 truncate text-right">{args.selectedName}</span>
+                <span className="font-body text-sm text-foreground/85 truncate text-right">{headerNames}</span>
               </span>
             );
           })()}
@@ -1387,6 +1403,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       )}
     </div>
   );
+  };
 
   const rugComponentGroups = (() => {
     const groups = new Map<string, Fabric[]>();
