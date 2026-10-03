@@ -26,7 +26,7 @@ type InviteRow = {
 function randomCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const pick = (n: number) =>
-    Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+    Array.from(crypto.getRandomValues(new Uint32Array(n)), (v) => alphabet[v % alphabet.length]).join("");
   return `${pick(4)}-${pick(4)}`;
 }
 
