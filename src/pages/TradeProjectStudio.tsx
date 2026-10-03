@@ -281,7 +281,7 @@ export default function TradeProjectStudio() {
                       {item.image_url ? (
                         <img
                           src={item.image_url}
-                          alt={`${item.name} by ${item.designer}`}
+                           alt={isClientMode ? item.name : `${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
                           className="w-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.01] lg:max-h-[24dvh]"
                         />

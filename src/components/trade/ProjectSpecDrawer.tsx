@@ -153,7 +153,7 @@ export function ProjectSpecDrawer({
             <div className="mb-8 bg-muted">
               <img
                 src={item.image_url}
-                alt={`${item.name} by ${item.designer}`}
+                 alt={clientMode ? item.name : `${item.name} by ${item.designer}`}
                 className="max-h-64 w-full object-contain"
               />
             </div>

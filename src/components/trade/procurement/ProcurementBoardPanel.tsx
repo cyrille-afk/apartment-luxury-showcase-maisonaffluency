@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toDiscountFraction, tradePriceCents, clientPriceCents, normalizeMultiplier, discountPercentLabel } from "@/lib/tradePricing";
+import { toDiscountFraction, tradePriceCents, clientPriceCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,6 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
 import { useStudio } from "@/hooks/useStudio";
-import { effectiveProjectMultiplier } from "@/lib/tradePricing";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
 
 type Row = {

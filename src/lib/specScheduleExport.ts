@@ -150,7 +150,6 @@ export async function compileSpecSchedule(opts: {
     const p: any = pickById.get(ref.pickId) ?? {};
     const rrp = priceById.get(ref.pickId);
     const rrpCents = rrp && rrp > 0 ? rrp : null;
-    const designer = (p.designers?.display_name ?? p.designers?.name ?? "").trim() || null;
     return {
       ref: `FF-${String(i + 1).padStart(3, "0")}`,
       productName: p.title ?? "Untitled piece",

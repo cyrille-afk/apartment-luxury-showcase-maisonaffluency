@@ -53,7 +53,6 @@ export function ProjectProposalPreview({
   currency = "USD",
 }: ProjectProposalPreviewProps) {
   const money = makeMoney(currency);
-  const retailTotal = items.reduce((sum, item) => sum + (item.rrp_cents || 0) * item.quantity, 0);
   const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
   const clientTotal = items.reduce((sum, item) => sum + (clientPriceCents(tradePriceCents(item.rrp_cents, tradeDiscount), markupMultiplier) || 0) * item.quantity, 0);
 
