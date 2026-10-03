@@ -769,6 +769,9 @@ export function AIConcierge({
   /** Embedded only: open a brand-new thread instead of restoring the last one. */
   startFresh?: boolean;
 } = {}) {
+  // Per-tab keys: the embedded workspace namespaces its tab state by project so
+  // it never shares drafts/transcripts with the floating Felix or another project.
+  const ssKey = (k: string) => (embedded ? `${k}:ws:${projectId || "none"}` : k);
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
@@ -823,7 +826,7 @@ export function AIConcierge({
   const briefProjectLocationRef = useRef<string | null>(null);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
     try {
-      return sessionStorage.getItem(BRIEF_ACTIVE_STORAGE_KEY) === "1" && !!loadBriefDraftText();
+      return sessionStorage.getItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY)) === "1" && !!loadBriefDraftText();
     } catch {
       return false;
     }
@@ -854,8 +857,8 @@ export function AIConcierge({
   }, [open, cancelBriefTransition]);
   useEffect(() => {
     try {
-      if (briefBuilderOpen) sessionStorage.setItem(BRIEF_ACTIVE_STORAGE_KEY, "1");
-      else sessionStorage.removeItem(BRIEF_ACTIVE_STORAGE_KEY);
+      if (briefBuilderOpen) sessionStorage.setItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY), "1");
+      else sessionStorage.removeItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY));
     } catch {}
   }, [briefBuilderOpen]);
   const openBriefBuilder = useCallback((draft?: string) => {
@@ -898,11 +901,11 @@ export function AIConcierge({
   // thread you actually opened — which both hid the selected history and
   // overwrote its row on the next save.
   const cachedTimelineThreadId = (() => {
-    try { return sessionStorage.getItem("concierge:timelineThread"); } catch { return null; }
+    try { return sessionStorage.getItem(ssKey("concierge:timelineThread")); } catch { return null; }
   })();
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
-      const raw = sessionStorage.getItem("concierge:timeline");
+      const raw = sessionStorage.getItem(ssKey("concierge:timeline"));
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) return stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(parsed as TimelineItem[]));
@@ -917,8 +920,8 @@ export function AIConcierge({
   const stampTimelineThread = useCallback((id: string | null) => {
     timelineThreadRef.current = id;
     try {
-      if (id) sessionStorage.setItem("concierge:timelineThread", id);
-      else sessionStorage.removeItem("concierge:timelineThread");
+      if (id) sessionStorage.setItem(ssKey("concierge:timelineThread"), id);
+      else sessionStorage.removeItem(ssKey("concierge:timelineThread"));
     } catch {}
   }, []);
 
@@ -948,9 +951,9 @@ export function AIConcierge({
 
   const [input, setInput] = useState<string>(() => {
     try {
-      const saved = sessionStorage.getItem("concierge:draft") || "";
+      const saved = sessionStorage.getItem(ssKey("concierge:draft")) || "";
       if (isStructuredBriefText(saved)) {
-        sessionStorage.removeItem("concierge:draft");
+        sessionStorage.removeItem(ssKey("concierge:draft"));
         return "";
       }
       return saved;
@@ -958,8 +961,8 @@ export function AIConcierge({
   });
   useEffect(() => {
     try {
-      if (input) sessionStorage.setItem("concierge:draft", input);
-      else sessionStorage.removeItem("concierge:draft");
+      if (input) sessionStorage.setItem(ssKey("concierge:draft"), input);
+      else sessionStorage.removeItem(ssKey("concierge:draft"));
     } catch {}
   }, [input]);
   const [streaming, setStreaming] = useState(false);
@@ -1508,14 +1511,14 @@ export function AIConcierge({
       // pdf previews would be heavier), then as a last resort drop all.
       const payload = JSON.stringify(timeline);
       try {
-        sessionStorage.setItem("concierge:timeline", payload);
+        sessionStorage.setItem(ssKey("concierge:timeline"), payload);
       } catch {
         const stripped = timeline.map((t) =>
           t.kind === "msg" && t.attachments?.length
             ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
             : t,
         );
-        sessionStorage.setItem("concierge:timeline", JSON.stringify(stripped));
+        sessionStorage.setItem(ssKey("concierge:timeline"), JSON.stringify(stripped));
       }
     } catch {}
   }, [timeline]);
@@ -1571,6 +1574,8 @@ export function AIConcierge({
       : `concierge:activeThread:${user.id}`
     : null;
   const [hydratedThreadId, setHydratedThreadId] = useState<string | null>(null);
+  const rowVersionRef = useRef<string | null>(null);
+  const saveChainRef = useRef<Promise<void>>(Promise.resolve());
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
     { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
@@ -1610,9 +1615,10 @@ export function AIConcierge({
         timeline: [],
         ...(embedded ? { workspace: true, project_id: projectId || null } : {}),
       })
-      .select("id,title,last_active_at")
+      .select("id,title,last_active_at,updated_at")
       .single();
     if (error || !data) return null;
+    rowVersionRef.current = (data as any).updated_at ?? null;
     setThreads((prev) => [data as ConciergeThread, ...prev]);
     hydratedThreadRef.current = data.id;
     cloudLastPayloadRef.current = "";
@@ -1737,11 +1743,55 @@ export function AIConcierge({
     const title = deriveThreadTitle(compact as TimelineItem[]);
     const nowIso = new Date().toISOString();
     try {
-      await supabase
-        .from("concierge_threads")
-        .update({ timeline: compact as any, title, last_active_at: nowIso })
-        .eq("id", activeThreadId)
-        .eq("user_id", user.id);
+      if (embedded) {
+        // Serialize this tab's saves so overlapping writes never trip the
+        // concurrency check against our own previous write.
+        const prevSave = saveChainRef.current;
+        let release!: () => void;
+        saveChainRef.current = new Promise<void>((r) => { release = r; });
+        await prevSave;
+        try {
+        // A queued save from before a fork/thread switch must not write again.
+        if (hydratedThreadRef.current !== activeThreadId) return;
+        // Optimistic concurrency: only write if nobody (e.g. another tab on the
+        // same project) changed the row since we last read/wrote it.
+        let q = supabase
+          .from("concierge_threads")
+          .update({ timeline: compact as any, title, last_active_at: nowIso })
+          .eq("id", activeThreadId)
+          .eq("user_id", user.id);
+        if (rowVersionRef.current) q = q.eq("updated_at", rowVersionRef.current);
+        const { data: upd } = await q.select("updated_at");
+        if (upd && upd.length > 0) {
+          rowVersionRef.current = (upd[0] as any).updated_at;
+        } else {
+          // Conflict — fork this tab's transcript into its own thread so
+          // neither tab's turns are overwritten.
+          const { data: forked } = await supabase
+            .from("concierge_threads")
+            .insert({ user_id: user.id, title, timeline: compact as any, last_active_at: nowIso, workspace: true, project_id: projectId || null })
+            .select("id,title,last_active_at,updated_at")
+            .single();
+          if (forked) {
+            hydratedThreadRef.current = forked.id;
+            rowVersionRef.current = (forked as any).updated_at;
+            stampTimelineThread(forked.id);
+            setActiveThreadId(forked.id);
+            if (activeThreadKey) try { localStorage.setItem(activeThreadKey, forked.id); } catch {}
+            setHydratedThreadId(forked.id);
+            setThreads((prev) => [forked as ConciergeThread, ...prev]);
+            toast.info("This curation was open in another tab — your latest turns were saved as a separate curation.");
+          }
+          return;
+        }
+        } finally { release(); }
+      } else {
+        await supabase
+          .from("concierge_threads")
+          .update({ timeline: compact as any, title, last_active_at: nowIso })
+          .eq("id", activeThreadId)
+          .eq("user_id", user.id);
+      }
       setThreads((prev) => {
         const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
         next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
@@ -1750,7 +1800,7 @@ export function AIConcierge({
     } catch {
       // Non-fatal: sessionStorage still holds the in-tab copy.
     }
-  }, [user?.id, activeThreadId, buildCompactTimeline, deriveThreadTitle]);
+  }, [user?.id, activeThreadId, buildCompactTimeline, deriveThreadTitle, embedded, projectId, activeThreadKey, stampTimelineThread]);
 
   // Hydrate timeline whenever the active thread changes. If the in-memory
   // timeline (restored from sessionStorage on refresh) has MORE messages than
@@ -1769,11 +1819,12 @@ export function AIConcierge({
     (async () => {
       const { data, error } = await supabase
         .from("concierge_threads")
-        .select("timeline")
+        .select("timeline, updated_at")
         .eq("id", activeThreadId)
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
+      rowVersionRef.current = (data as any)?.updated_at ?? null;
       if (error) {
         // Release the claim so a later render can retry once.
         hydratedThreadRef.current = null;
