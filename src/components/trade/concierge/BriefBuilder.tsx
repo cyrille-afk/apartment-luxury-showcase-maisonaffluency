@@ -499,6 +499,9 @@ function updateBlockField<B extends ObjectBlock>(
 }
 
 const DRAFT_STORAGE_KEY = "concierge:briefBuilder:draft";
+// Brief drafts are per browser tab (sessionStorage) and per active project, so
+// two tabs on different projects never share or overwrite a brief.
+const draftKey = () => `${DRAFT_STORAGE_KEY}:${getProjectScope()}`;
 
 type BriefDraft = {
   values: BriefValues;
@@ -509,7 +512,7 @@ type BriefDraft = {
 function loadDraft(): BriefDraft | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(draftKey());
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<BriefDraft>;
     if (!parsed || typeof parsed !== "object" || !parsed.values) return null;
@@ -546,7 +549,7 @@ export function loadBriefDraftText(): string {
 function saveDraft(draft: BriefDraft) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    window.sessionStorage.setItem(draftKey(), JSON.stringify(draft));
   } catch {
     // ignore quota / serialization errors
   }
