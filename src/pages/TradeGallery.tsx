@@ -304,12 +304,13 @@ const TradeGallery = () => {
     const tradeLabel = `${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`;
 
     return (
-      <span className={className}>
+       <span data-trade-sensitive={showTradePrice ? "" : undefined} className={className}>
         {showTradePrice ? (
           <>
             <span className="text-muted-foreground font-normal">
               RRP: {retailLabel}
             </span>
+       
             <span className="text-muted-foreground/50" aria-hidden="true">|</span>
             <span className="text-accent font-semibold">
               TRADE: {tradeLabel}
