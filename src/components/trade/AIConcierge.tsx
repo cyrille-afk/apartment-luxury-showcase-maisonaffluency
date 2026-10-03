@@ -403,6 +403,7 @@ import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingPro
 import { CuratedGridSkeleton } from "@/components/trade/concierge/CuratedGridSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
+import { collectSchedulePicks, compileSpecSchedule, renderSpecSchedulePdf } from "@/lib/specScheduleExport";
 import { LayoutComparisonGrid } from "@/components/trade/concierge/LayoutComparisonGrid";
 
 /** Pulls the "Aesthetic & Visual DNA" (VIBE) line out of a structured brief. */
@@ -1577,6 +1578,30 @@ export function AIConcierge({
   // Floating assistant: offer a jump back to this tab's active project thread
   // in Trade Concierge (project selection is per tab via sessionStorage).
   const [projectLink, setProjectLink] = useState<{ id: string; name: string } | null>(null);
+  // Specification Schedule export (structured pieces from this conversation).
+  const [exportingSchedule, setExportingSchedule] = useState(false);
+  const schedulePicks = useMemo(() => collectSchedulePicks(timeline as any), [timeline]);
+  const exportSpecSchedule = useCallback(async () => {
+    if (exportingSchedule || !schedulePicks.length) return;
+    setExportingSchedule(true);
+    try {
+      let pid: string | null = projectId;
+      if (!pid) { try { pid = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ } }
+      const ds = await compileSpecSchedule({
+        picks: schedulePicks,
+        projectId: pid,
+        studio: currentStudio ? { name: currentStudio.name, logo_url: currentStudio.logo_url } : null,
+        fallbackStudioName: "Maison Affluency",
+      });
+      await renderSpecSchedulePdf(ds);
+      toast.success("Specification Schedule ready");
+    } catch (err) {
+      console.error("[concierge] spec schedule export failed", err);
+      toast.error("Couldn't compile the Specification Schedule — please try again.");
+    } finally {
+      setExportingSchedule(false);
+    }
+  }, [exportingSchedule, schedulePicks, projectId, currentStudio]);
   useEffect(() => {
     if (embedded || surface !== "trade" || !user?.id || pathname.startsWith("/trade/concierge")) { setProjectLink(null); return; }
     let pid: string | null = null;
@@ -5837,6 +5862,25 @@ export function AIConcierge({
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
                 and every `concierge_inspector` log line for this run. */}
+            {schedulePicks.length > 0 && surface === "trade" && (
+              <button
+                type="button"
+                disabled={exportingSchedule}
+                aria-busy={exportingSchedule}
+                onClick={() => void exportSpecSchedule()}
+                className="mb-2 flex w-full items-center justify-between gap-2 rounded-sm border border-border bg-background px-3 py-2 text-left text-xs text-foreground transition-colors hover:border-accent hover:bg-accent/10 disabled:cursor-wait"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  {exportingSchedule
+                    ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" />
+                    : <FileDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                  <span className={cn("truncate", exportingSchedule && "font-display italic")}>
+                    {exportingSchedule ? "Compiling Specification Schedule…" : `Export Specification Schedule · ${schedulePicks.length} ${schedulePicks.length === 1 ? "piece" : "pieces"}`}
+                  </span>
+                </span>
+                {!exportingSchedule && <span aria-hidden className="shrink-0 text-muted-foreground">PDF</span>}
+              </button>
+            )}
             {projectLink && (
               <button
                 type="button"
