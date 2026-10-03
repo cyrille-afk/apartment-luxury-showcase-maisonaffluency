@@ -154,7 +154,8 @@ export async function renderCurationPdf(data: CurationExportData): Promise<void>
 
     for (const turn of data.turns) {
       const label = turn.role === "user" ? "YOU" : "FELIX";
-      const lines = doc.splitTextToSize(turn.text, CW - 60) as string[];
+      const plain = turn.text.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/[*_`]/g, "");
+      const lines = doc.splitTextToSize(plain, CW - 60) as string[];
       const blockH = lines.length * 12 + 14;
       ensure(blockH);
 
