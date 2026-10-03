@@ -119,7 +119,9 @@ Deno.serve(async (req) => {
       mode = "all";
       category = body.category || "all";
     } else if (body.urls && Array.isArray(body.urls)) {
-      urls = body.urls;
+      urls = body.urls
+        .filter((u: unknown): u is string => typeof u === "string" && /^https:\/\/(www\.)?maisonaffluency\.com(\/[^\s]*)?$/.test(u))
+        .slice(0, 500);
     }
   } catch {
     // no body

@@ -86,6 +86,14 @@ Deno.serve(async (req) => {
     const type = action === 'URL_DELETED' ? 'URL_DELETED' : 'URL_UPDATED';
     const results: { url: string; status: number; body: unknown }[] = [];
 
+    const SITE_URL_RE = /^https:\/\/(www\.)?maisonaffluency\.com(\/[^\s]*)?$/;
+    const bad = urls.filter((u: unknown) => typeof u !== 'string' || !SITE_URL_RE.test(u));
+    if (bad.length > 0 || urls.length > 200) {
+      return new Response(JSON.stringify({ error: 'Only maisonaffluency.com URLs (max 200) can be submitted' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     for (const url of urls) {
       const res = await fetch('https://indexing.googleapis.com/v3/urlNotifications:publish', {
         method: 'POST',

@@ -17,6 +17,7 @@
  * Output: { image: "data:image/png;base64,..." }
  */
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { safeFetch } from "../_shared/safeFetch.ts";
 import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
 import { requireUser, rateLimit } from "../_shared/auth.ts";
 
@@ -178,7 +179,8 @@ async function fetchImageBytes(urlOrDataUrl: string): Promise<Uint8Array> {
     for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
     return out;
   }
-  const res = await fetch(urlOrDataUrl);
+  if (!/^https:\/\//i.test(urlOrDataUrl)) throw new Error("roomImage must be an https URL or data URL");
+  const res = await safeFetch(urlOrDataUrl);
   if (!res.ok) throw new Error(`failed to fetch image: ${res.status}`);
   return new Uint8Array(await res.arrayBuffer());
 }
