@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toDiscountFraction, tradePriceCents, clientPriceCents, normalizeMultiplier, discountPercentLabel } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
