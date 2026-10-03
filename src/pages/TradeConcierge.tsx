@@ -1,15 +1,22 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, Plus, Square, Trash2 } from "lucide-react";
+import { ArrowUp, Clock, FileText, ImagePlus, Plus, Square, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurationThread } from "@/hooks/useCurationThread";
+import { useProjectFilter } from "@/hooks/useProjectFilter";
+import { useProjects } from "@/hooks/useProjects";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { FlashSkeleton, FrontierSkeleton } from "@/components/CuratorialGuideRouter";
+import { DotCircleLoader } from "@/components/ui/DotCircleLoader";
+
+const AIConcierge = lazy(() =>
+  import("@/components/trade/AIConcierge").then((m) => ({ default: m.AIConcierge })),
+);
 
 const QUICK_STARTS = [
   "Create a living room scheme",
@@ -25,6 +32,9 @@ function greeting() {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 
+/** One workspace session = one embedded Felix mount, keyed by this id. */
+interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string }
+
 export default function TradeConcierge() {
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
@@ -32,9 +42,15 @@ export default function TradeConcierge() {
   const [threads, setThreads] = useState<ThreadRow[]>([]);
   const [threadsLoaded, setThreadsLoaded] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [workspace, setWorkspace] = useState<WorkspaceSession | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<string | null>(null);
+
+  // Bind the concierge contextually to the project chosen in the header switcher.
+  const { projectFilter } = useProjectFilter();
+  const { projects } = useProjects({ activeOnly: false });
+  const activeProject = projectFilter ? projects.find((p) => p.id === projectFilter) : undefined;
 
   const loadThreads = useCallback(async () => {
     if (!user) return;
@@ -60,21 +76,47 @@ export default function TradeConcierge() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, phase]);
 
-  useEffect(() => { if (!busy) inputRef.current?.focus(); }, [busy, threadId]);
+  useEffect(() => { if (!busy && !workspace) inputRef.current?.focus(); }, [busy, threadId, workspace]);
 
+  // Opening a saved curation or starting fresh leaves the Felix workspace.
+  useEffect(() => { if (threadId) setWorkspace(null); }, [threadId]);
+
+  // Fire a queued tool action (e.g. open the moodboard picker) once the
+  // embedded workspace has mounted and attached its listener.
+  useEffect(() => {
+    if (!workspace?.pendingAction) return;
+    const action = workspace.pendingAction;
+    const t = window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("concierge:action", { detail: action }));
+      setWorkspace((w) => (w ? { ...w, pendingAction: undefined } : w));
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [workspace]);
+
+  const withProjectContext = (text: string) =>
+    activeProject ? `Project context: ${activeProject.name}${activeProject.location ? ` (${activeProject.location})` : ""}. ${text}` : text;
+
+  /** Entry-state input: open the Felix workspace, seeding the first prompt. */
+  const openWorkspace = (text: string, pendingAction?: string) => {
+    if (!user) return;
+    setPrompt("");
+    setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: text ? withProjectContext(text) : "", pendingAction }));
+  };
+
+  /** In-thread input: continue the saved curation conversation. */
   const submit = async (text: string) => {
     const p = text.trim();
     if (!p || busy || !user) return;
     setPrompt("");
     if (threadId) { void send(p); return; }
-    const { data, error: e } = await supabase.from("curation_threads")
-      .insert({ user_id: user.id }).select("id").single();
-    if (e || !data) return;
-    pendingRef.current = p;
-    navigate(`/trade/concierge/${data.id}`);
+    openWorkspace(p);
   };
 
-  const onSubmit = (e: FormEvent) => { e.preventDefault(); busy ? stop() : void submit(prompt); };
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (threadId) { busy ? stop() : void submit(prompt); return; }
+    void submit(prompt);
+  };
 
   const removeThread = async (id: string) => {
     const { error: e } = await supabase.from("curation_threads").delete().eq("id", id);
@@ -87,6 +129,12 @@ export default function TradeConcierge() {
   const last = messages[messages.length - 1];
   const awaitingFirstToken = busy && (!last || last.role === "user" || !last.content);
 
+  const TOOL_SHORTCUTS = [
+    { label: "Upload Moodboard", icon: ImagePlus, run: () => openWorkspace("", "upload-moodboard") },
+    { label: "Request Custom Quote", icon: FileText, run: () => openWorkspace("I'd like to request a custom quote for my project.") },
+    { label: "Check Lead Times", icon: Clock, run: () => openWorkspace("What are the current lead times for your pieces?") },
+  ];
+
   return (
     <div className="mx-auto w-full max-w-[1500px] px-6 py-6">
       <Helmet><title>Trade Concierge · Maison Affluency</title><meta name="robots" content="noindex" /></Helmet>
@@ -95,12 +143,14 @@ export default function TradeConcierge() {
         <aside className="space-y-5 lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)] lg:overflow-y-auto">
           <section className="relative overflow-hidden rounded-sm border border-border/60 bg-muted/40 p-6">
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/0 via-accent/70 to-accent/0" />
-            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Trade Concierge</p>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Trade Concierge · Powered by Felix</p>
             <h1 className="mt-3 font-display text-3xl italic leading-tight text-foreground">
               {greeting()}{firstName ? `, ${firstName}` : ""}.
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {profile?.company ? `Curating for ${profile.company}. ` : ""}Ask for schemes, specifications or finish guidance.
+              {profile?.company ? `Curating for ${profile.company}` : "Your personal concierge"}
+              {activeProject ? ` · ${activeProject.name}` : ""}.
+              Ask for schemes, specifications or finish guidance.
             </p>
           </section>
 
@@ -112,7 +162,7 @@ export default function TradeConcierge() {
                   key={q}
                   type="button"
                   disabled={busy}
-                  onClick={() => void submit(q)}
+                  onClick={() => (threadId ? void submit(q) : openWorkspace(q))}
                   className="rounded-full border border-border bg-background px-3.5 py-1.5 text-left text-xs text-foreground transition-colors hover:border-accent hover:bg-accent/10 disabled:opacity-50"
                 >
                   {q}
@@ -125,7 +175,7 @@ export default function TradeConcierge() {
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Past curations</p>
               <Button asChild variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
-                <Link to="/trade/concierge"><Plus className="h-3.5 w-3.5" /> New</Link>
+                <Link to="/trade/concierge" onClick={() => setWorkspace(null)}><Plus className="h-3.5 w-3.5" /> New</Link>
               </Button>
             </div>
             {!threadsLoaded ? (
@@ -154,63 +204,92 @@ export default function TradeConcierge() {
           </section>
         </aside>
 
-        {/* Right — full-height guide */}
+        {/* Right — unified workspace: entry hero → Felix workspace, or a saved curation thread */}
         <section className="flex h-[calc(100dvh-8rem)] min-h-[520px] flex-col overflow-hidden rounded-sm border border-border/60 bg-background">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
-            {messages.length === 0 && phase !== "loading" && !busy ? (
-              <div className="flex h-full flex-col items-center justify-center text-center">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Curatorial Guide</p>
-                <h2 className="mt-3 max-w-md font-display text-3xl italic text-foreground">What shall we curate today?</h2>
-                <div className="mt-5 h-px w-24 bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+          {workspace && !threadId ? (
+            <Suspense fallback={
+              <div className="flex h-full items-center justify-center">
+                <DotCircleLoader size="sm" className="text-muted-foreground" />
               </div>
-            ) : (
-              <div className="mx-auto max-w-3xl space-y-8">
-                {phase === "loading" && <FlashSkeleton />}
-                {messages.map((m) =>
-                  m.role === "user" ? (
-                    <div key={m.id} className="flex justify-end">
-                      <p className="max-w-[80%] whitespace-pre-wrap rounded-sm bg-primary px-4 py-3 text-sm text-primary-foreground">{m.content}</p>
-                    </div>
-                  ) : m.content ? (
-                    <article key={m.id} className="space-y-2">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                        {m.route === "FLASH" ? "Swift answer" : "Deep curation"}
-                      </p>
-                      <MessageResponse className="text-[15px] leading-relaxed text-foreground">{m.content}</MessageResponse>
-                    </article>
-                  ) : null,
+            }>
+              <AIConcierge key={workspace.key} embedded initialPrompt={workspace.seedPrompt || undefined} />
+            </Suspense>
+          ) : (
+            <>
+              <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
+                {messages.length === 0 && phase !== "loading" && !busy ? (
+                  <div className="flex h-full flex-col items-center justify-center text-center">
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Curatorial Guide</p>
+                    <h2 className="mt-3 max-w-md font-display text-3xl italic text-foreground">What shall we curate today?</h2>
+                    <div className="mt-5 h-px w-24 bg-gradient-to-r from-accent/0 via-accent to-accent/0" />
+                  </div>
+                ) : (
+                  <div className="mx-auto max-w-3xl space-y-8">
+                    {phase === "loading" && <FlashSkeleton />}
+                    {messages.map((m) =>
+                      m.role === "user" ? (
+                        <div key={m.id} className="flex justify-end">
+                          <p className="max-w-[80%] whitespace-pre-wrap rounded-sm bg-primary px-4 py-3 text-sm text-primary-foreground">{m.content}</p>
+                        </div>
+                      ) : m.content ? (
+                        <article key={m.id} className="space-y-2">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                            {m.route === "FLASH" ? "Swift answer" : "Deep curation"}
+                          </p>
+                          <MessageResponse className="text-[15px] leading-relaxed text-foreground">{m.content}</MessageResponse>
+                        </article>
+                      ) : null,
+                    )}
+                    {awaitingFirstToken && (
+                      phase === "streaming" && route === "FRONTIER" ? (
+                        <div className="space-y-2">
+                          {fallback && <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Prioritising accuracy</p>}
+                          <FrontierSkeleton />
+                        </div>
+                      ) : <FlashSkeleton />
+                    )}
+                    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+                  </div>
                 )}
-                {awaitingFirstToken && (
-                  phase === "streaming" && route === "FRONTIER" ? (
-                    <div className="space-y-2">
-                      {fallback && <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Prioritising accuracy</p>}
-                      <FrontierSkeleton />
-                    </div>
-                  ) : <FlashSkeleton />
-                )}
-                {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               </div>
-            )}
-          </div>
 
-          <form onSubmit={onSubmit} className="sticky bottom-0 border-t border-border/60 bg-background/95 px-4 py-4 backdrop-blur md:px-8">
-            <div className="relative mx-auto max-w-3xl">
-              <Textarea
-                ref={inputRef}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); busy ? undefined : void submit(prompt); } }}
-                placeholder="Ask the Curatorial Guide…"
-                maxLength={4000}
-                rows={2}
-                className="resize-none rounded-sm pr-14"
-              />
-              <Button type="submit" size="icon" aria-label={busy ? "Stop" : "Send"} disabled={!busy && !prompt.trim()}
-                className="absolute bottom-2.5 right-2.5 h-9 w-9 rounded-full">
-                {busy ? <Square className="h-3.5 w-3.5" /> : <ArrowUp className="h-4 w-4" />}
-              </Button>
-            </div>
-          </form>
+              <form onSubmit={onSubmit} className="sticky bottom-0 border-t border-border/60 bg-background/95 px-4 py-4 backdrop-blur md:px-8">
+                <div className="mx-auto max-w-3xl space-y-2">
+                  <div className="relative">
+                    <Textarea
+                      ref={inputRef}
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); busy ? undefined : void submit(prompt); } }}
+                      placeholder="Ask your Personal Concierge…"
+                      maxLength={4000}
+                      rows={2}
+                      className="resize-none rounded-sm pr-14"
+                    />
+                    <Button type="submit" size="icon" aria-label={busy && threadId ? "Stop" : "Send"} disabled={!busy && !prompt.trim()}
+                      className="absolute bottom-2.5 right-2.5 h-9 w-9 rounded-full">
+                      {busy && threadId ? <Square className="h-3.5 w-3.5" /> : <ArrowUp className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {!threadId && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {TOOL_SHORTCUTS.map((t) => (
+                        <button
+                          key={t.label}
+                          type="button"
+                          onClick={t.run}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground"
+                        >
+                          <t.icon className="h-3 w-3" />
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </form>
+            </>
+          )}
         </section>
       </div>
     </div>
