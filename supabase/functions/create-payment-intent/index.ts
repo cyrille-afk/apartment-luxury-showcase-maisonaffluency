@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
 import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
+import { canReusePaymentIntent } from "../_shared/paymentIntentReuse.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
@@ -331,17 +332,12 @@ serve(async (req) => {
     if (reuseId.startsWith("pi_")) {
       try {
         const existing = await stripe.paymentIntents.retrieve(reuseId);
-        const updatable =
-          existing.status === "requires_payment_method" ||
-          existing.status === "requires_confirmation";
-        const sameMethod = (existing.payment_method_types ?? []).includes(requestedMethod);
-        // Ownership: the caller must hold the intent's client secret and, when
-        // signed in, match the user that created it.
-        const secret = typeof body?.paymentIntentClientSecret === "string" ? body.paymentIntentClientSecret : "";
-        const owned =
-          !!secret && secret === existing.client_secret &&
-          (existing.metadata?.user_id ?? "") === (userId ?? "");
-        if (owned && updatable && existing.currency === currency && sameMethod) {
+        if (canReusePaymentIntent(existing, {
+          clientSecret: body?.paymentIntentClientSecret,
+          userId,
+          currency,
+          method: requestedMethod,
+        })) {
           intent = await stripe.paymentIntents.update(reuseId, {
             amount: chargeAmount,
             description,
