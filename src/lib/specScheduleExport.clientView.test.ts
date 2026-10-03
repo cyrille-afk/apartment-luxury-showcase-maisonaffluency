@@ -44,7 +44,8 @@ describe("client-only specification schedule", () => {
     await renderSpecSchedulePdf(dataset);
     expect(pdfBlob).toBeDefined();
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const pdf = await getDocument({ data: new Uint8Array(await pdfBlob!.arrayBuffer()), useSystemFonts: true, disableFontFace: true }).promise;
+    if (!pdfBlob) throw new Error("PDF download did not produce a blob");
+    const pdf = await getDocument({ data: new Uint8Array(await pdfBlob.arrayBuffer()), useSystemFonts: true, disableFontFace: true }).promise;
     const texts: string[] = [];
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n);

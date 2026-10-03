@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 
-const guardCss = readFileSync(new URL("../index.css", import.meta.url), "utf8");
+const guardCss = readFileSync("src/index.css", "utf8");
 
 afterEach(() => {
   document.head.querySelector("#client-mask-test-style")?.remove();
@@ -25,17 +25,20 @@ describe("Client View document guard", () => {
     expect(document.documentElement.dataset.clientView).toBe("active");
     const secret = document.querySelector<HTMLElement>("[data-trade-sensitive]");
     const placeholder = document.querySelector<HTMLElement>("[data-client-placeholder]");
-    expect(getComputedStyle(secret!).display).toBe("none");
-    expect(getComputedStyle(placeholder!).display).toBe("block");
+    expect(secret).not.toBeNull();
+    expect(placeholder).not.toBeNull();
+    if (!secret || !placeholder) return;
+    expect(getComputedStyle(secret).display).toBe("none");
+    expect(getComputedStyle(placeholder).display).toBe("block");
     expect(document.body.textContent).toContain("Client $9,727.88");
 
     mode.setClientSafeMode(false);
     expect(document.documentElement.dataset.clientView).toBe("inactive");
-    expect(getComputedStyle(secret!).display).not.toBe("none");
-    expect(getComputedStyle(placeholder!).display).toBe("none");
+    expect(getComputedStyle(secret).display).not.toBe("none");
+    expect(getComputedStyle(placeholder).display).toBe("none");
     mode.setClientSafeMode(true);
-    expect(getComputedStyle(secret!).display).toBe("none");
-    expect(getComputedStyle(placeholder!).display).toBe("block");
+    expect(getComputedStyle(secret).display).toBe("none");
+    expect(getComputedStyle(placeholder).display).toBe("block");
   });
 
   it("keeps the mask synchronized when another tab activates Client View", async () => {
