@@ -1,6 +1,8 @@
 import { FileText, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMoneyIn } from "@/lib/displayMoney";
+import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
+import { tradePriceCents, clientPriceCents } from "@/lib/tradePricing";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +29,8 @@ interface ProjectProposalPreviewProps {
   items: ProposalPreviewItem[];
   isClientMode: boolean;
   tradeDiscount: number;
+  markupMultiplier: number;
+  studio: StudioBranding | null;
   /** Member's declared base currency — every figure is rendered in it. */
   currency?: string;
 }
@@ -44,11 +48,14 @@ export function ProjectProposalPreview({
   items,
   isClientMode,
   tradeDiscount,
+  markupMultiplier,
+  studio,
   currency = "USD",
 }: ProjectProposalPreviewProps) {
   const money = makeMoney(currency);
   const retailTotal = items.reduce((sum, item) => sum + (item.rrp_cents || 0) * item.quantity, 0);
-  const tradeTotal = Math.round(retailTotal * (1 - tradeDiscount));
+  const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
+  const clientTotal = items.reduce((sum, item) => sum + (clientPriceCents(tradePriceCents(item.rrp_cents, tradeDiscount), markupMultiplier) || 0) * item.quantity, 0);
 
   const triggerPrint = () => {
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
@@ -99,9 +106,7 @@ export function ProjectProposalPreview({
         <main className="proposal-print-sheet mx-auto my-20 min-h-[1123px] w-[min(794px,calc(100vw-32px))] bg-card px-12 py-14 text-card-foreground shadow-elegant md:px-16 md:py-20">
           <header className="flex min-h-[330px] flex-col justify-between border-b border-card-foreground pb-12">
             <div className="flex items-center justify-between gap-6">
-              <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
-                [ Design Studio Specification Proposal ]
-              </p>
+               <StudioBrand studio={studio} />
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                 Private client document
               </p>
@@ -134,7 +139,8 @@ export function ProjectProposalPreview({
             <div>
               {items.map((item, index) => {
                 const retail = (item.rrp_cents || 0) * item.quantity;
-                const trade = Math.round(retail * (1 - tradeDiscount));
+                 const trade = (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity;
+                 const client = (clientPriceCents(tradePriceCents(item.rrp_cents, tradeDiscount), markupMultiplier) || 0) * item.quantity;
                 return (
                   <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">
                     <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
@@ -150,15 +156,15 @@ export function ProjectProposalPreview({
                     <div className="min-w-0">
                       <h3 className="font-display text-base font-normal leading-snug text-card-foreground">{item.name}</h3>
                       <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
-                        {item.designer}{item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
+                         {isClientMode ? "Curated Collection" : item.designer}{!isClientMode && item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
-                        {isClientMode ? "MSRP" : "Trade / MSRP"}
+                         {isClientMode ? "Client Price" : "Trade / MSRP"}
                       </p>
                       <p className="mt-1 font-body text-[11px] tracking-[0.05em] text-card-foreground">
-                        {isClientMode ? money(retail) : money(trade)}
+                         {isClientMode ? (money(client) || "Price upon Request") : (money(trade) || "Price upon Request")}
                       </p>
                       {!isClientMode && retail > 0 && (
                         <p className="mt-1 font-body text-[9px] tracking-[0.05em] text-muted-foreground line-through">
@@ -176,10 +182,11 @@ export function ProjectProposalPreview({
                 {isClientMode ? "Total Estimate" : "Total Trade"}
               </p>
               <p className="font-display text-2xl text-card-foreground">
-                {money(isClientMode ? retailTotal : tradeTotal)}
+                 {money(isClientMode ? clientTotal : tradeTotal)}
               </p>
             </footer>
           </section>
+           <p className="mt-12 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{studio?.display_name?.trim() || studio?.name || "Your Studio"} · {projectName}</p>
         </main>
       </DialogContent>
     </Dialog>
