@@ -224,7 +224,7 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
     doc.text(profile.studioName, M, M + 14);
   }
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...muted);
-  doc.text("SPECIFICATION SCHEDULE", W - M, M + 2, { align: "right", charSpace: 2 });
+  doc.text("SPECIFICATION SCHEDULE", W - M, M + 2, { align: "right" });
   doc.setFont("times", "italic"); doc.setFontSize(16); doc.setTextColor(...ink);
   doc.text(profile.projectName, W - M, M + 20, { align: "right" });
   doc.setDrawColor(...jade); doc.setLineWidth(0.6); doc.line(M, M + 34, W - M, M + 34);
@@ -249,11 +249,11 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   // Table.
   const cols: Array<{ h: string; w: number; get: (r: SpecScheduleRow) => string; right?: boolean }> = [
     { h: "REF", w: 46, get: (r) => r.ref },
-    { h: "PRODUCT", w: 140, get: (r) => [r.productName, r.designer, r.room].filter(Boolean).join("\n") },
+    { h: "PRODUCT", w: 130, get: (r) => [r.productName, r.designer, r.room].filter(Boolean).join("\n") },
     { h: "QTY", w: 28, get: (r) => String(r.qty), right: true },
-    { h: "DIMENSIONS", w: 112, get: (r) => r.dimensions },
+    { h: "DIMENSIONS", w: 104, get: (r) => r.dimensions },
     { h: "FINISH", w: 92, get: (r) => r.finish },
-    { h: "MATERIAL LIBRARY", w: 102, get: (r) => r.materialLibrary },
+    { h: "MATERIAL LIBRARY", w: 96, get: (r) => r.materialLibrary },
     { h: "RRP", w: 66, get: (r) => money(r.rrpCents, r.currency), right: true },
     { h: "TRADE NET", w: 66, get: (r) => money(r.tradeNetCents, r.currency), right: true },
     { h: "CLIENT PRICE", w: 70, get: (r) => money(r.clientPriceCents, r.currency), right: true },
@@ -267,7 +267,7 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
     doc.setFillColor(244, 241, 237); doc.rect(M, y - 11, W - M * 2, 18, "F");
     doc.setFont("helvetica", "bold"); doc.setFontSize(6.8); doc.setTextColor(...muted);
     let x = M;
-    for (const c of cols) { doc.text(c.h, c.right ? x + c.w - 6 : x + 6, y, { align: c.right ? "right" : "left", charSpace: 0.8 }); x += c.w; }
+    for (const c of cols) { doc.text(c.h, c.right ? x + c.w - 6 : x + 6, y, { align: c.right ? "right" : "left" }); x += c.w; }
     y += 16;
   };
   header();
