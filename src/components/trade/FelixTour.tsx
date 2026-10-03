@@ -250,16 +250,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (elements.length && (!didScroll || (current.id === "client-view" && !didEditorialScroll))) {
         const target = elements[0].getBoundingClientRect();
         const canvas = current.id === "client-view"
-          ? elements[0].closest("section")?.querySelector("article .aspect-\\[4\\/5\\]")?.getBoundingClientRect()
+          ? elements[0].closest("section")?.querySelector("article")?.getBoundingClientRect()
           : null;
         if (!didScroll || canvas) {
           didScroll = true;
           if (canvas) didEditorialScroll = true;
           if (current.id === "client-view") {
-            // Frame the switch and the upper half of the first product together.
+            // Frame the switch and the first product's image and price together.
             // Before Client View is enabled the image is not mounted yet; revisit
             // once it appears without repeating the scroll on every frame.
-            const bottom = canvas ? canvas.top + canvas.height / 2 : target.bottom + window.innerHeight * 0.38;
+            const bottom = canvas ? canvas.bottom : target.bottom + window.innerHeight * 0.38;
             const middle = (target.top + bottom) / 2;
             window.scrollBy({ top: middle - window.innerHeight / 2, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
           } else {
