@@ -1575,4 +1575,4 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
       )}
     </div>
   );
-}
+});
