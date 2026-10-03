@@ -13,6 +13,7 @@
  * price applies the project's trade multiplier.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { effectiveProjectMultiplier } from "@/lib/tradePricing";
 
 export interface SchedulePickRef {
   pickId: string;
@@ -46,6 +47,7 @@ export interface ScheduleProfile {
   region: string;
   studioName: string;
   studioLogoUrl: string | null;
+  studioFont: string;
   tierLabel: string;
   tierPct: number;
   multiplier: number;
@@ -108,8 +110,7 @@ const tierLabelFor = (pct: number) => TIERS.find(([p]) => pct >= p)?.[1] ?? "Sta
 export async function compileSpecSchedule(opts: {
   picks: SchedulePickRef[];
   projectId: string | null;
-  studio: { name: string; logo_url: string | null } | null;
-  fallbackStudioName: string;
+  studio: { name: string; display_name?: string | null; logo_url: string | null; primary_brand_font?: string | null; default_project_markup_percentage?: number | null } | null;
 }): Promise<SpecScheduleDataset> {
   const ids = opts.picks.map((p) => p.pickId);
   const [picksRes, priceRes, matRes, pctRes, projRes] = await Promise.all([
@@ -143,7 +144,7 @@ export async function compileSpecSchedule(opts: {
     : { data: null };
   const tierName = (prof as any)?.trade_tier as string | undefined;
   const proj = projRes.data as any;
-  const multiplier = Number(proj?.trade_multiplier) > 0 ? Number(proj.trade_multiplier) : 1;
+  const multiplier = effectiveProjectMultiplier(proj?.trade_multiplier, opts.studio?.default_project_markup_percentage);
 
   const rows: SpecScheduleRow[] = opts.picks.map((ref, i) => {
     const p: any = pickById.get(ref.pickId) ?? {};
@@ -153,7 +154,7 @@ export async function compileSpecSchedule(opts: {
     return {
       ref: `FF-${String(i + 1).padStart(3, "0")}`,
       productName: p.title ?? "Untitled piece",
-      designer,
+      designer: null,
       room: ref.room,
       qty: ref.qty,
       dimensions: formatDims(p),
@@ -174,8 +175,9 @@ export async function compileSpecSchedule(opts: {
       projectName: proj?.name || "Untitled Project",
       clientName: proj?.client_name || "—",
       region: proj?.location_city || proj?.location || "—",
-      studioName: opts.studio?.name || opts.fallbackStudioName,
+      studioName: opts.studio?.display_name?.trim() || opts.studio?.name?.trim() || "Your Studio",
       studioLogoUrl: opts.studio?.logo_url ?? null,
+      studioFont: opts.studio?.primary_brand_font || "editorial",
       tierLabel: tierName ? tierName[0].toUpperCase() + tierName.slice(1) : tierLabelFor(tierPct),
       tierPct,
       multiplier,
@@ -216,11 +218,13 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
 
   // Header — studio branding (white-label) left, document title right.
   const logo = profile.studioLogoUrl ? await toDataUrl(profile.studioLogoUrl) : null;
+  let logoDrawn = false;
   if (logo) {
     const h = 30; const w = Math.min(140, (logo.w / logo.h) * h);
-    try { doc.addImage(logo.data, M, M - 6, w, h); } catch { /* fall back to name */ }
-  } else {
-    doc.setFont("times", "italic"); doc.setFontSize(18); doc.setTextColor(...ink);
+    try { doc.addImage(logo.data, M, M - 6, w, h); logoDrawn = true; } catch { /* fall back to name */ }
+  }
+  if (!logoDrawn) {
+    doc.setFont(profile.studioFont === "modern" ? "helvetica" : "times", profile.studioFont === "modern" ? "normal" : "italic"); doc.setFontSize(18); doc.setTextColor(...ink);
     doc.text(profile.studioName, M, M + 14);
   }
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...muted);
@@ -234,7 +238,6 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
     ["PROJECT", profile.projectName],
     ["CLIENT", profile.clientName],
     ["REGION", profile.region],
-    ["PRICING", `${profile.tierLabel} tier · ${profile.tierPct}% trade · ×${profile.multiplier.toFixed(2)} client`],
     ["ISSUED", new Date(ds.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })],
   ];
   const bw = (W - M * 2) / blocks.length;
@@ -249,14 +252,12 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   // Table.
   const cols: Array<{ h: string; w: number; get: (r: SpecScheduleRow) => string; right?: boolean }> = [
     { h: "REF", w: 46, get: (r) => r.ref },
-    { h: "PRODUCT", w: 130, get: (r) => [r.productName, r.designer, r.room].filter(Boolean).join("\n") },
+    { h: "PRODUCT", w: 160, get: (r) => [r.productName, r.room].filter(Boolean).join("\n") },
     { h: "QTY", w: 28, get: (r) => String(r.qty), right: true },
     { h: "DIMENSIONS", w: 104, get: (r) => r.dimensions },
     { h: "FINISH", w: 92, get: (r) => r.finish },
     { h: "MATERIAL LIBRARY", w: 96, get: (r) => r.materialLibrary },
-    { h: "RRP", w: 66, get: (r) => money(r.rrpCents, r.currency), right: true },
-    { h: "TRADE NET", w: 66, get: (r) => money(r.tradeNetCents, r.currency), right: true },
-    { h: "CLIENT PRICE", w: 70, get: (r) => money(r.clientPriceCents, r.currency), right: true },
+    { h: "CLIENT PRICE", w: 112, get: (r) => money(r.clientPriceCents, r.currency), right: true },
     { h: "LEAD TIME", w: 0, get: (r) => r.leadTime },
   ];
   const fixed = cols.reduce((a, c) => a + c.w, 0);
@@ -299,10 +300,7 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...ink);
   const totalsX = M + cols.slice(0, 6).reduce((a, c) => a + c.w, 0);
   doc.text("TOTALS (priced lines × qty)", totalsX - 6, y, { align: "right" });
-  [sum((r) => r.rrpCents), sum((r) => r.tradeNetCents), sum((r) => r.clientPriceCents)].forEach((v, i) => {
-    const x = totalsX + cols.slice(6, 7 + i).reduce((a, c) => a + c.w, 0);
-    doc.text(money(v, cur), x - 6, y, { align: "right" });
-  });
+  doc.text(money(sum((r) => r.clientPriceCents), cur), totalsX + cols[6].w - 6, y, { align: "right" });
 
   // Footer.
   const pages = doc.getNumberOfPages();
