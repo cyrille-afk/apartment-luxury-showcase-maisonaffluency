@@ -400,7 +400,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
     const leftX = rect.left - PAD - 8 - cardW;
-    if (rightX + cardW <= viewport.w - 16) {
+    if (step.id === "client-view") {
+      // Step 8: never below the switch (it would cover the product photo).
+      // Right of the switch, bottom-aligned so the card grows upwards; else above.
+      if (rightX + cardW <= viewport.w - 16) {
+        cardLeft = rightX;
+        cardTop = clampY(rect.top + rect.height - cardH);
+      } else {
+        cardLeft = centerX;
+        cardTop = Math.max(16, rect.top - cardH - PAD - 8);
+      }
+    } else if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
       cardTop = centerY;
     } else if (leftX >= 16) {
