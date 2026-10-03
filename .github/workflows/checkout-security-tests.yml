@@ -1,0 +1,41 @@
+name: Checkout security regression tests
+
+# Guards the payment/shipping security rules: invalid or expired shipping
+# quotes, cross-customer quote access, and payment ownership (no taking over
+# another buyer's open card payment).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/create-payment-intent/**"
+      - "supabase/functions/create-bank-transfer-intent/**"
+      - "supabase/functions/create-proforma-order/**"
+      - "supabase/functions/_shared/confirmedShipping.ts"
+      - "supabase/functions/_shared/paymentIntentReuse.ts"
+      - "supabase/functions/_shared/checkoutSecurity_test.ts"
+      - ".github/workflows/checkout-security-tests.yml"
+  pull_request:
+    paths:
+      - "supabase/functions/create-payment-intent/**"
+      - "supabase/functions/create-bank-transfer-intent/**"
+      - "supabase/functions/create-proforma-order/**"
+      - "supabase/functions/_shared/confirmedShipping.ts"
+      - "supabase/functions/_shared/paymentIntentReuse.ts"
+      - "supabase/functions/_shared/checkoutSecurity_test.ts"
+      - ".github/workflows/checkout-security-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  deno-tests:
+    name: Shipping quote & payment ownership security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Checkout security regression tests
+        run: deno test --allow-net --allow-env supabase/functions/_shared/checkoutSecurity_test.ts
