@@ -158,7 +158,7 @@ export function ProjectProposalPreview({
                          {isClientMode ? "Curated Collection" : item.designer}{!isClientMode && item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
                       </p>
                     </div>
-                    <div className="text-right">
+                     <div data-trade-sensitive={!isClientMode ? "" : undefined} className="text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
                          {isClientMode ? "Client Price" : "Trade / MSRP"}
                       </p>

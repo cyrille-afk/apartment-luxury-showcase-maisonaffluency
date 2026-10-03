@@ -234,7 +234,7 @@ export function CuratedInventoryGrid({
                 <div className="mt-auto flex w-full min-w-0 flex-col gap-0.5 pt-3">
 
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
-                    <div className="leading-tight">
+                     <div data-trade-sensitive={showTradePrice ? "" : undefined} className="leading-tight">
                       <span className="font-display text-[15px] font-semibold text-foreground">
                         {fmtPrice(
                           showTradePrice
@@ -248,7 +248,7 @@ export function CuratedInventoryGrid({
                           {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
                         </span>
                       )}
-                    </div>
+                     </div>
                   ) : (
                     <div className="font-body text-[12px] text-foreground/80">Price upon Request</div>
                   )}

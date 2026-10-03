@@ -457,13 +457,14 @@ export default function TradeProjectStudio() {
                           </span>
                         </span>
                         <span className="whitespace-nowrap pt-1 text-right">
-                          <span className="block font-body text-[11px] tracking-[0.05em] text-foreground">
+                           <span data-trade-sensitive={!isClientMode ? "" : undefined} className="block font-body text-[11px] tracking-[0.05em] text-foreground">
                             {isClientMode
                                ? money(client) || "Price upon Request"
                               : msrp
                                 ? money(trade)
                                 : "Price upon Request"}
                           </span>
+                           {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-3 w-20 animate-pulse bg-muted/60" />}
                            {!isClientMode && msrp > 0 && (
                              <span data-trade-sensitive className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
                               {money(msrp)}
@@ -482,7 +483,7 @@ export default function TradeProjectStudio() {
                               <dt className="text-muted-foreground/60">Spec</dt>
                               <dd className="text-foreground">{item.sku || "—"}</dd>
                              </div>}
-                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                             <div data-trade-sensitive={!isClientMode ? "" : undefined} className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                               <dt className="text-muted-foreground/60">Lead</dt>
                               <dd className="text-foreground">{leadLabel(item)}</dd>
                             </div>
