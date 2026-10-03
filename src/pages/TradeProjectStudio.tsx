@@ -451,10 +451,11 @@ export default function TradeProjectStudio() {
                           <span className="block truncate font-display text-base text-foreground">
                             {item.name}
                           </span>
-                          <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                           <span data-trade-sensitive={!isClientMode ? "" : undefined} className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
                              {isClientMode ? "Curated Collection" : item.designer}
                             {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                           </span>
+                           {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
                         </span>
                         <span className="whitespace-nowrap pt-1 text-right">
                            <span data-trade-sensitive={!isClientMode ? "" : undefined} className="block font-body text-[11px] tracking-[0.05em] text-foreground">
@@ -522,7 +523,7 @@ export default function TradeProjectStudio() {
 
               {/* Totals */}
               {items.length > 0 && (
-                <div className="flex items-baseline justify-between gap-4 border-b border-foreground py-9">
+                 <div data-trade-sensitive={!isClientMode ? "" : undefined} className="flex items-baseline justify-between gap-4 border-b border-foreground py-9">
                   <span className="font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                     {isClientMode ? "Total Estimate" : "Total (Trade)"}
                   </span>
@@ -531,6 +532,7 @@ export default function TradeProjectStudio() {
                   </span>
                 </div>
               )}
+               {!isClientMode && items.length > 0 && <div data-client-placeholder aria-hidden="true" className="h-4 w-32 my-9 bg-muted/60 animate-pulse" />}
             </div>
           </div>
         </aside>

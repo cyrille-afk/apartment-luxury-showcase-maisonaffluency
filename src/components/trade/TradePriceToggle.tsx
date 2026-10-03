@@ -101,7 +101,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
       </span>
 
       {/* Live region: announces tier + discount on every change. */}
-      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+       <span data-trade-sensitive={showTradePrice ? "" : undefined} role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </span>
     </div>

@@ -64,7 +64,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
          </span>
       )}
 
-      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+       <span data-trade-sensitive={showTradePrice ? "" : undefined} role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </span>
     </div>

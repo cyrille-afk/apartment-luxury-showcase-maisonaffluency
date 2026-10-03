@@ -459,7 +459,7 @@ const TradeLayout = () => {
         data-price-view={showTradePrice ? "trade" : "client"}
       >
         {/* Sidebar — desktop only */}
-        <div className="hidden md:block" data-trade-sidebar>
+         <div className="hidden md:block" data-trade-sidebar data-trade-sensitive>
           <TradeSidebar />
         </div>
 
@@ -467,34 +467,34 @@ const TradeLayout = () => {
           <header className={`trade-editorial-header h-14 md:h-16 ${/^\/trade\/products\//.test(location.pathname) ? "hidden md:flex" : "flex"} items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden relative pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
-              <TradeMobileMenu
+               <div data-trade-sensitive><TradeMobileMenu
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
                 submittedCount={submittedCount}
-              />
+               /></div>
               {/* Desktop: sidebar collapse trigger */}
-              <SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" />
+               <span data-trade-sensitive><SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" /></span>
               {/* Desktop: Trade Portal branding */}
                <div className="hidden md:flex items-center gap-2">
-                 {showTradePrice ? <><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></> : <StudioBrand studio={currentStudio} />}
+                  {showTradePrice ? <span data-trade-sensitive className="inline-flex items-center gap-2"><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></span> : <StudioBrand studio={currentStudio} />}
                </div>
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4" data-felix-target="account-panel">
-               {showTradePrice && <StudioSwitcher />}
-              <GlobalProjectSwitcher />
+               {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
+               <span data-trade-sensitive><GlobalProjectSwitcher /></span>
               <div className="hidden sm:block">
                 <PriceModeSelector />
               </div>
-               {showTradePrice && <NotificationBell />}
-              <MobilePreviewHeaderButton />
+                {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
+               <span data-trade-sensitive><MobilePreviewHeaderButton /></span>
             </div>
           </header>
           <main className={`trade-editorial-main flex-1 ${fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
             <ToolsBreadcrumbProvider>
               {!fullBleed && (
-                <div className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
+                 <div data-trade-sensitive className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
                   <ToolsBreadcrumb className="mb-0" />
                   <ProjectWorkspaceBreadcrumb />
                 </div>
@@ -510,21 +510,13 @@ const TradeLayout = () => {
           </main>
 
           <Suspense fallback={null}>
-            <TradeBottomNav />
+             <div data-trade-sensitive><TradeBottomNav /></div>
           </Suspense>
         </div>
       </div>
       <Suspense fallback={null}>
-        <FelixTour />
-        <CompareFab />
-        <CompareDrawer />
-        <AIConcierge />
-        <ActivationWelcome />
-
-        <QuickTour />
-        <BriefWizard />
+         <div data-trade-sensitive><FelixTour /><CompareFab /><CompareDrawer /><AIConcierge /><ActivationWelcome /><QuickTour /><BriefWizard /><TradeCopilotOnboarding /></div>
         <BackToTopButton />
-        <TradeCopilotOnboarding />
       </Suspense>
     </SidebarProvider>
   );
