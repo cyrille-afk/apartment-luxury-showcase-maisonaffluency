@@ -4,7 +4,10 @@ const SITE = "https://www.maisonaffluency.com";
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
-  const path = url.searchParams.get("path") || "/";
+  const rawPath = url.searchParams.get("path") || "/";
+  // Only same-site relative paths; anything else (//host, schemes, quotes,
+  // script-breaking characters) collapses to the homepage.
+  const path = /^\/(?!\/)[A-Za-z0-9\-._~\/%]*$/.test(rawPath) ? rawPath : "/";
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -348,7 +351,7 @@ Deno.serve(async (req) => {
     <script>
       // Redirect human visitors to the SPA
       if(!/bot|crawl|spider|WhatsApp|facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Pinterest|Googlebot|Bingbot|YandexBot|Baiduspider|DuckDuckBot/i.test(navigator.userAgent)){
-        window.location.replace("${canonical}");
+        window.location.replace(${JSON.stringify(canonical).replace(/</g, "\\u003c")});
       }
     </script>
   </body>

@@ -10,13 +10,15 @@ const LOGISTICS_EMAIL = "logistics@maisonaffluency.com";
 const INTERNAL_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
 const ACKNOWLEDGED_STATUS = "PO Acknowledged by Designer";
 
+const escHtml = (v: unknown) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
 const page = (title: string, body: string) =>
   new Response(
-    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escHtml(title)}</title></head>
 <body style="margin:0;background:#f7f6f3;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;display:flex;align-items:center;justify-content:center;min-height:100vh;">
   <div style="background:#ffffff;max-width:520px;margin:24px;padding:48px 44px;text-align:center;border-top:3px solid #12352c;">
     <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#6e6e6e;margin-bottom:18px;">Maison Affluency · Trade Procurement</div>
-    <h1 style="font-size:22px;font-weight:400;margin:0 0 14px;">${title}</h1>
+    <h1 style="font-size:22px;font-weight:400;margin:0 0 14px;">${escHtml(title)}</h1>
     <p style="font-size:15px;line-height:24px;color:#2a2a2a;margin:0;">${body}</p>
   </div>
 </body></html>`,
@@ -106,7 +108,7 @@ serve(async (req) => {
   if (po.acknowledged_at) {
     return page(
       "Already confirmed",
-      `Receipt of purchase order <strong>${po.po_number}</strong> was already confirmed on ${new Date(po.acknowledged_at).toUTCString()}. No further action is needed.`,
+      `Receipt of purchase order <strong>${escHtml(po.po_number)}</strong> was already confirmed on ${new Date(po.acknowledged_at).toUTCString()}. No further action is needed.`,
     );
   }
 
@@ -201,6 +203,6 @@ serve(async (req) => {
 
   return page(
     "Receipt confirmed",
-    `Thank you — receipt of purchase order <strong>${po.po_number}</strong> has been recorded and the Maison Affluency logistics team has been notified. Kindly issue your invoice quoting this reference.`,
+    `Thank you — receipt of purchase order <strong>${escHtml(po.po_number)}</strong> has been recorded and the Maison Affluency logistics team has been notified. Kindly issue your invoice quoting this reference.`,
   );
 });

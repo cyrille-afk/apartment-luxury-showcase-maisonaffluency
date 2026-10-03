@@ -34,11 +34,6 @@ Deno.serve(async (req) => {
     });
   }
 
-  const svc = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-
   // Verify caller can see the doc via RLS by using a user-scoped client
   const userClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -57,9 +52,22 @@ Deno.serve(async (req) => {
     });
   }
 
-  await svc.from("cad_documents").update({ status: "parsing", error: null }).eq("id", docId);
+  // All writes and the download run as the caller, so the row-level update
+  // policy and storage policies decide what they may touch — a tampered
+  // file_path can't reach another user's upload.
+  const svc = userClient;
+  const { data: updated, error: upErr } = await svc
+    .from("cad_documents")
+    .update({ status: "parsing", error: null })
+    .eq("id", docId)
+    .select("id");
+  if (upErr || !updated || updated.length === 0) {
+    return new Response(JSON.stringify({ error: "You do not have permission to process this document" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
-  // Download the file via service role (bypasses storage RLS — we already verified RLS access above)
   const { data: file, error: dlErr } = await svc.storage.from("cad-uploads").download(doc.file_path);
   if (dlErr || !file) {
     const msg = dlErr?.message || "Download failed";

@@ -1,3 +1,4 @@
+import { safeFetch } from "../_shared/safeFetch.ts";
 // Share preview tester: fetches an arbitrary URL with social-crawler UAs
 // (Facebook, WhatsApp), parses OG/Twitter tags, and HEAD-checks the image
 // for the kind of issues that break previews (404, wrong MIME, oversize).
@@ -51,10 +52,9 @@ async function fetchAs(url: string, ua: string, retry404 = true) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       headers: { "user-agent": ua, "accept": "text/html,*/*", "cache-control": "no-cache" },
-      redirect: "follow",
-      signal: ctrl.signal,
+            signal: ctrl.signal,
     });
     const finalUrl = res.url;
     const status = res.status;
@@ -77,11 +77,10 @@ async function checkImage(url: string) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       method: "GET",
       headers: { "user-agent": UA_WA, "range": "bytes=0-0" },
-      redirect: "follow",
-      signal: ctrl.signal,
+            signal: ctrl.signal,
     });
     const ct = res.headers.get("content-type") ?? "";
     const cr = res.headers.get("content-range") ?? "";

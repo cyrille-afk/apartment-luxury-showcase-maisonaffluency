@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { safeOrigin } from "../_shared/safeOrigin.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -49,7 +50,7 @@ serve(async (req) => {
     const amountCents = Number(body.amountCents);
     const label = (typeof body.label === "string" && body.label.trim()) || "Full payment";
     const note = typeof body.note === "string" && body.note.trim() ? body.note.trim() : null;
-    const origin = req.headers.get("origin") || "https://www.maisonaffluency.com";
+    const origin = safeOrigin(req, "https://www.maisonaffluency.com");
 
     if (!quoteId) return json({ error: "Missing quoteId" }, 400);
     if (!recipientEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(recipientEmail)) {

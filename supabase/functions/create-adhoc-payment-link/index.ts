@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
+import { safeOrigin } from "../_shared/safeOrigin.ts";
+import { resolveQuoteTotal } from "../_shared/quoteTotal.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,7 +100,20 @@ serve(async (req) => {
       );
     }
 
-    const origin = rawOrigin || "https://www.maisonaffluency.com";
+    // Price is tied to a saved quote: the link may never exceed the quote's
+    // server-computed payable total (5% headroom for card processing fees).
+    if (!quoteId || !/^[0-9a-f-]{36}$/i.test(quoteId)) {
+      throw new Error("Payment links must be generated from a saved quote");
+    }
+    const qt = await resolveQuoteTotal(admin, quoteId);
+    if (!qt.ok) throw new Error(qt.error);
+    if (qt.currency !== currency) throw new Error(`Currency must match the quote (${qt.currency})`);
+    const ceiling = Math.round(qt.totalCents * 1.05);
+    if (amountCents > ceiling) {
+      throw new Error(`Amount exceeds the quote total (${(qt.totalCents / 100).toFixed(2)} ${qt.currency})`);
+    }
+
+    const origin = safeOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

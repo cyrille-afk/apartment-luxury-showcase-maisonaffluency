@@ -54,7 +54,11 @@ serve(async (req) => {
       return json({ error: "Order not found." }, 404);
     }
 
-    return json({ order: data });
+    // Mask the email: the session id alone shouldn't reveal full contact details.
+    const masked = data.customer_email
+      ? String(data.customer_email).replace(/^(.)(.*)(@.*)$/, (_m, a, b, c) => a + "*".repeat(Math.min(6, Math.max(1, b.length))) + c)
+      : null;
+    return json({ order: { ...data, customer_email: masked } });
   } catch (err) {
     console.error("[get-order-by-session] error", err);
     return json({ error: "Unable to retrieve order." }, 500);

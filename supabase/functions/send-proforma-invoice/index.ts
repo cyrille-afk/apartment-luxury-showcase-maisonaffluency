@@ -97,8 +97,13 @@ serve(async (req) => {
     let downloadUrl: string | null = null;
     if (pdfBase64) {
       try {
+        if (pdfBase64.length > 14 * 1024 * 1024) throw new Error("PDF too large (max ~10 MB)");
         const bytes = Uint8Array.from(atob(pdfBase64), (c) => c.charCodeAt(0));
-        const path = `orders/${orderRef}/proforma-${Date.now()}.pdf`;
+        // Must be a real PDF: "%PDF-" magic bytes.
+        if (bytes.length < 5 || String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") {
+          throw new Error("Uploaded file is not a PDF");
+        }
+        const path = `orders/${orderRef.replace(/[^A-Za-z0-9_-]/g, "_")}/proforma-${Date.now()}.pdf`;
         const { error: upErr } = await supabase.storage
           .from("proforma-invoices")
           .upload(path, bytes, { contentType: "application/pdf", upsert: true });
