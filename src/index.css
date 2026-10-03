@@ -1096,3 +1096,24 @@ body.designer-directory-open nav[data-site-header] {
 @media (prefers-reduced-motion: reduce) {
   .brief-field-glow { animation: none; border-color: hsl(var(--accent)); }
 }
+
+/* Past Curations — fixed-height scroll frame with a bottom fade hint and a
+   razor-thin minimalist scrollbar. */
+.curation-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.curation-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.curation-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.curation-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+.curation-scroll-fade {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
+}
