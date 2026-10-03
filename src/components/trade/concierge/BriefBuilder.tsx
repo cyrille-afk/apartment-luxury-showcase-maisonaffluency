@@ -176,13 +176,15 @@ function isPlaceholderValue(value: string, defaultValue?: string): boolean {
 }
 
 // Returns a copy of the values with real user input sanitized (brackets
-// stripped); fields left at their template default are kept verbatim.
+// stripped); fields still holding their unedited template placeholder
+// (e.g. "[humidity, sun exposure, glazing]", "Handover in [N] weeks…") are
+// emitted as empty strings so placeholder metadata never reaches the backend.
 function sanitizeBriefValues(values: BriefValues): BriefValues {
   const cleanBlock = <T extends Record<string, string>>(block: T, defaults: T): T => {
     const out: Record<string, string> = { ...block };
     for (const key of Object.keys(block)) {
       const sanitized = sanitizeFieldValue(block[key]);
-      out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? block[key] : sanitized;
+      out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? "" : sanitized;
     }
     return out as T;
   };
@@ -679,6 +681,8 @@ function Field({
   placeholder,
   required,
   invalid,
+  glow,
+  inputRef,
 }: {
   label: string;
   value: string;
@@ -686,6 +690,8 @@ function Field({
   placeholder: string;
   required?: boolean;
   invalid?: boolean;
+  glow?: boolean;
+  inputRef?: (el: HTMLInputElement | null) => void;
 }) {
   return (
     <label className="block">
@@ -694,13 +700,14 @@ function Field({
         {required && <span className="ml-1 text-amber-500" aria-hidden="true">*</span>}
       </span>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent ${
           invalid ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-border bg-background"
-        }`}
+        } ${glow ? "brief-field-glow" : ""}`}
         aria-required={required}
       />
       {required && invalid && (
