@@ -1591,7 +1591,8 @@ export function AIConcierge({
       .eq("user_id", uid);
     if (embedded) {
       q = q.eq("workspace", true);
-      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);    } else {
+      q = q.eq("workspace", false);
     }
     const { data } = await q.order("last_active_at", { ascending: false }).limit(50);
     if (data) setThreads(data as ConciergeThread[]);
