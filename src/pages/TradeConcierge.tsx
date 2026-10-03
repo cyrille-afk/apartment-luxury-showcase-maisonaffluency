@@ -25,7 +25,7 @@ const QUICK_STARTS = [
   "Suggest lighting for a double-height entrance",
 ];
 
-interface ThreadRow { id: string; title: string; updated_at: string }
+interface ThreadRow { id: string; title: string; updated_at: string; project_id?: string | null }
 
 function greeting() {
   const h = new Date().getHours();
@@ -34,8 +34,8 @@ function greeting() {
 
 /** One workspace session = one embedded Felix mount, keyed by this id. */
 interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string; fresh: boolean }
-interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace" }
-interface PreviewPick { title: string; finish?: string | null; qty?: number | null }
+interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace"; project_id?: string | null }
+interface PreviewPick { title: string; finish?: string | null; qty?: number | null; designer?: string | null }
 interface PreviewData { turns: { role: "user" | "assistant"; text: string }[]; picks: PreviewPick[] }
 
 /** Distil a workspace timeline into the turns and saved picks a compact preview needs. */
@@ -57,6 +57,7 @@ function extractWorkspacePreview(timeline: unknown): PreviewData {
         title,
         finish: p.materials ? String(p.materials).slice(0, 60) : (p.variant ?? null),
         qty: typeof p?.qty === "number" ? p.qty : null,
+        designer: p.designer_name ? String(p.designer_name).slice(0, 80) : null,
       };
       const key = `${pick.title}|${pick.finish ?? ""}`;
       if (!seen.has(key)) { seen.add(key); out.picks.push(pick); }
@@ -82,9 +83,12 @@ export default function TradeConcierge() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
   const buildingRef = useRef<Set<string>>(new Set());
+  const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
+  const [designerSel, setDesignerSel] = useState("all");
+  const [projectSel, setProjectSel] = useState("all");
 
   // Bind the concierge contextually to the project chosen in the header switcher.
-  const { projectFilter } = useProjectFilter();
+  const { projectFilter, setProjectFilter } = useProjectFilter();
   const { projects } = useProjects({ activeOnly: false });
   const activeProject = projectFilter ? projects.find((p) => p.id === projectFilter) : undefined;
 
@@ -101,17 +105,18 @@ export default function TradeConcierge() {
 
   const loadThreads = useCallback(async () => {
     if (!user) return;
-    let wq = supabase.from("concierge_threads").select("id, title, updated_at:last_active_at")
-      .eq("workspace", true).neq("title", "New conversation");
-    wq = projectFilter ? wq.eq("project_id", projectFilter) : wq.is("project_id", null);
+    // Workspace threads are fetched across all projects; the Past Curations
+    // project filter narrows them client-side.
     const [c, w] = await Promise.all([
       supabase.from("curation_threads").select("id, title, updated_at").order("updated_at", { ascending: false }).limit(50),
-      wq.order("last_active_at", { ascending: false }).limit(50),
+      supabase.from("concierge_threads").select("id, title, updated_at:last_active_at, project_id")
+        .eq("workspace", true).neq("title", "New conversation")
+        .order("last_active_at", { ascending: false }).limit(50),
     ]);
     if (!c.error) setThreads(c.data ?? []);
     if (!w.error) setWsThreads((w.data ?? []) as ThreadRow[]);
     setThreadsLoaded(true);
-  }, [user, projectFilter]);
+  }, [user]);
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
 
@@ -153,13 +158,28 @@ export default function TradeConcierge() {
   }, [user, threadsLoaded, threads, wsThreads]);
 
   const query = search.trim().toLowerCase();
-  const filteredItems = query
-    ? pastItems.filter((t) => {
-        const p = previews[t.id];
-        const haystack = `${t.title} ${p ? [...p.picks.map((x) => x.title), ...p.turns.map((x) => x.text)].join(" ") : ""}`.toLowerCase();
-        return haystack.includes(query);
-      })
-    : pastItems;
+  const cutoff = dateRange === "all" ? 0 : Date.now() - Number(dateRange) * 86_400_000;
+  const designerNames = Array.from(
+    new Set(pastItems.flatMap((t) => (previews[t.id]?.picks ?? []).map((p) => p.designer).filter((d): d is string => !!d))),
+  ).sort((a, b) => a.localeCompare(b));
+  const filtersActive = dateRange !== "all" || designerSel !== "all" || projectSel !== "all";
+  const clearFilters = () => { setDateRange("all"); setDesignerSel("all"); setProjectSel("all"); };
+  const filteredItems = pastItems.filter((t) => {
+    if (cutoff && new Date(t.updated_at).getTime() < cutoff) return false;
+    if (projectSel === "none" ? !!t.project_id : projectSel !== "all" && t.project_id !== projectSel) return false;
+    if (designerSel !== "all") {
+      const p = previews[t.id];
+      const hit = !!p && (p.picks.some((x) => x.designer === designerSel) ||
+        p.turns.some((x) => x.text.toLowerCase().includes(designerSel.toLowerCase())));
+      if (!hit) return false;
+    }
+    if (query) {
+      const p = previews[t.id];
+      const haystack = `${t.title} ${p ? [...p.picks.map((x) => x.title), ...p.picks.map((x) => x.designer ?? ""), ...p.turns.map((x) => x.text)].join(" ") : ""}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
 
   // Restore the selected project's open workspace on mount / project switch.
   useEffect(() => {
@@ -220,10 +240,14 @@ export default function TradeConcierge() {
     window.setTimeout(() => void loadThreads(), 4000);
   };
 
-  /** Reopen a past workspace curation for the current project. */
-  const resumeWorkspace = (id: string) => {
-    writeLS(wsThreadKey, id);
-    writeLS(openFlagKey, "1");
+  /** Reopen a past workspace curation, switching project context if needed. */
+  const resumeWorkspace = (id: string, projectId?: string | null) => {
+    const pk = projectId || "none";
+    if (user) {
+      writeLS(`concierge:workspaceThread:${user.id}:${pk}`, id);
+      writeLS(`concierge:workspaceOpen:${user.id}:${pk}`, "1");
+    }
+    if ((projectId ?? null) !== (projectFilter ?? null)) setProjectFilter(projectId ?? null);
     setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: "", fresh: false }));
   };
 
@@ -335,12 +359,53 @@ export default function TradeConcierge() {
                 )}
               </div>
             )}
+            {threadsLoaded && pastItems.length > 0 && (
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <div className="relative">
+                  <select value={dateRange} onChange={(e) => setDateRange(e.target.value as typeof dateRange)} aria-label="Filter by date"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All dates</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <div className="relative">
+                  <select value={designerSel} onChange={(e) => setDesignerSel(e.target.value)} aria-label="Filter by designer"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All designers</option>
+                    {designerNames.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <div className="relative">
+                  <select value={projectSel} onChange={(e) => setProjectSel(e.target.value)} aria-label="Filter by project"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All projects</option>
+                    <option value="none">No project</option>
+                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              </div>
+            )}
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
             ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
             ) : filteredItems.length === 0 ? (
-              <p className="font-display text-sm italic text-muted-foreground">No curations match “{search.trim()}”.</p>
+              <div className="space-y-1.5">
+                <p className="font-display text-sm italic text-muted-foreground">
+                  {filtersActive ? "No curations match your filters." : `No curations match “${search.trim()}”.`}
+                </p>
+                {filtersActive && (
+                  <button type="button" onClick={clearFilters}
+                    className="text-[11px] uppercase tracking-[0.16em] text-accent transition-colors hover:text-foreground">
+                    Clear filters
+                  </button>
+                )}
+              </div>
             ) : (
               <ul
                 onScroll={(e) => {
@@ -360,7 +425,7 @@ export default function TradeConcierge() {
                         ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
                       <div className="flex items-center">
                         <Link to={t.kind === "curation" ? `/trade/concierge/${t.id}` : "/trade/concierge"}
-                          onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id) : undefined}
+                          onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id, t.project_id) : undefined}
                           className="min-w-0 flex-1 px-3 py-2">
                           <span className="block truncate text-sm text-foreground">{t.title}</span>
                           <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
