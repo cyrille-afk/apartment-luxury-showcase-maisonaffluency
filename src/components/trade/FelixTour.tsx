@@ -6,6 +6,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
+import { setClientSafeMode } from "@/lib/clientSafeMode";
+import { Button } from "@/components/ui/button";
 
 type FelixStep = {
   id: string;
@@ -212,7 +214,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
-    let didEditorialScroll = false;
     let watched: Element[] = [];
     let observedTarget: Element | null = null;
     let revealFrame = 0;
@@ -247,27 +248,21 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         didEnter = true;
         current.onEnter?.();
       }
-      if (elements.length && (!didScroll || (current.id === "client-view" && !didEditorialScroll))) {
+      if (elements.length && !didScroll) {
         const target = elements[0].getBoundingClientRect();
         const canvas = current.id === "client-view"
           ? elements[0].closest("section")?.querySelector("article")?.getBoundingClientRect()
           : null;
-        if (!didScroll || canvas) {
-          didScroll = true;
-          if (canvas) didEditorialScroll = true;
-          if (current.id === "client-view") {
-            // Frame the switch and the first product's image and price together.
-            // Before Client View is enabled the image is not mounted yet; revisit
-            // once it appears without repeating the scroll on every frame.
-            const bottom = canvas ? canvas.bottom : target.bottom + window.innerHeight * 0.38;
-            const middle = (target.top + bottom) / 2;
-            // Keep the switch clear of the Trade header even when the full
-            // product card cannot fit in one short viewport.
-            const shift = Math.min(middle - window.innerHeight / 2, target.top - 160);
-            window.scrollBy({ top: shift, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-          } else {
-            elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-          }
+        didScroll = true;
+        if (current.id === "client-view") {
+          // Scroll once on entry. A second automatic scroll after switching
+          // views moves the control under the user's pointer mid-interaction.
+          const bottom = canvas ? canvas.bottom : target.bottom + window.innerHeight * 0.38;
+          const middle = (target.top + bottom) / 2;
+          const shift = Math.min(middle - window.innerHeight / 2, target.top - 160);
+          window.scrollBy({ top: shift, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        } else {
+          elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
         }
       }
       const watchedNow = [...elements, ...elements.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
@@ -551,14 +546,25 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
 
-           {!stepDone && !isPaused && (
-             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
-               <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
-               <p className="font-body text-sm font-semibold leading-snug">
-                 {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
-               </p>
-             </div>
-           )}
+          {!stepDone && !isPaused && (
+            step.id === "client-view" ? (
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3 w-full rounded-md font-body text-xs"
+                onClick={() => { setClientSafeMode(true); setStepDone(true); }}
+              >
+                Switch to Client View <ArrowRight aria-hidden="true" />
+              </Button>
+            ) : (
+              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
+                <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <p className="font-body text-sm font-semibold leading-snug">
+                  {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : "Use the highlighted control to continue."}
+                </p>
+              </div>
+            )
+          )}
 
           {isPaused && (
             <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
