@@ -182,10 +182,10 @@ export const conciergeCopy = (lang: Lang) => ({
   stage: { en: "Stage", id: "Tahap", th: "ขั้นตอน", zh: "阶段" }[lang],
   ask: { en: "Ask me anything…", id: "Tanyakan apa saja…", th: "ถามฉันได้ทุกเรื่อง…", zh: "随时向我提问…" }[lang],
   footer: {
-    en: "AI-powered · Tearsheet drafts require your approval",
-    id: "Didukung AI · Draf tearsheet memerlukan persetujuan Anda",
-    th: "ขับเคลื่อนด้วย AI · ร่างทีอร์ชีตต้องได้รับการอนุมัติจากคุณ",
-    zh: "AI 驱动 · Tearsheet 草稿需经您确认",
+    en: "Curated for your studio · Specification sheets require your final approval",
+    id: "Dikurasi untuk studio Anda · Lembar spesifikasi memerlukan persetujuan akhir Anda",
+    th: "คัดสรรเพื่อสตูดิโอของคุณ · แผ่นข้อมูลจำเพาะต้องได้รับการอนุมัติขั้นสุดท้ายจากคุณ",
+    zh: "为您的工作室精心策划 · 规格表需经您最终确认",
   }[lang],
 });
 

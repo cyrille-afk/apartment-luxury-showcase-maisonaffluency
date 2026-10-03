@@ -138,7 +138,7 @@ export default function TradeConcierge() {
   return (
     <div className="mx-auto w-full max-w-[1500px] px-6 py-6">
       <Helmet><title>Trade Concierge · Maison Affluency</title><meta name="robots" content="noindex" /></Helmet>
-      <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:gap-10 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* Left — persistent rail */}
         <aside className="space-y-5 lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)] lg:overflow-y-auto">
           <section className="relative overflow-hidden rounded-sm border border-border/60 bg-muted/40 p-6">
