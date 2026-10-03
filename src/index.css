@@ -363,6 +363,14 @@ All colors MUST be HSL.
   border-radius: 0;
 }
 
+/* Nav labels wrap to two lines instead of truncating into an ellipsis */
+.trade-editorial-sidebar [data-sidebar="menu-button"] > span:last-child {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+
 .trade-editorial-sidebar [data-sidebar="menu-button"]:hover,
 .trade-editorial-sidebar [data-sidebar="menu-button"][data-active="true"] {
   background: transparent;
