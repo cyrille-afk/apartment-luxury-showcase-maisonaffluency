@@ -234,7 +234,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         stableSince = 0;
       }
       // Only measure nodes that are actually mounted and laid out.
-      const live = elements.filter((el) => el.isConnected && (el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed");
+      const live = elements.filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed"));
       const boxes = live.map((el) => el.getBoundingClientRect());
       const next = boxes.length ? {
         top: Math.min(...boxes.map((r) => r.top)),
