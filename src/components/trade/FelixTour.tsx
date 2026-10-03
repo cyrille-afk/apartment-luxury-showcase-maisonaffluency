@@ -21,13 +21,6 @@ type FelixStep = {
   /** Clicking the highlighted element finishes the tour. */
   clickFinishes?: boolean;
   cta?: string;
-  /**
-   * Strict wait-for-element (shepherd-style): the step never shows until the
-   * target is mounted, connected, visible and laid out — used for shifting
-   * sidebar nav nodes. Grants a longer grace period before the centered
-   * fallback instead of dropping the spotlight early.
-   */
-  waitForTarget?: boolean;
 };
 
 const switchOn = (sel: string) =>
@@ -47,7 +40,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Sourcing 'The Collection'",
     target: "nav-collection",
     route: "/trade/the-collection",
-    waitForTarget: true,
     dialogue:
       "This is your primary design hub. Click here to browse our Curated Showroom and Full Catalogue with your Silver Tier trade pricing live.",
   },
@@ -56,7 +48,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Financial Management",
     target: "nav-quotes",
     route: "/trade/quotes",
-    waitForTarget: true,
     dialogue:
       "Manage your business transactions here. Track deposit pipelines, open balances, and instantly export beautiful proforma documents for client approval.",
   },
@@ -73,7 +64,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Account & Team Configurations",
     target: "nav-settings",
     route: "/trade/settings",
-    waitForTarget: true,
     dialogue:
       "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
   },
@@ -82,7 +72,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Project Structuring",
     target: "nav-projects",
     route: "/trade/projects",
-    waitForTarget: true,
     dialogue:
       "Organize your active work by project. Keep each project's collections, quotes, layouts, and documentation together in one dedicated workspace.",
   },
@@ -91,7 +80,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Your Personal Concierge",
     target: "nav-concierge",
     route: "/trade/concierge",
-    waitForTarget: true,
     dialogue:
       "Whenever you need bespoke project curation or styling advice, look to the sidebar. Open the Trade Concierge to brief me, co-curate custom schemes, or source rare artisan pieces alongside me.",
   },
@@ -313,8 +301,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       frame = requestAnimationFrame(tick);
     };
-    // The frame loop discovers async targets; ResizeObserver watches only their layout.
-    // Unrelated page mutations must not postpone this step forever.
+    // The frame loop discovers async targets and tracks movement; the observers
+    // watch node replacement and size changes without resetting stable layouts.
     frame = requestAnimationFrame(tick);
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, true);
