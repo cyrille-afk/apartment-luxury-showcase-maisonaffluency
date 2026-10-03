@@ -45,7 +45,13 @@ describe("client-only specification schedule", () => {
     expect(pdfBlob).toBeDefined();
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
     if (!pdfBlob) throw new Error("PDF download did not produce a blob");
-    const pdf = await getDocument({ data: new Uint8Array(await pdfBlob.arrayBuffer()), useSystemFonts: true, disableFontFace: true }).promise;
+    const bytes = new Uint8Array(await pdfBlob.arrayBuffer());
+    expect(new TextDecoder("latin1").decode(bytes)).not.toMatch(/jspdf|pdf-lib|maison affluency|lovable|supabase/i);
+    if (process.env.PDF_QA_PATH) {
+      const { writeFile } = await import("node:fs/promises");
+      await writeFile(process.env.PDF_QA_PATH, bytes);
+    }
+    const pdf = await getDocument({ data: bytes, useSystemFonts: true, disableFontFace: true }).promise;
     const texts: string[] = [];
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n);
@@ -57,6 +63,38 @@ describe("client-only specification schedule", () => {
     expect(visible).toContain("$19,455.76");
     expect(visible).toContain("Atelier Delval");
     expect(visible).not.toMatch(/SECRET SUPPLIER|FACTORY-SECRET-49|\$7,782\.30|\$8,647|trade|wholesale|tier|discount|margin|supplier|factory|sku|maison affluency/i);
+    const metadata = await pdf.getMetadata();
+    expect(metadata.info).toMatchObject({ Producer: "Atelier Delval", Creator: "Atelier Delval" });
+    expect(JSON.stringify(metadata.info)).not.toMatch(/jspdf|pdf-lib|maison affluency|lovable|supabase/i);
     await pdf.destroy();
+  });
+
+  it("uses a serif studio wordmark and Price upon Request when no price or logo is supplied", async () => {
+    const original = data.prices;
+    data.prices = [];
+    try {
+      const dataset = await compileSpecSchedule({
+        picks: [{ pickId: "pick-1", qty: 1, room: "Lounge", finish: null, leadWeeks: null }],
+        projectId: "project-1",
+        studio: { name: "Atelier Delval", display_name: "  ", logo_url: "  " },
+      });
+      expect(dataset.rows[0].clientPriceCents).toBeNull();
+      let pdfBlob: Blob | undefined;
+      vi.spyOn(URL, "createObjectURL").mockImplementation((blob) => { pdfBlob = blob as Blob; return "blob:test-unpriced"; });
+      vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+      await renderSpecSchedulePdf(dataset);
+      if (!pdfBlob) throw new Error("PDF download did not produce a blob");
+      const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      const pdf = await getDocument({ data: new Uint8Array(await pdfBlob.arrayBuffer()), useSystemFonts: true, disableFontFace: true }).promise;
+      const page = await pdf.getPage(1);
+      const visible = (await page.getTextContent()).items.map((item) => "str" in item ? item.str : "").join(" ");
+      expect(visible).toContain("ATELIER DELVAL");
+      expect(visible).toContain("Price upon Request");
+      expect(visible).not.toMatch(/\$0|\$8,647|maison affluency|jspdf/i);
+      await pdf.destroy();
+    } finally {
+      data.prices = original;
+    }
   });
 });

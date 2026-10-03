@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Give studio headers and specification PDFs a serif text-logo fallback, label unpriced pieces Price upon Request, and strip generator metadata from schedule downloads.
+
 - [x] Add automated Client View checks for markup math, document masking, generic attribution, and exported PDF text; run in the existing unit-test CI job.
 
 - [ ] Add studio branding profile, persistent Client View masking and project markup, and white-label client specification export.

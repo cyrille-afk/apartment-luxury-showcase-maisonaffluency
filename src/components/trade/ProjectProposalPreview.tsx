@@ -137,9 +137,11 @@ export function ProjectProposalPreview({
 
             <div>
               {items.map((item, index) => {
-                const retail = (item.rrp_cents || 0) * item.quantity;
-                 const trade = (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity;
-                 const client = (clientPriceCents(tradePriceCents(item.rrp_cents, tradeDiscount), markupMultiplier) || 0) * item.quantity;
+                const retail = item.rrp_cents != null && item.rrp_cents > 0 ? item.rrp_cents * item.quantity : null;
+                 const tradeUnit = tradePriceCents(item.rrp_cents, tradeDiscount);
+                 const trade = tradeUnit != null && tradeUnit > 0 ? tradeUnit * item.quantity : null;
+                 const clientUnit = clientPriceCents(tradeUnit, markupMultiplier);
+                 const client = clientUnit != null && clientUnit > 0 ? clientUnit * item.quantity : null;
                 return (
                   <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">
                     <span className="pr-3 text-right font-body text-[9px] tracking-[0.15em] text-muted-foreground">
@@ -164,9 +166,9 @@ export function ProjectProposalPreview({
                          {isClientMode ? "Client Price" : "Trade / MSRP"}
                       </p>
                       <p className="mt-1 font-body text-[11px] tracking-[0.05em] text-card-foreground">
-                         {isClientMode ? (money(client) || "Price upon Request") : (money(trade) || "Price upon Request")}
+                          {isClientMode ? (client == null ? "Price upon Request" : money(client)) : (trade == null ? "Price upon Request" : money(trade))}
                       </p>
-                       {!isClientMode && retail > 0 && (
+                        {!isClientMode && retail != null && (
                          <p data-trade-sensitive className="mt-1 font-body text-[9px] tracking-[0.05em] text-muted-foreground line-through">
                           {money(retail)}
                         </p>
@@ -183,7 +185,9 @@ export function ProjectProposalPreview({
                 {isClientMode ? "Total Estimate" : "Total Trade"}
               </p>
               <p className="font-display text-2xl text-card-foreground">
-                 {money(isClientMode ? clientTotal : tradeTotal)}
+                  {items.some((item) => item.rrp_cents != null && item.rrp_cents > 0)
+                    ? money(isClientMode ? clientTotal : tradeTotal)
+                    : "Price upon Request"}
               </p>
             </footer>
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-10 h-5 w-32 animate-pulse bg-muted/60" />}
