@@ -29,3 +29,11 @@ export function clientPriceCents(tradeCents: number | null, multiplier: number):
   if (tradeCents == null) return null;
   return Math.round(tradeCents * normalizeMultiplier(multiplier));
 }
+
+/** A project's explicit multiplier takes precedence over the studio's default markup. */
+export function effectiveProjectMultiplier(projectMultiplier: unknown, studioMarkupPercentage: unknown): number {
+  const project = Number(projectMultiplier);
+  if (Number.isFinite(project) && project > 0 && project !== 1) return project;
+  const markup = Number(studioMarkupPercentage);
+  return Number.isFinite(markup) && markup >= 0 ? 1 + markup / 100 : 1;
+}
