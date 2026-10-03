@@ -282,6 +282,29 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Manual scrapes are limited to sites already saved in scrape settings.
+    const { data: savedCfgs } = await serviceClient.from("scrape_configs").select("urls");
+    const allowedHosts = new Set<string>();
+    for (const c of savedCfgs ?? []) {
+      for (const u of (Array.isArray(c.urls) ? c.urls : [])) {
+        try { allowedHosts.add(new URL(String(u)).hostname.toLowerCase().replace(/^www\./, "")); } catch { /* skip */ }
+      }
+    }
+    for (const b of brands) {
+      const list = Array.isArray(b.urls) ? b.urls : [];
+      const bad = list.filter((u: unknown) => {
+        try {
+          const h = new URL(String(u));
+          return h.protocol !== "https:" || !allowedHosts.has(h.hostname.toLowerCase().replace(/^www\./, ""));
+        } catch { return true; }
+      });
+      if (bad.length > 0) {
+        return new Response(JSON.stringify({ error: `Only sites saved in scrape settings can be scraped: ${bad.slice(0, 3).join(", ")}` }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Save configs if requested
     if (body.save_configs) {
       for (const b of brands) {

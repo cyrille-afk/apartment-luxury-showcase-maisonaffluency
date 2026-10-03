@@ -76,12 +76,12 @@ const handler = async (req: Request): Promise<Response> => {
     // Bind the recipient to a stored applicant: a trade account or a profile
     // that has submitted a trade application. Arbitrary addresses are refused.
     const cleanEmail = String(applicantEmail).trim().toLowerCase().slice(0, 254);
-    const { data: acctMatch } = await supabaseAdmin.from("trade_accounts").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
+    const { data: acctMatch } = await serviceClient.from("trade_accounts").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
     let known = Boolean(acctMatch);
     if (!known) {
-      const { data: prof } = await supabaseAdmin.from("profiles").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
+      const { data: prof } = await serviceClient.from("profiles").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
       if (prof?.id) {
-        const { data: app } = await supabaseAdmin.from("trade_applications").select("id").eq("user_id", prof.id).limit(1).maybeSingle();
+        const { data: app } = await serviceClient.from("trade_applications").select("id").eq("user_id", prof.id).limit(1).maybeSingle();
         known = Boolean(app);
       }
     }

@@ -111,7 +111,7 @@ var search_curator_picks_default = defineTool({
       ]);
       const tokens = Array.from(
         new Set(
-          [cleanQuery, ...cleanQuery.split(/\s+/)].map((t) => t.trim()).filter((t) => t.length >= 3 && !STOP.has(t.toLowerCase()))
+          [cleanQuery, ...cleanQuery.split(/\s+/)].map((t) => t.replace(/[,()%*\\.:"']/g, " ").trim()).filter((t) => t.length >= 3 && !STOP.has(t.toLowerCase()))
         )
       );
       let brandFilter = "";
