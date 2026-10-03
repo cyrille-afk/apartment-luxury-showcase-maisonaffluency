@@ -1574,6 +1574,20 @@ export function AIConcierge({
       : `concierge:activeThread:${user.id}`
     : null;
   const [hydratedThreadId, setHydratedThreadId] = useState<string | null>(null);
+  // Floating assistant: offer a jump back to this tab's active project thread
+  // in Trade Concierge (project selection is per tab via sessionStorage).
+  const [projectLink, setProjectLink] = useState<{ id: string; name: string } | null>(null);
+  useEffect(() => {
+    if (embedded || surface !== "trade" || !user?.id || pathname.startsWith("/trade/concierge")) { setProjectLink(null); return; }
+    let pid: string | null = null;
+    try { pid = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+    if (!pid) { setProjectLink(null); return; }
+    let cancelled = false;
+    void supabase.from("projects").select("name").eq("id", pid).maybeSingle().then(({ data }) => {
+      if (!cancelled) setProjectLink(data?.name ? { id: pid!, name: data.name } : null);
+    });
+    return () => { cancelled = true; };
+  }, [embedded, surface, user?.id, pathname, search]);
   const rowVersionRef = useRef<string | null>(null);
   const saveChainRef = useRef<Promise<void>>(Promise.resolve());
 
@@ -5823,6 +5837,26 @@ export function AIConcierge({
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
                 and every `concierge_inspector` log line for this run. */}
+            {projectLink && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (user?.id) {
+                    try {
+                      if (localStorage.getItem(`concierge:workspaceThread:${user.id}:${projectLink.id}`)) {
+                        localStorage.setItem(`concierge:workspaceOpen:${user.id}:${projectLink.id}`, "1");
+                      }
+                    } catch { /* ignore */ }
+                  }
+                  setOpen(false);
+                  navigate(`/trade/concierge?project=${projectLink.id}`);
+                }}
+                className="mb-2 flex w-full items-center justify-between gap-2 rounded-sm border border-accent/50 bg-accent/10 px-3 py-2 text-left text-xs text-foreground transition-colors hover:bg-accent/20"
+              >
+                <span className="min-w-0 truncate">Continue curating for <span className="font-medium">{projectLink.name}</span> in Trade Concierge</span>
+                <span aria-hidden className="shrink-0 text-muted-foreground">→</span>
+              </button>
+            )}
             {lastRequestId && (
               <div className="mb-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
                 <button
