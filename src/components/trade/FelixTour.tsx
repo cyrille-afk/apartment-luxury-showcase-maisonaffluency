@@ -6,8 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
-import { setClientSafeMode } from "@/lib/clientSafeMode";
-import { Button } from "@/components/ui/button";
 
 type FelixStep = {
   id: string;
@@ -249,21 +247,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         current.onEnter?.();
       }
       if (elements.length && !didScroll) {
-        const target = elements[0].getBoundingClientRect();
-        const canvas = current.id === "client-view"
-          ? elements[0].closest("section")?.querySelector("article")?.getBoundingClientRect()
-          : null;
         didScroll = true;
-        if (current.id === "client-view") {
-          // Scroll once on entry. A second automatic scroll after switching
-          // views moves the control under the user's pointer mid-interaction.
-          const bottom = canvas ? canvas.bottom : target.bottom + window.innerHeight * 0.38;
-          const middle = (target.top + bottom) / 2;
-          const shift = Math.min(middle - window.innerHeight / 2, target.top - 160);
-          window.scrollBy({ top: shift, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-        } else {
-          elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-        }
+        elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const watchedNow = [...elements, ...elements.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
@@ -405,38 +390,25 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(380, viewport.w - 32);
-  // Step 8 includes an action prompt, so its real card is taller than the
-  // 320px estimate used by the other steps. Reserve enough room for it.
-  const cardH = Math.min(step.id === "client-view" ? 440 : 320, Math.max(0, viewport.h - 32));
+  const cardH = 320;
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
   let cardTop = 0;
-  let aboveTarget = false;
   if (rect) {
     const centerY = clampY(rect.top + rect.height / 2 - cardH / 2);
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
     const leftX = rect.left - PAD - 8 - cardW;
     if (step.id === "client-view") {
-      // Step 8 must never sit below the switch over the product photograph.
-      // Prefer the free space above; on short screens use the right-hand side,
-      // beyond the first product canvas when it is visible.
-      const canvas = document.querySelector('[data-felix-target="client-view-toggle"]')
-        ?.closest("section")?.querySelector("article .aspect-\\[4\\/5\\]")?.getBoundingClientRect();
-      const clearRight = Math.max(rightX, canvas ? canvas.right + PAD + 8 : rightX);
-      if (rect.top - PAD - 8 >= cardH + 16) {
-        cardLeft = centerX;
-        cardTop = rect.top - cardH - PAD - 8;
-        aboveTarget = true;
-      } else if (clearRight + cardW <= viewport.w - 16) {
-        cardLeft = clearRight;
-        cardTop = centerY;
+      // Step 8: never below the switch (it would cover the product photo).
+      // Right of the switch, bottom-aligned so the card grows upwards; else above.
+      if (rightX + cardW <= viewport.w - 16) {
+        cardLeft = rightX;
+        cardTop = clampY(rect.top + rect.height - cardH);
       } else {
-        // Constrained viewport: keep it at the very top rather than dropping
-        // below the toggle. The card itself scrolls if its content is taller.
-        cardLeft = clampX(viewport.w - cardW - 16);
-        cardTop = 16;
+        cardLeft = centerX;
+        cardTop = Math.max(16, rect.top - cardH - PAD - 8);
       }
     } else if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
@@ -487,10 +459,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         role="dialog"
         aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
-          "fixed z-[132] max-h-[calc(100dvh-32px)] overflow-y-auto overscroll-contain print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
-         style={{ width: cardW, left: 0, top: 0, maxHeight: aboveTarget && rect ? Math.max(80, rect.top - cardTop - PAD - 8) : undefined, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
+        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
         <div className="p-5">
           {/* Header */}
@@ -546,25 +518,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
 
-          {!stepDone && !isPaused && (
-            step.id === "client-view" ? (
-              <Button
-                type="button"
-                size="sm"
-                className="mt-3 w-full rounded-md font-body text-xs"
-                onClick={() => { setClientSafeMode(true); setStepDone(true); }}
-              >
-                Switch to Client View <ArrowRight aria-hidden="true" />
-              </Button>
-            ) : (
-              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
-                <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <p className="font-body text-sm font-semibold leading-snug">
-                  {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : "Use the highlighted control to continue."}
-                </p>
-              </div>
-            )
-          )}
+           {!stepDone && !isPaused && (
+             <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
+               <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
+               <p className="font-body text-sm font-semibold leading-snug">
+                 {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+               </p>
+             </div>
+           )}
 
           {isPaused && (
             <p className="mt-3 font-body text-[10px] uppercase tracking-[0.18em] text-accent">
