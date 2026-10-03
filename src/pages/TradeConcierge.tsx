@@ -45,6 +45,7 @@ export default function TradeConcierge() {
   const [threadsLoaded, setThreadsLoaded] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [workspace, setWorkspace] = useState<WorkspaceSession | null>(null);
+  const [listAtBottom, setListAtBottom] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<string | null>(null);
@@ -248,8 +249,14 @@ export default function TradeConcierge() {
             ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
             ) : (
-              <ul className={cn("space-y-1 pr-1",
-                pastItems.length > 4 && "curation-scroll curation-scroll-fade max-h-[224px] overflow-y-auto")}>
+              <ul
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
+                }}
+                className={cn("space-y-1 pr-1",
+                  pastItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
+                  pastItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
                 {pastItems.map((t) => (
                   <li key={t.id} className={cn("group flex items-center rounded-sm border-l-2 transition-colors",
                     (t.kind === "curation" ? t.id === threadId : !!workspace && t.id === activeWsThread)
