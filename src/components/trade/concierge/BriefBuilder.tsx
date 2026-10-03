@@ -720,19 +720,27 @@ function Field({
 }
 
 
-export function BriefBuilder({
-  value,
-  onChange,
-  onClose,
-  onSubmit,
-  onSubmittingChange,
-}: {
+export type BriefBuilderHandle = {
+  // Validation interceptor entry point: returns true when the brief is
+  // invalid (submission must stay blocked) — expands the section, keeps the
+  // amber warning visible, smooth-scrolls to the first missing required
+  // field and flashes a gold glow around it.
+  focusFirstMissing: () => boolean;
+};
+
+export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
   value: string;
   onChange: (next: string) => void;
   onClose: () => void;
   onSubmit?: (briefText: string) => Promise<void>;
   onSubmittingChange?: (submitting: boolean) => void;
-}) {
+}>(function BriefBuilder({
+  value,
+  onChange,
+  onClose,
+  onSubmit,
+  onSubmittingChange,
+}, ref) {
   const [values, setValues] = useState<BriefValues>(DEFAULT_VALUES);
   const [prefix, setPrefix] = useState("");
   const [suffix, setSuffix] = useState("");
