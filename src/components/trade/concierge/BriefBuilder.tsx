@@ -742,6 +742,11 @@ export function BriefBuilder({
   const restoredRef = useRef(false);
   const scopeRef = useRef<string>(getProjectScope());
   const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+  // Refs + glow state for the validation interceptor: on a blocked submit we
+  // smooth-scroll to the first missing required field and flash a gold glow.
+  const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [glowField, setGlowField] = useState<string | null>(null);
+  const glowTimer = useRef<number | null>(null);
 
   useEffect(() => {
     onSubmittingChange?.(isSubmitting);
