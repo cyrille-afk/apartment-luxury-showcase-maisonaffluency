@@ -106,6 +106,7 @@ export default function TradeConcierge() {
   const [designerSel, setDesignerSel] = useState("all");
   const [projectSel, setProjectSel] = useState("all");
   const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "designer" | "project">("date-desc");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Bind the concierge contextually to the project chosen in the header switcher.
   const { projectFilter, setProjectFilter } = useProjectFilter();
