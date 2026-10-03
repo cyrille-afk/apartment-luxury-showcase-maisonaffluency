@@ -25,7 +25,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
     setAnnouncement(
       showTradePrice
         ? `Showing ${tierLabel} trade price, ${pct} off retail.`
-        : "Client View active. Showing retail prices only.",
+        : "Client View active. Showing client prices only.",
     );
   }, [showTradePrice, tierLabel, discountLabel]);
 

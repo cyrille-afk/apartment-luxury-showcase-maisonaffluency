@@ -115,7 +115,7 @@ export async function compileSpecSchedule(opts: {
   const ids = opts.picks.map((p) => p.pickId);
   const [picksRes, priceRes, matRes, pctRes, projRes] = await Promise.all([
     supabase.from("designer_curator_picks")
-      .select("id, title, subtitle, dimensions, width_mm, depth_mm, height_mm, materials, lead_time, currency, designers:designer_id(display_name, name)")
+      .select("id, title, dimensions, width_mm, depth_mm, height_mm, materials, lead_time, currency")
       .in("id", ids),
     supabase.from("trade_product_pricing").select("pick_id, trade_price_cents").in("pick_id", ids),
     supabase.from("product_material_links").select("pick_id, role, material_taxonomy:material_id(name)").in("pick_id", ids),

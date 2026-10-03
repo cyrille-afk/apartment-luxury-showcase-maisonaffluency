@@ -185,7 +185,7 @@ export function ProjectProposalPreview({
               </p>
             </footer>
           </section>
-           <p className="mt-12 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{studio?.display_name?.trim() || studio?.name || "Your Studio"} · {projectName}</p>
+           <div className="mt-12 flex items-center gap-3 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground"><StudioBrand studio={studio} /><span>· {projectName}</span></div>
         </main>
       </DialogContent>
     </Dialog>
