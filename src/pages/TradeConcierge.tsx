@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, Clock, FileText, ImagePlus, Plus, Square, Trash2 } from "lucide-react";
+import { ArrowUp, ChevronDown, Clock, FileText, ImagePlus, Plus, Search, Square, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,35 @@ function greeting() {
 /** One workspace session = one embedded Felix mount, keyed by this id. */
 interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string; fresh: boolean }
 interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace" }
+interface PreviewPick { title: string; finish?: string | null; qty?: number | null }
+interface PreviewData { turns: { role: "user" | "assistant"; text: string }[]; picks: PreviewPick[] }
+
+/** Distil a workspace timeline into the turns and saved picks a compact preview needs. */
+function extractWorkspacePreview(timeline: unknown): PreviewData {
+  const out: PreviewData = { turns: [], picks: [] };
+  const seen = new Set<string>();
+  for (const raw of Array.isArray(timeline) ? timeline : []) {
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as Record<string, any>;
+    if (item.kind === "msg" && typeof item.content === "string" && item.content && out.turns.length < 8) {
+      out.turns.push({ role: item.role === "assistant" ? "assistant" : "user", text: item.content.slice(0, 280) });
+    }
+    const prop = item.proposal as Record<string, any> | undefined;
+    if (!prop || item.resolved === "discarded") continue;
+    for (const p of Array.isArray(prop.preview) ? prop.preview : []) {
+      const title = String(p?.title ?? "").slice(0, 90);
+      if (!title) continue;
+      const pick: PreviewPick = {
+        title,
+        finish: p.materials ? String(p.materials).slice(0, 60) : (p.variant ?? null),
+        qty: typeof p?.qty === "number" ? p.qty : null,
+      };
+      const key = `${pick.title}|${pick.finish ?? ""}`;
+      if (!seen.has(key)) { seen.add(key); out.picks.push(pick); }
+    }
+  }
+  return out;
+}
 
 export default function TradeConcierge() {
   const { threadId } = useParams<{ threadId?: string }>();
@@ -49,6 +78,10 @@ export default function TradeConcierge() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
+  const buildingRef = useRef<Set<string>>(new Set());
 
   // Bind the concierge contextually to the project chosen in the header switcher.
   const { projectFilter } = useProjectFilter();
