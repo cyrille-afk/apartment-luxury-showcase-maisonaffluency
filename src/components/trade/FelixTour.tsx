@@ -261,7 +261,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             // once it appears without repeating the scroll on every frame.
             const bottom = canvas ? canvas.bottom : target.bottom + window.innerHeight * 0.38;
             const middle = (target.top + bottom) / 2;
-            window.scrollBy({ top: middle - window.innerHeight / 2, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+            // Keep the switch clear of the Trade header even when the full
+            // product card cannot fit in one short viewport.
+            const shift = Math.min(middle - window.innerHeight / 2, target.top - 160);
+            window.scrollBy({ top: shift, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
           } else {
             elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
           }
