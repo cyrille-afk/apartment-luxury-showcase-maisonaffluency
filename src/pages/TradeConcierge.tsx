@@ -479,8 +479,8 @@ export default function TradeConcierge() {
                   setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
                 }}
                 className={cn("space-y-1 pr-1",
-                  sortedItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
-                  sortedItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
+                  sortedItems.length > 5 && "curation-scroll max-h-[330px] overflow-y-auto",
+                  sortedItems.length > 5 && !listAtBottom && "curation-scroll-fade")}>
                 {sortedItems.map((t) => {
                   const preview = previews[t.id];
                   const expanded = expandedId === t.id;
