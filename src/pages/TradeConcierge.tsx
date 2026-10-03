@@ -405,10 +405,22 @@ export default function TradeConcierge() {
                     className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
                     <option value="all">All projects</option>
                     <option value="none">No project</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                 </div>
+              </div>
+            )}
+            {threadsLoaded && pastItems.length > 0 && (
+              <div className="relative mb-3">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort curations"
+                  className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                  <option value="date-desc">Sort: Newest first</option>
+                  <option value="date-asc">Sort: Oldest first</option>
+                  <option value="designer">Sort: Designer A–Z</option>
+                  <option value="project">Sort: Project A–Z</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
               </div>
             )}
             {!threadsLoaded ? (
@@ -435,9 +447,9 @@ export default function TradeConcierge() {
                   setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
                 }}
                 className={cn("space-y-1 pr-1",
-                  filteredItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
-                  filteredItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
-                {filteredItems.map((t) => {
+                  sortedItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
+                  sortedItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
+                {sortedItems.map((t) => {
                   const preview = previews[t.id];
                   const expanded = expandedId === t.id;
                   return (
