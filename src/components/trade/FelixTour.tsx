@@ -262,14 +262,20 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           setStepDone(current.done ? current.done() : true);
           ready = true;
           setSettled(true);
+          // Force an immediate layout refresh the moment the step shows so the
+          // overlay recalculates boundaries against the live element state.
+          window.dispatchEvent(new Event("resize"));
         }
       };
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
         // Target unavailable (e.g. sidebar hidden on mobile): show the card
-        // centered without a spotlight instead of a dead dark screen.
-        if (now - startedAt >= 2000 && !ready) commit(null);
+        // centered without a spotlight instead of a dead dark screen. Steps
+        // flagged waitForTarget (shifting sidebar nav nodes) get a longer
+        // grace period before falling back.
+        const grace = current.waitForTarget ? 4000 : 2000;
+        if (now - startedAt >= grace && !ready) commit(null);
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
         if (!last || !sameRect(last, next)) { last = next; commit(next); }
