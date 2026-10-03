@@ -106,6 +106,7 @@ export default function TradeConcierge() {
   const [designerSel, setDesignerSel] = useState("all");
   const [projectSel, setProjectSel] = useState("all");
   const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "designer" | "project">("date-desc");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Bind the concierge contextually to the project chosen in the header switcher.
   const { projectFilter, setProjectFilter } = useProjectFilter();
@@ -389,7 +390,7 @@ export default function TradeConcierge() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name or product…"
-                  className="h-8 w-full rounded-sm border border-border bg-background pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                  className="h-7 w-full rounded-sm border border-border/60 bg-background py-1 pl-8 pr-8 text-[11px] text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 />
                 {search && (
                   <button type="button" aria-label="Clear search" onClick={() => setSearch("")}
@@ -400,46 +401,58 @@ export default function TradeConcierge() {
               </div>
             )}
             {threadsLoaded && pastItems.length > 0 && (
-              <div className="mb-3 grid grid-cols-3 gap-2">
-                <div className="relative">
-                  <select value={dateRange} onChange={(e) => setDateRange(e.target.value as typeof dateRange)} aria-label="Filter by date"
-                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
-                    <option value="all">All dates</option>
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="90">Last 90 days</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-                </div>
-                <div className="relative">
-                  <select value={designerSel} onChange={(e) => setDesignerSel(e.target.value)} aria-label="Filter by designer"
-                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
-                    <option value="all">All designers</option>
-                    {designerNames.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-                </div>
-                <div className="relative">
-                  <select value={projectSel} onChange={(e) => setProjectSel(e.target.value)} aria-label="Filter by project"
-                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
-                    <option value="all">All projects</option>
-                    <option value="none">No project</option>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-                </div>
-              </div>
-            )}
-            {threadsLoaded && pastItems.length > 0 && (
-              <div className="relative mb-3">
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort curations"
-                  className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
-                  <option value="date-desc">Sort: Newest first</option>
-                  <option value="date-asc">Sort: Oldest first</option>
-                  <option value="designer">Sort: Designer A–Z</option>
-                  <option value="project">Sort: Project A–Z</option>
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+              <div className="mb-3">
+                <button type="button" onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen}
+                  className="flex w-full items-center justify-between rounded-sm border border-border/60 bg-background px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground focus:outline-none">
+                  <span className="flex items-center gap-1.5">
+                    Filter &amp; Sort
+                    {(filtersActive || sortBy !== "date-desc") && <span className="h-1 w-1 rounded-full bg-accent" aria-hidden />}
+                  </span>
+                  <ChevronDown className={cn("h-3 w-3 transition-transform", filtersOpen && "rotate-180")} />
+                </button>
+                {filtersOpen && (
+                  <div className="mt-1.5 space-y-2 rounded-sm border border-border/60 bg-background p-2">
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <div className="relative">
+                        <select value={dateRange} onChange={(e) => setDateRange(e.target.value as typeof dateRange)} aria-label="Filter by date"
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          <option value="all">All dates</option>
+                          <option value="7">Last 7 days</option>
+                          <option value="30">Last 30 days</option>
+                          <option value="90">Last 90 days</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                      <div className="relative">
+                        <select value={designerSel} onChange={(e) => setDesignerSel(e.target.value)} aria-label="Filter by designer"
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          <option value="all">All designers</option>
+                          {designerNames.map((d) => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                      <div className="relative">
+                        <select value={projectSel} onChange={(e) => setProjectSel(e.target.value)} aria-label="Filter by project"
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          <option value="all">All projects</option>
+                          <option value="none">No project</option>
+                          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort curations"
+                        className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                        <option value="date-desc">Sort: Newest first</option>
+                        <option value="date-asc">Sort: Oldest first</option>
+                        <option value="designer">Sort: Designer A–Z</option>
+                        <option value="project">Sort: Project A–Z</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {!threadsLoaded ? (
@@ -466,8 +479,8 @@ export default function TradeConcierge() {
                   setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
                 }}
                 className={cn("space-y-1 pr-1",
-                  sortedItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
-                  sortedItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
+                  sortedItems.length > 5 && "curation-scroll max-h-[330px] overflow-y-auto",
+                  sortedItems.length > 5 && !listAtBottom && "curation-scroll-fade")}>
                 {sortedItems.map((t) => {
                   const preview = previews[t.id];
                   const expanded = expandedId === t.id;
