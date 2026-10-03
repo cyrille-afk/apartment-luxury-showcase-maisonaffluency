@@ -1,3 +1,4 @@
+import { toDiscountFraction, tradePriceCents, discountPercentLabel } from "@/lib/tradePricing";
 import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
@@ -198,7 +199,7 @@ export default function FinishesDrawer({
       } else setVariants([]);
       if (!clientMode) {
         const { data } = await supabase.rpc("current_trade_discount_pct" as any);
-        setDiscount(Number(data) || 0);
+        setDiscount(toDiscountFraction(data));
       }
       if (alive) setLoading(false);
     })();
@@ -231,7 +232,7 @@ export default function FinishesDrawer({
       return hit ? { ...hit, top: t || hit.top, base: b || hit.base } : null;
     })()
     ?? variants[0] ?? null;
-  const trade = activeVariant?.price_cents ? Math.round(activeVariant.price_cents * (1 - discount / 100)) : null;
+  const trade = tradePriceCents(activeVariant?.price_cents, discount);
   const glb = useMemo(() => {
     if (!glbs.length) return null;
     const lbl = norm(activeVariant?.label);
@@ -419,7 +420,7 @@ export default function FinishesDrawer({
                     <div>
                       <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
                       <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
-                      <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discount}%</p>
+                      <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discountPercentLabel(discount)}</p>
                     </div>
                   )}
                   <div>

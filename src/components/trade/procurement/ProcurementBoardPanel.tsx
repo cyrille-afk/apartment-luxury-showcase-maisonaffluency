@@ -58,7 +58,8 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
   const [pricing, setPricing] = useState<Map<string, any>>(new Map());
-  const [discountPct, setDiscountPct] = useState(0);
+  const [discountPct, setDiscountPct] = useState(0); // fraction (0.10 = 10%)
+  const [multiplier, setMultiplier] = useState(1);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [statusOverride, setStatusOverride] = useState<Record<string, string>>({});
@@ -88,8 +89,18 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
       .select("id, trade_price_cents, currency, lead_time, lead_time_weeks_min, lead_time_weeks_max, default_ship_mode")
       .in("id", ids)
       .then(({ data }) => setPricing(new Map((data || []).map((p: any) => [p.id, p]))));
-    supabase.rpc("current_trade_discount_pct" as any).then(({ data }) => setDiscountPct(Number(data) || 0));
+    supabase.rpc("current_trade_discount_pct" as any).then(({ data }) => setDiscountPct(toDiscountFraction(data)));
   }, [productIds]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: b } = await supabase.from("client_boards").select("project_id").eq("id", boardId).maybeSingle();
+      const pid = (b as any)?.project_id;
+      if (!pid) return setMultiplier(1);
+      const { data: p } = await supabase.from("projects").select("trade_multiplier").eq("id", pid).maybeSingle();
+      setMultiplier(normalizeMultiplier((p as any)?.trade_multiplier));
+    })();
+  }, [boardId]);
 
   const loadCollab = useCallback(async () => {
     const [{ data: inv }, { data: fb }] = await Promise.all([
@@ -184,7 +195,8 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
               </thead>
               <tbody>
                 {rows.map((r) => {
-                  const trade = r.msrp_cents ? Math.round(r.msrp_cents * (1 - discountPct / 100)) : null;
+                  const trade = tradePriceCents(r.msrp_cents, discountPct);
+                  const client = clientPriceCents(trade, multiplier);
                   const fb = fbFor(r.id);
                   const hearts = fb.filter((f) => f.reaction === "heart").length;
                   const ups = fb.filter((f) => f.reaction === "up").length;
@@ -196,8 +208,8 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                       <td className="truncate px-2 text-foreground" title={r.product_name}>{r.product_name}{finishOverrides[r.id] && <span className="flex items-center gap-1.5"><FinishChips fo={finishOverrides[r.id]} size="h-5 w-5" /><span className="truncate text-[10px] text-muted-foreground">{finishOverrides[r.id].label}</span></span>}</td>
                       <td className="truncate px-2 text-muted-foreground" title={r.brand_name ?? ""}>{r.brand_name ?? "—"}</td>
                       <td className="px-2 text-right tabular-nums">{formatMoneyIn(trade, r.currency, "On request")}</td>
-                      <td className="px-2 text-right tabular-nums">{r.msrp_cents ? `${discountPct}%` : "—"}</td>
-                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(r.msrp_cents, r.currency, "On request")}</td>
+                      <td className="px-2 text-right tabular-nums">{r.msrp_cents ? discountPercentLabel(discountPct) : "—"}</td>
+                      <td className="px-2 text-right tabular-nums">{formatMoneyIn(client, r.currency, "On request")}</td>
                       <td className="truncate px-2">{r.lead_time ?? "—"}</td>
                       <td className="truncate px-2 capitalize">{r.ship_mode ?? "—"}</td>
                       <td className="px-2">
