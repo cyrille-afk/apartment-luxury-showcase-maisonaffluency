@@ -175,7 +175,7 @@ export default function TradeConcierge() {
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Past curations</p>
               <Button asChild variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
-                <Link to="/trade/concierge" onClick={() => setWorkspace(null)}><Plus className="h-3.5 w-3.5" /> New</Link>
+                <Link to="/trade/concierge" onClick={() => setWorkspace(null)}><Plus className="h-3.5 w-3.5" /> New Curation</Link>
               </Button>
             </div>
             {!threadsLoaded ? (
