@@ -249,6 +249,7 @@ export function CuratedInventoryGrid({
                         </span>
                       )}
                      </div>
+                      {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
                   ) : (
                     <div className="font-body text-[12px] text-foreground/80">Price upon Request</div>
                   )}

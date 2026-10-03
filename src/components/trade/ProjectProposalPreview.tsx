@@ -171,6 +171,7 @@ export function ProjectProposalPreview({
                         </p>
                       )}
                     </div>
+                     {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
                   </article>
                 );
               })}

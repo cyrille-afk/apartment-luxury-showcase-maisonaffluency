@@ -483,11 +483,11 @@ export default function TradeProjectStudio() {
                               <dt className="text-muted-foreground/60">Spec</dt>
                               <dd className="text-foreground">{item.sku || "—"}</dd>
                              </div>}
-                             <div data-trade-sensitive={!isClientMode ? "" : undefined} className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                              <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                               <dt className="text-muted-foreground/60">Lead</dt>
                               <dd className="text-foreground">{leadLabel(item)}</dd>
                             </div>
-                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                             <div data-trade-sensitive={!isClientMode ? "" : undefined} className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                                <dt className="text-muted-foreground/60">{isClientMode ? "Client Price" : "Trade"}</dt>
                               <dd className="tracking-[0.05em] text-foreground">
                                 {isClientMode ? (
@@ -504,6 +504,7 @@ export default function TradeProjectStudio() {
                                 )}
                               </dd>
                             </div>
+                             {!isClientMode && <div data-client-placeholder aria-hidden="true" className="h-3 w-24 animate-pulse bg-muted/60" />}
                           </dl>
                           <button
                             type="button"
