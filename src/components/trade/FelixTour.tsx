@@ -21,6 +21,13 @@ type FelixStep = {
   /** Clicking the highlighted element finishes the tour. */
   clickFinishes?: boolean;
   cta?: string;
+  /**
+   * Strict wait-for-element (shepherd-style): the step never shows until the
+   * target is mounted, connected, visible and laid out — used for shifting
+   * sidebar nav nodes. Grants a longer grace period before the centered
+   * fallback instead of dropping the spotlight early.
+   */
+  waitForTarget?: boolean;
 };
 
 const switchOn = (sel: string) =>
