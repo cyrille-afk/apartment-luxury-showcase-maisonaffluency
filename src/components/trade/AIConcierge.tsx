@@ -1751,6 +1751,8 @@ export function AIConcierge({
         saveChainRef.current = new Promise<void>((r) => { release = r; });
         await prevSave;
         try {
+        // A queued save from before a fork/thread switch must not write again.
+        if (hydratedThreadRef.current !== activeThreadId) return;
         // Optimistic concurrency: only write if nobody (e.g. another tab on the
         // same project) changed the row since we last read/wrote it.
         let q = supabase
