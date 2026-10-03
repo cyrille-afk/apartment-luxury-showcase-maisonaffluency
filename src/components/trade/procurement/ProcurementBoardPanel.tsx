@@ -164,7 +164,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
       {/* Master toggle + collaborators */}
       <div className="flex flex-col gap-4 border-b border-border/60 px-5 py-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3" data-felix-target="client-view-toggle">
-          <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${!clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Studio Internal Matrix</span>
+           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${!clientSafe ? "text-foreground" : "text-muted-foreground"}`}>{clientSafe ? "Studio View" : "Studio Internal Matrix"}</span>
           <Switch checked={clientSafe} onCheckedChange={setClientSafe} aria-label="Toggle client editorial presentation" />
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Client Editorial Presentation</span>
         </div>

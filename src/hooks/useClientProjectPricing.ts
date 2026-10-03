@@ -23,7 +23,7 @@ export function useClientProjectPricing() {
     let active = true;
     setOverride(null);
     if (projectId) {
-      supabase.from("projects").select("trade_multiplier").eq("id", projectId).eq("studio_id", currentStudio?.id || "00000000-0000-0000-0000-000000000000").maybeSingle()
+      supabase.from("projects").select("trade_multiplier").eq("id", projectId).maybeSingle()
         .then(({ data }) => { if (active) setOverride(data?.trade_multiplier ?? null); });
     }
     return () => { active = false; };

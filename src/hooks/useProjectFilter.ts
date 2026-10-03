@@ -25,6 +25,7 @@ export function useProjectFilter() {
     setRestored(true);
     if (projectFilter) {
       try { sessionStorage.setItem(STORAGE_KEY, projectFilter); } catch {}
+      window.dispatchEvent(new Event("trade:project-filter-change"));
       return;
     }
     let stored: string | null = null;
@@ -44,6 +45,7 @@ export function useProjectFilter() {
       if (projectFilter) sessionStorage.setItem(STORAGE_KEY, projectFilter);
       else sessionStorage.removeItem(STORAGE_KEY);
     } catch {}
+    window.dispatchEvent(new Event("trade:project-filter-change"));
   }, [projectFilter, restored]);
 
   const setProjectFilter = (id: string | null) => {
@@ -80,6 +82,7 @@ export function useProjectFilter() {
     next.delete("designer");
     setSearchParams(next);
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    window.dispatchEvent(new Event("trade:project-filter-change"));
   };
 
   return {
