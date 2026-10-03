@@ -1865,8 +1865,8 @@ const TradeProductPage: React.FC = () => {
              {showTradePrice ? "Net Trade Price" : "Client Price"}
           </span>
         </p>
-        {showTradePrice && retailLabel && (
-          <p className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
+         {showTradePrice && retailLabel && (
+           <p data-trade-sensitive className="mt-1 font-body text-[11px] tracking-[0.04em] text-muted-foreground">
             <span className="line-through decoration-muted-foreground/50">Retail: {retailLabel}</span>
           </p>
         )}
@@ -2507,8 +2507,8 @@ const TradeProductPage: React.FC = () => {
 
                 {priceLabels && (
                   <div className="flex flex-col gap-1">
-                    {showTradePrice && priceLabels.retailLabel && (
-                      <p className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
+                     {showTradePrice && priceLabels.retailLabel && (
+                       <p data-trade-sensitive className="font-body text-[11px] tracking-[0.04em] text-muted-foreground line-through decoration-muted-foreground/50">
                         Retail: {priceLabels.prefix}{priceLabels.retailLabel}
                       </p>
                     )}

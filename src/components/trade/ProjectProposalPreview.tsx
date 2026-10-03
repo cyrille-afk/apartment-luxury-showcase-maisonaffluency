@@ -165,8 +165,8 @@ export function ProjectProposalPreview({
                       <p className="mt-1 font-body text-[11px] tracking-[0.05em] text-card-foreground">
                          {isClientMode ? (money(client) || "Price upon Request") : (money(trade) || "Price upon Request")}
                       </p>
-                      {!isClientMode && retail > 0 && (
-                        <p className="mt-1 font-body text-[9px] tracking-[0.05em] text-muted-foreground line-through">
+                       {!isClientMode && retail > 0 && (
+                         <p data-trade-sensitive className="mt-1 font-body text-[9px] tracking-[0.05em] text-muted-foreground line-through">
                           {money(retail)}
                         </p>
                       )}

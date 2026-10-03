@@ -243,8 +243,8 @@ export function CuratedInventoryGrid({
                           item.currency || "EUR",
                         )}
                       </span>
-                      {showTradePrice && (
-                        <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-focus-within:text-muted-foreground/70">
+                       {showTradePrice && (
+                         <span data-trade-sensitive className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-focus-within:text-muted-foreground/70">
                           {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
                         </span>
                       )}

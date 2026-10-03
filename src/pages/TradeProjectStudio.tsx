@@ -388,8 +388,8 @@ export default function TradeProjectStudio() {
                   Project status: <span className="text-foreground">Active Development</span>
                 </p>
               </div>
-            ) : (
-              <div className="mt-6">
+             ) : (
+               <div data-trade-sensitive className="mt-6">
                 <div className="flex items-baseline justify-between font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                   <span>Budget allocated</span>
                   <span className="text-foreground">
@@ -463,8 +463,8 @@ export default function TradeProjectStudio() {
                                 ? money(trade)
                                 : "Price upon Request"}
                           </span>
-                          {!isClientMode && msrp > 0 && (
-                            <span className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
+                           {!isClientMode && msrp > 0 && (
+                             <span data-trade-sensitive className="mt-0.5 block font-body text-[10px] tracking-[0.05em] text-muted-foreground/60 line-through">
                               {money(msrp)}
                             </span>
                           )}
@@ -477,7 +477,7 @@ export default function TradeProjectStudio() {
                       {expanded && (
                         <div className="pb-9">
                           <dl className="space-y-3">
-                             {!isClientMode && <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                              {!isClientMode && <div data-trade-sensitive className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                               <dt className="text-muted-foreground/60">Spec</dt>
                               <dd className="text-foreground">{item.sku || "—"}</dd>
                              </div>}
