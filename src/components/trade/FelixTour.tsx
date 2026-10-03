@@ -151,7 +151,9 @@ const renderBold = (text: string) =>
 const SEEN_KEY = "felix_dashboard_tour_seen_v1";
 const BOARD_PATH = /^\/trade\/boards\/[0-9a-f-]{36}/i;
 const PAD = 10;
-const SPOTLIGHT_EASE = "all 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
+// Tracking must not ease behind a scrolling or collapsing target. Fade only
+// the spotlight in/out; its geometry follows the measured node each frame.
+const SPOTLIGHT_EASE = "opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
 
 type Rect = { top: number; left: number; width: number; height: number };
 const sameRect = (a: Rect, b: Rect) =>
@@ -225,7 +227,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let watched: Element[] = [];
     const startedAt = performance.now();
     const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
-    const onChange = () => { stableSince = 0; };
+    const onChange = () => {
+      stableSince = 0;
+      // A viewport change can alter the tooltip's available space even when
+      // the target itself retains exactly the same bounding rectangle.
+      setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
+        ? previous : { w: window.innerWidth, h: window.innerHeight });
+    };
     const tick = (now: number) => {
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${current.target}"]`))
@@ -245,6 +253,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         watched = watchedNow;
         stableSince = 0;
       }
+      // Sample every frame while open: scroll containers and the sidebar's
+      // width transition can move a target without resizing that target.
       // Only measure nodes that are actually mounted and laid out.
       const live = elements.filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed"));
       const boxes = live.map((el) => el.getBoundingClientRect());
@@ -431,7 +441,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         role="dialog"
         aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-300 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
