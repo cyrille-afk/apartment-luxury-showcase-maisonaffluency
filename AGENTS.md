@@ -29,3 +29,4 @@
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns are persisted only by `curatorial-guide-stream` after an ownership check — accuracy first, no client-forged history.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false — keeps each project's curation separate.
+- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements, including exit animations and portalled drawers, so route remounts cannot briefly reveal internal figures; it is not an authorization boundary.
