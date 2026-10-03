@@ -212,6 +212,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
+    let didEditorialScroll = false;
     let watched: Element[] = [];
     let observedTarget: Element | null = null;
     let revealFrame = 0;
@@ -246,9 +247,25 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         didEnter = true;
         current.onEnter?.();
       }
-      if (elements.length && !didScroll) {
-        didScroll = true;
-        elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      if (elements.length && (!didScroll || (current.id === "client-view" && !didEditorialScroll))) {
+        const target = elements[0].getBoundingClientRect();
+        const canvas = current.id === "client-view"
+          ? elements[0].closest("section")?.querySelector("article .aspect-\\[4\\/5\\]")?.getBoundingClientRect()
+          : null;
+        if (!didScroll || canvas) {
+          didScroll = true;
+          if (canvas) didEditorialScroll = true;
+          if (current.id === "client-view") {
+            // Frame the switch and the upper half of the first product together.
+            // Before Client View is enabled the image is not mounted yet; revisit
+            // once it appears without repeating the scroll on every frame.
+            const bottom = canvas ? canvas.top + canvas.height / 2 : target.bottom + window.innerHeight * 0.38;
+            const middle = (target.top + bottom) / 2;
+            window.scrollBy({ top: middle - window.innerHeight / 2, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+          } else {
+            elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+          }
+        }
       }
       const watchedNow = [...elements, ...elements.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
@@ -390,7 +407,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(380, viewport.w - 32);
-  const cardH = 320;
+  const cardH = Math.min(320, Math.max(0, viewport.h - 32));
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -400,7 +417,26 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
     const rightX = rect.left + rect.width + PAD + 8;
     const leftX = rect.left - PAD - 8 - cardW;
-    if (rightX + cardW <= viewport.w - 16) {
+    if (step.id === "client-view") {
+      // Step 8 must never sit below the switch over the product photograph.
+      // Prefer the free space above; on short screens use the right-hand side,
+      // beyond the first product canvas when it is visible.
+      const canvas = document.querySelector('[data-felix-target="client-view-toggle"]')
+        ?.closest("section")?.querySelector("article .aspect-\\[4\\/5\\]")?.getBoundingClientRect();
+      const clearRight = Math.max(rightX, canvas ? canvas.right + PAD + 8 : rightX);
+      if (rect.top - PAD - 8 >= cardH + 16) {
+        cardLeft = centerX;
+        cardTop = rect.top - cardH - PAD - 8;
+      } else if (clearRight + cardW <= viewport.w - 16) {
+        cardLeft = clearRight;
+        cardTop = clampY(Math.min(centerY, rect.top - cardH - PAD - 8));
+      } else {
+        // Constrained viewport: keep it at the very top rather than dropping
+        // below the toggle. The card itself scrolls if its content is taller.
+        cardLeft = clampX(viewport.w - cardW - 16);
+        cardTop = 16;
+      }
+    } else if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
       cardTop = centerY;
     } else if (leftX >= 16) {
@@ -449,7 +485,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         role="dialog"
         aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
+          "fixed z-[132] max-h-[calc(100dvh-32px)] overflow-y-auto overscroll-contain print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
