@@ -769,6 +769,9 @@ export function AIConcierge({
   /** Embedded only: open a brand-new thread instead of restoring the last one. */
   startFresh?: boolean;
 } = {}) {
+  // Per-tab keys: the embedded workspace namespaces its tab state by project so
+  // it never shares drafts/transcripts with the floating Felix or another project.
+  const ssKey = (k: string) => (embedded ? `${k}:ws:${projectId || "none"}` : k);
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
@@ -823,7 +826,7 @@ export function AIConcierge({
   const briefProjectLocationRef = useRef<string | null>(null);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(() => {
     try {
-      return sessionStorage.getItem(BRIEF_ACTIVE_STORAGE_KEY) === "1" && !!loadBriefDraftText();
+      return sessionStorage.getItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY)) === "1" && !!loadBriefDraftText();
     } catch {
       return false;
     }
@@ -854,8 +857,8 @@ export function AIConcierge({
   }, [open, cancelBriefTransition]);
   useEffect(() => {
     try {
-      if (briefBuilderOpen) sessionStorage.setItem(BRIEF_ACTIVE_STORAGE_KEY, "1");
-      else sessionStorage.removeItem(BRIEF_ACTIVE_STORAGE_KEY);
+      if (briefBuilderOpen) sessionStorage.setItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY), "1");
+      else sessionStorage.removeItem(ssKey(BRIEF_ACTIVE_STORAGE_KEY));
     } catch {}
   }, [briefBuilderOpen]);
   const openBriefBuilder = useCallback((draft?: string) => {
@@ -898,11 +901,11 @@ export function AIConcierge({
   // thread you actually opened — which both hid the selected history and
   // overwrote its row on the next save.
   const cachedTimelineThreadId = (() => {
-    try { return sessionStorage.getItem("concierge:timelineThread"); } catch { return null; }
+    try { return sessionStorage.getItem(ssKey("concierge:timelineThread")); } catch { return null; }
   })();
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
-      const raw = sessionStorage.getItem("concierge:timeline");
+      const raw = sessionStorage.getItem(ssKey("concierge:timeline"));
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) return stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(parsed as TimelineItem[]));
@@ -917,8 +920,8 @@ export function AIConcierge({
   const stampTimelineThread = useCallback((id: string | null) => {
     timelineThreadRef.current = id;
     try {
-      if (id) sessionStorage.setItem("concierge:timelineThread", id);
-      else sessionStorage.removeItem("concierge:timelineThread");
+      if (id) sessionStorage.setItem(ssKey("concierge:timelineThread"), id);
+      else sessionStorage.removeItem(ssKey("concierge:timelineThread"));
     } catch {}
   }, []);
 
@@ -948,9 +951,9 @@ export function AIConcierge({
 
   const [input, setInput] = useState<string>(() => {
     try {
-      const saved = sessionStorage.getItem("concierge:draft") || "";
+      const saved = sessionStorage.getItem(ssKey("concierge:draft")) || "";
       if (isStructuredBriefText(saved)) {
-        sessionStorage.removeItem("concierge:draft");
+        sessionStorage.removeItem(ssKey("concierge:draft"));
         return "";
       }
       return saved;
@@ -958,8 +961,8 @@ export function AIConcierge({
   });
   useEffect(() => {
     try {
-      if (input) sessionStorage.setItem("concierge:draft", input);
-      else sessionStorage.removeItem("concierge:draft");
+      if (input) sessionStorage.setItem(ssKey("concierge:draft"), input);
+      else sessionStorage.removeItem(ssKey("concierge:draft"));
     } catch {}
   }, [input]);
   const [streaming, setStreaming] = useState(false);
@@ -1508,14 +1511,14 @@ export function AIConcierge({
       // pdf previews would be heavier), then as a last resort drop all.
       const payload = JSON.stringify(timeline);
       try {
-        sessionStorage.setItem("concierge:timeline", payload);
+        sessionStorage.setItem(ssKey("concierge:timeline"), payload);
       } catch {
         const stripped = timeline.map((t) =>
           t.kind === "msg" && t.attachments?.length
             ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
             : t,
         );
-        sessionStorage.setItem("concierge:timeline", JSON.stringify(stripped));
+        sessionStorage.setItem(ssKey("concierge:timeline"), JSON.stringify(stripped));
       }
     } catch {}
   }, [timeline]);
