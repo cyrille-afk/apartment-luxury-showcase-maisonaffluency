@@ -727,7 +727,7 @@ const ShowroomGridView = ({
              title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing client price"}
           >
             <Tag className="h-3.5 w-3.5" />
-            {showTradePrice ? "Retail" : "Trade"}
+            {showTradePrice ? "Client View" : "Trade View"}
           </button>
         </div>
       </div>

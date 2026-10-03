@@ -1879,8 +1879,8 @@ const TradeProductPage: React.FC = () => {
             {selectedFabric && (
               <>
                 {selectedWoodPrice ? "Fabric: " : "Includes "}{selectedFabric.name}
-                {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
-                {upcharge > 0 && (
+               {showTradePrice && selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
+               {showTradePrice && upcharge > 0 && (
                   <>
                     {" — "}
                     {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
@@ -2119,7 +2119,7 @@ const TradeProductPage: React.FC = () => {
           <div className="relative flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
-                {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
+                {showTradePrice && (() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                 <Link
                   to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
                   onClick={() => {
@@ -2127,12 +2127,12 @@ const TradeProductPage: React.FC = () => {
                   }}
                   className="font-body text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
-                  {designerDisplay}
+                   {showTradePrice ? designerDisplay : "Curated Collection"}
                 </Link>
                 <div className="flex items-baseline justify-between gap-4 mt-1">
                   <h1 className="font-display text-[1.5rem] md:text-[1.85rem] leading-tight">
                     {product.title}
-                    {formatProductSubtitleLine(product.title, product.subtitle) && (
+                    {showTradePrice && formatProductSubtitleLine(product.title, product.subtitle) && (
                       <span className="block mt-1 text-[0.8em] text-muted-foreground">
                         {formatProductSubtitleLine(product.title, product.subtitle)}
                       </span>
@@ -3052,7 +3052,7 @@ const TradeProductPage: React.FC = () => {
         </div>
 
         {/* From the Same Maker — related picks */}
-        {relatedPicks.length > 0 && (() => {
+        {showTradePrice && relatedPicks.length > 0 && (() => {
           const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
             ? "From the Same Maker"
             : "From the Same Designer";
