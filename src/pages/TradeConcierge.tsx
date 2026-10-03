@@ -248,7 +248,8 @@ export default function TradeConcierge() {
             ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
             ) : (
-              <ul className="space-y-1">
+              <ul className={cn("space-y-1 pr-1",
+                pastItems.length > 4 && "curation-scroll curation-scroll-fade max-h-[224px] overflow-y-auto")}>
                 {pastItems.map((t) => (
                   <li key={t.id} className={cn("group flex items-center rounded-sm border-l-2 transition-colors",
                     (t.kind === "curation" ? t.id === threadId : !!workspace && t.id === activeWsThread)
