@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { sendLovableEmail } from "../_shared/lovableEmail.ts";
 import { buildOrderDeliveryMessage } from "../_shared/orderDeliveryMessaging.ts";
@@ -110,7 +111,15 @@ serve(async (req) => {
     const subtotalCents = verified.subtotalCents;
     const { pct: accountPct } = await resolveAccountDiscount(admin, userId);
     const discountCents = Math.min(int(body?.discountCents), Math.round(subtotalCents * accountPct));
-    const shippingCents = int(body?.shippingCents);
+    const requestedShipping = int(body?.shippingCents);
+    const shipRes = await resolveConfirmedShipping(admin, {
+      confirmed: requestedShipping > 0,
+      quoteRef: body?.shippingQuoteRef ?? body?.shippingLabel,
+      currency,
+      userId,
+    });
+    if (!shipRes.ok) return json({ error: shipRes.error }, 400);
+    const shippingCents = shipRes.cents;
     applyIossEnv();
     const treatment = resolveTaxTreatment({
       country: shippingCountry,

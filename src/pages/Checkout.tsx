@@ -1267,6 +1267,7 @@ function PurchaseOrderForm({
           discountCents: summary.discountCents,
           discountLabel: summary.discountLabel,
           shippingCents: summary.deliveryCents,
+          shippingLabel: summary.shippingLabel,
           incoterm: summary.incoterm,
           importDutyCents: summary.importDutyCents,
           importVatCents: summary.importVatCents,
