@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, Clock, FileText, ImagePlus, Plus, Square, Trash2 } from "lucide-react";
+import { ArrowUp, ChevronDown, Clock, FileText, ImagePlus, Plus, Search, Square, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,35 @@ function greeting() {
 /** One workspace session = one embedded Felix mount, keyed by this id. */
 interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string; fresh: boolean }
 interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace" }
+interface PreviewPick { title: string; finish?: string | null; qty?: number | null }
+interface PreviewData { turns: { role: "user" | "assistant"; text: string }[]; picks: PreviewPick[] }
+
+/** Distil a workspace timeline into the turns and saved picks a compact preview needs. */
+function extractWorkspacePreview(timeline: unknown): PreviewData {
+  const out: PreviewData = { turns: [], picks: [] };
+  const seen = new Set<string>();
+  for (const raw of Array.isArray(timeline) ? timeline : []) {
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as Record<string, any>;
+    if (item.kind === "msg" && typeof item.content === "string" && item.content && out.turns.length < 8) {
+      out.turns.push({ role: item.role === "assistant" ? "assistant" : "user", text: item.content.slice(0, 280) });
+    }
+    const prop = item.proposal as Record<string, any> | undefined;
+    if (!prop || item.resolved === "discarded") continue;
+    for (const p of Array.isArray(prop.preview) ? prop.preview : []) {
+      const title = String(p?.title ?? "").slice(0, 90);
+      if (!title) continue;
+      const pick: PreviewPick = {
+        title,
+        finish: p.materials ? String(p.materials).slice(0, 60) : (p.variant ?? null),
+        qty: typeof p?.qty === "number" ? p.qty : null,
+      };
+      const key = `${pick.title}|${pick.finish ?? ""}`;
+      if (!seen.has(key)) { seen.add(key); out.picks.push(pick); }
+    }
+  }
+  return out;
+}
 
 export default function TradeConcierge() {
   const { threadId } = useParams<{ threadId?: string }>();
@@ -49,6 +78,10 @@ export default function TradeConcierge() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
+  const buildingRef = useRef<Set<string>>(new Set());
 
   // Bind the concierge contextually to the project chosen in the header switcher.
   const { projectFilter } = useProjectFilter();
@@ -86,6 +119,47 @@ export default function TradeConcierge() {
     ...wsThreads.map((t) => ({ ...t, kind: "workspace" as const })),
     ...threads.map((t) => ({ ...t, kind: "curation" as const })),
   ].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+
+  // Lazily index each past curation (turns + saved picks) for the search field and preview.
+  useEffect(() => {
+    if (!user || !threadsLoaded) return;
+    const missing = pastItems.filter((t) => !previews[t.id] && !buildingRef.current.has(t.id));
+    if (!missing.length) return;
+    missing.forEach((t) => buildingRef.current.add(t.id));
+    const cIds = missing.filter((t) => t.kind === "curation").map((t) => t.id);
+    const wIds = missing.filter((t) => t.kind === "workspace").map((t) => t.id);
+    void (async () => {
+      const built: Record<string, PreviewData> = {};
+      if (cIds.length) {
+        const { data } = await supabase.from("curation_messages").select("thread_id, role, content")
+          .in("thread_id", cIds).order("created_at", { ascending: true });
+        const turns: Record<string, PreviewData["turns"]> = {};
+        for (const r of data ?? []) {
+          if (!r.content) continue;
+          (turns[r.thread_id] ??= []).push({
+            role: r.role === "assistant" ? "assistant" : "user",
+            text: String(r.content).slice(0, 280),
+          });
+        }
+        for (const id of cIds) built[id] = { turns: (turns[id] ?? []).slice(0, 8), picks: [] };
+      }
+      if (wIds.length) {
+        const { data } = await supabase.from("concierge_threads").select("id, timeline").in("id", wIds);
+        for (const row of data ?? []) built[row.id] = extractWorkspacePreview((row as Record<string, unknown>).timeline);
+      }
+      setPreviews((p) => ({ ...p, ...built }));
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, threadsLoaded, threads, wsThreads]);
+
+  const query = search.trim().toLowerCase();
+  const filteredItems = query
+    ? pastItems.filter((t) => {
+        const p = previews[t.id];
+        const haystack = `${t.title} ${p ? [...p.picks.map((x) => x.title), ...p.turns.map((x) => x.text)].join(" ") : ""}`.toLowerCase();
+        return haystack.includes(query);
+      })
+    : pastItems;
 
   // Restore the selected project's open workspace on mount / project switch.
   useEffect(() => {
@@ -244,37 +318,113 @@ export default function TradeConcierge() {
                 <Link to="/trade/concierge" onClick={newCuration}><Plus className="h-3.5 w-3.5" /> New Curation</Link>
               </Button>
             </div>
+            {threadsLoaded && pastItems.length > 0 && (
+              <div className="relative mb-3">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by name or product…"
+                  className="h-8 w-full rounded-sm border border-border bg-background pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                />
+                {search && (
+                  <button type="button" aria-label="Clear search" onClick={() => setSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground">
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            )}
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
             ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
+            ) : filteredItems.length === 0 ? (
+              <p className="font-display text-sm italic text-muted-foreground">No curations match “{search.trim()}”.</p>
             ) : (
               <ul
                 onScroll={(e) => {
+                  if (e.target !== e.currentTarget) return; // ignore scrolls inside an expanded preview
                   const el = e.currentTarget;
                   setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
                 }}
                 className={cn("space-y-1 pr-1",
-                  pastItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
-                  pastItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
-                {pastItems.map((t) => (
-                  <li key={t.id} className={cn("group flex items-center rounded-sm border-l-2 transition-colors",
-                    (t.kind === "curation" ? t.id === threadId : !!workspace && t.id === activeWsThread)
-                      ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
-                    <Link to={t.kind === "curation" ? `/trade/concierge/${t.id}` : "/trade/concierge"}
-                      onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id) : undefined}
-                      className="min-w-0 flex-1 px-3 py-2">
-                      <span className="block truncate text-sm text-foreground">{t.title}</span>
-                      <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                        {new Date(t.updated_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                      </span>
-                    </Link>
-                    <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id, t.kind)}
-                      className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </li>
-                ))}
+                  filteredItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
+                  filteredItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
+                {filteredItems.map((t) => {
+                  const preview = previews[t.id];
+                  const expanded = expandedId === t.id;
+                  return (
+                    <li key={t.id} className={cn("group rounded-sm border-l-2 transition-colors",
+                      (t.kind === "curation" ? t.id === threadId : !!workspace && t.id === activeWsThread)
+                        ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
+                      <div className="flex items-center">
+                        <Link to={t.kind === "curation" ? `/trade/concierge/${t.id}` : "/trade/concierge"}
+                          onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id) : undefined}
+                          className="min-w-0 flex-1 px-3 py-2">
+                          <span className="block truncate text-sm text-foreground">{t.title}</span>
+                          <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                            {new Date(t.updated_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                          </span>
+                        </Link>
+                        <button type="button" aria-label={`${expanded ? "Hide" : "Preview"} ${t.title}`} aria-expanded={expanded}
+                          onClick={() => setExpandedId(expanded ? null : t.id)}
+                          className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors group-hover:opacity-100 focus:opacity-100 hover:text-foreground">
+                          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
+                        </button>
+                        <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id, t.kind)}
+                          className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {expanded && (
+                        <div className="curation-scroll max-h-[260px] overflow-y-auto border-t border-border/40 px-3 py-2.5">
+                          {!preview ? (
+                            <div className="h-14 animate-pulse rounded-sm bg-foreground/[0.05]" />
+                          ) : (
+                            <div className="space-y-2.5">
+                              <div>
+                                <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Saved products</p>
+                                {preview.picks.length === 0 ? (
+                                  <p className="font-display text-xs italic text-muted-foreground">No saved products.</p>
+                                ) : (
+                                  <ul className="space-y-0.5">
+                                    {preview.picks.slice(0, 8).map((p, i) => (
+                                      <li key={i} className="truncate text-xs text-foreground">
+                                        {p.title}
+                                        {p.finish ? <span className="text-muted-foreground"> · {p.finish}</span> : null}
+                                        {p.qty && p.qty > 1 ? <span className="text-muted-foreground"> ×{p.qty}</span> : null}
+                                      </li>
+                                    ))}
+                                    {preview.picks.length > 8 && (
+                                      <li className="text-[10px] text-muted-foreground">+{preview.picks.length - 8} more</li>
+                                    )}
+                                  </ul>
+                                )}
+                              </div>
+                              {preview.turns.length > 0 && (
+                                <div>
+                                  <p className="mb-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Conversation</p>
+                                  <ul className="space-y-1.5">
+                                    {preview.turns.map((turn, i) => (
+                                      <li key={i} className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                                        <span className={cn("mr-1.5 text-[9px] uppercase tracking-[0.14em]",
+                                          turn.role === "user" ? "text-foreground" : "text-accent")}>
+                                          {turn.role === "user" ? "You" : "Felix"}
+                                        </span>
+                                        {turn.text}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
