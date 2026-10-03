@@ -205,7 +205,7 @@ export default function TradeConcierge() {
         </aside>
 
         {/* Right — unified workspace: entry hero → Felix workspace, or a saved curation thread */}
-        <section className="flex h-[calc(100dvh-8rem)] min-h-[520px] flex-col overflow-hidden rounded-sm border border-border/60 bg-background">
+        <section className="relative flex h-[calc(100dvh-8rem)] min-h-[520px] flex-col overflow-hidden rounded-sm border border-border/60 bg-background">
           {workspace && !threadId ? (
             <Suspense fallback={
               <div className="flex h-full items-center justify-center">
