@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add automated Client View checks for markup math, document masking, generic attribution, and exported PDF text; run in the existing unit-test CI job.
+
 - [ ] Add studio branding profile, persistent Client View masking and project markup, and white-label client specification export.
 - [x] Prevent marked trade-only content flashing during Client View navigation, loading, and animated transitions; verify rapid switching and reload on the board and project studio.
 
