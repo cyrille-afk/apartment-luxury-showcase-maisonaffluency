@@ -33,7 +33,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "greeting",
     route: "/trade",
     dialogue:
-      "Welcome! I am {name}, your AI Curatorial Guide. Your Silver Tier benefits are pre-applied across the entire platform. Let's look at how you'll manage your workflow.",
+      "Welcome! I am {name}, your dedicated Curatorial Assistant. I have pre-applied your Silver Tier privileges across the entire studio portfolio. Let's look at how we will manage your workspace together.",
   },
   {
     id: "collection",
@@ -57,7 +57,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tools-grid",
     route: "/trade/tools",
     dialogue:
-      "Welcome to your studio utility deck. Here you can utilize our Curation widgets, search Materials Libraries, create Moodboards, run a Product Comparator, or request physical fabric samples.",
+      "Welcome to your studio utility deck. Here you can utilize our tailored sourcing tools, search Materials Libraries, create presentation moodboards, or request physical fabric samples.",
   },
   {
     id: "settings",
@@ -77,11 +77,11 @@ const FELIX_STEPS: FelixStep[] = [
   },
   {
     id: "felix-chat",
-    title: "Dynamic Design Assistance",
-    target: "felix-chat",
-    route: "/trade",
+    title: "Your Personal Concierge",
+    target: "nav-concierge",
+    route: "/trade/concierge",
     dialogue:
-      "Whenever you need real-time design assistance, look up here. Launch the {name} Chat at any time to co-curate collections, source hard-to-find items, or build out an entire project layout alongside me. Let's create something iconic!",
+      "Whenever you need bespoke project curation or styling advice, look to the sidebar. Open the Trade Concierge to brief me, co-curate custom schemes, or source rare artisan pieces alongside me.",
   },
   {
     id: "client-view",
@@ -90,7 +90,7 @@ const FELIX_STEPS: FelixStep[] = [
     route: "board",
     done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
     dialogue:
-      "Incredible sourcing begins with smart AI curation, but enterprise victory lies in client presentation. Let's look at how you will pitch this board to your high-net-worth clients. Click **Client View** to hide internal trade calculations.",
+      "Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Let's look at how we tailor this board for your high-net-worth presentations. Click **Client View** to hide internal trade calculations.",
   },
   {
     id: "branding-panel",

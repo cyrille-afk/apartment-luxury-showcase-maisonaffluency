@@ -143,9 +143,11 @@ export function TradeSidebar() {
                             ? "nav-quotes"
                             : item.url === "/trade/tools"
                               ? "nav-tools"
-                              : item.url === "/trade/settings"
-                                ? "nav-settings"
-                                : undefined
+                            : item.url === "/trade/settings"
+                                 ? "nav-settings"
+                                 : item.url === "/trade/concierge"
+                                   ? "nav-concierge"
+                                   : undefined
                       }
                       className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                       activeClassName="text-foreground font-medium border-foreground"
