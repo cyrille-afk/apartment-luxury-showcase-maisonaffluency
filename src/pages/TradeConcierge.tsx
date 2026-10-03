@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, ChevronDown, Clock, FileText, ImagePlus, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { ArrowUp, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { renderCurationPdf } from "@/lib/curationExport";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -82,6 +83,24 @@ export default function TradeConcierge() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const exportCuration = async (t: PastItem) => {
+    if (exportingId) return;
+    setExportingId(t.id);
+    try {
+      const preview = previews[t.id] ?? { turns: [], picks: [] };
+      await renderCurationPdf({
+        title: t.title,
+        updatedAt: t.updated_at,
+        projectName: t.project_id ? projects.find((p) => p.id === t.project_id)?.name ?? null : null,
+        picks: preview.picks,
+        turns: preview.turns,
+      });
+    } finally {
+      setExportingId(null);
+    }
+  };
   const buildingRef = useRef<Set<string>>(new Set());
   const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
   const [designerSel, setDesignerSel] = useState("all");
@@ -469,6 +488,11 @@ export default function TradeConcierge() {
                           onClick={() => setExpandedId(expanded ? null : t.id)}
                           className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors group-hover:opacity-100 focus:opacity-100 hover:text-foreground">
                           <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
+                        </button>
+                        <button type="button" aria-label={`Export ${t.title} as PDF`} disabled={exportingId === t.id}
+                          onClick={() => void exportCuration(t)}
+                          className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors group-hover:opacity-100 focus:opacity-100 hover:text-foreground disabled:opacity-60">
+                          {exportingId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                         </button>
                         <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id, t.kind)}
                           className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100">
