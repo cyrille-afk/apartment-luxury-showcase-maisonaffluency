@@ -38,6 +38,6 @@ describe("client proposal and print sheet", () => {
     const sheet = container.querySelector(".proposal-print-sheet");
     expect(sheet?.textContent).toContain("Price upon Request");
     expect(sheet?.textContent).not.toMatch(/\$0|SECRET SUPPLIER|FACTORY-SECRET-49/);
-    expect(container.querySelector(".font-serif.uppercase.tracking-widest")?.textContent).toBe("ATELIER DELVAL");
+    expect(container.querySelector(".font-serif.uppercase.tracking-widest")?.textContent).toBe("Atelier Delval");
   });
 });

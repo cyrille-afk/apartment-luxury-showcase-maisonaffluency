@@ -185,7 +185,9 @@ export function ProjectProposalPreview({
                 {isClientMode ? "Total Estimate" : "Total Trade"}
               </p>
               <p className="font-display text-2xl text-card-foreground">
-                 {money(isClientMode ? clientTotal : tradeTotal)}
+                  {items.some((item) => item.rrp_cents != null && item.rrp_cents > 0)
+                    ? money(isClientMode ? clientTotal : tradeTotal)
+                    : "Price upon Request"}
               </p>
             </footer>
              {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-10 h-5 w-32 animate-pulse bg-muted/60" />}
