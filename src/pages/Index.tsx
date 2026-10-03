@@ -256,15 +256,26 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     const revealOnIntent = () => {
       if (window.scrollY > 80) revealBelowFold();
     };
+    // Keyboard, scrollbar drags and pointer clicks must also release the hero
+    // lock — otherwise the page feels frozen when no wheel/touch event arrives
+    // (e.g. inside the embedded preview frame).
+    const SCROLL_KEYS = new Set(["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Space", " ", "End", "Home"]);
+    const revealOnKey = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(e.key) || SCROLL_KEYS.has(e.code)) revealBelowFold();
+    };
     window.addEventListener("ma:reveal-below-fold", revealBelowFold);
     window.addEventListener("scroll", revealOnIntent, { passive: true });
     window.addEventListener("wheel", revealBelowFold, { once: true, passive: true });
     window.addEventListener("touchmove", revealBelowFold, { once: true, passive: true });
+    window.addEventListener("keydown", revealOnKey);
+    window.addEventListener("pointerdown", revealBelowFold, { once: true, passive: true });
     return () => {
       window.removeEventListener("ma:reveal-below-fold", revealBelowFold);
       window.removeEventListener("scroll", revealOnIntent);
       window.removeEventListener("wheel", revealBelowFold);
       window.removeEventListener("touchmove", revealBelowFold);
+      window.removeEventListener("keydown", revealOnKey);
+      window.removeEventListener("pointerdown", revealBelowFold);
     };
   }, [unlockPageScroll]);
 
