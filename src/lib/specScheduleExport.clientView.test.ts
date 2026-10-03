@@ -45,11 +45,13 @@ describe("client-only specification schedule", () => {
     expect(pdfBlob).toBeDefined();
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
     if (!pdfBlob) throw new Error("PDF download did not produce a blob");
+    const bytes = new Uint8Array(await pdfBlob.arrayBuffer());
+    expect(new TextDecoder("latin1").decode(bytes)).not.toMatch(/jspdf|pdf-lib|maison affluency|lovable|supabase/i);
     if (process.env.PDF_QA_PATH) {
       const { writeFile } = await import("node:fs/promises");
-      await writeFile(process.env.PDF_QA_PATH, new Uint8Array(await pdfBlob.arrayBuffer()));
+      await writeFile(process.env.PDF_QA_PATH, bytes);
     }
-    const pdf = await getDocument({ data: new Uint8Array(await pdfBlob.arrayBuffer()), useSystemFonts: true, disableFontFace: true }).promise;
+    const pdf = await getDocument({ data: bytes, useSystemFonts: true, disableFontFace: true }).promise;
     const texts: string[] = [];
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n);
