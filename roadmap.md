@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Unblock Welcome Tour Step 8: stop the second automatic scroll and provide a direct Client View action; verify the tour advances and the board remains usable.
+
 - [x] Correct Living gallery alternatives for Stéphane CG wall art, low stools, and floor lamps; verify in the live preview.
 
 - [x] Publish only Solare Side Table and Griffe Stool / Side Table prices for Amélie Vermersch; list Griffe in both stool and side-table subcategories.
