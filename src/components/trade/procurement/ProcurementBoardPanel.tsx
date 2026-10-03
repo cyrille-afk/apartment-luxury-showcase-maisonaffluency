@@ -184,7 +184,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
 
       <AnimatePresence mode="wait">
         {!clientSafe ? (
-          <motion.div key="matrix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
+           <motion.div key="matrix" data-trade-sensitive initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="overflow-x-auto">
             <table className="w-full table-fixed font-body text-[11px] leading-tight">
               <colgroup>
                 <col className="w-11" /><col className="w-[16%]" /><col className="w-[9%]" /><col className="w-[7%]" /><col className="w-[5%]" /><col className="w-[7%]" /><col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[10%]" /><col />

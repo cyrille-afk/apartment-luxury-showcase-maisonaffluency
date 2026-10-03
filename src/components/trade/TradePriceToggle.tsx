@@ -2,17 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 
-const STORAGE_KEY = "trade:show-trade-price";
-
-/** Module-level subscribers so all toggles + price displays stay in sync. */
-const listeners = new Set<(v: boolean) => void>();
-function readInitial(): boolean {
-  if (typeof window === "undefined") return true;
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  return raw === null ? true : raw === "1";
-}
-let currentValue = readInitial();
-
 /**
  * Hook: returns whether the user has elected to view trade-discounted prices,
  * along with their tier metadata and a setter that broadcasts to all toggles.
@@ -20,28 +9,12 @@ let currentValue = readInitial();
 export function useTradePriceMode() {
   const trade = useTradeDiscount();
   const { clientSafe, setClientSafe } = useClientSafeMode();
-  const [showTradePrice, setLocal] = useState<boolean>(() => !clientSafe && currentValue);
-
-  useEffect(() => {
-    const cb = (v: boolean) => setLocal(v);
-    listeners.add(cb);
-    return () => {
-      listeners.delete(cb);
-    };
-  }, []);
-
-  useEffect(() => {
-    setLocal(!clientSafe);
-    currentValue = !clientSafe;
-  }, [clientSafe]);
+  // A single external-store snapshot is the source of truth. An effect-based
+  // mirror can briefly render the previous trade view after a remount.
+  const showTradePrice = !clientSafe;
 
   const setShowTradePrice = useCallback((v: boolean) => {
-    currentValue = v;
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, v ? "1" : "0");
-    }
     setClientSafe(!v);
-    listeners.forEach((l) => l(v));
   }, [setClientSafe]);
 
   return {
@@ -102,7 +75,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
         }}
         className="inline-flex items-center border border-border rounded-md p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span
+        <span data-trade-sensitive
           className={`px-2 py-1 text-xs font-body rounded transition-colors ${
             !showTradePrice
               ? "bg-primary text-primary-foreground"
@@ -118,7 +91,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
               : "text-muted-foreground"
           }`}
         >
-          {tierLabel} –{discountLabel}
+          {showTradePrice ? `${tierLabel} –${discountLabel}` : "Trade"}
         </span>
       </button>
 
