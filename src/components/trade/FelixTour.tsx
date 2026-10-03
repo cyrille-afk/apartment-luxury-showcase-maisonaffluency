@@ -233,40 +233,39 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         watched = watchedNow;
         stableSince = 0;
       }
-      const boxes = elements.map((el) => el.getBoundingClientRect());
+      // Only measure nodes that are actually mounted and laid out.
+      const live = elements.filter((el) => el.isConnected && (el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed");
+      const boxes = live.map((el) => el.getBoundingClientRect());
       const next = boxes.length ? {
         top: Math.min(...boxes.map((r) => r.top)),
         left: Math.min(...boxes.map((r) => r.left)),
         width: Math.max(...boxes.map((r) => r.right)) - Math.min(...boxes.map((r) => r.left)),
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
-      if (!next || next.width < 1 || next.height < 1) {
-        last = null;
-        stableSince = 0;
-        if (now - startedAt >= 2000) {
-          // Target unavailable (e.g. sidebar hidden on mobile): show the card
-          // centered without a spotlight instead of a dead dark screen.
-          setRect(null);
-          setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
-            ? previous : { w: window.innerWidth, h: window.innerHeight });
+      const commit = (r: Rect | null) => {
+        setRect((previous) => (previous && r && sameRect(previous, r)) || (!previous && !r) ? previous : r);
+        setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
+          ? previous : { w: window.innerWidth, h: window.innerHeight });
+        if (!ready) {
           setStepDone(current.done ? current.done() : true);
           ready = true;
           setSettled(true);
-        } else {
-          ready = false;
-          setSettled(false);
         }
+      };
+      if (!next || next.width < 1 || next.height < 1) {
+        last = null;
+        stableSince = 0;
+        // Target unavailable (e.g. sidebar hidden on mobile): show the card
+        // centered without a spotlight instead of a dead dark screen.
+        if (now - startedAt >= 2000 && !ready) commit(null);
+      } else if (ready) {
+        // Already shown: redraw immediately on any movement so the box never lags.
+        if (!last || !sameRect(last, next)) { last = next; commit(next); }
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
-        if (!ready) setSettled(false);
-      } else if (now - stableSince >= 160) {
-        setRect((previous) => previous && sameRect(previous, next) ? previous : next);
-        setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
-          ? previous : { w: window.innerWidth, h: window.innerHeight });
-        setStepDone(current.done ? current.done() : true);
-        ready = true;
-        setSettled(true);
+      } else if (now - stableSince >= 150) {
+        commit(next);
       }
       frame = requestAnimationFrame(tick);
     };
