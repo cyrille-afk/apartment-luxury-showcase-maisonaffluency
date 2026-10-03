@@ -886,10 +886,30 @@ export function BriefBuilder({
     const text = briefTextForSubmit();
     const validation = validateBriefDraft(text);
     if (!validation.valid) {
+      // Validation interceptor: block the submission, keep the amber
+      // "Required: …" warning visible, then smooth-scroll to the first
+      // missing field and flash a gold glow around it.
       setSubmitError(
         `Complete the three required onboarding details before submitting. Missing: ${validation.missing.join(", ")}`,
       );
       window.setTimeout(() => setSubmitError(null), 5000);
+      const firstMissing = REQUIRED_FIELDS.find((f) => validation.missing.includes(f.label));
+      if (firstMissing) {
+        if (!expanded[firstMissing.block]) {
+          const next = { ...expanded, [firstMissing.block]: true };
+          setExpanded(next);
+          saveExpanded(scopeRef.current, next);
+        }
+        setGlowField(firstMissing.key);
+        if (glowTimer.current) window.clearTimeout(glowTimer.current);
+        glowTimer.current = window.setTimeout(() => setGlowField(null), 2600);
+        // Wait a frame so a just-expanded section is laid out before scrolling.
+        requestAnimationFrame(() => {
+          const el = fieldRefs.current[firstMissing.key];
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          el?.focus({ preventScroll: true });
+        });
+      }
       return;
     }
     setSubmitError(null);
