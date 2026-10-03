@@ -5,6 +5,7 @@
 // It NEVER touches email templates, PDF publication or the /pay token routes —
 // keeping checkout URL generation isolated from document delivery.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { safeOrigin } from "../_shared/safeOrigin.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
 
@@ -131,7 +132,7 @@ serve(async (req) => {
       ? Math.round(majorAmount)
       : Math.round(majorAmount * 100);
 
-    const origin = req.headers.get("origin") || SITE_URL;
+    const origin = safeOrigin(req, SITE_URL);
     const buyerEmail = claims.email ?? undefined;
     const productName = liveMode
       ? "Checkout Verification (Internal)"

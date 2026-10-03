@@ -215,7 +215,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       if (enqueueError) {
-        console.error("Enqueue error for", recipientEmail, enqueueError);
+        console.error("Enqueue error for a shared recipient", enqueueError);
       }
 
       await adminClient.from("email_send_log").insert({

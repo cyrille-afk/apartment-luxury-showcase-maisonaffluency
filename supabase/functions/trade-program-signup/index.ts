@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
   const { data: existing } = await supabase
     .from('trade_program_signups')
-    .select('id, invite_email_sent_at')
+    .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path')
     .ilike('email', email)
     .maybeSingle()
 
@@ -105,10 +105,25 @@ Deno.serve(async (req) => {
   }
 
   let signupId = existing?.id as string | undefined
+  // Unauthenticated callers can't prove they own this email, so an existing
+  // application is never overwritten: only empty fields are filled in and the
+  // step can only move forward.
+  const fillEmpty = (row: Record<string, unknown> | null | undefined, fields: Record<string, unknown>) => {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(fields)) {
+      if (v === null || v === undefined || k === 'email') continue
+      const cur = row?.[k]
+      if (cur === null || cur === undefined || cur === '') out[k] = v
+    }
+    return out
+  }
   if (existing) {
-    const { error } = await supabase
+    const safeUpdate = fillEmpty(existing as Record<string, unknown>, payload)
+    delete safeUpdate.step
+    if (Number(existing.step ?? 0) < step) safeUpdate.step = step
+    const { error } = Object.keys(safeUpdate).length === 0 ? { error: null } : await supabase
       .from('trade_program_signups')
-      .update(payload)
+      .update(safeUpdate)
       .eq('id', existing.id)
     if (error) {
       console.error('signup update failed', error)
@@ -151,7 +166,7 @@ Deno.serve(async (req) => {
             .upload(path, bytes, { contentType: detected })
           if (upErr) {
             console.error('credential upload failed', upErr)
-          } else {
+          } else if (!existing?.credential_document_path) {
             await supabase
               .from('trade_program_signups')
               .update({ credential_document_path: path })
@@ -233,14 +248,14 @@ Deno.serve(async (req) => {
     for (const k of Object.keys(acctFields)) if (acctFields[k] === null && k !== 'email') delete acctFields[k]
     const { data: existingAcct } = await supabase
       .from('trade_accounts')
-      .select('id, signup_id')
+      .select('id, signup_id, studio_name, contact_name, phone_number, website_or_ig, business_reg_number, credential_document_path, source, intent')
       .or(`signup_id.eq.${signupId},email.ilike.${email.replace(/[,()]/g, '')}`)
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle()
     const { data: acct, error: acctErr } = existingAcct
       ? await supabase.from('trade_accounts')
-          .update({ ...acctFields, ...(existingAcct.signup_id ? {} : { signup_id: signupId }) })
+          .update({ ...fillEmpty(existingAcct as Record<string, unknown>, acctFields), ...(existingAcct.signup_id ? {} : { signup_id: signupId }) })
           .eq('id', existingAcct.id).select('id, status').single()
       : await supabase.from('trade_accounts')
           .insert({ ...acctFields, signup_id: signupId }).select('id, status').single()

@@ -494,12 +494,8 @@ const handler = async (req: Request): Promise<Response> => {
           .ilike("email", lowerEmail).maybeSingle();
         let acctId: string | null = existingAcct?.id ?? null;
         if (existingAcct) {
-          await supabase.from("trade_accounts").update({
-            studio_name: existingAcct.studio_name || companyName || null,
-            contact_name: existingAcct.contact_name || name || null,
-            phone_number: existingAcct.phone_number || (phoneOk ? cleanPhone : null),
-            website_or_ig: existingAcct.website_or_ig || reference,
-          }).eq("id", existingAcct.id);
+          // Public request: never modify an existing trade account (the caller
+          // has not proven ownership of this email). Just link to it.
         } else {
           const { data: created, error: acctErr } = await supabase.from("trade_accounts").insert({
             email: lowerEmail,

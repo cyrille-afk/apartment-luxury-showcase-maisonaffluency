@@ -148,13 +148,13 @@ serve(async (req) => {
             });
             if (error) {
               emailsFailed++;
-              console.error(`email failed for ${p.email}`, error);
+              console.error(`email failed for recipient ${p.id ?? "(unknown)"}`, error);
             } else {
               emailsSent++;
             }
           } catch (e) {
             emailsFailed++;
-            console.error(`email exception for ${p.email}`, e);
+            console.error(`email exception for recipient ${p.id ?? "(unknown)"}`, e);
           }
         })
     );
