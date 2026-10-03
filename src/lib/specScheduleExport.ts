@@ -266,15 +266,20 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   }
 
   // Totals (only priced rows; others remain Price upon Request).
-   const cur = ds.rows.find((r) => r.clientPriceCents != null)?.currency ?? "EUR";
-  const sum = (f: (r: SpecScheduleRow) => number | null) =>
-    ds.rows.reduce((a, r) => a + (f(r) ?? 0) * r.qty, 0);
-  if (y + 40 > H - M - 20) { doc.addPage(); y = M + 10; }
-  y += 6;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...ink);
+   const totals = new Map<string, number>();
+   for (const r of ds.rows) {
+     if (r.clientPriceCents == null) continue;
+     totals.set(r.currency, (totals.get(r.currency) ?? 0) + r.clientPriceCents * r.qty);
+   }
+   if (y + Math.max(1, totals.size) * 16 + 30 > H - M - 20) { doc.addPage(); y = M + 10; }
+   y += 6;
+   doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...ink);
   const totalsX = M + cols.slice(0, 6).reduce((a, c) => a + c.w, 0);
-  doc.text("TOTALS (priced lines × qty)", totalsX - 6, y, { align: "right" });
-  doc.text(money(sum((r) => r.clientPriceCents), cur), totalsX + cols[6].w - 6, y, { align: "right" });
+   for (const [currency, amount] of totals) {
+     doc.text("TOTAL (priced lines × qty)", totalsX - 6, y, { align: "right" });
+     doc.text(money(amount, currency), totalsX + cols[6].w - 6, y, { align: "right" });
+     y += 16;
+   }
 
   // Footer.
   const pages = doc.getNumberOfPages();
