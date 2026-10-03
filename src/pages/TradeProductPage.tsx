@@ -72,6 +72,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useClientProjectPricing } from "@/hooks/useClientProjectPricing";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { categoryUrl } from "@/lib/categorySlugs";
@@ -3019,7 +3020,7 @@ const TradeProductPage: React.FC = () => {
             {/* Origin & lead time — mobile: after the price */}
             <div className="flex flex-col gap-2">
               {(() => {
-                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, product.lead_time);
                 if (!handcrafted) return null;
                 let originLine = handcrafted;
                 let leadLine: string | null = null;

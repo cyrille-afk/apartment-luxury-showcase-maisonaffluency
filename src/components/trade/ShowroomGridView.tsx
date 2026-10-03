@@ -785,7 +785,7 @@ const ShowroomGridView = ({
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
-                  {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
+                  {showTradePrice && getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
                     <p className="pointer-events-none absolute top-3 left-3 z-10 text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
                       {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by })}
                     </p>
@@ -852,7 +852,7 @@ const ShowroomGridView = ({
                 {/* Description in portal tooltip */}
                 <div className="flex flex-col items-center p-3 min-h-[4rem]">
                   <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">{product.product_name}</h3>
-                  {isAdmin ? (
+                  {isAdmin && showTradePrice ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
                       <InlinePriceEditor
@@ -896,7 +896,7 @@ const ShowroomGridView = ({
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
                 </div>
-                {isAdmin ? (
+                {isAdmin && showTradePrice ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
                     {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.price_prefix)}
                     <InlinePriceEditor
