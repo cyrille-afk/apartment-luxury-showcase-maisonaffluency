@@ -1326,6 +1326,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "projectProfile", v)}
               required
               invalid={isPlaceholderValue(values.block1.projectProfile, DEFAULT_VALUES.block1.projectProfile)}
+              glow={glowField === "projectProfile"}
+              inputRef={(el) => { fieldRefs.current.projectProfile = el; }}
             />
             <Field
               label="Zone"
@@ -1334,6 +1336,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "zone", v)}
               required
               invalid={isPlaceholderValue(values.block1.zone, DEFAULT_VALUES.block1.zone)}
+              glow={glowField === "zone"}
+              inputRef={(el) => { fieldRefs.current.zone = el; }}
             />
             <Field
               label="Budget"
@@ -1342,6 +1346,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "budget", v)}
               required
               invalid={isPlaceholderValue(values.block1.budget, DEFAULT_VALUES.block1.budget)}
+              glow={glowField === "budget"}
+              inputRef={(el) => { fieldRefs.current.budget = el; }}
             />
             <Field
               label="Environment"
@@ -1439,7 +1445,7 @@ export function BriefBuilder({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || !validateBriefValues(values).valid}
+            disabled={isSubmitting}
             className={cn(
               "flex items-center gap-2 rounded-lg px-5 py-2 font-body text-[11px] uppercase transition-all duration-300 motion-reduce:transition-none disabled:cursor-not-allowed",
               isSubmitting
