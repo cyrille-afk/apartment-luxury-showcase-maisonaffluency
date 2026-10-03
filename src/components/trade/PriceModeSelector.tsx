@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /**
  * Unified top-bar control: combines tier badge + RRP ⇄ Trade price toggle
@@ -39,8 +40,9 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
         ? `Price view — ${tierLabel} tier, ${discountLabel} trade discount`
         : "Price view — Client View active"}
     >
-      <button
+      <Button
         type="button"
+        variant="ghost"
         role="switch"
         aria-checked={!showTradePrice}
         onClick={() => setShowTradePrice(!showTradePrice)}
@@ -52,7 +54,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
         )}
       >
         Client View
-      </button>
+      </Button>
       {showTradePrice && (
         <>
           <span className="h-3 w-px bg-border" aria-hidden="true" />

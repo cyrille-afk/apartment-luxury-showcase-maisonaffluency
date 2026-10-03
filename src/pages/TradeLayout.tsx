@@ -21,6 +21,8 @@ import PriceModeSelector from "@/components/trade/PriceModeSelector";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
+import { useStudio } from "@/hooks/useStudio";
+import { StudioBrand } from "@/components/trade/StudioBrand";
 
 
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
@@ -322,6 +324,7 @@ const TradeLayout = () => {
   if (!loading) didMountShellRef.current = true;
   const showInitialLoader = loading && !didMountShellRef.current;
   const { showTradePrice } = useTradePriceMode();
+  const { currentStudio } = useStudio();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
@@ -472,20 +475,19 @@ const TradeLayout = () => {
               {/* Desktop: sidebar collapse trigger */}
               <SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" />
               {/* Desktop: Trade Portal branding */}
-              <div className="hidden md:flex items-center gap-2">
-                <LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" />
-                <span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span>
-              </div>
+               <div className="hidden md:flex items-center gap-2">
+                 {showTradePrice ? <><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></> : <StudioBrand studio={currentStudio} />}
+               </div>
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4" data-felix-target="account-panel">
-              <StudioSwitcher />
+               {showTradePrice && <StudioSwitcher />}
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
                 <PriceModeSelector />
               </div>
-              <NotificationBell />
+               {showTradePrice && <NotificationBell />}
               <MobilePreviewHeaderButton />
             </div>
           </header>
