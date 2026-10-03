@@ -1,0 +1,3 @@
+ALTER TABLE public.studios ADD COLUMN display_name text, ADD COLUMN primary_brand_font text NOT NULL DEFAULT 'editorial', ADD COLUMN default_project_markup_percentage numeric(7,2) NOT NULL DEFAULT 0;
+ALTER TABLE public.studios ADD CONSTRAINT studios_brand_font_supported CHECK (primary_brand_font IN ('editorial', 'modern', 'classic'));
+ALTER TABLE public.studios ADD CONSTRAINT studios_markup_range CHECK (default_project_markup_percentage BETWEEN 0 AND 1000);

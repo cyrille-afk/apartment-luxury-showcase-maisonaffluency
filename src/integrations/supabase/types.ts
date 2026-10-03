@@ -8515,9 +8515,12 @@ export type Database = {
           billing_email: string | null
           created_at: string
           created_by: string
+          default_project_markup_percentage: number
+          display_name: string | null
           id: string
           logo_url: string | null
           name: string
+          primary_brand_font: string
           slug: string | null
           updated_at: string
         }
@@ -8525,9 +8528,12 @@ export type Database = {
           billing_email?: string | null
           created_at?: string
           created_by: string
+          default_project_markup_percentage?: number
+          display_name?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          primary_brand_font?: string
           slug?: string | null
           updated_at?: string
         }
@@ -8535,9 +8541,12 @@ export type Database = {
           billing_email?: string | null
           created_at?: string
           created_by?: string
+          default_project_markup_percentage?: number
+          display_name?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          primary_brand_font?: string
           slug?: string | null
           updated_at?: string
         }
