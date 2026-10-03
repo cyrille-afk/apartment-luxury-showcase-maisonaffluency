@@ -237,6 +237,7 @@ const ShowroomGridView = ({
              {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
           </span>
         )}
+        {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
       </span>
     );
   };

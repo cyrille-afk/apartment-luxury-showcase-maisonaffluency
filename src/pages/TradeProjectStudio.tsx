@@ -404,6 +404,7 @@ export default function TradeProjectStudio() {
                 </p>
               </div>
             )}
+             {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-6 h-3 w-40 animate-pulse bg-muted/60" />}
           </div>
 
           {/* Scrollable ledger body */}

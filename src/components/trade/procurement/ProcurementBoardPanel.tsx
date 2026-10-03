@@ -296,6 +296,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
           </motion.div>
         )}
       </AnimatePresence>
+       {!clientSafe && <div data-client-placeholder aria-hidden="true" className="grid grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3"><div className="aspect-[4/5] animate-pulse bg-muted/60" /><div className="aspect-[4/5] animate-pulse bg-muted/60" /><div className="aspect-[4/5] animate-pulse bg-muted/60" /></div>}
 
       <InviteCollaboratorDialog open={inviteOpen} onOpenChange={setInviteOpen} boardId={boardId} onInvited={loadCollab} />
     </section>
