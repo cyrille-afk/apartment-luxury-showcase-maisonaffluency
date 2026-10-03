@@ -119,16 +119,18 @@ const orderCurrency = (lines: CheckoutLine[]) => lines[0]?.currency || "usd";
 const withIso = (formatted: string, code: string) =>
   formatted.startsWith(code) ? formatted : `${code} ${formatted}`;
 
-/* Clean integers with an explicit ISO code so USD and SGD never look alike. */
+/* Exact amounts (cents shown only when non-zero) with an explicit ISO code. */
 const money = (cents: number, currency: string) => {
   const code = (currency || "usd").toUpperCase();
+  const c = Math.round(cents);
   return withIso(
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: code,
       currencyDisplay: "symbol",
-      maximumFractionDigits: 0,
-    }).format(Math.round(cents / 100)),
+      minimumFractionDigits: c % 100 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(c / 100),
     code,
   );
 };
@@ -268,12 +270,9 @@ export const deriveCheckoutTotals = (input: {
   // must be the sum of those displayed rows — otherwise the page shows
   // 10,188 + 1,471 + 917 ≠ 12,575. Round each component to whole dollars
   // first, then add: displayTotal is ALWAYS row-consistent.
-  const roundDollar = (c: number) => Math.round(c / 100) * 100;
-  const rowSum =
-    roundDollar(goodsCents) +
-    roundDollar(deliveryCents) +
-    roundDollar(taxCents) +
-    roundDollar(clearanceFeeCents);
+  // Rows display exact cents, so the total is their exact sum — identical to
+  // the amount create-payment-intent sends to Stripe.
+  const rowSum = Math.round(goodsCents + deliveryCents + taxCents + clearanceFeeCents);
   return {
     goodsCents,
     deliveryCents,
@@ -2543,11 +2542,9 @@ export default function Checkout() {
           totals.totalCents -
           (serverPct > 0 ? Math.round(totals.totalCents * serverPct) : 0);
         const serverDeliveryCents = serverShippingCents > 0 ? serverShippingCents : estimate.cents;
-        const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
-        const expectedCents =
-          roundDollar(serverGoodsCents) +
-          roundDollar(serverDeliveryCents) +
-          roundDollar(serverTaxCents);
+        const expectedCents = Math.round(
+          serverGoodsCents + serverDeliveryCents + serverTaxCents,
+        );
         const check = reconcileBackendAmount(
           { ...totals, totalCents: expectedCents },
           pi?.amount,
