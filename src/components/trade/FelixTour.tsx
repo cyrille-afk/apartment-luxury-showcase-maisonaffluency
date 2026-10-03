@@ -407,7 +407,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(380, viewport.w - 32);
-  const cardH = Math.min(320, Math.max(0, viewport.h - 32));
+  // Step 8 includes an action prompt, so its real card is taller than the
+  // 320px estimate used by the other steps. Reserve enough room for it.
+  const cardH = Math.min(step.id === "client-view" ? 440 : 320, Math.max(0, viewport.h - 32));
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -429,7 +431,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         cardTop = rect.top - cardH - PAD - 8;
       } else if (clearRight + cardW <= viewport.w - 16) {
         cardLeft = clearRight;
-        cardTop = clampY(Math.min(centerY, rect.top - cardH - PAD - 8));
+        cardTop = centerY;
       } else {
         // Constrained viewport: keep it at the very top rather than dropping
         // below the toggle. The card itself scrolls if its content is taller.
@@ -488,7 +490,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           "fixed z-[132] max-h-[calc(100dvh-32px)] overflow-y-auto overscroll-contain print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
-        style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
+         style={{ width: cardW, left: 0, top: 0, maxHeight: step.id === "client-view" && rect ? Math.max(80, Math.min(viewport.h - cardTop - 16, cardTop < rect.top ? rect.top - cardTop - PAD - 8 : viewport.h - cardTop - 16)) : undefined, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
         <div className="p-5">
           {/* Header */}
