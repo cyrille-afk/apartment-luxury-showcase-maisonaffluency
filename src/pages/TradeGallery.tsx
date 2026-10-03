@@ -311,8 +311,6 @@ const TradeGallery = () => {
             <span className="text-muted-foreground font-normal">
               RRP: {retailLabel}
             </span>
-       {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-3 w-20 animate-pulse bg-muted/60" />}
-       </>
             <span className="text-muted-foreground/50" aria-hidden="true">|</span>
             <span className="text-accent font-semibold">
               TRADE: {tradeLabel}
@@ -333,6 +331,8 @@ const TradeGallery = () => {
           </span>
         )}
       </span>
+       {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-3 w-20 animate-pulse bg-muted/60" />}
+       </>
     );
   };
 
