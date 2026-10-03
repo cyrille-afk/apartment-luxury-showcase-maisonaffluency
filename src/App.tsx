@@ -622,23 +622,35 @@ function installPreviewNavTrace() {
   const t0 = performance.now();
   const stamp = () => `${Math.round(performance.now() - t0)}ms`;
   const caller = () => (new Error().stack || "").split("\n").slice(3, 9).map((l) => l.trim()).join(" | ");
-  console.info("[nav-trace] boot", stamp(), window.location.pathname + window.location.search, "framed:", window.parent !== window);
+  // Events before a full reload would otherwise be lost: keep a short buffer
+  // across reloads and replay it at boot. warn level so preview capture keeps it.
+  const BUF = "ma:nav-trace";
+  let buffer: string[] = [];
+  try { buffer = JSON.parse(sessionStorage.getItem(BUF) || "[]"); } catch { buffer = []; }
+  if (buffer.length) console.warn("[nav-trace] previous loads:\n" + buffer.join("\n"));
+  const log = (...parts: unknown[]) => {
+    const line = `${new Date().toISOString().slice(11, 23)} ${parts.map(String).join(" ")}`;
+    console.warn("[nav-trace]", line);
+    buffer = [...buffer, line].slice(-40);
+    try { sessionStorage.setItem(BUF, JSON.stringify(buffer)); } catch { /* noop */ }
+  };
+  log("boot", stamp(), window.location.pathname + window.location.search, "framed:", window.parent !== window, "referrer:", document.referrer || "-");
   (["pushState", "replaceState"] as const).forEach((method) => {
     const original = window.history[method].bind(window.history);
     window.history[method] = ((state: unknown, title: string, url?: string | URL | null) => {
       const from = window.location.pathname;
       const result = original(state, title, url);
       const to = window.location.pathname;
-      if (from !== to) console.info(`[nav-trace] ${method}`, stamp(), from, "->", to, caller());
+      if (from !== to) log(method, stamp(), from, "->", to, caller());
       return result;
     }) as History[typeof method];
   });
-  window.addEventListener("popstate", () => console.info("[nav-trace] popstate", stamp(), window.location.pathname));
-  window.addEventListener("pagehide", () => console.info("[nav-trace] pagehide", stamp(), window.location.pathname));
+  window.addEventListener("popstate", () => log("popstate", stamp(), window.location.pathname));
+  window.addEventListener("pagehide", () => log("pagehide", stamp(), window.location.pathname));
   window.addEventListener("message", (e) => {
     const type = (e.data && typeof e.data === "object" && (e.data as { type?: unknown }).type) || "";
     if (typeof type === "string" && /navigat|route|url|path|reload/i.test(type)) {
-      console.info("[nav-trace] message", stamp(), e.origin, type, JSON.stringify(e.data).slice(0, 200));
+      log("message", stamp(), e.origin, type, JSON.stringify(e.data).slice(0, 200));
     }
   });
 }
