@@ -25,7 +25,7 @@ const QUICK_STARTS = [
   "Suggest lighting for a double-height entrance",
 ];
 
-interface ThreadRow { id: string; title: string; updated_at: string }
+interface ThreadRow { id: string; title: string; updated_at: string; project_id?: string | null }
 
 function greeting() {
   const h = new Date().getHours();
@@ -34,8 +34,8 @@ function greeting() {
 
 /** One workspace session = one embedded Felix mount, keyed by this id. */
 interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string; fresh: boolean }
-interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace" }
-interface PreviewPick { title: string; finish?: string | null; qty?: number | null }
+interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace"; project_id?: string | null }
+interface PreviewPick { title: string; finish?: string | null; qty?: number | null; designer?: string | null }
 interface PreviewData { turns: { role: "user" | "assistant"; text: string }[]; picks: PreviewPick[] }
 
 /** Distil a workspace timeline into the turns and saved picks a compact preview needs. */
@@ -57,6 +57,7 @@ function extractWorkspacePreview(timeline: unknown): PreviewData {
         title,
         finish: p.materials ? String(p.materials).slice(0, 60) : (p.variant ?? null),
         qty: typeof p?.qty === "number" ? p.qty : null,
+        designer: p.designer_name ? String(p.designer_name).slice(0, 80) : null,
       };
       const key = `${pick.title}|${pick.finish ?? ""}`;
       if (!seen.has(key)) { seen.add(key); out.picks.push(pick); }
@@ -82,9 +83,12 @@ export default function TradeConcierge() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
   const buildingRef = useRef<Set<string>>(new Set());
+  const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
+  const [designerSel, setDesignerSel] = useState("all");
+  const [projectSel, setProjectSel] = useState("all");
 
   // Bind the concierge contextually to the project chosen in the header switcher.
-  const { projectFilter } = useProjectFilter();
+  const { projectFilter, setProjectFilter } = useProjectFilter();
   const { projects } = useProjects({ activeOnly: false });
   const activeProject = projectFilter ? projects.find((p) => p.id === projectFilter) : undefined;
 
@@ -101,17 +105,18 @@ export default function TradeConcierge() {
 
   const loadThreads = useCallback(async () => {
     if (!user) return;
-    let wq = supabase.from("concierge_threads").select("id, title, updated_at:last_active_at")
-      .eq("workspace", true).neq("title", "New conversation");
-    wq = projectFilter ? wq.eq("project_id", projectFilter) : wq.is("project_id", null);
+    // Workspace threads are fetched across all projects; the Past Curations
+    // project filter narrows them client-side.
     const [c, w] = await Promise.all([
       supabase.from("curation_threads").select("id, title, updated_at").order("updated_at", { ascending: false }).limit(50),
-      wq.order("last_active_at", { ascending: false }).limit(50),
+      supabase.from("concierge_threads").select("id, title, updated_at:last_active_at, project_id")
+        .eq("workspace", true).neq("title", "New conversation")
+        .order("last_active_at", { ascending: false }).limit(50),
     ]);
     if (!c.error) setThreads(c.data ?? []);
     if (!w.error) setWsThreads((w.data ?? []) as ThreadRow[]);
     setThreadsLoaded(true);
-  }, [user, projectFilter]);
+  }, [user]);
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
 
