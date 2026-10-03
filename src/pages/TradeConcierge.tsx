@@ -158,13 +158,28 @@ export default function TradeConcierge() {
   }, [user, threadsLoaded, threads, wsThreads]);
 
   const query = search.trim().toLowerCase();
-  const filteredItems = query
-    ? pastItems.filter((t) => {
-        const p = previews[t.id];
-        const haystack = `${t.title} ${p ? [...p.picks.map((x) => x.title), ...p.turns.map((x) => x.text)].join(" ") : ""}`.toLowerCase();
-        return haystack.includes(query);
-      })
-    : pastItems;
+  const cutoff = dateRange === "all" ? 0 : Date.now() - Number(dateRange) * 86_400_000;
+  const designerNames = Array.from(
+    new Set(pastItems.flatMap((t) => (previews[t.id]?.picks ?? []).map((p) => p.designer).filter((d): d is string => !!d))),
+  ).sort((a, b) => a.localeCompare(b));
+  const filtersActive = dateRange !== "all" || designerSel !== "all" || projectSel !== "all";
+  const clearFilters = () => { setDateRange("all"); setDesignerSel("all"); setProjectSel("all"); };
+  const filteredItems = pastItems.filter((t) => {
+    if (cutoff && new Date(t.updated_at).getTime() < cutoff) return false;
+    if (projectSel === "none" ? !!t.project_id : projectSel !== "all" && t.project_id !== projectSel) return false;
+    if (designerSel !== "all") {
+      const p = previews[t.id];
+      const hit = !!p && (p.picks.some((x) => x.designer === designerSel) ||
+        p.turns.some((x) => x.text.toLowerCase().includes(designerSel.toLowerCase())));
+      if (!hit) return false;
+    }
+    if (query) {
+      const p = previews[t.id];
+      const haystack = `${t.title} ${p ? [...p.picks.map((x) => x.title), ...p.picks.map((x) => x.designer ?? ""), ...p.turns.map((x) => x.text)].join(" ") : ""}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
 
   // Restore the selected project's open workspace on mount / project switch.
   useEffect(() => {
@@ -225,10 +240,14 @@ export default function TradeConcierge() {
     window.setTimeout(() => void loadThreads(), 4000);
   };
 
-  /** Reopen a past workspace curation for the current project. */
-  const resumeWorkspace = (id: string) => {
-    writeLS(wsThreadKey, id);
-    writeLS(openFlagKey, "1");
+  /** Reopen a past workspace curation, switching project context if needed. */
+  const resumeWorkspace = (id: string, projectId?: string | null) => {
+    const pk = projectId || "none";
+    if (user) {
+      writeLS(`concierge:workspaceThread:${user.id}:${pk}`, id);
+      writeLS(`concierge:workspaceOpen:${user.id}:${pk}`, "1");
+    }
+    if ((projectId ?? null) !== (projectFilter ?? null)) setProjectFilter(projectId ?? null);
     setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: "", fresh: false }));
   };
 
