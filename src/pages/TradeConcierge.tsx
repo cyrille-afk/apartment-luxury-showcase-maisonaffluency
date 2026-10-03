@@ -359,12 +359,53 @@ export default function TradeConcierge() {
                 )}
               </div>
             )}
+            {threadsLoaded && pastItems.length > 0 && (
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                <div className="relative">
+                  <select value={dateRange} onChange={(e) => setDateRange(e.target.value as typeof dateRange)} aria-label="Filter by date"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All dates</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <div className="relative">
+                  <select value={designerSel} onChange={(e) => setDesignerSel(e.target.value)} aria-label="Filter by designer"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All designers</option>
+                    {designerNames.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+                <div className="relative">
+                  <select value={projectSel} onChange={(e) => setProjectSel(e.target.value)} aria-label="Filter by project"
+                    className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                    <option value="all">All projects</option>
+                    <option value="none">No project</option>
+                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              </div>
+            )}
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
             ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
             ) : filteredItems.length === 0 ? (
-              <p className="font-display text-sm italic text-muted-foreground">No curations match “{search.trim()}”.</p>
+              <div className="space-y-1.5">
+                <p className="font-display text-sm italic text-muted-foreground">
+                  {filtersActive ? "No curations match your filters." : `No curations match “${search.trim()}”.`}
+                </p>
+                {filtersActive && (
+                  <button type="button" onClick={clearFilters}
+                    className="text-[11px] uppercase tracking-[0.16em] text-accent transition-colors hover:text-foreground">
+                    Clear filters
+                  </button>
+                )}
+              </div>
             ) : (
               <ul
                 onScroll={(e) => {
@@ -384,7 +425,7 @@ export default function TradeConcierge() {
                         ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
                       <div className="flex items-center">
                         <Link to={t.kind === "curation" ? `/trade/concierge/${t.id}` : "/trade/concierge"}
-                          onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id) : undefined}
+                          onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id, t.project_id) : undefined}
                           className="min-w-0 flex-1 px-3 py-2">
                           <span className="block truncate text-sm text-foreground">{t.title}</span>
                           <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
