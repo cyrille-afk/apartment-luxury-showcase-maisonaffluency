@@ -20,6 +20,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP, inferSubcategory, normalizeCategory } 
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useClientProjectPricing } from "@/hooks/useClientProjectPricing";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { MobileProductGridSkeleton } from "@/components/trade/MobileProductGridSkeleton";
@@ -174,6 +175,7 @@ const ShowroomGridView = ({
     : "grid grid-cols-2 md:grid-cols-3 gap-4";
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
+  const clientMultiplier = useClientProjectPricing();
   const fxRates = useFxRates();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -205,7 +207,7 @@ const ShowroomGridView = ({
 
   const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!price) return null;
-    return showTradePrice ? { ...price, cents: Math.round(price.cents * (1 - TRADE_DISCOUNT)) } : price;
+    return { ...price, cents: showTradePrice ? Math.round(price.cents * (1 - TRADE_DISCOUNT)) : Math.round(Math.round(price.cents * (1 - TRADE_DISCOUNT)) * clientMultiplier) };
   };
 
   const renderPriceDisplay = (
@@ -223,7 +225,7 @@ const ShowroomGridView = ({
         {showTradePrice ? (
           <>
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
-              {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+             {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
@@ -722,10 +724,10 @@ const ShowroomGridView = ({
                 ? "border-accent bg-accent/10 text-accent"
                 : "border-border text-muted-foreground hover:text-foreground"
             )}
-            title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing retail price"}
+             title={showTradePrice ? `Showing trade price (–${discountLabel}, ${tierLabel} tier)` : "Showing client price"}
           >
             <Tag className="h-3.5 w-3.5" />
-            {showTradePrice ? "Retail" : "Trade"}
+            {showTradePrice ? "Client View" : "Trade View"}
           </button>
         </div>
       </div>
@@ -733,7 +735,7 @@ const ShowroomGridView = ({
       {/* Results count */}
       <p className="font-body text-xs text-muted-foreground mb-4">
         {filtered.length} {filtered.length === 1 ? "product" : "products"}
-        {selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}
+         {showTradePrice && selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}
         {selectedSection !== "all" ? ` in ${selectedSection}` : ""}
       </p>
 
@@ -783,7 +785,7 @@ const ShowroomGridView = ({
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
-                  {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
+                  {showTradePrice && getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by }) && (
                     <p className="pointer-events-none absolute top-3 left-3 z-10 text-[10px] font-normal uppercase tracking-[0.15em] text-foreground">
                       {getHouseEditionLabel({ designerName: product.designer_name, reeditionBy: product.reedition_by })}
                     </p>
@@ -850,7 +852,7 @@ const ShowroomGridView = ({
                 {/* Description in portal tooltip */}
                 <div className="flex flex-col items-center p-3 min-h-[4rem]">
                   <h3 className="font-display text-sm text-foreground leading-tight line-clamp-2 min-h-[2.25rem]">{product.product_name}</h3>
-                  {isAdmin ? (
+                  {isAdmin && showTradePrice ? (
                     <div className="mt-1 flex flex-col items-center gap-1.5">
                       {renderPriceDisplay(price, "font-display text-sm inline-flex items-center justify-center gap-1.5 flex-wrap", product.price_prefix)}
                       <InlinePriceEditor
@@ -894,7 +896,7 @@ const ShowroomGridView = ({
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display text-sm text-foreground truncate">{product.product_name}</h3>
                 </div>
-                {isAdmin ? (
+                {isAdmin && showTradePrice ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
                     {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.price_prefix)}
                     <InlinePriceEditor

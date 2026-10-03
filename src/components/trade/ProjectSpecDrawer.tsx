@@ -46,9 +46,11 @@ function dimsLabel(item: SpecDrawerItem) {
 
 export function ProjectSpecDrawer({
   item,
+  clientMode = false,
   onClose,
 }: {
   item: SpecDrawerItem | null;
+  clientMode?: boolean;
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -95,9 +97,9 @@ export function ProjectSpecDrawer({
       { label: "Crating Dimensions", value: cratingLabel(item) },
       { label: "COM Requirements", value: "14 yards of customer fabric required" },
       { label: "Lead Time", value: item.lead_time || "On request" },
-      { label: "SKU", value: item.sku || "—" },
+      ...(!clientMode ? [{ label: "SKU", value: item.sku || "—" }] : []),
     ];
-  }, [item]);
+  }, [item, clientMode]);
 
   if (!mounted || !item) return null;
 
@@ -128,13 +130,13 @@ export function ProjectSpecDrawer({
         <div className="flex items-start justify-between gap-6 border-b border-border px-6 py-6 md:px-10">
           <div className="min-w-0">
             <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-              Specification // {item.sku || "—"}
+               Specification{!clientMode && ` // ${item.sku || "—"}`}
             </p>
             <h2 className="mt-2 font-display text-2xl leading-tight text-foreground">
               {item.name}
             </h2>
             <p className="mt-1 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-              {item.designer}
+               {clientMode ? "Curated Collection" : item.designer}
             </p>
           </div>
           <button
@@ -151,7 +153,7 @@ export function ProjectSpecDrawer({
             <div className="mb-8 bg-muted">
               <img
                 src={item.image_url}
-                alt={`${item.name} by ${item.designer}`}
+                 alt={clientMode ? item.name : `${item.name} by ${item.designer}`}
                 className="max-h-64 w-full object-contain"
               />
             </div>

@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PayoutAccountsSection from "@/components/trade/settings/PayoutAccountsSection";
 import ResaleCertificatesSection from "@/components/trade/settings/ResaleCertificatesSection";
+import { StudioBrand } from "@/components/trade/StudioBrand";
 
 interface Member {
   id: string;
@@ -64,9 +65,20 @@ export default function TradeStudioSettings() {
   const [creatingStudio, setCreatingStudio] = useState(false);
 
   const [studioName, setStudioName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [brandFont, setBrandFont] = useState("editorial");
+  const [markup, setMarkup] = useState("0");
+  const [savingBrand, setSavingBrand] = useState(false);
 
   useEffect(() => {
-    if (currentStudio) setStudioName(currentStudio.name);
+    if (currentStudio) {
+      setStudioName(currentStudio.name);
+      setDisplayName(currentStudio.display_name || "");
+      setLogoUrl(currentStudio.logo_url || "");
+      setBrandFont(currentStudio.primary_brand_font || "editorial");
+      setMarkup(String(currentStudio.default_project_markup_percentage ?? 0));
+    }
   }, [currentStudio?.id]);
 
   const fetchData = async () => {
@@ -179,6 +191,26 @@ export default function TradeStudioSettings() {
     refreshStudios();
   };
 
+  const handleSaveBrand = async () => {
+    if (!currentStudio || !isAdmin) return;
+    const value = Number(markup);
+    if (!Number.isFinite(value) || value < 0 || value > 1000 || (logoUrl.trim() && !/^https:\/\//i.test(logoUrl.trim()))) {
+      toast({ title: "Enter a markup between 0 and 1000% and an HTTPS logo URL", variant: "destructive" });
+      return;
+    }
+    setSavingBrand(true);
+    const { error } = await supabase.from("studios").update({
+      display_name: displayName.trim() || null,
+      logo_url: logoUrl.trim() || null,
+      primary_brand_font: brandFont,
+      default_project_markup_percentage: value,
+    }).eq("id", currentStudio.id);
+    setSavingBrand(false);
+    if (error) { toast({ title: "Branding could not be saved", description: error.message, variant: "destructive" }); return; }
+    await refreshStudios();
+    toast({ title: "Studio branding saved" });
+  };
+
   const handleCreateStudio = async () => {
     if (!newStudioName.trim() || !user) return;
     setCreatingStudio(true);
@@ -255,6 +287,18 @@ export default function TradeStudioSettings() {
           <div className="text-xs text-muted-foreground">
             Your role: <Badge variant="secondary" className="ml-1">{currentStudio.role}</Badge>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-lg">Client-facing identity</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-b border-border pb-4"><StudioBrand studio={{ name: studioName, display_name: displayName, logo_url: logoUrl, primary_brand_font: brandFont }} /></div>
+          <div><Label htmlFor="display-name">Display name</Label><Input id="display-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={studioName} disabled={!isAdmin} /></div>
+          <div><Label htmlFor="brand-logo">Logo URL</Label><Input id="brand-logo" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" disabled={!isAdmin} /></div>
+          <div><Label htmlFor="brand-font">Brand typeface</Label><Select value={brandFont} onValueChange={setBrandFont} disabled={!isAdmin}><SelectTrigger id="brand-font"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="editorial">Editorial</SelectItem><SelectItem value="modern">Modern</SelectItem><SelectItem value="classic">Classic</SelectItem></SelectContent></Select></div>
+          <div><Label htmlFor="default-markup">Default project markup (%)</Label><Input id="default-markup" type="number" min="0" max="1000" step="0.01" value={markup} onChange={(e) => setMarkup(e.target.value)} disabled={!isAdmin} /></div>
+          {isAdmin && <Button onClick={handleSaveBrand} disabled={savingBrand}>{savingBrand ? "Saving…" : "Save branding"}</Button>}
         </CardContent>
       </Card>
 

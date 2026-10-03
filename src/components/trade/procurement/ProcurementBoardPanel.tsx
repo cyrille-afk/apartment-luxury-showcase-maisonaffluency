@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toDiscountFraction, tradePriceCents, clientPriceCents, normalizeMultiplier, discountPercentLabel } from "@/lib/tradePricing";
+import { toDiscountFraction, tradePriceCents, clientPriceCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { toast } from "@/hooks/use-toast";
+import { useStudio } from "@/hooks/useStudio";
 import InviteCollaboratorDialog from "./InviteCollaboratorDialog";
 
 type Row = {
@@ -58,6 +59,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
   items: Array<{ id: string; product_id: string; approval_status: string; product?: { product_name: string; brand_name: string; image_url: string | null } }>;
 }) {
   const { clientSafe, setClientSafe } = useClientSafeMode();
+  const { currentStudio } = useStudio();
   const [pricing, setPricing] = useState<Map<string, any>>(new Map());
   const [discountPct, setDiscountPct] = useState(0); // fraction (0.10 = 10%)
   const [multiplier, setMultiplier] = useState(1);
@@ -97,11 +99,11 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
     (async () => {
       const { data: b } = await supabase.from("client_boards").select("project_id").eq("id", boardId).maybeSingle();
       const pid = (b as any)?.project_id;
-      if (!pid) return setMultiplier(1);
+      if (!pid) return setMultiplier(effectiveProjectMultiplier(null, currentStudio?.default_project_markup_percentage));
       const { data: p } = await supabase.from("projects").select("trade_multiplier").eq("id", pid).maybeSingle();
-      setMultiplier(normalizeMultiplier((p as any)?.trade_multiplier));
+      setMultiplier(effectiveProjectMultiplier((p as any)?.trade_multiplier, currentStudio?.default_project_markup_percentage));
     })();
-  }, [boardId]);
+  }, [boardId, currentStudio?.default_project_markup_percentage]);
 
   const loadCollab = useCallback(async () => {
     const [{ data: inv }, { data: fb }] = await Promise.all([
@@ -162,7 +164,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
       {/* Master toggle + collaborators */}
       <div className="flex flex-col gap-4 border-b border-border/60 px-5 py-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3" data-felix-target="client-view-toggle">
-          <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${!clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Studio Internal Matrix</span>
+           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${!clientSafe ? "text-foreground" : "text-muted-foreground"}`}>{clientSafe ? "Studio View" : "Studio Internal Matrix"}</span>
           <Switch checked={clientSafe} onCheckedChange={setClientSafe} aria-label="Toggle client editorial presentation" />
           <span className={`font-body text-[10px] uppercase tracking-[0.2em] ${clientSafe ? "text-foreground" : "text-muted-foreground"}`}>Client Editorial Presentation</span>
         </div>
@@ -285,7 +287,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   </div>
                   <div>
                     {r.approval_status === "approved" && <p className="mb-1 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
-                    <p className="font-body text-sm text-foreground">{formatMoneyIn(r.msrp_cents, r.currency)}</p>
+                     <p className="font-body text-sm text-foreground">{formatMoneyIn(clientPriceCents(tradePriceCents(r.msrp_cents, discountPct), multiplier), r.currency, "Price upon Request")}</p>
                     {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
                   </div>
                 </div>

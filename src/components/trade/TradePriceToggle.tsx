@@ -75,7 +75,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
     setAnnouncement(
       showTradePrice
         ? `Showing ${tierLabel} trade price, ${pct} off retail.`
-        : `Showing retail price (RRP). Trade tier ${tierLabel}, ${pct} off available.`,
+        : "Showing client prices.",
     );
   }, [showTradePrice, tierLabel, discountLabel]);
 
@@ -109,7 +109,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
               : "text-muted-foreground"
           }`}
         >
-          RRP
+           Client
         </span>
         <span
           className={`px-2 py-1 text-xs font-body rounded transition-colors ${
@@ -124,8 +124,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
 
       {/* Static description for the switch, read once on focus. */}
       <span id="trade-price-toggle-desc" className="sr-only">
-        Toggle between retail price and your {tierLabel} trade price at{" "}
-        {discountLabel.replace("%", " percent")} off.
+         Toggle between client and trade prices.
       </span>
 
       {/* Live region: announces tier + discount on every change. */}

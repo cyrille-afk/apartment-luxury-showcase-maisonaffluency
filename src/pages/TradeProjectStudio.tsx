@@ -14,6 +14,10 @@ import { dimensionBadgeLabel } from "@/lib/productDimensions";
 import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { useStudio } from "@/hooks/useStudio";
+import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents } from "@/lib/tradePricing";
+import { StudioBrand } from "@/components/trade/StudioBrand";
 
 type StudioItem = {
   id: string;
@@ -34,8 +38,6 @@ type StudioItem = {
   quantity: number;
 };
 
-const TRADE_DISCOUNT = 0.08;
-
 function leadLabel(item: StudioItem) {
   if (item.lead_time) return item.lead_time;
   return "On request";
@@ -52,6 +54,9 @@ export default function TradeProjectStudio() {
   const [loadingItems, setLoadingItems] = useState(true);
   const [itemsVersion, setItemsVersion] = useState(0);
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
+  const { discountPct } = useTradeDiscount();
+  const { currentStudio } = useStudio();
+  const multiplier = effectiveProjectMultiplier((project as any)?.trade_multiplier, currentStudio?.default_project_markup_percentage);
   const isClientMode = !showTradePrice;
   const [specItemId, setSpecItemId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -181,13 +186,13 @@ export default function TradeProjectStudio() {
 
   const totals = useMemo(() => {
     const msrp = items.reduce((s, i) => s + toBase(i.rrp_cents, i.currency) * i.quantity, 0);
-    const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
+    const trade = items.reduce((s, i) => s + (tradePriceCents(toBase(i.rrp_cents, i.currency), discountPct) || 0) * i.quantity, 0);
     const clientEstimateCents = items.reduce((s, i) => {
-      const line = toBase(i.rrp_cents, i.currency) * i.quantity;
-      return s + Math.round(line / 100) * 100;
+      const tradeLine = tradePriceCents(toBase(i.rrp_cents, i.currency), discountPct);
+      return s + (clientPriceCents(tradeLine, multiplier) || 0) * i.quantity;
     }, 0);
     return { msrp, trade, clientEstimateCents };
-  }, [items, toBase]);
+  }, [items, toBase, discountPct, multiplier]);
 
   const budgetCents = totals.msrp ? Math.round(totals.msrp * 1.25) : 0;
   const budgetPct = budgetCents ? Math.min(100, Math.round((totals.msrp / budgetCents) * 100)) : 0;
@@ -224,7 +229,7 @@ export default function TradeProjectStudio() {
           <ArrowLeft className="h-3 w-3" /> Project file
         </Link>
         <h1 className="mt-4 font-body text-lg md:text-2xl uppercase tracking-[0.15em] text-foreground">
-          {titleLine}
+           {isClientMode ? <><StudioBrand studio={currentStudio} /> <span className="ml-3">{project.name}</span></> : titleLine}
         </h1>
       </div>
 
@@ -276,7 +281,7 @@ export default function TradeProjectStudio() {
                       {item.image_url ? (
                         <img
                           src={item.image_url}
-                          alt={`${item.name} by ${item.designer}`}
+                           alt={isClientMode ? item.name : `${item.name} by ${item.designer}`}
                           loading={idx < 4 ? "eager" : "lazy"}
                           className="w-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.01] lg:max-h-[24dvh]"
                         />
@@ -419,7 +424,8 @@ export default function TradeProjectStudio() {
               ) : (
                 items.map((item, idx) => {
                   const msrp = toBase(item.rrp_cents, item.currency) * item.quantity;
-                  const trade = Math.round(msrp * (1 - TRADE_DISCOUNT));
+                   const trade = (tradePriceCents(toBase(item.rrp_cents, item.currency), discountPct) || 0) * item.quantity;
+                   const client = (clientPriceCents(tradePriceCents(toBase(item.rrp_cents, item.currency), discountPct), multiplier) || 0) * item.quantity;
                   const expanded = expandedId === item.product_id;
                   return (
                     <div key={item.product_id} className="border-b border-border">
@@ -445,14 +451,14 @@ export default function TradeProjectStudio() {
                             {item.name}
                           </span>
                           <span className="mt-1.5 block font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-                            {item.designer}
+                             {isClientMode ? "Curated Collection" : item.designer}
                             {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                           </span>
                         </span>
                         <span className="whitespace-nowrap pt-1 text-right">
                           <span className="block font-body text-[11px] tracking-[0.05em] text-foreground">
                             {isClientMode
-                              ? money(msrp) || "Price upon Request"
+                               ? money(client) || "Price upon Request"
                               : msrp
                                 ? money(trade)
                                 : "Price upon Request"}
@@ -471,19 +477,19 @@ export default function TradeProjectStudio() {
                       {expanded && (
                         <div className="pb-9">
                           <dl className="space-y-3">
-                            <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
+                             {!isClientMode && <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                               <dt className="text-muted-foreground/60">Spec</dt>
                               <dd className="text-foreground">{item.sku || "—"}</dd>
-                            </div>
+                             </div>}
                             <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
                               <dt className="text-muted-foreground/60">Lead</dt>
                               <dd className="text-foreground">{leadLabel(item)}</dd>
                             </div>
                             <div className="flex items-baseline justify-between gap-4 font-body text-[10px] uppercase tracking-[0.15em]">
-                              <dt className="text-muted-foreground/60">{isClientMode ? "MSRP" : "Trade"}</dt>
+                               <dt className="text-muted-foreground/60">{isClientMode ? "Client Price" : "Trade"}</dt>
                               <dd className="tracking-[0.05em] text-foreground">
                                 {isClientMode ? (
-                                  money(msrp) || "Price upon Request"
+                                   money(client) || "Price upon Request"
                                 ) : msrp ? (
                                   <>
                                     {money(trade)}
@@ -528,7 +534,7 @@ export default function TradeProjectStudio() {
 
       </div>
 
-      <ProjectSpecDrawer item={specItem} onClose={() => setSpecItemId(null)} />
+       <ProjectSpecDrawer item={specItem} clientMode={isClientMode} onClose={() => setSpecItemId(null)} />
       <ProjectProposalPreview
         open={isProposalPreviewOpen}
         onOpenChange={setIsProposalPreviewOpen}
@@ -537,7 +543,9 @@ export default function TradeProjectStudio() {
         location={project.location}
         items={items.map((i) => ({ ...i, rrp_cents: toBase(i.rrp_cents, i.currency) || null }))}
         isClientMode={isClientMode}
-        tradeDiscount={TRADE_DISCOUNT}
+         tradeDiscount={discountPct}
+         markupMultiplier={multiplier}
+         studio={currentStudio}
         currency={baseCurrency}
       />
     </div>

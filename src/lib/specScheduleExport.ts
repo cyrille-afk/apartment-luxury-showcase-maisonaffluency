@@ -4,15 +4,15 @@
  * 1. collectSchedulePicks(timeline) — pulls the structured pieces Felix has
  *    proposed in the active conversation (tearsheet / quote / FF&E proposals).
  * 2. compileSpecSchedule(...) — enriches them into a download-ready dataset
- *    (dimensions, finish, material library, tier pricing, multiplier, lead time).
+ *    (dimensions, finish, material library, client pricing, lead time).
  * 3. renderSpecSchedulePdf(...) — white-label PDF: studio branding + project
  *    profile (project, client, region) in the header blocks.
  *
- * Pricing: RRP comes from the approved-member pricing table (never the public
- * price-stripped view); trade net applies the member's live tier %; client
- * price applies the project's trade multiplier.
+ * Pricing is calculated internally from approved-member prices and the live
+ * discount, but only client prices are included in the exported dataset.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { effectiveProjectMultiplier } from "@/lib/tradePricing";
 
 export interface SchedulePickRef {
   pickId: string;
@@ -25,16 +25,11 @@ export interface SchedulePickRef {
 export interface SpecScheduleRow {
   ref: string;
   productName: string;
-  designer: string | null;
   room: string | null;
   qty: number;
   dimensions: string;
   finish: string;
   materialLibrary: string;
-  rrpCents: number | null;
-  tierPct: number;
-  tradeNetCents: number | null;
-  multiplier: number;
   clientPriceCents: number | null;
   currency: string;
   leadTime: string;
@@ -46,9 +41,7 @@ export interface ScheduleProfile {
   region: string;
   studioName: string;
   studioLogoUrl: string | null;
-  tierLabel: string;
-  tierPct: number;
-  multiplier: number;
+  studioFont: string;
 }
 
 export interface SpecScheduleDataset {
@@ -102,19 +95,15 @@ function formatDims(p: any): string {
   return (p.dimensions ?? "").replace(/\s+/g, " ").trim() || "—";
 }
 
-const TIERS: Array<[number, string]> = [[20, "Platinum"], [15, "Gold"], [10, "Silver"]];
-const tierLabelFor = (pct: number) => TIERS.find(([p]) => pct >= p)?.[1] ?? "Standard";
-
 export async function compileSpecSchedule(opts: {
   picks: SchedulePickRef[];
   projectId: string | null;
-  studio: { name: string; logo_url: string | null } | null;
-  fallbackStudioName: string;
+  studio: { name: string; display_name?: string | null; logo_url: string | null; primary_brand_font?: string | null; default_project_markup_percentage?: number | null } | null;
 }): Promise<SpecScheduleDataset> {
   const ids = opts.picks.map((p) => p.pickId);
   const [picksRes, priceRes, matRes, pctRes, projRes] = await Promise.all([
     supabase.from("designer_curator_picks")
-      .select("id, title, subtitle, dimensions, width_mm, depth_mm, height_mm, materials, lead_time, currency, designers:designer_id(display_name, name)")
+      .select("id, title, dimensions, width_mm, depth_mm, height_mm, materials, lead_time, currency")
       .in("id", ids),
     supabase.from("trade_product_pricing").select("pick_id, trade_price_cents").in("pick_id", ids),
     supabase.from("product_material_links").select("pick_id, role, material_taxonomy:material_id(name)").in("pick_id", ids),
@@ -137,32 +126,21 @@ export async function compileSpecSchedule(opts: {
   // The RPC returns a fraction (0.10 = 10%); normalise to a percentage.
   const rawPct = Number(pctRes.data) || 0;
   const tierPct = Math.round((rawPct <= 1 ? rawPct * 100 : rawPct) * 100) / 100;
-  const { data: auth } = await supabase.auth.getUser();
-  const { data: prof } = auth.user
-    ? await supabase.from("profiles").select("trade_tier").eq("id", auth.user.id).maybeSingle()
-    : { data: null };
-  const tierName = (prof as any)?.trade_tier as string | undefined;
   const proj = projRes.data as any;
-  const multiplier = Number(proj?.trade_multiplier) > 0 ? Number(proj.trade_multiplier) : 1;
+  const multiplier = effectiveProjectMultiplier(proj?.trade_multiplier, opts.studio?.default_project_markup_percentage);
 
   const rows: SpecScheduleRow[] = opts.picks.map((ref, i) => {
     const p: any = pickById.get(ref.pickId) ?? {};
     const rrp = priceById.get(ref.pickId);
     const rrpCents = rrp && rrp > 0 ? rrp : null;
-    const designer = (p.designers?.display_name ?? p.designers?.name ?? "").trim() || null;
     return {
       ref: `FF-${String(i + 1).padStart(3, "0")}`,
       productName: p.title ?? "Untitled piece",
-      designer,
       room: ref.room,
       qty: ref.qty,
       dimensions: formatDims(p),
       finish: ref.finish?.trim() || "To be confirmed",
       materialLibrary: (matsById.get(ref.pickId) ?? []).join(", ") || (p.materials ?? "").trim() || "—",
-      rrpCents,
-      tierPct,
-      tradeNetCents: rrpCents != null ? Math.round(rrpCents * (1 - tierPct / 100)) : null,
-      multiplier,
       clientPriceCents: rrpCents != null ? Math.round(Math.round(rrpCents * (1 - tierPct / 100)) * multiplier) : null,
       currency: p.currency || "EUR",
       leadTime: ref.leadWeeks ? `${ref.leadWeeks} weeks` : (p.lead_time ?? "").trim() || "On request",
@@ -174,11 +152,9 @@ export async function compileSpecSchedule(opts: {
       projectName: proj?.name || "Untitled Project",
       clientName: proj?.client_name || "—",
       region: proj?.location_city || proj?.location || "—",
-      studioName: opts.studio?.name || opts.fallbackStudioName,
+      studioName: opts.studio?.display_name?.trim() || opts.studio?.name?.trim() || "Your Studio",
       studioLogoUrl: opts.studio?.logo_url ?? null,
-      tierLabel: tierName ? tierName[0].toUpperCase() + tierName.slice(1) : tierLabelFor(tierPct),
-      tierPct,
-      multiplier,
+      studioFont: opts.studio?.primary_brand_font || "editorial",
     },
     rows,
     generatedAt: new Date().toISOString(),
@@ -216,11 +192,13 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
 
   // Header — studio branding (white-label) left, document title right.
   const logo = profile.studioLogoUrl ? await toDataUrl(profile.studioLogoUrl) : null;
+  let logoDrawn = false;
   if (logo) {
     const h = 30; const w = Math.min(140, (logo.w / logo.h) * h);
-    try { doc.addImage(logo.data, M, M - 6, w, h); } catch { /* fall back to name */ }
-  } else {
-    doc.setFont("times", "italic"); doc.setFontSize(18); doc.setTextColor(...ink);
+    try { doc.addImage(logo.data, M, M - 6, w, h); logoDrawn = true; } catch { /* fall back to name */ }
+  }
+  if (!logoDrawn) {
+    doc.setFont(profile.studioFont === "modern" ? "helvetica" : "times", profile.studioFont === "modern" ? "normal" : "italic"); doc.setFontSize(18); doc.setTextColor(...ink);
     doc.text(profile.studioName, M, M + 14);
   }
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...muted);
@@ -234,7 +212,6 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
     ["PROJECT", profile.projectName],
     ["CLIENT", profile.clientName],
     ["REGION", profile.region],
-    ["PRICING", `${profile.tierLabel} tier · ${profile.tierPct}% trade · ×${profile.multiplier.toFixed(2)} client`],
     ["ISSUED", new Date(ds.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })],
   ];
   const bw = (W - M * 2) / blocks.length;
@@ -249,14 +226,12 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   // Table.
   const cols: Array<{ h: string; w: number; get: (r: SpecScheduleRow) => string; right?: boolean }> = [
     { h: "REF", w: 46, get: (r) => r.ref },
-    { h: "PRODUCT", w: 130, get: (r) => [r.productName, r.designer, r.room].filter(Boolean).join("\n") },
+    { h: "PRODUCT", w: 160, get: (r) => [r.productName, r.room].filter(Boolean).join("\n") },
     { h: "QTY", w: 28, get: (r) => String(r.qty), right: true },
     { h: "DIMENSIONS", w: 104, get: (r) => r.dimensions },
     { h: "FINISH", w: 92, get: (r) => r.finish },
     { h: "MATERIAL LIBRARY", w: 96, get: (r) => r.materialLibrary },
-    { h: "RRP", w: 66, get: (r) => money(r.rrpCents, r.currency), right: true },
-    { h: "TRADE NET", w: 66, get: (r) => money(r.tradeNetCents, r.currency), right: true },
-    { h: "CLIENT PRICE", w: 70, get: (r) => money(r.clientPriceCents, r.currency), right: true },
+    { h: "CLIENT PRICE", w: 112, get: (r) => money(r.clientPriceCents, r.currency), right: true },
     { h: "LEAD TIME", w: 0, get: (r) => r.leadTime },
   ];
   const fixed = cols.reduce((a, c) => a + c.w, 0);
@@ -291,18 +266,20 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   }
 
   // Totals (only priced rows; others remain Price upon Request).
-  const cur = ds.rows.find((r) => r.rrpCents != null)?.currency ?? "EUR";
-  const sum = (f: (r: SpecScheduleRow) => number | null) =>
-    ds.rows.reduce((a, r) => a + (f(r) ?? 0) * r.qty, 0);
-  if (y + 40 > H - M - 20) { doc.addPage(); y = M + 10; }
-  y += 6;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...ink);
+   const totals = new Map<string, number>();
+   for (const r of ds.rows) {
+     if (r.clientPriceCents == null) continue;
+     totals.set(r.currency, (totals.get(r.currency) ?? 0) + r.clientPriceCents * r.qty);
+   }
+   if (y + Math.max(1, totals.size) * 16 + 30 > H - M - 20) { doc.addPage(); y = M + 10; }
+   y += 6;
+   doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...ink);
   const totalsX = M + cols.slice(0, 6).reduce((a, c) => a + c.w, 0);
-  doc.text("TOTALS (priced lines × qty)", totalsX - 6, y, { align: "right" });
-  [sum((r) => r.rrpCents), sum((r) => r.tradeNetCents), sum((r) => r.clientPriceCents)].forEach((v, i) => {
-    const x = totalsX + cols.slice(6, 7 + i).reduce((a, c) => a + c.w, 0);
-    doc.text(money(v, cur), x - 6, y, { align: "right" });
-  });
+   for (const [currency, amount] of totals) {
+     doc.text("TOTAL (priced lines × qty)", totalsX - 6, y, { align: "right" });
+     doc.text(money(amount, currency), totalsX + cols[6].w - 6, y, { align: "right" });
+     y += 16;
+   }
 
   // Footer.
   const pages = doc.getNumberOfPages();

@@ -883,6 +883,13 @@
       "when": 1790993452705,
       "tag": "0125_concierge_threads_project_binding",
       "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1791014093355,
+      "tag": "0126_studio_branding_profile",
+      "breakpoints": true
     }
   ]
 }

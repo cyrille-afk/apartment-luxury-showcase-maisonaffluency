@@ -1592,8 +1592,7 @@ export function AIConcierge({
       const ds = await compileSpecSchedule({
         picks: schedulePicks,
         projectId: pid,
-        studio: currentStudio ? { name: currentStudio.name, logo_url: currentStudio.logo_url } : null,
-        fallbackStudioName: "Maison Affluency",
+        studio: currentStudio ? { name: currentStudio.name, display_name: currentStudio.display_name, logo_url: currentStudio.logo_url, primary_brand_font: currentStudio.primary_brand_font, default_project_markup_percentage: currentStudio.default_project_markup_percentage } : null,
       });
       await renderSpecSchedulePdf(ds);
       toast.success("Specification Schedule ready");
