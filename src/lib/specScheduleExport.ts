@@ -4,13 +4,12 @@
  * 1. collectSchedulePicks(timeline) — pulls the structured pieces Felix has
  *    proposed in the active conversation (tearsheet / quote / FF&E proposals).
  * 2. compileSpecSchedule(...) — enriches them into a download-ready dataset
- *    (dimensions, finish, material library, tier pricing, multiplier, lead time).
+ *    (dimensions, finish, material library, client pricing, lead time).
  * 3. renderSpecSchedulePdf(...) — white-label PDF: studio branding + project
  *    profile (project, client, region) in the header blocks.
  *
- * Pricing: RRP comes from the approved-member pricing table (never the public
- * price-stripped view); trade net applies the member's live tier %; client
- * price applies the project's trade multiplier.
+ * Pricing is calculated internally from approved-member prices and the live
+ * discount, but only client prices are included in the exported dataset.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { effectiveProjectMultiplier } from "@/lib/tradePricing";
@@ -26,16 +25,11 @@ export interface SchedulePickRef {
 export interface SpecScheduleRow {
   ref: string;
   productName: string;
-  designer: string | null;
   room: string | null;
   qty: number;
   dimensions: string;
   finish: string;
   materialLibrary: string;
-  rrpCents: number | null;
-  tierPct: number;
-  tradeNetCents: number | null;
-  multiplier: number;
   clientPriceCents: number | null;
   currency: string;
   leadTime: string;
@@ -48,9 +42,6 @@ export interface ScheduleProfile {
   studioName: string;
   studioLogoUrl: string | null;
   studioFont: string;
-  tierLabel: string;
-  tierPct: number;
-  multiplier: number;
 }
 
 export interface SpecScheduleDataset {
@@ -104,9 +95,6 @@ function formatDims(p: any): string {
   return (p.dimensions ?? "").replace(/\s+/g, " ").trim() || "—";
 }
 
-const TIERS: Array<[number, string]> = [[20, "Platinum"], [15, "Gold"], [10, "Silver"]];
-const tierLabelFor = (pct: number) => TIERS.find(([p]) => pct >= p)?.[1] ?? "Standard";
-
 export async function compileSpecSchedule(opts: {
   picks: SchedulePickRef[];
   projectId: string | null;
@@ -138,11 +126,6 @@ export async function compileSpecSchedule(opts: {
   // The RPC returns a fraction (0.10 = 10%); normalise to a percentage.
   const rawPct = Number(pctRes.data) || 0;
   const tierPct = Math.round((rawPct <= 1 ? rawPct * 100 : rawPct) * 100) / 100;
-  const { data: auth } = await supabase.auth.getUser();
-  const { data: prof } = auth.user
-    ? await supabase.from("profiles").select("trade_tier").eq("id", auth.user.id).maybeSingle()
-    : { data: null };
-  const tierName = (prof as any)?.trade_tier as string | undefined;
   const proj = projRes.data as any;
   const multiplier = effectiveProjectMultiplier(proj?.trade_multiplier, opts.studio?.default_project_markup_percentage);
 
@@ -153,16 +136,11 @@ export async function compileSpecSchedule(opts: {
     return {
       ref: `FF-${String(i + 1).padStart(3, "0")}`,
       productName: p.title ?? "Untitled piece",
-      designer: null,
       room: ref.room,
       qty: ref.qty,
       dimensions: formatDims(p),
       finish: ref.finish?.trim() || "To be confirmed",
       materialLibrary: (matsById.get(ref.pickId) ?? []).join(", ") || (p.materials ?? "").trim() || "—",
-      rrpCents,
-      tierPct,
-      tradeNetCents: rrpCents != null ? Math.round(rrpCents * (1 - tierPct / 100)) : null,
-      multiplier,
       clientPriceCents: rrpCents != null ? Math.round(Math.round(rrpCents * (1 - tierPct / 100)) * multiplier) : null,
       currency: p.currency || "EUR",
       leadTime: ref.leadWeeks ? `${ref.leadWeeks} weeks` : (p.lead_time ?? "").trim() || "On request",
@@ -177,9 +155,6 @@ export async function compileSpecSchedule(opts: {
       studioName: opts.studio?.display_name?.trim() || opts.studio?.name?.trim() || "Your Studio",
       studioLogoUrl: opts.studio?.logo_url ?? null,
       studioFont: opts.studio?.primary_brand_font || "editorial",
-      tierLabel: tierName ? tierName[0].toUpperCase() + tierName.slice(1) : tierLabelFor(tierPct),
-      tierPct,
-      multiplier,
     },
     rows,
     generatedAt: new Date().toISOString(),
@@ -291,7 +266,7 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   }
 
   // Totals (only priced rows; others remain Price upon Request).
-  const cur = ds.rows.find((r) => r.rrpCents != null)?.currency ?? "EUR";
+   const cur = ds.rows.find((r) => r.clientPriceCents != null)?.currency ?? "EUR";
   const sum = (f: (r: SpecScheduleRow) => number | null) =>
     ds.rows.reduce((a, r) => a + (f(r) ?? 0) * r.qty, 0);
   if (y + 40 > H - M - 20) { doc.addPage(); y = M + 10; }
