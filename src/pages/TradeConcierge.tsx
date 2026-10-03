@@ -390,7 +390,7 @@ export default function TradeConcierge() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name or product…"
-                  className="h-8 w-full rounded-sm border border-border bg-background pl-8 pr-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                  className="h-7 w-full rounded-sm border border-border/60 bg-background py-1 pl-8 pr-8 text-[11px] text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 />
                 {search && (
                   <button type="button" aria-label="Clear search" onClick={() => setSearch("")}
