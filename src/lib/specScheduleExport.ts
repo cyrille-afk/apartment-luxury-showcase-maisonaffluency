@@ -134,7 +134,14 @@ export async function compileSpecSchedule(opts: {
     if (!list.includes(n)) list.push(n);
     matsById.set(m.pick_id, list);
   }
-  const tierPct = Number(pctRes.data) || 0;
+  // The RPC returns a fraction (0.10 = 10%); normalise to a percentage.
+  const rawPct = Number(pctRes.data) || 0;
+  const tierPct = Math.round((rawPct <= 1 ? rawPct * 100 : rawPct) * 100) / 100;
+  const { data: auth } = await supabase.auth.getUser();
+  const { data: prof } = auth.user
+    ? await supabase.from("profiles").select("trade_tier").eq("id", auth.user.id).maybeSingle()
+    : { data: null };
+  const tierName = (prof as any)?.trade_tier as string | undefined;
   const proj = projRes.data as any;
   const multiplier = Number(proj?.trade_multiplier) > 0 ? Number(proj.trade_multiplier) : 1;
 
@@ -169,7 +176,7 @@ export async function compileSpecSchedule(opts: {
       region: proj?.location_city || proj?.location || "—",
       studioName: opts.studio?.name || opts.fallbackStudioName,
       studioLogoUrl: opts.studio?.logo_url ?? null,
-      tierLabel: tierLabelFor(tierPct),
+      tierLabel: tierName ? tierName[0].toUpperCase() + tierName.slice(1) : tierLabelFor(tierPct),
       tierPct,
       multiplier,
     },
