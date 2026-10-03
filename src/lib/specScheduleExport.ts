@@ -163,7 +163,7 @@ export async function compileSpecSchedule(opts: {
       tierPct,
       tradeNetCents: rrpCents != null ? Math.round(rrpCents * (1 - tierPct / 100)) : null,
       multiplier,
-      clientPriceCents: rrpCents != null ? Math.round(rrpCents * multiplier) : null,
+      clientPriceCents: rrpCents != null ? Math.round(Math.round(rrpCents * (1 - tierPct / 100)) * multiplier) : null,
       currency: p.currency || "EUR",
       leadTime: ref.leadWeeks ? `${ref.leadWeeks} weeks` : (p.lead_time ?? "").trim() || "On request",
     };

@@ -1,3 +1,4 @@
+import { toDiscountFraction } from "@/lib/tradePricing";
 import { GuestContactCapture } from "./GuestContactCapture";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -2451,7 +2452,7 @@ export function AIConcierge({
     let shippingHub = "NY Hub";
     try {
       const { data: pctData } = await supabase.rpc("current_trade_discount_pct");
-      if (typeof pctData === "number" && pctData > 0) discountPct = pctData;
+      if (Number(pctData) > 0) discountPct = Math.round(toDiscountFraction(pctData) * 10000) / 100;
     } catch { /* ignore */ }
 
     const lineItems: Array<{ group: "Seating" | "Casegoods" | "Lighting" | "Textiles"; label: string; amount: number }> = [
