@@ -9,6 +9,7 @@
  */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { isServiceCall } from "../_shared/auth.ts";
 import {
   notifyDepositCleared,
   notifyInternalPaymentReceived,
@@ -29,6 +30,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status,
     });
+
+  // Internal only: invoked by process-webhook-events with the service key.
+  if (!isServiceCall(req)) return json({ error: "Forbidden" }, 403);
 
   let payload: { kind?: string; args?: Record<string, unknown> };
   try {

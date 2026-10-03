@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
@@ -81,7 +82,15 @@ serve(async (req) => {
     const { pct } = await resolveAccountDiscount(supabase, userId);
     const maxDiscount = Math.round(subtotalCents * (pct + 0.015));
     const discountCents = Math.min(int(body?.discountCents), maxDiscount);
-    const shippingCents = int(body?.shippingCents);
+    const requestedShipping = int(body?.shippingCents);
+    const shipRes = await resolveConfirmedShipping(supabase, {
+      confirmed: requestedShipping > 0,
+      quoteRef: body?.shippingQuoteRef ?? body?.shippingLabel,
+      currency,
+      userId,
+    });
+    if (!shipRes.ok) return json({ error: shipRes.error }, 400);
+    const shippingCents = shipRes.cents;
     const buyerType = body?.buyerType === "business" ? "business" : "private";
     const buyerTaxId = normaliseBuyerTaxId(str(body?.buyerTaxId, 40));
     const taxCountry = str(body?.buyerTaxCountry, 2).toUpperCase();

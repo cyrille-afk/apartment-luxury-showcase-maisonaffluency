@@ -1900,6 +1900,10 @@ function ShippingQuoteCard({
       toast.error("Enter the shipping amount from your advisor quote.");
       return;
     }
+    if (!/^[0-9a-f-]{36}$/i.test(label.trim())) {
+      toast.error("Enter the shipping quote reference issued by your advisor.");
+      return;
+    }
     onConfirm({ cents: Math.round(value * 100), label: label.trim() });
     setOpen(false);
   };
@@ -1944,7 +1948,7 @@ function ShippingQuoteCard({
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="Quote reference (optional)"
+            placeholder="Shipping quote reference (from your advisor)"
             className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
           />
           <button
@@ -2340,6 +2344,7 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
+  const clientSecretRef = useRef<string>("");
   const [syncing, setSyncing] = useState(false);
 
   // Resolve the order from router state, then the persisted secure basket
@@ -2476,6 +2481,7 @@ export default function Checkout() {
           // advisor replaces it with a confirmed shipping quote.
           estimatedFreightCents: nextShipping ? 0 : estimate.cents,
           paymentIntentId: intentIdRef.current || undefined,
+          paymentIntentClientSecret: intentIdRef.current ? clientSecretRef.current || undefined : undefined,
           // Destination country — drives Singapore GST server-side.
           shippingCountry: formCountry ?? "",
           incoterm: summary?.incoterm ?? incoterm,
@@ -2564,6 +2570,7 @@ export default function Checkout() {
             } as Parameters<typeof loadStripe>[1]),
           );
 
+        clientSecretRef.current = String(pi.clientSecret || "");
         setClientSecret(pi.clientSecret);
       } catch (err: any) {
         setError(err?.message || "Unable to start checkout.");
@@ -2608,6 +2615,7 @@ export default function Checkout() {
     if (next === intentMethodRef.current) return;
     intentMethodRef.current = next;
     intentIdRef.current = "";
+    clientSecretRef.current = "";
     setClientSecret(null);
     void syncIntent(shipping, next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
