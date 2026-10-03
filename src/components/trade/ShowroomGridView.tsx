@@ -20,6 +20,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP, inferSubcategory, normalizeCategory } 
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useClientProjectPricing } from "@/hooks/useClientProjectPricing";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { MobileProductGridSkeleton } from "@/components/trade/MobileProductGridSkeleton";
