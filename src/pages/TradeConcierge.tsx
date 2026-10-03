@@ -12,7 +12,7 @@ import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useProjects } from "@/hooks/useProjects";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { FlashSkeleton, FrontierSkeleton } from "@/components/CuratorialGuideRouter";
-import { DotCircleLoader } from "@/components/ui/DotCircleLoader";
+import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 
 const AIConcierge = lazy(() =>
   import("@/components/trade/AIConcierge").then((m) => ({ default: m.AIConcierge })),
