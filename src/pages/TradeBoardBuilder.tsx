@@ -608,7 +608,7 @@ const TradeBoardBuilder = () => {
             <span className="truncate">{finishes[item.id].label}</span>
           </p>
         )}
-        {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
+         {item.product?.materials && <p data-trade-sensitive={!clientSafe ? "" : undefined} className="font-body text-[11px] text-muted-foreground mt-1 truncate">{clientSafe ? "Selected materials" : item.product.materials}</p>}
         {isEditable && (
           <div className="flex items-center gap-1 mt-2">
             {subfolders.length > 0 && (

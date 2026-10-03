@@ -154,9 +154,10 @@ export function ProjectProposalPreview({
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-display text-base font-normal leading-snug text-card-foreground">{item.name}</h3>
-                      <p className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                       <p data-trade-sensitive={!isClientMode ? "" : undefined} className="mt-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
                          {isClientMode ? "Curated Collection" : item.designer}{!isClientMode && item.sku ? ` · ${item.sku}` : ""}{item.quantity > 1 ? ` · Qty ${item.quantity}` : ""}
                       </p>
+                       {!isClientMode && <span data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
                     </div>
                      <div data-trade-sensitive={!isClientMode ? "" : undefined} className="text-right">
                       <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
@@ -177,7 +178,7 @@ export function ProjectProposalPreview({
               })}
             </div>
 
-            <footer className="mt-10 flex items-baseline justify-between border-t border-card-foreground pt-5">
+             <footer data-trade-sensitive={!isClientMode ? "" : undefined} className="mt-10 flex items-baseline justify-between border-t border-card-foreground pt-5">
               <p className="font-body text-[10px] uppercase tracking-[0.15em] text-card-foreground">
                 {isClientMode ? "Total Estimate" : "Total Trade"}
               </p>
@@ -185,6 +186,7 @@ export function ProjectProposalPreview({
                  {money(isClientMode ? clientTotal : tradeTotal)}
               </p>
             </footer>
+             {!isClientMode && <div data-client-placeholder aria-hidden="true" className="mt-10 h-5 w-32 animate-pulse bg-muted/60" />}
           </section>
            <div className="mt-12 flex items-center gap-3 border-t border-border pt-4 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground"><StudioBrand studio={studio} /><span>· {projectName}</span></div>
         </main>
