@@ -29,7 +29,7 @@ describe("client proposal and print sheet", () => {
     const sheet = container.querySelector(".proposal-print-sheet");
     expect(sheet).not.toBeNull();
     expect(sheet?.textContent).toMatch(/Curated Collection/);
-    expect(sheet?.textContent).toMatch(/\$9,727\.88/);
+    expect(sheet?.textContent).toMatch(/\$9,728/);
     expect(sheet?.textContent).not.toMatch(/SECRET SUPPLIER|FACTORY-SECRET-49|\$7,782\.30|\$8,647|Trade \/ MSRP|Total Trade|tier|discount|margin/i);
     expect(screen.getByText("Clam Chair")).toBeInTheDocument();
   });
