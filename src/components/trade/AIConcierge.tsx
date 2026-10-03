@@ -753,12 +753,15 @@ export function AIConcierge({
   initialGreeting,
   embedded = false,
   onEmbeddedClose,
+  initialPrompt,
 }: {
   surface?: ConciergeSurface;
   initialGreeting?: string;
   /** Render the complete Felix workspace inside an existing drawer shell. */
   embedded?: boolean;
   onEmbeddedClose?: () => void;
+  /** Embedded only: a prompt seeded by the host page, sent once on mount. */
+  initialPrompt?: string;
 } = {}) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
@@ -3761,6 +3764,29 @@ export function AIConcierge({
   useEffect(() => () => {
     if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
   }, []);
+
+  // Embedded seeding: the host page (Trade Concierge workspace) hands over the
+  // prompt that opened the workspace; send it once on mount.
+  const seededPromptRef = useRef(false);
+  useEffect(() => {
+    if (!embedded || !initialPrompt?.trim() || seededPromptRef.current) return;
+    seededPromptRef.current = true;
+    void sendRef.current(initialPrompt.trim());
+  }, [embedded, initialPrompt]);
+
+  // Embedded tool shortcuts: the host page's composer chips trigger Felix's own
+  // pickers/actions instead of duplicating them.
+  useEffect(() => {
+    if (!embedded) return;
+    const onAction = (e: Event) => {
+      const action = (e as CustomEvent<string>).detail;
+      if (action === "upload-moodboard") moodInputRef.current?.click();
+      else if (action === "check-lead-times") void sendRef.current("What are the current lead times for your pieces?");
+      else if (action === "request-quote") void sendRef.current("I'd like to request a custom quote for my project.");
+    };
+    window.addEventListener("concierge:action", onAction);
+    return () => window.removeEventListener("concierge:action", onAction);
+  }, [embedded]);
 
 
   const submitBriefFromBuilder = useCallback(async (text: string) => {
