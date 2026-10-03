@@ -132,7 +132,7 @@ export async function compileSpecSchedule(opts: {
   const rows: SpecScheduleRow[] = opts.picks.map((ref, i) => {
     const p: any = pickById.get(ref.pickId) ?? {};
     const rrp = priceById.get(ref.pickId);
-    const rrpCents = rrp && rrp > 0 ? rrp : null;
+    const rrpCents = typeof rrp === "number" && Number.isFinite(rrp) && rrp > 0 ? rrp : null;
     return {
       ref: `FF-${String(i + 1).padStart(3, "0")}`,
       productName: p.title ?? "Untitled piece",
@@ -162,7 +162,7 @@ export async function compileSpecSchedule(opts: {
 }
 
 const money = (cents: number | null, cur: string) =>
-  cents == null ? "Price upon Request"
+  cents == null || !Number.isFinite(cents) || cents <= 0 ? "Price upon Request"
     : new Intl.NumberFormat("en-US", { style: "currency", currency: cur, maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 
 async function toDataUrl(url: string): Promise<{ data: string; w: number; h: number } | null> {
@@ -189,17 +189,19 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   const muted: [number, number, number] = [110, 118, 116];
   const jade: [number, number, number] = [42, 110, 98];
   const { profile } = ds;
+  const studioName = profile.studioName?.trim() || "Your Studio";
 
   // Header — studio branding (white-label) left, document title right.
-  const logo = profile.studioLogoUrl ? await toDataUrl(profile.studioLogoUrl) : null;
+  const logo = profile.studioLogoUrl?.trim() ? await toDataUrl(profile.studioLogoUrl.trim()) : null;
   let logoDrawn = false;
   if (logo) {
     const h = 30; const w = Math.min(140, (logo.w / logo.h) * h);
     try { doc.addImage(logo.data, M, M - 6, w, h); logoDrawn = true; } catch { /* fall back to name */ }
   }
   if (!logoDrawn) {
-    doc.setFont(profile.studioFont === "modern" ? "helvetica" : "times", profile.studioFont === "modern" ? "normal" : "italic"); doc.setFontSize(18); doc.setTextColor(...ink);
-    doc.text(profile.studioName, M, M + 14);
+    doc.setFont("times", "normal"); doc.setFontSize(16); doc.setTextColor(...ink);
+    const wordmark = studioName.toLocaleUpperCase("en-US");
+    doc.text(wordmark, M, M + 14, { charSpace: 1.6, maxWidth: W * 0.48 });
   }
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...muted);
   doc.text("SPECIFICATION SCHEDULE", W - M, M + 2, { align: "right" });
@@ -286,12 +288,20 @@ export async function renderSpecSchedulePdf(ds: SpecScheduleDataset): Promise<vo
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
     doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...muted);
-    doc.text(`${profile.studioName} · ${profile.projectName} · Specification Schedule`, M, H - 20);
+    doc.text(`${studioName} · ${profile.projectName} · Specification Schedule`, M, H - 20);
     doc.text(`Page ${p} of ${pages}`, W - M, H - 20, { align: "right" });
   }
 
   const safe = profile.projectName.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "") || "Project";
-  const blob = doc.output("blob");
+   // jsPDF inserts its own generator name into /Producer; replace it with the
+   // studio identity before creating the downloadable file.
+   const { PDFDocument } = await import("pdf-lib");
+   const branded = await PDFDocument.load(doc.output("arraybuffer"), { updateMetadata: false });
+   branded.setProducer(studioName);
+   branded.setCreator(studioName);
+   branded.setTitle(`${profile.projectName} — Specification Schedule`);
+   branded.setSubject("Client specification schedule");
+   const blob = new Blob([await branded.save() as BlobPart], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = `${safe}_Specification-Schedule_${ds.generatedAt.slice(0, 10)}.pdf`;
