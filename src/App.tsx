@@ -542,7 +542,9 @@ function restorePreviewLocationBeforeRouter() {
     const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
     if (!raw) return;
     const saved = JSON.parse(raw) as { path?: string; search?: string; ts?: number };
-    const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 30 * 60 * 1000;
+    // The preview frame reloads to "/" on every hard refresh; keep returning
+    // the member to the page they were working on for a full working day.
+    const isFresh = typeof saved.ts === "number" && Date.now() - saved.ts < 12 * 60 * 60 * 1000;
     const currentSearch = new URLSearchParams(window.location.search);
     currentSearch.delete("__lovable_token");
     const currentIsRoot = window.location.pathname === "/" && !currentSearch.toString() && !window.location.hash;
