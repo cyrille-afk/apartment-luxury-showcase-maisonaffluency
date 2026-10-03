@@ -33,13 +33,15 @@ function greeting() {
 }
 
 /** One workspace session = one embedded Felix mount, keyed by this id. */
-interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string }
+interface WorkspaceSession { key: number; seedPrompt: string; pendingAction?: string; fresh: boolean }
+interface PastItem { id: string; title: string; updated_at: string; kind: "curation" | "workspace" }
 
 export default function TradeConcierge() {
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [threads, setThreads] = useState<ThreadRow[]>([]);
+  const [wsThreads, setWsThreads] = useState<ThreadRow[]>([]);
   const [threadsLoaded, setThreadsLoaded] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [workspace, setWorkspace] = useState<WorkspaceSession | null>(null);
@@ -52,15 +54,53 @@ export default function TradeConcierge() {
   const { projects } = useProjects({ activeOnly: false });
   const activeProject = projectFilter ? projects.find((p) => p.id === projectFilter) : undefined;
 
+  // Per-user, per-project persistence of the Felix workspace.
+  const projectKey = projectFilter || "none";
+  const openFlagKey = user ? `concierge:workspaceOpen:${user.id}:${projectKey}` : null;
+  const wsThreadKey = user ? `concierge:workspaceThread:${user.id}:${projectKey}` : null;
+  const readLS = (k: string | null) => { if (!k) return null; try { return localStorage.getItem(k); } catch { return null; } };
+  const writeLS = (k: string | null, v: string | null) => {
+    if (!k) return;
+    try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* ignore */ }
+  };
+  const activeWsThread = readLS(wsThreadKey);
+
   const loadThreads = useCallback(async () => {
     if (!user) return;
-    const { data, error } = await supabase.from("curation_threads")
-      .select("id, title, updated_at").order("updated_at", { ascending: false }).limit(50);
-    if (!error) setThreads(data ?? []);
+    let wq = supabase.from("concierge_threads").select("id, title, updated_at:last_active_at")
+      .eq("workspace", true).neq("title", "New conversation");
+    wq = projectFilter ? wq.eq("project_id", projectFilter) : wq.is("project_id", null);
+    const [c, w] = await Promise.all([
+      supabase.from("curation_threads").select("id, title, updated_at").order("updated_at", { ascending: false }).limit(50),
+      wq.order("last_active_at", { ascending: false }).limit(50),
+    ]);
+    if (!c.error) setThreads(c.data ?? []);
+    if (!w.error) setWsThreads((w.data ?? []) as ThreadRow[]);
     setThreadsLoaded(true);
-  }, [user]);
+  }, [user, projectFilter]);
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
+
+  const pastItems: PastItem[] = [
+    ...wsThreads.map((t) => ({ ...t, kind: "workspace" as const })),
+    ...threads.map((t) => ({ ...t, kind: "curation" as const })),
+  ].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+
+  // Restore the selected project's open workspace on mount / project switch.
+  useEffect(() => {
+    if (!user || threadId) return;
+    setWorkspace((w) => readLS(openFlagKey) === "1"
+      ? { key: (w?.key ?? 0) + 1, seedPrompt: "", fresh: false }
+      : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, projectKey]);
+
+  // Refresh the rail periodically while a workspace is open so new turns surface.
+  useEffect(() => {
+    if (!workspace) return;
+    const t = window.setInterval(() => void loadThreads(), 15000);
+    return () => window.clearInterval(t);
+  }, [workspace, loadThreads]);
 
   const { loadedFor, messages, phase, route, fallback, error, send, stop, busy } = useCurationThread(threadId, loadThreads);
 
@@ -78,7 +118,7 @@ export default function TradeConcierge() {
 
   useEffect(() => { if (!busy && !workspace) inputRef.current?.focus(); }, [busy, threadId, workspace]);
 
-  // Opening a saved curation or starting fresh leaves the Felix workspace.
+  // Opening a saved curation leaves the Felix workspace (without forgetting it).
   useEffect(() => { if (threadId) setWorkspace(null); }, [threadId]);
 
   // Fire a queued tool action (e.g. open the moodboard picker) once the
@@ -96,11 +136,29 @@ export default function TradeConcierge() {
   const withProjectContext = (text: string) =>
     activeProject ? `Project context: ${activeProject.name}${activeProject.location ? ` (${activeProject.location})` : ""}. ${text}` : text;
 
-  /** Entry-state input: open the Felix workspace, seeding the first prompt. */
+  /** Entry-state input: open a fresh Felix workspace, seeding the first prompt. */
   const openWorkspace = (text: string, pendingAction?: string) => {
     if (!user) return;
     setPrompt("");
-    setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: text ? withProjectContext(text) : "", pendingAction }));
+    writeLS(openFlagKey, "1");
+    setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: text ? withProjectContext(text) : "", pendingAction, fresh: true }));
+    window.setTimeout(() => void loadThreads(), 4000);
+  };
+
+  /** Reopen a past workspace curation for the current project. */
+  const resumeWorkspace = (id: string) => {
+    writeLS(wsThreadKey, id);
+    writeLS(openFlagKey, "1");
+    setWorkspace((w) => ({ key: (w?.key ?? 0) + 1, seedPrompt: "", fresh: false }));
+  };
+
+  /** Archive the active thread to Past Curations and return to the greeting. */
+  const newCuration = () => {
+    writeLS(openFlagKey, null);
+    writeLS(wsThreadKey, null);
+    setWorkspace(null);
+    setPrompt("");
+    void loadThreads();
   };
 
   /** In-thread input: continue the saved curation conversation. */
@@ -118,7 +176,14 @@ export default function TradeConcierge() {
     void submit(prompt);
   };
 
-  const removeThread = async (id: string) => {
+  const removeThread = async (id: string, kind: PastItem["kind"] = "curation") => {
+    if (kind === "workspace") {
+      const { error: e } = await supabase.from("concierge_threads").delete().eq("id", id);
+      if (e) return;
+      setWsThreads((t) => t.filter((x) => x.id !== id));
+      if (id === activeWsThread) newCuration();
+      return;
+    }
     const { error: e } = await supabase.from("curation_threads").delete().eq("id", id);
     if (e) return;
     setThreads((t) => t.filter((x) => x.id !== id));
@@ -175,25 +240,28 @@ export default function TradeConcierge() {
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Past curations</p>
               <Button asChild variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
-                <Link to="/trade/concierge" onClick={() => setWorkspace(null)}><Plus className="h-3.5 w-3.5" /> New Curation</Link>
+                <Link to="/trade/concierge" onClick={newCuration}><Plus className="h-3.5 w-3.5" /> New Curation</Link>
               </Button>
             </div>
             {!threadsLoaded ? (
               <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 animate-pulse rounded-sm bg-foreground/[0.05]" />)}</div>
-            ) : threads.length === 0 ? (
+            ) : pastItems.length === 0 ? (
               <p className="font-display text-sm italic text-muted-foreground">Your curations will appear here.</p>
             ) : (
               <ul className="space-y-1">
-                {threads.map((t) => (
+                {pastItems.map((t) => (
                   <li key={t.id} className={cn("group flex items-center rounded-sm border-l-2 transition-colors",
-                    t.id === threadId ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
-                    <Link to={`/trade/concierge/${t.id}`} className="min-w-0 flex-1 px-3 py-2">
+                    (t.kind === "curation" ? t.id === threadId : !!workspace && t.id === activeWsThread)
+                      ? "border-accent bg-muted/60" : "border-transparent hover:bg-muted/40")}>
+                    <Link to={t.kind === "curation" ? `/trade/concierge/${t.id}` : "/trade/concierge"}
+                      onClick={t.kind === "workspace" ? () => resumeWorkspace(t.id) : undefined}
+                      className="min-w-0 flex-1 px-3 py-2">
                       <span className="block truncate text-sm text-foreground">{t.title}</span>
                       <span className="block text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         {new Date(t.updated_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                       </span>
                     </Link>
-                    <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id)}
+                    <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id, t.kind)}
                       className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -212,7 +280,8 @@ export default function TradeConcierge() {
                 <DotCircleLoader size="sm" className="text-muted-foreground" />
               </div>
             }>
-              <AIConcierge key={workspace.key} embedded initialPrompt={workspace.seedPrompt || undefined} />
+              <AIConcierge key={`${projectKey}:${workspace.key}`} embedded projectId={projectFilter || null}
+                startFresh={workspace.fresh} initialPrompt={workspace.seedPrompt || undefined} />
             </Suspense>
           ) : (
             <>

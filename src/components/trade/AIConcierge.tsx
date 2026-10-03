@@ -754,6 +754,8 @@ export function AIConcierge({
   embedded = false,
   onEmbeddedClose,
   initialPrompt,
+  projectId = null,
+  startFresh = false,
 }: {
   surface?: ConciergeSurface;
   initialGreeting?: string;
@@ -762,6 +764,10 @@ export function AIConcierge({
   onEmbeddedClose?: () => void;
   /** Embedded only: a prompt seeded by the host page, sent once on mount. */
   initialPrompt?: string;
+  /** Embedded only: project the workspace thread is bound to. */
+  projectId?: string | null;
+  /** Embedded only: open a brand-new thread instead of restoring the last one. */
+  startFresh?: boolean;
 } = {}) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
@@ -1557,7 +1563,14 @@ export function AIConcierge({
   const timelineRef = useRef<TimelineItem[]>(timeline);
   useEffect(() => { timelineRef.current = timeline; }, [timeline]);
 
-  const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
+  // Embedded (Trade Concierge page) threads are scoped per project, so each
+  // project restores its own active Felix workspace.
+  const activeThreadKey = user?.id
+    ? embedded
+      ? `concierge:workspaceThread:${user.id}:${projectId || "none"}`
+      : `concierge:activeThread:${user.id}`
+    : null;
+  const [hydratedThreadId, setHydratedThreadId] = useState<string | null>(null);
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
     { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
@@ -1567,26 +1580,36 @@ export function AIConcierge({
     const firstUser = items.find((t) => t.kind === "msg" && t.role === "user");
     const raw = (firstUser as any)?.content?.trim?.() || "";
     if (!raw) return "New conversation";
-    const cleaned = raw.replace(/\s+/g, " ").slice(0, 60);
+    const cleaned = raw.replace(/^Project context:[^.]*\.\s*/i, "").replace(/\s+/g, " ").slice(0, 60);
     return cleaned.length < raw.length ? cleaned + "…" : cleaned;
   }, []);
 
   const refreshThreads = useCallback(async (uid: string) => {
-    const { data } = await supabase
+    let q = supabase
       .from("concierge_threads")
       .select("id,title,last_active_at")
-      .eq("user_id", uid)
-      .order("last_active_at", { ascending: false })
-      .limit(50);
+      .eq("user_id", uid);
+    if (embedded) {
+      q = q.eq("workspace", true);
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+    } else {
+      q = q.eq("workspace", false);
+    }
+    const { data } = await q.order("last_active_at", { ascending: false }).limit(50);
     if (data) setThreads(data as ConciergeThread[]);
     return (data as ConciergeThread[]) || [];
-  }, []);
+  }, [embedded, projectId]);
 
   const createNewThread = useCallback(async (): Promise<string | null> => {
     if (!user?.id) return null;
     const { data, error } = await supabase
       .from("concierge_threads")
-      .insert({ user_id: user.id, title: "New conversation", timeline: [] })
+      .insert({
+        user_id: user.id,
+        title: "New conversation",
+        timeline: [],
+        ...(embedded ? { workspace: true, project_id: projectId || null } : {}),
+      })
       .select("id,title,last_active_at")
       .single();
     if (error || !data) return null;
@@ -1598,6 +1621,7 @@ export function AIConcierge({
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
     stampTimelineThread(data.id);
     setTimeline(buildInitialTimeline());
+    setHydratedThreadId(data.id);
     return data.id;
   }, [user?.id, activeThreadKey, buildInitialTimeline, stampTimelineThread]);
 
@@ -1643,6 +1667,14 @@ export function AIConcierge({
       if (cancelled) return;
       let stored: string | null = null;
       if (activeThreadKey) try { stored = localStorage.getItem(activeThreadKey); } catch {}
+      // Embedded workspace: threads are bound to the selected project. Restore
+      // that project's last thread, or open a fresh one (New Curation / none yet).
+      if (embedded) {
+        const restore = !startFresh && stored && list.some((t) => t.id === stored) ? stored : null;
+        if (restore) setActiveThreadId(restore);
+        else await createNewThread();
+        return;
+      }
       const preferred = stored && list.some((t) => t.id === stored) ? stored : (list[0]?.id ?? null);
       if (preferred) {
         setActiveThreadId(preferred);
@@ -1671,7 +1703,8 @@ export function AIConcierge({
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadKey, refreshThreads, deriveThreadTitle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, activeThreadKey, refreshThreads, deriveThreadTitle, embedded, startFresh]);
 
   // Build the compact, JSONB-safe timeline payload we upsert to the cloud.
   // Kept as a callable so both the debounced save and the pagehide flush use
@@ -1757,6 +1790,7 @@ export function AIConcierge({
         // sessionStorage-restored timeline is fresher than DB — keep it and
         // flush upstream so the DB catches up.
         void saveActiveThreadNow(current);
+        setHydratedThreadId(activeThreadId);
         return;
       }
       stampTimelineThread(activeThreadId);
@@ -1765,6 +1799,7 @@ export function AIConcierge({
       } else {
         setTimeline(buildInitialTimeline());
       }
+      setHydratedThreadId(activeThreadId);
     })();
     return () => { cancelled = true; };
   }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, stampTimelineThread]);
@@ -3767,12 +3802,15 @@ export function AIConcierge({
 
   // Embedded seeding: the host page (Trade Concierge workspace) hands over the
   // prompt that opened the workspace; send it once on mount.
+  // Waits until the (project-bound) thread is hydrated so the seeded turn is
+  // never overwritten by the thread's initial timeline.
   const seededPromptRef = useRef(false);
   useEffect(() => {
     if (!embedded || !initialPrompt?.trim() || seededPromptRef.current) return;
+    if (!activeThreadId || hydratedThreadId !== activeThreadId) return;
     seededPromptRef.current = true;
     void sendRef.current(initialPrompt.trim());
-  }, [embedded, initialPrompt]);
+  }, [embedded, initialPrompt, activeThreadId, hydratedThreadId]);
 
   // Embedded tool shortcuts: the host page's composer chips trigger Felix's own
   // pickers/actions instead of duplicating them.

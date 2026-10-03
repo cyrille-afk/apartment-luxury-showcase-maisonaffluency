@@ -2452,30 +2452,44 @@ export type Database = {
           created_at: string
           id: string
           last_active_at: string
+          project_id: string | null
           timeline: Json
           title: string
           updated_at: string
           user_id: string
+          workspace: boolean
         }
         Insert: {
           created_at?: string
           id?: string
           last_active_at?: string
+          project_id?: string | null
           timeline?: Json
           title?: string
           updated_at?: string
           user_id: string
+          workspace?: boolean
         }
         Update: {
           created_at?: string
           id?: string
           last_active_at?: string
+          project_id?: string | null
           timeline?: Json
           title?: string
           updated_at?: string
           user_id?: string
+          workspace?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "concierge_threads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent_audit_log: {
         Row: {
