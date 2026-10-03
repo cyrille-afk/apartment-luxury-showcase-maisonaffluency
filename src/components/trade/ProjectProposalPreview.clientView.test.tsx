@@ -33,4 +33,11 @@ describe("client proposal and print sheet", () => {
     expect(sheet?.textContent).not.toMatch(/SECRET SUPPLIER|FACTORY-SECRET-49|\$7,782\.30|\$8,647|Trade \/ MSRP|Total Trade|tier|discount|margin/i);
     expect(screen.getByText("Clam Chair")).toBeInTheDocument();
   });
+  it("shows Price upon Request rather than zero for a custom unpriced piece", () => {
+    const { container } = render(<ProjectProposalPreview {...props} items={[{ ...props.items[0], rrp_cents: null }]} />);
+    const sheet = container.querySelector(".proposal-print-sheet");
+    expect(sheet?.textContent).toContain("Price upon Request");
+    expect(sheet?.textContent).not.toMatch(/\$0|SECRET SUPPLIER|FACTORY-SECRET-49/);
+    expect(container.querySelector(".font-serif.uppercase.tracking-widest")?.textContent).toBe("ATELIER DELVAL");
+  });
 });
