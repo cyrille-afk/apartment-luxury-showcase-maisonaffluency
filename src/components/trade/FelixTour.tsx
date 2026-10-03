@@ -414,6 +414,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
   let cardTop = 0;
+  let aboveTarget = false;
   if (rect) {
     const centerY = clampY(rect.top + rect.height / 2 - cardH / 2);
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
@@ -429,6 +430,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (rect.top - PAD - 8 >= cardH + 16) {
         cardLeft = centerX;
         cardTop = rect.top - cardH - PAD - 8;
+        aboveTarget = true;
       } else if (clearRight + cardW <= viewport.w - 16) {
         cardLeft = clearRight;
         cardTop = centerY;
@@ -490,7 +492,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           "fixed z-[132] max-h-[calc(100dvh-32px)] overflow-y-auto overscroll-contain print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
-         style={{ width: cardW, left: 0, top: 0, maxHeight: step.id === "client-view" && rect ? Math.max(80, Math.min(viewport.h - cardTop - 16, cardTop < rect.top ? rect.top - cardTop - PAD - 8 : viewport.h - cardTop - 16)) : undefined, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
+         style={{ width: cardW, left: 0, top: 0, maxHeight: aboveTarget && rect ? Math.max(80, rect.top - cardTop - PAD - 8) : undefined, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
       >
         <div className="p-5">
           {/* Header */}
