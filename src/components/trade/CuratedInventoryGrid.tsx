@@ -234,6 +234,7 @@ export function CuratedInventoryGrid({
                 <div className="mt-auto flex w-full min-w-0 flex-col gap-0.5 pt-3">
 
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
+                    <>
                      <div data-trade-sensitive={showTradePrice ? "" : undefined} className="leading-tight">
                       <span className="font-display text-[15px] font-semibold text-foreground">
                         {fmtPrice(
@@ -250,6 +251,7 @@ export function CuratedInventoryGrid({
                       )}
                      </div>
                       {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
+                    </>
                   ) : (
                     <div className="font-body text-[12px] text-foreground/80">Price upon Request</div>
                   )}
