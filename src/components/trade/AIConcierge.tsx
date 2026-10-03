@@ -1575,6 +1575,7 @@ export function AIConcierge({
     : null;
   const [hydratedThreadId, setHydratedThreadId] = useState<string | null>(null);
   const rowVersionRef = useRef<string | null>(null);
+  const saveChainRef = useRef<Promise<void>>(Promise.resolve());
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
     { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
@@ -1743,6 +1744,13 @@ export function AIConcierge({
     const nowIso = new Date().toISOString();
     try {
       if (embedded) {
+        // Serialize this tab's saves so overlapping writes never trip the
+        // concurrency check against our own previous write.
+        const prevSave = saveChainRef.current;
+        let release!: () => void;
+        saveChainRef.current = new Promise<void>((r) => { release = r; });
+        await prevSave;
+        try {
         // Optimistic concurrency: only write if nobody (e.g. another tab on the
         // same project) changed the row since we last read/wrote it.
         let q = supabase
@@ -1774,6 +1782,7 @@ export function AIConcierge({
           }
           return;
         }
+        } finally { release(); }
       } else {
         await supabase
           .from("concierge_threads")
