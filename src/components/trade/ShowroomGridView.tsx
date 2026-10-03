@@ -174,6 +174,7 @@ const ShowroomGridView = ({
     : "grid grid-cols-2 md:grid-cols-3 gap-4";
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
+  const clientMultiplier = useClientProjectPricing();
   const fxRates = useFxRates();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
@@ -205,7 +206,7 @@ const ShowroomGridView = ({
 
   const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!price) return null;
-    return showTradePrice ? { ...price, cents: Math.round(price.cents * (1 - TRADE_DISCOUNT)) } : price;
+    return { ...price, cents: showTradePrice ? Math.round(price.cents * (1 - TRADE_DISCOUNT)) : Math.round(Math.round(price.cents * (1 - TRADE_DISCOUNT)) * clientMultiplier) };
   };
 
   const renderPriceDisplay = (
@@ -223,7 +224,7 @@ const ShowroomGridView = ({
         {showTradePrice ? (
           <>
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
-              {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+             {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
@@ -733,7 +734,7 @@ const ShowroomGridView = ({
       {/* Results count */}
       <p className="font-body text-xs text-muted-foreground mb-4">
         {filtered.length} {filtered.length === 1 ? "product" : "products"}
-        {selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}
+         {showTradePrice && selectedDesigner !== "all" ? ` by ${selectedDesigner}` : ""}
         {selectedSection !== "all" ? ` in ${selectedSection}` : ""}
       </p>
 
