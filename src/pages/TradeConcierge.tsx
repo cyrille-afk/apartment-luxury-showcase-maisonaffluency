@@ -83,6 +83,24 @@ export default function TradeConcierge() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, PreviewData>>({});
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const exportCuration = async (t: PastItem) => {
+    if (exportingId) return;
+    setExportingId(t.id);
+    try {
+      const preview = previews[t.id] ?? { turns: [], picks: [] };
+      await renderCurationPdf({
+        title: t.title,
+        updatedAt: t.updated_at,
+        projectName: t.project_id ? projects.find((p) => p.id === t.project_id)?.name ?? null : null,
+        picks: preview.picks,
+        turns: preview.turns,
+      });
+    } finally {
+      setExportingId(null);
+    }
+  };
   const buildingRef = useRef<Set<string>>(new Set());
   const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
   const [designerSel, setDesignerSel] = useState("all");
