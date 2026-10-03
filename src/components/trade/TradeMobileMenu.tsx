@@ -19,7 +19,7 @@ const coreItems = [
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "The Collection", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
-  { title: "Trade Concierge", url: "/trade/concierge", icon: Sparkles },
+  { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Clients", url: "/trade/client-management", icon: Users },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },

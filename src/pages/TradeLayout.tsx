@@ -488,7 +488,6 @@ const TradeLayout = () => {
               </div>
               <NotificationBell />
               <MobilePreviewHeaderButton />
-              <ConciergeHeaderButton />
             </div>
           </header>
           <main className={`trade-editorial-main flex-1 ${fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
