@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -136,11 +137,14 @@ serve(async (req) => {
 
     const goodsAmount = items.reduce((sum, i) => sum + i.unitAmount * i.quantity, 0);
     const shippingConfirmed = body?.shippingConfirmed === true;
-    const rawShipping = Number(body?.shippingCents);
-    const shippingCents =
-      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
-        ? Math.round(rawShipping)
-        : 0;
+    const shipRes = await resolveConfirmedShipping(supabaseAdmin, {
+      confirmed: shippingConfirmed,
+      quoteRef: body?.shippingQuoteRef ?? body?.shippingLabel,
+      currency,
+      userId,
+    });
+    if (!shipRes.ok) return json({ error: shipRes.error }, 400);
+    const shippingCents = shipRes.cents;
     const amount = goodsAmount + shippingCents;
     if (amount < 100) return json({ error: "Price out of range." }, 400);
 

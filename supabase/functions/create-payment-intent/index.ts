@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
+import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
@@ -137,11 +138,14 @@ serve(async (req) => {
     // Shipping is "To be Quoted by Advisor" until the buyer explicitly confirms
     // an advisor-issued quote. No estimate is ever invented server-side.
     const shippingConfirmed = body?.shippingConfirmed === true;
-    const rawShipping = Number(body?.shippingCents);
-    const shippingCents =
-      shippingConfirmed && Number.isFinite(rawShipping) && rawShipping > 0
-        ? Math.round(rawShipping)
-        : 0;
+    const shipRes = await resolveConfirmedShipping(supabaseAdmin, {
+      confirmed: shippingConfirmed,
+      quoteRef: body?.shippingQuoteRef ?? body?.shippingLabel,
+      currency,
+      userId,
+    });
+    if (!shipRes.ok) return json({ error: shipRes.error }, 400);
+    const shippingCents = shipRes.cents;
     if (shippingCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
     const shippingLabel =
       typeof body?.shippingLabel === "string" ? body.shippingLabel.trim().slice(0, 120) : "";
@@ -331,7 +335,13 @@ serve(async (req) => {
           existing.status === "requires_payment_method" ||
           existing.status === "requires_confirmation";
         const sameMethod = (existing.payment_method_types ?? []).includes(requestedMethod);
-        if (updatable && existing.currency === currency && sameMethod) {
+        // Ownership: the caller must hold the intent's client secret and, when
+        // signed in, match the user that created it.
+        const secret = typeof body?.paymentIntentClientSecret === "string" ? body.paymentIntentClientSecret : "";
+        const owned =
+          !!secret && secret === existing.client_secret &&
+          (existing.metadata?.user_id ?? "") === (userId ?? "");
+        if (owned && updatable && existing.currency === currency && sameMethod) {
           intent = await stripe.paymentIntents.update(reuseId, {
             amount: chargeAmount,
             description,
