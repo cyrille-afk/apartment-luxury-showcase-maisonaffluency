@@ -489,6 +489,11 @@ export default function TradeConcierge() {
                           className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors group-hover:opacity-100 focus:opacity-100 hover:text-foreground">
                           <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")} />
                         </button>
+                        <button type="button" aria-label={`Export ${t.title} as PDF`} disabled={exportingId === t.id}
+                          onClick={() => void exportCuration(t)}
+                          className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors group-hover:opacity-100 focus:opacity-100 hover:text-foreground disabled:opacity-60">
+                          {exportingId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                        </button>
                         <button type="button" aria-label={`Delete ${t.title}`} onClick={() => void removeThread(t.id, t.kind)}
                           className="mr-2 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100">
                           <Trash2 className="h-3.5 w-3.5" />
