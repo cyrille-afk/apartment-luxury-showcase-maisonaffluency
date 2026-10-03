@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowUp, ChevronDown, Clock, FileText, ImagePlus, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { ArrowUp, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
+import { renderCurationPdf } from "@/lib/curationExport";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
