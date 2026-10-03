@@ -1574,6 +1574,7 @@ export function AIConcierge({
       : `concierge:activeThread:${user.id}`
     : null;
   const [hydratedThreadId, setHydratedThreadId] = useState<string | null>(null);
+  const rowVersionRef = useRef<string | null>(null);
 
   const buildInitialTimeline = useCallback((): TimelineItem[] => [
     { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang(), greetingMeta) },
@@ -1613,9 +1614,10 @@ export function AIConcierge({
         timeline: [],
         ...(embedded ? { workspace: true, project_id: projectId || null } : {}),
       })
-      .select("id,title,last_active_at")
+      .select("id,title,last_active_at,updated_at")
       .single();
     if (error || !data) return null;
+    rowVersionRef.current = (data as any).updated_at ?? null;
     setThreads((prev) => [data as ConciergeThread, ...prev]);
     hydratedThreadRef.current = data.id;
     cloudLastPayloadRef.current = "";
@@ -1740,11 +1742,45 @@ export function AIConcierge({
     const title = deriveThreadTitle(compact as TimelineItem[]);
     const nowIso = new Date().toISOString();
     try {
-      await supabase
-        .from("concierge_threads")
-        .update({ timeline: compact as any, title, last_active_at: nowIso })
-        .eq("id", activeThreadId)
-        .eq("user_id", user.id);
+      if (embedded) {
+        // Optimistic concurrency: only write if nobody (e.g. another tab on the
+        // same project) changed the row since we last read/wrote it.
+        let q = supabase
+          .from("concierge_threads")
+          .update({ timeline: compact as any, title, last_active_at: nowIso })
+          .eq("id", activeThreadId)
+          .eq("user_id", user.id);
+        if (rowVersionRef.current) q = q.eq("updated_at", rowVersionRef.current);
+        const { data: upd } = await q.select("updated_at");
+        if (upd && upd.length > 0) {
+          rowVersionRef.current = (upd[0] as any).updated_at;
+        } else {
+          // Conflict — fork this tab's transcript into its own thread so
+          // neither tab's turns are overwritten.
+          const { data: forked } = await supabase
+            .from("concierge_threads")
+            .insert({ user_id: user.id, title, timeline: compact as any, last_active_at: nowIso, workspace: true, project_id: projectId || null })
+            .select("id,title,last_active_at,updated_at")
+            .single();
+          if (forked) {
+            hydratedThreadRef.current = forked.id;
+            rowVersionRef.current = (forked as any).updated_at;
+            stampTimelineThread(forked.id);
+            setActiveThreadId(forked.id);
+            if (activeThreadKey) try { localStorage.setItem(activeThreadKey, forked.id); } catch {}
+            setHydratedThreadId(forked.id);
+            setThreads((prev) => [forked as ConciergeThread, ...prev]);
+            toast.info("This curation was open in another tab — your latest turns were saved as a separate curation.");
+          }
+          return;
+        }
+      } else {
+        await supabase
+          .from("concierge_threads")
+          .update({ timeline: compact as any, title, last_active_at: nowIso })
+          .eq("id", activeThreadId)
+          .eq("user_id", user.id);
+      }
       setThreads((prev) => {
         const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
         next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
@@ -1753,7 +1789,7 @@ export function AIConcierge({
     } catch {
       // Non-fatal: sessionStorage still holds the in-tab copy.
     }
-  }, [user?.id, activeThreadId, buildCompactTimeline, deriveThreadTitle]);
+  }, [user?.id, activeThreadId, buildCompactTimeline, deriveThreadTitle, embedded, projectId, activeThreadKey, stampTimelineThread]);
 
   // Hydrate timeline whenever the active thread changes. If the in-memory
   // timeline (restored from sessionStorage on refresh) has MORE messages than
@@ -1772,11 +1808,12 @@ export function AIConcierge({
     (async () => {
       const { data, error } = await supabase
         .from("concierge_threads")
-        .select("timeline")
+        .select("timeline, updated_at")
         .eq("id", activeThreadId)
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
+      rowVersionRef.current = (data as any)?.updated_at ?? null;
       if (error) {
         // Release the claim so a later render can retry once.
         hydratedThreadRef.current = null;
