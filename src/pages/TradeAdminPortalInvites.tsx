@@ -27,7 +27,7 @@ function randomCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const pick = (n: number) =>
     Array.from(crypto.getRandomValues(new Uint32Array(n)), (v) => alphabet[v % alphabet.length]).join("");
-  return `${pick(4)}-${pick(4)}`;
+  return `${pick(4)}-${pick(4)}-${pick(4)}`;
 }
 
 export default function TradeAdminPortalInvites() {
