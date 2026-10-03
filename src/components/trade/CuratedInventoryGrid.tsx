@@ -6,6 +6,8 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { useClientProjectPricing } from "@/hooks/useClientProjectPricing";
+import { clientPriceCents, tradePriceCents } from "@/lib/tradePricing";
 
 export type CuratedInventoryItem = PickPreview;
 
@@ -71,6 +73,7 @@ export function CuratedInventoryGrid({
   const navigate = useNavigate();
   const { discountPct, tierLabel } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
+  const multiplier = useClientProjectPricing();
   const [details, setDetails] = useState<Record<string, HoverDetail>>({});
   const requested = useRef<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(false);
@@ -213,7 +216,7 @@ export function CuratedInventoryGrid({
               {/* Body */}
               <div className="relative flex min-h-[140px] w-full min-w-0 flex-1 flex-col pt-2.5">
                 <div className="w-full min-w-0 break-words font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                  {brand}
+                   {showTradePrice ? brand : "Curated Collection"}
                 </div>
                 <button
                   type="button"
@@ -236,7 +239,7 @@ export function CuratedInventoryGrid({
                         {fmtPrice(
                           showTradePrice
                             ? Math.round(item.price_cents * (1 - discountPct))
-                            : item.price_cents,
+                             : (clientPriceCents(tradePriceCents(item.price_cents, discountPct), multiplier) ?? item.price_cents),
                           item.currency || "EUR",
                         )}
                       </span>

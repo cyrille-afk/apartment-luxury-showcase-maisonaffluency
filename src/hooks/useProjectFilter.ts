@@ -50,6 +50,8 @@ export function useProjectFilter() {
     const next = new URLSearchParams(searchParams);
     if (id) next.set("project", id); else next.delete("project");
     setSearchParams(next);
+    try { if (id) sessionStorage.setItem(STORAGE_KEY, id); else sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    window.dispatchEvent(new Event("trade:project-filter-change"));
   };
 
   const setDesignerFilter = (name: string | null) => {
@@ -63,6 +65,7 @@ export function useProjectFilter() {
     next.delete("project");
     setSearchParams(next);
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    window.dispatchEvent(new Event("trade:project-filter-change"));
   };
 
   const clearDesignerFilter = () => {
