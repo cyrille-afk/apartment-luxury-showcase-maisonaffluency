@@ -1082,3 +1082,17 @@ body.designer-directory-open nav[data-site-header] {
   pointer-events: none;
   user-select: none;
 }
+
+/* Brief Builder validation glow — flashes a soft gold ring around the first
+   missing required field after a blocked submit. */
+@keyframes brief-field-glow {
+  0% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); border-color: hsl(var(--accent) / 0.9); }
+  35% { box-shadow: 0 0 0 5px hsl(var(--accent) / 0.28); border-color: hsl(var(--accent)); }
+  100% { box-shadow: 0 0 0 8px hsl(var(--accent) / 0); border-color: hsl(var(--accent) / 0.4); }
+}
+.brief-field-glow {
+  animation: brief-field-glow 1.3s ease-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brief-field-glow { animation: none; border-color: hsl(var(--accent)); }
+}

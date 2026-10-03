@@ -176,13 +176,15 @@ function isPlaceholderValue(value: string, defaultValue?: string): boolean {
 }
 
 // Returns a copy of the values with real user input sanitized (brackets
-// stripped); fields left at their template default are kept verbatim.
+// stripped); fields still holding their unedited template placeholder
+// (e.g. "[humidity, sun exposure, glazing]", "Handover in [N] weeks…") are
+// emitted as empty strings so placeholder metadata never reaches the backend.
 function sanitizeBriefValues(values: BriefValues): BriefValues {
   const cleanBlock = <T extends Record<string, string>>(block: T, defaults: T): T => {
     const out: Record<string, string> = { ...block };
     for (const key of Object.keys(block)) {
       const sanitized = sanitizeFieldValue(block[key]);
-      out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? block[key] : sanitized;
+      out[key] = sanitized.toLowerCase() === sanitizeFieldValue(defaults[key]).toLowerCase() ? "" : sanitized;
     }
     return out as T;
   };
@@ -679,6 +681,8 @@ function Field({
   placeholder,
   required,
   invalid,
+  glow,
+  inputRef,
 }: {
   label: string;
   value: string;
@@ -686,6 +690,8 @@ function Field({
   placeholder: string;
   required?: boolean;
   invalid?: boolean;
+  glow?: boolean;
+  inputRef?: (el: HTMLInputElement | null) => void;
 }) {
   return (
     <label className="block">
@@ -694,13 +700,14 @@ function Field({
         {required && <span className="ml-1 text-amber-500" aria-hidden="true">*</span>}
       </span>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent ${
           invalid ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-border bg-background"
-        }`}
+        } ${glow ? "brief-field-glow" : ""}`}
         aria-required={required}
       />
       {required && invalid && (
@@ -713,19 +720,27 @@ function Field({
 }
 
 
-export function BriefBuilder({
-  value,
-  onChange,
-  onClose,
-  onSubmit,
-  onSubmittingChange,
-}: {
+export type BriefBuilderHandle = {
+  // Validation interceptor entry point: returns true when the brief is
+  // invalid (submission must stay blocked) — expands the section, keeps the
+  // amber warning visible, smooth-scrolls to the first missing required
+  // field and flashes a gold glow around it.
+  focusFirstMissing: () => boolean;
+};
+
+export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
   value: string;
   onChange: (next: string) => void;
   onClose: () => void;
   onSubmit?: (briefText: string) => Promise<void>;
   onSubmittingChange?: (submitting: boolean) => void;
-}) {
+}>(function BriefBuilder({
+  value,
+  onChange,
+  onClose,
+  onSubmit,
+  onSubmittingChange,
+}, ref) {
   const [values, setValues] = useState<BriefValues>(DEFAULT_VALUES);
   const [prefix, setPrefix] = useState("");
   const [suffix, setSuffix] = useState("");
@@ -735,6 +750,11 @@ export function BriefBuilder({
   const restoredRef = useRef(false);
   const scopeRef = useRef<string>(getProjectScope());
   const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+  // Refs + glow state for the validation interceptor: on a blocked submit we
+  // smooth-scroll to the first missing required field and flash a gold glow.
+  const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [glowField, setGlowField] = useState<string | null>(null);
+  const glowTimer = useRef<number | null>(null);
 
   useEffect(() => {
     onSubmittingChange?.(isSubmitting);
@@ -869,15 +889,43 @@ export function BriefBuilder({
     return [prefix, formatted, suffix].filter(Boolean).join("\n\n");
   };
 
+  // Shared validation interceptor used by both the in-builder SUBMIT BRIEF
+  // button and the composer's send button (via the imperative handle).
+  const focusFirstMissing = (): boolean => {
+    const validation = validateBriefValues(values);
+    if (validation.valid) return false;
+    setSubmitError(
+      `Complete the three required onboarding details before submitting. Missing: ${validation.missing.join(", ")}`,
+    );
+    window.setTimeout(() => setSubmitError(null), 5000);
+    const firstMissing = REQUIRED_FIELDS.find((f) => validation.missing.includes(f.label));
+    if (firstMissing) {
+      if (!expanded[firstMissing.block]) {
+        const next = { ...expanded, [firstMissing.block]: true };
+        setExpanded(next);
+        saveExpanded(scopeRef.current, next);
+      }
+      setGlowField(firstMissing.key);
+      if (glowTimer.current) window.clearTimeout(glowTimer.current);
+      glowTimer.current = window.setTimeout(() => setGlowField(null), 2600);
+      // Wait a frame so a just-expanded section is laid out before scrolling.
+      requestAnimationFrame(() => {
+        const el = fieldRefs.current[firstMissing.key];
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        el?.focus({ preventScroll: true });
+      });
+    }
+    return true;
+  };
+
+  React.useImperativeHandle(ref, () => ({ focusFirstMissing }));
+
   const handleSubmit = async () => {
     if (!onSubmit) return;
     const text = briefTextForSubmit();
     const validation = validateBriefDraft(text);
     if (!validation.valid) {
-      setSubmitError(
-        `Complete the three required onboarding details before submitting. Missing: ${validation.missing.join(", ")}`,
-      );
-      window.setTimeout(() => setSubmitError(null), 5000);
+      focusFirstMissing();
       return;
     }
     setSubmitError(null);
@@ -1294,6 +1342,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "projectProfile", v)}
               required
               invalid={isPlaceholderValue(values.block1.projectProfile, DEFAULT_VALUES.block1.projectProfile)}
+              glow={glowField === "projectProfile"}
+              inputRef={(el) => { fieldRefs.current.projectProfile = el; }}
             />
             <Field
               label="Zone"
@@ -1302,6 +1352,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "zone", v)}
               required
               invalid={isPlaceholderValue(values.block1.zone, DEFAULT_VALUES.block1.zone)}
+              glow={glowField === "zone"}
+              inputRef={(el) => { fieldRefs.current.zone = el; }}
             />
             <Field
               label="Budget"
@@ -1310,6 +1362,8 @@ export function BriefBuilder({
               onChange={(v) => setBlockField("block1", "budget", v)}
               required
               invalid={isPlaceholderValue(values.block1.budget, DEFAULT_VALUES.block1.budget)}
+              glow={glowField === "budget"}
+              inputRef={(el) => { fieldRefs.current.budget = el; }}
             />
             <Field
               label="Environment"
@@ -1407,7 +1461,7 @@ export function BriefBuilder({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || !validateBriefValues(values).valid}
+            disabled={isSubmitting}
             className={cn(
               "flex items-center gap-2 rounded-lg px-5 py-2 font-body text-[11px] uppercase transition-all duration-300 motion-reduce:transition-none disabled:cursor-not-allowed",
               isSubmitting
@@ -1521,4 +1575,4 @@ export function BriefBuilder({
       )}
     </div>
   );
-}
+});

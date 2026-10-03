@@ -5,7 +5,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { BriefBuilder, loadBriefDraftText, validateBriefDraft } from "@/components/trade/concierge/BriefBuilder";
+import { BriefBuilder, loadBriefDraftText, validateBriefDraft, type BriefBuilderHandle } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
 import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
 import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
@@ -834,6 +834,7 @@ export function AIConcierge({
   });
   const [briefCanvasExiting, setBriefCanvasExiting] = useState(false);
   const [briefBuilderClosing, setBriefBuilderClosing] = useState(false);
+  const briefBuilderRef = useRef<BriefBuilderHandle>(null);
   const [briefHistoryEntering, setBriefHistoryEntering] = useState(false);
   const [briefSubmitting, setBriefSubmitting] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
@@ -5993,6 +5994,7 @@ export function AIConcierge({
                 )}
               >
                 <BriefBuilder
+                  ref={briefBuilderRef}
                   value={briefDraft}
                   onChange={setBriefDraft}
                   onClose={closeBriefBuilder}
@@ -6278,12 +6280,20 @@ export function AIConcierge({
               )}
 
               <button
-                onClick={() => send()}
+                onClick={() => {
+                  // Validation interceptor: with the builder open and required
+                  // fields missing, block the send and scroll/glow to the gap
+                  // instead of silently swallowing the click.
+                  if (briefBuilderOpen && !briefValidation.valid) {
+                    briefBuilderRef.current?.focusFirstMissing();
+                    return;
+                  }
+                  send();
+                }}
                 disabled={
                   (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
                   streaming ||
-                  briefSubmitting ||
-                  (briefBuilderOpen && !briefValidation.valid)
+                  briefSubmitting
                 }
                 className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
                 aria-label={briefBuilderOpen ? "Submit brief" : "Send"}
