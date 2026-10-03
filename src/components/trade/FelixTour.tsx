@@ -21,13 +21,6 @@ type FelixStep = {
   /** Clicking the highlighted element finishes the tour. */
   clickFinishes?: boolean;
   cta?: string;
-  /**
-   * Strict wait-for-element (shepherd-style): the step never shows until the
-   * target is mounted, connected, visible and laid out — used for shifting
-   * sidebar nav nodes. Grants a longer grace period before the centered
-   * fallback instead of dropping the spotlight early.
-   */
-  waitForTarget?: boolean;
 };
 
 const switchOn = (sel: string) =>
@@ -47,7 +40,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Sourcing 'The Collection'",
     target: "nav-collection",
     route: "/trade/the-collection",
-    waitForTarget: true,
     dialogue:
       "This is your primary design hub. Click here to browse our Curated Showroom and Full Catalogue with your Silver Tier trade pricing live.",
   },
@@ -56,7 +48,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Financial Management",
     target: "nav-quotes",
     route: "/trade/quotes",
-    waitForTarget: true,
     dialogue:
       "Manage your business transactions here. Track deposit pipelines, open balances, and instantly export beautiful proforma documents for client approval.",
   },
@@ -73,7 +64,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Account & Team Configurations",
     target: "nav-settings",
     route: "/trade/settings",
-    waitForTarget: true,
     dialogue:
       "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
   },
@@ -82,7 +72,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Project Structuring",
     target: "nav-projects",
     route: "/trade/projects",
-    waitForTarget: true,
     dialogue:
       "Organize your active work by project. Keep each project's collections, quotes, layouts, and documentation together in one dedicated workspace.",
   },
@@ -91,7 +80,6 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Your Personal Concierge",
     target: "nav-concierge",
     route: "/trade/concierge",
-    waitForTarget: true,
     dialogue:
       "Whenever you need bespoke project curation or styling advice, look to the sidebar. Open the Trade Concierge to brief me, co-curate custom schemes, or source rare artisan pieces alongside me.",
   },
@@ -168,7 +156,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [rect, setRect] = useState<Rect | null>(null);
+  const [position, setPosition] = useState<{ step: number; path: string; rect: Rect } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
@@ -225,8 +213,24 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let didEnter = false;
     let didScroll = false;
     let watched: Element[] = [];
-    const startedAt = performance.now();
+    let observedTarget: Element | null = null;
+    let revealFrame = 0;
     const resizeObserver = new ResizeObserver(() => { stableSince = 0; });
+    // React may replace a sidebar item or workspace control during navigation.
+    // Wake the stability check when that specific target changes, not whenever
+    // unrelated page content mutates.
+    const mutationObserver = new MutationObserver(() => {
+      const target = routeReady ? document.querySelector(`[data-felix-target="${current.target}"]`) : null;
+      if (target !== observedTarget) {
+        observedTarget = target;
+        last = null;
+        stableSince = 0;
+        ready = false;
+        setSettled(false);
+        setPosition(null);
+      }
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
     const onChange = () => {
       stableSince = 0;
       // A viewport change can alter the tooltip's available space even when
@@ -256,7 +260,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Sample every frame while open: scroll containers and the sidebar's
       // width transition can move a target without resizing that target.
       // Only measure nodes that are actually mounted and laid out.
-      const live = elements.filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed"));
+      const live = elements.filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
       const boxes = live.map((el) => el.getBoundingClientRect());
       const next = boxes.length ? {
         top: Math.min(...boxes.map((r) => r.top)),
@@ -264,28 +268,28 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         width: Math.max(...boxes.map((r) => r.right)) - Math.min(...boxes.map((r) => r.left)),
         height: Math.max(...boxes.map((r) => r.bottom)) - Math.min(...boxes.map((r) => r.top)),
       } : null;
-      const commit = (r: Rect | null) => {
-        setRect((previous) => (previous && r && sameRect(previous, r)) || (!previous && !r) ? previous : r);
+      const commit = (r: Rect) => {
+        setPosition((previous) => previous?.step === currentStep && previous.path === location.pathname && sameRect(previous.rect, r)
+          ? previous : { step: currentStep, path: location.pathname, rect: r });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         if (!ready) {
           setStepDone(current.done ? current.done() : true);
           ready = true;
-          setSettled(true);
-          // Force an immediate layout refresh the moment the step shows so the
-          // overlay recalculates boundaries against the live element state.
-          window.dispatchEvent(new Event("resize"));
+          // Render at the measured position invisibly first, then fade in on
+          // the next frame. Never inject a tooltip at the viewport center.
+          revealFrame = requestAnimationFrame(() => setSettled(true));
         }
       };
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
-        // Target unavailable (e.g. sidebar hidden on mobile): show the card
-        // centered without a spotlight instead of a dead dark screen. Steps
-        // flagged waitForTarget (shifting sidebar nav nodes) get a longer
-        // grace period before falling back.
-        const grace = current.waitForTarget ? 4000 : 2000;
-        if (now - startedAt >= grace && !ready) commit(null);
+        if (ready) {
+          ready = false;
+          cancelAnimationFrame(revealFrame);
+          setSettled(false);
+          setPosition(null);
+        }
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
         if (!last || !sameRect(last, next)) { last = next; commit(next); }
@@ -297,14 +301,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       frame = requestAnimationFrame(tick);
     };
-    // The frame loop discovers async targets; ResizeObserver watches only their layout.
-    // Unrelated page mutations must not postpone this step forever.
+    // The frame loop discovers async targets and tracks movement; the observers
+    // watch node replacement and size changes without resetting stable layouts.
     frame = requestAnimationFrame(tick);
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, true);
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(revealFrame);
       resizeObserver.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
@@ -380,13 +386,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   if (!open || typeof document === "undefined") return null;
 
-  // Card placement: centered on the target — right of it, else below, else above.
+  // No stale step or route geometry may be used while the new target mounts.
+  const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
+  // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(380, viewport.w - 32);
   const cardH = 320;
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
-  let cardLeft = clampX((viewport.w - cardW) / 2);
-  let cardTop = clampY((viewport.h - cardH) / 2);
+  let cardLeft = 0;
+  let cardTop = 0;
   if (rect) {
     const centerY = clampY(rect.top + rect.height / 2 - cardH / 2);
     const centerX = clampX(rect.left + rect.width / 2 - cardW / 2);
@@ -436,12 +444,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         {ring}
       </div>}
 
-      {/* Felix card */}
-      <div
+      {/* The card is not mounted until this step's actual target is measured. */}
+      {rect && <div
         role="dialog"
         aria-label={`${guideName} — Your Curatorial Guide`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-300 ease-out motion-reduce:transition-none",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
@@ -543,7 +551,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </button>
           </div>
         </div>
-      </div>
+      </div>}
     </>,
     document.body,
   );
