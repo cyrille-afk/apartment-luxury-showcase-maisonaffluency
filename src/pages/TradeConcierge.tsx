@@ -86,6 +86,7 @@ export default function TradeConcierge() {
   const [dateRange, setDateRange] = useState<"all" | "7" | "30" | "90">("all");
   const [designerSel, setDesignerSel] = useState("all");
   const [projectSel, setProjectSel] = useState("all");
+  const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "designer" | "project">("date-desc");
 
   // Bind the concierge contextually to the project chosen in the header switcher.
   const { projectFilter, setProjectFilter } = useProjectFilter();
@@ -179,6 +180,26 @@ export default function TradeConcierge() {
       if (!haystack.includes(query)) return false;
     }
     return true;
+  });
+
+  /** Alphabetical comparator that always sends unassigned entries last. */
+  const compareKey = (a: string | null, b: string | null) => {
+    if (!a && !b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+    return a.localeCompare(b);
+  };
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (sortBy === "date-asc") return a.updated_at.localeCompare(b.updated_at);
+    if (sortBy === "date-desc") return b.updated_at.localeCompare(a.updated_at);
+    if (sortBy === "designer") {
+      const da = previews[a.id]?.picks.find((p) => p.designer)?.designer ?? null;
+      const db = previews[b.id]?.picks.find((p) => p.designer)?.designer ?? null;
+      return compareKey(da, db);
+    }
+    const pa = a.project_id ? projects.find((p) => p.id === a.project_id)?.name ?? null : null;
+    const pb = b.project_id ? projects.find((p) => p.id === b.project_id)?.name ?? null : null;
+    return compareKey(pa, pb);
   });
 
   // Restore the selected project's open workspace on mount / project switch.
@@ -384,10 +405,22 @@ export default function TradeConcierge() {
                     className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
                     <option value="all">All projects</option>
                     <option value="none">No project</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                 </div>
+              </div>
+            )}
+            {threadsLoaded && pastItems.length > 0 && (
+              <div className="relative mb-3">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort curations"
+                  className="h-8 w-full appearance-none rounded-sm border border-border bg-background pl-2.5 pr-6 text-xs text-foreground focus:border-accent focus:outline-none">
+                  <option value="date-desc">Sort: Newest first</option>
+                  <option value="date-asc">Sort: Oldest first</option>
+                  <option value="designer">Sort: Designer A–Z</option>
+                  <option value="project">Sort: Project A–Z</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
               </div>
             )}
             {!threadsLoaded ? (
@@ -414,9 +447,9 @@ export default function TradeConcierge() {
                   setListAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 8);
                 }}
                 className={cn("space-y-1 pr-1",
-                  filteredItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
-                  filteredItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
-                {filteredItems.map((t) => {
+                  sortedItems.length > 4 && "curation-scroll max-h-[224px] overflow-y-auto",
+                  sortedItems.length > 4 && !listAtBottom && "curation-scroll-fade")}>
+                {sortedItems.map((t) => {
                   const preview = previews[t.id];
                   const expanded = expandedId === t.id;
                   return (
