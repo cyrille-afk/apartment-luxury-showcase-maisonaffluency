@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 
 const guardCss = readFileSync("src/index.css", "utf8");
@@ -45,7 +45,7 @@ describe("Client View document guard", () => {
     localStorage.setItem("ma_client_safe_mode", "0");
     const mode = await import("./clientSafeMode");
     const hook = renderHook(() => mode.useClientSafeMode());
-    window.dispatchEvent(new StorageEvent("storage", { key: "ma_client_safe_mode", newValue: "1" }));
+    act(() => window.dispatchEvent(new StorageEvent("storage", { key: "ma_client_safe_mode", newValue: "1" })));
     expect(document.documentElement.dataset.clientView).toBe("active");
     expect(mode.getClientSafeMode()).toBe(true);
     hook.unmount();
