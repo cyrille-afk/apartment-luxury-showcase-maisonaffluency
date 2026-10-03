@@ -329,7 +329,8 @@ const TradeAtelierProfile = () => {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
         <h1 className="text-2xl font-light text-foreground mb-4">Atelier not found</h1>
-        <button
+                   <button
+                     data-trade-sensitive={showTradePrice ? "" : undefined}
           onClick={() => navigate("/trade/designers")}
           className="text-primary underline underline-offset-4 text-sm"
         >
@@ -770,7 +771,7 @@ const TradeAtelierProfile = () => {
                         </div>
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
                           <div className="shrink-0 whitespace-nowrap text-right">
-                            <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
+                             <p data-trade-sensitive={showTradePrice ? "" : undefined} className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased md:inline-flex md:w-full md:items-center md:justify-end md:gap-1.5">
                             {pick.trade_price_cents != null
                               ? (isTradeUser || isAdmin)
                                 ? showTradePrice
@@ -787,6 +788,7 @@ const TradeAtelierProfile = () => {
                                 : "Price upon Request"
                               : "Price upon Request"}
                           </p>
+                           {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-3 w-20 animate-pulse bg-muted/60" />}
                         </div>
                       </div>
                     </div>

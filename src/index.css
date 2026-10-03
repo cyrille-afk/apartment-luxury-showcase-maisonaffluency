@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Presentation guard: applied synchronously at the document root, before
+   React paints, and remains in force for suspended routes and exit animations. */
+html[data-client-view="active"] [data-trade-sensitive] {
+  display: none !important;
+  visibility: hidden !important;
+}
+html[data-client-view="active"] [data-client-placeholder] {
+  display: block !important;
+}
+[data-client-placeholder] { display: none; }
+
 /* Trade routes never mount or expose the third-party floating WhatsApp launcher.
    The data attribute is also applied to launchers injected after React mounts. */
 html.hide-whatsapp-widget #whatsapp-floating-widget,

@@ -417,12 +417,13 @@ export default function FinishesDrawer({
                     </p>
                   </div>
                   {!clientMode && (
-                    <div>
+                     <div data-trade-sensitive>
                       <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Trade</p>
                       <p className="font-body text-sm tabular-nums text-foreground">{formatMoneyIn(trade, currency, "—")}</p>
                       <p className="font-body text-[10px] tabular-nums text-muted-foreground">Margin {discountPercentLabel(discount)}</p>
                     </div>
                   )}
+                   {!clientMode && <div data-client-placeholder aria-hidden="true" className="h-5 w-24 animate-pulse bg-muted/60" />}
                   <div>
                     <p className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Lead Time</p>
                     <p className="font-body text-sm text-foreground">{activeVariant.lead_time || lead || "—"}</p>

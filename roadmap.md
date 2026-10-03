@@ -1,6 +1,7 @@
 # Roadmap
 
 - [ ] Add studio branding profile, persistent Client View masking and project markup, and white-label client specification export.
+- [x] Prevent marked trade-only content flashing during Client View navigation, loading, and animated transitions; verify rapid switching and reload on the board and project studio.
 
 - [x] Unblock Welcome Tour Step 8: stop the second automatic scroll and provide a direct Client View action; verify the tour advances and the board remains usable.
 

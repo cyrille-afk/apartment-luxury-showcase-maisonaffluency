@@ -18,6 +18,15 @@ let safe = (() => {
   }
 })();
 
+// Set the document guard before React mounts, so lazy routes and retained exit
+// animations cannot paint an internal price while Client View is restored.
+function syncDocumentMask() {
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.clientView = safe ? "active" : "inactive";
+  }
+}
+syncDocumentMask();
+
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -27,6 +36,7 @@ function emit() {
 export function setClientSafeMode(next: boolean) {
   if (safe === next) return;
   safe = next;
+  syncDocumentMask();
   try {
     localStorage.setItem(KEY, next ? "1" : "0");
   } catch {
@@ -44,6 +54,7 @@ function subscribe(cb: () => void) {
   const onStorage = (e: StorageEvent) => {
     if (e.key === KEY) {
       safe = e.newValue === "1";
+      syncDocumentMask();
       emit();
     }
   };

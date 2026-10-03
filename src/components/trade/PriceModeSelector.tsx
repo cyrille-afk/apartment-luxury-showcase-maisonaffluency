@@ -55,16 +55,16 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
       >
         Client View
       </Button>
-      {showTradePrice && (
-        <>
+       {showTradePrice && (
+         <span data-trade-sensitive className="inline-flex items-center gap-3">
           <span className="h-3 w-px bg-border" aria-hidden="true" />
           <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
             Account: Preferred Trade
           </span>
-        </>
+         </span>
       )}
 
-      <span role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+       <span data-trade-sensitive={showTradePrice ? "" : undefined} role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </span>
     </div>

@@ -223,20 +223,21 @@ const ShowroomGridView = ({
     return (
       <span className={className}>
         {showTradePrice ? (
-          <>
+           <span data-trade-sensitive className="inline-flex items-center gap-1.5 flex-wrap">
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
              {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
-            <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>{tierLabel} –{discountLabel}</span>
-          </>
+             <span className="font-body text-[9px] bg-accent/15 text-accent px-1.5 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>{tierLabel} –{discountLabel}</span>
+           </span>
         ) : (
-          <span className="text-foreground font-semibold">
-            {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
+           <span className="text-foreground font-semibold">
+             {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
           </span>
         )}
+        {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
       </span>
     );
   };

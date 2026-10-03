@@ -600,14 +600,15 @@ const TradeBoardBuilder = () => {
         >
           {item.product?.product_name}
         </button>
-         <p className="font-body text-xs text-muted-foreground">{clientSafe ? "Curated Collection" : item.product?.brand_name}</p>
+          <p data-trade-sensitive={!clientSafe ? "" : undefined} className="font-body text-xs text-muted-foreground">{clientSafe ? "Curated Collection" : item.product?.brand_name}</p>
+          {!clientSafe && <p data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
         {finishes[item.id] && (
           <p className="font-body text-[11px] text-muted-foreground mt-1 flex items-center gap-1.5">
             <FinishChips fo={finishes[item.id]} size="h-7 w-7" />
             <span className="truncate">{finishes[item.id].label}</span>
           </p>
         )}
-        {item.product?.materials && <p className="font-body text-[11px] text-muted-foreground mt-1 truncate">{item.product.materials}</p>}
+         {item.product?.materials && <p data-trade-sensitive={!clientSafe ? "" : undefined} className="font-body text-[11px] text-muted-foreground mt-1 truncate">{clientSafe ? "Selected materials" : item.product.materials}</p>}
         {isEditable && (
           <div className="flex items-center gap-1 mt-2">
             {subfolders.length > 0 && (
@@ -1160,7 +1161,8 @@ const TradeBoardBuilder = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-body text-sm text-foreground truncate">{p.product_name}</p>
-                       <p className="font-body text-xs text-muted-foreground truncate">{clientSafe ? "Curated Collection" : p.brand_name}{p.category ? ` · ${p.category}` : ""}</p>
+                       <p data-trade-sensitive={!clientSafe ? "" : undefined} className="font-body text-xs text-muted-foreground truncate">{clientSafe ? "Curated Collection" : p.brand_name}{p.category ? ` · ${p.category}` : ""}</p>
+                       {!clientSafe && <p data-client-placeholder aria-hidden="true" className="h-3 w-24 bg-muted/60 animate-pulse" />}
                     </div>
                     {addedIds.has(p.id) ? (
                       <Check className="h-4 w-4 text-green-500 shrink-0" />

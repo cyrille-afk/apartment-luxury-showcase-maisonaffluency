@@ -303,8 +303,9 @@ const TradeGallery = () => {
     const retailLabel = `${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`;
     const tradeLabel = `${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`;
 
-    return (
-      <span className={className}>
+     return (
+       <>
+       <span data-trade-sensitive={showTradePrice ? "" : undefined} className={className}>
         {showTradePrice ? (
           <>
             <span className="text-muted-foreground font-normal">
@@ -330,6 +331,8 @@ const TradeGallery = () => {
           </span>
         )}
       </span>
+       {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-3 w-20 animate-pulse bg-muted/60" />}
+       </>
     );
   };
 
