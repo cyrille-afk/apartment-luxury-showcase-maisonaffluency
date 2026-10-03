@@ -225,14 +225,10 @@ serve(async (req) => {
       const parsed = Math.round(Number(value) || 0);
       return String(Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 100_000_000) : 0);
     };
-    // Checkout presents whole-currency rows. Charge their exact displayed sum
-    // so the action label, bank-wire amount, invoice, and PaymentIntent agree.
+    // Charge the exact cent sum of the rows checkout displays (two decimals),
+    // so tier discount + tax never drift from what the buyer sees.
     const roundDollar = (cents: number) => Math.round(cents / 100) * 100;
-    const amount =
-      roundDollar(goodsAmount) +
-      roundDollar(deliveryCents) +
-      roundDollar(taxCents) +
-      roundDollar(clearanceFeeCents);
+    const amount = goodsAmount + deliveryCents + taxCents + clearanceFeeCents;
     if (amount < 100 || amount > 100_000_00 * 100) return json({ error: "Price out of range." }, 400);
 
     // ---- Deposit / balance split ----------------------------------------

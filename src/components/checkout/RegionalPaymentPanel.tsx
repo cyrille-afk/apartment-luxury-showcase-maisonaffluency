@@ -52,8 +52,9 @@ const money = (cents: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: (currency || "usd").toUpperCase(),
-    maximumFractionDigits: 0,
-  }).format(Math.round(cents / 100));
+    minimumFractionDigits: Math.round(cents) % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(Math.round(cents) / 100);
 
 function CopyValue({ value }: { value: string }) {
   const [done, setDone] = useState(false);
