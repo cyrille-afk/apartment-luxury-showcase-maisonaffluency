@@ -330,6 +330,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
           }))}
           shippingConfirmed={shippingCents > 0}
           shippingCents={shippingCents}
+          shippingQuoteRef={shippingLabel}
           orderReference={orderRef}
           fallback={
             <dl className="divide-y divide-border border border-border">

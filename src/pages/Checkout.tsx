@@ -2344,6 +2344,7 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
+  const clientSecretRef = useRef<string>("");
   const [syncing, setSyncing] = useState(false);
 
   // Resolve the order from router state, then the persisted secure basket
@@ -2569,6 +2570,7 @@ export default function Checkout() {
             } as Parameters<typeof loadStripe>[1]),
           );
 
+        clientSecretRef.current = String(pi.clientSecret || "");
         setClientSecret(pi.clientSecret);
       } catch (err: any) {
         setError(err?.message || "Unable to start checkout.");
@@ -2613,6 +2615,7 @@ export default function Checkout() {
     if (next === intentMethodRef.current) return;
     intentMethodRef.current = next;
     intentIdRef.current = "";
+    clientSecretRef.current = "";
     setClientSecret(null);
     void syncIntent(shipping, next);
     // eslint-disable-next-line react-hooks/exhaustive-deps

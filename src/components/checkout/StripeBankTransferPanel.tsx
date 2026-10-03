@@ -230,6 +230,7 @@ export default function StripeBankTransferPanel({
   email,
   shippingConfirmed,
   shippingCents,
+  shippingQuoteRef,
   orderReference,
   fallback,
 }: {
@@ -238,6 +239,7 @@ export default function StripeBankTransferPanel({
   email: string;
   shippingConfirmed?: boolean;
   shippingCents?: number;
+  shippingQuoteRef?: string | null;
   orderReference?: string;
   fallback: React.ReactNode;
 }) {
@@ -267,6 +269,7 @@ export default function StripeBankTransferPanel({
             items,
             shippingConfirmed: !!shippingConfirmed,
             shippingCents: shippingCents ?? 0,
+            shippingQuoteRef: shippingQuoteRef ?? "",
           },
         });
         if (cancelled) return;
