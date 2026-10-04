@@ -18,6 +18,7 @@ interface DirectoryDesigner {
   slug: string;
   image_url: string | null;
   specialty: string | null;
+  productImageUrl: string | null;
 }
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -41,25 +42,28 @@ const ShowroomDesignerDirectory = ({
     queryKey: ["showroom-designer-directory"],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
-      // Only makers that actually carry showroom pieces.
+      // Only makers that actually carry showroom pieces. The inner join also
+      // gives us each designer's curated product imagery for the hover reveal.
       const { data, error } = await supabase
         .from("designers")
-        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id)")
+        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id, image_url)")
         .eq("is_published", true)
         .not("slug", "is", null)
         .range(0, 9999);
       if (error) throw error;
       const byId = new Map<string, DirectoryDesigner>();
       (data || []).forEach((d: any) => {
-        if (!byId.has(d.id)) {
-          byId.set(d.id, {
-            id: d.id,
-            name: d.name,
-            slug: d.slug,
-            image_url: d.image_url,
-            specialty: d.specialty,
-          });
-        }
+        if (byId.has(d.id)) return;
+        const productImage =
+          (d.designer_curator_picks || []).find((p: any) => p.image_url)?.image_url || null;
+        byId.set(d.id, {
+          id: d.id,
+          name: d.name,
+          slug: d.slug,
+          image_url: d.image_url,
+          specialty: d.specialty,
+          productImageUrl: productImage,
+        });
       });
       return Array.from(byId.values()).sort((a, b) =>
         sortNameKey(a.name).localeCompare(sortNameKey(b.name)),
@@ -130,13 +134,27 @@ const ShowroomDesignerDirectory = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-14 pt-10">
           {visible.map((d) => (
             <button key={d.id} onClick={() => onSelectDesigner(d)} className="group text-left">
-              <div className="overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
+              {/* Signature-product hover reveal: portrait in full colour
+                  fades out over the curated piece underneath. */}
+              <div className="relative overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
+                {d.productImageUrl ? (
+                  <img
+                    src={thumb(d.productImageUrl)}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : null}
                 {d.image_url ? (
                   <img
                     src={thumb(d.image_url)}
                     alt={displayDesignerName(d.name)}
                     loading="lazy"
-                    className="h-full w-full object-cover object-top grayscale transition-all duration-700 group-hover:scale-[1.03] group-hover:grayscale-0"
+                    className={cn(
+                      "relative h-full w-full object-cover object-top transition-opacity duration-500",
+                      d.productImageUrl && "group-hover:opacity-0",
+                    )}
                   />
                 ) : null}
               </div>
