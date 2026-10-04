@@ -512,7 +512,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
-      } else if (now - stableSince >= 150) {
+      } else if (now - stableSince >= 80) {
         commit(next);
       }
       frame = requestAnimationFrame(tick);
@@ -613,7 +613,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
-    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
+    }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 80);
   };
   const next = () => {
     if (!stepDone || !settled || transitioning) return;
@@ -633,6 +633,19 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const back = () => {
     changeStep(-1);
   };
+
+  // Switching the board to client presentation is the action Step 15 asks
+  // for, so it moves straight on to Step 16 instead of waiting for Next.
+  const clientViewSawOff = useRef(false);
+  useEffect(() => {
+    if (step.id !== "client-view") { clientViewSawOff.current = false; return; }
+    if (settled && !stepDone) { clientViewSawOff.current = true; return; }
+    if (open && !isPaused && clientViewSawOff.current && stepDone && settled && !transitioning) {
+      clientViewSawOff.current = false;
+      next();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isPaused, step.id, stepDone, settled, transitioning]);
 
   useEffect(() => {
     if (settled && transitioning && transitionTimer.current === null) setTransitioning(false);
