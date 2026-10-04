@@ -562,6 +562,20 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         cardLeft = centerX;
         cardTop = Math.max(16, rect.top - cardH - PAD - 8);
       }
+    } else if (step.id === "quotes") {
+      // Step 3: never cover the Interactive Gallery heading. Prefer below it
+      // (left-aligned to the heading); on short viewports go right, else above.
+      const belowY = rect.top + rect.height + PAD + 8;
+      if (belowY + cardH <= viewport.h - 16) {
+        cardLeft = clampX(rect.left);
+        cardTop = belowY;
+      } else if (rightX + cardW <= viewport.w - 16) {
+        cardLeft = rightX;
+        cardTop = centerY;
+      } else {
+        cardLeft = centerX;
+        cardTop = clampY(rect.top - cardH - PAD - 8);
+      }
     } else if (rightX + cardW <= viewport.w - 16) {
       cardLeft = rightX;
       cardTop = centerY;
