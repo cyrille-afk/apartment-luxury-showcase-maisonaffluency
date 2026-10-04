@@ -42,25 +42,28 @@ const ShowroomDesignerDirectory = ({
     queryKey: ["showroom-designer-directory"],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
-      // Only makers that actually carry showroom pieces.
+      // Only makers that actually carry showroom pieces. The inner join also
+      // gives us each designer's curated product imagery for the hover reveal.
       const { data, error } = await supabase
         .from("designers")
-        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id)")
+        .select("id, name, slug, image_url, specialty, designer_curator_picks!inner(id, image_url)")
         .eq("is_published", true)
         .not("slug", "is", null)
         .range(0, 9999);
       if (error) throw error;
       const byId = new Map<string, DirectoryDesigner>();
       (data || []).forEach((d: any) => {
-        if (!byId.has(d.id)) {
-          byId.set(d.id, {
-            id: d.id,
-            name: d.name,
-            slug: d.slug,
-            image_url: d.image_url,
-            specialty: d.specialty,
-          });
-        }
+        if (byId.has(d.id)) return;
+        const productImage =
+          (d.designer_curator_picks || []).find((p: any) => p.image_url)?.image_url || null;
+        byId.set(d.id, {
+          id: d.id,
+          name: d.name,
+          slug: d.slug,
+          image_url: d.image_url,
+          specialty: d.specialty,
+          productImageUrl: productImage,
+        });
       });
       return Array.from(byId.values()).sort((a, b) =>
         sortNameKey(a.name).localeCompare(sortNameKey(b.name)),
