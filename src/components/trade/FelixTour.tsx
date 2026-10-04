@@ -445,7 +445,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(380, viewport.w - 32);
-  const cardH = 320;
+  // Step 1 carries the tier breakdown and needs a taller placement box.
+  const cardH = step.id === "welcome" ? 500 : 320;
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
@@ -572,6 +573,38 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           >
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
+
+          {/* Trade tier structure — Step 1 only */}
+          {step.id === "welcome" && (
+            <div className="mt-4 animate-fade-in">
+              <p className="font-body text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+                Trade Tier Structure
+              </p>
+              <div className="mt-2 divide-y divide-border border-y border-border">
+                {[
+                  { tier: "Silver Partner", note: "Base trade entry discount", current: true },
+                  { tier: "Gold Partner", note: "Unlocks deeper project margins as aggregate project budgets scale", current: false },
+                  { tier: "Platinum Partner", note: "Maximum trade benefits for high-volume studio portfolios", current: false },
+                ].map((row) => (
+                  <div key={row.tier} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="font-display text-[13px] text-foreground shrink-0">{row.tier}</span>
+                    {row.current ? (
+                      <span className="inline-flex shrink-0 items-center rounded-full bg-accent/15 px-2 py-0.5 font-body text-[8px] uppercase tracking-[0.18em] text-accent">
+                        Current Status
+                      </span>
+                    ) : null}
+                    <span className="font-body text-[10px] leading-snug text-muted-foreground text-right">
+                      {row.note}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
+                Your pricing updates dynamically. As your active projects and procurement volume grow, your studio automatically escalates to higher trade tiers with maximized commercial margins.
+              </p>
+            </div>
+          )}
+
 
            {!stepDone && !isPaused && (
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
