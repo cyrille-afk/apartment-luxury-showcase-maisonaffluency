@@ -9,6 +9,8 @@ import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
 import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolumeLocale";
+import { useStudio } from "@/hooks/useStudio";
+import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -78,7 +80,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "nav-projects",
     route: "/trade/projects",
     dialogue:
-      "Every engagement lives in its own isolated workspace. Your Singapore GCB project, for instance, keeps its collections, quotes, layouts, and client documentation fully separate from every other pipeline. Use Projects & Interventions to structure each client engagement end to end.",
+      "Every engagement lives in its own isolated workspace. Your pre-loaded {projectTitle} folder, for instance, showcases how we map your collections, layouts, quotes, and client documentation. Use Projects & Interventions to structure each client engagement end to end.",
   },
   {
     id: "tier-tracking",
@@ -258,6 +260,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
   } as Record<TradeTier, TierConfigRow>;
   const tierVolume = useTierVolumeLocale();
+  const { currentStudio } = useStudio();
+  const projectTitle = onboardingProjectForMarket(tierVolume.market).name;
   const navigate = useNavigate();
   const location = useLocation();
   const [stepDone, setStepDone] = useState(true);
@@ -305,14 +309,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (BOARD_PATH.test(location.pathname)) return;
     let cancelled = false;
     (async () => {
-      const data = await ensureSampleBoard();
+      const data = await ensureSampleBoard(tierVolume.market, currentStudio?.id ?? null);
       if (cancelled) return;
       if (data?.id) navigate(`/trade/boards/${data.id}${data.project_id ? `?project=${data.project_id}` : ""}`);
       else navigate("/trade/boards");
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, open, stepRoute]);
+  }, [navigate, open, stepRoute, tierVolume.market, currentStudio?.id]);
 
   // Advance before the card Link routes, independently of destination loading.
   useEffect(() => {
@@ -810,7 +814,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               ? step.dialogue
                : resolveTierTokens(step.dialogue, tiers, tierVolume))
               .replace(/\{goldPct\}/g, fmtPct(tiers.gold.discount_pct))
-              .replace(/\{name\}/g, guideName))}</p>
+               .replace(/\{name\}/g, guideName)
+               .replace(/\{projectTitle\}/g, projectTitle))}</p>
           </div>
 
           {/* Trade tier structure — Step 1 only */}
