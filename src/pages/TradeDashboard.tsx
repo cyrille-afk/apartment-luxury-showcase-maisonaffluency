@@ -371,20 +371,28 @@ const TradeDashboard = () => {
       </div>
 
       {activeProjects.length > 0 && (
-        <div className="mt-14 border-y border-border py-4 md:mt-20" aria-label="Active workspace projects">
-          <div className="h-px w-full bg-border" aria-hidden="true" />
-          <div className="mt-3 flex gap-x-7 gap-y-2 overflow-x-auto whitespace-nowrap font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <section className="mt-14 border-t border-border pt-6 md:mt-20" aria-label="Active workspace projects">
+          <div className="mb-5 flex items-baseline justify-between gap-4">
+            <h2 className="font-display text-2xl text-foreground">Projects & Interventions</h2>
+            <Link to="/trade/projects" className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground">View all projects →</Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {activeProjects.slice(0, 4).map((project, index) => (
               <Link
                 key={project.id}
-                 to={projectDefaultUrl(project.id, projectBoards)}
-                className="shrink-0 transition-colors hover:text-foreground"
+                to={projectDefaultUrl(project.id, projectBoards)}
+                className="group flex min-h-36 flex-col justify-between border border-border bg-background p-5 transition-colors hover:border-foreground/40"
               >
-                {String(index + 1).padStart(2, "0")} // {project.name} (Active)
+                <FolderOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden="true" />
+                <div className="mt-6">
+                  <p className="trade-micro-label text-muted-foreground">{String(index + 1).padStart(2, "0")} — Active project</p>
+                  <h3 className="mt-1 font-display text-lg text-foreground group-hover:underline">{project.name}</h3>
+                  {project.location && <p className="mt-1 font-body text-xs text-muted-foreground">{project.location}</p>}
+                </div>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Most Popular */}
