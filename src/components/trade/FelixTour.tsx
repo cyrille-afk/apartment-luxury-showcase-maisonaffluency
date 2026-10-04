@@ -527,13 +527,27 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (settled && transitioning && transitionTimer.current === null) setTransitioning(false);
   }, [settled, transitioning]);
 
-  // Escape always closes the tour.
+  // Keyboard: Escape closes; ArrowRight/ArrowLeft move between steps.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { close(false); return; }
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); back(); }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, close]);
+  }, [open, close, next, back]);
+
+  // Move focus into the tooltip whenever the step changes so keyboard and
+  // screen-reader users land on the new content.
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open || isPaused) return;
+    if (settled && !transitioning) cardRef.current?.focus({ preventScroll: true });
+  }, [open, currentStep, settled, transitioning, isPaused]);
 
   if (!open || typeof document === "undefined") return null;
 
