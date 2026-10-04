@@ -10,9 +10,11 @@ export const REGIONAL_TIERS = {
 } as const;
 type TierCurrency = keyof typeof REGIONAL_TIERS;
 
-export function tierVolumeCurrency(market: TradeOfficeMarket, preferred: DisplayCurrency): TierCurrency {
+export function tierVolumeCurrency(market: TradeOfficeMarket, preferred: DisplayCurrency, ipMarket: TradeOfficeMarket = null): TierCurrency {
   if (market === "US") return "USD";
   if (market === "SG") return "SGD";
+  if (ipMarket === "US") return "USD";
+  if (ipMarket === "SG") return "SGD";
   if (preferred === "USD" || preferred === "SGD") return preferred;
   return "EUR";
 }
@@ -26,21 +28,23 @@ export function tierVolumeModel(currency: TierCurrency) {
   return { currency, amount, format, gold: region.gold, platinum: region.platinum, examples: region.examples };
 }
 
+export type TierVolumeModel = ReturnType<typeof tierVolumeModel>;
+
 export function useTierVolumeLocale() {
   const market = useTradeOfficeMarket();
   const [preferred] = useTradeDisplayCurrency();
-  const [usIp, setUsIp] = useState(false);
+  const [ipMarket, setIpMarket] = useState<TradeOfficeMarket>(null);
   useEffect(() => {
     let cancelled = false;
-    // Use the same consent-gated country cache as the trade currency selector.
-    // A US visitor takes the native US baseline even when their saved display
-    // currency was chosen on a previous visit elsewhere.
+    setIpMarket(null);
+    // Office location takes precedence; otherwise use the same consent-gated
+    // country cache as the trade currency selector for US and SG visitors.
     try {
-      if (localStorage.getItem("cookie_consent") !== "accepted" || market) return;
+      if (localStorage.getItem("cookie_consent") !== "accepted" || market === "US" || market === "SG") return;
       const cached = localStorage.getItem("trade.detectedCountry");
       const age = Date.now() - Number(localStorage.getItem("trade.detectedCountry.ts") || 0);
       if (cached && age >= 0 && age < 30 * 24 * 60 * 60 * 1000) {
-        setUsIp(cached.toUpperCase() === "US");
+        setIpMarket(cached.toUpperCase() === "US" ? "US" : cached.toUpperCase() === "SG" ? "SG" : null);
         return;
       }
     } catch { return; }
@@ -49,10 +53,13 @@ export function useTierVolumeLocale() {
     fetch("https://ipapi.co/json/", { signal: controller.signal })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
-        if (!cancelled && data) setUsIp((data.country_code || data.country || "").toUpperCase() === "US");
+        if (!cancelled && data) {
+          const country = (data.country_code || data.country || "").toUpperCase();
+          setIpMarket(country === "US" ? "US" : country === "SG" ? "SG" : null);
+        }
       }).catch(() => undefined).finally(() => window.clearTimeout(timeout));
     return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); };
   }, [market]);
-  const currency = tierVolumeCurrency(usIp ? "US" : market, preferred);
+  const currency = tierVolumeCurrency(market, preferred, ipMarket);
   return { ...tierVolumeModel(currency), market };
 }

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
 import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
-import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
+import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolumeLocale";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -16,21 +16,17 @@ const fmtPct = (fraction: number) => {
   return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
 };
 
-/** Format a spend threshold in cents as "EUR150,000". */
-const fmtEur = (cents: number) => `EUR ${Math.round(cents / 100).toLocaleString("en-US")}`;
-
 /**
- * Tour copy tokens ({silverPct}, {goldEur}, …) resolve against the live
- * `trade_tier_config` table so admin pricing changes update the tour
- * automatically — no hardcoded rates or thresholds in the walkthrough.
+ * Discounts follow live tier configuration; volume thresholds use the same
+ * fixed regional presentation model as the Step 1 table and Step 5 tracker.
  */
-const resolveTierTokens = (text: string, cfg: Record<TradeTier, TierConfigRow>) =>
+export const resolveTierTokens = (text: string, cfg: Record<TradeTier, TierConfigRow>, volume: TierVolumeModel) =>
   text
     .replace(/\{silverPct\}/g, fmtPct(cfg.silver.discount_pct))
     .replace(/\{goldPct\}/g, fmtPct(cfg.gold.discount_pct))
     .replace(/\{platinumPct\}/g, fmtPct(cfg.platinum.discount_pct))
-    .replace(/\{goldEur\}/g, fmtEur(cfg.gold.min_spend_cents))
-    .replace(/\{platinumEur\}/g, fmtEur(cfg.platinum.min_spend_cents));
+    .replace(/\{goldVolume\}/g, volume.format(volume.amount(cfg.gold.min_spend_cents)))
+    .replace(/\{platinumVolume\}/g, volume.format(volume.amount(cfg.platinum.min_spend_cents)));
 
 type FelixStep = {
   id: string;
@@ -74,7 +70,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldEur} Gold Tier threshold.",
+      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
   },
   {
     id: "projects",
@@ -122,7 +118,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "quotes-ledger-panel",
     route: "/trade/quotes",
     dialogue:
-      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldEur} threshold, moving you closer to your {goldPct} Gold Tier discount.",
+      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldVolume} threshold, moving you closer to your {goldPct} Gold Tier discount.",
   },
   {
     id: "tools",
@@ -812,7 +808,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           >
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold((step.id === "tier-tracking"
               ? step.dialogue
-              : resolveTierTokens(step.dialogue, tiers))
+               : resolveTierTokens(step.dialogue, tiers, tierVolume))
               .replace(/\{goldPct\}/g, fmtPct(tiers.gold.discount_pct))
               .replace(/\{name\}/g, guideName))}</p>
           </div>
