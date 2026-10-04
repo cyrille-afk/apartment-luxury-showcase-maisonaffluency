@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
 import TradeBoards from "@/pages/TradeBoards";
-import { isSampleProject, SAMPLE_PROJECT_TAG } from "@/lib/onboardingProject";
+import { isSampleProject, SAMPLE_PROJECT_TAG, CONVERTED_PROJECT_TAG } from "@/lib/onboardingProject";
 
 const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[] = [
   { key: "active", label: "Active" },
@@ -107,7 +107,7 @@ export default function TradeProjects() {
       location: location.trim(),
     };
     const conversion = starter ? supabase.from("projects")
-      .update({ ...fields, tags: (starter.tags ?? []).filter((tag) => tag !== SAMPLE_PROJECT_TAG) })
+      .update({ ...fields, tags: [...(starter.tags ?? []).filter((tag) => tag !== SAMPLE_PROJECT_TAG), CONVERTED_PROJECT_TAG] })
       .eq("id", starter.id) : null;
     const { error } = conversion
       ? await (currentStudio ? conversion.eq("studio_id", currentStudio.id) : conversion.eq("user_id", user.id).is("studio_id", null)).select("id").single()

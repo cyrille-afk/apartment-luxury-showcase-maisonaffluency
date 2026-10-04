@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { onboardingProjectForMarket, isSampleProject, SAMPLE_PROJECT_TAG } from "./onboardingProject";
+import { onboardingProjectForMarket, isSampleProject, SAMPLE_PROJECT_TAG, CONVERTED_PROJECT_TAG } from "./onboardingProject";
 
 describe("onboarding project localization", () => {
   it("uses the exact folder title and location for each supported market", () => {
@@ -17,5 +17,6 @@ describe("onboarding project localization", () => {
     expect(isSampleProject({ name: "Singapore GCB workflow", location: "Maison Singapore / Central Area", tags: [] })).toBe(true);
     expect(isSampleProject({ name: "Singapore GCB workflow", location: "My client site", tags: [] })).toBe(false);
     expect(isSampleProject({ name: "Singapore GCB workflow", location: "Maison Singapore / Central Area", client_name: "Real client" })).toBe(false);
+    expect(isSampleProject({ name: "Singapore GCB workflow", location: "Maison Singapore / Central Area", tags: [CONVERTED_PROJECT_TAG] })).toBe(false);
   });
 });
