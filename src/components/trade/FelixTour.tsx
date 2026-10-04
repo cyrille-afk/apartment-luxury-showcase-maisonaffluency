@@ -214,6 +214,14 @@ const sameRect = (a: Rect, b: Rect) =>
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
+  // Live tier config (trade_tier_config) drives every rate/threshold in the
+  // tour copy, tier table, and worked example — realtime-invalidated on admin edits.
+  const { data: tierCfg } = useTierConfig();
+  const tiers = tierCfg ?? {
+    silver: { tier: "silver", discount_pct: 0, min_spend_cents: 0, label: "Silver" },
+    gold: { tier: "gold", discount_pct: 0, min_spend_cents: 0, label: "Gold" },
+    platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
+  } as Record<TradeTier, TierConfigRow>;
   const navigate = useNavigate();
   const location = useLocation();
   const [stepDone, setStepDone] = useState(true);
