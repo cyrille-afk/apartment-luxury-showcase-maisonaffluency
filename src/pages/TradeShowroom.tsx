@@ -134,7 +134,7 @@ const TradeShowroom = () => {
         <div className="bg-background py-14 md:py-20 lg:py-24">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-tight">
+              <h1 data-felix-target="client-view-collection-heading" className="font-display text-3xl md:text-4xl lg:text-5xl font-light text-foreground tracking-tight">
                 The Collection
               </h1>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">

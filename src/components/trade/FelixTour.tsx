@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
-import { setClientSafeMode } from "@/lib/clientSafeMode";
+import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 
 /** Format a tier discount fraction (0.15) as "15%". */
@@ -103,7 +103,7 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "margin-protection",
     title: "Absolute Margin Protection",
-    target: "collection-price-tag",
+    target: "client-view-collection-heading",
     route: "/trade/the-collection",
     dialogue:
       "With Client View active, your {silverPct} Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
@@ -247,6 +247,7 @@ const sameRect = (a: Rect, b: Rect) =>
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
+  const { clientSafe } = useClientSafeMode();
   const officeMarket = useTradeOfficeMarket();
   const projectExampleByMarket = {
     SG: "Singapore GCB, living + dining",
@@ -272,6 +273,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [settled, setSettled] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const transitionTimer = useRef<number | null>(null);
+  const previousClientSafe = useRef(clientSafe);
+  const stepTargetRef = useRef<Element | null>(null);
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
@@ -285,6 +288,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const s = FELIX_STEPS[currentStep];
     setStepDone(s.id === "collection" ? false : s.done ? s.done() : true);
   }, [currentStep]);
+
+  // A direct click on the header switch advances Step 6 just like Next.
+  // Only react to the off→on edge: Back can still revisit Step 6.
+  useLayoutEffect(() => {
+    const entered = clientSafe && !previousClientSafe.current;
+    previousClientSafe.current = clientSafe;
+    if (entered && open && currentStep === 5) {
+      setCollectionArrived(false);
+      setCurrentStep(6);
+    }
+  }, [clientSafe, open, currentStep]);
 
   useEffect(() => {
     if (!open) return;
@@ -351,6 +365,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const target = routeReady ? document.querySelector(`[data-felix-target="${stepTarget}"]`) : null;
       if (target !== observedTarget) {
         observedTarget = target;
+        stepTargetRef.current = target;
         last = null;
         stableSince = 0;
         ready = false;
@@ -370,15 +385,24 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
-      if (elements.length && !didEnter) {
+      // Step 7 stays attached to a validated heading in the workspace, never
+      // to a disappearing trade price or a viewport-center fallback.
+      const targets = current.id === "margin-protection"
+        ? elements.filter((el) => {
+            if (el.tagName !== "H1" || !el.closest("main.trade-editorial-main")) return false;
+            stepTargetRef.current = el;
+            return true;
+          })
+        : elements;
+      if (targets.length && !didEnter) {
         didEnter = true;
         current.onEnter?.();
       }
-      if (elements.length && !didScroll) {
+      if (targets.length && !didScroll) {
         didScroll = true;
-        elements[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
-      const watchedNow = [...elements, ...elements.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
+      const watchedNow = [...targets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
         resizeObserver.disconnect();
         watchedNow.forEach((el) => resizeObserver.observe(el));
@@ -388,7 +412,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Sample every frame while open: scroll containers and the sidebar's
       // width transition can move a target without resizing that target.
       // Only measure nodes that are actually mounted and laid out.
-      const live = elements.filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
+      const live = targets.filter((el) => el === stepTargetRef.current || current.id !== "margin-protection")
+        .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
       const boxes = live.map((el) => el.getBoundingClientRect());
       const next = boxes.length ? {
         top: Math.min(...boxes.map((r) => r.top)),
@@ -416,7 +441,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         // Target hidden (e.g. sidebar items on phones): after a grace period,
         // anchor the card to the viewport centre so the step stays usable.
         if (!missingSince) missingSince = now;
-        if (!ready && routeReady && now - missingSince >= 1500) {
+        if (!ready && routeReady && current.id !== "margin-protection" && now - missingSince >= 1500) {
           commit({ top: window.innerHeight / 2 - 1, left: window.innerWidth / 2 - 1, width: 2, height: 2 });
           frame = requestAnimationFrame(tick);
           return;
@@ -433,6 +458,11 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
         if (!last || !sameRect(last, next)) { last = next; commit(next); }
+      } else if (current.id === "margin-protection") {
+        // Client View may reflow in the same paint: commit the validated
+        // heading immediately instead of waiting for the stability timer.
+        last = next;
+        commit(next);
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
@@ -539,7 +569,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (!stepDone || !settled || transitioning) return;
     if (isLast) { close(true); return; }
     // The next frame (including route fallbacks) must already be client-safe.
-    if (step.id === "client-safe-presentations") setClientSafeMode(true);
+    if (step.id === "client-safe-presentations") {
+      setClientSafeMode(true);
+      setCollectionArrived(false);
+      setCurrentStep(6);
+      return;
+    }
     changeStep(1);
   };
   const back = () => {

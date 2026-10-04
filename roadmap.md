@@ -1,6 +1,7 @@
 # Roadmap
 
 - [x] Refine the global Client View control and Step 6 spotlight; verify immediate retail presentation on toggle and Next.
+- [x] Keep Felix mounted through Client View, advance Step 6 on switch or Next, and anchor Step 7 to the Collection heading.
 
 - [x] Align Felix Steps 2–3 with Interactive Sourcing and Transparent Project Margins; preserve Back and make Pause hide the tour frame until Resume.
 
