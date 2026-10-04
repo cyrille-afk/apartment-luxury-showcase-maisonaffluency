@@ -212,6 +212,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const gallery = document.querySelector('[data-felix-target="collection-gallery"]');
     if (!gallery || !gallery.getClientRects().length) return;
     const timer = window.setTimeout(() => {
+      setCollectionOpened(false);
       setCurrentStep(2);
     }, 180);
     return () => window.clearTimeout(timer);
@@ -408,7 +409,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(true);
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
-      if (currentStep !== 1 || direction < 0) setCollectionOpened(false);
+      setCollectionOpened(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
