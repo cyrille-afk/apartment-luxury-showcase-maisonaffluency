@@ -6,6 +6,29 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
+import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
+
+/** Format a tier discount fraction (0.15) as "15%". */
+const fmtPct = (fraction: number) => {
+  const pct = fraction * 100;
+  return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
+};
+
+/** Format a spend threshold in cents as "EUR150,000". */
+const fmtEur = (cents: number) => `EUR${Math.round(cents / 100).toLocaleString("en-US")}`;
+
+/**
+ * Tour copy tokens ({silverPct}, {goldEur}, …) resolve against the live
+ * `trade_tier_config` table so admin pricing changes update the tour
+ * automatically — no hardcoded rates or thresholds in the walkthrough.
+ */
+const resolveTierTokens = (text: string, cfg: Record<TradeTier, TierConfigRow>) =>
+  text
+    .replace(/\{silverPct\}/g, fmtPct(cfg.silver.discount_pct))
+    .replace(/\{goldPct\}/g, fmtPct(cfg.gold.discount_pct))
+    .replace(/\{platinumPct\}/g, fmtPct(cfg.platinum.discount_pct))
+    .replace(/\{goldEur\}/g, fmtEur(cfg.gold.min_spend_cents))
+    .replace(/\{platinumEur\}/g, fmtEur(cfg.platinum.min_spend_cents));
 
 type FelixStep = {
   id: string;
