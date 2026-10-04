@@ -30,14 +30,11 @@ export async function ensureSampleBoard(market: TradeOfficeMarket = null, studio
   if (!uid) return null;
 
   const sample = onboardingProjectForMarket(market);
-  const { data: existingProject } = await supabase.from("projects")
-    .select("id").eq("user_id", uid).eq("name", sample.name)
-    .eq("studio_id", studioId ?? "00000000-0000-0000-0000-000000000000")
-    .limit(1).maybeSingle();
-  // A personal workspace uses a NULL studio ID rather than a sentinel.
-  const { data: personalProject } = studioId ? { data: null } : await supabase.from("projects")
-    .select("id").eq("user_id", uid).eq("name", sample.name).is("studio_id", null).limit(1).maybeSingle();
-  let projectId = existingProject?.id ?? personalProject?.id ?? null;
+  let projectQuery = supabase.from("projects").select("id")
+    .eq("user_id", uid).eq("name", sample.name).limit(1);
+  projectQuery = studioId ? projectQuery.eq("studio_id", studioId) : projectQuery.is("studio_id", null);
+  const { data: existingProject } = await projectQuery.maybeSingle();
+  let projectId = existingProject?.id ?? null;
   if (!projectId) {
     const { data: project } = await supabase.from("projects")
       .insert({ user_id: uid, studio_id: studioId, name: sample.name, location: sample.location, client_name: "Sample Client" })

@@ -70,7 +70,6 @@ export default function TradeProjects() {
       if (localStorage.getItem(key)) return;
       localStorage.setItem(key, "pending");
     } catch { return; }
-    let cancelled = false;
     setSeeding(true);
     (async () => {
       const sample = onboardingProjectForMarket(market);
@@ -79,10 +78,10 @@ export default function TradeProjects() {
       let query = supabase.from("projects").select("id").limit(1);
       query = currentStudio ? query.eq("studio_id", currentStudio.id) : query.eq("user_id", user.id).is("studio_id", null);
       const { data: existing, error: readError } = await query;
-      if (readError || existing?.length || cancelled) {
-        if (!cancelled && existing?.length) localStorage.setItem(key, "done");
+      if (readError || existing?.length) {
+        if (existing?.length) localStorage.setItem(key, "done");
         else localStorage.removeItem(key);
-        if (!cancelled) setSeeding(false);
+        setSeeding(false);
         return;
       }
       const { error } = await supabase.from("projects").insert({
@@ -91,12 +90,9 @@ export default function TradeProjects() {
       });
       if (error) localStorage.removeItem(key);
       else localStorage.setItem(key, "done");
-      if (!cancelled) {
-        setSeeding(false);
-        if (!error) { void refresh(); window.dispatchEvent(new Event("trade-projects:changed")); }
-      }
+      setSeeding(false);
+      if (!error) window.dispatchEvent(new Event("trade-projects:changed"));
     })();
-    return () => { cancelled = true; };
   }, [user?.id, currentStudio?.id, studioLoading, loading, marketLoading, market, hiddenForMeCount, canEdit, projects.length, view, refresh]);
 
   const filtered = projects.filter((p) => p.status === tab);
