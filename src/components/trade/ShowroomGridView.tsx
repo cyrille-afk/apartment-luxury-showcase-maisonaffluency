@@ -222,7 +222,7 @@ const ShowroomGridView = ({
     const pfx = pricePrefix ? `${pricePrefix} ` : '';
 
     return (
-      <span className={className}>
+      <span className={className} data-felix-target="collection-price-tag">
         {showTradePrice ? (
            <span data-trade-sensitive className="inline-flex items-center gap-1.5 flex-wrap">
             <span className="line-through text-muted-foreground/60 font-normal text-xs">

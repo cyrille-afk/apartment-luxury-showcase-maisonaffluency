@@ -484,9 +484,9 @@ const TradeLayout = () => {
             <div className="ml-auto flex items-center gap-2 md:gap-4" data-felix-target="account-panel">
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
-              <div className="hidden sm:block">
-                <PriceModeSelector />
-              </div>
+              <div className="hidden sm:block" data-felix-target="header-client-view">
+                 <PriceModeSelector />
+               </div>
                 {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
                <span data-trade-sensitive><MobilePreviewHeaderButton /></span>
             </div>

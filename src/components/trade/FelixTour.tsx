@@ -68,6 +68,22 @@ const FELIX_STEPS: FelixStep[] = [
       "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR100,000 threshold, where your 12% Gold Tier discount unlocks automatically — no forms, no waiting.",
   },
   {
+    id: "client-safe-presentations",
+    title: "Client-Safe Presentations",
+    target: "header-client-view",
+    route: "/trade",
+    dialogue:
+      "The Client View switch in the top bar transforms your entire workspace into a client-facing presentation mode. Every internal figure — trade pricing, tier discounts, supplier identities, and studio margins — is masked instantly, so you can present live on a shared screen with complete confidence.",
+  },
+  {
+    id: "margin-protection",
+    title: "Absolute Margin Protection",
+    target: "collection-price-tag",
+    route: "/trade/the-collection",
+    dialogue:
+      "With Client View active, your 10% Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
+  },
+  {
     id: "tools",
     title: "The Trade Tools Grid",
     target: "tools-grid",
