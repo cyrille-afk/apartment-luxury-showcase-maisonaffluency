@@ -13,6 +13,12 @@ html[data-client-view="active"] [data-client-placeholder] {
 }
 [data-client-placeholder] { display: none; }
 
+/* Lift only the Step 6 header above the tour veil. The toggle remains the
+   sole active presentation control while the rest of the page stays dimmed. */
+html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
+  z-index: 133;
+}
+
 /* Trade routes never mount or expose the third-party floating WhatsApp launcher.
    The data attribute is also applied to launchers injected after React mounts. */
 html.hide-whatsapp-widget #whatsapp-floating-widget,
