@@ -13,7 +13,7 @@ export function tierVolumeCurrency(market: TradeOfficeMarket, preferred: Display
   if (market === "US") return "USD";
   if (market === "SG") return "SGD";
   if (preferred !== "original") return preferred;
-  return market === "SG" ? "SGD" : market === "GB" ? "GBP" : "EUR";
+  return market === "GB" ? "GBP" : "EUR";
 }
 
 export function tierVolumeModel(config: TierConfig, currency: TierCurrency, fxRate: number) {
