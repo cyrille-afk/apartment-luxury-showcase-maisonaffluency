@@ -71,7 +71,11 @@ export function useProjects(opts: { activeOnly?: boolean } = {}) {
     setLoading(false);
   }, [user, currentStudio?.id, opts.activeOnly]);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    refresh();
+    window.addEventListener("trade-projects:changed", refresh);
+    return () => window.removeEventListener("trade-projects:changed", refresh);
+  }, [refresh]);
 
   return { projects, loading, refresh };
 }
