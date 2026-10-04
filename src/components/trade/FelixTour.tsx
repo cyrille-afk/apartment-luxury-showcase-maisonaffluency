@@ -273,6 +273,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [settled, setSettled] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const transitionTimer = useRef<number | null>(null);
+  const manualStartRef = useRef(false);
   const previousClientSafe = useRef(clientSafe);
   const stepTargetRef = useRef<Element | null>(null);
 
@@ -516,20 +517,23 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const saved = Number(localStorage.getItem(PROGRESS_KEY));
       if (Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length) setCurrentStep(saved);
     } catch {}
-    const t = window.setTimeout(() => setOpen(true), 900);
+    const t = window.setTimeout(() => {
+      if (!manualStartRef.current) setOpen(true);
+    }, 900);
     return () => window.clearTimeout(t);
   }, [autoStart]);
 
   // External relaunch: window.dispatchEvent(new Event("felix-tour:start"))
   useEffect(() => {
     const onStart = () => {
-      // Manual relaunch resumes from saved progress when present.
-      let startAt = 0;
-      try {
-        const saved = Number(localStorage.getItem(PROGRESS_KEY));
-        if (Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length) startAt = saved;
-      } catch {}
-      setCurrentStep(startAt);
+      // An explicit Meet Felix/restart always begins at Welcome. Saved progress
+      // is reserved for automatic continuation after an interrupted tour.
+      manualStartRef.current = true;
+      if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+      transitionTimer.current = null;
+      try { localStorage.removeItem(PROGRESS_KEY); } catch {}
+      setTransitioning(false);
+      setCurrentStep(0);
       setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
