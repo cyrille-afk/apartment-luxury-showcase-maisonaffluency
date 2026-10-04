@@ -311,10 +311,11 @@ const TradeDashboard = () => {
             ));
             const fmt = (cents: number) =>
               new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
-            const fmtLocal = (cents: number) => localFx ? new Intl.NumberFormat(
-              localFx.currency === "SGD" ? "en-SG" : localFx.currency === "GBP" ? "en-GB" : "en-US",
-              { style: "currency", currency: localFx.currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 },
-            ).format(Math.round(cents / 100 * localFx.rate)) : "";
+            const fmtLocal = (cents: number) => {
+              if (!localFx) return "";
+              const amount = Math.round(cents / 100 * localFx.rate).toLocaleString("en-US");
+              return `${localFx.currency === "SGD" ? "S$" : localFx.currency === "GBP" ? "£" : "$"}${amount}`;
+            };
             return (
               <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
                 <div className="flex items-baseline justify-between gap-3">
