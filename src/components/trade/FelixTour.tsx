@@ -582,25 +582,32 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {[
-                  { tier: "Silver Partner", note: "Base trade entry discount", current: true },
-                  { tier: "Gold Partner", note: "Unlocks deeper project margins as aggregate project budgets scale", current: false },
-                  { tier: "Platinum Partner", note: "Maximum trade benefits for high-volume studio portfolios", current: false },
+                  { tier: "Silver Partner", discount: "10% Trade Discount", note: "Base entry tier", current: true },
+                  { tier: "Gold Partner", discount: "12% Trade Discount", note: "Unlocks at EUR100,000 cumulative project volume", current: false },
+                  { tier: "Platinum Partner", discount: "15% Trade Discount", note: "Unlocks at EUR300,000 cumulative project volume", current: false },
                 ].map((row) => (
-                  <div key={row.tier} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="font-display text-[13px] text-foreground shrink-0">{row.tier}</span>
-                    {row.current ? (
-                      <span className="inline-flex shrink-0 items-center rounded-full bg-accent/15 px-2 py-0.5 font-body text-[8px] uppercase tracking-[0.18em] text-accent">
-                        Current Status
-                      </span>
-                    ) : null}
-                    <span className="font-body text-[10px] leading-snug text-muted-foreground text-right">
-                      {row.note}
-                    </span>
+                  <div key={row.tier} className="flex items-start justify-between gap-4 py-3">
+                    <div className="flex flex-col items-start gap-1.5 shrink-0">
+                      <span className="font-display text-[13px] text-foreground whitespace-nowrap">{row.tier}</span>
+                      {row.current ? (
+                        <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 font-body text-[8px] uppercase tracking-[0.18em] text-accent">
+                          Current Status
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="text-right min-w-0">
+                      <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap">
+                        {row.discount}
+                      </p>
+                      <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
+                        {row.note}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Your pricing updates dynamically. As your active projects and procurement volume grow, your studio automatically escalates to higher trade tiers with maximized commercial margins.
+                Prices shown across The Collection and the interactive galleries calculate automatically based on your active 10% discount level.
               </p>
             </div>
           )}
