@@ -581,7 +581,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     <div
       aria-hidden="true"
       data-felix-spotlight
-      className="pointer-events-none fixed z-[131] rounded-md border-2 border-accent motion-reduce:!transition-none"
+      className="pointer-events-none fixed z-[134] rounded-md border-2 border-accent motion-reduce:!transition-none"
       style={{
         top: 0,
         left: 0,
@@ -615,8 +615,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         onClick={rect ? undefined : () => close(false)}
       >
         {(!rect || !settled || transitioning) && <div className="absolute inset-0 bg-foreground/40" />}
-        {ring}
       </div>}
+      {ring}
 
       {/* The card is not mounted until this step's actual target is measured. */}
       {rect && <div
