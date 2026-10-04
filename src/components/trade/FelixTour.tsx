@@ -637,6 +637,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           {/* Controls */}
           <div className="mt-4 flex items-center justify-between gap-2">
             <button
+              onClick={() => close(false)}
+              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Skip tour
+            </button>
+            <button
               onClick={back}
                disabled={currentStep === 0 || transitioning}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
