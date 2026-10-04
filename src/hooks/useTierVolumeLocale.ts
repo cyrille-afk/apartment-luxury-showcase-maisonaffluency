@@ -39,7 +39,31 @@ export function tierVolumeModel(config: TierConfig, currency: TierCurrency, fxRa
 export function useTierVolumeLocale(config: TierConfig) {
   const market = useTradeOfficeMarket();
   const [preferred] = useTradeDisplayCurrency();
-  const currency = tierVolumeCurrency(market, preferred);
+  const [usIp, setUsIp] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    // Use the same consent-gated country cache as the trade currency selector.
+    // A US visitor takes the native US baseline even when their saved display
+    // currency was chosen on a previous visit elsewhere.
+    try {
+      if (localStorage.getItem("cookie_consent") !== "accepted") return;
+      const cached = localStorage.getItem("trade.detectedCountry");
+      const age = Date.now() - Number(localStorage.getItem("trade.detectedCountry.ts") || 0);
+      if (cached && age >= 0 && age < 30 * 24 * 60 * 60 * 1000) {
+        setUsIp(cached.toUpperCase() === "US");
+        return;
+      }
+    } catch { return; }
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 2500);
+    fetch("https://ipapi.co/json/", { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!cancelled && data) setUsIp((data.country_code || data.country || "").toUpperCase() === "US");
+      }).catch(() => undefined).finally(() => window.clearTimeout(timeout));
+    return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); };
+  }, []);
+  const currency = tierVolumeCurrency(usIp ? "US" : market, preferred);
   const [fx, setFx] = useState<{ currency: TierCurrency; rate: number } | null>(null);
 
   useEffect(() => {
