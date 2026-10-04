@@ -16,7 +16,7 @@ const fmtPct = (fraction: number) => {
 };
 
 /** Format a spend threshold in cents as "EUR150,000". */
-const fmtEur = (cents: number) => `EUR${Math.round(cents / 100).toLocaleString("en-US")}`;
+const fmtEur = (cents: number) => `EUR ${Math.round(cents / 100).toLocaleString("en-US")}`;
 
 /**
  * Tour copy tokens ({silverPct}, {goldEur}, …) resolve against the live
