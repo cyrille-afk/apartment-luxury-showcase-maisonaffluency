@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { onboardingProjectForMarket } from "@/lib/onboardingProject";
+import type { TradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 
 /** Curated catalogue pieces used to pre-populate a new user's sample board. */
 const SAMPLE_PRODUCT_IDS = [
@@ -9,14 +11,12 @@ const SAMPLE_PRODUCT_IDS = [
   "163af529-08b9-4391-9a48-03663261c085", // Cinnamon Gardens Floor Lamp
 ];
 
-export const SAMPLE_PROJECT_NAME = "Sample Project — Singapore Penthouse";
-
 /**
  * Returns the user's most recent board; if they have none, creates a sample
  * project + board pre-filled with catalogue pieces so every tour lands on a
  * real canvas. Returns null only if creation fails.
  */
-export async function ensureSampleBoard(): Promise<{ id: string; project_id: string | null } | null> {
+export async function ensureSampleBoard(market: TradeOfficeMarket = null, studioId: string | null = null): Promise<{ id: string; project_id: string | null } | null> {
   const { data: existing } = await supabase
     .from("client_boards")
     .select("id, project_id")
@@ -29,12 +29,24 @@ export async function ensureSampleBoard(): Promise<{ id: string; project_id: str
   const uid = auth.user?.id;
   if (!uid) return null;
 
-  const { data: project } = await supabase
-    .from("projects" as any)
-    .insert({ user_id: uid, name: SAMPLE_PROJECT_NAME, client_name: "Sample Client", location: "Singapore" } as any)
-    .select("id")
-    .single();
-  const projectId = (project as any)?.id ?? null;
+  const sample = onboardingProjectForMarket(market);
+  let projectQuery = supabase.from("projects").select("id")
+    .eq("user_id", uid).eq("name", sample.name).limit(1);
+  projectQuery = studioId ? projectQuery.eq("studio_id", studioId) : projectQuery.is("studio_id", null);
+  const { data: existingProject } = await projectQuery.maybeSingle();
+  let projectId = existingProject?.id ?? null;
+  if (!projectId) {
+    let anyProject = supabase.from("projects").select("id").order("updated_at", { ascending: false }).limit(1);
+    anyProject = studioId ? anyProject.eq("studio_id", studioId) : anyProject.eq("user_id", uid).is("studio_id", null);
+    const { data } = await anyProject.maybeSingle();
+    projectId = data?.id ?? null;
+  }
+  if (!projectId) {
+    const { data: project } = await supabase.from("projects")
+      .insert({ user_id: uid, studio_id: studioId, name: sample.name, location: sample.location, client_name: "Sample Client" })
+      .select("id").single();
+    projectId = project?.id ?? null;
+  }
 
   const { data: board, error } = await supabase
     .from("client_boards")

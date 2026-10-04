@@ -38,7 +38,7 @@ export default function TradeProjects() {
   const [client, setClient] = useState<PickedClient | null>(null);
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
-  const [hiddenForMeCount, setHiddenForMeCount] = useState(0);
+  const [hiddenForMeCount, setHiddenForMeCount] = useState<number | null>(null);
 
   // Count projects in this studio that are explicitly hidden from the current
   // user via a per-project override (role = NULL). Purely informational.

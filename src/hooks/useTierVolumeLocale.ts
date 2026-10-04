@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTradeOfficeMarket, type TradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
+import { useTradeOfficeMarketState, type TradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
 
@@ -31,23 +31,30 @@ export function tierVolumeModel(currency: TierCurrency) {
 export type TierVolumeModel = ReturnType<typeof tierVolumeModel>;
 
 export function useTierVolumeLocale() {
-  const market = useTradeOfficeMarket();
+  const { market, loading: marketLoading } = useTradeOfficeMarketState();
   const [preferred] = useTradeDisplayCurrency();
   const [ipMarket, setIpMarket] = useState<TradeOfficeMarket>(null);
+  const [ipResolved, setIpResolved] = useState(false);
   useEffect(() => {
     let cancelled = false;
     setIpMarket(null);
+    setIpResolved(false);
     // Office location takes precedence; otherwise use the same consent-gated
     // country cache as the trade currency selector for US and SG visitors.
     try {
-      if (localStorage.getItem("cookie_consent") !== "accepted" || market === "US" || market === "SG") return;
+      if (localStorage.getItem("cookie_consent") !== "accepted" || market) {
+        setIpResolved(true);
+        return;
+      }
       const cached = localStorage.getItem("trade.detectedCountry");
       const age = Date.now() - Number(localStorage.getItem("trade.detectedCountry.ts") || 0);
       if (cached && age >= 0 && age < 30 * 24 * 60 * 60 * 1000) {
-        setIpMarket(cached.toUpperCase() === "US" ? "US" : cached.toUpperCase() === "SG" ? "SG" : null);
+        const country = cached.toUpperCase();
+        setIpMarket(country === "US" ? "US" : country === "SG" ? "SG" : country === "GB" || country === "UK" ? "GB" : null);
+        setIpResolved(true);
         return;
       }
-    } catch { return; }
+    } catch { setIpResolved(true); return; }
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 2500);
     fetch("https://ipapi.co/json/", { signal: controller.signal })
@@ -55,11 +62,11 @@ export function useTierVolumeLocale() {
       .then((data) => {
         if (!cancelled && data) {
           const country = (data.country_code || data.country || "").toUpperCase();
-          setIpMarket(country === "US" ? "US" : country === "SG" ? "SG" : null);
+          setIpMarket(country === "US" ? "US" : country === "SG" ? "SG" : country === "GB" || country === "UK" ? "GB" : null);
         }
-      }).catch(() => undefined).finally(() => window.clearTimeout(timeout));
+      }).catch(() => undefined).finally(() => { window.clearTimeout(timeout); if (!cancelled) setIpResolved(true); });
     return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); };
   }, [market]);
   const currency = tierVolumeCurrency(market, preferred, ipMarket);
-  return { ...tierVolumeModel(currency), market };
+  return { ...tierVolumeModel(currency), market: market ?? ipMarket, marketLoading: marketLoading || !ipResolved };
 }
