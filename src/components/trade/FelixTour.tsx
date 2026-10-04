@@ -165,7 +165,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
   const [collectionOpened, setCollectionOpened] = useState(false);
-  const stepRoute = collectionOpened && (step.id === "collection" || step.id === "quotes") ? "/trade/the-collection" : step.route;
+  const [collectionArrived, setCollectionArrived] = useState(false);
+  const stepRoute = (step.id === "collection" && collectionOpened) || (step.id === "quotes" && collectionArrived) ? "/trade/the-collection" : step.route;
   const stepTarget = step.id === "collection" && collectionOpened ? "collection-gallery" : step.target;
 
   const measure = useCallback(() => {
@@ -213,6 +214,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (!gallery || !gallery.getClientRects().length) return;
     const timer = window.setTimeout(() => {
       setCollectionOpened(false);
+      setCollectionArrived(true);
       setCurrentStep(2);
     }, 180);
     return () => window.clearTimeout(timer);
@@ -377,6 +379,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const onStart = () => {
       setCurrentStep(0);
       setCollectionOpened(false);
+      setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
     };
@@ -410,6 +413,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
       setCollectionOpened(false);
+      setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
