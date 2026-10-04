@@ -46,7 +46,7 @@ export function useTierVolumeLocale(config: TierConfig) {
     // A US visitor takes the native US baseline even when their saved display
     // currency was chosen on a previous visit elsewhere.
     try {
-      if (localStorage.getItem("cookie_consent") !== "accepted") return;
+      if (localStorage.getItem("cookie_consent") !== "accepted" || market === "SG" || market === "GB") return;
       const cached = localStorage.getItem("trade.detectedCountry");
       const age = Date.now() - Number(localStorage.getItem("trade.detectedCountry.ts") || 0);
       if (cached && age >= 0 && age < 30 * 24 * 60 * 60 * 1000) {
@@ -62,7 +62,7 @@ export function useTierVolumeLocale(config: TierConfig) {
         if (!cancelled && data) setUsIp((data.country_code || data.country || "").toUpperCase() === "US");
       }).catch(() => undefined).finally(() => window.clearTimeout(timeout));
     return () => { cancelled = true; controller.abort(); window.clearTimeout(timeout); };
-  }, []);
+  }, [market]);
   const currency = tierVolumeCurrency(usIp ? "US" : market, preferred);
   const [fx, setFx] = useState<{ currency: TierCurrency; rate: number } | null>(null);
 
