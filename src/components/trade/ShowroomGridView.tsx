@@ -1,3 +1,4 @@
+import { clientUnitCents } from "@/lib/tradePricing";
 /**
  * Grid/list view of hotspot products from the gallery.
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
