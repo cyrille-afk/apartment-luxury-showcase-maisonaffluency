@@ -544,7 +544,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               onClick={() => close(false)}
               className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
               aria-label="Close tour"
-              title="Skip tour"
+              title="Close tour"
             >
               <X className="h-4 w-4" />
             </button>
