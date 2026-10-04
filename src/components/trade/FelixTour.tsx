@@ -123,6 +123,23 @@ const FELIX_STEPS: FelixStep[] = [
       "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldEur} threshold, moving you closer to your {goldPct} Gold Tier discount.",
   },
   {
+    id: "technical-assets",
+    title: "Technical Design Assets",
+    target: "nav-tools",
+    route: "/trade/tools",
+    dialogue:
+      "Every piece in the catalogue carries its full technical dossier. From the Tools grid you can reach CAD blocks and BIM-ready 3D models for direct import into your drawings, download specification sheets and finish matrices, and request physical material samples — everything your technical team needs to specify with confidence.",
+  },
+  {
+    id: "priority-concierge",
+    title: "Priority Concierge Access",
+    target: "felix-chat",
+    route: "/trade",
+    cta: "Finish Tour",
+    dialogue:
+      "You are never sourcing alone. I am available from the top bar on every page — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
+  },
+  {
     id: "tools",
     title: "The Trade Tools Grid",
     target: "tools-grid",
