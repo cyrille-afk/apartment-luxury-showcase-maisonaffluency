@@ -81,6 +81,9 @@ const formatRelativeDate = (dateStr: string) => {
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
+// Warm the galleries chunk so Step 2 → Step 3 swaps instantly.
+if (typeof window !== "undefined") { setTimeout(() => { void import("./TradeShowroom"); }, 1500); }
+
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
   const { profile, user } = useAuth();

@@ -45,6 +45,7 @@ function ShowroomLegacyRedirect() {
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeFaqPage = lazy(() => import("./pages/TradeFaqPage"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
+import GallerySkeleton from "./components/trade/GallerySkeleton";
 import LegacyTradeSignupRedirect from "./components/trade/LegacyTradeSignupRedirect";
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 
@@ -902,7 +903,7 @@ const App = () => {
                     <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
-                    <Route path="the-collection" element={<TradeShowroom />} />
+                    <Route path="the-collection" element={<Suspense fallback={<div className="px-6 py-10"><GallerySkeleton withHeader /></div>}><TradeShowroom /></Suspense>} />
                     <Route path="collection" element={<ShowroomLegacyRedirect />} />
                     <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
