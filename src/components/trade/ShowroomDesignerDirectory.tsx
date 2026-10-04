@@ -134,13 +134,27 @@ const ShowroomDesignerDirectory = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-14 pt-10">
           {visible.map((d) => (
             <button key={d.id} onClick={() => onSelectDesigner(d)} className="group text-left">
-              <div className="overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
+              {/* Signature-product hover reveal: portrait in full colour
+                  fades out over the curated piece underneath. */}
+              <div className="relative overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
+                {d.productImageUrl ? (
+                  <img
+                    src={thumb(d.productImageUrl)}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : null}
                 {d.image_url ? (
                   <img
                     src={thumb(d.image_url)}
                     alt={displayDesignerName(d.name)}
                     loading="lazy"
-                    className="h-full w-full object-cover object-top grayscale transition-all duration-700 group-hover:scale-[1.03] group-hover:grayscale-0"
+                    className={cn(
+                      "relative h-full w-full object-cover object-top transition-opacity duration-500",
+                      d.productImageUrl && "group-hover:opacity-0",
+                    )}
                   />
                 ) : null}
               </div>
