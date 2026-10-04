@@ -709,11 +709,21 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 How Volume Progresses — Worked Example
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
-                {[
-                  { project: "Three-room apartment, full curation", spend: "EUR 48,000", running: "Running total: EUR 48,000" },
-                  { project: "Singapore GCB, living + dining", spend: "EUR 52,000", running: "Running total: EUR 100,000" },
-                  { project: "Penthouse bedroom suites", spend: "EUR 50,000", running: "Running total: EUR 150,000 — Gold unlocked" },
-                ].map((row) => (
+                {(() => {
+                  // Example spends derive from the live thresholds: three projects
+                  // that sum exactly to the Gold unlock, then the gap to Platinum.
+                  const goldC = tiers.gold.min_spend_cents;
+                  const platC = tiers.platinum.min_spend_cents;
+                  const p1 = Math.round(goldC * 0.32 / 100) * 100;
+                  const p2 = Math.round(goldC * 0.3467 / 100) * 100;
+                  const p3 = goldC - p1 - p2;
+                  const eur = (c: number) => `EUR ${Math.round(c / 100).toLocaleString("en-US")}`;
+                  return [
+                    { project: "Three-room apartment, full curation", spend: eur(p1), running: `Running total: ${eur(p1)}` },
+                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)}` },
+                    { project: "Penthouse bedroom suites", spend: eur(p3), running: `Running total: ${eur(goldC)} — ${tiers.gold.label} unlocked` },
+                  ];
+                })().map((row) => (
                   <div key={row.project} className="flex items-start justify-between gap-4 py-3">
                     <div className="min-w-0">
                       <p className="font-display text-[13px] text-foreground">{row.project}</p>
