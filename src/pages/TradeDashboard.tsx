@@ -116,19 +116,19 @@ const TradeDashboard = () => {
 
   // Rolling 12-month confirmed spend drives the tier volume tracker.
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!user?.id) return;
     let cancelled = false;
     supabase
       .from("profiles")
       .select("trade_tier_12mo_spend_cents")
-      .eq("id", profile.id)
+      .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (cancelled) return;
         setSpendCents(((data as any)?.trade_tier_12mo_spend_cents as number | null) ?? 0);
       });
     return () => { cancelled = true; };
-  }, [profile?.id]);
+  }, [user?.id]);
 
   // Arriving from /trade-onboarding ("Enter Workspace") — confirm the copilot
   // is live with a single non-intrusive toast at the base of the sidebar.
