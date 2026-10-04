@@ -2,7 +2,7 @@ import { FileText, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import { StudioBrand, type StudioBranding } from "@/components/trade/StudioBrand";
-import { tradePriceCents, clientPriceCents } from "@/lib/tradePricing";
+import { tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ export function ProjectProposalPreview({
 }: ProjectProposalPreviewProps) {
   const money = makeMoney(currency);
   const tradeTotal = items.reduce((sum, item) => sum + (tradePriceCents(item.rrp_cents, tradeDiscount) || 0) * item.quantity, 0);
-  const clientTotal = items.reduce((sum, item) => sum + (clientPriceCents(tradePriceCents(item.rrp_cents, tradeDiscount), markupMultiplier) || 0) * item.quantity, 0);
+  const clientTotal = items.reduce((sum, item) => sum + (clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier) || 0) * item.quantity, 0);
 
   const triggerPrint = () => {
     const sheet = document.querySelector<HTMLElement>(".proposal-print-sheet");
@@ -140,7 +140,7 @@ export function ProjectProposalPreview({
                 const retail = item.rrp_cents != null && item.rrp_cents > 0 ? item.rrp_cents * item.quantity : null;
                  const tradeUnit = tradePriceCents(item.rrp_cents, tradeDiscount);
                  const trade = tradeUnit != null && tradeUnit > 0 ? tradeUnit * item.quantity : null;
-                 const clientUnit = clientPriceCents(tradeUnit, markupMultiplier);
+                 const clientUnit = clientUnitCents(item.rrp_cents, tradeDiscount, markupMultiplier);
                  const client = clientUnit != null && clientUnit > 0 ? clientUnit * item.quantity : null;
                 return (
                   <article key={item.product_id} className="proposal-line-item grid grid-cols-[48px_72px_minmax(0,1fr)_auto] items-center gap-x-5 border-b border-border py-6 break-inside-avoid">

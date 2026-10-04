@@ -37,3 +37,14 @@ export function effectiveProjectMultiplier(projectMultiplier: unknown, studioMar
   const markup = Number(studioMarkupPercentage);
   return Number.isFinite(markup) && markup >= 0 ? 1 + markup / 100 : 1;
 }
+
+/**
+ * Client-facing unit price. With no markup configured (multiplier 1) the client
+ * sees retail (RRP) — never the designer's net trade price.
+ */
+export function clientUnitCents(rrpCents: number | null | undefined, fraction: number, multiplier: number): number | null {
+  if (rrpCents == null || rrpCents <= 0) return null;
+  const m = normalizeMultiplier(multiplier);
+  if (m === 1) return Math.round(rrpCents);
+  return clientPriceCents(tradePriceCents(rrpCents, fraction), m);
+}
