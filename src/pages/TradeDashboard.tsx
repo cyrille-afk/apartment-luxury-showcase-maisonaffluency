@@ -23,6 +23,7 @@ import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardT
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
+import { useStudio } from "@/hooks/useStudio";
 import { isSampleProject } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
@@ -90,6 +91,7 @@ if (typeof window !== "undefined") { setTimeout(() => { void import("./TradeShow
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
   const { profile, user } = useAuth();
+  const { canEdit } = useStudio();
   const [firstWelcome, setFirstWelcome] = useState(() => {
     try {
       return document.documentElement.dataset.felixTourActive === "true" || !localStorage.getItem("felix_dashboard_tour_seen_v1");
@@ -394,7 +396,7 @@ const TradeDashboard = () => {
                     <h3 className="mt-1 font-display text-lg text-foreground">{project.name}</h3>
                   </Link>
                   {project.location && <p className="mt-1 font-body text-xs text-muted-foreground">{project.location}</p>}
-                  {isSampleProject(project) && <Button asChild variant="link" className="mt-3 h-auto p-0 text-xs"><Link to={`/trade/projects?convert=${encodeURIComponent(project.id)}`}>Create my first real project →</Link></Button>}
+                  {isSampleProject(project) && canEdit && <Button asChild variant="link" className="mt-3 h-auto p-0 text-xs"><Link to={`/trade/projects?convert=${encodeURIComponent(project.id)}`}>Create my first real project →</Link></Button>}
                 </div>
               </div>
             ))}
