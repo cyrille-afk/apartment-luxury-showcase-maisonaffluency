@@ -826,8 +826,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {([
                   { key: "silver" as TradeTier, note: "Base entry tier", current: true },
-                  { key: "gold" as TradeTier, note: `Unlocks at ${fmtEur(tiers.gold.min_spend_cents)} cumulative project volume`, current: false },
-                  { key: "platinum" as TradeTier, note: `Unlocks at ${fmtEur(tiers.platinum.min_spend_cents)} cumulative project volume`, current: false },
+                  // Same regional milestones as Step 5: amounts convert the EUR-cent
+                  // ledger through the fixed fiscal-year display ratio per market.
+                  { key: "gold" as TradeTier, note: `Unlocks at ${tierVolume.format(tierVolume.amount(tiers.gold.min_spend_cents))} cumulative project volume`, current: false },
+                  { key: "platinum" as TradeTier, note: `Unlocks at ${tierVolume.format(tierVolume.amount(tiers.platinum.min_spend_cents))} cumulative project volume`, current: false },
                 ]).map((row) => (
                   <div key={row.key} className="flex items-start justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5 shrink-0">
