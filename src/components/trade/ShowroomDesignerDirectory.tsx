@@ -1,9 +1,10 @@
 /**
  * Showroom → Designers & Makers.
  *
- * Museum-grade alphabetical index of every published maker in the trade
- * catalogue. Unframed, shadowless cards on an alabaster canvas; clicking a
- * maker routes into the Product Grid filtered to that brand.
+ * Fluid, full-width alphabetical index of every published maker in the trade
+ * catalogue. Prominent A–Z navigation, full-bleed black-and-white portrait
+ * cards on a responsive 1→6 column grid; clicking a maker routes into their
+ * trade gallery page.
  */
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 function thumb(url: string | null) {
   if (!url) return "";
   if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
-    return url.replace("/upload/", "/upload/w_600,c_fill,g_auto,q_auto:good,f_auto/");
+    return url.replace("/upload/", "/upload/w_800,c_fill,g_auto,q_auto:good,f_auto/");
   }
   return url;
 }
@@ -77,14 +78,16 @@ const ShowroomDesignerDirectory = ({
   );
 
   return (
-    <div className="bg-[#F9F8F6] -mx-4 px-4 py-10 md:-mx-6 md:px-6">
-      {/* A–Z alpha slider */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[#E5E5E5] pb-5">
+    <div className="bg-[#F9F8F6] -mx-4 px-4 py-10 md:-mx-6 md:px-6 lg:-mx-10 lg:px-10">
+      {/* Prominent A–Z navigation */}
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-1 border-b border-[#E5E5E5] pb-4">
         <button
           onClick={() => setLetter(null)}
           className={cn(
-            "font-mono text-[10px] uppercase tracking-[0.15em] transition-colors",
-            letter === null ? "text-foreground" : "text-muted-foreground/60 hover:text-foreground",
+            "px-3 py-2 font-body text-base tracking-[0.08em] transition-colors",
+            letter === null
+              ? "font-semibold text-foreground underline decoration-foreground underline-offset-[10px]"
+              : "text-muted-foreground/60 hover:text-foreground",
           )}
         >
           All
@@ -97,9 +100,11 @@ const ShowroomDesignerDirectory = ({
               disabled={!enabled}
               onClick={() => setLetter(l)}
               className={cn(
-                "font-mono text-[11px] tracking-[0.15em] transition-colors",
+                "px-3 py-2 font-body text-base tracking-[0.08em] transition-colors",
                 !enabled && "text-muted-foreground/25 cursor-default",
-                enabled && letter === l && "text-foreground underline underline-offset-[6px]",
+                enabled &&
+                  letter === l &&
+                  "font-semibold text-foreground underline decoration-foreground underline-offset-[10px]",
                 enabled && letter !== l && "text-muted-foreground/60 hover:text-foreground",
               )}
             >
@@ -107,14 +112,14 @@ const ShowroomDesignerDirectory = ({
             </button>
           );
         })}
-        <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
+        <span className="ml-auto pl-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
           {designers.length} Makers
         </span>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12 pt-10">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-12 pt-10">
+          {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="aspect-[3/4] bg-black/5" />
               <div className="h-3 w-2/3 mt-4 bg-black/5" />
@@ -122,28 +127,24 @@ const ShowroomDesignerDirectory = ({
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-14 pt-10">
-          {visible.map((d, i) => (
-            <button
-              key={d.id}
-              onClick={() => onSelectDesigner(d)}
-              className="group text-left"
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-14 pt-10">
+          {visible.map((d) => (
+            <button key={d.id} onClick={() => onSelectDesigner(d)} className="group text-left">
               <div className="overflow-hidden bg-[#F2F1EE] aspect-[3/4]">
                 {d.image_url ? (
                   <img
                     src={thumb(d.image_url)}
                     alt={displayDesignerName(d.name)}
                     loading="lazy"
-                    className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover object-top grayscale transition-all duration-700 group-hover:scale-[1.03] group-hover:grayscale-0"
                   />
                 ) : null}
               </div>
-              <h3 className="font-display text-base font-light mt-4 leading-snug text-foreground line-clamp-1">
+              <h3 className="font-display text-lg font-light mt-4 leading-snug text-foreground line-clamp-1">
                 {displayDesignerName(d.name)}
               </h3>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-1.5 line-clamp-1 min-h-[15px]">
-                {d.specialty || " "}
+                {d.specialty || " "}
               </p>
             </button>
           ))}

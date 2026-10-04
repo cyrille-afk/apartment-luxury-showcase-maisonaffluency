@@ -128,7 +128,7 @@ const TradeShowroom = () => {
       <Helmet>
         <title>The Collection — Trade Portal — Maison Affluency</title>
       </Helmet>
-      <div className="max-w-7xl">
+      <div className="w-full">
         {/* Editorial header: pure white, no banner */}
         <div className="bg-background py-14 md:py-20 lg:py-24">
           <div className="flex items-start justify-between gap-6">
