@@ -736,18 +736,18 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
                 <div className="flex items-start justify-between gap-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-display text-[13px] text-foreground">Continued volume at 15% Gold</p>
+                    <p className="font-display text-[13px] text-foreground">Continued volume at {fmtPct(tiers.gold.discount_pct)} {tiers.gold.label}</p>
                     <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
-                      A further EUR 150,000 of confirmed spend — Running total: EUR 300,000 — Platinum unlocked
+                      A further EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")} of confirmed spend — Running total: EUR {Math.round(tiers.platinum.min_spend_cents / 100).toLocaleString("en-US")} — {tiers.platinum.label} unlocked
                     </p>
                   </div>
                   <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
-                    EUR 150,000+
+                    EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")}+
                   </p>
                 </div>
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Every confirmed quote counts toward the same rolling 12-month total — a single EUR150,000 project reaches Gold on its own.
+                Every confirmed quote counts toward the same rolling 12-month total — a single {fmtEur(tiers.gold.min_spend_cents)} project reaches {tiers.gold.label} on its own.
               </p>
             </div>
           )}
