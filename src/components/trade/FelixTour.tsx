@@ -41,7 +41,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "dashboard-showroom",
     route: "/trade",
     dialogue:
-      "Welcome back, Cyrille. This is your primary project dashboard. Let's start with our Curated Showroom—click here to browse our fully interactive galleries, where you can view your live Silver Tier trade pricing staged in real residential environments.",
+      "Welcome to the Trade Program, Cyrille. This is your primary project dashboard. Let's start with our Curated Showroom—click here to browse our fully interactive galleries, where you can view your live Silver Tier trade pricing staged in real residential environments.",
   },
   {
     id: "quotes",
@@ -365,15 +365,24 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     return () => window.removeEventListener("felix-tour:start", onStart);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dataset.felixTourActive = String(open);
+    window.dispatchEvent(new Event("felix-tour:state"));
+    return () => {
+      document.documentElement.dataset.felixTourActive = "false";
+      window.dispatchEvent(new Event("felix-tour:state"));
+    };
+  }, [open]);
+
   const close = useCallback((completed: boolean) => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
     transitionTimer.current = null;
     setOpen(false);
     setIsPaused(false);
     setTransitioning(false);
-    if (completed) {
-      try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
-    }
+    // Closing is an explicit skip; neither a completed nor skipped first tour
+    // should keep greeting the member as new on the dashboard.
+    try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
   }, []);
 
   const changeStep = (direction: number) => {
