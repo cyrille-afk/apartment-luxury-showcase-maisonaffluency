@@ -106,9 +106,11 @@ export default function TradeProjects() {
       client_name: client?.name ?? "",
       location: location.trim(),
     };
-    const { error } = starter
-      ? await supabase.from("projects").update({ ...fields, tags: (starter.tags ?? []).filter((tag) => tag !== SAMPLE_PROJECT_TAG) })
-          .eq("id", starter.id).eq("studio_id", currentStudio?.id ?? null)
+    const conversion = starter ? supabase.from("projects")
+      .update({ ...fields, tags: (starter.tags ?? []).filter((tag) => tag !== SAMPLE_PROJECT_TAG) })
+      .eq("id", starter.id) : null;
+    const { error } = conversion
+      ? await (currentStudio ? conversion.eq("studio_id", currentStudio.id) : conversion.eq("user_id", user.id).is("studio_id", null)).select("id").single()
       : await supabase.from("projects").insert({ ...fields, user_id: user.id, studio_id: currentStudio?.id ?? null });
     setCreating(false);
     if (error) { toast.error("Could not create project"); return; }
