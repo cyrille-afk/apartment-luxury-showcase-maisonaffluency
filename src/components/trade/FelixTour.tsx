@@ -400,7 +400,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       }
       if (targets.length && !didScroll) {
         didScroll = true;
-        targets[0].scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        targets[0].scrollIntoView({ block: "center", behavior: current.id === "margin-protection" || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
       }
       const watchedNow = [...targets, ...targets.map((el) => el.parentElement).filter((el): el is HTMLElement => el !== null)];
       if (watchedNow.length !== watched.length || watchedNow.some((el, i) => el !== watched[i])) {
@@ -414,6 +414,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       // Only measure nodes that are actually mounted and laid out.
       const live = targets.filter((el) => el === stepTargetRef.current || current.id !== "margin-protection")
         .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
+      // Gallery imagery may restore its previous scroll position after mount.
+      // Keep the Step 7 heading within the viewport instead of spotlighting
+      // a valid but offscreen bounding box.
+      if (current.id === "margin-protection" && live.length) {
+        const heading = live[0].getBoundingClientRect();
+        if (heading.bottom < 72 || heading.top > window.innerHeight - 72) {
+          live[0].scrollIntoView({ block: "center", behavior: "instant" });
+        }
+      }
       const boxes = live.map((el) => el.getBoundingClientRect());
       const next = boxes.length ? {
         top: Math.min(...boxes.map((r) => r.top)),
