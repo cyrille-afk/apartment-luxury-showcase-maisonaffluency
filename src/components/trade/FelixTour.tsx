@@ -680,7 +680,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </div>
             <button
               onClick={() => close(false)}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
+              className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Close tour"
               title="Close tour"
             >
@@ -825,21 +825,21 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           <div className="mt-4 flex items-center justify-between gap-2">
             <button
               onClick={() => close(false)}
-              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               Skip tour
             </button>
             <button
               onClick={back}
                disabled={currentStep === 0 || transitioning}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <ArrowLeft className="h-3 w-3" />
               Back
             </button>
             <button
               onClick={() => setIsPaused((p) => !p)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-pressed={isPaused}
             >
               {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
@@ -848,7 +848,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <button
               onClick={next}
                disabled={!stepDone || !settled || transitioning}
-              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90"
+              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               {step.cta ?? (isLast ? "Finish" : "Next")}
               {isLast ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
