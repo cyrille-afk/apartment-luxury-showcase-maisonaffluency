@@ -140,6 +140,22 @@ const FELIX_STEPS: FelixStep[] = [
       "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
   },
   {
+    id: "portfolio-management",
+    title: "Studio Portfolio Management",
+    target: "header-project-switcher",
+    route: "/trade",
+    dialogue:
+      "This switcher in the top bar scopes your entire workspace to a single client project. Select a project and every collection, quote, board, and document you see is filtered to that engagement alone — each client's pipeline stays fully isolated from the rest of your studio portfolio. Switch back to **All projects** whenever you want the complete view.",
+  },
+  {
+    id: "bespoke-commissions",
+    title: "Bespoke & Custom Commissions",
+    target: "nav-custom-requests",
+    route: "/trade/projects",
+    dialogue:
+      "When a project calls for something beyond the catalogue, submit a bespoke specification through Projects & Interventions. Describe the piece, dimensions, materials, and finish references, and our atelier network will scope feasibility, pricing, and lead time — custom commissions are tracked alongside your standard procurement in the same project workspace.",
+  },
+  {
     id: "felix-chat",
     title: "Your Personal Concierge",
     target: "nav-concierge",

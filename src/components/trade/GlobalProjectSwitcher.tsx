@@ -88,6 +88,7 @@ export function GlobalProjectSwitcher() {
       <PopoverTrigger asChild>
         <button
           type="button"
+          data-felix-target="header-project-switcher"
           className="hidden md:inline-flex items-center gap-1.5 rounded-md border border-border bg-background hover:bg-muted/40 transition-colors px-2.5 py-1.5 font-body text-[11px] text-foreground max-w-[220px]"
           aria-label="Active project"
         >
