@@ -347,8 +347,8 @@ const TradeDashboard = () => {
                   aria-label="Enter the Interactive Galleries"
                   className="absolute inset-0 z-10 hidden items-center justify-center cursor-pointer"
                 >
-                  <span className="relative flex items-center justify-center">
-                    <span className="absolute h-12 w-12 rounded-full bg-stone-400/30 animate-ping motion-reduce:animate-none transition-transform duration-500 ease-out group-hover/radar:scale-110" />
+                  <span className="relative flex items-center justify-center transition-transform duration-500 ease-out group-hover/radar:scale-110">
+                    <span className="absolute h-12 w-12 rounded-full bg-stone-400/15 animate-radar-ping motion-reduce:animate-none" />
                     <span className="relative h-2.5 w-2.5 rounded-full bg-stone-900 border border-white shadow-sm" />
                   </span>
                 </button>
