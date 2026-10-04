@@ -671,14 +671,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 Trade Tier Structure
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
-                {[
-                  { tier: "Silver Partner", discount: "10% Trade Discount", note: "Base entry tier", current: true },
-                  { tier: "Gold Partner", discount: "15% Trade Discount", note: "Unlocks at EUR150,000 cumulative project volume", current: false },
-                  { tier: "Platinum Partner", discount: "20% Trade Discount", note: "Unlocks at EUR300,000 cumulative project volume", current: false },
-                ].map((row) => (
+                {([
+                  { key: "silver" as TradeTier, note: "Base entry tier", current: true },
+                  { key: "gold" as TradeTier, note: `Unlocks at ${fmtEur(tiers.gold.min_spend_cents)} cumulative project volume`, current: false },
+                  { key: "platinum" as TradeTier, note: `Unlocks at ${fmtEur(tiers.platinum.min_spend_cents)} cumulative project volume`, current: false },
+                ]).map((row) => (
                   <div key={row.tier} className="flex items-start justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5 shrink-0">
-                      <span className="font-display text-[13px] text-foreground whitespace-nowrap">{row.tier}</span>
+                      <span className="font-display text-[13px] text-foreground whitespace-nowrap">{tiers[row.key].label} Partner</span>
                       {row.current ? (
                         <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 font-body text-[8px] uppercase tracking-[0.18em] text-accent">
                           Current Status
