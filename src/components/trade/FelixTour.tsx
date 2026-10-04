@@ -217,11 +217,11 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "priority-concierge",
     title: "Priority Concierge Access",
-    target: "felix-chat",
+    target: "nav-concierge",
     route: "/trade",
     cta: "Finish Tour",
     dialogue:
-      "You are never sourcing alone. I am available from the top bar on every page — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
+      "You are never sourcing alone. I am available in the sidebar on every page through the Trade Concierge — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
   },
 ];
 
