@@ -295,6 +295,15 @@ const TradeDashboard = () => {
                 </div>
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+              {card.key === "dash-showroom" && (
+                <span data-felix-hotspot aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center">
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-full border border-accent bg-background/90 shadow-lg">
+                    <span className="absolute inset-0 rounded-full border-2 border-accent animate-ping motion-reduce:animate-none" />
+                    <span className="absolute -inset-2 rounded-full border border-accent/70" />
+                    <MapPin className="h-5 w-5 text-accent-foreground" />
+                  </span>
+                </span>
+              )}
               {card.key === "dash-3d-studio" && studioStats.count > 0 && (
                 <span className="absolute top-3 right-3 inline-flex items-center px-2 py-1 bg-background/90 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
                   {studioStats.count} render{studioStats.count !== 1 ? "s" : ""}

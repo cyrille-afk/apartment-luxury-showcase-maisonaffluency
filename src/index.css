@@ -235,6 +235,9 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  html[data-felix-tour-step="collection"] [data-felix-hotspot] {
+    display: flex;
+  }
   .text-crimson-black {
     color: hsl(var(--crimson-black));
   }

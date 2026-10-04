@@ -160,12 +160,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  const [collectionOpened, setCollectionOpened] = useState(false);
   const transitionTimer = useRef<number | null>(null);
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
-  const stepRoute = step.id === "collection" && collectionOpened ? "/trade/the-collection" : step.route;
+  const [collectionOpened, setCollectionOpened] = useState(false);
+  const [collectionArrived, setCollectionArrived] = useState(false);
+  const stepRoute = (step.id === "collection" && collectionOpened) || (step.id === "quotes" && collectionArrived) ? "/trade/the-collection" : step.route;
   const stepTarget = step.id === "collection" && collectionOpened ? "collection-gallery" : step.target;
 
   const measure = useCallback(() => {
@@ -194,6 +195,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
       if (el && step.id === "collection" && !collectionOpened) {
+        // The dashboard Link handles navigation; Step 3 follows once its
+        // gallery destination has mounted, without another Next press.
         setCollectionOpened(true);
         return;
       }
@@ -204,6 +207,18 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     return () => document.removeEventListener("click", onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, step, stepTarget, collectionOpened, measure]);
+
+  useEffect(() => {
+    if (!open || step.id !== "collection" || !collectionOpened || location.pathname !== "/trade/the-collection") return;
+    const gallery = document.querySelector('[data-felix-target="collection-gallery"]');
+    if (!gallery || !gallery.getClientRects().length) return;
+    const timer = window.setTimeout(() => {
+      setCollectionOpened(false);
+      setCollectionArrived(true);
+      setCurrentStep(2);
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [open, step.id, collectionOpened, location.pathname, position]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -337,6 +352,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     };
   }, [open, currentStep, location.pathname, stepRoute, stepTarget, collectionOpened]);
 
+  useLayoutEffect(() => {
+    if (open) document.documentElement.dataset.felixTourStep = step.id;
+    else delete document.documentElement.dataset.felixTourStep;
+    return () => { delete document.documentElement.dataset.felixTourStep; };
+  }, [open, step.id]);
+
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
@@ -358,6 +379,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const onStart = () => {
       setCurrentStep(0);
       setCollectionOpened(false);
+      setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
     };
@@ -391,6 +413,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
       setCollectionOpened(false);
+      setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
@@ -554,7 +577,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
                <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                <p className="font-body text-sm font-semibold leading-snug">
-                 {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+                 {step.id === "collection" ? "Click on the Curated Showroom card to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
                </p>
              </div>
            )}
