@@ -6,6 +6,29 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
+import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
+
+/** Format a tier discount fraction (0.15) as "15%". */
+const fmtPct = (fraction: number) => {
+  const pct = fraction * 100;
+  return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
+};
+
+/** Format a spend threshold in cents as "EUR150,000". */
+const fmtEur = (cents: number) => `EUR${Math.round(cents / 100).toLocaleString("en-US")}`;
+
+/**
+ * Tour copy tokens ({silverPct}, {goldEur}, …) resolve against the live
+ * `trade_tier_config` table so admin pricing changes update the tour
+ * automatically — no hardcoded rates or thresholds in the walkthrough.
+ */
+const resolveTierTokens = (text: string, cfg: Record<TradeTier, TierConfigRow>) =>
+  text
+    .replace(/\{silverPct\}/g, fmtPct(cfg.silver.discount_pct))
+    .replace(/\{goldPct\}/g, fmtPct(cfg.gold.discount_pct))
+    .replace(/\{platinumPct\}/g, fmtPct(cfg.platinum.discount_pct))
+    .replace(/\{goldEur\}/g, fmtEur(cfg.gold.min_spend_cents))
+    .replace(/\{platinumEur\}/g, fmtEur(cfg.platinum.min_spend_cents));
 
 type FelixStep = {
   id: string;
@@ -41,7 +64,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "dashboard-showroom",
     route: "/trade",
     dialogue:
-      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a 10% trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
+      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
   },
   {
     id: "quotes",
@@ -49,7 +72,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the EUR150,000 Gold Tier threshold.",
+      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldEur} Gold Tier threshold.",
   },
   {
     id: "projects",
@@ -65,7 +88,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tier-volume-tracker",
     route: "/trade",
     dialogue:
-      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR150,000 threshold, where your 15% Gold Tier discount unlocks automatically — no forms, no waiting.",
+      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the {goldEur} threshold, where your {goldPct} Gold Tier discount unlocks automatically — no forms, no waiting.",
   },
   {
     id: "client-safe-presentations",
@@ -81,7 +104,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-price-tag",
     route: "/trade/the-collection",
     dialogue:
-      "With Client View active, your 10% Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
+      "With Client View active, your {silverPct} Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
   },
   {
     id: "quote-generation",
@@ -97,7 +120,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "quotes-ledger-panel",
     route: "/trade/quotes",
     dialogue:
-      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the EUR150,000 threshold, moving you closer to your 15% Gold Tier discount.",
+      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldEur} threshold, moving you closer to your {goldPct} Gold Tier discount.",
   },
   {
     id: "tools",
@@ -191,6 +214,14 @@ const sameRect = (a: Rect, b: Rect) =>
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
+  // Live tier config (trade_tier_config) drives every rate/threshold in the
+  // tour copy, tier table, and worked example — realtime-invalidated on admin edits.
+  const { data: tierCfg } = useTierConfig();
+  const tiers = tierCfg ?? {
+    silver: { tier: "silver", discount_pct: 0, min_spend_cents: 0, label: "Silver" },
+    gold: { tier: "gold", discount_pct: 0, min_spend_cents: 0, label: "Gold" },
+    platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
+  } as Record<TradeTier, TierConfigRow>;
   const navigate = useNavigate();
   const location = useLocation();
   const [stepDone, setStepDone] = useState(true);
@@ -630,7 +661,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(resolveTierTokens(step.dialogue, tiers).replace(/\{name\}/g, guideName))}</p>
           </div>
 
           {/* Trade tier structure — Step 1 only */}
@@ -640,14 +671,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 Trade Tier Structure
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
-                {[
-                  { tier: "Silver Partner", discount: "10% Trade Discount", note: "Base entry tier", current: true },
-                  { tier: "Gold Partner", discount: "15% Trade Discount", note: "Unlocks at EUR150,000 cumulative project volume", current: false },
-                  { tier: "Platinum Partner", discount: "20% Trade Discount", note: "Unlocks at EUR300,000 cumulative project volume", current: false },
-                ].map((row) => (
-                  <div key={row.tier} className="flex items-start justify-between gap-4 py-3">
+                {([
+                  { key: "silver" as TradeTier, note: "Base entry tier", current: true },
+                  { key: "gold" as TradeTier, note: `Unlocks at ${fmtEur(tiers.gold.min_spend_cents)} cumulative project volume`, current: false },
+                  { key: "platinum" as TradeTier, note: `Unlocks at ${fmtEur(tiers.platinum.min_spend_cents)} cumulative project volume`, current: false },
+                ]).map((row) => (
+                  <div key={row.key} className="flex items-start justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5 shrink-0">
-                      <span className="font-display text-[13px] text-foreground whitespace-nowrap">{row.tier}</span>
+                      <span className="font-display text-[13px] text-foreground whitespace-nowrap">{tiers[row.key].label} Partner</span>
                       {row.current ? (
                         <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 font-body text-[8px] uppercase tracking-[0.18em] text-accent">
                           Current Status
@@ -656,7 +687,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                     </div>
                     <div className="text-right min-w-0">
                       <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap">
-                        {row.discount}
+                        {fmtPct(tiers[row.key].discount_pct)} Trade Discount
                       </p>
                       <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
                         {row.note}
@@ -666,7 +697,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Prices shown across The Collection and the interactive galleries calculate automatically based on your active 10% discount level.
+                Prices shown across The Collection and the interactive galleries calculate automatically based on your active {fmtPct(tiers.silver.discount_pct)} discount level.
               </p>
             </div>
           )}
@@ -678,11 +709,21 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 How Volume Progresses — Worked Example
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
-                {[
-                  { project: "Three-room apartment, full curation", spend: "EUR 48,000", running: "Running total: EUR 48,000" },
-                  { project: "Singapore GCB, living + dining", spend: "EUR 52,000", running: "Running total: EUR 100,000" },
-                  { project: "Penthouse bedroom suites", spend: "EUR 50,000", running: "Running total: EUR 150,000 — Gold unlocked" },
-                ].map((row) => (
+                {(() => {
+                  // Example spends derive from the live thresholds: three projects
+                  // that sum exactly to the Gold unlock, then the gap to Platinum.
+                  const goldC = tiers.gold.min_spend_cents;
+                  const platC = tiers.platinum.min_spend_cents;
+                  const p1 = Math.round(goldC * 0.32 / 100000) * 100000;
+                  const p2 = Math.round(goldC * 0.3467 / 100000) * 100000;
+                  const p3 = goldC - p1 - p2;
+                  const eur = (c: number) => `EUR ${Math.round(c / 100).toLocaleString("en-US")}`;
+                  return [
+                    { project: "Three-room apartment, full curation", spend: eur(p1), running: `Running total: ${eur(p1)}` },
+                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)}` },
+                    { project: "Penthouse bedroom suites", spend: eur(p3), running: `Running total: ${eur(goldC)} — ${tiers.gold.label} unlocked` },
+                  ];
+                })().map((row) => (
                   <div key={row.project} className="flex items-start justify-between gap-4 py-3">
                     <div className="min-w-0">
                       <p className="font-display text-[13px] text-foreground">{row.project}</p>
@@ -695,18 +736,18 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
                 <div className="flex items-start justify-between gap-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-display text-[13px] text-foreground">Continued volume at 15% Gold</p>
+                    <p className="font-display text-[13px] text-foreground">Continued volume at {fmtPct(tiers.gold.discount_pct)} {tiers.gold.label}</p>
                     <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
-                      A further EUR 150,000 of confirmed spend — Running total: EUR 300,000 — Platinum unlocked
+                      A further EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")} of confirmed spend — Running total: EUR {Math.round(tiers.platinum.min_spend_cents / 100).toLocaleString("en-US")} — {tiers.platinum.label} unlocked
                     </p>
                   </div>
                   <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
-                    EUR 150,000+
+                    EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")}+
                   </p>
                 </div>
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Every confirmed quote counts toward the same rolling 12-month total — a single EUR150,000 project reaches Gold on its own.
+                Every confirmed quote counts toward the same rolling 12-month total — a single {fmtEur(tiers.gold.min_spend_cents)} project reaches {tiers.gold.label} on its own.
               </p>
             </div>
           )}
