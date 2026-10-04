@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { useProjects } from "@/hooks/useProjects";
 import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
-import { onboardingProjectForMarket } from "@/lib/onboardingProject";
+import { onboardingProjectForMarket, SAMPLE_PROJECT_TAG } from "@/lib/onboardingProject";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Mount in the trade shell so the project exists even before Step 4 opens Projects. */
@@ -40,7 +40,7 @@ export default function SeedOnboardingProject() {
       const sample = onboardingProjectForMarket(market);
       const { error } = await supabase.from("projects").insert({
         user_id: user.id, studio_id: currentStudio?.id ?? null,
-        name: sample.name, location: sample.location,
+        name: sample.name, location: sample.location, tags: [SAMPLE_PROJECT_TAG],
       });
       try { if (error) localStorage.removeItem(key); else localStorage.setItem(key, "done"); } catch { /* optional storage */ }
       if (!error) window.dispatchEvent(new Event("trade-projects:changed"));

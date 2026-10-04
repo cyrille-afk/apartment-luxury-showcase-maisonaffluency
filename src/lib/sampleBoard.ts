@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { onboardingProjectForMarket } from "@/lib/onboardingProject";
+import { onboardingProjectForMarket, SAMPLE_PROJECT_TAG } from "@/lib/onboardingProject";
 import type { TradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 
 /** Curated catalogue pieces used to pre-populate a new user's sample board. */
@@ -43,7 +43,7 @@ export async function ensureSampleBoard(market: TradeOfficeMarket = null, studio
   }
   if (!projectId) {
     const { data: project } = await supabase.from("projects")
-      .insert({ user_id: uid, studio_id: studioId, name: sample.name, location: sample.location, client_name: "Sample Client" })
+      .insert({ user_id: uid, studio_id: studioId, name: sample.name, location: sample.location, client_name: "Sample Client", tags: [SAMPLE_PROJECT_TAG] })
       .select("id").single();
     projectId = project?.id ?? null;
   }

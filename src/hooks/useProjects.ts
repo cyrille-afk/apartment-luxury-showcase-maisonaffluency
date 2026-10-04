@@ -10,6 +10,7 @@ export type Project = {
   name: string;
   client_name: string;
   location: string;
+  tags: string[];
   status: "active" | "completed" | "archived";
   color: string;
   cover_image_url: string | null;
