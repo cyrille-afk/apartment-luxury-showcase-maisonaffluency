@@ -125,6 +125,11 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "radar-ping": {
+          "0%": { transform: "scale(0.55)", opacity: "0.4" },
+          "70%": { transform: "scale(1.55)", opacity: "0.08" },
+          "100%": { transform: "scale(2)", opacity: "0" },
+        },
         "accordion-down": {
           from: {
             height: "0",
