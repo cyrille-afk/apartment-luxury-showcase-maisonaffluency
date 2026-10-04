@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
 import TradeBoards from "@/pages/TradeBoards";
+import { isSampleProject, SAMPLE_PROJECT_TAG } from "@/lib/onboardingProject";
 
 const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[] = [
   { key: "active", label: "Active" },
@@ -38,7 +39,37 @@ export default function TradeProjects() {
   const [client, setClient] = useState<PickedClient | null>(null);
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
   const [hiddenForMeCount, setHiddenForMeCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const id = searchParams.get("convert");
+    if (!id || loading) return;
+    const starter = projects.find((project) => project.id === id && isSampleProject(project));
+    if (starter && canEdit) {
+      setConvertingId(id);
+      setName("");
+      setLocation("");
+      setClient(null);
+      setTab("active");
+      setDialogOpen(true);
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("convert");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, loading, projects, canEdit, setSearchParams]);
+
+  const openCreate = () => {
+    setConvertingId(null);
+    setName(""); setLocation(""); setClient(null);
+    setDialogOpen(true);
+  };
+
+  const openConvert = (id: string) => {
+    setConvertingId(id);
+    setName(""); setLocation(""); setClient(null);
+    setDialogOpen(true);
+  };
 
   // Count projects in this studio that are explicitly hidden from the current
   // user via a per-project override (role = NULL). Purely informational.
@@ -67,20 +98,26 @@ export default function TradeProjects() {
       return;
     }
     setCreating(true);
-    const { error } = await supabase.from("projects" as any).insert({
-      user_id: user.id,
-      studio_id: currentStudio?.id ?? null,
+    const starter = convertingId ? projects.find((project) => project.id === convertingId && isSampleProject(project)) : null;
+    if (convertingId && !starter) { setCreating(false); toast.error("Sample project is no longer available"); return; }
+    const fields = {
       name: name.trim(),
       client_id: client?.id ?? null,
       client_name: client?.name ?? "",
       location: location.trim(),
-    } as any);
+    };
+    const { error } = starter
+      ? await supabase.from("projects").update({ ...fields, tags: (starter.tags ?? []).filter((tag) => tag !== SAMPLE_PROJECT_TAG) })
+          .eq("id", starter.id).eq("studio_id", currentStudio?.id ?? null)
+      : await supabase.from("projects").insert({ ...fields, user_id: user.id, studio_id: currentStudio?.id ?? null });
     setCreating(false);
     if (error) { toast.error("Could not create project"); return; }
-    toast.success("Project created");
+    toast.success(starter ? "Sample converted to your project" : "Project created");
     setName(""); setClient(null); setLocation("");
+    setConvertingId(null);
     setDialogOpen(false);
     refresh();
+    window.dispatchEvent(new Event("trade-projects:changed"));
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -119,16 +156,17 @@ export default function TradeProjects() {
             </div>
           )}
         </div>
-        {view === "projects" && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {view === "projects" && <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setConvertingId(null); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2" onClick={openCreate}>
               <Plus className="h-4 w-4" /> New project
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-display">Create project</DialogTitle>
+              <DialogTitle className="font-display">{convertingId ? "Create your first real project" : "Create project"}</DialogTitle>
             </DialogHeader>
+            {convertingId && <p className="font-body text-sm text-muted-foreground">Name your project and add its client. Your sample folder and anything saved inside it will stay together.</p>}
             <div className="space-y-4">
               <div>
                 <Label className="text-xs">Project name *</Label>
@@ -148,7 +186,7 @@ export default function TradeProjects() {
                 <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City / region" />
               </div>
               <Button onClick={handleCreate} disabled={!name.trim() || creating} className="w-full">
-                {creating ? <DotCircleLoader size="sm" /> : "Create project"}
+                 {creating ? <DotCircleLoader size="sm" /> : convertingId ? "Use this project" : "Create project"}
               </Button>
             </div>
           </DialogContent>
@@ -226,7 +264,7 @@ export default function TradeProjects() {
             </p>
             <div className="flex items-center justify-center gap-2 flex-wrap">
               {canEdit && (
-                <Button size="sm" onClick={() => setDialogOpen(true)} className="gap-2">
+                 <Button size="sm" onClick={openCreate} className="gap-2">
                   <Plus className="h-4 w-4" /> Create a project
                 </Button>
               )}
@@ -245,7 +283,7 @@ export default function TradeProjects() {
               No {tab} projects yet.
             </p>
             {tab === "active" && canEdit && (
-              <Button size="sm" onClick={() => setDialogOpen(true)}>
+               <Button size="sm" onClick={openCreate}>
                 Create your first project
               </Button>
             )}
@@ -272,7 +310,8 @@ export default function TradeProjects() {
                     </div>
                   )}
                 </div>
-                <div className="p-4">
+                 <div className="p-4">
+                   {isSampleProject(p) && <span className="mb-2 inline-flex border border-accent px-2 py-0.5 font-body text-[10px] uppercase text-accent">Sample project</span>}
                   <h3 className="font-display text-base text-foreground truncate mb-1">{p.name}</h3>
                   <div className="space-y-1 text-xs text-muted-foreground font-body">
                     {p.client_name && (
@@ -294,6 +333,7 @@ export default function TradeProjects() {
                   </div>
                 </div>
               </Link>
+               {isSampleProject(p) && canEdit && <div className="px-4 pb-3"><Button size="sm" variant="outline" onClick={() => openConvert(p.id)}>Create my first real project →</Button></div>}
               <div className="px-4 pb-4 -mt-1">
                 <Link
                   to={`/trade/visualiser?project=${p.id}${(p as any).client_id ? `&client=${(p as any).client_id}` : ""}`}
