@@ -84,6 +84,24 @@ const formatRelativeDate = (dateStr: string) => {
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
   const { profile } = useAuth();
+  const [firstWelcome, setFirstWelcome] = useState(() => {
+    try {
+      return document.documentElement.dataset.felixTourActive === "true" || !localStorage.getItem("felix_dashboard_tour_seen_v1");
+    } catch { return true; }
+  });
+  useEffect(() => {
+    const syncWelcome = () => {
+      try {
+        setFirstWelcome(document.documentElement.dataset.felixTourActive === "true" || !localStorage.getItem("felix_dashboard_tour_seen_v1"));
+      } catch { setFirstWelcome(true); }
+    };
+    window.addEventListener("felix-tour:state", syncWelcome);
+    window.addEventListener("storage", syncWelcome);
+    return () => {
+      window.removeEventListener("felix-tour:state", syncWelcome);
+      window.removeEventListener("storage", syncWelcome);
+    };
+  }, []);
   const { tierLabel } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
@@ -235,7 +253,7 @@ const TradeDashboard = () => {
         <div className="flex items-start justify-between gap-4">
           <div data-felix-target="greeting">
             <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-foreground leading-none">
-              Welcome back{profile?.first_name ? `, ${profile.first_name}` : ""}
+               {firstWelcome ? "Welcome to the Trade Program" : "Welcome back"}{profile?.first_name ? `, ${profile.first_name}` : ""}
             </h1>
             {profile?.company && showTradePrice && (
               <p className="trade-micro-label mt-4 font-body uppercase text-muted-foreground">

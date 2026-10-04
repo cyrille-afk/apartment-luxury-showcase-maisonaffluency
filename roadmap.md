@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Show first-time welcome on the dashboard until Felix is completed or skipped, and align Step 2 copy.
+
 - [x] Anchor Felix Step 2 to the dashboard Curated Showroom card; require a card click and keep Interactive Galleries visible before continuing.
 
 - [x] Give studio headers and specification PDFs a serif text-logo fallback, label unpriced pieces Price upon Request, and strip generator metadata from schedule downloads.
