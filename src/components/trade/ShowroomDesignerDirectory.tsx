@@ -18,6 +18,7 @@ interface DirectoryDesigner {
   slug: string;
   image_url: string | null;
   specialty: string | null;
+  productImageUrl: string | null;
 }
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
