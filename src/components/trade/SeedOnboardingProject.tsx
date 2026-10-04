@@ -8,13 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** Mount in the trade shell so the project exists even before Step 4 opens Projects. */
 export default function SeedOnboardingProject() {
-  const { user } = useAuth();
+  const { user, isTradeUser, isAdmin, rolesLoaded } = useAuth();
   const { currentStudio, loading: studioLoading, canEdit } = useStudio();
   const { projects, loading } = useProjects();
   const { market, marketLoading } = useTierVolumeLocale();
 
   useEffect(() => {
-    if (!user || studioLoading || loading || marketLoading || !canEdit) return;
+    if (!user || !rolesLoaded || studioLoading || loading || marketLoading || !(currentStudio ? canEdit : isTradeUser || isAdmin)) return;
     const key = `ma:onboarding-project:v1:${user.id}:${currentStudio?.id ?? "personal"}`;
     try {
       if (projects.length) { localStorage.setItem(key, "done"); return; }
@@ -42,6 +42,6 @@ export default function SeedOnboardingProject() {
       try { if (error) localStorage.removeItem(key); else localStorage.setItem(key, "done"); } catch { /* optional storage */ }
       if (!error) window.dispatchEvent(new Event("trade-projects:changed"));
     })();
-  }, [user?.id, studioLoading, loading, marketLoading, canEdit, currentStudio?.id, market, projects.length]);
+  }, [user?.id, rolesLoaded, isTradeUser, isAdmin, studioLoading, loading, marketLoading, canEdit, currentStudio?.id, market, projects.length]);
   return null;
 }
