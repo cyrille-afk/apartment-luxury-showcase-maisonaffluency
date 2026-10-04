@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
 import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
-import { useTradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
 
 /** Format a tier discount fraction (0.15) as "15%". */
@@ -91,7 +90,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tier-volume-tracker",
     route: "/trade",
     dialogue:
-      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the {goldEur} threshold, where your {goldPct} Gold Tier discount unlocks automatically — no forms, no waiting.",
+      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the regional Gold Tier milestone, where your {goldPct} discount unlocks automatically — no forms, no waiting.",
   },
   {
     id: "client-safe-presentations",
@@ -249,11 +248,10 @@ const sameRect = (a: Rect, b: Rect) =>
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
   const { clientSafe } = useClientSafeMode();
-  const officeMarket = useTradeOfficeMarket();
-  const projectExampleByMarket = {
-    SG: "Singapore GCB, living + dining",
-    US: "Tribeca Penthouse Loft, master living",
-    GB: "Belgravia Townhouse, formal reception",
+  const projectExampleByCurrency = {
+    SGD: "Singapore GCB, living + dining",
+    USD: "Tribeca Luxury Loft",
+    EUR: "Major residential project, living + dining",
   };
   // Live tier config (trade_tier_config) drives every rate/threshold in the
   // tour copy, tier table, and worked example — realtime-invalidated on admin edits.
@@ -263,7 +261,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     gold: { tier: "gold", discount_pct: 0, min_spend_cents: 0, label: "Gold" },
     platinum: { tier: "platinum", discount_pct: 0, min_spend_cents: 0, label: "Platinum" },
   } as Record<TradeTier, TierConfigRow>;
-  const tierVolume = useTierVolumeLocale(tiers);
+  const tierVolume = useTierVolumeLocale();
   const navigate = useNavigate();
   const location = useLocation();
   const [stepDone, setStepDone] = useState(true);
@@ -810,7 +808,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             )}
           >
             <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold((step.id === "tier-tracking"
-              ? step.dialogue.replace(/\{goldEur\}/g, `${tierVolume.currency} ${tierVolume.gold.toLocaleString("en-US")}`)
+              ? step.dialogue
               : resolveTierTokens(step.dialogue, tiers))
               .replace(/\{goldPct\}/g, fmtPct(tiers.gold.discount_pct))
               .replace(/\{name\}/g, guideName))}</p>
@@ -861,16 +859,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 How Volume Progresses — Worked Example
               </p>
               <p className="mt-2 font-body text-[10px] leading-relaxed text-muted-foreground">
-                Gold: {tierVolume.currency} {tierVolume.gold.toLocaleString("en-US")} cumulative project volume · Platinum: {tierVolume.currency} {tierVolume.platinum.toLocaleString("en-US")} cumulative project volume
+                Gold Tier — {tierVolume.format(tierVolume.gold)} cumulative spend · Platinum Tier — {tierVolume.format(tierVolume.platinum)} cumulative spend
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {(() => {
                   const [p1, p2, p3] = tierVolume.examples;
-                  const money = (v: number) => `${tierVolume.currency} ${v.toLocaleString("en-US")}`;
+                  const money = tierVolume.format;
                   return [
                     { project: "Three-room apartment, full curation", spend: money(p1), running: `Running total: ${money(p1)}` },
-                    { project: officeMarket ? projectExampleByMarket[officeMarket] : "Major residential project, living + dining", spend: money(p2), running: `Running total: ${money(p1 + p2)} — Gold unlocked` },
-                    { project: "Penthouse primary bedroom suites", spend: money(p3), running: `Running total: ${money(p1 + p2 + p3)} — Platinum unlocked` },
+                    { project: projectExampleByCurrency[tierVolume.currency], spend: money(p2), running: `${money(p2)} — Gold unlocked single-handedly · Running total: ${money(p1 + p2)}` },
+                    { project: tierVolume.currency === "SGD" ? "Sentosa Cove penthouse primary suites" : "Penthouse primary suites", spend: money(p3), running: `Running total: ${money(p1 + p2 + p3)} — Platinum unlocked` },
                   ];
                 })().map((row) => (
                   <div key={row.project} className="flex items-start justify-between gap-4 py-3">
@@ -887,16 +885,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                   <div className="min-w-0">
                     <p className="font-display text-[13px] text-foreground">Continued volume across studio portfolio</p>
                     <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
-                      Running total: {tierVolume.currency} {tierVolume.platinum.toLocaleString("en-US")}+ — Platinum privileges maintained
+                      Running total: {tierVolume.format(tierVolume.platinum)}+ — Platinum privileges maintained
                     </p>
                   </div>
                   <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
-                    {tierVolume.currency} {tierVolume.platinum.toLocaleString("en-US")}+
+                    {tierVolume.format(tierVolume.platinum)}+
                   </p>
                 </div>
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Every confirmed quote counts toward the same rolling 12-month total — a single {tierVolume.currency} {tierVolume.gold.toLocaleString("en-US")} project reaches {tiers.gold.label} on its own.
+                Every confirmed quote counts toward the same rolling 12-month total — a single {tierVolume.format(tierVolume.gold)} project reaches {tiers.gold.label} on its own.
               </p>
             </div>
           )}
