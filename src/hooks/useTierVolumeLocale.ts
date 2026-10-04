@@ -11,6 +11,7 @@ type TierCurrency = Exclude<DisplayCurrency, "original">;
 export function tierVolumeCurrency(market: TradeOfficeMarket, preferred: DisplayCurrency): TierCurrency {
   // The US branch's tier milestones are a fixed native USD programme.
   if (market === "US") return "USD";
+  if (market === "SG") return "SGD";
   if (preferred !== "original") return preferred;
   return market === "SG" ? "SGD" : market === "GB" ? "GBP" : "EUR";
 }
@@ -28,9 +29,10 @@ export function tierVolumeModel(config: TierConfig, currency: TierCurrency, fxRa
   const platinum = amount(config.platinum.min_spend_cents);
   // The worked examples are matched to the native US milestones, not rounded
   // from EUR independently (53 + 167 + 110 = 330).
-  const examples = currency === "USD"
-    ? [53000, 167000, 110000]
-    : [48000, 152000, 100000].map((eur) => Math.round(eur * scale));
+  const base = currency === "USD" ? [53000, 167000] : [48000, 152000];
+  const reference = currency === "USD" ? 330000 : 300000;
+  const examples = [Math.round(platinum * base[0] / reference), Math.round(platinum * base[1] / reference)];
+  examples.push(platinum - examples[0] - examples[1]);
   return { currency, amount, format, gold, platinum, examples };
 }
 
