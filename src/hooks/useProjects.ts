@@ -39,12 +39,13 @@ export function getRecentProjectIds(): string[] {
 
 export function useProjects(opts: { activeOnly?: boolean } = {}) {
   const { user } = useAuth();
-  const { currentStudio } = useStudio();
+  const { currentStudio, loading: studioLoading } = useStudio();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     if (!user) { setProjects([]); setLoading(false); return; }
+    if (studioLoading) return;
     setLoading(true);
     // Scope to current studio (when one is selected) so the switcher works.
     // RLS (`can_view_project`) hides any project where the user has a
@@ -69,7 +70,7 @@ export function useProjects(opts: { activeOnly?: boolean } = {}) {
       setProjects((data || []) as unknown as Project[]);
     }
     setLoading(false);
-  }, [user, currentStudio?.id, opts.activeOnly]);
+  }, [user, studioLoading, currentStudio?.id, opts.activeOnly]);
 
   useEffect(() => {
     refresh();
