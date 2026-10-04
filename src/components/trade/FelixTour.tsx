@@ -655,6 +655,46 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </div>
           )}
 
+          {/* Spend examples — Step 5 (tier-tracking) only */}
+          {step.id === "tier-tracking" && (
+            <div className="mt-4 animate-fade-in">
+              <p className="font-body text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+                How Volume Progresses — Worked Example
+              </p>
+              <div className="mt-2 divide-y divide-border border-y border-border">
+                {[
+                  { project: "Three-room apartment, full curation", spend: "EUR 48,000", running: "Running total: EUR 48,000" },
+                  { project: "Singapore GCB, living + dining", spend: "EUR 52,000", running: "Running total: EUR 100,000" },
+                  { project: "Penthouse bedroom suites", spend: "EUR 50,000", running: "Running total: EUR 150,000 — Gold unlocked" },
+                ].map((row) => (
+                  <div key={row.project} className="flex items-start justify-between gap-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-display text-[13px] text-foreground">{row.project}</p>
+                      <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">{row.running}</p>
+                    </div>
+                    <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
+                      {row.spend}
+                    </p>
+                  </div>
+                ))}
+                <div className="flex items-start justify-between gap-4 py-3">
+                  <div className="min-w-0">
+                    <p className="font-display text-[13px] text-foreground">Continued volume at 15% Gold</p>
+                    <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
+                      A further EUR 150,000 of confirmed spend — Running total: EUR 300,000 — Platinum unlocked
+                    </p>
+                  </div>
+                  <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
+                    EUR 150,000+
+                  </p>
+                </div>
+              </div>
+              <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
+                Every confirmed quote counts toward the same rolling 12-month total — a single EUR150,000 project reaches Gold on its own.
+              </p>
+            </div>
+          )}
+
 
            {!stepDone && !isPaused && (
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
