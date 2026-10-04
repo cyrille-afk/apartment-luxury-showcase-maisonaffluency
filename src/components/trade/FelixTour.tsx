@@ -527,13 +527,27 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (settled && transitioning && transitionTimer.current === null) setTransitioning(false);
   }, [settled, transitioning]);
 
-  // Escape always closes the tour.
+  // Keyboard: Escape closes; ArrowRight/ArrowLeft move between steps.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { close(false); return; }
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); back(); }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, close]);
+  }, [open, close, next, back]);
+
+  // Move focus into the tooltip whenever the step changes so keyboard and
+  // screen-reader users land on the new content.
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open || isPaused) return;
+    if (settled && !transitioning) cardRef.current?.focus({ preventScroll: true });
+  }, [open, currentStep, settled, transitioning, isPaused]);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -633,11 +647,19 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       {ring}
 
       {/* The card is not mounted until this step's actual target is measured. */}
+      {/* Screen-reader announcement for each step change */}
+      <div aria-live="polite" role="status" className="sr-only">
+        {`Step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
+      </div>
+
       {rect && <div
+        ref={cardRef}
         role="dialog"
-        aria-label={`${guideName} — Your Curatorial Guide`}
+        aria-modal="false"
+        tabIndex={-1}
+        aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
-          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
+          "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
           isPaused && "opacity-90",
         )}
         style={{ width: cardW, left: 0, top: 0, transform: `translate3d(${cardLeft}px, ${cardTop}px, 0)`, opacity: settled && !transitioning ? 1 : 0, pointerEvents: settled && !transitioning ? "auto" : "none" }}
@@ -658,7 +680,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </div>
             <button
               onClick={() => close(false)}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
+              className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label="Close tour"
               title="Close tour"
             >
@@ -803,21 +825,21 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           <div className="mt-4 flex items-center justify-between gap-2">
             <button
               onClick={() => close(false)}
-              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               Skip tour
             </button>
             <button
               onClick={back}
                disabled={currentStep === 0 || transitioning}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <ArrowLeft className="h-3 w-3" />
               Back
             </button>
             <button
               onClick={() => setIsPaused((p) => !p)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground hover:bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-pressed={isPaused}
             >
               {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
@@ -826,7 +848,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             <button
               onClick={next}
                disabled={!stepDone || !settled || transitioning}
-              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90"
+              className="disabled:opacity-30 disabled:cursor-not-allowed inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-widest text-background hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               {step.cta ?? (isLast ? "Finish" : "Next")}
               {isLast ? <Check className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
