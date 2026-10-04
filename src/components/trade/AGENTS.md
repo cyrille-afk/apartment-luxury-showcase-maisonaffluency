@@ -1,0 +1,1 @@
+- Felix tour sets Client View on each step entry (on for margin-protection, member choice kept on board presentation steps, off elsewhere) — later steps target trade-only navigation that Client View hides.
