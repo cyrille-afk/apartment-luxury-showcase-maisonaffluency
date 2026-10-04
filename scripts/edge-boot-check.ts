@@ -31,6 +31,20 @@ D.listen = () => ({
   [Symbol.asyncIterator]: () => ({ next: () => new Promise(() => {}) }),
 });
 
+// Child mode: boot exactly one function in this isolated process.
+if (Deno.args[0] === "--one") {
+  try {
+    await import(new URL(`${Deno.args[1]}/index.ts`, root).href);
+    Deno.exit(0);
+  } catch (e) {
+    console.error((e instanceof Error ? `${e.name}: ${e.message}` : String(e)).split("\n")[0]);
+    Deno.exit(1);
+  }
+}
+
+// Parent mode: each function gets its own process, because the runtime boots
+// each function in isolation — sharing one module graph would let one function's
+// npm versions leak into another's resolution and hide or invent failures.
 const requested = Deno.args;
 const names: string[] = [];
 for await (const e of Deno.readDir(root)) {
@@ -40,22 +54,27 @@ for await (const e of Deno.readDir(root)) {
 }
 names.sort();
 
+const self = new URL(import.meta.url).pathname;
 const failures: { name: string; error: string }[] = [];
-for (const name of names) {
-  try {
-    await import(new URL(`${name}/index.ts`, root).href);
-    console.log(`ok    ${name}`);
-  } catch (e) {
-    const msg = (e instanceof Error ? `${e.name}: ${e.message}` : String(e)).split("\n")[0];
-    failures.push({ name, error: msg });
-    console.log(`FAIL  ${name} — ${msg}`);
-  }
+async function bootOne(name: string) {
+  const out = await new Deno.Command(Deno.execPath(), {
+    args: ["run", "-A", "--no-config", "--node-modules-dir=none", self, "--one", name],
+    stdout: "piped", stderr: "piped",
+  }).output();
+  if (out.code === 0) { console.log(`ok    ${name}`); return; }
+  const err = new TextDecoder().decode(out.stderr).replace(/\x1b\[[0-9;]*m/g, "").trim().split("\n")[0] || `exit ${out.code}`;
+  failures.push({ name, error: err });
+  console.log(`FAIL  ${name} — ${err}`);
 }
+const queue = [...names];
+await Promise.all(Array.from({ length: 6 }, async () => {
+  while (queue.length) await bootOne(queue.shift()!);
+}));
 
 console.log(`\n${names.length - failures.length}/${names.length} functions boot.`);
 if (failures.length) {
   console.error(`\n${failures.length} function(s) would fail to start:`);
-  for (const f of failures) console.error(`  - ${f.name}: ${f.error}`);
+  for (const f of failures.sort((a, b) => a.name.localeCompare(b.name))) console.error(`  - ${f.name}: ${f.error}`);
   Deno.exit(1);
 }
-Deno.exit(0); // unref'd timers / pending top-level promises must not hang CI
+Deno.exit(0);
