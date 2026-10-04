@@ -225,6 +225,9 @@ const FELIX_STEPS: FelixStep[] = [
   },
 ];
 
+/** Board presentation steps where the member's Client View choice is kept. */
+const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", "white-label", "invite"]);
+
 const renderBold = (text: string) =>
   text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
     part.startsWith("**") ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part,
@@ -289,6 +292,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     const s = FELIX_STEPS[currentStep];
     setStepDone(s.id === "collection" ? false : s.done ? s.done() : true);
   }, [currentStep]);
+
+  // Client View is owned per step, not by whichever step last flipped it:
+  // margin-protection must show it, the board presentation steps leave the
+  // member's own choice alone, and every other step needs Trade view so its
+  // sidebar/header target is visible. Runs on entry (Next, Back, resume).
+  useLayoutEffect(() => {
+    if (!open) return;
+    const id = FELIX_STEPS[currentStep]?.id;
+    if (id === "margin-protection") setClientSafeMode(true);
+    else if (!CLIENT_VIEW_PASSTHROUGH_STEPS.has(id)) setClientSafeMode(false);
+  }, [open, currentStep]);
 
   // A direct click on the header switch advances Step 6 just like Next.
   // Only react to the off→on edge: Back can still revisit Step 6.
