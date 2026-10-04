@@ -647,9 +647,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       {ring}
 
       {/* The card is not mounted until this step's actual target is measured. */}
+      {/* Screen-reader announcement for each step change */}
+      <div aria-live="polite" role="status" className="sr-only">
+        {`Step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
+      </div>
+
       {rect && <div
+        ref={cardRef}
         role="dialog"
-        aria-label={`${guideName} — Your Curatorial Guide`}
+        aria-modal="false"
+        tabIndex={-1}
+        aria-label={`${guideName} — Your Curatorial Guide, step ${currentStep + 1} of ${FELIX_STEPS.length}: ${step.title}`}
         className={cn(
           "fixed z-[132] print:hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl transition-opacity duration-150 ease-out motion-reduce:transition-none",
           isPaused && "opacity-90",
