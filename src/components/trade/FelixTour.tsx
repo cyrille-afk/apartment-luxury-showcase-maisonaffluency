@@ -16,7 +16,7 @@ const fmtPct = (fraction: number) => {
 };
 
 /** Format a spend threshold in cents as "EUR150,000". */
-const fmtEur = (cents: number) => `EUR${Math.round(cents / 100).toLocaleString("en-US")}`;
+const fmtEur = (cents: number) => `EUR ${Math.round(cents / 100).toLocaleString("en-US")}`;
 
 /**
  * Tour copy tokens ({silverPct}, {goldEur}, …) resolve against the live
@@ -728,18 +728,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {(() => {
-                  // Example spends derive from the live thresholds: three projects
-                  // that sum exactly to the Gold unlock, then the gap to Platinum.
-                  const goldC = tiers.gold.min_spend_cents;
-                  const platC = tiers.platinum.min_spend_cents;
-                  const p1 = Math.round(goldC * 0.32 / 100000) * 100000;
-                  const p2 = Math.round(goldC * 0.3467 / 100000) * 100000;
-                  const p3 = goldC - p1 - p2;
-                  const eur = (c: number) => `EUR ${Math.round(c / 100).toLocaleString("en-US")}`;
+                  // Realistic luxury project spends (user-specified): the GCB
+                  // clears the Gold threshold alone; the penthouse suite
+                  // completes the Platinum unlock.
+                  const p1 = 48000;
+                  const p2 = 152000;
+                  const p3 = 100000;
+                  const eur = (v: number) => `EUR ${v.toLocaleString("en-US")}`;
                   return [
                     { project: "Three-room apartment, full curation", spend: eur(p1), running: `Running total: ${eur(p1)}` },
-                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)}` },
-                    { project: "Penthouse bedroom suites", spend: eur(p3), running: `Running total: ${eur(goldC)} — ${tiers.gold.label} unlocked` },
+                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)} — Gold unlocked single-handedly` },
+                    { project: "Penthouse primary bedroom suites", spend: eur(p3), running: `Running total: ${eur(p1 + p2 + p3)} — Platinum unlocked` },
                   ];
                 })().map((row) => (
                   <div key={row.project} className="flex items-start justify-between gap-4 py-3">
@@ -754,13 +753,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
                 <div className="flex items-start justify-between gap-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-display text-[13px] text-foreground">Continued volume at {fmtPct(tiers.gold.discount_pct)} {tiers.gold.label}</p>
+                    <p className="font-display text-[13px] text-foreground">Continued volume across studio portfolio</p>
                     <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
-                      A further EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")} of confirmed spend — Running total: EUR {Math.round(tiers.platinum.min_spend_cents / 100).toLocaleString("en-US")} — {tiers.platinum.label} unlocked
+                      Running total: EUR 300,000+ — Platinum privileges maintained
                     </p>
                   </div>
                   <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
-                    EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")}+
+                    EUR 300,000+
                   </p>
                 </div>
               </div>
