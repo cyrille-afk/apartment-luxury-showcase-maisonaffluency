@@ -18,8 +18,6 @@ import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
 import TradeBoards from "@/pages/TradeBoards";
-import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
-import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 
 const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[] = [
   { key: "active", label: "Active" },
@@ -29,9 +27,8 @@ const STATUS_TABS: { key: "active" | "completed" | "archived"; label: string }[]
 
 export default function TradeProjects() {
   const { user } = useAuth();
-  const { currentStudio, canEdit, isAdmin, loading: studioLoading } = useStudio();
+  const { currentStudio, canEdit, isAdmin } = useStudio();
   const { projects, loading, refresh } = useProjects();
-  const { market, marketLoading } = useTierVolumeLocale();
   const boardLinks = useProjectBoardTree(projects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") === "folders" ? "folders" : "projects";
@@ -42,7 +39,6 @@ export default function TradeProjects() {
   const [location, setLocation] = useState("");
   const [creating, setCreating] = useState(false);
   const [hiddenForMeCount, setHiddenForMeCount] = useState<number | null>(null);
-  const [seeding, setSeeding] = useState(false);
 
   // Count projects in this studio that are explicitly hidden from the current
   // user via a per-project override (role = NULL). Purely informational.
@@ -61,48 +57,7 @@ export default function TradeProjects() {
     return () => { cancelled = true; };
   }, [user?.id, currentStudio?.id, projects.length]);
 
-  // A starter folder is a genuine, scoped project, created only for an empty
-  // editable workspace. Mark it once so deleting it cannot silently recreate it.
-  useEffect(() => {
-    if (!user || studioLoading || loading || marketLoading || hiddenForMeCount === null || hiddenForMeCount > 0 || !canEdit || projects.length > 0 || view !== "projects") return;
-    const key = `ma:onboarding-project:v1:${user.id}:${currentStudio?.id ?? "personal"}`;
-    try {
-      if (localStorage.getItem(key)) return;
-      localStorage.setItem(key, "pending");
-    } catch { return; }
-    setSeeding(true);
-    (async () => {
-      const sample = onboardingProjectForMarket(market);
-      // Recheck immediately before insertion: other mounted project lists can
-      // finish loading independently, and a member may have just made a folder.
-      let query = supabase.from("projects").select("id").limit(1);
-      query = currentStudio ? query.eq("studio_id", currentStudio.id) : query.eq("user_id", user.id).is("studio_id", null);
-      const { data: existing, error: readError } = await query;
-      if (readError || existing?.length) {
-        if (existing?.length) localStorage.setItem(key, "done");
-        else localStorage.removeItem(key);
-        setSeeding(false);
-        return;
-      }
-      const { error } = await supabase.from("projects").insert({
-        user_id: user.id, studio_id: currentStudio?.id ?? null,
-        name: sample.name, location: sample.location,
-      });
-      if (error) localStorage.removeItem(key);
-      else localStorage.setItem(key, "done");
-      setSeeding(false);
-      if (!error) window.dispatchEvent(new Event("trade-projects:changed"));
-    })();
-  }, [user?.id, currentStudio?.id, studioLoading, loading, marketLoading, market, hiddenForMeCount, canEdit, projects.length, view, refresh]);
-
   const filtered = projects.filter((p) => p.status === tab);
-
-  useEffect(() => {
-    if (!user || studioLoading || loading || projects.length === 0) return;
-    try {
-      localStorage.setItem(`ma:onboarding-project:v1:${user.id}:${currentStudio?.id ?? "personal"}`, "done");
-    } catch { /* Storage is optional; do not disturb real projects. */ }
-  }, [user?.id, currentStudio?.id, studioLoading, loading, projects.length]);
 
 
   const handleCreate = async () => {
@@ -237,7 +192,7 @@ export default function TradeProjects() {
         ))}
       </div>
 
-      {loading || seeding || (projects.length === 0 && (studioLoading || marketLoading || hiddenForMeCount === null)) ? (
+      {loading ? (
         <div className="flex items-center justify-center py-20">
           <DotCircleLoader size="sm" className="text-muted-foreground" />
         </div>
