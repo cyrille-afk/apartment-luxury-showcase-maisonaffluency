@@ -22,6 +22,8 @@ import { useProjects } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { getFxRate, getFxSource, type FxSource } from "@/lib/fxRates";
+import { useTradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -107,6 +109,18 @@ const TradeDashboard = () => {
   }, []);
   const { tier, tierLabel, config: tierConfig } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
+  const officeMarket = useTradeOfficeMarket();
+  const [localFx, setLocalFx] = useState<{ currency: "SGD" | "USD" | "GBP"; rate: number; source: FxSource } | null>(null);
+  useEffect(() => {
+    const currency = officeMarket === "SG" ? "SGD" : officeMarket === "US" ? "USD" : officeMarket === "GB" ? "GBP" : null;
+    let cancelled = false;
+    setLocalFx(null);
+    if (!currency) return;
+    getFxRate("EUR", currency).then((rate) => {
+      if (!cancelled && Number.isFinite(rate) && rate > 0) setLocalFx({ currency, rate, source: getFxSource("EUR", currency) });
+    });
+    return () => { cancelled = true; };
+  }, [officeMarket]);
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
@@ -297,6 +311,11 @@ const TradeDashboard = () => {
             ));
             const fmt = (cents: number) =>
               new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
+            const fmtLocal = (cents: number) => {
+              if (!localFx) return "";
+              const amount = Math.round(cents / 100 * localFx.rate).toLocaleString("en-US");
+              return `${localFx.currency === "SGD" ? "S$" : localFx.currency === "GBP" ? "£" : "$"}${amount}`;
+            };
             return (
               <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
                 <div className="flex items-baseline justify-between gap-3">
@@ -311,6 +330,16 @@ const TradeDashboard = () => {
                 <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                   Rolling 12-month confirmed spend · next: {nextCfg.label} {Math.round(nextCfg.discount_pct * 100)}%
                 </p>
+                {showTradePrice && localFx && (
+                  <div className="mt-3 border-t border-border pt-2 font-body text-[10px] leading-relaxed text-muted-foreground tabular-nums">
+                    <span className="text-foreground">
+                      {fmtLocal(spendCents)} / {fmtLocal(nextCfg.min_spend_cents)} {localFx.currency}
+                    </span>
+                    <span className="block text-muted-foreground">
+                      [Based on {localFx.source === "hardcoded" ? "offline reference FX" : "current FX"}: 1 EUR = {localFx.rate.toFixed(2)} {localFx.currency}]
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })()}
