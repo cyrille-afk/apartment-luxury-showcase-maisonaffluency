@@ -538,7 +538,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.id === "collection" && collectionOpened ? "Interactive Galleries" : step.dialogue.replace(/\{name\}/g, guideName))}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
           </div>
 
            {!stepDone && !isPaused && (
