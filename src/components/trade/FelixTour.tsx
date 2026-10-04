@@ -37,19 +37,19 @@ const FELIX_STEPS: FelixStep[] = [
   },
   {
     id: "collection",
-    title: "Sourcing 'The Collection'",
+    title: "Interactive Sourcing",
     target: "dashboard-showroom",
     route: "/trade",
     dialogue:
-      "Welcome to the Trade Program, Cyrille. This is your primary project dashboard. Let's start with our Curated Showroom—click here to browse our fully interactive galleries, where you can view your live Silver Tier trade pricing staged in real residential environments.",
+      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a 10% trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
   },
   {
     id: "quotes",
-    title: "Financial Management",
-    target: "nav-quotes",
-    route: "/trade/quotes",
+    title: "Transparent Project Margins",
+    target: "collection-gallery",
+    route: "/trade/the-collection",
     dialogue:
-      "Manage your business transactions here. Track deposit pipelines, open balances, and instantly export beautiful proforma documents for client approval.",
+      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the $100,000 Gold Tier threshold.",
   },
   {
     id: "tools",
@@ -166,7 +166,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
   const [collectionArrived, setCollectionArrived] = useState(false);
-  // Trade navigation persists, so Step 3 need not wait for gallery data.
+  // The showroom card advances the step before navigation; do not redirect
+  // away while its Link takes the member into the gallery.
   const stepRoute = step.id === "quotes" && collectionArrived ? location.pathname : step.route;
   const stepTarget = step.target;
 
@@ -195,7 +196,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // Advance before the card Link routes, independently of destination loading.
   useEffect(() => {
-    if (!open) return;
+    if (!open || isPaused) return;
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
       if (el && step.id === "collection") {
@@ -211,7 +212,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, step, stepTarget, measure]);
+  }, [open, isPaused, step, stepTarget, measure]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -503,6 +504,18 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         boxShadow: "0 0 0 100vmax hsl(var(--foreground) / 0.4), 0 0 24px hsl(var(--accent) / 0.35)",
       }}
     >{step.pulse && <span className="absolute inset-0 rounded-md border-2 border-accent animate-pulse motion-reduce:animate-none" />}</div>
+  );
+
+  if (isPaused) return createPortal(
+    <button
+      type="button"
+      onClick={() => setIsPaused(false)}
+      className="fixed bottom-6 right-6 z-[132] inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground shadow-lg hover:bg-muted print:hidden"
+      aria-label="Resume Felix tour"
+    >
+      <Play className="h-3 w-3" /> Resume tour
+    </button>,
+    document.body,
   );
 
   return createPortal(

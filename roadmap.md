@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Align Felix Steps 2–3 with Interactive Sourcing and Transparent Project Margins; preserve Back and make Pause hide the tour frame until Resume.
+
 - [x] Replace Felix Step 2's pin with a radar dot and advance before gallery navigation resolves.
 
 - [x] Add a centered pulse to Felix Step 2's showroom image, clarify its click prompt, and advance to Step 3 on gallery navigation.
