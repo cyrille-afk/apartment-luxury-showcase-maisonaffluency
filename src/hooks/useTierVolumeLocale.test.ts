@@ -6,6 +6,7 @@ import type { TradeTier, TierConfigRow } from "./useTradeDiscount";
 describe("localized tier volume presentation", () => {
   it("gives the US branch native USD milestones even with another saved preference", () => {
     expect(tierVolumeCurrency("US", "EUR")).toBe("USD");
+    expect(tierVolumeCurrency(null, "EUR", "US")).toBe("USD");
     const us = tierVolumeModel("USD");
     expect([us.gold, us.platinum, us.examples]).toEqual([165000, 330000, [50000, 165000, 115000]]);
     expect(us.examples.reduce((sum, n) => sum + n, 0)).toBe(us.platinum);
@@ -16,6 +17,8 @@ describe("localized tier volume presentation", () => {
   it("restores the EUR baseline and keeps Singapore thresholds and examples in SGD", () => {
     expect(tierVolumeCurrency(null, "EUR")).toBe("EUR");
     expect(tierVolumeCurrency("SG", "original")).toBe("SGD");
+    expect(tierVolumeCurrency(null, "EUR", "SG")).toBe("SGD");
+    expect(tierVolumeCurrency("SG", "USD", "US")).toBe("SGD");
     expect(tierVolumeCurrency(null, "USD")).toBe("USD");
     const eu = tierVolumeModel("EUR");
     expect([eu.gold, eu.platinum, eu.examples]).toEqual([150000, 300000, [48000, 152000, 100000]]);
