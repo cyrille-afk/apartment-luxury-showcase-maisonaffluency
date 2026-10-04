@@ -397,7 +397,7 @@ const TradeQuotes = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-b border-border">
+        <div data-felix-target="quotes-ledger-panel" className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-b border-border">
           {(() => {
             const fmt = (cents: number) =>
               new Intl.NumberFormat("en-US", {

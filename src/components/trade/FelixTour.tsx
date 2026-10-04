@@ -84,6 +84,22 @@ const FELIX_STEPS: FelixStep[] = [
       "With Client View active, your 10% Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
   },
   {
+    id: "quote-generation",
+    title: "Professional Quote Generation",
+    target: "nav-quotes",
+    route: "/trade/quotes",
+    dialogue:
+      "This is your Quotes & Proformas workspace. The automated document compiler turns any product selection into a polished, client-ready quotation in moments — line items, finishes, lead times, and your tier pricing assembled for you. Create a new proforma specification whenever a project is ready to formalize.",
+  },
+  {
+    id: "direct-client-billing",
+    title: "Direct Client Billing",
+    target: "quotes-ledger-panel",
+    route: "/trade/quotes",
+    dialogue:
+      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the EUR150,000 threshold, moving you closer to your 15% Gold Tier discount.",
+  },
+  {
     id: "tools",
     title: "The Trade Tools Grid",
     target: "tools-grid",
