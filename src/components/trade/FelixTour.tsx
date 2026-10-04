@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
 import { setClientSafeMode } from "@/lib/clientSafeMode";
+import { useTradeOfficeMarket } from "@/hooks/useTradeOfficeMarket";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -246,6 +247,12 @@ const sameRect = (a: Rect, b: Rect) =>
 
 export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const guideName = useAIGuideName();
+  const officeMarket = useTradeOfficeMarket();
+  const projectExampleByMarket = {
+    SG: "Singapore GCB, living + dining",
+    US: "Tribeca Penthouse Loft, master living",
+    GB: "Belgravia Townhouse, formal reception",
+  };
   // Live tier config (trade_tier_config) drives every rate/threshold in the
   // tour copy, tier table, and worked example — realtime-invalidated on admin edits.
   const { data: tierCfg } = useTierConfig();
@@ -805,16 +812,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {(() => {
-                  // Realistic luxury project spends (user-specified): the GCB
-                  // clears the Gold threshold alone; the penthouse suite
-                  // completes the Platinum unlock.
+                  // EUR accounting values stay fixed across office markets;
+                  // only the residential reference changes.
                   const p1 = 48000;
                   const p2 = 152000;
                   const p3 = 100000;
                   const eur = (v: number) => `EUR ${v.toLocaleString("en-US")}`;
                   return [
                     { project: "Three-room apartment, full curation", spend: eur(p1), running: `Running total: ${eur(p1)}` },
-                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)} — Gold unlocked single-handedly` },
+                    { project: officeMarket ? projectExampleByMarket[officeMarket] : "Major residential project, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)} — Gold unlocked single-handedly` },
                     { project: "Penthouse primary bedroom suites", spend: eur(p3), running: `Running total: ${eur(p1 + p2 + p3)} — Platinum unlocked` },
                   ];
                 })().map((row) => (
