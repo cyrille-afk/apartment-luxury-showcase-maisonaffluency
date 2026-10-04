@@ -661,7 +661,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               isPaused && "opacity-50",
             )}
           >
-            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(step.dialogue.replace(/\{name\}/g, guideName))}</p>
+            <p className="font-body text-[13px] leading-relaxed text-foreground">{renderBold(resolveTierTokens(step.dialogue, tiers).replace(/\{name\}/g, guideName))}</p>
           </div>
 
           {/* Trade tier structure — Step 1 only */}
