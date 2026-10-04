@@ -137,6 +137,7 @@ const renderBold = (text: string) =>
   );
 
 const SEEN_KEY = "felix_dashboard_tour_seen_v1";
+const PROGRESS_KEY = "felix_tour_progress_v1";
 const BOARD_PATH = /^\/trade\/boards\/[0-9a-f-]{36}/i;
 const PAD = 10;
 // Tracking must not ease behind a scrolling or collapsing target. Fade only
@@ -361,6 +362,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (localStorage.getItem(SEEN_KEY)) return;
       if (localStorage.getItem("trade_quick_tour_step")) return;
       if (!localStorage.getItem("trade_quick_tour_done")) return; // let the page tour lead first
+      // Resume where the member left off if they skipped mid-tour.
+      const saved = Number(localStorage.getItem(PROGRESS_KEY));
+      if (Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length) setCurrentStep(saved);
     } catch {}
     const t = window.setTimeout(() => setOpen(true), 900);
     return () => window.clearTimeout(t);
@@ -369,7 +373,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // External relaunch: window.dispatchEvent(new Event("felix-tour:start"))
   useEffect(() => {
     const onStart = () => {
-      setCurrentStep(0);
+      // Manual relaunch resumes from saved progress when present.
+      let startAt = 0;
+      try {
+        const saved = Number(localStorage.getItem(PROGRESS_KEY));
+        if (Number.isInteger(saved) && saved > 0 && saved < FELIX_STEPS.length) startAt = saved;
+      } catch {}
+      setCurrentStep(startAt);
       setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
@@ -395,8 +405,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(false);
     // Closing is an explicit skip; neither a completed nor skipped first tour
     // should keep greeting the member as new on the dashboard.
-    try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
-  }, []);
+    try {
+      localStorage.setItem(SEEN_KEY, String(Date.now()));
+      // Remember where the member left off so the tour can resume there;
+      // a finished tour clears any saved progress.
+      if (completed) localStorage.removeItem(PROGRESS_KEY);
+      else localStorage.setItem(PROGRESS_KEY, String(currentStep));
+    } catch {}
+  }, [currentStep]);
 
   const changeStep = (direction: number) => {
     if (transitioning) return;
@@ -528,7 +544,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               onClick={() => close(false)}
               className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted -mr-1 -mt-1 shrink-0"
               aria-label="Close tour"
-              title="Skip tour"
+              title="Close tour"
             >
               <X className="h-4 w-4" />
             </button>
@@ -620,6 +636,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
           {/* Controls */}
           <div className="mt-4 flex items-center justify-between gap-2">
+            <button
+              onClick={() => close(false)}
+              className="font-body text-[11px] uppercase tracking-widest text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Skip tour
+            </button>
             <button
               onClick={back}
                disabled={currentStep === 0 || transitioning}
