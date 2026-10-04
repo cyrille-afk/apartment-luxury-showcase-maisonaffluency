@@ -714,8 +714,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                   // that sum exactly to the Gold unlock, then the gap to Platinum.
                   const goldC = tiers.gold.min_spend_cents;
                   const platC = tiers.platinum.min_spend_cents;
-                  const p1 = Math.round(goldC * 0.32 / 100) * 100;
-                  const p2 = Math.round(goldC * 0.3467 / 100) * 100;
+                  const p1 = Math.round(goldC * 0.32 / 100000) * 100000;
+                  const p2 = Math.round(goldC * 0.3467 / 100000) * 100000;
                   const p3 = goldC - p1 - p2;
                   const eur = (c: number) => `EUR ${Math.round(c / 100).toLocaleString("en-US")}`;
                   return [
