@@ -704,7 +704,32 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
             </div>
             <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground shrink-0">
               Step {currentStep + 1} of {FELIX_STEPS.length}
+              {FELIX_STEPS.length - currentStep - 1 > 0 && (
+                <span className="normal-case tracking-normal"> · {FELIX_STEPS.length - currentStep - 1} left</span>
+              )}
             </span>
+          </div>
+          {/* Step dots — completed steps are clickable to jump back */}
+          <div className="mt-2 flex items-center gap-1.5" role="group" aria-label="Tour progress">
+            {FELIX_STEPS.map((s, i) => {
+              const completed = i < currentStep;
+              const active = i === currentStep;
+              const jumpable = completed && !transitioning;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  disabled={!jumpable}
+                  onClick={() => jumpable && setCurrentStep(i)}
+                  aria-label={completed ? `Go back to step ${i + 1}: ${s.title}` : `Step ${i + 1}: ${s.title}`}
+                  aria-current={active ? "step" : undefined}
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1",
+                    active ? "w-5 bg-accent" : completed ? "w-2 bg-accent/50 hover:bg-accent cursor-pointer" : "w-2 bg-muted-foreground/25 cursor-default",
+                  )}
+                />
+              );
+            })}
           </div>
 
           {/* Dialogue */}
