@@ -196,7 +196,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // Advance before the card Link routes, independently of destination loading.
   useEffect(() => {
-    if (!open) return;
+    if (!open || isPaused) return;
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
       if (el && step.id === "collection") {
@@ -212,7 +212,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, step, stepTarget, measure]);
+  }, [open, isPaused, step, stepTarget, measure]);
 
   useLayoutEffect(() => {
     if (!open) return;
