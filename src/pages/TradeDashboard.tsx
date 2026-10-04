@@ -321,7 +321,7 @@ const TradeDashboard = () => {
             to={card.to}
             data-felix-target={card.key === "dash-showroom" ? "dashboard-showroom" : undefined}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
-            className={`group flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
+            className={`group ${card.key === "dash-showroom" ? "group/radar" : ""} flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
           >
             <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
               {getCardImage(card) ? (
@@ -338,11 +338,17 @@ const TradeDashboard = () => {
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
               {card.key === "dash-showroom" && (
-                <span data-felix-hotspot aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-background/80 bg-transparent animate-pulse motion-reduce:animate-none">
-                    <span className="h-1.5 w-1.5 rounded-full bg-background shadow-sm" />
+                <button
+                  type="button"
+                  data-felix-hotspot
+                  aria-label="Enter the Interactive Galleries"
+                  className="absolute inset-0 z-10 hidden items-center justify-center cursor-pointer"
+                >
+                  <span className="relative flex items-center justify-center">
+                    <span className="absolute h-12 w-12 rounded-full bg-stone-400/30 animate-ping motion-reduce:animate-none transition-transform duration-500 ease-out group-hover/radar:scale-110" />
+                    <span className="relative h-2.5 w-2.5 rounded-full bg-stone-900 border border-white shadow-sm" />
                   </span>
-                </span>
+                </button>
               )}
               {card.key === "dash-3d-studio" && studioStats.count > 0 && (
                 <span className="absolute top-3 right-3 inline-flex items-center px-2 py-1 bg-background/90 font-body text-[10px] uppercase tracking-[0.15em] text-foreground">
