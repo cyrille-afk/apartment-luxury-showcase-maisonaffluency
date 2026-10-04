@@ -52,6 +52,22 @@ const FELIX_STEPS: FelixStep[] = [
       "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the EUR100,000 Gold Tier threshold.",
   },
   {
+    id: "projects",
+    title: "Client Project Folders",
+    target: "nav-projects",
+    route: "/trade/projects",
+    dialogue:
+      "Every engagement lives in its own isolated workspace. Your Singapore GCB project, for instance, keeps its collections, quotes, layouts, and client documentation fully separate from every other pipeline. Use Projects & Interventions to structure each client engagement end to end.",
+  },
+  {
+    id: "tier-tracking",
+    title: "Real-Time Tier Tracking",
+    target: "tier-volume-tracker",
+    route: "/trade",
+    dialogue:
+      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR100,000 threshold, where your 12% Gold Tier discount unlocks automatically — no forms, no waiting.",
+  },
+  {
     id: "tools",
     title: "The Trade Tools Grid",
     target: "tools-grid",
@@ -66,14 +82,6 @@ const FELIX_STEPS: FelixStep[] = [
     route: "/trade/settings",
     dialogue:
       "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
-  },
-  {
-    id: "projects",
-    title: "Project Structuring",
-    target: "nav-projects",
-    route: "/trade/projects",
-    dialogue:
-      "Organize your active work by project. Keep each project's collections, quotes, layouts, and documentation together in one dedicated workspace.",
   },
   {
     id: "felix-chat",

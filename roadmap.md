@@ -123,3 +123,5 @@
 - [x] Separate OOL 77 Mini bar finishes into frame (Cement Stuc/Glossy Lacquer), shelf (Wood), and drawer (Wood/Suède leather) across public and trade views.
 - [x] Group product finishes by variant matrix values (name, colourway prefix, generic "Wood"): OOL Night table shows only Frame + Drawer Finish on public and trade.
 - [x] OOL 77 Mini bar: curated preset combinations (4 one-tap chips) + reduced to Frame + Drawer dropdowns only (Shelf auto-committed); regression test added (FinishSelector.ool-minibar.test.tsx).
+
+- [x] Felix tour Steps 4–5: Client Project Folders (Projects & Interventions sidebar, Singapore GCB copy) and Real-Time Tier Tracking (new dashboard Tier Volume Tracker widget); Back/NEXT verified live.
