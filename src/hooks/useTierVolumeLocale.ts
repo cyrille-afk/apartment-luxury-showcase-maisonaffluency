@@ -26,6 +26,8 @@ export function tierVolumeModel(currency: TierCurrency) {
   return { currency, amount, format, gold: region.gold, platinum: region.platinum, examples: region.examples };
 }
 
+export type TierVolumeModel = ReturnType<typeof tierVolumeModel>;
+
 export function useTierVolumeLocale() {
   const market = useTradeOfficeMarket();
   const [preferred] = useTradeDisplayCurrency();
