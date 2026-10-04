@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Replace Felix Step 2's pin with a radar dot and advance before gallery navigation resolves.
+
 - [x] Add a centered pulse to Felix Step 2's showroom image, clarify its click prompt, and advance to Step 3 on gallery navigation.
 
 - [x] Show first-time welcome on the dashboard until Felix is completed or skipped, and align Step 2 copy.

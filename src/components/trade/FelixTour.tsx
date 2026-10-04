@@ -1,6 +1,6 @@
 import { ensureSampleBoard } from "@/lib/sampleBoard";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,19 +164,22 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
-  const [collectionOpened, setCollectionOpened] = useState(false);
   const [collectionArrived, setCollectionArrived] = useState(false);
-  const stepRoute = (step.id === "collection" && collectionOpened) || (step.id === "quotes" && collectionArrived) ? "/trade/the-collection" : step.route;
-  const stepTarget = step.id === "collection" && collectionOpened ? "collection-gallery" : step.target;
+  // Trade navigation persists, so Step 3 need not wait for gallery data.
+  const stepRoute = step.id === "quotes" && collectionArrived ? location.pathname : step.route;
+  const stepTarget = step.target;
 
   const measure = useCallback(() => {
     const s = FELIX_STEPS[currentStep];
-    setStepDone(s.id === "collection" ? collectionOpened : s.done ? s.done() : true);
-  }, [currentStep, collectionOpened]);
+    setStepDone(s.id === "collection" ? false : s.done ? s.done() : true);
+  }, [currentStep]);
 
   useEffect(() => {
     if (!open) return;
-    if (stepRoute !== "board") { navigate(stepRoute); return; }
+    if (stepRoute !== "board") {
+      if (location.pathname !== stepRoute) navigate(stepRoute);
+      return;
+    }
     if (BOARD_PATH.test(location.pathname)) return;
     let cancelled = false;
     (async () => {
@@ -189,15 +192,16 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, open, stepRoute]);
 
-  // Action-required steps: re-check on any click; invite click ends the tour.
+  // Advance before the card Link routes, independently of destination loading.
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
-      if (el && step.id === "collection" && !collectionOpened) {
-        // The dashboard Link handles navigation; Step 3 follows once its
-        // gallery destination has mounted, without another Next press.
-        setCollectionOpened(true);
+      if (el && step.id === "collection") {
+        flushSync(() => {
+          setCollectionArrived(true);
+          setCurrentStep(2);
+        });
         return;
       }
       if (el && step.clickFinishes) { close(true); return; }
@@ -206,19 +210,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, step, stepTarget, collectionOpened, measure]);
-
-  useEffect(() => {
-    if (!open || step.id !== "collection" || !collectionOpened || location.pathname !== "/trade/the-collection") return;
-    const gallery = document.querySelector('[data-felix-target="collection-gallery"]');
-    if (!gallery || !gallery.getClientRects().length) return;
-    const timer = window.setTimeout(() => {
-      setCollectionOpened(false);
-      setCollectionArrived(true);
-      setCurrentStep(2);
-    }, 180);
-    return () => window.clearTimeout(timer);
-  }, [open, step.id, collectionOpened, location.pathname, position]);
+  }, [open, step, stepTarget, measure]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -299,7 +291,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 2 && r.height === 2 && !next;
         if (!ready) {
-          setStepDone(current.id === "collection" ? collectionOpened : current.done ? current.done() : true);
+          setStepDone(current.id === "collection" ? false : current.done ? current.done() : true);
           ready = true;
           // Render at the measured position invisibly first, then fade in on
           // the next frame. Never inject a tooltip at the viewport center.
@@ -350,7 +342,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
-  }, [open, currentStep, location.pathname, stepRoute, stepTarget, collectionOpened]);
+  }, [open, currentStep, location.pathname, stepRoute, stepTarget]);
 
   useLayoutEffect(() => {
     if (open) document.documentElement.dataset.felixTourStep = step.id;
@@ -378,7 +370,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useEffect(() => {
     const onStart = () => {
       setCurrentStep(0);
-      setCollectionOpened(false);
       setCollectionArrived(false);
       setIsPaused(false);
       setOpen(true);
@@ -412,7 +403,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(true);
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
-      setCollectionOpened(false);
       setCollectionArrived(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
