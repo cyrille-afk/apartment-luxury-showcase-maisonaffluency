@@ -23,7 +23,9 @@
     "check:product-images": "python3 scripts/check-product-image-parity.py",
     "audit:meta-descriptions": "node scripts/audit-meta-descriptions.mjs",
     "test:unit": "vitest run",
-    "test:commerce": "vitest run src/config/taxRules.test.ts src/config/landedCost.test.ts src/lib/shippingEstimator.fallback.test.ts"
+    "test:commerce": "vitest run src/config/taxRules.test.ts src/config/landedCost.test.ts src/lib/shippingEstimator.fallback.test.ts",
+    "check:edge-boot": "deno run -A --no-config --node-modules-dir=none scripts/edge-boot-check.ts",
+    "check:edge-live": "deno run -A --no-config scripts/edge-live-check.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

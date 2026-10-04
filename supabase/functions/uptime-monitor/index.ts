@@ -25,6 +25,40 @@ const PAGES: { path: string; label: string; marker: string }[] = [
   { path: "/trade-program", label: "Trade Program", marker: "Trade" },
 ];
 
+// Checkout & payment backend functions. Each gets a harmless CORS preflight
+// (no body, no auth, no side effects); a function that failed to start answers
+// 5xx (BOOT_ERROR / WORKER_ERROR) or not at all. Anything below 500 = running.
+const FUNCTIONS_BASE = `${Deno.env.get("SUPABASE_URL")}/functions/v1`;
+const PAYMENT_FUNCTIONS = [
+  "create-cart-checkout", "create-payment-intent", "create-bank-transfer-intent",
+  "create-proforma-order", "create-quote-payment", "guest-quote-checkout",
+  "create-ffe-checkout", "create-adhoc-payment-link", "verify-adhoc-payment",
+  "refresh-shipping-quote", "request-wire-transfer", "get-order-by-session",
+  "mark-order-paid", "stripe-webhook", "stripe-config", "stripe-connect-onboard",
+  "notify-payment-alerts", "send-client-quote-payment",
+];
+
+const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+
+async function checkFunction(name: string): Promise<CheckResult> {
+  const started = Date.now();
+  const path = `fn:${name}`;
+  const label = `Checkout function: ${name}`;
+  try {
+    const res = await fetch(`${FUNCTIONS_BASE}/${name}`, {
+      method: "OPTIONS",
+      headers: { Origin: BASE, "Access-Control-Request-Method": "POST" },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    const body = (await res.text()).slice(0, 200);
+    const ok = res.status < 500;
+    return { path, label, ok, status: res.status, error: ok ? undefined : `HTTP ${res.status} ${body}`, durationMs: Date.now() - started };
+  } catch (e) {
+    return { path, label, ok: false, status: null, error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - started };
+  }
+}
+
 const FAIL_THRESHOLD = 2; // consecutive failures before alerting
 const FETCH_TIMEOUT_MS = 20000;
 
@@ -94,6 +128,16 @@ serve(async (req) => {
 
   const results: CheckResult[] = [];
   for (const p of PAGES) results.push(await checkPage(p));
+  // Optional extra function names (authenticated callers only) — used to prove
+  // the alert path with a deliberately broken probe function.
+  let extra: string[] = [];
+  try {
+    const b = await req.json();
+    if (Array.isArray(b?.probeFunctions)) {
+      extra = b.probeFunctions.filter((n: unknown) => typeof n === "string" && /^[a-z0-9-]{1,64}$/.test(n)).slice(0, 5);
+    }
+  } catch { /* empty body from cron */ }
+  results.push(...await Promise.all([...PAYMENT_FUNCTIONS, ...extra].map(checkFunction)));
 
   const newlyDown: CheckResult[] = [];
   const recovered: CheckResult[] = [];
@@ -130,13 +174,13 @@ serve(async (req) => {
 
   if (newlyDown.length > 0) {
     const rows = newlyDown.map((r) =>
-      `<tr><td style="padding:8px 12px;border:1px solid #ddd;">${r.label}</td>` +
-      `<td style="padding:8px 12px;border:1px solid #ddd;">${BASE}${r.path}</td>` +
-      `<td style="padding:8px 12px;border:1px solid #ddd;">${r.error ?? "unknown"}</td></tr>`
+      `<tr><td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.label)}</td>` +
+      `<td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.path.startsWith("fn:") ? "backend function" : BASE + r.path)}</td>` +
+      `<td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.error ?? "unknown")}</td></tr>`
     ).join("");
     const html = `
       <div style="font-family:Georgia,serif;color:#1a1a1a;max-width:640px;">
-        <h2 style="color:#8B1E1E;">Uptime alert — ${newlyDown.length} page${newlyDown.length > 1 ? "s" : ""} not loading</h2>
+        <h2 style="color:#8B1E1E;">Uptime alert — ${newlyDown.length} item${newlyDown.length > 1 ? "s" : ""} down${newlyDown.some((r) => r.path.startsWith("fn:")) ? " (checkout / payments affected)" : ""}</h2>
         <p>The public uptime monitor detected ${FAIL_THRESHOLD} consecutive failures (checked ${checkedAt}):</p>
         <table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">
           <tr style="background:#f5f2ec;"><th style="padding:8px 12px;border:1px solid #ddd;text-align:left;">Page</th><th style="padding:8px 12px;border:1px solid #ddd;text-align:left;">URL</th><th style="padding:8px 12px;border:1px solid #ddd;text-align:left;">Error</th></tr>
@@ -147,7 +191,7 @@ serve(async (req) => {
     for (const to of ADMIN_EMAILS) {
       await sendLovableEmail({
         to,
-        subject: `[Uptime] ${newlyDown.map((r) => r.label).join(", ")} not loading — maisonaffluency.com`,
+        subject: `[Uptime] ${newlyDown.some((r) => r.path.startsWith("fn:")) ? "CHECKOUT DOWN: " : ""}${newlyDown.map((r) => r.label).join(", ")} not working — maisonaffluency.com`,
         html,
         label: "uptime-alert",
       }, supabase);
@@ -157,8 +201,8 @@ serve(async (req) => {
   for (const r of recovered) {
     const html = `
       <div style="font-family:Georgia,serif;color:#1a1a1a;max-width:640px;">
-        <h2 style="color:#1A535C;">Recovered — ${r.label} is loading again</h2>
-        <p style="font-family:Arial,sans-serif;font-size:14px;">${BASE}${r.path} responded with HTTP ${r.status} in ${r.durationMs}ms (checked ${checkedAt}).</p>
+        <h2 style="color:#1A535C;">Recovered — ${esc(r.label)} is working again</h2>
+        <p style="font-family:Arial,sans-serif;font-size:14px;">${esc(r.path.startsWith("fn:") ? r.label : BASE + r.path)} responded with HTTP ${r.status} in ${r.durationMs}ms (checked ${checkedAt}).</p>
       </div>`;
     for (const to of ADMIN_EMAILS) {
       await sendLovableEmail({

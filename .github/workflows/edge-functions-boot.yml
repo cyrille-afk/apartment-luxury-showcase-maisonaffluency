@@ -1,0 +1,50 @@
+name: Backend functions start-up checks
+
+# 1) Before release: boots every supabase/functions/* entrypoint in isolation
+#    (server stubbed) — fails on missing _shared exports, duplicate
+#    declarations, bad imports, syntax errors. Blocks the change.
+# 2) After deploy (push to main): calls every live function once with a
+#    harmless preflight and fails if any answers 5xx / not at all.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/**"
+      - "scripts/edge-boot-check.ts"
+      - "scripts/edge-live-check.ts"
+      - ".github/workflows/edge-functions-boot.yml"
+  pull_request:
+    paths:
+      - "supabase/functions/**"
+      - "scripts/edge-boot-check.ts"
+      - ".github/workflows/edge-functions-boot.yml"
+  workflow_dispatch:
+
+jobs:
+  boot-check:
+    name: Every backend function starts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Boot every function
+        run: deno run -A --no-config --node-modules-dir=none scripts/edge-boot-check.ts
+
+  live-check:
+    name: Every deployed function is running
+    needs: boot-check
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Wait for backend deploy to settle
+        run: sleep 120
+      - name: Call every deployed function
+        run: deno run -A --no-config scripts/edge-live-check.ts
