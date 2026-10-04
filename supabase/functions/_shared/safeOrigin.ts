@@ -18,3 +18,8 @@ export function safeOrigin(req: Request, fallback = SITE_ORIGIN): string {
   const raw = req.headers.get("origin") || "";
   return isAllowedOrigin(raw) ? raw : fallback;
 }
+
+/** Alias kept for checkout functions that import the request-origin helper by this name. */
+export function safeRequestOrigin(req: Request): string {
+  return safeOrigin(req);
+}
