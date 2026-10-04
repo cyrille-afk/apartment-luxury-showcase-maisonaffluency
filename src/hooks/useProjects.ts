@@ -70,7 +70,7 @@ export function useProjects(opts: { activeOnly?: boolean } = {}) {
       setProjects((data || []) as unknown as Project[]);
     }
     setLoading(false);
-  }, [user, studioLoading, currentStudio?.id, opts.activeOnly]);
+  }, [user?.id, studioLoading, currentStudio?.id, opts.activeOnly]);
 
   useEffect(() => {
     refresh();
