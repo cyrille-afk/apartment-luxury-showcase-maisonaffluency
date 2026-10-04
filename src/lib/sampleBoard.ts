@@ -36,6 +36,12 @@ export async function ensureSampleBoard(market: TradeOfficeMarket = null, studio
   const { data: existingProject } = await projectQuery.maybeSingle();
   let projectId = existingProject?.id ?? null;
   if (!projectId) {
+    let anyProject = supabase.from("projects").select("id").order("updated_at", { ascending: false }).limit(1);
+    anyProject = studioId ? anyProject.eq("studio_id", studioId) : anyProject.eq("user_id", uid).is("studio_id", null);
+    const { data } = await anyProject.maybeSingle();
+    projectId = data?.id ?? null;
+  }
+  if (!projectId) {
     const { data: project } = await supabase.from("projects")
       .insert({ user_id: uid, studio_id: studioId, name: sample.name, location: sample.location, client_name: "Sample Client" })
       .select("id").single();

@@ -97,6 +97,13 @@ export default function TradeProjects() {
 
   const filtered = projects.filter((p) => p.status === tab);
 
+  useEffect(() => {
+    if (!user || studioLoading || loading || projects.length === 0) return;
+    try {
+      localStorage.setItem(`ma:onboarding-project:v1:${user.id}:${currentStudio?.id ?? "personal"}`, "done");
+    } catch { /* Storage is optional; do not disturb real projects. */ }
+  }, [user?.id, currentStudio?.id, studioLoading, loading, projects.length]);
+
 
   const handleCreate = async () => {
     if (!user || !name.trim()) return;
