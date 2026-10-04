@@ -125,6 +125,11 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "radar-ping": {
+          "0%": { transform: "scale(0.55)", opacity: "0.4" },
+          "70%": { transform: "scale(1.55)", opacity: "0.08" },
+          "100%": { transform: "scale(2)", opacity: "0" },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -250,6 +255,7 @@ export default {
         "curator-sweep": "curator-sweep 2.2s ease-in-out infinite",
         "scroll-cue": "scroll-cue 3.2s cubic-bezier(0.4,0,0.2,1) infinite",
         "hotspot-pulse": "hotspot-pulse 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
+        "radar-ping": "radar-ping 2.6s cubic-bezier(0.16,1,0.3,1) infinite",
       },
     },
   },
