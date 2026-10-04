@@ -728,18 +728,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               </p>
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {(() => {
-                  // Example spends derive from the live thresholds: three projects
-                  // that sum exactly to the Gold unlock, then the gap to Platinum.
-                  const goldC = tiers.gold.min_spend_cents;
-                  const platC = tiers.platinum.min_spend_cents;
-                  const p1 = Math.round(goldC * 0.32 / 100000) * 100000;
-                  const p2 = Math.round(goldC * 0.3467 / 100000) * 100000;
-                  const p3 = goldC - p1 - p2;
-                  const eur = (c: number) => `EUR ${Math.round(c / 100).toLocaleString("en-US")}`;
+                  // Realistic luxury project spends (user-specified): the GCB
+                  // clears the Gold threshold alone; the penthouse suite
+                  // completes the Platinum unlock.
+                  const p1 = 48000;
+                  const p2 = 152000;
+                  const p3 = 100000;
+                  const eur = (v: number) => `EUR ${v.toLocaleString("en-US")}`;
                   return [
                     { project: "Three-room apartment, full curation", spend: eur(p1), running: `Running total: ${eur(p1)}` },
-                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)}` },
-                    { project: "Penthouse bedroom suites", spend: eur(p3), running: `Running total: ${eur(goldC)} — ${tiers.gold.label} unlocked` },
+                    { project: "Singapore GCB, living + dining", spend: eur(p2), running: `Running total: ${eur(p1 + p2)} — Gold unlocked single-handedly` },
+                    { project: "Penthouse primary bedroom suites", spend: eur(p3), running: `Running total: ${eur(p1 + p2 + p3)} — Platinum unlocked` },
                   ];
                 })().map((row) => (
                   <div key={row.project} className="flex items-start justify-between gap-4 py-3">
