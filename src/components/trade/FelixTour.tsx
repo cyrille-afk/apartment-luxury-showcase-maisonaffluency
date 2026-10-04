@@ -753,13 +753,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
                 <div className="flex items-start justify-between gap-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-display text-[13px] text-foreground">Continued volume at {fmtPct(tiers.gold.discount_pct)} {tiers.gold.label}</p>
+                    <p className="font-display text-[13px] text-foreground">Continued volume across studio portfolio</p>
                     <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
-                      A further EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")} of confirmed spend — Running total: EUR {Math.round(tiers.platinum.min_spend_cents / 100).toLocaleString("en-US")} — {tiers.platinum.label} unlocked
+                      Running total: EUR 300,000+ — Platinum privileges maintained
                     </p>
                   </div>
                   <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap shrink-0">
-                    EUR {Math.round((tiers.platinum.min_spend_cents - tiers.gold.min_spend_cents) / 100).toLocaleString("en-US")}+
+                    EUR 300,000+
                   </p>
                 </div>
               </div>
