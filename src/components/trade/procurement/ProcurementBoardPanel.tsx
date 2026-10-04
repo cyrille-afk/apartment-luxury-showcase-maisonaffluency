@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toDiscountFraction, tradePriceCents, clientPriceCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
+import { toDiscountFraction, tradePriceCents, clientPriceCents, clientUnitCents, discountPercentLabel, effectiveProjectMultiplier } from "@/lib/tradePricing";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -199,7 +199,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
               <tbody>
                 {rows.map((r) => {
                   const trade = tradePriceCents(r.msrp_cents, discountPct);
-                  const client = clientPriceCents(trade, multiplier);
+                  const client = clientUnitCents(r.msrp_cents, discountPct, multiplier);
                   const fb = fbFor(r.id);
                   const hearts = fb.filter((f) => f.reaction === "heart").length;
                   const ups = fb.filter((f) => f.reaction === "up").length;
@@ -287,7 +287,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                   </div>
                   <div>
                     {r.approval_status === "approved" && <p className="mb-1 flex items-center gap-1 font-body text-[10px] uppercase tracking-[0.18em] text-primary"><Heart className="h-3 w-3 fill-current" /> Approved</p>}
-                     <p className="font-body text-sm text-foreground">{formatMoneyIn(clientPriceCents(tradePriceCents(r.msrp_cents, discountPct), multiplier), r.currency, "Price upon Request")}</p>
+                     <p className="font-body text-sm text-foreground">{formatMoneyIn(clientUnitCents(r.msrp_cents, discountPct, multiplier), r.currency, "Price upon Request")}</p>
                     {r.lead_time && <p className="mt-0.5 font-body text-xs text-muted-foreground">Lead time {r.lead_time}</p>}
                   </div>
                 </div>

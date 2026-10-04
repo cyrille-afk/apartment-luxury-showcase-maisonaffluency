@@ -212,6 +212,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
+    let missingSince = 0;
+    let fallback = false;
     let watched: Element[] = [];
     let observedTarget: Element | null = null;
     let revealFrame = 0;
@@ -273,6 +275,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           ? previous : { step: currentStep, path: location.pathname, rect: r });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
+        fallback = r.width === 2 && r.height === 2 && !next;
         if (!ready) {
           setStepDone(current.done ? current.done() : true);
           ready = true;
@@ -284,12 +287,23 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
-        if (ready) {
+        // Target hidden (e.g. sidebar items on phones): after a grace period,
+        // anchor the card to the viewport centre so the step stays usable.
+        if (!missingSince) missingSince = now;
+        if (!ready && routeReady && now - missingSince >= 1500) {
+          commit({ top: window.innerHeight / 2 - 1, left: window.innerWidth / 2 - 1, width: 2, height: 2 });
+          frame = requestAnimationFrame(tick);
+          return;
+        }
+        if (ready && !fallback) {
           ready = false;
           cancelAnimationFrame(revealFrame);
           setSettled(false);
           setPosition(null);
         }
+      } else if (ready && fallback) {
+        ready = false; fallback = false; missingSince = 0;
+        last = next; stableSince = now;
       } else if (ready) {
         // Already shown: redraw immediately on any movement so the box never lags.
         if (!last || !sameRect(last, next)) { last = next; commit(next); }

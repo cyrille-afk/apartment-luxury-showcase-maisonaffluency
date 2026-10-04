@@ -1840,7 +1840,7 @@ const TradeProductPage: React.FC = () => {
       prefix,
       upcharge,
       netLabel: formatPriceConverted(netCents, pricing.currency, displayCurrency, fxRates, unit),
-      clientLabel: formatPriceConverted(Math.round(netCents * clientMultiplier), pricing.currency, displayCurrency, fxRates, unit),
+      clientLabel: formatPriceConverted(clientMultiplier === 1 ? retailCents : Math.round(netCents * clientMultiplier), pricing.currency, displayCurrency, fxRates, unit),
       retailLabel: formatPriceConverted(retailCents, pricing.currency, displayCurrency, fxRates, unit),
     };
   })();

@@ -16,7 +16,7 @@ import { formatMoneyIn } from "@/lib/displayMoney";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useStudio } from "@/hooks/useStudio";
-import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents } from "@/lib/tradePricing";
+import { effectiveProjectMultiplier, tradePriceCents, clientPriceCents, clientUnitCents } from "@/lib/tradePricing";
 import { StudioBrand } from "@/components/trade/StudioBrand";
 
 type StudioItem = {
@@ -188,8 +188,7 @@ export default function TradeProjectStudio() {
     const msrp = items.reduce((s, i) => s + toBase(i.rrp_cents, i.currency) * i.quantity, 0);
     const trade = items.reduce((s, i) => s + (tradePriceCents(toBase(i.rrp_cents, i.currency), discountPct) || 0) * i.quantity, 0);
     const clientEstimateCents = items.reduce((s, i) => {
-      const tradeLine = tradePriceCents(toBase(i.rrp_cents, i.currency), discountPct);
-      return s + (clientPriceCents(tradeLine, multiplier) || 0) * i.quantity;
+      return s + (clientUnitCents(toBase(i.rrp_cents, i.currency), discountPct, multiplier) || 0) * i.quantity;
     }, 0);
     return { msrp, trade, clientEstimateCents };
   }, [items, toBase, discountPct, multiplier]);
@@ -426,7 +425,7 @@ export default function TradeProjectStudio() {
                 items.map((item, idx) => {
                   const msrp = toBase(item.rrp_cents, item.currency) * item.quantity;
                    const trade = (tradePriceCents(toBase(item.rrp_cents, item.currency), discountPct) || 0) * item.quantity;
-                   const client = (clientPriceCents(tradePriceCents(toBase(item.rrp_cents, item.currency), discountPct), multiplier) || 0) * item.quantity;
+                   const client = (clientUnitCents(toBase(item.rrp_cents, item.currency), discountPct, multiplier) || 0) * item.quantity;
                   const expanded = expandedId === item.product_id;
                   return (
                     <div key={item.product_id} className="border-b border-border">

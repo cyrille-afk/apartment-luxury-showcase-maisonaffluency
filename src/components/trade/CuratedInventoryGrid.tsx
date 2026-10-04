@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useClientProjectPricing } from "@/hooks/useClientProjectPricing";
-import { clientPriceCents, tradePriceCents } from "@/lib/tradePricing";
+import { clientPriceCents, clientUnitCents, tradePriceCents } from "@/lib/tradePricing";
 
 export type CuratedInventoryItem = PickPreview;
 
@@ -240,7 +240,7 @@ export function CuratedInventoryGrid({
                         {fmtPrice(
                           showTradePrice
                             ? Math.round(item.price_cents * (1 - discountPct))
-                             : (clientPriceCents(tradePriceCents(item.price_cents, discountPct), multiplier) ?? item.price_cents),
+                             : (clientUnitCents(item.price_cents, discountPct, multiplier) ?? item.price_cents),
                           item.currency || "EUR",
                         )}
                       </span>

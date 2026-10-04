@@ -22,7 +22,7 @@
 - Single-axis products whose linked finishes span exactly two stored categories render one FinishSelector dropdown per category (labelled like the Pictured Finishes strip), and a slide counts as non-specific only when more than two finishes map to every photo — keeps dropdowns and strip in agreement.
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the previous load never stayed responsive for 5s, open with nothing expanded — prevents a hung restore from re-freezing on every reload.
-- Curator Notes on public and Trade product pages stay in a vertical full-width list under the gallery with the lead note as a softly tinted panel; the product lightbox uses a separate three-column layout with only the lead header tinted — these are distinct presentation contexts.
+- Curator Notes: product pages use a full-width vertical list (lead note tinted panel); the lightbox uses three columns (lead header tinted) — distinct contexts.
 - Keep supplier PDFs labelled Fabric & Finishes in the finish-document menu, separate from general spec sheets, so adding a source PDF does not replace the generated swatch-selection PDF or mislabel it in the Trade workspace.
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
@@ -30,3 +30,4 @@
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns are persisted only by `curatorial-guide-stream` after an ownership check — accuracy first, no client-forged history.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false — keeps each project's curation separate.
 - Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements, including exit animations and portalled drawers, so route remounts cannot briefly reveal internal figures; it is not an authorization boundary.
+- Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.

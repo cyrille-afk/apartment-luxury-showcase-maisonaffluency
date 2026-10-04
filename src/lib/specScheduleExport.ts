@@ -12,7 +12,7 @@
  * discount, but only client prices are included in the exported dataset.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { effectiveProjectMultiplier } from "@/lib/tradePricing";
+import { effectiveProjectMultiplier, clientUnitCents } from "@/lib/tradePricing";
 
 export interface SchedulePickRef {
   pickId: string;
@@ -141,7 +141,7 @@ export async function compileSpecSchedule(opts: {
       dimensions: formatDims(p),
       finish: ref.finish?.trim() || "To be confirmed",
       materialLibrary: (matsById.get(ref.pickId) ?? []).join(", ") || (p.materials ?? "").trim() || "—",
-      clientPriceCents: rrpCents != null ? Math.round(Math.round(rrpCents * (1 - tierPct / 100)) * multiplier) : null,
+      clientPriceCents: clientUnitCents(rrpCents, tierPct / 100, multiplier),
       currency: p.currency || "EUR",
       leadTime: ref.leadWeeks ? `${ref.leadWeeks} weeks` : (p.lead_time ?? "").trim() || "On request",
     };

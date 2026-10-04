@@ -1,3 +1,4 @@
+import { clientUnitCents } from "@/lib/tradePricing";
 /**
  * Grid/list view of hotspot products from the gallery.
  * Extracted from the original TradeShowroom for use as a tab alongside the interactive Gallery.
@@ -207,7 +208,7 @@ const ShowroomGridView = ({
 
   const getDisplayPrice = (price: { cents: number; currency: string; price_unit?: string } | null) => {
     if (!price) return null;
-    return { ...price, cents: showTradePrice ? Math.round(price.cents * (1 - TRADE_DISCOUNT)) : Math.round(Math.round(price.cents * (1 - TRADE_DISCOUNT)) * clientMultiplier) };
+    return { ...price, cents: showTradePrice ? Math.round(price.cents * (1 - TRADE_DISCOUNT)) : (clientUnitCents(price.cents, TRADE_DISCOUNT, clientMultiplier) ?? price.cents) };
   };
 
   const renderPriceDisplay = (
@@ -225,7 +226,7 @@ const ShowroomGridView = ({
         {showTradePrice ? (
            <span data-trade-sensitive className="inline-flex items-center gap-1.5 flex-wrap">
             <span className="line-through text-muted-foreground/60 font-normal text-xs">
-             {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
+             {`${pfx}${formatPriceConverted(price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
             </span>
             <span className="text-accent font-semibold">
               {`${pfx}${formatPriceConverted(tradePrice, price.currency, displayCurrency, fxRates, price.price_unit)}`}
@@ -234,7 +235,7 @@ const ShowroomGridView = ({
            </span>
         ) : (
            <span className="text-foreground font-semibold">
-             {`${pfx}${formatPriceConverted(Math.round(tradePrice * clientMultiplier), price.currency, displayCurrency, fxRates, price.price_unit)}`}
+             {`${pfx}${formatPriceConverted(clientUnitCents(price.cents, TRADE_DISCOUNT, clientMultiplier) ?? price.cents, price.currency, displayCurrency, fxRates, price.price_unit)}`}
           </span>
         )}
         {showTradePrice && <span data-client-placeholder aria-hidden="true" className="h-4 w-24 animate-pulse bg-muted/60" />}
