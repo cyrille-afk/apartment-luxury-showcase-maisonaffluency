@@ -17,7 +17,7 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-import PriceModeSelector from "@/components/trade/PriceModeSelector";
+import ClientViewToggle from "@/components/trade/ClientViewToggle";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
@@ -464,7 +464,7 @@ const TradeLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header h-14 md:h-16 ${/^\/trade\/products\//.test(location.pathname) ? "hidden md:flex" : "flex"} items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden relative pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header h-14 md:h-16 ${/^\/trade\/products\//.test(location.pathname) ? "hidden md:flex" : "flex"} items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive><TradeMobileMenu
@@ -481,11 +481,11 @@ const TradeLayout = () => {
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
-            <div className="ml-auto flex items-center gap-2 md:gap-4" data-felix-target="account-panel">
+            <div className="ml-auto flex min-w-0 items-center gap-2 md:gap-4" data-felix-target="account-panel">
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
-              <div className="hidden sm:block" data-felix-target="header-client-view">
-                 <PriceModeSelector />
+              <div className="shrink-0" data-felix-target="header-client-view">
+                 <ClientViewToggle />
                </div>
                 {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
                <span data-trade-sensitive><MobilePreviewHeaderButton /></span>

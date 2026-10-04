@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Refine the global Client View control and Step 6 spotlight; verify immediate retail presentation on toggle and Next.
+
 - [x] Align Felix Steps 2–3 with Interactive Sourcing and Transparent Project Margins; preserve Back and make Pause hide the tour frame until Resume.
 
 - [x] Replace Felix Step 2's pin with a radar dot and advance before gallery navigation resolves.

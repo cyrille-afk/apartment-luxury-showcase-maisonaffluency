@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useTierConfig, type TradeTier, type TierConfigRow } from "@/hooks/useTradeDiscount";
+import { setClientSafeMode } from "@/lib/clientSafeMode";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -514,6 +515,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const next = () => {
     if (!stepDone || !settled || transitioning) return;
     if (isLast) { close(true); return; }
+    // The next frame (including route fallbacks) must already be client-safe.
+    if (step.id === "client-safe-presentations") setClientSafeMode(true);
     changeStep(1);
   };
   const back = () => {
