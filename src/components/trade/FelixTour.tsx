@@ -49,7 +49,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the EUR100,000 Gold Tier threshold.",
+      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the EUR150,000 Gold Tier threshold.",
   },
   {
     id: "projects",
@@ -65,7 +65,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tier-volume-tracker",
     route: "/trade",
     dialogue:
-      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR100,000 threshold, where your 12% Gold Tier discount unlocks automatically — no forms, no waiting.",
+      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR150,000 threshold, where your 15% Gold Tier discount unlocks automatically — no forms, no waiting.",
   },
   {
     id: "client-safe-presentations",
@@ -626,8 +626,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
               <div className="mt-2 divide-y divide-border border-y border-border">
                 {[
                   { tier: "Silver Partner", discount: "10% Trade Discount", note: "Base entry tier", current: true },
-                  { tier: "Gold Partner", discount: "12% Trade Discount", note: "Unlocks at EUR100,000 cumulative project volume", current: false },
-                  { tier: "Platinum Partner", discount: "15% Trade Discount", note: "Unlocks at EUR300,000 cumulative project volume", current: false },
+                  { tier: "Gold Partner", discount: "15% Trade Discount", note: "Unlocks at EUR150,000 cumulative project volume", current: false },
+                  { tier: "Platinum Partner", discount: "20% Trade Discount", note: "Unlocks at EUR300,000 cumulative project volume", current: false },
                 ].map((row) => (
                   <div key={row.tier} className="flex items-start justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5 shrink-0">
