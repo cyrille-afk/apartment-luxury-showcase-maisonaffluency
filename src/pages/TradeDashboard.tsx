@@ -108,7 +108,7 @@ const TradeDashboard = () => {
   }, []);
   const { tier, tierLabel, config: tierConfig } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
-  const tierVolume = useTierVolumeLocale(tierConfig);
+  const tierVolume = useTierVolumeLocale();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
@@ -298,12 +298,13 @@ const TradeDashboard = () => {
               ((spendCents - prevThreshold) / (nextCfg.min_spend_cents - prevThreshold)) * 100
             ));
             const fmt = (cents: number) => tierVolume.format(tierVolume.amount(cents));
+            const nextMilestone = tier === "silver" ? tierVolume.gold : tierVolume.platinum;
             return (
               <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="trade-micro-label uppercase text-muted-foreground">Tier Volume Tracker</p>
                   <p className="font-body text-[11px] text-muted-foreground tabular-nums">
-                    {fmt(spendCents)} <span className="opacity-60">/ {fmt(nextCfg.min_spend_cents)}</span>
+                    {fmt(spendCents)} <span className="opacity-60">/ {tierVolume.format(nextMilestone)}</span>
                   </p>
                 </div>
                 <div className="mt-3 h-1 w-full bg-muted rounded-full overflow-hidden">
