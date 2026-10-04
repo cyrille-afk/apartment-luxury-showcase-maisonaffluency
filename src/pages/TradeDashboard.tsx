@@ -23,6 +23,9 @@ import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardT
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
+import { useStudio } from "@/hooks/useStudio";
+import { isSampleProject } from "@/lib/onboardingProject";
+import { Button } from "@/components/ui/button";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -88,6 +91,7 @@ if (typeof window !== "undefined") { setTimeout(() => { void import("./TradeShow
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
   const { profile, user } = useAuth();
+  const { canEdit } = useStudio();
   const [firstWelcome, setFirstWelcome] = useState(() => {
     try {
       return document.documentElement.dataset.felixTourActive === "true" || !localStorage.getItem("felix_dashboard_tour_seen_v1");
@@ -378,18 +382,23 @@ const TradeDashboard = () => {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {activeProjects.slice(0, 4).map((project, index) => (
-              <Link
+              <div
                 key={project.id}
-                to={projectDefaultUrl(project.id, projectBoards)}
                 className="group flex min-h-36 flex-col justify-between border border-border bg-background p-5 transition-colors hover:border-foreground/40"
               >
-                <FolderOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden="true" />
+                <div className="flex items-start justify-between gap-2">
+                  <FolderOpen className="h-5 w-5 text-muted-foreground/70" aria-hidden="true" />
+                  {isSampleProject(project) && <span className="border border-accent px-2 py-0.5 font-body text-[10px] uppercase text-accent">Sample project</span>}
+                </div>
                 <div className="mt-6">
                   <p className="trade-micro-label text-muted-foreground">{String(index + 1).padStart(2, "0")} — Active project</p>
-                  <h3 className="mt-1 font-display text-lg text-foreground group-hover:underline">{project.name}</h3>
+                  <Link to={projectDefaultUrl(project.id, projectBoards)} className="block hover:underline">
+                    <h3 className="mt-1 font-display text-lg text-foreground">{project.name}</h3>
+                  </Link>
                   {project.location && <p className="mt-1 font-body text-xs text-muted-foreground">{project.location}</p>}
+                  {isSampleProject(project) && canEdit && <Button asChild variant="link" className="mt-3 h-auto p-0 text-xs"><Link to={`/trade/projects?convert=${encodeURIComponent(project.id)}`}>Create my first real project →</Link></Button>}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </section>
