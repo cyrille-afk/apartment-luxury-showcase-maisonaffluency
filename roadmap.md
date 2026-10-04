@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Label localized starter projects as samples and let members turn them into real projects without losing their folders or boards.
+
 - [x] Seed an empty first-time project workspace with a regional sample folder and synchronize Felix Step 4 with its title.
 
 - [x] Lock Step 5 and tracker to fixed annual EUR/USD/SGD milestones and regional examples.
