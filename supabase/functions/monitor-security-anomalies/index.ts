@@ -103,10 +103,11 @@ serve(async (req) => {
       html: `<p><strong>${unauthorized.length}</strong> total 401 responses across all edge functions.</p>`,
     });
   }
-  // Rule 4: any unexpected storage write
+  // Rule 4: any unexpected storage write (all row values are user-influenced)
+  const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
   if (storageBad.length >= ALERT_THRESHOLDS.storage_unexpected_writes) {
     const rows = storageBad.slice(0, 20).map(e =>
-      `<tr><td style="padding:4px 8px;">${e.source}</td><td style="padding:4px 8px;">${(e.details as any)?.reason ?? ""}</td><td style="padding:4px 8px;font-family:monospace;">${(e.details as any)?.object_name ?? ""}</td><td style="padding:4px 8px;">${e.user_id ?? "anon"}</td></tr>`
+      `<tr><td style="padding:4px 8px;">${esc(e.source)}</td><td style="padding:4px 8px;">${esc((e.details as any)?.reason)}</td><td style="padding:4px 8px;font-family:monospace;">${esc((e.details as any)?.object_name)}</td><td style="padding:4px 8px;">${esc(e.user_id ?? "anon")}</td></tr>`
     ).join("");
     triggered.push({
       key: "storage_unexpected",

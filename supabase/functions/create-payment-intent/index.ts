@@ -8,6 +8,8 @@ import { canReusePaymentIntent } from "../_shared/paymentIntentReuse.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
 import { applyIossEnv } from "../_shared/iossConfig.ts";
 import { verifyVatNumber } from "../_shared/vatValidation.ts";
+import { getShippingZone, getRatePerCbm, MIN_SHIPMENT_CBM, applyFreightCap } from "../_shared/shippingZones.ts";
+import { convertCents } from "../_shared/fxConvert.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -178,6 +180,24 @@ serve(async (req) => {
         ? Math.round(rawEstimatedFreight)
         : 0;
     if (estimatedFreightCents > 5_000_000) return json({ error: "Shipping amount out of range." }, 400);
+    // Never trust the buyer's estimate downwards: the smallest freight the
+    // engine can produce for this destination is one minimum shipment at the
+    // zone rate (capped at 15% of goods). Anything meaningfully below that
+    // floor was tampered with or is stale, so the checkout must refresh.
+    if (!shippingConfirmed) {
+      const zone = getShippingZone(shippingCountry);
+      if (zone) {
+        const zoneFloor = Math.round(getRatePerCbm(zone) * MIN_SHIPMENT_CBM * 100);
+        const inOrderCcy = zone.currency.toUpperCase() === currency.toUpperCase()
+          ? zoneFloor
+          : await convertCents(zoneFloor, zone.currency, currency).catch(() => 0);
+        const floorCents = applyFreightCap(inOrderCcy, goodsAmount).cents;
+        // 10% tolerance absorbs FX drift between the buyer's view and ours.
+        if (floorCents > 0 && estimatedFreightCents < Math.floor(floorCents * 0.9)) {
+          return json({ error: "Your delivery estimate is out of date. Please refresh checkout and try again." }, 409);
+        }
+      }
+    }
     const freightForTaxCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;
     // The client's "verified" flag is never trusted: re-run the authority check
     // here. Invalid, unsupported or unavailable ⇒ standard destination VAT.
