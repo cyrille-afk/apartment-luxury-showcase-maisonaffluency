@@ -311,6 +311,10 @@ const TradeDashboard = () => {
             ));
             const fmt = (cents: number) =>
               new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
+            const fmtLocal = (cents: number) => localFx ? new Intl.NumberFormat(
+              localFx.currency === "SGD" ? "en-SG" : localFx.currency === "GBP" ? "en-GB" : "en-US",
+              { style: "currency", currency: localFx.currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 },
+            ).format(Math.round(cents / 100 * localFx.rate)) : "";
             return (
               <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
                 <div className="flex items-baseline justify-between gap-3">
@@ -328,9 +332,7 @@ const TradeDashboard = () => {
                 {showTradePrice && localFx && (
                   <div className="mt-3 border-t border-border pt-2 font-body text-[10px] leading-relaxed text-muted-foreground tabular-nums">
                     <span className="text-foreground">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: localFx.currency, maximumFractionDigits: 0 }).format(Math.round(spendCents / 100 * localFx.rate))}
-                      {" / "}
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: localFx.currency, maximumFractionDigits: 0 }).format(Math.round(nextCfg.min_spend_cents / 100 * localFx.rate))} {localFx.currency}
+                      {fmtLocal(spendCents)} / {fmtLocal(nextCfg.min_spend_cents)} {localFx.currency}
                     </span>
                     <span className="block text-muted-foreground">
                       [Based on {localFx.source === "hardcoded" ? "offline reference FX" : "current FX"}: 1 EUR = {localFx.rate.toFixed(2)} {localFx.currency}]
