@@ -83,7 +83,7 @@ const formatRelativeDate = (dateStr: string) => {
 
 const TradeDashboard = () => {
   const guideName = useAIGuideName();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [firstWelcome, setFirstWelcome] = useState(() => {
     try {
       return document.documentElement.dataset.felixTourActive === "true" || !localStorage.getItem("felix_dashboard_tour_seen_v1");
