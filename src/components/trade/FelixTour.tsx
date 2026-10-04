@@ -137,6 +137,7 @@ const renderBold = (text: string) =>
   );
 
 const SEEN_KEY = "felix_dashboard_tour_seen_v1";
+const PROGRESS_KEY = "felix_tour_progress_v1";
 const BOARD_PATH = /^\/trade\/boards\/[0-9a-f-]{36}/i;
 const PAD = 10;
 // Tracking must not ease behind a scrolling or collapsing target. Fade only
@@ -395,8 +396,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(false);
     // Closing is an explicit skip; neither a completed nor skipped first tour
     // should keep greeting the member as new on the dashboard.
-    try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch {}
-  }, []);
+    try {
+      localStorage.setItem(SEEN_KEY, String(Date.now()));
+      // Remember where the member left off so the tour can resume there;
+      // a finished tour clears any saved progress.
+      if (completed) localStorage.removeItem(PROGRESS_KEY);
+      else localStorage.setItem(PROGRESS_KEY, String(currentStep));
+    } catch {}
+  }, [currentStep]);
 
   const changeStep = (direction: number) => {
     if (transitioning) return;
