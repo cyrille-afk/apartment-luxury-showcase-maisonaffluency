@@ -444,9 +444,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // No stale step or route geometry may be used while the new target mounts.
   const rect = position?.step === currentStep && position.path === location.pathname ? position.rect : null;
   // Card placement: right of the target, else left, below, or above.
-  const cardW = Math.min(380, viewport.w - 32);
+  const cardW = Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 32);
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = step.id === "welcome" ? 500 : 320;
+  const cardH = step.id === "welcome" ? 545 : 320;
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
