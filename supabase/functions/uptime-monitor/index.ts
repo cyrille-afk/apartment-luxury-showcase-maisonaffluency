@@ -174,9 +174,9 @@ serve(async (req) => {
 
   if (newlyDown.length > 0) {
     const rows = newlyDown.map((r) =>
-      `<tr><td style="padding:8px 12px;border:1px solid #ddd;">${r.label}</td>` +
-      `<td style="padding:8px 12px;border:1px solid #ddd;">${BASE}${r.path}</td>` +
-      `<td style="padding:8px 12px;border:1px solid #ddd;">${r.error ?? "unknown"}</td></tr>`
+      `<tr><td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.label)}</td>` +
+      `<td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.path.startsWith("fn:") ? "backend function" : BASE + r.path)}</td>` +
+      `<td style="padding:8px 12px;border:1px solid #ddd;">${esc(r.error ?? "unknown")}</td></tr>`
     ).join("");
     const html = `
       <div style="font-family:Georgia,serif;color:#1a1a1a;max-width:640px;">
