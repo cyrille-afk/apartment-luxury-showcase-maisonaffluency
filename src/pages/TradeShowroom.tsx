@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import Gallery from "@/components/Gallery";
 import ProductImageSearch from "@/components/trade/ProductImageSearch";
 import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
+import GallerySkeleton from "@/components/trade/GallerySkeleton";
 import { createActiveDraftQuote, fetchScopedDraftQuotes, rememberActiveQuoteId } from "@/lib/activeProjectId";
 
 interface DraftQuote {
@@ -176,7 +177,9 @@ const TradeShowroom = () => {
 
         {/* Tab content */}
         {activeTab === "gallery" ? (
-          <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
+          <GalleryWithSkeleton>
+            <Gallery onHotspotAddToQuote={handleHotspotAddToQuote} hideIntro />
+          </GalleryWithSkeleton>
         ) : activeTab === "designers" ? (
           <ShowroomDesignerDirectory
             onSelectDesigner={(designer) => {
@@ -207,6 +210,41 @@ const TradeShowroom = () => {
         refreshKey={drawerRefreshKey}
       />
     </>
+  );
+};
+
+/** Overlays the skeleton until the first gallery photo has painted, then fades it out. */
+const GalleryWithSkeleton = ({ children }: { children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const started = Date.now();
+    const id = window.setInterval(() => {
+      const imgs = ref.current?.querySelectorAll("img") ?? [];
+      const loaded = Array.from(imgs).some((i) => i.complete && i.naturalWidth > 0);
+      if (loaded || Date.now() - started > 8000) {
+        setReady(true);
+        window.clearInterval(id);
+        window.dispatchEvent(new Event("resize")); // let the tour re-measure its target
+      }
+    }, 100);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <div className="relative">
+      <div ref={ref} className={cn("transition-opacity duration-500", ready ? "opacity-100" : "opacity-0")}>
+        {children}
+      </div>
+      <div
+        aria-hidden={ready}
+        className={cn(
+          "absolute inset-x-0 top-0 transition-opacity duration-500",
+          ready ? "pointer-events-none opacity-0" : "opacity-100",
+        )}
+      >
+        <GallerySkeleton />
+      </div>
+    </div>
   );
 };
 
