@@ -64,7 +64,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "dashboard-showroom",
     route: "/trade",
     dialogue:
-      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a 10% trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
+      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
   },
   {
     id: "quotes",
@@ -72,7 +72,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's 10% trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the EUR150,000 Gold Tier threshold.",
+      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldEur} Gold Tier threshold.",
   },
   {
     id: "projects",
@@ -88,7 +88,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tier-volume-tracker",
     route: "/trade",
     dialogue:
-      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the EUR150,000 threshold, where your 15% Gold Tier discount unlocks automatically — no forms, no waiting.",
+      "This tracker follows your rolling 12-month confirmed project spend in real time. As procurement volume accumulates across your projects, you advance toward the {goldEur} threshold, where your {goldPct} Gold Tier discount unlocks automatically — no forms, no waiting.",
   },
   {
     id: "client-safe-presentations",
@@ -104,7 +104,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-price-tag",
     route: "/trade/the-collection",
     dialogue:
-      "With Client View active, your 10% Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
+      "With Client View active, your {silverPct} Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
   },
   {
     id: "quote-generation",
@@ -120,7 +120,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "quotes-ledger-panel",
     route: "/trade/quotes",
     dialogue:
-      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the EUR150,000 threshold, moving you closer to your 15% Gold Tier discount.",
+      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldEur} threshold, moving you closer to your {goldPct} Gold Tier discount.",
   },
   {
     id: "tools",
