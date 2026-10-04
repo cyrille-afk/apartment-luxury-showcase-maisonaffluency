@@ -15,6 +15,9 @@ export default function SeedOnboardingProject() {
 
   useEffect(() => {
     if (!user || !rolesLoaded || studioLoading || loading || marketLoading || !(currentStudio ? canEdit : isTradeUser || isAdmin)) return;
+    // A starter folder is for onboarding, not a replacement for a project an
+    // established member intentionally removed.
+    if (localStorage.getItem("felix_dashboard_tour_seen_v1") || localStorage.getItem("trade_quick_tour_done")) return;
     const key = `ma:onboarding-project:v1:${user.id}:${currentStudio?.id ?? "personal"}`;
     try {
       if (projects.length) { localStorage.setItem(key, "done"); return; }
@@ -30,7 +33,7 @@ export default function SeedOnboardingProject() {
         currentStudio ? supabase.from("studio_project_overrides").select("project_id, projects!inner(studio_id)")
           .eq("user_id", user.id).is("role", null).eq("projects.studio_id", currentStudio.id).limit(1) : Promise.resolve({ data: [] }),
       ]);
-      if (readError || hidden.data?.length || existing?.length) {
+      if (readError || ("error" in hidden && hidden.error) || hidden.data?.length || existing?.length) {
         try { if (existing?.length || hidden.data?.length) localStorage.setItem(key, "done"); else localStorage.removeItem(key); } catch { /* optional storage */ }
         return;
       }
