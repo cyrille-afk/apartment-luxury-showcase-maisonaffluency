@@ -7,7 +7,7 @@
 - Fetch the two approved MicMac pins and side photos via scoped public RPC; never widen trade-only designer access.
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
-- Felix tour advances before gallery load; greeting tracks tour state. Share localized tier-volume model with dashboard so milestones agree.
+- Felix advances before gallery load; greeting tracks tour state. Share fixed regional tiers with dashboard; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 - Room menu previews use room-specific percent pins and alternatives.
 <!-- LOVABLE:BEGIN -->
