@@ -636,8 +636,14 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   // Switching the board to client presentation is the action Step 15 asks
   // for, so it moves straight on to Step 16 instead of waiting for Next.
+  const clientViewSawOff = useRef(false);
   useEffect(() => {
-    if (open && !isPaused && step.id === "client-view" && stepDone && settled && !transitioning) next();
+    if (step.id !== "client-view") { clientViewSawOff.current = false; return; }
+    if (settled && !stepDone) { clientViewSawOff.current = true; return; }
+    if (open && !isPaused && clientViewSawOff.current && stepDone && settled && !transitioning) {
+      clientViewSawOff.current = false;
+      next();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isPaused, step.id, stepDone, settled, transitioning]);
 
