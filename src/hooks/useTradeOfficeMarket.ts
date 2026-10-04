@@ -16,9 +16,10 @@ export function resolveTradeOfficeMarket(country?: string | null, city?: string 
 }
 
 /** The member's registered trade office, not their browser or delivery address. */
-export function useTradeOfficeMarket(): TradeOfficeMarket {
+export function useTradeOfficeMarketState(): { market: TradeOfficeMarket; loading: boolean } {
   const { user } = useAuth();
   const [market, setMarket] = useState<TradeOfficeMarket>(null);
+  const [resolvedUser, setResolvedUser] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -30,11 +31,19 @@ export function useTradeOfficeMarket(): TradeOfficeMarket {
         supabase.from("trade_accounts").select("country,city").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("profiles").select("country").eq("id", user.id).maybeSingle(),
       ]);
-      if (!cancelled) setMarket(resolveTradeOfficeMarket(account?.country || profile?.country, account?.city));
+      if (!cancelled) {
+        setMarket(resolveTradeOfficeMarket(account?.country || profile?.country, account?.city));
+        setResolvedUser(user.id);
+      }
     })();
 
     return () => { cancelled = true; };
   }, [user?.id]);
 
-  return market;
+  return { market, loading: !!user?.id && resolvedUser !== user.id };
+}
+
+/** The member's registered office without the loading metadata. */
+export function useTradeOfficeMarket(): TradeOfficeMarket {
+  return useTradeOfficeMarketState().market;
 }
