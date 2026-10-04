@@ -512,7 +512,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       } else if (!last || !sameRect(last, next)) {
         last = next;
         stableSince = now;
-      } else if (now - stableSince >= 80) {
+      } else if (now - stableSince >= (current.id === "quotes" ? 350 : 80)) {
+        // The galleries restore their own scroll after mounting; wait it out
+        // so Step 3 never appears on the pre-scroll position first.
         commit(next);
       }
       frame = requestAnimationFrame(tick);
