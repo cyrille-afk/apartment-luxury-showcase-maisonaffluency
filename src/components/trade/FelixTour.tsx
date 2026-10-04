@@ -187,10 +187,25 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Activating the Viral Loop",
     target: "invite-collaborator",
     route: "board",
-    clickFinishes: true,
-    cta: "Enter My Workspace",
     dialogue:
       "Your custom branded workspace is ready. Click **Invite Collaborator** to send a secure, 30-day interactive portal link to your client or external contractors. When they drop feedback or swap 3D fabric finishes, their choices sync live to your master ledger.",
+  },
+  {
+    id: "technical-assets",
+    title: "Technical Design Assets",
+    target: "nav-tools",
+    route: "/trade/tools",
+    dialogue:
+      "Every piece in the catalogue carries its full technical dossier. From the Tools grid you can reach CAD blocks and BIM-ready 3D models for direct import into your drawings, download specification sheets and finish matrices, and request physical material samples — everything your technical team needs to specify with confidence.",
+  },
+  {
+    id: "priority-concierge",
+    title: "Priority Concierge Access",
+    target: "felix-chat",
+    route: "/trade",
+    cta: "Finish Tour",
+    dialogue:
+      "You are never sourcing alone. I am available from the top bar on every page — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
   },
 ];
 
