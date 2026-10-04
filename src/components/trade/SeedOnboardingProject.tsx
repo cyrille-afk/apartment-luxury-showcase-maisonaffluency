@@ -30,6 +30,7 @@ export default function SeedOnboardingProject() {
         currentStudio ? supabase.from("studio_project_overrides").select("project_id, projects!inner(studio_id)")
           .eq("user_id", user.id).is("role", null).eq("projects.studio_id", currentStudio.id).limit(1) : Promise.resolve({ data: [] }),
       ]);
+      console.info("starter-debug", { existing, readError, hidden });
       if (readError || hidden.data?.length || existing?.length) {
         try { if (existing?.length || hidden.data?.length) localStorage.setItem(key, "done"); else localStorage.removeItem(key); } catch { /* optional storage */ }
         return;
