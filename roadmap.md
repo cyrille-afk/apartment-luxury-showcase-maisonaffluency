@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Lock Step 5 and tracker to fixed annual EUR/USD/SGD milestones and regional examples.
+- [x] Lock Step 5 and tracker to fixed annual EUR/USD/SGD milestones and regional examples.
 
 - [x] Localize Felix Step 5 and the dashboard tier tracker to US fixed USD, EUR, and SGD baselines with consistent examples and verification.
 
