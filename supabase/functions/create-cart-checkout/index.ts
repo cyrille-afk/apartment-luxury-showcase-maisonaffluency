@@ -84,6 +84,9 @@ serve(async (req) => {
     // ---- Server-side price resolution (never trust client prices) ----
     const pickIds = Array.from(new Set(rawItems.map((i) => String(i.pickId || "")).filter(Boolean)));
     if (!pickIds.length) return json({ error: "Invalid cart." }, 400);
+    // Pick IDs are interpolated into a filter string below; accept UUIDs only.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (pickIds.some((id) => !UUID_RE.test(id))) return json({ error: "Invalid cart." }, 400);
 
     const { data: priced, error: priceErr } = await supabaseAdmin
       .from("trade_products_public_rrp")

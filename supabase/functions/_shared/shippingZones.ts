@@ -1,0 +1,539 @@
+export interface ShippingZone {
+  /**
+   * Reference freight rate for the zone: one full-size crated piece
+   * (a sofa, REFERENCE_CBM cubic metres) in zone currency units.
+   */
+  baseRate: number;
+  /** ISO 4217 currency code used for the zone's rates. */
+  currency: string;
+  /** ISO 3166-1 alpha-2 country codes covered by this zone. */
+  countries: string[];
+  /** Human-readable zone name shown in the checkout order summary. */
+  label: string;
+}
+
+/**
+ * Luxury furniture freight zones.
+ * Base rates reflect white-glove, crated international freight for the
+ * reference piece; the per-CBM rate is derived from them.
+ */
+export const SHIPPING_ZONES: Record<string, ShippingZone> = {
+  domesticEu: {
+    baseRate: 1200,
+    currency: "EUR",
+    countries: [
+      "FR", "DE", "IT", "ES", "NL", "BE", "IE", "PT", "AT",
+      "LU", "MC", "GR",
+    ],
+    label: "Domestic EU",
+  },
+  // Post-Brexit the United Kingdom is a third country: every shipment is
+  // customs-cleared on entry and carries import VAT, so it can never be
+  // priced as Domestic EU freight.
+  unitedKingdom: {
+    baseRate: 1450,
+    currency: "GBP",
+    countries: ["GB", "GG", "JE", "IM"],
+    label: "United Kingdom (DDP)",
+  },
+  // Switzerland sits outside the EU customs union: shipments cross a third-
+  // country border and are cleared, taxed and duty-assessed on entry.
+  switzerland: {
+    baseRate: 1600,
+    currency: "CHF",
+    countries: ["CH", "LI"],
+    label: "International Shipping (Switzerland)",
+  },
+
+  northAmerica: {
+    baseRate: 5132,
+    currency: "USD",
+    countries: ["US", "CA", "MX"],
+    label: "North America",
+  },
+  middleEast: {
+    baseRate: 4800,
+    currency: "USD",
+    countries: ["AE", "SA", "QA", "KW", "BH", "OM"],
+    label: "Middle East",
+  },
+  asiaPacific: {
+    baseRate: 5800,
+    currency: "USD",
+    countries: ["SG", "JP", "AU", "HK", "NZ", "KR", "TW", "MY", "TH", "ID"],
+    label: "Asia Pacific",
+  },
+} as const;
+
+
+/** Fallback zone applied when a country is not matched to any zone. */
+export const DEFAULT_SHIPPING_ZONE: ShippingZone = {
+  baseRate: 6400,
+  currency: "USD",
+  countries: [],
+  label: "Rest of World",
+};
+
+const COUNTRY_TO_ZONE = new Map<string, ShippingZone>();
+for (const zone of Object.values(SHIPPING_ZONES)) {
+  for (const code of zone.countries) {
+    COUNTRY_TO_ZONE.set(code.toUpperCase(), zone);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Volumetric model (CBM)                                              */
+/* ------------------------------------------------------------------ */
+
+/** Crated volume of the reference piece (a sofa), in cubic metres. */
+export const REFERENCE_CBM = 2.5;
+
+/** Minimum billable volume for any shipment. */
+export const MIN_SHIPMENT_CBM = 0.5;
+
+/** Base country rate per cubic metre. */
+export function getRatePerCbm(zone: ShippingZone): number {
+  return zone.baseRate / REFERENCE_CBM;
+}
+
+export type ShippingItemClass =
+  | "sofa"
+  | "cabinet"
+  | "table"
+  | "bed"
+  | "armchair"
+  | "chair"
+  | "lighting"
+  | "accessory";
+
+/** Typical crated volume per class, in cubic metres. */
+export const ITEM_CLASS_CBM: Record<ShippingItemClass, number> = {
+  sofa: 2.5,
+  cabinet: 2.2,
+  bed: 2.0,
+  table: 1.8,
+  armchair: 1.0,
+  chair: 0.6,
+  lighting: 0.4,
+  accessory: 0.25,
+};
+
+/** Legacy view of the same model: class volume as a share of the reference. */
+export const ITEM_CLASS_MODIFIERS: Record<ShippingItemClass, number> = Object.fromEntries(
+  Object.entries(ITEM_CLASS_CBM).map(([k, v]) => [k, v / REFERENCE_CBM]),
+) as Record<ShippingItemClass, number>;
+
+/** Applied when nothing can be inferred (mid-size piece assumption). */
+export const DEFAULT_ITEM_CBM = ITEM_CLASS_CBM.armchair;
+export const DEFAULT_ITEM_MODIFIER = DEFAULT_ITEM_CBM / REFERENCE_CBM;
+
+/** Keyword hints, ordered — first match wins. */
+const CLASS_HINTS: [ShippingItemClass, RegExp][] = [
+  // Lighting first: "Lantern Table Lamp" / "Console Floor Light" must never be
+  // priced as a dining table — that misread was inflating freight ~4×.
+  ["lighting", /\b(lamp|lamps|light|lights|sconce|chandelier|pendant|lantern|luminaire)\b/i],
+  ["sofa", /\b(sofa|settee|couch|daybed|chaise|banquette|modular)\b/i],
+  ["cabinet", /\b(cabinet|sideboard|credenza|armoire|bookcase|dresser|commode|shelving|wardrobe)\b/i],
+  ["bed", /\b(bed|headboard)\b/i],
+  ["table", /\b(table|desk|console|bureau)\b/i],
+  ["armchair", /\b(armchair|lounge chair|club chair|bergère|bergere|wing chair|swivel)\b/i],
+  ["chair", /\b(chair|stool|bench|ottoman|pouf|footstool)\b/i],
+  ["accessory", /\b(mirror|tray|vase|box|rug|cushion|object|sculpture|screen)\b/i],
+];
+
+
+/** Infers an item class from a product title / category string. */
+export function inferItemClass(text?: string | null): ShippingItemClass | null {
+  if (!text) return null;
+  for (const [cls, re] of CLASS_HINTS) {
+    if (re.test(text)) return cls;
+  }
+  return null;
+}
+
+/** Cart / catalogue shape needed to price freight. */
+export interface ShippingEstimateItem {
+  title?: string | null;
+  category?: string | null;
+  /** Explicit crated volume per unit, in cubic metres (wins over inference). */
+  cbm?: number | null;
+  /** Legacy multiplier of the reference piece — converted to CBM. */
+  shippingModifier?: number | null;
+  itemClass?: ShippingItemClass | null;
+  quantity?: number | null;
+  /** Retail value of a single unit, in minor units (cents). */
+  unitPriceCents?: number | null;
+}
+
+/** Resolves the crated volume (CBM) of one unit of a line item. */
+export function getItemCbm(item: ShippingEstimateItem): number {
+  if (typeof item.cbm === "number" && item.cbm > 0) return item.cbm;
+  if (typeof item.shippingModifier === "number" && item.shippingModifier > 0) {
+    return item.shippingModifier * REFERENCE_CBM;
+  }
+  const cls =
+    item.itemClass ?? inferItemClass(item.category) ?? inferItemClass(item.title);
+  return cls ? ITEM_CLASS_CBM[cls] : DEFAULT_ITEM_CBM;
+}
+
+/** Legacy accessor kept for callers thinking in multipliers. */
+export function getItemShippingModifier(item: ShippingEstimateItem): number {
+  return getItemCbm(item) / REFERENCE_CBM;
+}
+
+/**
+ * Share of the crated volume that each ADDITIONAL identical unit adds.
+ *
+ * The published per-class CBM is a single crated piece: net product volume
+ * plus crate tare (timber frame, corner blocking, foam void). When several
+ * units of the same line ship together they are consolidated into one crate
+ * or nested onto one pallet, so the tare is paid once — not per unit.
+ * Fragile small pieces (lighting, accessories) nest far better than case
+ * goods, hence the lower factors.
+ */
+export const CONSOLIDATION_FACTOR: Record<ShippingItemClass, number> = {
+  sofa: 0.85,
+  cabinet: 0.85,
+  bed: 0.85,
+  table: 0.8,
+  armchair: 0.75,
+  chair: 0.65,
+  lighting: 0.55,
+  accessory: 0.5,
+};
+
+/** Applied when the item class cannot be inferred. */
+export const DEFAULT_CONSOLIDATION_FACTOR = 0.75;
+
+/** Resolves the class used for consolidation (null when unknown). */
+export function resolveItemClass(item: ShippingEstimateItem): ShippingItemClass | null {
+  return item.itemClass ?? inferItemClass(item.category) ?? inferItemClass(item.title);
+}
+
+/**
+ * Billable crated volume of one cart line, quantity included.
+ * First unit at full crate volume, each additional unit at its consolidation
+ * factor — so two lamps never carry two full container tares.
+ */
+export function getLineCbm(item: ShippingEstimateItem): number {
+  const qty = Math.max(1, Math.round(item.quantity ?? 1));
+  const unit = getItemCbm(item);
+  if (qty === 1) return unit;
+  const cls = resolveItemClass(item);
+  const factor = cls ? CONSOLIDATION_FACTOR[cls] : DEFAULT_CONSOLIDATION_FACTOR;
+  return unit + unit * factor * (qty - 1);
+}
+
+/** Total crated volume of the cart, consolidated per line. */
+export function getCartCbm(items?: ShippingEstimateItem[] | null): number {
+  if (!items?.length) return 0;
+  const total = items.reduce((sum, item) => sum + getLineCbm(item), 0);
+  return total > 0 ? Math.max(MIN_SHIPMENT_CBM, Number(total.toFixed(2))) : 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Freight safety cap                                                  */
+/* ------------------------------------------------------------------ */
+
+/** Freight is never displayed above this share of the order value. */
+export const FREIGHT_CAP_RATIO = 0.15;
+
+export const FREIGHT_CAP_NOTICE =
+  "Oversized shipping quote requires advisor validation. Initial freight deposit shown below.";
+
+export interface CappedFreight {
+  /** Freight to display, in minor units. */
+  cents: number;
+  /** Raw engine output before the cap, in minor units. */
+  uncappedCents: number;
+  capped: boolean;
+  /** Advisor-validation copy when capped, otherwise null. */
+  notice: string | null;
+}
+
+/**
+ * Caps a freight figure at {@link FREIGHT_CAP_RATIO} of the order value.
+ * Above the cap the shown amount becomes an initial freight deposit and the
+ * order is routed to an advisor for validation.
+ */
+export function applyFreightCap(
+  freightCents: number,
+  orderValueCents: number,
+): CappedFreight {
+  const freight = Math.max(0, Math.round(freightCents || 0));
+  const value = Math.max(0, Math.round(orderValueCents || 0));
+  const ceiling = Math.round(value * FREIGHT_CAP_RATIO);
+  if (freight <= 0 || value <= 0 || freight <= ceiling) {
+    return { cents: freight, uncappedCents: freight, capped: false, notice: null };
+  }
+  return {
+    cents: ceiling,
+    uncappedCents: freight,
+    capped: true,
+    notice: FREIGHT_CAP_NOTICE,
+  };
+}
+
+
+/**
+ * Estimated freight for a country.
+ *
+ * Formula: Base Country Rate per CBM × Total Cart CBM.
+ * Adding a second armchair doubles that line's volume, so the estimate
+ * scales linearly. With no items the reference-piece base rate is returned.
+ * Unknown country → null.
+ */
+export function getEstimatedShipping(
+  countryCode: string,
+  items?: ShippingEstimateItem[] | null,
+): number | null {
+  if (!countryCode) return null;
+  const zone = COUNTRY_TO_ZONE.get(countryCode.trim().toUpperCase());
+  if (!zone) return null;
+  if (!items || items.length === 0) return zone.baseRate;
+  const cbm = getCartCbm(items);
+  if (cbm <= 0) return 0;
+  return Math.round(getRatePerCbm(zone) * cbm);
+}
+
+/** Resolves the full zone (rate + currency) for a country code. Unknown countries return null. */
+export function getShippingZone(countryCode: string): ShippingZone | null {
+  if (!countryCode) return null;
+  const code = countryCode.trim().toUpperCase();
+  return COUNTRY_TO_ZONE.get(code) ?? null;
+}
+
+/** Resolves the display label of the shipping zone for a country code (e.g. "Asia Pacific"). */
+export function getShippingZoneLabel(countryCode: string): string | null {
+  return getShippingZone(countryCode)?.label ?? null;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Landed cost (DDP)                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Import charges payable when the goods cross the destination border.
+ * Percentages are applied to the value in the order currency; the clearance
+ * fee is quoted in the rule's own currency and converted by the caller.
+ */
+export interface LandedCostRule {
+  /** ISO 3166-1 alpha-2 destination. */
+  country: string;
+  /** Import duty on the goods value, percent. */
+  dutyPercent: number;
+  /** Import VAT / GST, percent. */
+  vatPercent: number;
+  /** Whether freight is included in the VAT base (CIF valuation). */
+  vatOnFreight: boolean;
+  /** Customs brokerage / clearance fee, in minor units of `currency`. */
+  clearanceCents: number;
+  currency: string;
+  /** Short name of the destination tax, e.g. "UK VAT". */
+  taxName: string;
+  /** Plain-language explanation shown beside the estimate. */
+  note: string;
+  /**
+   * Prepaid customs handling applied to freight when the buyer chooses DDP:
+   * the forwarder acts as importer of record, advances the border charges and
+   * bills a flat fee plus a percentage of the freight for doing so. The flat
+   * fee is denominated in EUR (see DDP_HANDLING_FLAT_CURRENCY). Not charged
+   * under DDU.
+   */
+  ddpHandlingPercent: number;
+  /** Flat DDP handling fee, in minor units of DDP_HANDLING_FLAT_CURRENCY. */
+  ddpHandlingFlatCents: number;
+  /** Plain-language explanation shown when the buyer chooses DDU. */
+  dduNote: string;
+}
+
+/** Delivery term chosen by the buyer at checkout. */
+export type Incoterm = "DDP" | "DDU";
+
+export const DEFAULT_INCOTERM: Incoterm = "DDP";
+
+export const LANDED_COST_RULES: LandedCostRule[] = [
+  {
+    country: "GB",
+    // HS 94 furniture and lighting enter the UK duty-free; VAT is the charge
+    // that matters, and it is assessed on the CIF value.
+    dutyPercent: 0,
+    vatPercent: 20,
+    vatOnFreight: true,
+    clearanceCents: 15_000,
+    currency: "GBP",
+    taxName: "UK VAT",
+    note: "Delivered Duty Paid to London: UK import VAT at 20% of the goods and freight value, plus customs clearance. Collected by your advisor before despatch.",
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
+    dduNote: "Delivered Duty Unpaid to London: freight only. HMRC import VAT at 20% of the goods and freight value, plus customs clearance, are invoiced to you by the carrier before delivery.",
+  },
+  {
+    country: "CH",
+    dutyPercent: 0,
+    vatPercent: 8.1,
+    vatOnFreight: true,
+    clearanceCents: 18_000,
+    currency: "CHF",
+    taxName: "Swiss import VAT",
+    note: "Switzerland is outside the EU customs union: import VAT at 8.1% and clearance are assessed at the border.",
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
+    dduNote: "Delivered Duty Unpaid: freight only. Swiss import VAT at 8.1% and customs clearance are billed to you by the carrier at the border.",
+  },
+  {
+    country: "AE",
+    dutyPercent: 5,
+    vatPercent: 5,
+    vatOnFreight: true,
+    clearanceCents: 90_000,
+    currency: "AED",
+    taxName: "UAE VAT",
+    note: "UAE import duty at 5% plus 5% VAT on the landed value.",
+    ddpHandlingPercent: 40,
+    ddpHandlingFlatCents: 2_000, // €20 flat + 40% freight surcharge (forwarder-confirmed)
+    dduNote: "Delivered Duty Unpaid: freight only. UAE import duty (5%), VAT (5%) and clearance are settled by you with the carrier on arrival.",
+  },
+];
+
+const LANDED_BY_COUNTRY = new Map(LANDED_COST_RULES.map((r) => [r.country, r]));
+
+/** Resolves the import-charge rule for a destination. Unknown → null. */
+export function getLandedCostRule(countryCode?: string | null): LandedCostRule | null {
+  if (!countryCode) return null;
+  return LANDED_BY_COUNTRY.get(countryCode.trim().toUpperCase()) ?? null;
+}
+
+export interface LandedCostEstimate {
+  available: boolean;
+  dutyCents: number;
+  vatCents: number;
+  clearanceCents: number;
+  /**
+   * Duty + VAT + clearance collected at checkout. Zero under DDU, where the
+   * same charges are billed at the border instead — see `deferredTotalCents`.
+   */
+  totalCents: number;
+  /** Duty + VAT + clearance payable by the buyer on arrival. 0 under DDP. */
+  deferredTotalCents: number;
+  dutyPercent: number;
+  vatPercent: number;
+  taxName: string | null;
+  note: string | null;
+  rule: LandedCostRule | null;
+  /** Delivery term the figures were computed under. */
+  incoterm: Incoterm;
+  /** Prepaid customs handling added to freight under DDP. 0 under DDU. */
+  handlingCents: number;
+}
+
+export const EMPTY_LANDED_COST: LandedCostEstimate = {
+  available: false,
+  dutyCents: 0,
+  vatCents: 0,
+  clearanceCents: 0,
+  totalCents: 0,
+  deferredTotalCents: 0,
+  dutyPercent: 0,
+  vatPercent: 0,
+  taxName: null,
+  note: null,
+  rule: null,
+  incoterm: DEFAULT_INCOTERM,
+  handlingCents: 0,
+};
+
+/**
+ * Prepaid customs handling the forwarder charges for acting as importer of
+ * record under DDP. Returns 0 for DDU or destinations that need no clearance.
+ */
+/** Currency the flat DDP handling fee is quoted in by the forwarder. */
+export const DDP_HANDLING_FLAT_CURRENCY = "EUR";
+
+export function getDdpHandlingCents(
+  countryCode: string | null | undefined,
+  freightCents: number,
+  incoterm: Incoterm = DEFAULT_INCOTERM,
+  /**
+   * Flat fee already converted into the order currency. Defaults to the raw
+   * EUR amount, which is correct only when the order currency is EUR.
+   */
+  flatInOrderCurrencyCents?: number | null,
+): number {
+  if (incoterm !== "DDP") return 0;
+  const rule = getLandedCostRule(countryCode);
+  if (!rule) return 0;
+  const freight = Math.max(0, Math.round(freightCents || 0));
+  const flat = Math.max(
+    0,
+    Math.round(
+      flatInOrderCurrencyCents == null
+        ? rule.ddpHandlingFlatCents
+        : flatInOrderCurrencyCents,
+    ),
+  );
+  return Math.round(freight * (rule.ddpHandlingPercent / 100)) + flat;
+}
+
+/**
+ * Estimates the import charges for a destination.
+ * `goodsCents` and `freightCents` must already be expressed in the order
+ * currency; `clearanceInOrderCurrencyCents` lets the caller pass the
+ * converted clearance fee (defaults to the rule's own currency amount).
+ */
+export function getLandedCostEstimate(input: {
+  countryCode?: string | null;
+  goodsCents: number;
+  freightCents?: number;
+  clearanceInOrderCurrencyCents?: number | null;
+  /** DDP collects the import charges now; DDU defers them to the border. */
+  incoterm?: Incoterm;
+  /** Flat DDP handling fee already converted into the order currency. */
+  handlingFlatInOrderCurrencyCents?: number | null;
+}): LandedCostEstimate {
+  const rule = getLandedCostRule(input.countryCode);
+  const goods = Math.max(0, Math.round(input.goodsCents || 0));
+  const incoterm: Incoterm = input.incoterm ?? DEFAULT_INCOTERM;
+  if (!rule || goods <= 0) return { ...EMPTY_LANDED_COST, incoterm };
+  // `freightCents` is the base freight; DDP adds prepaid customs handling on
+  // top, and that uplift is part of the CIF value the border tax is assessed on.
+  const baseFreight = Math.max(0, Math.round(input.freightCents || 0));
+  const handling = getDdpHandlingCents(
+    rule.country,
+    baseFreight,
+    incoterm,
+    input.handlingFlatInOrderCurrencyCents,
+  );
+  const freight = baseFreight + handling;
+  const duty = Math.round(goods * (rule.dutyPercent / 100));
+  const vatBase = goods + duty + (rule.vatOnFreight ? freight : 0);
+  const vat = Math.round(vatBase * (rule.vatPercent / 100));
+  const clearance = Math.max(
+    0,
+    Math.round(
+      input.clearanceInOrderCurrencyCents == null
+        ? rule.clearanceCents
+        : input.clearanceInOrderCurrencyCents,
+    ),
+  );
+  const chargesCents = duty + vat + clearance;
+  const ddp = incoterm === "DDP";
+  return {
+    available: true,
+    // Under DDU the border charges are not collected by us — they are still
+    // shown, but as an amount the buyer settles with the carrier on arrival.
+    dutyCents: ddp ? duty : 0,
+    vatCents: ddp ? vat : 0,
+    clearanceCents: ddp ? clearance : 0,
+    totalCents: ddp ? chargesCents : 0,
+    deferredTotalCents: ddp ? 0 : chargesCents,
+    dutyPercent: rule.dutyPercent,
+    vatPercent: rule.vatPercent,
+    taxName: rule.taxName,
+    note: ddp ? rule.note : rule.dduNote,
+    rule,
+    incoterm,
+    handlingCents: handling,
+  };
+}
