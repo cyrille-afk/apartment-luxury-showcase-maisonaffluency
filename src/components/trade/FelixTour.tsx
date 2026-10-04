@@ -228,6 +228,28 @@ const FELIX_STEPS: FelixStep[] = [
 /** Board presentation steps where the member's Client View choice is kept. */
 const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", "white-label", "invite"]);
 
+/**
+ * Tour pages are lazy routes; React Router keeps the old page (and the old
+ * location) until a chunk loads, so an unwarmed route stalls the next step.
+ * Same specifiers as App.tsx so Vite resolves to the identical module.
+ */
+const TOUR_ROUTE_CHUNKS = [
+  () => import("@/pages/TradeDashboard"),
+  () => import("@/pages/TradeShowroom"),
+  () => import("@/pages/TradeProjects"),
+  () => import("@/pages/TradeQuotes"),
+  () => import("@/pages/TradeTools"),
+  () => import("@/pages/TradeSettings"),
+  () => import("@/pages/TradeConcierge"),
+  () => import("@/pages/TradeBoardBuilder"),
+];
+let tourChunksWarmed = false;
+const warmTourRoutes = () => {
+  if (tourChunksWarmed) return;
+  tourChunksWarmed = true;
+  TOUR_ROUTE_CHUNKS.forEach((load) => { void load().catch(() => { tourChunksWarmed = false; }); });
+};
+
 const renderBold = (text: string) =>
   text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
     part.startsWith("**") ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong> : part,
