@@ -102,7 +102,7 @@ const TradeDashboard = () => {
       window.removeEventListener("storage", syncWelcome);
     };
   }, []);
-  const { tierLabel } = useTradeDiscount();
+  const { tier, tierLabel, config: tierConfig } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
@@ -112,6 +112,23 @@ const TradeDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
+  const [spendCents, setSpendCents] = useState<number | null>(null);
+
+  // Rolling 12-month confirmed spend drives the tier volume tracker.
+  useEffect(() => {
+    if (!profile?.id) return;
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("trade_tier_12mo_spend_cents")
+      .eq("id", profile.id)
+      .single()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setSpendCents(((data as any)?.trade_tier_12mo_spend_cents as number | null) ?? 0);
+      });
+    return () => { cancelled = true; };
+  }, [profile?.id]);
 
   // Arriving from /trade-onboarding ("Enter Workspace") — confirm the copilot
   // is live with a single non-intrusive toast at the base of the sidebar.
@@ -269,6 +286,31 @@ const TradeDashboard = () => {
               Meet {guideName}
             </button>
           </div>
+          {spendCents !== null && tier !== "platinum" && tierConfig.gold.min_spend_cents > 0 && (() => {
+            const nextCfg = tier === "silver" ? tierConfig.gold : tierConfig.platinum;
+            const prevThreshold = tier === "silver" ? tierConfig.silver.min_spend_cents : tierConfig.gold.min_spend_cents;
+            const progressPct = Math.min(100, Math.max(0,
+              ((spendCents - prevThreshold) / (nextCfg.min_spend_cents - prevThreshold)) * 100
+            ));
+            const fmt = (cents: number) =>
+              new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
+            return (
+              <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="trade-micro-label uppercase text-muted-foreground">Tier Volume Tracker</p>
+                  <p className="font-body text-[11px] text-muted-foreground tabular-nums">
+                    {fmt(spendCents)} <span className="opacity-60">/ {fmt(nextCfg.min_spend_cents)}</span>
+                  </p>
+                </div>
+                <div className="mt-3 h-1 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+                </div>
+                <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Rolling 12-month confirmed spend · next: {nextCfg.label} {Math.round(nextCfg.discount_pct * 100)}%
+                </p>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
