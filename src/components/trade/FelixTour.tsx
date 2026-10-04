@@ -676,7 +676,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                   { key: "gold" as TradeTier, note: `Unlocks at ${fmtEur(tiers.gold.min_spend_cents)} cumulative project volume`, current: false },
                   { key: "platinum" as TradeTier, note: `Unlocks at ${fmtEur(tiers.platinum.min_spend_cents)} cumulative project volume`, current: false },
                 ]).map((row) => (
-                  <div key={row.tier} className="flex items-start justify-between gap-4 py-3">
+                  <div key={row.key} className="flex items-start justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5 shrink-0">
                       <span className="font-display text-[13px] text-foreground whitespace-nowrap">{tiers[row.key].label} Partner</span>
                       {row.current ? (
@@ -687,7 +687,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                     </div>
                     <div className="text-right min-w-0">
                       <p className="font-display text-[13px] font-semibold tracking-tight text-foreground whitespace-nowrap">
-                        {row.discount}
+                        {fmtPct(tiers[row.key].discount_pct)} Trade Discount
                       </p>
                       <p className="mt-0.5 font-body text-[10px] leading-snug text-muted-foreground">
                         {row.note}
@@ -697,7 +697,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Prices shown across The Collection and the interactive galleries calculate automatically based on your active 10% discount level.
+                Prices shown across The Collection and the interactive galleries calculate automatically based on your active {fmtPct(tiers.silver.discount_pct)} discount level.
               </p>
             </div>
           )}
