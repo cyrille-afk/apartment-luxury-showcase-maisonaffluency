@@ -584,6 +584,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       setCurrentStep(6);
       return;
     }
+    // Leaving the Client View demo: restore Trade view so later steps
+    // (sidebar nav, project switcher) have visible targets again.
+    if (step.id === "margin-protection") setClientSafeMode(false);
     changeStep(1);
   };
   const back = () => {
