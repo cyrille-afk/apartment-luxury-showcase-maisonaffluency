@@ -27,7 +27,7 @@ export default function SeedOnboardingProject() {
       query = currentStudio ? query.eq("studio_id", currentStudio.id) : query.eq("user_id", user.id).is("studio_id", null);
       const [{ data: existing, error: readError }, hidden] = await Promise.all([
         query,
-        currentStudio ? supabase.from("studio_project_overrides").select("project_id")
+        currentStudio ? supabase.from("studio_project_overrides").select("project_id, projects!inner(studio_id)")
           .eq("user_id", user.id).is("role", null).eq("projects.studio_id", currentStudio.id).limit(1) : Promise.resolve({ data: [] }),
       ]);
       if (readError || hidden.data?.length || existing?.length) {
