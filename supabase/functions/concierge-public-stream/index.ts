@@ -683,7 +683,7 @@ serve(async (req) => {
   let handoffFired = false;
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
-  const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128) || "no-sid";
+  const handoffSid = sid || "no-sid";
   // Build a compact transcript for the hand-off email. Flatten multimodal
   // parts (image uploads) back to text so the email is readable.
   const transcript = trimmed
@@ -705,7 +705,7 @@ serve(async (req) => {
       const message = [
         `A concierge visitor has reached serious intent and been handed to you.`,
         ``,
-        `Session: ${sid}`,
+        `Session: ${handoffSid}`,
         `Path: ${req.headers.get("referer") || "—"}`,
         ``,
         `— Conversation —`,
@@ -718,7 +718,7 @@ serve(async (req) => {
         body: {
           templateName: "inquiry-notification",
           recipientEmail: CYRILLE_EMAIL,
-          idempotencyKey: `concierge-handoff-${sid}-${Date.now()}`,
+          idempotencyKey: `concierge-handoff-${handoffSid}-${Date.now()}`,
           templateData: {
             name: "Concierge visitor",
             firm: "",
