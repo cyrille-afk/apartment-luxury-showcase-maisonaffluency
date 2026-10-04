@@ -580,6 +580,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
   useEffect(() => {
     document.documentElement.dataset.felixTourActive = String(open);
+    if (open) warmTourRoutes();
     window.dispatchEvent(new Event("felix-tour:state"));
     return () => {
       document.documentElement.dataset.felixTourActive = "false";
