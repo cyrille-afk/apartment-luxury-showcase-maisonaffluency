@@ -159,6 +159,7 @@ const TradeShowroom = () => {
           ] as const).map(({ id, label, Icon }) => (
             <button
               key={id}
+              data-felix-target={id === "gallery" ? "collection-gallery" : undefined}
               onClick={() => setActiveTab(id)}
               className={cn(
                 "flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.15em] transition-colors",

@@ -259,6 +259,7 @@ const TradeDashboard = () => {
           <Link
             key={card.to}
             to={card.to}
+            data-felix-target={card.key === "dash-showroom" ? "dashboard-showroom" : undefined}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
             className={`group flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
           >

@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Anchor Felix Step 2 to the dashboard Curated Showroom card; require a card click and keep Interactive Galleries visible before continuing.
+
 - [x] Give studio headers and specification PDFs a serif text-logo fallback, label unpriced pieces Price upon Request, and strip generator metadata from schedule downloads.
 
 - [x] Add automated Client View checks for markup math, document masking, generic attribution, and exported PDF text; run in the existing unit-test CI job.
