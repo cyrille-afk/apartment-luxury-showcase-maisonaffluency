@@ -44,6 +44,13 @@ const FELIX_STEPS: FelixStep[] = [
       "Welcome to the Trade Program, Cyrille. This is your primary project dashboard. Let's start with our Curated Showroom—click here to browse our fully interactive galleries, where you can view your live Silver Tier trade pricing staged in real residential environments.",
   },
   {
+    id: "gallery",
+    title: "Interactive Galleries",
+    target: "collection-gallery",
+    route: "/trade/the-collection",
+    dialogue: "Explore the interactive galleries to see curated pieces in residential settings, then continue to your trade workspace.",
+  },
+  {
     id: "quotes",
     title: "Financial Management",
     target: "nav-quotes",
@@ -160,18 +167,17 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  const [collectionOpened, setCollectionOpened] = useState(false);
   const transitionTimer = useRef<number | null>(null);
 
   const step = FELIX_STEPS[currentStep];
   const isLast = currentStep === FELIX_STEPS.length - 1;
-  const stepRoute = step.id === "collection" && collectionOpened ? "/trade/the-collection" : step.route;
-  const stepTarget = step.id === "collection" && collectionOpened ? "collection-gallery" : step.target;
+  const stepRoute = step.route;
+  const stepTarget = step.target;
 
   const measure = useCallback(() => {
     const s = FELIX_STEPS[currentStep];
-    setStepDone(s.id === "collection" ? collectionOpened : s.done ? s.done() : true);
-  }, [currentStep, collectionOpened]);
+    setStepDone(s.id === "collection" ? false : s.done ? s.done() : true);
+  }, [currentStep]);
 
   useEffect(() => {
     if (!open) return;
@@ -193,8 +199,9 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (!open) return;
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.(`[data-felix-target="${stepTarget}"]`);
-      if (el && step.id === "collection" && !collectionOpened) {
-        setCollectionOpened(true);
+      if (el && step.id === "collection") {
+        // The dashboard Link navigates to the gallery on this same click.
+        setCurrentStep(2);
         return;
       }
       if (el && step.clickFinishes) { close(true); return; }
@@ -203,7 +210,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, step, stepTarget, collectionOpened, measure]);
+  }, [open, step, stepTarget, measure]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -284,7 +291,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           ? previous : { w: window.innerWidth, h: window.innerHeight });
         fallback = r.width === 2 && r.height === 2 && !next;
         if (!ready) {
-          setStepDone(current.id === "collection" ? collectionOpened : current.done ? current.done() : true);
+          setStepDone(current.id === "collection" ? false : current.done ? current.done() : true);
           ready = true;
           // Render at the measured position invisibly first, then fade in on
           // the next frame. Never inject a tooltip at the viewport center.
@@ -335,7 +342,13 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
-  }, [open, currentStep, location.pathname, stepRoute, stepTarget, collectionOpened]);
+  }, [open, currentStep, location.pathname, stepRoute, stepTarget]);
+
+  useLayoutEffect(() => {
+    if (open) document.documentElement.dataset.felixTourStep = step.id;
+    else delete document.documentElement.dataset.felixTourStep;
+    return () => { delete document.documentElement.dataset.felixTourStep; };
+  }, [open, step.id]);
 
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
@@ -357,7 +370,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useEffect(() => {
     const onStart = () => {
       setCurrentStep(0);
-      setCollectionOpened(false);
       setIsPaused(false);
       setOpen(true);
     };
@@ -390,7 +402,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     setTransitioning(true);
     transitionTimer.current = window.setTimeout(() => {
       setIsPaused(false);
-      setCollectionOpened(false);
       setCurrentStep((s) => Math.max(0, Math.min(s + direction, FELIX_STEPS.length - 1)));
       transitionTimer.current = null;
     }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 180);
@@ -554,7 +565,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
                <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                <p className="font-body text-sm font-semibold leading-snug">
-                 {step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
+                 {step.id === "collection" ? "Click on the Curated Showroom card to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
                </p>
              </div>
            )}
