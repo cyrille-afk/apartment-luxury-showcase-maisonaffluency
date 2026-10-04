@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Localize Felix Step 5 and the dashboard tier tracker to US fixed USD, EUR, and SGD baselines with consistent examples and verification.
+
 - [x] Refine the global Client View control and Step 6 spotlight; verify immediate retail presentation on toggle and Next.
 - [x] Keep Felix mounted through Client View, advance Step 6 on switch or Next, and anchor Step 7 to the Collection heading.
 
