@@ -267,7 +267,7 @@ export function useTradeProducts() {
     }
 
     return Array.from(merged.values());
-  }, [staticProducts, liveProducts]);
+  }, [staticProducts, liveProducts, dbHiddenKeys]);
 
   // Apply dev-only hidden-key filter (used by the duplicate banner so devs
   // can suppress unwanted near-duplicate cards from the live grid).
