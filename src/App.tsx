@@ -43,6 +43,7 @@ function ShowroomLegacyRedirect() {
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const TradeFaqPage = lazy(() => import("./pages/TradeFaqPage"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 import GallerySkeleton from "./components/trade/GallerySkeleton";
@@ -795,6 +796,7 @@ const App = () => {
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
+                  <Route path="/.lovable/oauth/consent" element={<Suspense fallback={null}><OAuthConsent /></Suspense>} />
                   <Route path="/trade/concierge/sidebar" element={<Suspense fallback={<PageLoadingSkeleton />}><ChatGPTTradeSidebar /></Suspense>} />
                   <Route path="/trade/extension-sync" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeExtensionSync /></Suspense>} />
                   <Route path="/trade-faq" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeFaqPage /></Suspense>} />

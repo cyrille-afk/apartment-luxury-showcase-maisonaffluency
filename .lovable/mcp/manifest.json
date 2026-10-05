@@ -3,7 +3,12 @@
   "sdk_version": "2.0.4",
   "path": "/functions/v1/mcp",
   "auth": {
-    "type": "none"
+    "type": "oauth",
+    "issuer": "https://dcrauiygaezoduwdjmsm.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ],
+    "jwks_uri": "https://dcrauiygaezoduwdjmsm.supabase.co/auth/v1/.well-known/jwks.json"
   },
   "mcp": {
     "server": {
@@ -90,7 +95,7 @@
       {
         "name": "get_synced_projects",
         "title": "List synced project folders",
-        "description": "Returns the Maison Affluency trade member's active project workflow folders (e.g. 'Singapore GCB workflow', 'Hamptons Project') that the extension can stage products into. ALWAYS call this before `stage_product_to_project` so the targetWorkflow name matches an existing folder. Requires the member's portal access token: sign in as a trade member on maisonaffluency.com to obtain it. Without a valid token the tool returns an authentication error.",
+        "description": "Returns the Maison Affluency trade member's active project workflow folders (e.g. 'Singapore GCB workflow', 'Hamptons Project') that the extension can stage products into. ALWAYS call this before `stage_product_to_project` so the targetWorkflow name matches an existing folder. Authenticates automatically as the connected trade member.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -99,11 +104,6 @@
         "inputSchema": {
           "type": "object",
           "properties": {
-            "access_token": {
-              "type": "string",
-              "minLength": 20,
-              "description": "The trade member's Maison Affluency portal access token (JWT) obtained by signing in on maisonaffluency.com."
-            },
             "limit": {
               "type": "integer",
               "minimum": 1,
@@ -111,9 +111,6 @@
               "description": "Maximum number of active project folders to return. Defaults to all active folders."
             }
           },
-          "required": [
-            "access_token"
-          ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
@@ -122,7 +119,7 @@
       {
         "name": "stage_product_to_project",
         "title": "Stage product to project workflow",
-        "description": "Stages a Maison Affluency catalogue product into one of the trade member's active project workflow folders (e.g. 'Singapore GCB workflow' or 'Hamptons Project'). Executes a verified data handshake back to the member's dashboard database. ALWAYS call `get_synced_projects` first to resolve a valid targetWorkflow, and use the product id returned by `search_curator_picks` as productId. Requires the member's portal access token obtained by signing in on maisonaffluency.com.",
+        "description": "Stages a Maison Affluency catalogue product into one of the trade member's active project workflow folders (e.g. 'Singapore GCB workflow' or 'Hamptons Project'). Executes a verified data handshake back to the member's dashboard database. ALWAYS call `get_synced_projects` first to resolve a valid targetWorkflow, and use the product id returned by `search_curator_picks` as productId. Authenticates automatically as the connected trade member.",
         "annotations": {
           "readOnlyHint": false,
           "idempotentHint": false,
@@ -147,18 +144,12 @@
               "minLength": 1,
               "maxLength": 160,
               "description": "Exact name of the destination project folder, e.g. 'Singapore GCB workflow'."
-            },
-            "access_token": {
-              "type": "string",
-              "minLength": 20,
-              "description": "The trade member's Maison Affluency portal access token (JWT) obtained by signing in on maisonaffluency.com."
             }
           },
           "required": [
             "productId",
             "productName",
-            "targetWorkflow",
-            "access_token"
+            "targetWorkflow"
           ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"

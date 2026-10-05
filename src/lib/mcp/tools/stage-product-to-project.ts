@@ -14,7 +14,7 @@ export default defineTool({
   name: "stage_product_to_project",
   title: "Stage product to project workflow",
   description:
-    "Stages a Maison Affluency catalogue product into one of the trade member's active project workflow folders (e.g. 'Singapore GCB workflow' or 'Hamptons Project'). Executes a verified data handshake back to the member's dashboard database. ALWAYS call `get_synced_projects` first to resolve a valid targetWorkflow, and use the product id returned by `search_curator_picks` as productId. Requires the member's portal access token obtained by signing in on maisonaffluency.com.",
+    "Stages a Maison Affluency catalogue product into one of the trade member's active project workflow folders (e.g. 'Singapore GCB workflow' or 'Hamptons Project'). Executes a verified data handshake back to the member's dashboard database. ALWAYS call `get_synced_projects` first to resolve a valid targetWorkflow, and use the product id returned by `search_curator_picks` as productId. Authenticates automatically as the connected trade member.",
   inputSchema: {
     productId: z
       .string()
@@ -30,13 +30,13 @@ export default defineTool({
       .min(1)
       .max(160)
       .describe("Exact name of the destination project folder, e.g. 'Singapore GCB workflow'."),
-    access_token: z
-      .string()
-      .min(20)
-      .describe("The trade member's Maison Affluency portal access token (JWT) obtained by signing in on maisonaffluency.com."),
   },
   annotations: { readOnlyHint: false, idempotentHint: false, openWorldHint: false },
-  handler: async ({ productId, productName, targetWorkflow, access_token }) => {
+  handler: async ({ productId, productName, targetWorkflow }, ctx) => {
+    // Verified OAuth token from the MCP request header (member approved once on
+    // maisonaffluency.com). Forwarded to the edge function; never logged.
+    const access_token = ctx.getToken();
+    if (!access_token) throw new ToolError("Sign in to Maison Affluency from ChatGPT's connector settings to use project tools.");
     let res: Response;
     try {
       res = await fetch(STAGE_ENDPOINT, {
