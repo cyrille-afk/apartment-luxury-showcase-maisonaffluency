@@ -15,6 +15,7 @@ import {
   type PaymentDetailRow,
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
+import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
 
 const FG = [26, 26, 26] as const;
 const MUTED = [110, 110, 110] as const;
@@ -50,6 +51,8 @@ export interface ProformaArgs {
   buyerTaxId?: string | null;
   totalCents: number;
   channel: TradePaymentChannel;
+  /** Replaces the itemized ledger and standard totals with a ceiling matrix. */
+  ceilingBudget?: CeilingBudgetInput | null;
 }
 
 const money = (cents: number, currency: string) =>
@@ -167,19 +170,9 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   rule(y);
   y += 18;
 
-  /* Line items ------------------------------------------------------ */
+  /* Line items / target ceiling ledger ----------------------------- */
   const colQty = right - 210;
   const colUnit = right - 120;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text("DESCRIPTION", M, y, { charSpace: 1.2 });
-  doc.text("QTY", colQty, y, { align: "right", charSpace: 1.2 });
-  doc.text("UNIT", colUnit, y, { align: "right", charSpace: 1.2 });
-  doc.text("AMOUNT", right, y, { align: "right", charSpace: 1.2 });
-  y += 8;
-  rule(y);
-  y += 16;
 
   const ensureRoom = (needed: number) => {
     if (y + needed < pageH - 74) return;
@@ -188,32 +181,75 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     y = M;
   };
 
-  for (const line of args.lines) {
-    const detail = [line.designer, line.finishLabel].filter(Boolean).join(" · ");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const titleLines = doc.splitTextToSize(line.title, colQty - M - 20) as string[];
-    ensureRoom(titleLines.length * 13 + (detail ? 12 : 0) + 14);
-
+  if (args.ceilingBudget) {
+    const budget = calculateCeilingBudget(args.ceilingBudget);
+    ensureRoom(196);
+    doc.setFillColor(250, 249, 246);
+    doc.rect(M, y, contentW, 190, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.setFontSize(10);
-    titleLines.forEach((t, i) => doc.text(t, M, y + i * 13));
-    const blockH = titleLines.length * 13;
+    doc.text("TARGET CEILING BUDGET SUMMARY", M + 14, y + 20, { charSpace: 1.1 });
+    rule(y + 30);
+    const tier = budget.tierLabel ? `${budget.tierLabel} ` : "";
+    const rows = [
+      ["Target Client Ceiling Budget", budget.targetCeilingCents],
+      [`Designer Net Profit Margin (${budget.clientMarkupPct.toFixed(2)}%)`, budget.designerNetProfitCents],
+      ["Max Allowed Designer Cost", budget.maxDesignerCostCents],
+      [`Trade Sourcing Markdown (${tier}${budget.tradeDiscountPct.toFixed(2)}%)`, -budget.tradeSourcingMarkdownCents],
+      ["Net Purchasing Sourcing Budget", budget.netPurchasingBudgetCents],
+    ] as const;
+    let budgetY = y + 52;
+    rows.forEach(([label, amount], index) => {
+      if (index === rows.length - 1) rule(budgetY - 12);
+      doc.setFont("helvetica", index === 0 || index === rows.length - 1 ? "bold" : "normal");
+      doc.setFontSize(index === 0 || index === rows.length - 1 ? 10.5 : 9.5);
+      doc.setTextColor(index === 0 || index === rows.length - 1 ? FG[0] : MUTED[0], index === 0 || index === rows.length - 1 ? FG[1] : MUTED[1], index === 0 || index === rows.length - 1 ? FG[2] : MUTED[2]);
+      doc.text(label, M + 14, budgetY);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      doc.text(amount < 0 ? `- ${money(Math.abs(amount), args.currency)}` : money(amount, args.currency), right - 14, budgetY, { align: "right" });
+      budgetY += 28;
+    });
+    y += 206;
+  } else {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text("DESCRIPTION", M, y, { charSpace: 1.2 });
+    doc.text("QTY", colQty, y, { align: "right", charSpace: 1.2 });
+    doc.text("UNIT", colUnit, y, { align: "right", charSpace: 1.2 });
+    doc.text("AMOUNT", right, y, { align: "right", charSpace: 1.2 });
+    y += 8;
+    rule(y);
+    y += 16;
 
-    doc.text(String(line.quantity), colQty, y, { align: "right" });
-    doc.text(money(line.unitCents, args.currency), colUnit, y, { align: "right" });
-    doc.text(money(line.unitCents * line.quantity, args.currency), right, y, { align: "right" });
+    for (const line of args.lines) {
+      const detail = [line.designer, line.finishLabel].filter(Boolean).join(" · ");
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      const titleLines = doc.splitTextToSize(line.title, colQty - M - 20) as string[];
+      ensureRoom(titleLines.length * 13 + (detail ? 12 : 0) + 14);
 
-    if (detail) {
-      doc.setFontSize(8.5);
-      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-      doc.text(detail, M, y + blockH);
+      doc.setTextColor(FG[0], FG[1], FG[2]);
+      doc.setFontSize(10);
+      titleLines.forEach((t, i) => doc.text(t, M, y + i * 13));
+      const blockH = titleLines.length * 13;
+
+      doc.text(String(line.quantity), colQty, y, { align: "right" });
+      doc.text(money(line.unitCents, args.currency), colUnit, y, { align: "right" });
+      doc.text(money(line.unitCents * line.quantity, args.currency), right, y, { align: "right" });
+
+      if (detail) {
+        doc.setFontSize(8.5);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.text(detail, M, y + blockH);
+      }
+      y += blockH + (detail ? 13 : 3) + 6;
     }
-    y += blockH + (detail ? 13 : 3) + 6;
-  }
 
-  rule(y);
-  y += 16;
+    rule(y);
+    y += 16;
+  }
 
   /* Totals ---------------------------------------------------------- */
   const totalRow = (label: string, value: string, strong = false) => {
@@ -228,15 +264,17 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     y += strong ? 20 : 16;
   };
 
-  totalRow("Subtotal", money(args.subtotalCents, args.currency));
-  if (args.discountCents > 0) {
-    totalRow(args.discountLabel || "Trade discount", `- ${money(args.discountCents, args.currency)}`);
+  if (!args.ceilingBudget) {
+    totalRow("Subtotal", money(args.subtotalCents, args.currency));
+    if (args.discountCents > 0) {
+      totalRow(args.discountLabel || "Trade discount", `- ${money(args.discountCents, args.currency)}`);
+    }
+    totalRow(
+      args.shippingLabel || "Freight & white-glove delivery",
+      args.shippingCents > 0 ? money(args.shippingCents, args.currency) : "To be quoted",
+    );
+    totalRow(args.taxLabel, args.taxCents > 0 ? money(args.taxCents, args.currency) : "—");
   }
-  totalRow(
-    args.shippingLabel || "Freight & white-glove delivery",
-    args.shippingCents > 0 ? money(args.shippingCents, args.currency) : "To be quoted",
-  );
-  totalRow(args.taxLabel, args.taxCents > 0 ? money(args.taxCents, args.currency) : "—");
   if (args.taxStatement) {
     ensureRoom(26);
     doc.setFontSize(7.5);
@@ -246,10 +284,22 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     y += noteLines.length * 10 + 6;
     doc.setTextColor(FG[0], FG[1], FG[2]);
   }
+  if (!args.ceilingBudget) {
+    y += 4;
+    rule(y);
+    y += 18;
+    totalRow("Total due", money(args.totalCents, args.currency), true);
+  }
+
+  const paymentBaseCents = args.ceilingBudget
+    ? calculateCeilingBudget(args.ceilingBudget).targetCeilingCents
+    : args.totalCents;
+  ensureRoom(52);
   y += 4;
   rule(y);
   y += 18;
-  totalRow("Total due", money(args.totalCents, args.currency), true);
+  totalRow("60% deposit", money(Math.round(paymentBaseCents * 0.6), args.currency));
+  totalRow("40% balance", money(paymentBaseCents - Math.round(paymentBaseCents * 0.6), args.currency));
 
   /* Payment instructions -------------------------------------------- */
   ensureRoom(300);
