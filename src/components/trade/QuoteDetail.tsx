@@ -3232,6 +3232,129 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
+        {isDraft && !clientSafe && (
+          <div className="border-b border-border px-4 py-4 md:px-6 lg:px-8 print:hidden">
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="space-y-1">
+                <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Proforma ledger</span>
+                <select
+                  value={ceilingMode}
+                  onChange={async (event) => {
+                    const mode = event.target.value as "inherit" | "itemized" | "target_ceiling";
+                    setCeilingMode(mode);
+                    await supabase.from("trade_quotes").update({ ceiling_ledger_mode: mode }).eq("id", quoteId);
+                  }}
+                  className="h-9 min-w-44 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                >
+                  <option value="inherit">Project default</option>
+                  <option value="itemized">Itemized products</option>
+                  <option value="target_ceiling">Target ceiling</option>
+                </select>
+              </label>
+              {ceilingBudgetActive && (
+                <>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Target ceiling ({currency})</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={effectiveCeilingCents ? effectiveCeilingCents / 100 : ""}
+                      onChange={(event) => setQuoteCeilingCents(event.target.value ? Math.round(Number(event.target.value) * 100) : null)}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ target_ceiling_cents: quoteCeilingCents, ceiling_currency: currency }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-40 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Client markup %</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={effectiveCeilingMarkupPct}
+                      onChange={(event) => setQuoteMarkupPct(Number(event.target.value))}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ client_markup_pct: quoteMarkupPct }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-28 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Trade discount %</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={effectiveCeilingDiscountPct}
+                      onChange={(event) => setQuoteCeilingDiscountPct(Number(event.target.value))}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ ceiling_trade_discount_pct: quoteCeilingDiscountPct, ceiling_tier_label: effectiveCeilingTierLabel }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-28 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  {projectId && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const { error } = await supabase.from("projects").update({
+                          ceiling_ledger_enabled: true,
+                          target_ceiling_cents: effectiveCeilingCents,
+                          ceiling_currency: currency,
+                          client_markup_pct: effectiveCeilingMarkupPct,
+                          ceiling_trade_discount_pct: effectiveCeilingDiscountPct,
+                          ceiling_tier_label: effectiveCeilingTierLabel,
+                        }).eq("id", projectId);
+                        if (error) {
+                          toast({ title: "Project default not saved", description: error.message, variant: "destructive" });
+                          return;
+                        }
+                        setProjectCeilingDefaults({
+                          enabled: true,
+                          targetCents: effectiveCeilingCents,
+                          markupPct: effectiveCeilingMarkupPct,
+                          discountPct: effectiveCeilingDiscountPct,
+                          tierLabel: effectiveCeilingTierLabel,
+                        });
+                        toast({ title: "Project ceiling default saved" });
+                      }}
+                      className="h-9 rounded-md border border-border px-3 font-body text-[10px] uppercase tracking-widest text-foreground transition-colors hover:bg-muted"
+                    >
+                      Save as project default
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {ceilingBudgetActive && effectiveCeilingCents > 0 && (
+          <div className="border-b border-border bg-muted/20 px-4 py-6 md:px-6 lg:px-8">
+            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+              <h2 className="font-body text-[11px] uppercase tracking-widest text-foreground">Target Ceiling Budget Summary</h2>
+              <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">{effectiveCeilingTierLabel} {effectiveCeilingDiscountPct.toFixed(2)}%</span>
+            </div>
+            <div className="ml-auto max-w-xl space-y-2 font-body text-xs">
+              {[
+                ["Target Client Ceiling Budget", ceilingBudget.targetCeilingCents],
+                [`Designer Net Profit Margin (${effectiveCeilingMarkupPct.toFixed(2)}%)`, ceilingBudget.designerNetProfitCents],
+                ["Max Allowed Designer Cost", ceilingBudget.maxDesignerCostCents],
+                [`Trade Sourcing Markdown (${effectiveCeilingTierLabel} ${effectiveCeilingDiscountPct.toFixed(2)}%)`, -ceilingBudget.tradeSourcingMarkdownCents],
+                ["Net Purchasing Sourcing Budget", ceilingBudget.netPurchasingBudgetCents],
+              ].map(([label, value], index) => (
+                <div key={String(label)} className={cn("flex justify-between gap-8", index === 4 ? "border-t border-foreground pt-3 text-foreground" : "text-muted-foreground")}>
+                  <span>{label}</span>
+                  <span className="tabular-nums text-foreground">{Number(value) < 0 ? "− " : ""}{currencySymbol(currency)} {formatPriceRaw(Math.abs(Number(value)), currency)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ===== Line items ===== */}
         <div className="p-4 md:p-6 lg:p-8">
           {loading ? (
