@@ -81,6 +81,18 @@ export default function TradeApplicationsQueue() {
     setBusy(null);
     if (error) return toast.error("Could not update the application.");
     toast.success(`${a.studio_name ?? a.email} — ${STATUS_LABEL[status]}`);
+    if ((status === "approved" || status === "rejected") && a.status !== status) {
+      const { error: mailErr } = await supabase.functions.invoke("send-application-status", {
+        body: {
+          applicantEmail: a.email,
+          applicantName: a.contact_name ?? undefined,
+          companyName: a.studio_name ?? undefined,
+          status,
+        },
+      });
+      if (mailErr) toast.error("Status saved, but the notification email could not be sent.");
+      else toast.success(`Notification email sent to ${a.email}`);
+    }
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
     qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] });
   };
