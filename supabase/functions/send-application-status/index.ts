@@ -1,195 +1,48 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { sendLovableEmail } from "../_shared/lovableEmail.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { z } from 'npm:zod@3'
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const Body = z.object({
+  applicantEmail: z.string().trim().email().max(254),
+  status: z.enum(['approved', 'rejected']),
+})
+const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+})
 
-const escapeHtml = (text: string): string =>
-  text.replace(/[&<>"']/g, (char) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] || char)
-  );
-
-const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  if (req.method !== 'POST') return response({ error: 'Method not allowed' }, 405)
   try {
-    // Verify the caller is an authenticated admin
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const adminId = claimsData.claims.sub as string;
-
-    // Check admin role using service role client
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: roleData } = await serviceClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", adminId)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const { applicantEmail, applicantName, companyName, status } = await req.json();
-
-    if (!applicantEmail || !status || !["approved", "rejected"].includes(status)) {
-      return new Response(JSON.stringify({ error: "Invalid parameters" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    // Bind the recipient to a stored applicant: a trade account or a profile
-    // that has submitted a trade application. Arbitrary addresses are refused.
-    const cleanEmail = String(applicantEmail).trim().toLowerCase().slice(0, 254);
-    const { data: acctMatch } = await serviceClient.from("trade_accounts").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
-    let known = Boolean(acctMatch);
-    if (!known) {
-      const { data: prof } = await serviceClient.from("profiles").select("id").ilike("email", cleanEmail).limit(1).maybeSingle();
-      if (prof?.id) {
-        const { data: app } = await serviceClient.from("trade_applications").select("id").eq("user_id", prof.id).limit(1).maybeSingle();
-        known = Boolean(app);
-      }
-    }
-    if (!known) {
-      return new Response(JSON.stringify({ error: "No trade application found for this email" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const safeName = escapeHtml(applicantName || "");
-    const safeCompany = escapeHtml(companyName || "");
-    const greeting = safeName ? `Dear ${safeName},` : "Dear Applicant,";
-
-    const isApproved = status === "approved";
-
-    const subject = isApproved
-      ? "Credential Initialized: Welcome to the Maison Affluency Trade Program"
-      : "Maison Affluency Trade Program — Application Update";
-
-    const bodyHtml = isApproved
-      ? `
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          Your application for the Maison Affluency Trade Program has been verified and fully authenticated by our global network registry. ${safeCompany ? `<strong>${safeCompany}</strong> has` : "Your studio has"} been granted premium international trade status across our automated sourcing matrix.
-        </p>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 12px;">
-          Your Enterprise Corporate Tier credentials have initialized the following active capabilities:
-        </p>
-        <ul style="color: #333; line-height: 1.8; margin-bottom: 20px; padding-left: 20px;">
-          <li style="margin-bottom: 10px;"><strong>Global Ledger Access:</strong> Unlocked automated inbound/outbound real-time pricing and logistics tracking across our A–Z Index of master artisan collections.</li>
-          <li style="margin-bottom: 10px;"><strong>White-Label Status:</strong> Enabled. Custom logo uploads and domain-masked client portals can now be configured directly inside your Admin → Studio Settings tab.</li>
-          <li style="margin-bottom: 10px;"><strong>Multi-User Collaborative Seats:</strong> Your active workspace is now provisioned to host independent sub-contractors and client collaboration nodes concurrently.</li>
-        </ul>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          To guide your design leads through their initial workspace customization, our interactive system manager, Felix, will launch a brief spatial alignment walkthrough immediately upon your first initialization.
-        </p>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 8px;">
-          Enter your secure studio workspace to begin data curation:
-        </p>
-        <div style="text-align: center; margin: 24px 0 32px;">
-          <a href="https://www.maisonaffluency.com/trade/login" 
-             style="display: inline-block; padding: 14px 32px; background-color: #1a1a1a; color: #ffffff; text-decoration: none; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 24px;">
-            Access My Corporate Workspace Ledger
-          </a>
-        </div>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          Welcome to the future of procurement velocity.
-        </p>
-      `
-      : `
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          Thank you for your interest in the Maison Affluency Trade Program${safeCompany ? ` with <strong>${safeCompany}</strong>` : ""}.
-        </p>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          After careful review, we are unable to approve your application at this time. This decision may be based on the information provided or our current program capacity.
-        </p>
-        <p style="color: #333; line-height: 1.8; margin-bottom: 20px;">
-          If you believe this was made in error, or if your circumstances have changed, we welcome you to reach out to discuss your application further at 
-          <a href="mailto:concierge@myaffluency.com" style="color: #8B7355;">concierge@myaffluency.com</a>.
-        </p>
-      `;
-
-    const emailResult = await sendLovableEmail({
-      to: cleanEmail,
-      label: "application-status",
-      subject,
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #faf9f7;">
-          <div style="text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e8e4de;">
-            <img 
-              src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" 
-              alt="Affluency - Unique by Design" 
-              style="max-width: 280px; height: auto;"
-            />
-          </div>
-          
-          <h1 style="color: #1a1a1a; font-size: 24px; margin-bottom: 24px;">${greeting}</h1>
-          
-          ${bodyHtml}
-          
-          <p style="color: #333; line-height: 1.8; margin-top: 32px;">
-            The Maison Affluency Concierge Team<br>
-            <span style="color: #888; font-size: 13px;">Singapore, District 9 | <a href="mailto:trade@maisonaffluency.com" style="color: #8B7355;">trade@maisonaffluency.com</a></span>
-          </p>
-          
-          <hr style="border: none; border-top: 1px solid #e8e4de; margin: 40px 0 20px;" />
-          
-          <p style="color: #888; font-size: 12px; line-height: 1.6; text-align: center;">
-            Maison Affluency Singapore<br>
-            <em>Unique by Design</em>
-          </p>
-        </div>
-      `,
-    });
-
-    console.log("Status notification email sent:", emailResult);
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  } catch (error: any) {
-    console.error("Error in send-application-status:", error);
-    return new Response(
-      JSON.stringify({ error: "An unexpected error occurred." }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    const url = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!url || !anonKey || !serviceKey) return response({ error: 'Server configuration error' }, 500)
+    const auth = req.headers.get('Authorization') ?? ''
+    if (!auth.startsWith('Bearer ')) return response({ error: 'Unauthorized' }, 401)
+    const client = createClient(url, anonKey, { global: { headers: { Authorization: auth } } })
+    const { data: claims, error: authError } = await client.auth.getClaims(auth.slice(7))
+    const callerId = claims?.claims?.sub
+    if (authError || !callerId) return response({ error: 'Unauthorized' }, 401)
+    const service = createClient(url, serviceKey)
+    const { data: roles, error: roleError } = await service.from('user_roles').select('role')
+      .eq('user_id', callerId).in('role', ['admin', 'super_admin'])
+    if (roleError || !roles?.length) return response({ error: 'Forbidden' }, 403)
+    const parsed = Body.safeParse(await req.json().catch(() => null))
+    if (!parsed.success) return response({ error: 'Invalid application notification' }, 400)
+    const { applicantEmail, status } = parsed.data
+    const { data: account, error } = await service.from('trade_accounts')
+      .select('id, email, contact_name, studio_name, status').eq('email', applicantEmail.toLowerCase()).maybeSingle()
+    if (error || !account) return response({ error: 'Application not found' }, 404)
+    if (account.status !== status) return response({ error: 'Save the application decision before notifying' }, 409)
+    const templateName = status === 'approved' ? 'trade-approval' : 'trade-rejection'
+    const { data, error: mailError } = await client.functions.invoke('send-transactional-email', {
+      body: { templateName, recipientEmail: account.email, idempotencyKey: `${templateName}-${account.id}`,
+        templateData: { name: account.contact_name ?? undefined, companyName: account.studio_name ?? undefined } },
+    })
+    if (mailError) return response({ error: 'Notification could not be queued' }, 502)
+    return response(data)
+  } catch {
+    return response({ error: 'An unexpected error occurred' }, 500)
   }
-};
-
-serve(handler);
+})
