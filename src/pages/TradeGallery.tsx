@@ -520,7 +520,7 @@ const TradeGallery = () => {
   return (
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto bg-[hsl(var(--trade-gallery-bg))]">
+    <div className="w-full max-w-7xl mx-auto bg-[hsl(var(--trade-gallery-bg))]">
       {routeBrandSlug && galleryDesigner && !galleryDesigner.trade_only && (
         <div className="mb-4 border-b border-border/40 pb-4 md:mb-5 md:pb-5">
           <NewInSpotlight
