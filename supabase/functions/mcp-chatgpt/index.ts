@@ -158,7 +158,14 @@ async function forwardUpstream(req: Request, rpcMessage: unknown): Promise<Respo
 
   const responseHeaders: Record<string, string> = { ...corsHeaders };
   const wwwAuth = upstream.headers.get("www-authenticate");
-  if (wwwAuth) responseHeaders["WWW-Authenticate"] = wwwAuth;
+  if (wwwAuth) {
+    // Rebind the challenge to THIS endpoint so the client's OAuth flow
+    // registers the resource it actually connected to.
+    responseHeaders["WWW-Authenticate"] = wwwAuth.replaceAll(
+      "/functions/v1/mcp/.well-known/",
+      "/functions/v1/mcp-chatgpt/.well-known/",
+    );
+  }
   const upstreamSession = upstream.headers.get("mcp-session-id");
   if (upstreamSession) responseHeaders["mcp-session-id"] = upstreamSession;
 
@@ -201,12 +208,22 @@ Deno.serve(async (req: Request) => {
 
   const url = new URL(req.url);
 
-  // OAuth protected-resource metadata is owned by the upstream server.
+  // OAuth protected-resource metadata is owned by the upstream server; rebind
+  // the advertised resource to this endpoint so clients validate the right URL.
   if (req.method === "GET" && url.pathname.includes("/.well-known/")) {
     const upstream = await fetch(`${UPSTREAM}${url.pathname.substring(url.pathname.indexOf("/.well-known/"))}`, {
       headers: { Accept: "application/json" },
     });
-    const body = await upstream.text();
+    let body = await upstream.text();
+    try {
+      const meta = JSON.parse(body);
+      if (meta && typeof meta.resource === "string") {
+        meta.resource = meta.resource.replace("/functions/v1/mcp", "/functions/v1/mcp-chatgpt");
+        body = JSON.stringify(meta);
+      }
+    } catch {
+      // Not JSON — pass through as-is.
+    }
     return new Response(body, {
       status: upstream.status,
       headers: { ...corsHeaders, "Content-Type": upstream.headers.get("content-type") ?? "application/json" },
