@@ -21,6 +21,7 @@ type Account = {
   email: string;
   studio_name: string | null;
   contact_name: string | null;
+  country: string | null;
   website_or_ig: string | null;
   business_reg_number: string | null;
   status: "pending_review" | "on_hold" | "approved" | "rejected";
@@ -60,7 +61,7 @@ export default function TradeApplicationsQueue() {
 
   const openReview = (account: Account, approval: boolean) => {
     setDraftError(null);
-    setReview({ account, approval, draft: createApplicationDraft(approval ? 'approved' : 'rejected', account.contact_name, account.studio_name) });
+    setReview({ account, approval, draft: createApplicationDraft(approval ? 'approved' : 'rejected', account.contact_name, account.studio_name, account.country) });
   };
 
   const { data: accounts = [], isLoading } = useQuery({
@@ -70,7 +71,7 @@ export default function TradeApplicationsQueue() {
       let q = supabase
         .from("trade_accounts")
         .select(
-          "id, email, studio_name, contact_name, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
+          "id, email, studio_name, contact_name, country, website_or_ig, business_reg_number, status, created_at, radar_score, radar_flag, radar_status, studio_aesthetic_dna(status, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, image_urls, error)",
         )
         .order("created_at", { ascending: false })
         .limit(200);

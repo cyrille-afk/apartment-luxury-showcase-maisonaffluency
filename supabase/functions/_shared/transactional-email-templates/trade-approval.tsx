@@ -6,17 +6,19 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 import { ApplicationDraftBody } from './application-draft-body.tsx'
+import { payoutsBenefit } from '../applicationNotificationCopy.ts'
 
 const SITE_NAME = "Maison Affluency"
 
 interface TradeApprovalProps {
   name?: string
   companyName?: string
+  country?: string
   bodyText?: string
   subjectText?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName, bodyText }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
@@ -92,18 +94,7 @@ const TradeApprovalEmail = ({ name, companyName, bodyText }: TradeApprovalProps)
               title="AI Concierge"
               description="An in-app assistant trained exclusively on our catalogue for instant recommendations."
             />
-            <BenefitRow
-              title="Trade payouts"
-              description="Choose how your studio gets paid on every quote."
-              details={[
-                'Agent commission (EU / Asia default): your client pays full MSRP and you receive a commission payout after delivery.',
-                'Net buy (US / CA / MX default): your firm pays MSRP minus your tier discount on a white-label invoice.',
-                'Country-aware defaults: US / Canada / Mexico default to net buy; the rest of the world defaults to agent commission.',
-                'Per-quote override: flip billing mode on any individual quote when the project calls for it.',
-                'Resale certificates: upload state-issued US resale certificates to unlock net-buy shipments to those states.',
-                'Stripe Connect: agent commissions paid directly to your linked studio payout account.',
-              ]}
-            />
+            <BenefitRow {...payoutsBenefit(country)} details={[...payoutsBenefit(country).details]} />
           </tbody>
         </table>
 
