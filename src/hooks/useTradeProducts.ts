@@ -29,7 +29,7 @@ type LiveTradeProduct = TradeProduct & {
 };
 
 const normalizeHiddenPart = (value: string | null | undefined) =>
-  (value || "").trim().toLowerCase();
+  (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 
 const brandVariants = (rawBrand: string) => {
   const raw = (rawBrand || "").trim();
@@ -186,6 +186,8 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
 
 const keyOf = (p: TradeProduct) =>
   `${p.brand_name.trim().toLowerCase()}::${p.product_name.trim().toLowerCase()}`;
+const hiddenKeyOf = (p: TradeProduct) =>
+  `${normalizeHiddenPart(p.brand_name)}::${normalizeHiddenPart(p.product_name)}`;
 
 /**
  * Returns merged static + live trade products, brands, and helpers.
@@ -208,10 +210,12 @@ export function useTradeProducts() {
     const merged = new Map<string, TradeProduct>();
     for (const p of staticProducts) {
       // Static (hardcoded) cards must respect products hidden in the database.
-      if (dbHiddenKeys?.has(keyOf(p))) continue;
+      if (dbHiddenKeys?.has(hiddenKeyOf(p))) continue;
       merged.set(keyOf(p), p);
     }
     for (const p of liveProducts) {
+      // Live curator picks must also respect trade_products hidden in the DB.
+      if (dbHiddenKeys?.has(hiddenKeyOf(p))) continue;
       const key = keyOf(p);
       const existing = merged.get(key);
       const { hasExplicitCategory, hasExplicitSubcategory, ...liveProduct } = p;
