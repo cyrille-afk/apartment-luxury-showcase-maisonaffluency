@@ -248,7 +248,7 @@ function EntryCard({ entry }: { entry: Entry }) {
                   type="button"
                   aria-label="Download screenshot"
                   title="Download full-resolution image"
-                  className={btn}
+                  className={controlBtnClass}
                   disabled={downloading}
                   onClick={downloadImage}
                 >
