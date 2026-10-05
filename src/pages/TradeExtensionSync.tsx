@@ -27,6 +27,28 @@ export default function TradeExtensionSync() {
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [catalogueOpen, setCatalogueOpen] = useState(false);
   const [syncNotice, setSyncNotice] = useState("");
+  const [health, setHealth] = useState<McpHealthReport | null>(null);
+  const [healthError, setHealthError] = useState<string | null>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+
+  const runHealthCheck = useCallback(async () => {
+    setHealthLoading(true);
+    setHealthError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("mcp-health-check");
+      if (error) {
+        setHealth(null);
+        setHealthError(error.message ?? "Health check request failed");
+      } else {
+        setHealth(data as McpHealthReport);
+      }
+    } catch (err) {
+      setHealth(null);
+      setHealthError(err instanceof Error ? err.message : "Health check request failed");
+    } finally {
+      setHealthLoading(false);
+    }
+  }, []);
 
   const recordVerifiedSync = useCallback((payload: ProjectStagingPayload) => {
     const formatted = new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
