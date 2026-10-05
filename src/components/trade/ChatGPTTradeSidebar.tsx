@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useAuth } from "@/hooks/useAuth";
-import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useBrandDiscountCaps, effectiveDiscountForBrand } from "@/lib/brandDiscountCap";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
