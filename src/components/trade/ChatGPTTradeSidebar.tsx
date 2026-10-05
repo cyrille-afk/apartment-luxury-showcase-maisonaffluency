@@ -228,6 +228,15 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
     staleTime: 60_000,
   });
 
+  // 500ms guardrail on the initial database fetch: inside a third-party embed
+  // the storage-partitioned auth lock can stall PostgREST calls indefinitely,
+  // so after 500ms we stop waiting and render the local catalogue cache.
+  const [fetchTimedOut, setFetchTimedOut] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setFetchTimedOut(true), 500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const products = useMemo(() => {
     const term = search.trim().toLocaleLowerCase();
     return allProducts.filter((item) =>
@@ -237,6 +246,8 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
     );
   }, [allProducts, search, category]);
 
+  const showFeedSpinner = isLoading && !fetchTimedOut && products.length === 0;
+
   const productUrl = (product: TradeProduct) => {
     if (product.trade_product_id) return `/trade/products/${product.trade_product_id}`;
     const brand = product.brand_name.includes(" - ") ? product.brand_name.split(" - ")[0] : product.brand_name;
@@ -245,7 +256,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
   };
 
   const priceLabel = (product: TradeProduct) => {
-    if (!catalogue) return pricesPending ? "Loading price…" : "Price upon Request";
+    if (!catalogue) return pricesPending && !fetchTimedOut ? "Loading price…" : "Price upon Request";
     const price = catalogue.byId.get(product.id) || catalogue.byKey.get(priceKey(product.brand_name, product.product_name));
     if (!price) return "Price upon Request";
     const fraction = showTradePrice ? effectiveDiscountForBrand(discountPct, product.brand_name, caps).pct : 0;
@@ -307,7 +318,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
         {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
             collection) is available synchronously, so only show the spinner when
             there is literally nothing to display yet. */}
-        {isLoading && products.length === 0 ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {showFeedSpinner ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
@@ -362,7 +373,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
             ) : (
               // Local workspace fallbacks while the live project handshake initializes.
               <div className="max-h-[38dvh] overflow-y-auto">
-                {LOCAL_WORKFLOW_FOLDERS.map((name) => <Button key={name} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => {
+                {LOCAL_WORKFLOW_FOLDERS.map((name) => <Button key={name} variant="ghost" type="button" disabled={saving || (!canEdit && !optimistic)} onClick={() => {
                   const resolved = projects.find((p) => normalizeFolderName(p.name) === normalizeFolderName(name));
                   if (resolved) { void stageToProject(resolved); return; }
                   toast.info("Workspace is still syncing — please retry in a moment.");
