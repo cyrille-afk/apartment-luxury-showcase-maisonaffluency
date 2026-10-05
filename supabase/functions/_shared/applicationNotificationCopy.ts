@@ -110,7 +110,7 @@ export function createApplicationDraft(status: 'approved' | 'rejected', name?: s
   return { subject: APPROVAL_SUBJECT, body: [greeting,
     `We are pleased to inform you that your application${company ? ` for ${company}` : ''} to the Maison Affluency Trade Program has been approved.`,
     "Your account is now active. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.",
-    ...APPROVAL_BENEFITS.map(b => `◆ ${b.title}\n${b.description}${b.details.length ? '\n' + b.details.map(d => `• ${d}`).join('\n') : ''}`),
+    ...approvalBenefits(country).map(b => `◆ ${b.title}\n${b.description}${b.details.length ? '\n' + b.details.map(d => `• ${d}`).join('\n') : ''}`),
     'A dedicated Client Advisor will reach out to you shortly to introduce themselves and discuss how we can best support your projects.',
     'Warm regards,\nThe Maison Affluency Team'].join('\n\n') };
 }
