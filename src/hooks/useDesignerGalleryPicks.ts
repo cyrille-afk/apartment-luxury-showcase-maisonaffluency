@@ -20,7 +20,7 @@ export function useDesignerGalleryPicks(designer: Designer | null | undefined) {
       const { data: dagmar } = await supabase.from("designers").select("id").eq("slug", "dagmar-london").maybeSingle();
       if (!dagmar?.id) return [];
       const { data } = await supabase.from("designer_curator_picks_public").select("*").eq("designer_id", dagmar.id);
-      return (data || []) as DesignerCuratorPick[];
+      return (data || []).map((row) => ({ ...row, trade_price_cents: null })) as unknown as DesignerCuratorPick[];
     },
   });
 
