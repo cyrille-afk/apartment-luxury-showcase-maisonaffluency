@@ -1943,6 +1943,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       projectName: projectName || null,
       currency,
       lines,
+      ceilingBudget: ceilingBudgetActive && effectiveCeilingCents > 0
+        ? {
+            targetCeilingCents: effectiveCeilingCents,
+            clientMarkupPct: effectiveCeilingMarkupPct,
+            tradeDiscountPct: effectiveCeilingDiscountPct,
+            tierLabel: effectiveCeilingTierLabel,
+          }
+        : null,
       subtotalCents,
       tradeDiscountPct,
       tradeDiscountApplied: discountApplies,
@@ -1976,7 +1984,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         const cifBase = goodsAfterDiscountCents + liveFreightCents;
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
-      depositPct: computeWeightedDepositPct(
+      depositPct: ceilingBudgetActive ? 0.6 : computeWeightedDepositPct(
         items.map((it) => {
           const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
           const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
