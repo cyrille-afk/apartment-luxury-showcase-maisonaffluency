@@ -14,6 +14,10 @@ const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 const trackProductUrl = (slug: string, pickId: string) =>
   `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
 const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
+// Interactive visual panel (the ChatGPTTradeSidebar view) that renders the same
+// catalogue as a rich editorial sidebar inside the trade portal. Advertised as an
+// MCP resource_link so clients know a companion UI exists for these results.
+const TRADE_SIDEBAR_PANEL_URL = `${SITE_ORIGIN}/trade/concierge/sidebar`;
 
 function getClient() {
   const url = process.env.SUPABASE_URL!;
@@ -193,8 +197,24 @@ export default defineTool({
 
     logCall(results.length);
     return {
-      content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL },
+      content: [
+        { type: "text", text: summary },
+        {
+          type: "resource_link",
+          uri: TRADE_SIDEBAR_PANEL_URL,
+          name: "maison-affluency-trade-sidebar",
+          title: "Maison Affluency Trade Concierge — visual catalogue panel",
+          description:
+            "Interactive companion panel that renders these catalogue results as a rich visual sidebar (editorial product cards, search, category filters, and stage-to-project controls) inside the Maison Affluency trade portal. Offer this link when the user wants a visual browsing UI; trade sign-in is required to open it.",
+          mimeType: "text/html",
+        },
+      ],
+      structuredContent: {
+        results,
+        total: results.length,
+        trade_signup_url: TRADE_SIGNUP_URL,
+        visual_panel_url: TRADE_SIDEBAR_PANEL_URL,
+      },
     };
   },
 });
