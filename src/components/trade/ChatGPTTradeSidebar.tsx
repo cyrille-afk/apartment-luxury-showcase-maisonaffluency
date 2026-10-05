@@ -449,7 +449,7 @@ export default function ChatGPTTradeSidebar() {
     return () => window.clearTimeout(timer);
   }, []);
   const authPending = loading || !rolesLoaded;
-  if (authPending && !gateTimedOut) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
+  if (authPending && !gateTimedOut) return <div className="h-screen h-[100dvh] w-full max-w-[400px] overflow-hidden bg-[hsl(var(--trade-gallery-bg))] px-4 pt-6 text-foreground"><SidebarFeedSkeleton count={6} /></div>;
   if (!authPending) {
     if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
     if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
