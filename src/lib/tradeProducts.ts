@@ -16,6 +16,8 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 export interface TradeProduct {
   id: string;
+  sort_order?: number | null;
+  created_at?: string | null;
   trade_product_id?: string | null;
   brand_name: string;
   product_name: string;

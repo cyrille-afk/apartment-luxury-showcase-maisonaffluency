@@ -79,6 +79,8 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
       .from("designer_curator_picks")
       .select(`
         id,
+        sort_order,
+        created_at,
         title,
         subtitle,
         image_url,
@@ -155,6 +157,8 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
     return [
       {
         id: pick.id,
+        sort_order: pick.sort_order,
+        created_at: pick.created_at,
         trade_product_id: tradeProduct?.id ?? null,
         brand_name: brandName,
         product_name: pick.title,
