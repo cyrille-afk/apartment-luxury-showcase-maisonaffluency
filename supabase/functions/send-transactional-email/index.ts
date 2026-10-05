@@ -163,6 +163,18 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Only privileged callers reach trade notices above. Validate edited copy
+  // before any suppression/token/queue writes; templates escape text via React.
+  if (templateName === 'trade-approval' || templateName === 'trade-rejection') {
+    const { subjectText, bodyText } = templateData
+    if ((subjectText !== undefined && (typeof subjectText !== 'string' || !subjectText.trim() || subjectText.length > 200 || /[\r\n]/.test(subjectText))) ||
+        (bodyText !== undefined && (typeof bodyText !== 'string' || !bodyText.trim() || bodyText.length > 20000))) {
+      return new Response(JSON.stringify({ error: 'Invalid notification draft' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
   if (
     (templateName === 'quote-confirmation-payment-link' ||
       templateName === 'quote-confirmation-internal-copy') &&
