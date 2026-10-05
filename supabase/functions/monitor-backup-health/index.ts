@@ -86,11 +86,12 @@ serve(async (req) => {
   }
 
   for (const table of EXPECTED_TABLES) {
-    const dataFile = `${table}.json`;
+    const dataFile = `${table}.json.gz`;
+    const legacyDataFile = `${table}.json`;
     const statusFile = `${table}.status.json`;
     const check: TableCheck = {
       table,
-      data_present: fileNames.has(dataFile),
+      data_present: fileNames.has(dataFile) || fileNames.has(legacyDataFile),
       status_present: fileNames.has(statusFile),
     };
 
