@@ -2,9 +2,12 @@
 // Executes the verified data handshake: validates the bearer token, the
 // catalogue product and the target project folder, then writes the staged
 // piece to the member's board exactly as the in-portal sidebar does.
+// Folder names resolve case-insensitively against the same normalization
+// rule used by get_synced_projects (supabase/functions/_shared/projectFolders.ts).
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { normalizeFolderName, pickCanonicalFolder } from '../_shared/projectFolders.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
