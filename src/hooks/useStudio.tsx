@@ -16,6 +16,7 @@ export interface Studio {
   primary_brand_font: string;
   default_project_markup_percentage: number;
   billing_email: string | null;
+  pdf_locale: string;
   created_by: string;
 }
 
@@ -58,7 +59,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     const supabase = await getSupabase();
     const { data, error } = await supabase
       .from("studio_members")
-       .select("role, studio:studios(id, name, slug, logo_url, display_name, primary_brand_font, default_project_markup_percentage, billing_email, created_by)")
+       .select("role, studio:studios(id, name, slug, logo_url, display_name, primary_brand_font, default_project_markup_percentage, billing_email, pdf_locale, created_by)")
       .eq("user_id", user.id);
 
     if (error || !data) {

@@ -16,6 +16,7 @@ import {
   type TradePaymentChannel,
 } from "@/config/tradePaymentChannels";
 import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
+import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 const FG = [26, 26, 26] as const;
 const MUTED = [110, 110, 110] as const;
@@ -53,14 +54,10 @@ export interface ProformaArgs {
   channel: TradePaymentChannel;
   /** Replaces the itemized ledger and standard totals with a ceiling matrix. */
   ceilingBudget?: CeilingBudgetInput | null;
+  formatting?: { locale: PdfLocalePreset };
 }
 
-const money = (cents: number, currency: string) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: (currency || "usd").toUpperCase(),
-    maximumFractionDigits: 2,
-  }).format(cents / 100);
+const money = (cents: number, currency: string, locale?: string) => formatPdfMoney(cents, currency, locale);
 
 async function fetchDataUrl(url: string): Promise<string | null> {
   try {
@@ -135,7 +132,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   /* Meta block ------------------------------------------------------ */
   const meta: [string, string][] = [
     ["Order ID", args.orderRef],
-    ["Issued", issued.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })],
+    ["Issued", formatPdfDate(issued, args.formatting?.locale)],
     ["Region", args.regionTier],
     ["Settlement", args.channel.label],
   ];
@@ -207,7 +204,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
       doc.setTextColor(index === 0 || index === rows.length - 1 ? FG[0] : MUTED[0], index === 0 || index === rows.length - 1 ? FG[1] : MUTED[1], index === 0 || index === rows.length - 1 ? FG[2] : MUTED[2]);
       doc.text(label, M + 14, budgetY);
       doc.setTextColor(FG[0], FG[1], FG[2]);
-      doc.text(amount < 0 ? `- ${money(Math.abs(amount), args.currency)}` : money(amount, args.currency), right - 14, budgetY, { align: "right" });
+      doc.text(amount < 0 ? `−${money(Math.abs(amount), args.currency, args.formatting?.locale)}` : money(amount, args.currency, args.formatting?.locale), right - 14, budgetY, { align: "right" });
       budgetY += 28;
     });
     y += 206;
@@ -236,8 +233,8 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
       const blockH = titleLines.length * 13;
 
       doc.text(String(line.quantity), colQty, y, { align: "right" });
-      doc.text(money(line.unitCents, args.currency), colUnit, y, { align: "right" });
-      doc.text(money(line.unitCents * line.quantity, args.currency), right, y, { align: "right" });
+      doc.text(money(line.unitCents, args.currency, args.formatting?.locale), colUnit, y, { align: "right" });
+      doc.text(money(line.unitCents * line.quantity, args.currency, args.formatting?.locale), right, y, { align: "right" });
 
       if (detail) {
         doc.setFontSize(8.5);
@@ -265,15 +262,15 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   };
 
   if (!args.ceilingBudget) {
-    totalRow("Subtotal", money(args.subtotalCents, args.currency));
+    totalRow("Subtotal", money(args.subtotalCents, args.currency, args.formatting?.locale));
     if (args.discountCents > 0) {
-      totalRow(args.discountLabel || "Trade discount", `- ${money(args.discountCents, args.currency)}`);
+      totalRow(args.discountLabel || "Trade discount", `−${money(args.discountCents, args.currency, args.formatting?.locale)}`);
     }
     totalRow(
       args.shippingLabel || "Freight & white-glove delivery",
-      args.shippingCents > 0 ? money(args.shippingCents, args.currency) : "To be quoted",
+      args.shippingCents > 0 ? money(args.shippingCents, args.currency, args.formatting?.locale) : "To be quoted",
     );
-    totalRow(args.taxLabel, args.taxCents > 0 ? money(args.taxCents, args.currency) : "—");
+    totalRow(args.taxLabel, args.taxCents > 0 ? money(args.taxCents, args.currency, args.formatting?.locale) : "—");
   }
   if (args.taxStatement) {
     ensureRoom(26);
@@ -288,7 +285,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
     y += 4;
     rule(y);
     y += 18;
-    totalRow("Total due", money(args.totalCents, args.currency), true);
+    totalRow("Total due", money(args.totalCents, args.currency, args.formatting?.locale), true);
   }
 
   const paymentBaseCents = args.ceilingBudget
@@ -298,8 +295,8 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   y += 4;
   rule(y);
   y += 18;
-  totalRow("60% deposit", money(Math.round(paymentBaseCents * 0.6), args.currency));
-  totalRow("40% balance", money(paymentBaseCents - Math.round(paymentBaseCents * 0.6), args.currency));
+  totalRow("60% deposit", money(Math.round(paymentBaseCents * 0.6), args.currency, args.formatting?.locale));
+  totalRow("40% balance", money(paymentBaseCents - Math.round(paymentBaseCents * 0.6), args.currency, args.formatting?.locale));
 
   /* Payment instructions -------------------------------------------- */
   ensureRoom(300);

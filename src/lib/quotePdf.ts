@@ -22,6 +22,7 @@ import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
+import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -193,24 +194,16 @@ export interface QuotePdfArgs {
   } | null;
   /** Replaces itemized products and ordinary totals with a top-down budget matrix. */
   ceilingBudget?: CeilingBudgetInput | null;
+  formatting?: { locale: PdfLocalePreset };
 }
 
 
 
 
-const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
+const fmtMoney = (cents: number | null | undefined, currency: string, locale?: string) =>
+  formatPdfMoney(cents, currency, locale);
 
-const fmtMoney = (cents: number | null | undefined, currency: string): string => {
-  if (cents == null) return "TBD";
-  const sym = currencySymbol(currency);
-  return `${sym}${new Intl.NumberFormat("en-GB", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(cents / 100)}`;
-};
-
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const fmtDate = (d: Date, locale?: string) => formatPdfDate(d, locale);
 
 const CURRENCY_CODES = new Set(["HKD", "USD", "EUR", "GBP", "SGD", "AED", "CHF", "AUD", "CAD", "JPY", "CNY"]);
 

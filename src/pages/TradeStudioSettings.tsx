@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import PayoutAccountsSection from "@/components/trade/settings/PayoutAccountsSection";
 import ResaleCertificatesSection from "@/components/trade/settings/ResaleCertificatesSection";
 import { StudioBrand } from "@/components/trade/StudioBrand";
+import { PDF_LOCALE_LABELS, PDF_LOCALE_PRESETS, normalizePdfLocale, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 interface Member {
   id: string;
@@ -69,6 +70,7 @@ export default function TradeStudioSettings() {
   const [logoUrl, setLogoUrl] = useState("");
   const [brandFont, setBrandFont] = useState("editorial");
   const [markup, setMarkup] = useState("0");
+  const [pdfLocale, setPdfLocale] = useState<PdfLocalePreset>("en-GB");
   const [savingBrand, setSavingBrand] = useState(false);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function TradeStudioSettings() {
       setLogoUrl(currentStudio.logo_url || "");
       setBrandFont(currentStudio.primary_brand_font || "editorial");
       setMarkup(String(currentStudio.default_project_markup_percentage ?? 0));
+      setPdfLocale(normalizePdfLocale(currentStudio.pdf_locale));
     }
   }, [currentStudio?.id]);
 
@@ -204,6 +207,7 @@ export default function TradeStudioSettings() {
       logo_url: logoUrl.trim() || null,
       primary_brand_font: brandFont,
       default_project_markup_percentage: value,
+      pdf_locale: pdfLocale,
     }).eq("id", currentStudio.id);
     setSavingBrand(false);
     if (error) { toast({ title: "Branding could not be saved", description: error.message, variant: "destructive" }); return; }
@@ -298,6 +302,16 @@ export default function TradeStudioSettings() {
           <div><Label htmlFor="brand-logo">Logo URL</Label><Input id="brand-logo" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" disabled={!isAdmin} /></div>
           <div><Label htmlFor="brand-font">Brand typeface</Label><Select value={brandFont} onValueChange={setBrandFont} disabled={!isAdmin}><SelectTrigger id="brand-font"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="editorial">Editorial</SelectItem><SelectItem value="modern">Modern</SelectItem><SelectItem value="classic">Classic</SelectItem></SelectContent></Select></div>
           <div><Label htmlFor="default-markup">Default project markup (%)</Label><Input id="default-markup" type="number" min="0" max="1000" step="0.01" value={markup} onChange={(e) => setMarkup(e.target.value)} disabled={!isAdmin} /></div>
+          <div>
+            <Label htmlFor="pdf-locale">Proforma date &amp; number locale</Label>
+            <Select value={pdfLocale} onValueChange={(value) => setPdfLocale(value as PdfLocalePreset)} disabled={!isAdmin}>
+              <SelectTrigger id="pdf-locale"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PDF_LOCALE_PRESETS.map((preset) => <SelectItem key={preset} value={preset}>{PDF_LOCALE_LABELS[preset]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">All PDF currency values retain two decimal places.</p>
+          </div>
           {isAdmin && <Button onClick={handleSaveBrand} disabled={savingBrand}>{savingBrand ? "Saving…" : "Save branding"}</Button>}
         </CardContent>
       </Card>
