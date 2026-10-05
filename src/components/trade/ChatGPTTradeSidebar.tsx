@@ -29,6 +29,11 @@ type StagedItem = { productId: string; projectId: string; projectName: string; p
 const priceKey = (brand: string, title: string) =>
   `${slugify(normalizeBrandToParent(brand))}::${slugify(title)}`;
 
+// Local workspace fallbacks shown while the live project handshake is still
+// initializing, so the staging drawer is never trapped behind a spinner.
+const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
+const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed() {
   const { user, profile } = useAuth();
@@ -297,7 +302,10 @@ function TradeSidebarFeed() {
         </div>
       )}
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-4 pb-8 pt-5" aria-live="polite">
-        {isLoading ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
+            collection) is available synchronously, so only show the spinner when
+            there is literally nothing to display yet. */}
+        {isLoading && products.length === 0 ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
