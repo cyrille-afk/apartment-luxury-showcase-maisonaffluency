@@ -116,9 +116,22 @@ function EntryCard({ entry }: { entry: Entry }) {
       <h3 className="font-body text-sm font-medium break-words">{entry.title}</h3>
       {entry.observations && <p className="mt-1 whitespace-pre-wrap break-words font-body text-xs text-muted-foreground">{entry.observations}</p>}
       {url && <a href={url} target="_blank" rel="noreferrer"><img src={url} alt="Screenshot" className="mt-3 max-h-40 w-full border border-border object-contain" /></a>}
-      <p className="mt-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-        {new Date(entry.created_at).toLocaleString()}
-      </p>
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-2">
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Logged by</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            {[entry.author_name, entry.author_company].filter(Boolean).join(" · ") || "—"}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Captured</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{editorialDate(entry.created_at)}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Environment</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.viewport_tag ?? "—"}</p>
+        </div>
+      </div>
     </article>
   );
 }
