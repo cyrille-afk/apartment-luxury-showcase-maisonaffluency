@@ -19,7 +19,7 @@ const RAW_ALIASES: Record<string, string> = {
   // "Okha Design Studio - Adam Courts" merged into single OKHA record (DB-side) on 2026-04-21.
   "ecart - jean-michel frank": "Ecart",
   "ecart international": "Ecart",
-  "noé duchaufour-lawrance": "NDL Editions",
+  "ndl editions": "Noé Duchaufour-Lawrance",
   "achille salvagni": "Achille Salvagni Atelier",
   "as atelier": "Achille Salvagni Atelier",
   "alinea": "Alinea",
