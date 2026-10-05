@@ -13,17 +13,25 @@ export default function TradeExtensionSync() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [catalogueOpen, setCatalogueOpen] = useState(false);
+  const [syncNotice, setSyncNotice] = useState("");
 
   const recordVerifiedSync = useCallback((payload: ProjectStagingPayload) => {
     const formatted = new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     try { localStorage.setItem(LAST_SYNC_KEY, formatted); } catch { /* local storage unavailable */ }
     setLastSync(formatted);
+    setSyncNotice(`Success: ${payload.productName} routed to ${payload.targetWorkflow} and verified in core records.`);
   }, []);
 
   useDashboardDataSync({
     onVerified: recordVerifiedSync,
-    successMessage: (payload) => `Success: ${payload.productName} routed to ${payload.targetWorkflow} and verified in core records.`,
+    showToast: false,
   });
+
+  useEffect(() => {
+    if (!syncNotice) return;
+    const timer = window.setTimeout(() => setSyncNotice(""), 4200);
+    return () => window.clearTimeout(timer);
+  }, [syncNotice]);
 
   useEffect(() => {
     const read = () => {
@@ -43,6 +51,15 @@ export default function TradeExtensionSync() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
+      {syncNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed top-6 z-[70] max-w-sm border border-border bg-background px-4 py-3 font-body text-xs text-foreground shadow-lg transition-[right] ${catalogueOpen ? "right-[384px]" : "right-6"}`}
+        >
+          {syncNotice}
+        </div>
+      )}
       <div>
         <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
           ChatGPT Extension Integration

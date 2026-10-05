@@ -8,6 +8,7 @@ import { parseProjectStagingMessage, type ProjectStagingPayload } from "@/lib/pr
 interface DashboardDataSyncOptions {
   onVerified?: (payload: ProjectStagingPayload) => void;
   successMessage?: string | ((payload: ProjectStagingPayload) => string);
+  showToast?: boolean;
 }
 
 /** Receives same-origin sidebar notifications and reconciles them with RLS-visible saved items. */
@@ -55,14 +56,16 @@ export function useDashboardDataSync(options: DashboardDataSyncOptions = {}) {
       });
       window.dispatchEvent(new Event("concierge:artifacts-changed"));
       onVerifiedRef.current?.(verified);
-      const message = successMessageRef.current;
-      toast.success(typeof message === "function"
-        ? message(verified)
-        : message || "Database Sync Complete: Project records refreshed via Trade Concierge Extension.");
+      if (options.showToast !== false) {
+        const message = successMessageRef.current;
+        toast.success(typeof message === "function"
+          ? message(verified)
+          : message || "Database Sync Complete: Project records refreshed via Trade Concierge Extension.");
+      }
     };
     window.addEventListener("message", onMessage);
     return () => { mounted = false; window.removeEventListener("message", onMessage); };
-  }, [user?.id, currentStudio?.id]);
+  }, [user?.id, currentStudio?.id, options.showToast]);
 
   return itemsByProject;
 }
