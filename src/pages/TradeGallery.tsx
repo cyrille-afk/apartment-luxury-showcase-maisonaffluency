@@ -90,20 +90,20 @@ const TradeGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
-  const originatingProductPath = useMemo(() => {
+  const [originatingProductPath] = useState(() => {
     const path = consumeProductBackRef(routeBrandSlug);
     return path?.startsWith("/trade/products/") ? path : null;
-  }, [routeBrandSlug]);
+  });
 
   const catalogueBreadcrumbs = useMemo<Crumb[]>(() => {
     if (!routeBrandSlug) return [];
-    const designerName = galleryDesigner?.display_name || galleryDesigner?.name || routeBrandName || routeBrandSlug.replace(/-/g, " ");
+    const designerName = galleryDesigner?.display_name || galleryDesigner?.name || routeBrandSlug.replace(/-/g, " ");
     return [
       { label: "Full Collection", to: "/trade/gallery" },
       ...(originatingProductPath ? [{ label: "Return to Product", to: originatingProductPath }] : []),
       { label: designerName },
     ];
-  }, [galleryDesigner, originatingProductPath, routeBrandName, routeBrandSlug]);
+  }, [galleryDesigner, originatingProductPath, routeBrandSlug]);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.trade_product_id) {
