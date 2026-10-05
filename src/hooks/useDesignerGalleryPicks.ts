@@ -9,10 +9,10 @@ import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort
 export function useDesignerGalleryPicks(designer: Designer | null | undefined) {
   const isParentBrand = isParentBrandDesigner(designer);
   const isArnoldMadsen = designer?.slug === "arnold-madsen";
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly: true });
-  const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
-  const { data: attributedPicks = [] } = useAttributedDesignerPicks(designer && !isParentBrand ? designer : undefined, { publicOnly: true });
-  const { data: dagmarAllPicks = [] } = useQuery({
+  const { data: groupedPicks = [], isPending: groupedPending } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly: true });
+  const { data: ownPicks = [], isPending: ownPending } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: attributedPicks = [], isPending: attributedPending } = useAttributedDesignerPicks(designer && !isParentBrand ? designer : undefined, { publicOnly: true });
+  const { data: dagmarAllPicks = [], isPending: dagmarPending } = useQuery({
     queryKey: ["arnold-madsen-dagmar-all-picks"],
     enabled: isArnoldMadsen,
     staleTime: 10 * 60_000,
@@ -46,5 +46,9 @@ export function useDesignerGalleryPicks(designer: Designer | null | undefined) {
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [designer, groupedPicks, ownPicks, attributedPicks, dagmarAllPicks, isParentBrand, isArnoldMadsen]);
 
-  return { picks, dagmarAllPicks };
+  return {
+    picks,
+    dagmarAllPicks,
+    isLoading: Boolean(designer) && (ownPending || (isParentBrand ? groupedPending : attributedPending) || (isArnoldMadsen && dagmarPending)),
+  };
 }

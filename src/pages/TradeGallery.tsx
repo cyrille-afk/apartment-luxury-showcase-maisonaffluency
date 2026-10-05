@@ -86,7 +86,7 @@ const TradeGallery = () => {
   const location = useLocation();
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
-  const { picks: galleryPicks } = useDesignerGalleryPicks(galleryDesigner);
+  const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.trade_product_id) {
@@ -645,7 +645,7 @@ const TradeGallery = () => {
         </div>
       </div>
       {/* Content */}
-      {(productsLoading || (routeBrandSlug && designerLoading)) ? (
+      {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
         <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
       ) : filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
