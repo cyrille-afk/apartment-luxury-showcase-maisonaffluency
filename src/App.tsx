@@ -798,7 +798,6 @@ const App = () => {
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/.lovable/oauth/consent" element={<Suspense fallback={null}><OAuthConsent /></Suspense>} />
                   <Route path="/trade/concierge/sidebar" element={<Suspense fallback={<PageLoadingSkeleton />}><ChatGPTTradeSidebar /></Suspense>} />
-                  <Route path="/trade/extension-sync" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeExtensionSync /></Suspense>} />
                   <Route path="/trade-faq" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeFaqPage /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade-program/apply" element={<TradeApplyRedirect />} />
@@ -938,6 +937,7 @@ const App = () => {
                     {/* magazine-analytics route removed — AD free-download flow discontinued */}
                     <Route path="concierge" element={<TradeConcierge />} />
                     <Route path="concierge/:threadId" element={<TradeConcierge />} />
+                    <Route path="extension-sync" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeExtensionSync /></Suspense>} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="collectibles/admin" element={<TradeCollectiblesAdmin />} />
