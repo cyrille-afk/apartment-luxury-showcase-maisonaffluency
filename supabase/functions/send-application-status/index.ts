@@ -32,13 +32,13 @@ Deno.serve(async (req) => {
     if (!parsed.success) return response({ error: 'Invalid application notification' }, 400)
     const { applicantEmail, status } = parsed.data
     const { data: account, error } = await service.from('trade_accounts')
-      .select('id, email, contact_name, studio_name, status').eq('email', applicantEmail.toLowerCase()).maybeSingle()
+      .select('id, email, contact_name, studio_name, country, status').eq('email', applicantEmail.toLowerCase()).maybeSingle()
     if (error || !account) return response({ error: 'Application not found' }, 404)
     if (account.status !== status) return response({ error: 'Save the application decision before notifying' }, 409)
     const templateName = status === 'approved' ? 'trade-approval' : 'trade-rejection'
     const { data, error: mailError } = await client.functions.invoke('send-transactional-email', {
       body: { templateName, recipientEmail: account.email, idempotencyKey: `${templateName}-${account.id}`,
-        templateData: { name: account.contact_name ?? undefined, companyName: account.studio_name ?? undefined } },
+        templateData: { name: account.contact_name ?? undefined, companyName: account.studio_name ?? undefined, country: account.country ?? undefined } },
     })
     if (mailError) return response({ error: 'Notification could not be queued' }, 502)
     return response(data)
