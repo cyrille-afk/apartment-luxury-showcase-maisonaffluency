@@ -22,7 +22,7 @@ const json = (body: unknown, status = 200) =>
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = modelFor("balanced");
 const MAX_ATTEMPTS = 3;
-const MAX_IMAGES = 6;
+const MAX_IMAGES = 10;
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const BROWSER_HEADERS = {
   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -76,7 +76,7 @@ function isCachedEvidenceUrl(url: string): boolean {
   }
 }
 
-type ScrapeResult = { text: string; images: string[]; notes: string[]; screenshots?: string[] };
+type ScrapeResult = { text: string; images: string[]; notes: string[]; screenshots?: string[]; links?: string[] };
 
 // Instagram blocks generic scrapers, so handles are read through the Meta
 // Graph API's business_discovery (works for public Business/Creator accounts).
@@ -117,6 +117,7 @@ async function scrape(url: string): Promise<ScrapeResult> {
   const notes: string[] = [];
   let text = "";
   const screenshots: string[] = [];
+  const links = new Set<string>();
   if (!key) return { text, images: [], notes: ["Web reader not configured"] };
   try {
     const res = await fetchWithRetry("https://api.firecrawl.dev/v1/scrape", {
@@ -134,10 +135,19 @@ async function scrape(url: string): Promise<ScrapeResult> {
       const d = (await res.json().catch(() => null))?.data ?? null;
       if (!d) { notes.push(`${new URL(url).hostname} returned a malformed reader response`); return { text, images: [], notes }; }
       if (typeof d.screenshot === "string" && d.screenshot.startsWith("https://")) screenshots.push(d.screenshot);
-      text = String(d.markdown ?? "").slice(0, 4000);
+      text = String(d.markdown ?? "").slice(0, 5000);
       const og = d.metadata?.ogImage ?? d.metadata?.["og:image"];
       if (typeof og === "string") images.add(og);
       const html = String(d.html ?? "");
+      // Internal project / portfolio / about pages for a deeper crawl.
+      const host = new URL(url).hostname.replace(/^www\./, "");
+      for (const m of html.matchAll(/<a[^>]+href=["']([^"'#]+)["']/gi)) {
+        try {
+          const u = new URL(m[1], url);
+          if (u.hostname.replace(/^www\./, "") !== host || u.pathname === "/" ) continue;
+          if (/project|portfolio|work|residen|villa|hotel|hospitality|about|studio|profile|award|press|architect|interior/i.test(u.pathname)) links.add(u.origin + u.pathname);
+        } catch { /* */ }
+      }
       const JUNK = /\.svg(\?|$)|sprite|logo|icon|avatar|favicon|placeholder|spacer|pixel|blank\.|loading\.|1x1|tracking|badge|button|arrow|facebook|fb-|instagram|linkedin|twitter|x-logo|youtube|pinterest|tiktok|whatsapp|social|share/i;
       const JUNK_HOST = /(^|\.)((static|scontent|platform|connect)\.)?(facebook|fbcdn|instagram|cdninstagram|linkedin|licdn|twitter|twimg|youtube|ytimg|pinterest|pinimg|tiktok|tiktokcdn|whatsapp)\./i;
       // Drop tiny images (social glyphs, spacers) declared small in the URL,
@@ -165,7 +175,7 @@ async function scrape(url: string): Promise<ScrapeResult> {
   if (!text && images.size === 0 && screenshots.length === 0 && notes.length === 0) {
     notes.push(`${new URL(url).hostname} returned an empty capture`);
   }
-  return { text, images: [...images].slice(0, MAX_IMAGES), notes, screenshots };
+  return { text, images: [...images].slice(0, MAX_IMAGES), notes, screenshots, links: [...links] };
 }
 
 const PERSONAL = /^(gmail|googlemail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|qq|163|126|gmx|yandex|mail)\./i;
@@ -175,9 +185,11 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
   const v = (ref ?? "").trim();
   const handle = v.startsWith("@") ? v.slice(1)
     : (v.match(/instagram\.com\/([A-Za-z0-9._]+)/i)?.[1] ?? null);
+  const links: string[] = [];
   let text = "", images: string[] = [], screenshots: string[] = [], source: string | null = resolveSourceUrl(ref);
   const merge = (r: ScrapeResult) => {
-    if (r.text) text = [text, r.text].filter(Boolean).join("\n\n").slice(0, 6000);
+    if (r.text) text = [text, r.text].filter(Boolean).join("\n\n").slice(0, 16000);
+    links.push(...(r.links ?? []));
     images = [...new Set([...images, ...r.images])].slice(0, MAX_IMAGES);
     screenshots = [...new Set([...screenshots, ...(r.screenshots ?? [])])].slice(0, 2);
   };
@@ -203,6 +215,11 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
     merge(r); notes.push(...r.notes);
     if (r.text || r.images.length) source = `https://${domain}`;
   }
+  // Deeper crawl: up to 4 project / about pages found on the homepage.
+  const deep = [...new Set(links)].sort((a, b) => Number(/project|portfolio|work/i.test(b)) - Number(/project|portfolio|work/i.test(a))).slice(0, 4);
+  const sub = await Promise.all(deep.map((u) => scrape(u)));
+  for (const r of sub) { merge(r); }
+  if (deep.length) notes.push(`deep-crawled: ${deep.join(", ")}`);
   return { text, images, notes, source, screenshots };
 }
 
@@ -386,5 +403,19 @@ serve(async (req) => {
   }).eq("trade_account_id", id);
   await logRun("complete");
 
-  return json({ ok: true });
+  // Re-score the Radar with the scraped portfolio evidence, not just form fields.
+  const radar = await scoreTradeApplication({
+    studio: account.studio_name ?? "", email: account.email ?? "", websiteOrIg: account.website_or_ig ?? "",
+    regNumber: account.business_reg_number ?? "", hasDocument: false, returning: false,
+    evidence: [
+      `Aesthetic: ${parsed.aesthetic_label ?? ""} — ${parsed.aesthetic_summary ?? ""}`,
+      `Pages read: ${sourceUrl}; ${notes.filter((n) => n.startsWith("deep-crawled")).join("")}`,
+      `Website text:\n${text.slice(0, 9000)}`,
+    ].join("\n"),
+  });
+  if (radar.ok) await supabase.from("trade_accounts").update({
+    radar_score: radar.score, radar_flag: radar.flag, radar_status: "scored", radar_scored_at: new Date().toISOString(),
+  }).eq("id", id);
+
+  return json({ ok: true, radar: radar.ok ? { score: radar.score, flag: radar.flag } : null });
 });
