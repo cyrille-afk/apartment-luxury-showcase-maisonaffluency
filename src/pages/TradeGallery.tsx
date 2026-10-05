@@ -90,10 +90,10 @@ const TradeGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
-  const [originatingProductPath] = useState(() => {
+  const originatingProductPath = useMemo(() => {
     const path = consumeProductBackRef(routeBrandSlug);
     return path?.startsWith("/trade/products/") ? path : null;
-  });
+  }, [routeBrandSlug]);
 
   const catalogueBreadcrumbs = useMemo<Crumb[]>(() => {
     if (!routeBrandSlug) return [];
