@@ -339,9 +339,9 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
       )}
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-4 pb-8 pt-5" aria-live="polite">
         {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
-            collection) is available synchronously, so only show the spinner when
+            collection) is available synchronously, so only show the skeleton when
             there is literally nothing to display yet. */}
-        {showFeedSpinner ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {showSkeleton ? <SidebarFeedSkeleton /> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
