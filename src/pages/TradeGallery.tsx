@@ -28,6 +28,7 @@ import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
+import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
@@ -407,9 +408,18 @@ const TradeGallery = () => {
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
   const filtered = useMemo(
-    () => curateGrid(matchedProducts, (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]),
+    () => {
+      // A single maker's trade gallery follows the same saved product order
+      // and subcategory interleaving as their public Curators' Picks.
+      if (routeBrandName || selectedBrand !== "all") {
+        return interleaveBySubcategory(sortCuratorPicks(
+          matchedProducts.map((p) => ({ ...p, sort_order: p.sort_order ?? null })),
+        ));
+      }
+      return curateGrid(matchedProducts, (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [matchedProducts, imageTones, Object.keys(imageTones).length],
+    [matchedProducts, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
