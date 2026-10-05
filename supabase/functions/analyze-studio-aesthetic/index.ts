@@ -138,9 +138,13 @@ async function scrape(url: string): Promise<ScrapeResult> {
       const og = d.metadata?.ogImage ?? d.metadata?.["og:image"];
       if (typeof og === "string") images.add(og);
       const html = String(d.html ?? "");
+      const JUNK = /\.svg(\?|$)|sprite|logo|icon|avatar|favicon|placeholder|spacer|pixel|blank\.|loading\.|1x1|tracking|badge|button|arrow|facebook|fb-|instagram|linkedin|twitter|x-logo|youtube|pinterest|tiktok|whatsapp|social|share/i;
+      const JUNK_HOST = /(^|\.)((static|scontent|platform|connect)\.)?(facebook|fbcdn|instagram|cdninstagram|linkedin|licdn|twitter|twimg|youtube|ytimg|pinterest|pinimg|tiktok|tiktokcdn|whatsapp)\./i;
       for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
         const src = m[1];
-        if (/^https:\/\//.test(src) && !/\.svg(\?|$)|sprite|logo|icon|avatar/i.test(src)) images.add(src);
+        if (!/^https:\/\//.test(src) || JUNK.test(src)) continue;
+        try { if (JUNK_HOST.test(new URL(src).hostname)) continue; } catch { continue; }
+        images.add(src);
         if (images.size >= MAX_IMAGES * 2) break;
       }
     } else {
