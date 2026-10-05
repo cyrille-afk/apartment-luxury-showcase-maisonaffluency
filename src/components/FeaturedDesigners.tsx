@@ -104,7 +104,6 @@ const adamCourtsVillaNightstand = "https://res.cloudinary.com/dif1oamtj/image/up
 // Curators' Picks images
 const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
 const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Galea-Lantern-Rock_Crystal_01_alexander-lamont_1_rhpxsg.jpg";
-const alexanderLamontPick3 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
 const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
 const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
 const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
@@ -312,17 +311,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     philosophy: "Objects have power: they connect us to our most intimate selves and to the people, places, stories and memories of our lives.",
     curatorPicks: [
-      { 
-        image: alexanderLamontPick3, 
-        title: "Casque",
-        subtitle: "Bar Cabinet",
-        category: "Storage",
-        tags: ["Couture", "Storage", "Cabinet"],
-        materials: "Straw marquetry • Hammered bronze handles • Lacquered interior",
-        dimensions: "H110 × W120 × D45 cm",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Casque_Bar_Cabinet_-_Amethyst_Ombre_Havana.pdf",
-        pdfFilename: "Alexander_Lamont-Casque_Bar_Cabinet.pdf"
-      },
+      // Casque Bar Cabinet comes from the current designer_curator_picks entry.
+      // An older static "Casque" card duplicated it with a different default photo.
       { 
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578109/Screen_Shot_2026-03-15_at_8.30.52_PM_vm6hej.png", 
         title: "Ondas Sconce",
