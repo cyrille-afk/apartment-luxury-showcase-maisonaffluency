@@ -18,12 +18,18 @@ export default defineTool({
       .number()
       .positive()
       .describe("Total retail (RRP) value of the selection, in any single currency."),
+    // Maison Affluency trade tiers: Platinum 15% / Gold 12% / Silver 10%.
+    const TIER_DISCOUNTS: Record<string, number> = {
+      "Platinum Tier": 15,
+      "Gold Tier": 12,
+      "Silver Tier": 10,
+    };
     tradeDiscountPercentage: z
-      .number()
-      .min(0)
-      .max(90)
-      .default(20)
-      .describe("Trade discount percentage off retail. Defaults to 20 (standard trade tier)."),
+      .union([z.number(), z.enum(["Platinum Tier", "Gold Tier", "Silver Tier"])])
+      .default(15)
+      .describe(
+        "Trade discount percentage off retail, or a Maison Affluency tier name. Defaults to 15 (Platinum Tier). Tiers: 'Platinum Tier' = 15%, 'Gold Tier' = 12%, 'Silver Tier' = 10%."
+      ),
     logisticsFeePercentage: z
       .number()
       .min(0)
