@@ -1,29 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
-import { Activity, Check, CheckCircle2, FolderKanban, Plug, RefreshCw, XCircle } from "lucide-react";
+import { Activity, Check, CheckCircle2, Copy, FolderKanban, KeyRound, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import type { ProjectStagingPayload } from "@/lib/projectStagingMessage";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const EXTENSION_ORIGIN = "/trade/concierge/sidebar";
 const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
+const CONSENT_PATH = "/.lovable/oauth/consent";
+
+type HealthCheck = {
+  ok: boolean;
+  status: number | null;
+  duration_ms: number;
+  error: string | null;
+  detail?: unknown;
+};
 
 type McpHealthReport = {
   healthy: boolean;
   endpoint: string;
+  mode?: string;
   checked_at: string;
   checks: {
-    initialize: { ok: boolean; status: number | null; duration_ms: number; error: string | null; serverInfo: unknown };
-    tools_list: { ok: boolean; status: number | null; duration_ms: number; error: string | null };
+    auth_challenge: HealthCheck;
+    protected_resource_metadata: HealthCheck;
+    oauth_discovery: HealthCheck;
   };
-  tools: string[];
-  missing_expected_tools: string[];
+  note?: string;
 };
 
 export default function TradeExtensionSync() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const { toast } = useToast();
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [catalogueOpen, setCatalogueOpen] = useState(false);
   const [syncNotice, setSyncNotice] = useState("");
@@ -38,17 +50,34 @@ export default function TradeExtensionSync() {
       const { data, error } = await supabase.functions.invoke("mcp-health-check");
       if (error) {
         setHealth(null);
-        setHealthError(error.message ?? "Health check request failed");
+        setHealthError(error.message ?? "Connection test request failed");
       } else {
         setHealth(data as McpHealthReport);
       }
     } catch (err) {
       setHealth(null);
-      setHealthError(err instanceof Error ? err.message : "Health check request failed");
+      setHealthError(err instanceof Error ? err.message : "Connection test request failed");
     } finally {
       setHealthLoading(false);
     }
   }, []);
+
+  // Live status on page load — the panel always reflects the current endpoint state.
+  useEffect(() => {
+    void runHealthCheck();
+  }, [runHealthCheck]);
+
+  const copyText = useCallback(async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({ title: `${label} copied`, description: value });
+    } catch {
+      toast({ title: "Copy failed", description: value, variant: "destructive" });
+    }
+  }, [toast]);
+
+  const mcpEndpoint = health?.endpoint ?? "";
+  const consentUrl = `${window.location.origin}${CONSENT_PATH}`;
 
   const recordVerifiedSync = useCallback((payload: ProjectStagingPayload) => {
     const formatted = new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -207,35 +236,55 @@ export default function TradeExtensionSync() {
         </div>
       </section>
 
-      {/* MCP endpoint health check */}
+      {/* Live OAuth connection status */}
       <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
-              MCP Endpoint Health
+              OAuth Connection Status
             </h2>
             <p className="font-body text-xs text-muted-foreground mt-1">
-              Verifies the public MCP server answers initialization and tool-list
-              requests — the same handshake ChatGPT runs when connecting.
+              Live state of the secure sign-in layer ChatGPT uses to reach your project
+              folders — checked automatically when this page opens.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={runHealthCheck}
-            disabled={healthLoading}
-            className="gap-2"
-          >
-            <Activity className={`h-3.5 w-3.5 ${healthLoading ? "animate-pulse" : ""}`} />
-            {healthLoading ? "Checking…" : "Run Health Check"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={runHealthCheck}
+              disabled={healthLoading}
+              className="gap-2"
+            >
+              <Activity className={`h-3.5 w-3.5 ${healthLoading ? "animate-pulse" : ""}`} />
+              {healthLoading ? "Testing…" : "Test Connection"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => mcpEndpoint && copyText("MCP endpoint", mcpEndpoint)}
+              disabled={!mcpEndpoint}
+              className="gap-2"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              Copy Endpoint
+            </Button>
+            <Button
+              type="button"
+              onClick={() => copyText("Consent screen", consentUrl)}
+              className="gap-2"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              Reconnect
+            </Button>
+          </div>
         </div>
 
         {healthError && (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
             <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
             <p className="font-body text-xs text-destructive">
-              Health check could not run: {healthError}
+              Connection test could not run: {healthError}
             </p>
           </div>
         )}
@@ -244,13 +293,13 @@ export default function TradeExtensionSync() {
           <div className="mt-4 space-y-3">
             <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${health.healthy ? "border-emerald-500/40 bg-emerald-500/10" : "border-destructive/40 bg-destructive/10"}`}>
               {health.healthy ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
               ) : (
                 <XCircle className="h-4 w-4 text-destructive shrink-0" />
               )}
               <div className="min-w-0">
                 <p className={`font-body text-sm font-medium ${health.healthy ? "text-emerald-700" : "text-destructive"}`}>
-                  {health.healthy ? "MCP endpoint healthy" : "MCP endpoint failing"}
+                  {health.healthy ? "OAuth layer healthy — ChatGPT can authenticate" : "OAuth layer failing — reconnect required"}
                 </p>
                 <p className="font-body text-[11px] text-muted-foreground break-all">
                   {health.endpoint} · checked {new Date(health.checked_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
@@ -258,10 +307,11 @@ export default function TradeExtensionSync() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {([
-                { label: "Initialization", check: health.checks.initialize },
-                { label: "Tool List", check: health.checks.tools_list },
+                { label: "Sign-In Challenge", check: health.checks.auth_challenge },
+                { label: "Resource Metadata", check: health.checks.protected_resource_metadata },
+                { label: "OAuth Discovery", check: health.checks.oauth_discovery },
               ] as const).map(({ label, check }) => (
                 <div key={label} className="rounded-xl border border-border bg-background px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -282,14 +332,18 @@ export default function TradeExtensionSync() {
               ))}
             </div>
 
-            {health.tools.length > 0 && (
-              <p className="font-body text-[11px] text-muted-foreground">
-                Tools advertised: {health.tools.join(", ")}
+            {health.healthy && (
+              <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+                To reconnect ChatGPT: open the connector's settings in ChatGPT, choose
+                Reconnect, sign in with your Maison Affluency account and approve access.
+                The consent screen is <span className="break-all">{consentUrl}</span> —
+                use Reconnect above to copy it.
               </p>
             )}
-            {health.missing_expected_tools.length > 0 && (
-              <p className="font-body text-[11px] text-destructive">
-                Missing expected tools: {health.missing_expected_tools.join(", ")}
+            {!health.healthy && (
+              <p className="font-body text-[11px] text-destructive leading-relaxed">
+                One or more OAuth checks failed. Re-run the test; if it persists, the
+                endpoint deployment may be stale — publish the latest version and retry.
               </p>
             )}
           </div>
