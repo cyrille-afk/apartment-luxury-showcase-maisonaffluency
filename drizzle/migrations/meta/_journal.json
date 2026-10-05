@@ -897,6 +897,13 @@
       "when": 1791163548975,
       "tag": "0127_curator_pick_version_restore",
       "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1791163659187,
+      "tag": "0128_curator_pick_versions_use_index",
+      "breakpoints": true
     }
   ]
 }
