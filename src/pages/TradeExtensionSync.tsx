@@ -1,25 +1,36 @@
 import { useCallback, useEffect, useState } from "react";
-import { Activity, Check, CheckCircle2, FolderKanban, Plug, RefreshCw, XCircle } from "lucide-react";
+import { Activity, Check, CheckCircle2, Copy, FolderKanban, KeyRound, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import type { ProjectStagingPayload } from "@/lib/projectStagingMessage";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const EXTENSION_ORIGIN = "/trade/concierge/sidebar";
 const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
+const CONSENT_PATH = "/.lovable/oauth/consent";
+
+type HealthCheck = {
+  ok: boolean;
+  status: number | null;
+  duration_ms: number;
+  error: string | null;
+  detail?: unknown;
+};
 
 type McpHealthReport = {
   healthy: boolean;
   endpoint: string;
+  mode?: string;
   checked_at: string;
   checks: {
-    initialize: { ok: boolean; status: number | null; duration_ms: number; error: string | null; serverInfo: unknown };
-    tools_list: { ok: boolean; status: number | null; duration_ms: number; error: string | null };
+    auth_challenge: HealthCheck;
+    protected_resource_metadata: HealthCheck;
+    oauth_discovery: HealthCheck;
   };
-  tools: string[];
-  missing_expected_tools: string[];
+  note?: string;
 };
 
 export default function TradeExtensionSync() {
