@@ -8538,6 +8538,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          pdf_locale: string
           primary_brand_font: string
           slug: string | null
           updated_at: string
@@ -8551,6 +8552,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          pdf_locale?: string
           primary_brand_font?: string
           slug?: string | null
           updated_at?: string
@@ -8564,6 +8566,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          pdf_locale?: string
           primary_brand_font?: string
           slug?: string | null
           updated_at?: string
@@ -10424,6 +10427,7 @@ export type Database = {
           net_discount_pct: number | null
           notes: string | null
           payer_type: Database["public"]["Enums"]["payer_type"]
+          pdf_locale: string | null
           project_id: string | null
           quote_kind: string
           resale_certificate_id: string | null
@@ -10485,6 +10489,7 @@ export type Database = {
           net_discount_pct?: number | null
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
+          pdf_locale?: string | null
           project_id?: string | null
           quote_kind?: string
           resale_certificate_id?: string | null
@@ -10546,6 +10551,7 @@ export type Database = {
           net_discount_pct?: number | null
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
+          pdf_locale?: string | null
           project_id?: string | null
           quote_kind?: string
           resale_certificate_id?: string | null
