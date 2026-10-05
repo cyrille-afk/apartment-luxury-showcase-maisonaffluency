@@ -155,6 +155,52 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "calculate_trade_budget",
+        "title": "Trade Margin Budget Calculator",
+        "description": "Calculates the Maison Affluency trade budget for a project or product selection: net trade cost after trade discount, logistics fee, total cost to the designer, suggested client price after the designer's markup, and designer net profit. All amounts are in the same currency as totalRetailValue. Pure calculation — no catalogue lookup.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "totalRetailValue": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Total retail (RRP) value of the selection, in any single currency."
+            },
+            "tradeDiscountPercentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 90,
+              "default": 20,
+              "description": "Trade discount percentage off retail. Defaults to 20 (standard trade tier)."
+            },
+            "logisticsFeePercentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 5,
+              "description": "Logistics/delivery fee as a percentage of the net trade cost. Defaults to 5 (Singapore delivery)."
+            },
+            "clientMarkupPercentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 500,
+              "description": "Designer's markup percentage on top of total cost, to derive the suggested client price. Optional; omit for cost-only breakdown."
+            }
+          },
+          "required": [
+            "totalRetailValue"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }
