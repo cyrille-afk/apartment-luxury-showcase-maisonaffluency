@@ -1216,7 +1216,8 @@ function drawCeilingBudgetSummary(
   if (!args.ceilingBudget) return y;
   const budget = calculateCeilingBudget(args.ceilingBudget);
   const rowH = 28;
-  const blockH = 42 + rowH * 5 + 18;
+  const paymentRowH = 22;
+  const blockH = 42 + rowH * 5 + paymentRowH * 2 + 34;
   const right = M + contentW;
 
   doc.setFillColor(250, 249, 246);
@@ -1256,6 +1257,23 @@ function drawCeilingBudgetSummary(
     doc.text(amount, right - 16, cy, { align: "right" });
     cy += rowH;
   }
+
+  const depositCents = Math.round(budget.targetCeilingCents * 0.6);
+  const balanceCents = budget.targetCeilingCents - depositCents;
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.35);
+  doc.line(M + 16, cy - 10, right - 16, cy - 10);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("60% deposit due on confirmation", M + 16, cy + 6);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text(fmtMoney(depositCents, args.currency), right - 16, cy + 6, { align: "right" });
+  cy += paymentRowH;
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("40% balance before shipment", M + 16, cy + 6);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text(fmtMoney(balanceCents, args.currency), right - 16, cy + 6, { align: "right" });
 
   return y + blockH + 12;
 }
