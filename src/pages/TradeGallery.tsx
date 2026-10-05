@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
+import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ const TradeGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
     return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
@@ -545,26 +545,7 @@ const TradeGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-      <div className="flex items-center justify-between gap-3 mt-6 mb-4">
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={cn("p-1.5 transition-colors", viewMode === "grid" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-            aria-label="Grid view"
-            title="Grid view"
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn("p-1.5 transition-colors", viewMode === "list" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-            aria-label="List view"
-            title="List view"
-          >
-            <List className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 mt-6 mb-4">
           <button
             onClick={() => setDrawerOpen(true)}
             className="relative p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
@@ -578,7 +559,6 @@ const TradeGallery = () => {
             )}
           </button>
         </div>
-      </div>
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
@@ -642,7 +622,7 @@ const TradeGallery = () => {
             </div>
           )}
         </div>
-        <div className="flex min-w-0 shrink-0 items-center justify-between gap-4 px-3 py-2 sm:px-0 xl:w-auto xl:min-w-[31rem] xl:py-0">
+        <div className="flex min-w-0 shrink-0 items-center justify-end gap-3 px-3 py-2 sm:px-0 xl:w-auto xl:min-w-[31rem] xl:py-0">
           <GridDensityToggle
             value={density === "compact" ? 4 : 3}
             onChange={(columns) => setDensity(columns === 4 ? "compact" : "comfortable")}
