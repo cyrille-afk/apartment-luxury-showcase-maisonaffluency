@@ -269,7 +269,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
     );
   }, [allProducts, search, category]);
 
-  const showFeedSpinner = isLoading && !fetchTimedOut && products.length === 0;
+  const showSkeleton = products.length === 0 && (isLoading || pricesPending || !fetchTimedOut);
 
   const productUrl = (product: TradeProduct) => {
     if (product.trade_product_id) return `/trade/products/${product.trade_product_id}`;
