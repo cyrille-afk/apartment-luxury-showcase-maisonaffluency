@@ -100,7 +100,7 @@ export function TradeSidebar() {
   const [lookupSlow, setLookupSlow] = useState(false);
   useEffect(() => {
     if (rolesLoaded || !user?.id) { setLookupSlow(false); return; }
-    const t = window.setTimeout(() => { console.log("[sidebar-debug] timer fired"); setLookupSlow(true); }, 4000);
+    const t = window.setTimeout(() => setLookupSlow(true), 4000);
     return () => window.clearTimeout(t);
   }, [rolesLoaded, user?.id]);
   const connectionIssue = !!user?.id && (lookupSlow || betaLookupFailed);
