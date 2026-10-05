@@ -128,7 +128,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
     }
   }
 
-  return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
+  const products = ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
     const designer = Array.isArray(pick.designers)
       ? pick.designers[0]
       : pick.designers;
@@ -181,6 +181,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
       } satisfies LiveTradeProduct,
     ];
   });
+  return { products, hiddenKeys };
 }
 
 const keyOf = (p: TradeProduct) =>
@@ -194,16 +195,22 @@ export function useTradeProducts() {
   const staticProducts = useMemo(() => getAllTradeProducts(), []);
   const { ids: hiddenIds } = useHiddenTradeProductIds();
 
-  const { data: liveProducts = [], isLoading: liveLoading, isFetching: liveFetching } = useQuery({
+  const { data: liveData, isLoading: liveLoading, isFetching: liveFetching } = useQuery({
     queryKey: ["trade-live-products"],
     queryFn: fetchLiveProducts,
     staleTime: 60_000,
   });
+  const liveProducts = useMemo(() => liveData?.products ?? [], [liveData]);
+  const dbHiddenKeys = liveData?.hiddenKeys;
 
 
   const mergedProducts = useMemo(() => {
     const merged = new Map<string, TradeProduct>();
-    for (const p of staticProducts) merged.set(keyOf(p), p);
+    for (const p of staticProducts) {
+      // Static (hardcoded) cards must respect products hidden in the database.
+      if (dbHiddenKeys?.has(keyOf(p))) continue;
+      merged.set(keyOf(p), p);
+    }
     for (const p of liveProducts) {
       const key = keyOf(p);
       const existing = merged.get(key);
