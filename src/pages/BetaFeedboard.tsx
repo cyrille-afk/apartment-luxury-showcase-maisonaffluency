@@ -161,6 +161,18 @@ function EntryCard({ entry }: { entry: Entry }) {
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Environment</p>
           <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.viewport_tag ?? "—"}</p>
         </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Browser</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.browser ?? "—"}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">System</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.os ?? "—"}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Viewport</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.viewport_dims ?? "—"}</p>
+        </div>
       </div>
     </article>
   );
@@ -209,6 +221,7 @@ function EntryDrawer({ lane, onClose, onSaved }: { lane: Lane | null; onClose: (
       author_name,
       author_company: profile?.company?.trim() || null,
       viewport_tag: viewportTag(),
+      ...deviceContext(),
     });
     setSaving(false);
     if (error) return toast.error("Could not save entry");
