@@ -20,6 +20,9 @@ type Entry = {
   author_name: string | null;
   author_company: string | null;
   viewport_tag: string | null;
+  browser: string | null;
+  os: string | null;
+  viewport_dims: string | null;
   created_at: string;
 };
 
@@ -36,6 +39,33 @@ const editorialDate = (iso: string) =>
 const viewportTag = () => {
   const w = window.innerWidth;
   return w < 768 ? "Mobile Viewport" : w <= 1024 ? "Tablet Viewport" : "Desktop Viewport";
+};
+
+const detectBrowser = (ua: string) => {
+  if (/edg/i.test(ua)) return "Edge";
+  if (/opr|opera/i.test(ua)) return "Opera";
+  if (/chrome|crios/i.test(ua)) return "Chrome";
+  if (/safari/i.test(ua)) return "Safari";
+  if (/firefox|fxios/i.test(ua)) return "Firefox";
+  return "Other";
+};
+
+const detectOS = (ua: string) => {
+  if (/windows nt/i.test(ua)) return "Windows";
+  if (/mac os x/i.test(ua)) return "macOS";
+  if (/android/i.test(ua)) return "Android";
+  if (/iphone|ipad|ipod/i.test(ua)) return "iOS";
+  if (/linux/i.test(ua)) return "Linux";
+  return "Other";
+};
+
+const deviceContext = () => {
+  const ua = navigator.userAgent;
+  return {
+    browser: detectBrowser(ua),
+    os: detectOS(ua),
+    viewport_dims: `${window.innerWidth} × ${window.innerHeight}`,
+  };
 };
 
 const LANES: { key: Lane; title: string; hint: string }[] = [
