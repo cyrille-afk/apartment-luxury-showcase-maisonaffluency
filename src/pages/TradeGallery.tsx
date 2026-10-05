@@ -36,7 +36,6 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
 import GridDensityToggle from "@/components/GridDensityToggle";
-import { consumeProductBackRef } from "@/lib/designerBackRef";
 import NewInSpotlight from "@/components/NewInSpotlight";
 
 
@@ -68,7 +67,7 @@ const TradeGallery = () => {
     return (localStorage.getItem("trade:gridDensity:v2") as "comfortable" | "compact") || "compact";
   });
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
+    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity:v2", density);
   }, [density]);
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice } = useTradePriceMode();
