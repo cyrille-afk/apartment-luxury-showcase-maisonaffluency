@@ -1,6 +1,8 @@
 import { defineMcp } from "@lovable.dev/mcp-js";
 import searchCuratorPicks from "./tools/search-curator-picks";
 import getProduct from "./tools/get-product";
+import getSyncedProjects from "./tools/get-synced-projects";
+import stageProductToProject from "./tools/stage-product-to-project";
 
 // Public MCP server for Maison Affluency's designer catalog.
 //
