@@ -87,7 +87,7 @@ paths:
                   status:
                     type: string
                     enum: [staged, rejected]
-                    description: "'staged' when the record was written and verified, 'rejected' when validation failed."
+                    description: staged when the record was written and verified, rejected when validation failed.
                   boardItemId:
                     type: string
                     description: UUID of the created board item record, present when status is 'staged'.
@@ -99,7 +99,7 @@ paths:
                     description: ISO 8601 timestamp of server-side verification.
                   message:
                     type: string
-                    description: Human-readable result, e.g. 'Success: Casque Bar Cabinet added to Singapore GCB workflow'.
+                    description: Human-readable result, e.g. Success - Casque Bar Cabinet added to Singapore GCB workflow.
                 required: [status, targetWorkflow, message]
         "401":
           description: Missing or invalid bearer token.
