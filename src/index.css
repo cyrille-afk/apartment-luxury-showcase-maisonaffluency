@@ -159,6 +159,7 @@ All colors MUST be HSL.
   .dark {
     --background: 168 15% 12%;
     --foreground: 32 20% 95%;
+    --trade-gallery-bg: 168 15% 10%;
 
     --card: 168 15% 15%;
     --card-foreground: 32 20% 95%;
