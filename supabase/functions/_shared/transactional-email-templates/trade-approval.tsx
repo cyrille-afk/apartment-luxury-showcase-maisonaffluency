@@ -6,17 +6,19 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 import { ApplicationDraftBody } from './application-draft-body.tsx'
+import { payoutsBenefit } from '../applicationNotificationCopy.ts'
 
 const SITE_NAME = "Maison Affluency"
 
 interface TradeApprovalProps {
   name?: string
   companyName?: string
+  country?: string
   bodyText?: string
   subjectText?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName, bodyText }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
