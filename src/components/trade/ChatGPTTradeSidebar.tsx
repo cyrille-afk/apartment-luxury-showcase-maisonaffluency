@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, Package, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useBrandDiscountCaps, effectiveDiscountForBrand } from "@/lib/brandDiscountCap";
@@ -24,7 +25,7 @@ const priceKey = (brand: string, title: string) =>
   `${slugify(normalizeBrandToParent(brand))}::${slugify(title)}`;
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
-export default function ChatGPTTradeSidebar() {
+function TradeSidebarFeed() {
   const { allProducts, categories, isLoading } = useTradeProducts();
   const { discountPct } = useTradeDiscount();
   const { showTradePrice } = useTradePriceMode();
@@ -166,4 +167,13 @@ export default function ChatGPTTradeSidebar() {
       </main>
     </div>
   );
+}
+
+export default function ChatGPTTradeSidebar() {
+  const { user, loading, rolesLoaded, isAdmin, isTradeUser } = useAuth();
+  const location = useLocation();
+  if (loading || !rolesLoaded) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
+  if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
+  if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
+  return <TradeSidebarFeed />;
 }
