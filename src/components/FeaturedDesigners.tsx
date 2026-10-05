@@ -104,7 +104,6 @@ const adamCourtsVillaNightstand = "https://res.cloudinary.com/dif1oamtj/image/up
 // Curators' Picks images
 const alexanderLamontPick1 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Ondas-Sconce-Clear_07_alexander-lamont_1_t6ygbc.jpg";
 const alexanderLamontPick2 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Galea-Lantern-Rock_Crystal_01_alexander-lamont_1_rhpxsg.jpg";
-const alexanderLamontPick4 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160682/Dais-Lounge-Chair_06_alexander-lamont_1_fuodom.jpg";
 const alexanderLamontPick5 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160703/Corteza-Console-Table-Dark_03_alexander-lamont_r2ubvz.jpg";
 const alexanderLamontPick6 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772161289/Barbican-Cabinet_13_alexander-lamont_2_hyp2sd.jpg";
 const alexanderLamontPick7 = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773560865/Screen_Shot_2026-03-15_at_3.47.13_PM_qpqypt.png";
@@ -325,17 +324,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         pdfFilename: "Alexander_Lamont-Ondas_Sconce.pdf"
       },
       { 
-        image: alexanderLamontPick4, 
-        title: "Dais",
-        subtitle: "Lounge Chair",
-        category: "Seating",
-        tags: ["Couture", "Seating", "Chair"],
-        materials: "Bouclé upholstery • Shagreen leather • Straw marquetry accents",
-        dimensions: "H75 × W80 × D85 cm",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Dais_Lounge_Chair.pdf",
-        pdfFilename: "Alexander_Lamont-Dais_Lounge_Chair.pdf"
-      },
-      { 
         image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578050/Screen_Shot_2026-03-15_at_8.32.08_PM_leki9q.png", 
         title: "Galea Lantern",
         subtitle: "Rock Crystal",
@@ -345,17 +333,6 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
         dimensions: "H28 × W18 × D18 cm",
         pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Galea_Lantern.pdf",
         pdfFilename: "Alexander_Lamont-Galea_Lantern.pdf"
-      },
-      { 
-        image: "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1773578132/Screen_Shot_2026-03-15_at_8.30.15_PM_wmuyur.png", 
-        title: "Corteza Console Table",
-        subtitle: "",
-        category: "Tables",
-        tags: ["Couture", "Tables", "Console"],
-        materials: "Natural distressed wood • Bronze detailing",
-        dimensions: "H85 × W140 × D40 cm",
-        pdfUrl: "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/pdfs/Corteza_Console_Table.pdf",
-        pdfFilename: "Alexander_Lamont-Corteza_Console_Table.pdf"
       },
       { 
         image: alexanderLamontPick6, 
