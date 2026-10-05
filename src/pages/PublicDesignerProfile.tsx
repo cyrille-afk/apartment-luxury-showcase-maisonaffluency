@@ -2070,26 +2070,28 @@ const PublicDesignerProfile = () => {
                         )}
                       </div>
 
-                      {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                      {/* Editorial text block — designer / product / price hierarchy.
+                          Mobile: single vertical column so titles never truncate;
+                          sm+: unified split horizontal row. */}
+                      <div className="mt-3 flex w-full flex-col items-stretch gap-1 px-1 sm:h-12 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div className="flex min-w-0 flex-1 flex-col text-left">
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
                               to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70"
+                              className="block w-full break-words font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70 sm:truncate sm:whitespace-nowrap"
                             >
                               {cardBrandLabel || parentBrandName}
                             </Link>
                           ) : (
-                            <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
+                            <span className="block w-full break-words font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased sm:truncate sm:whitespace-nowrap">
                               {cardBrandLabel || parentBrandName || designer.name}
                             </span>
                           )}
 
-                          {/* Product name — secondary, elegant */}
-                          <h3 className="mt-0.5 line-clamp-1 font-body text-xs font-medium leading-snug text-muted-foreground antialiased">
+                          {/* Product name — secondary, elegant; full title wraps on mobile */}
+                          <h3 className="mt-0.5 font-body text-xs font-medium leading-snug text-muted-foreground antialiased sm:line-clamp-1">
                             <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground transition-colors">
                               {displayTitle}
                             </Link>
@@ -2100,7 +2102,7 @@ const PublicDesignerProfile = () => {
                             cardSubtitle.trim().toLowerCase() !== (cardBrandLabel || "").trim().toLowerCase() &&
                             !subtitleDesignerLabel && (
                               <p className={cn(
-                                "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight line-clamp-1",
+                                "font-body text-[10px] md:text-[11px] tracking-[0.14em] text-muted-foreground leading-tight sm:line-clamp-1",
                                 !isArnoldClamChair && "uppercase"
                               )}>
                                 {cardSubtitle}
@@ -2108,8 +2110,8 @@ const PublicDesignerProfile = () => {
                             )}
                         </div>
 
-                        {/* Price slot — bottom right, aligned to product title baseline */}
-                        <div className="shrink-0 whitespace-nowrap text-right">
+                        {/* Price slot — bottom right on sm+, full-width line under the title on mobile */}
+                        <div className="whitespace-nowrap sm:shrink-0 sm:text-right">
                            <p className="whitespace-nowrap font-body text-xs font-semibold text-foreground antialiased">
                             {formatPublicRrpForDestination(publicRrpMap[pick.id], dest.currency) || "Price upon Request"}
                           </p>
