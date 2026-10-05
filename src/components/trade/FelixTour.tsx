@@ -219,9 +219,16 @@ const FELIX_STEPS: FelixStep[] = [
     title: "Priority Concierge Access",
     target: "nav-concierge",
     route: "/trade",
-    cta: "Finish Tour",
     dialogue:
       "You are never sourcing alone. I am available in the sidebar on every page through the Trade Concierge — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
+  },
+  {
+    id: "ai-extension-sync",
+    title: "ACTIVATE YOUR AI DESIGN CO-PILOT",
+    target: "sidebar-ai-sync",
+    route: "/trade/extension-sync",
+    dialogue:
+      "One final capability: the AI Extension Sync connects your workspace directly to ChatGPT. Your AI design co-pilot can discover your synced project folders, stage catalogue pieces straight into an active workflow, and run live top-down budget mathematics — target client ceilings, tier discounts, and net sourcing budgets — without leaving the conversation. Activate it from the sidebar whenever you are ready.",
   },
 ];
 
