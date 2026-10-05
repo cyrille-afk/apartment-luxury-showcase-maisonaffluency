@@ -138,7 +138,7 @@ const TradeShowroom = () => {
                 The Collection
               </h1>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">
-                A MATRICULATED INDEX OF 150+ COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
+                A MATRICULATED INDEX OF {makerCount ?? "…"} COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
               </p>
             </div>
             <button
