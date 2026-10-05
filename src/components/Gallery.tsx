@@ -66,9 +66,12 @@ const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "
 const slugify = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 const getFixedHeaderOffset = () => {
-  const nav = document.querySelector("nav");
-  const navHeight = nav?.getBoundingClientRect().height ?? 96;
-  return Math.ceil(navHeight + 8);
+  const tradeHeader = document.querySelector<HTMLElement>("header.trade-editorial-header");
+  const navigation = document.querySelector<HTMLElement>("nav");
+  const headerHeight = tradeHeader?.getBoundingClientRect().height
+    ?? navigation?.getBoundingClientRect().height
+    ?? 64;
+  return Math.ceil(headerHeight + 8);
 };
 
 const pinElementBelowHeader = (element: HTMLElement, maxPasses = 8) => {
