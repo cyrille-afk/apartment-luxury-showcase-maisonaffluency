@@ -241,6 +241,17 @@ function EntryCard({ entry }: { entry: Entry }) {
               </p>
               <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
                 <TransformUtils />
+                <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+                <button
+                  type="button"
+                  aria-label="Download screenshot"
+                  title="Download full-resolution image"
+                  className={btn}
+                  disabled={downloading}
+                  onClick={downloadImage}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
           </TransformWrapper>
