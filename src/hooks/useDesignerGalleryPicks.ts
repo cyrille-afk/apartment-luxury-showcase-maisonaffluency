@@ -9,9 +9,10 @@ import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort
 export function useDesignerGalleryPicks(designer: Designer | null | undefined) {
   const isParentBrand = isParentBrandDesigner(designer);
   const isArnoldMadsen = designer?.slug === "arnold-madsen";
-  const { data: groupedPicks = [], isPending: groupedPending } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly: true });
-  const { data: ownPicks = [], isPending: ownPending } = useDesignerPicks(designer?.id, { publicOnly: true });
-  const { data: attributedPicks = [], isPending: attributedPending } = useAttributedDesignerPicks(designer && !isParentBrand ? designer : undefined, { publicOnly: true });
+  const publicOnly = !designer?.trade_only;
+  const { data: groupedPicks = [], isPending: groupedPending } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly });
+  const { data: ownPicks = [], isPending: ownPending } = useDesignerPicks(designer?.id, { publicOnly });
+  const { data: attributedPicks = [], isPending: attributedPending } = useAttributedDesignerPicks(designer && !isParentBrand ? designer : undefined, { publicOnly });
   const { data: dagmarAllPicks = [], isPending: dagmarPending } = useQuery({
     queryKey: ["arnold-madsen-dagmar-all-picks"],
     enabled: isArnoldMadsen,
