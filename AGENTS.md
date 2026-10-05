@@ -28,3 +28,4 @@
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
+- TradeSidebar caches last-known admin/trade/beta nav access per user (ma-sidebar-access-v1:<uid>) and shows a "Reconnecting…" notice while role lookups are pending/failing — outages must not hide links; cache is presentation only, pages/RLS still enforce access.
