@@ -19,6 +19,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useProjects } from "@/hooks/useProjects";
+import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -114,6 +115,7 @@ const TradeDashboard = () => {
   const { showTradePrice } = useTradePriceMode();
   const tierVolume = useTierVolumeLocale();
   const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const syncedItemsByProject = useDashboardDataSync();
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
@@ -396,6 +398,11 @@ const TradeDashboard = () => {
                     <h3 className="mt-1 font-display text-lg text-foreground">{project.name}</h3>
                   </Link>
                   {project.location && <p className="mt-1 font-body text-xs text-muted-foreground">{project.location}</p>}
+                  {(syncedItemsByProject[project.id] || []).map((item) => (
+                    <p key={item.boardItemId} className="mt-2 font-body text-xs text-muted-foreground">
+                      {item.productName} · {item.designer}
+                    </p>
+                  ))}
                   {isSampleProject(project) && canEdit && <Button asChild variant="link" className="mt-3 h-auto p-0 text-xs"><Link to={`/trade/projects?convert=${encodeURIComponent(project.id)}`}>Create my first real project →</Link></Button>}
                 </div>
               </div>
