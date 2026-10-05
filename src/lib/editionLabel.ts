@@ -103,8 +103,10 @@ export function getHouseEditionLabel(input: {
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
-  // On a child designer's own page the card already credits the house.
+  // On a child designer's own page the card already credits the house, so no
+  // chip. Independent designers (e.g. Dan Yeffet for Veronese) stand alone —
+  // only Ecart's family carries the REEDITION chip, handled above.
   const page = normalizeHouseName(input.pageDesignerName);
-  if (page && page !== normalizeHouseName(house)) return ECART_REEDITION_LABEL;
+  if (page && page !== normalizeHouseName(house)) return null;
   return /(?:^|\s)[ée]ditions?$/i.test(house) ? house : `${house} Edition`;
 }
