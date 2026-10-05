@@ -18,8 +18,8 @@ export function MobileContinuityBanner() {
   const [open, setOpen] = useState(false);
 
   const redirectTo = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/trade`;
+    // Always target production — never the preview/dev host.
+    return "https://maisonaffluency.com/trade";
   }, []);
 
   useEffect(() => {

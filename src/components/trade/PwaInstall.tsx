@@ -13,12 +13,15 @@ if (typeof window !== "undefined") {
   });
 }
 
+/** Production origin — never derive from window.location so preview/dev hosts never leak into QR codes. */
+const PWA_ORIGIN = "https://maisonaffluency.com";
+
 /** QR pointing at the mobile launch page, which handles sign-in and install. */
 export function usePwaQr(size = 200) {
   const [src, setSrc] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
-    QRCode.toDataURL(`${window.location.origin}/trade/launch`, {
+    QRCode.toDataURL(`${PWA_ORIGIN}/trade/launch`, {
       margin: 1,
       width: size,
       errorCorrectionLevel: "M",
@@ -76,7 +79,7 @@ export function DashboardPwaBanner() {
       await deferredPrompt.prompt();
       deferredPrompt = null;
     } else {
-      window.location.href = "/trade/launch";
+      window.location.href = `${PWA_ORIGIN}/trade/launch`;
     }
   };
   return (

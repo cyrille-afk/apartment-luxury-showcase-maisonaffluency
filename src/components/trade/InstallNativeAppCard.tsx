@@ -18,8 +18,8 @@ export function InstallNativeAppCard() {
   const attempted = useRef(false);
 
   const redirectTo = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/trade`;
+    // Always target production — never the preview/dev host.
+    return "https://maisonaffluency.com/trade";
   }, []);
 
   const mint = async () => {

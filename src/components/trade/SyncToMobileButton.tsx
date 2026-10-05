@@ -23,8 +23,8 @@ export function SyncToMobileButton() {
   const lastPathRef = useRef<string | null>(null);
 
   const redirectTo = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}${location.pathname}${location.search}`;
+    // Always target production — never the preview/dev host.
+    return `https://maisonaffluency.com${location.pathname}${location.search}`;
   }, [location.pathname, location.search]);
 
   const mint = async () => {
