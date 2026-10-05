@@ -24,8 +24,9 @@ import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptio
 import { InventoryBadgeStack } from "@/components/ui/InventoryBadge";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
-import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAttributedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerByName, useAllDesigners } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
+import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ShareMenu from "@/components/ShareMenu";
@@ -46,7 +47,6 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { ParentHouseOverview } from "@/components/ParentHouseOverview";
 import { toOgImage } from "@/lib/ogImage";
-import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -600,46 +600,10 @@ const PublicDesignerProfile = () => {
     }
   }, [portraitOpen, newInExpanded]);
 
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined,
-    { publicOnly: true }
-  );
-  const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
-  const { data: attributedPicks = [] } = useAttributedDesignerPicks(
-    designer && !isParentBrand ? designer : undefined,
-    { publicOnly: true },
-  );
   // Arnold Madsen owns no products of his own: his portrait surfaces Dagmar's
   // Clam Chair & Clam Stool, attributed to Dagmar (see isArnoldClamChair below).
   const isArnoldMadsenProfile = designer?.slug === "arnold-madsen";
-  // Full Dagmar catalogue — the Clam pieces are shown on Arnold Madsen's grid,
-  // while the complete list feeds the lightbox "More from Dagmar" strip so it
-  // matches the strip shown on Dagmar's own page.
-  const { data: dagmarAllPicks = [] } = useQuery({
-    queryKey: ["arnold-madsen-dagmar-all-picks"],
-    enabled: !!isArnoldMadsenProfile,
-    staleTime: 10 * 60_000,
-    queryFn: async () => {
-      const { data: dagmar } = await supabase
-        .from("designers")
-        .select("id")
-        .eq("slug", "dagmar-london")
-        .maybeSingle();
-      if (!dagmar?.id) return [];
-      const { data } = await supabase
-        .from("designer_curator_picks_public" as any)
-        .select("*")
-        .eq("designer_id", dagmar.id);
-      return (data as any[]) || [];
-    },
-  });
-  const dagmarClamPicks = useMemo(
-    () =>
-      (dagmarAllPicks as any[]).filter((p) =>
-        /^clam (chair|stool)(?:,|\s|$)/i.test(p.title || "")
-      ),
-    [dagmarAllPicks]
-  );
+  const { picks, dagmarAllPicks } = useDesignerGalleryPicks(designer);
 
 
   const { data: allDesignersForLookup = [] } = useAllDesigners();
@@ -663,12 +627,7 @@ const PublicDesignerProfile = () => {
   }, [allDesignersForLookup]);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
-  const isGrouped = isParentBrand && groupedPicks.length > 0;
-  const rawPicks = isGrouped
-    ? groupedPicks
-    : isArnoldMadsenProfile
-      ? (dagmarClamPicks as any[])
-      : [...ownPicks, ...attributedPicks];
+  const isGrouped = isParentBrand;
 
   // Child designers must never inherit biography text, philosophy, or media from
   // the parent brand — parent bios embed inline image/video URLs that would leak.
@@ -682,34 +641,6 @@ const PublicDesignerProfile = () => {
   const useNewInSpotlightFormat = designer?.slug === "emmanuel-babled" && !isMobile;
 
   const displayPhilosophy = designer?.philosophy;
-
-  const picks = useMemo(() => {
-    // Collect image URLs used in biography so matching picks are excluded from the grid.
-    const bioUrls = new Set<string>();
-    for (const entry of displayBiographyImages || []) {
-      if (entry) {
-        const url = entry.split(/\s*\|\s*/)[0]?.trim();
-        if (url) bioUrls.add(url);
-      }
-    }
-    if (displayBiography) {
-      for (const block of displayBiography.split(/\n\n+/)) {
-        const trimmed = block.trim();
-        const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
-        if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
-          bioUrls.add(url);
-        }
-      }
-    }
-
-    // Exclude picks whose image already appears in the biography
-    const filtered = bioUrls.size > 0 && !isGrouped && !isArnoldMadsenProfile
-      ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
-      : rawPicks;
-
-
-    return interleaveBySubcategory(sortCuratorPicks(filtered));
-  }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
 
   const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p: any) => p.id));
 
