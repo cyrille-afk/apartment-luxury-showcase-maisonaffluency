@@ -11,36 +11,26 @@ export type ApplicationRecord = {
   status: ApplicationStatus;
 };
 
-const ADMIN_ALERT_TEMPLATES = ['application-decision-alert-concierge', 'application-decision-alert-cyrille'] as const;
-
-/** Separate internal notice to each admin mailbox (one recipient per send). Never blocks the applicant notice. */
-async function alertAdmins(a: ApplicationRecord, status: 'approved' | 'rejected', draft?: NotificationDraft) {
-  const { data: session } = await supabase.auth.getSession();
-  const templateData = {
-    decision: status, applicantName: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined,
-    applicantEmail: a.email, subjectSent: draft?.subject, reviewerEmail: session.session?.user.email ?? undefined,
-    sentAt: new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Singapore' }) + ' SGT',
-  };
-  await Promise.all(ADMIN_ALERT_TEMPLATES.map((templateName) =>
-    supabase.functions.invoke('send-transactional-email', {
-      body: { templateName, idempotencyKey: `${templateName}-${status}-${a.id}`, templateData },
-    }).catch(() => null)));
+/** Exact copy of the applicant's letter to each admin mailbox (one recipient per send). Never blocks the applicant notice. */
+async function copyAdmins(a: ApplicationRecord, base: string, templateData: Record<string, unknown>) {
+  await Promise.all(['concierge', 'cyrille'].map((who) => {
+    const templateName = `${base}-copy-${who}`;
+    return supabase.functions.invoke('send-transactional-email', {
+      body: { templateName, idempotencyKey: `${templateName}-${a.id}`, templateData },
+    }).catch(() => null);
+  }));
 }
 
 async function notifyApplication(a: ApplicationRecord, status: 'approved' | 'rejected', draft?: NotificationDraft) {
   const templateName = status === 'approved' ? 'trade-approval' : 'trade-rejection';
   try {
+    const templateData = { name: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined, country: a.country ?? undefined,
+      ...(draft ? { subjectText: draft.subject, bodyText: draft.body } : {}) };
     const { data, error } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName,
-        recipientEmail: a.email,
-        idempotencyKey: `${templateName}-${a.id}`,
-        templateData: { name: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined, country: a.country ?? undefined,
-          ...(draft ? { subjectText: draft.subject, bodyText: draft.body } : {}) },
-      },
+      body: { templateName, recipientEmail: a.email, idempotencyKey: `${templateName}-${a.id}`, templateData },
     });
     if (error || data?.success !== true) return false;
-    await alertAdmins(a, status, draft);
+    await copyAdmins(a, templateName, templateData);
     return true;
   } catch {
     return false;
