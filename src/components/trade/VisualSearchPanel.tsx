@@ -151,7 +151,7 @@ export default function VisualSearchPanel() {
             {matches.map((p) => (
               <div key={p.id} className="bg-card p-3">
                 <div className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-background">
-                  <img src={optimizeImageUrl(p.image_url!, { width: 500 })} alt={p.product_name} loading="lazy" className="h-full w-full object-contain" />
+                  <img src={optimizeImageUrl(p.image_url!, "w_500,c_limit,q_auto,f_auto")} alt={p.product_name} loading="lazy" className="h-full w-full object-contain" />
                 </div>
                 <div className="flex items-start justify-between gap-3 px-1 pt-3">
                   <p className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{p.brand_name}</p>
