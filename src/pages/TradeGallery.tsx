@@ -36,7 +36,6 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
 import GridDensityToggle from "@/components/GridDensityToggle";
-import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import NewInSpotlight from "@/components/NewInSpotlight";
 
@@ -65,7 +64,8 @@ const TradeGallery = () => {
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
-    return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
+    // Default to 4-column (compact); new storage key resets the legacy 3-column default
+    return (localStorage.getItem("trade:gridDensity:v2") as "comfortable" | "compact") || "compact";
   });
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
@@ -91,20 +91,6 @@ const TradeGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
-  const originatingProductPath = useMemo(() => {
-    const path = consumeProductBackRef(routeBrandSlug);
-    return path?.startsWith("/trade/products/") ? path : null;
-  }, [routeBrandSlug]);
-
-  const catalogueBreadcrumbs = useMemo<Crumb[]>(() => {
-    if (!routeBrandSlug) return [];
-    const designerName = galleryDesigner?.display_name || galleryDesigner?.name || routeBrandSlug.replace(/-/g, " ");
-    return [
-      { label: "Full Collection", to: "/trade/gallery" },
-      ...(originatingProductPath ? [{ label: "Return to Product", to: originatingProductPath }] : []),
-      { label: designerName },
-    ];
-  }, [galleryDesigner, originatingProductPath, routeBrandSlug]);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.trade_product_id) {
@@ -539,13 +525,10 @@ const TradeGallery = () => {
           />
         </div>
       )}
-      {catalogueBreadcrumbs.length > 0 && (
-        <Breadcrumbs items={catalogueBreadcrumbs} className="mb-5" />
-      )}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
+      <div className="flex items-end justify-between gap-4 pb-2 border-b border-[#E5E5E5]">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
-          <p className="mt-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+          <h1 className="font-display text-base md:text-lg font-normal tracking-wide text-foreground">Trade Gallery</h1>
+          <p className="mt-0.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
             {filtered.length} {filtered.length === 1 ? "collected piece" : "collected pieces"}
             {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
           </p>
