@@ -15,6 +15,8 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates 
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { useDesigner } from "@/hooks/useDesigner";
+import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
 import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,7 +50,7 @@ const TradeGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const { allProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -83,6 +85,8 @@ const TradeGallery = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
+  const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
+  const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.trade_product_id) {
@@ -407,10 +411,28 @@ const TradeGallery = () => {
     });
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
+  const canonicalProducts = useMemo(() => {
+    if (!routeBrandSlug || !galleryDesigner || galleryDesigner.trade_only) return null;
+    // The merged grid deduplicates by brand/title. Resolve saved pick IDs from
+    // the live rows as well so no public card disappears due to a name collision.
+    const byId = new Map([...allProducts, ...liveProducts].map((product) => [product.id, product]));
+    return galleryPicks.flatMap((pick) => {
+      const product = byId.get(pick.id);
+      if (!product || isTradeProductMarkedHidden(product, hiddenTradeProductIds)) return [];
+      // Filter the shared public sequence, not the trade brand name: a credited
+      // designer may feature a piece owned by a different atelier.
+      const q = search.toLowerCase();
+      if (q && ![product.product_name, product.brand_name, product.subtitle, product.materials]
+        .some((value) => value?.toLowerCase().includes(q))) return [];
+      if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
+      if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
+      return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
+    });
+  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
   const filtered = useMemo(
     () => {
-      // A single maker's trade gallery follows the same saved product order
-      // and subcategory interleaving as their public Curators' Picks.
+      if (canonicalProducts) return canonicalProducts;
+      // Trade-only designers have no public counterpart. Use their saved order.
       if (routeBrandName || selectedBrand !== "all") {
         return interleaveBySubcategory(sortCuratorPicks(
           matchedProducts.map((p) => ({ ...p, sort_order: p.sort_order ?? null })),
@@ -419,7 +441,7 @@ const TradeGallery = () => {
       return curateGrid(matchedProducts, (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [matchedProducts, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
+    [matchedProducts, canonicalProducts, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
@@ -625,7 +647,9 @@ const TradeGallery = () => {
         </div>
       </div>
       {/* Content */}
-      {filtered.length === 0 ? (
+      {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
+        <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
+      ) : filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">
             No products match your search criteria.

@@ -344,7 +344,16 @@ export function useTradeProducts() {
     return groups;
   }, [mergedProducts]);
 
-  return { allProducts, brands, categories, getSubcategories, duplicateGroups, isLoading: liveLoading, isFetching: liveFetching };
+  const visibleLiveProducts = useMemo(
+    () => liveProducts.filter((p) =>
+      !dbHiddenKeys?.has(hiddenKeyOf(p)) &&
+      !dbHiddenKeys?.has(`brand::${normalizeHiddenPart(p.brand_name)}`) &&
+      !isTradeProductMarkedHidden(p, hiddenIds)
+    ),
+    [liveProducts, dbHiddenKeys, hiddenIds],
+  );
+
+  return { allProducts, liveProducts: visibleLiveProducts, brands, categories, getSubcategories, duplicateGroups, isLoading: liveLoading, isFetching: liveFetching };
 }
 
 export interface DuplicateGroup {

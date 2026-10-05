@@ -99,6 +99,7 @@ export interface Designer {
   links: { type: string; url?: string }[];
   biography_images: string[];
   is_published: boolean;
+  trade_only?: boolean;
   sort_order: number;
   new_in_order: number | null;
   collab_brands: string[] | null;

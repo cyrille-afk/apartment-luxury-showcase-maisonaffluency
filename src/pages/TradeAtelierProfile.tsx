@@ -14,7 +14,8 @@ import EditorialBiography, { renderParagraph } from "@/components/EditorialBiogr
 import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { cn } from "@/lib/utils";
-import { useDesigner, useDesignerPicks, useRelatedDesigners, useGroupedDesignerPicks } from "@/hooks/useDesigner";
+import { useDesigner, useRelatedDesigners } from "@/hooks/useDesigner";
+import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
@@ -168,63 +169,10 @@ const TradeAtelierProfile = () => {
   // For parent brands (founder === name) or child designers, fetch picks from all related designers
   const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
-  const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined
-  );
-  const { data: ownPicks = [] } = useDesignerPicks(designer?.id);
-  const rawPicks = isParentBrand && groupedPicks.length > 0 ? groupedPicks : ownPicks;
+  const { picks } = useDesignerGalleryPicks(designer);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
 
-  // Extract image URLs used in biography to deprioritize matching picks
-  const bioImageUrls = useMemo(() => {
-    const urls = new Set<string>();
-    for (const entry of designer?.biography_images || []) {
-      if (entry) {
-        const url = entry.split(/\s*\|\s*/)[0]?.trim();
-        if (url) urls.add(url);
-      }
-    }
-    if (designer?.biography) {
-      for (const block of designer.biography.split(/\n\n+/)) {
-        const trimmed = block.trim();
-        const url = trimmed.split(/\s*\|\s*/)[0]?.trim();
-        if (url && /^https?:\/\//i.test(url) && !/\s/.test(url)) {
-          urls.add(url);
-        }
-      }
-    }
-    return urls;
-  }, [designer?.biography_images, designer?.biography]);
-
-  // Interleave picks so same functional subcategory never appears side-by-side
-  const picks = useMemo(() => {
-    // Deprioritize picks whose image appears in biography
-    const deprioritized = [...rawPicks].sort((a, b) => {
-      const aInBio = bioImageUrls.has(a.image_url) ? 1 : 0;
-      const bInBio = bioImageUrls.has(b.image_url) ? 1 : 0;
-      return aInBio - bInBio;
-    });
-    if (deprioritized.length <= 2) return deprioritized;
-
-    const getFunctionalCategory = (p: typeof rawPicks[0]) => {
-      if (p.category?.trim()) return p.category.trim().toLowerCase();
-      if (p.subcategory?.trim()) return p.subcategory.trim().toLowerCase();
-      return "other";
-    };
-
-    const result: typeof rawPicks = [];
-    const remaining = [...deprioritized];
-    let lastCat = "";
-
-    while (remaining.length > 0) {
-      const idx = remaining.findIndex((p) => getFunctionalCategory(p) !== lastCat);
-      const picked = idx >= 0 ? remaining.splice(idx, 1)[0] : remaining.shift()!;
-      lastCat = getFunctionalCategory(picked);
-      result.push(picked);
-    }
-    return result;
-  }, [rawPicks, bioImageUrls]);
   const { data: related = [] } = useRelatedDesigners(slug, designer?.source);
   const profileBadgeLabel = designer?.display_name || designer?.name;
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
@@ -612,7 +560,7 @@ const TradeAtelierProfile = () => {
 
         {/* Curator's Picks */}
         {picks.length > 0 && (() => {
-          const isGrouped = isParentBrand && groupedPicks.length > 0;
+          const isGrouped = isParentBrand;
 
           return (
           <motion.div
