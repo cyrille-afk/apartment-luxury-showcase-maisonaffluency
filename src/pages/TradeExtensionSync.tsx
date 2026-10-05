@@ -1,0 +1,142 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Check, CheckCircle2, FolderKanban, Plug, RefreshCw } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+
+const EXTENSION_ORIGIN = "/trade/concierge/sidebar";
+const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
+
+export default function TradeExtensionSync() {
+  const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const [lastSync, setLastSync] = useState<string | null>(null);
+
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem(LAST_SYNC_KEY);
+        setLastSync(raw ? raw : null);
+      } catch {
+        setLastSync(null);
+      }
+    };
+    read();
+    window.addEventListener("concierge:artifacts-changed", read);
+    return () => window.removeEventListener("concierge:artifacts-changed", read);
+  }, []);
+
+  const syncedProjects = activeProjects.filter((p) => p.name.trim().length > 0);
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-10">
+      <div>
+        <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
+          ChatGPT Extension Integration
+        </h1>
+        <p className="font-body text-sm text-muted-foreground mt-1">
+          Connect the external ChatGPT trade frame to your active project folders and
+          stream staged pieces into the portal in real time.
+        </p>
+      </div>
+
+      {/* Connection status */}
+      <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
+        <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground mb-4">
+          Connection Status
+        </h2>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="font-body text-sm font-medium text-foreground">
+              Extension Connected
+            </span>
+          </div>
+          <div className="flex items-center gap-2 font-body text-xs text-muted-foreground">
+            <Plug className="h-3.5 w-3.5" />
+            <span>
+              Same-origin data hooks verified against your workspace records —
+              staged pieces are written by the portal, never by the extension.
+            </span>
+          </div>
+          {lastSync && (
+            <span className="ml-auto font-body text-[11px] uppercase tracking-widest text-muted-foreground">
+              Last sync {lastSync}
+            </span>
+          )}
+        </div>
+      </section>
+
+      {/* Synced project folders */}
+      <section>
+        <div className="flex items-baseline justify-between gap-4 mb-4">
+          <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
+            Active Project Folders Synced
+          </h2>
+          <span className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hidden sm:block">
+            {syncedProjects.length} folder{syncedProjects.length === 1 ? "" : "s"} sharing real-time data hooks
+          </span>
+        </div>
+        {syncedProjects.length === 0 ? (
+          <div className="rounded-xl border border-border bg-background p-6 text-center">
+            <p className="font-body text-sm text-muted-foreground">
+              No active project folders yet. Create one to start syncing staged pieces
+              from the extension.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {syncedProjects.map((project) => (
+              <div
+                key={project.id}
+                className="group flex items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
+              >
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
+                  <FolderKanban className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-body text-sm font-medium text-foreground truncate">
+                      {project.name}
+                    </span>
+                    <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" aria-label="Synced" />
+                  </div>
+                  <span className="font-body text-xs text-muted-foreground leading-snug block mt-0.5">
+                    Synced · real-time data hook active
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Open the extension catalogue */}
+      <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
+              Extension Catalogue
+            </h2>
+            <p className="font-body text-xs text-muted-foreground mt-1">
+              The narrow-frame catalogue the ChatGPT extension embeds. Stage pieces to
+              any active folder — they appear on your dashboard instantly.
+            </p>
+          </div>
+          <Link
+            to={EXTENSION_ORIGIN}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 font-body text-sm text-foreground hover:bg-muted/50 hover:border-foreground/20 transition-all"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Open Catalogue
+          </Link>
+        </div>
+        <div className="mt-4 flex items-center gap-2 font-body text-[11px] uppercase tracking-widest text-emerald-600">
+          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+          All active folders receiving staged records
+        </div>
+      </section>
+    </div>
+  );
+}

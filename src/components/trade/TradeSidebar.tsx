@@ -32,7 +32,7 @@ const topItems: NavItem[] = [
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
-  { title: "Trade Concierge Catalogue", url: "/trade/concierge/sidebar", icon: Wand2 },
+  { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "Settings", url: "/trade/settings", icon: Settings },
