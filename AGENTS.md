@@ -27,3 +27,4 @@
 - Extension project-folder names are canonicalized through `supabase/functions/_shared/projectFolders.ts` (trim + collapse whitespace + lowercase); get_synced_projects dedupes to the most recently updated row per normalized name and stage_product_to_project resolves names with the same rule — DB casing variants must never split a folder for ChatGPT.
 - Top-down proforma ledgers inherit project defaults unless a quote explicitly selects itemized or target-ceiling mode; all ceiling arithmetic lives in `calculateCeilingBudget` so screen and PDF figures cannot drift.
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
+- Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
