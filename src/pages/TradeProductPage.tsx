@@ -24,7 +24,6 @@ import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
-import RegionalLogisticsNote from "@/components/trade/RegionalLogisticsNote";
 import ShareMenu from "@/components/ShareMenu";
 import CornerTooltip from "@/components/product/CornerTooltip";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
@@ -3019,36 +3018,20 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
-            {/* Origin & lead time — mobile: after the price */}
+            {/* Origin only — lead time lives exclusively in the pricing block. */}
             <div className="flex flex-col gap-2">
               {(() => {
-                const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, product.lead_time);
+                const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, null);
                 if (!handcrafted) return null;
-                let originLine = handcrafted;
-                let leadLine: string | null = null;
-                const dotSplit = handcrafted.split(" · ");
-                if (dotSplit.length === 2) {
-                  originLine = dotSplit[0];
-                  leadLine = dotSplit[1];
-                } else {
-                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                  if (m) {
-                    originLine = m[1];
-                    leadLine = `Production lead time: ${m[2]}`;
-                  }
-                }
                 return (
                   <div className="-mt-4 border-b border-border/60 py-4 flex items-start gap-5">
                     {specIcon("✦", "mt-0.5")}
                     <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                      <p>{originLine}</p>
-                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                      <p>{handcrafted}</p>
                     </div>
                   </div>
                 );
               })()}
-
-              <RegionalLogisticsNote className="mt-1" />
             </div>
           </div>
         </div>
