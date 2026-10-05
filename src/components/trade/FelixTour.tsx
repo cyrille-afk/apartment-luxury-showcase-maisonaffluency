@@ -230,6 +230,14 @@ const FELIX_STEPS: FelixStep[] = [
     dialogue:
       "One final capability: the AI Extension Sync connects your workspace directly to ChatGPT. Your AI design co-pilot can discover your synced project folders, stage catalogue pieces straight into an active workflow, and run live top-down budget mathematics — target client ceilings, tier discounts, and net sourcing budgets — without leaving the conversation. Activate it from the sidebar whenever you are ready.",
   },
+  {
+    id: "pwa-install",
+    title: "TAKE YOUR STUDIO ON SITE",
+    target: "pwa-banner",
+    route: "/trade",
+    dialogue:
+      "To complete your multi-device workspace, scan this QR code with your phone — or tap Install Applicable App on mobile — to add the Maison Affluency Mobile Studio Concierge to your home screen. Your projects, pricing and staged pieces follow you to every site visit.",
+  },
 ];
 
 /** Board presentation steps where the member's Client View choice is kept. */
