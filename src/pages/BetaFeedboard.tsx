@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
-import { Maximize, Minus, Plus, Upload, X, ImageIcon } from "lucide-react";
+import { Download, Maximize, Minus, Plus, Upload, X, ImageIcon } from "lucide-react";
 import { TransformWrapper, TransformComponent, useControls } from "react-zoom-pan-pinch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -157,11 +157,35 @@ function TransformUtils() {
 function EntryCard({ entry }: { entry: Entry }) {
   const [url, setUrl] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   useEffect(() => {
     if (!entry.screenshot_path) return;
     supabase.storage.from("beta-feedback").createSignedUrl(entry.screenshot_path, 300)
       .then(({ data }) => setUrl(data?.signedUrl ?? null));
   }, [entry.screenshot_path]);
+
+  const downloadImage = async () => {
+    if (!url || downloading) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ext = blob.type.split("/")[1]?.split(";")[0] || "png";
+      a.href = objectUrl;
+      a.download = `beta-screenshot-${entry.id.slice(0, 8)}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Could not download screenshot");
+    } finally {
+      setDownloading(false);
+    }
+  };
   return (
     <article className="p-4">
       <h3 className="font-body text-sm font-medium break-words">{entry.title}</h3>
