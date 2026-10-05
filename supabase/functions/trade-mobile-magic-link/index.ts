@@ -25,6 +25,8 @@ function isThisProjectPreviewOrigin(url: URL): boolean {
   return host.endsWith(".lovable.app") || host.endsWith(".lovableproject.com") || host.endsWith(".lovableproject-dev.com");
 }
 
+const PRODUCTION_ORIGIN = "https://maisonaffluency.com";
+
 function safeRedirect(input: unknown): string | null {
   if (typeof input !== "string" || !input) return null;
   let url: URL;
@@ -42,11 +44,15 @@ function safeRedirect(input: unknown): string | null {
  * Wrap the caller-requested destination in a clean deep-link handoff route
  * (`/trade/launch?next=<path>`). That page waits for the Supabase session to
  * hydrate, invites installable-PWA install, then forwards to the real path.
+ *
+ * The handoff URL is ALWAYS built on the production origin: a link minted
+ * from a preview/dev host must still send the phone to the live site, never
+ * back into the internal workspace.
  */
 function buildHandoffUrl(target: string): string {
   const url = new URL(target);
   const nextPath = `${url.pathname}${url.search}${url.hash}` || "/trade";
-  const launch = new URL("/trade/launch", url.origin);
+  const launch = new URL("/trade/launch", PRODUCTION_ORIGIN);
   launch.searchParams.set("next", nextPath);
   return launch.toString();
 }
