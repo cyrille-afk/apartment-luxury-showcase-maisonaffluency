@@ -3332,26 +3332,46 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {ceilingBudgetActive && effectiveCeilingCents > 0 && (
-          <div className="border-b border-border bg-muted/20 px-4 py-6 md:px-6 lg:px-8">
+        {ceilingBudgetActive && (
+          <div className="border-b border-border bg-muted/20 px-4 py-6 md:px-6 lg:px-8 print:hidden" aria-live="polite">
             <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
-              <h2 className="font-body text-[11px] uppercase tracking-widest text-foreground">Target Ceiling Budget Summary</h2>
+              <div className="flex items-center gap-3">
+                <h2 className="font-body text-[11px] uppercase tracking-widest text-foreground">Target Ceiling Budget Summary</h2>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 font-body text-[9px] uppercase tracking-widest text-muted-foreground">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                  Live PDF preview
+                </span>
+              </div>
               <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">{effectiveCeilingTierLabel} {effectiveCeilingDiscountPct.toFixed(2)}%</span>
             </div>
-            <div className="ml-auto max-w-xl space-y-2 font-body text-xs">
-              {[
-                ["Target Client Ceiling Budget", ceilingBudget.targetCeilingCents],
-                [`Designer Net Profit Margin (${effectiveCeilingMarkupPct.toFixed(2)}%)`, ceilingBudget.designerNetProfitCents],
-                ["Max Allowed Designer Cost", ceilingBudget.maxDesignerCostCents],
-                [`Trade Sourcing Markdown (${effectiveCeilingTierLabel} ${effectiveCeilingDiscountPct.toFixed(2)}%)`, -ceilingBudget.tradeSourcingMarkdownCents],
-                ["Net Purchasing Sourcing Budget", ceilingBudget.netPurchasingBudgetCents],
-              ].map(([label, value], index) => (
-                <div key={String(label)} className={cn("flex justify-between gap-8", index === 4 ? "border-t border-foreground pt-3 text-foreground" : "text-muted-foreground")}>
-                  <span>{label}</span>
-                  <span className="tabular-nums text-foreground">{Number(value) < 0 ? "− " : ""}{currencySymbol(currency)} {formatPriceRaw(Math.abs(Number(value)), currency)}</span>
+            {effectiveCeilingCents > 0 ? (
+              <div className="ml-auto max-w-xl space-y-2 font-body text-xs font-light">
+                {([
+                  ["Target Client Ceiling Budget", ceilingBudget.targetCeilingCents],
+                  [`Designer Net Profit Margin (${effectiveCeilingMarkupPct.toFixed(2)}%)`, ceilingBudget.designerNetProfitCents],
+                  ["Max Allowed Designer Cost", ceilingBudget.maxDesignerCostCents],
+                  [`Trade Sourcing Markdown (${effectiveCeilingTierLabel} ${effectiveCeilingDiscountPct.toFixed(2)}%)`, -ceilingBudget.tradeSourcingMarkdownCents],
+                  ["Net Purchasing Sourcing Budget", ceilingBudget.netPurchasingBudgetCents],
+                ] as [string, number][]).map(([label, value], index) => (
+                  <div key={label} className={cn("flex justify-between gap-8", index === 0 && "pb-2 text-sm text-foreground", index === 4 ? "border-t border-foreground pt-3 text-foreground" : index !== 0 && "text-muted-foreground")}>
+                    <span>{label}</span>
+                    <span className="tabular-nums text-foreground">{value < 0 ? "− " : ""}{currencySymbol(currency)} {formatPriceRaw(Math.abs(value), currency)}</span>
+                  </div>
+                ))}
+                <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-3 text-muted-foreground">
+                  <div className="flex justify-between gap-4">
+                    <span>Deposit (60%)</span>
+                    <span className="tabular-nums text-foreground">{currencySymbol(currency)} {formatPriceRaw(Math.round(ceilingBudget.targetCeilingCents * 0.6), currency)}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Balance (40%)</span>
+                    <span className="tabular-nums text-foreground">{currencySymbol(currency)} {formatPriceRaw(ceilingBudget.targetCeilingCents - Math.round(ceilingBudget.targetCeilingCents * 0.6), currency)}</span>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <p className="font-body text-xs text-muted-foreground">Enter a target ceiling above to preview the ledger.</p>
+            )}
           </div>
         )}
 
