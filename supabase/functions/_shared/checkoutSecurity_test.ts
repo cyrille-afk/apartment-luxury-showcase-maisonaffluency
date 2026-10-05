@@ -103,3 +103,7 @@ for (const status of ["succeeded", "processing", "canceled", "requires_capture"]
 }
 Deno.test("currency change refused", () => assertEquals(reuse(intent(), { currency: "sgd" }), false));
 Deno.test("payment method change refused", () => assertEquals(reuse(intent(), { method: "paynow" }), false));
+
+Deno.test("guest cannot apply any confirmed shipping quote", async () => {
+  assertEquals(await resolve(quote(), { userId: null }), { ok: false, error: "Shipping quote not found." });
+});

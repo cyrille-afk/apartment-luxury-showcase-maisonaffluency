@@ -212,8 +212,8 @@ serve(async (req) => {
           return {
             hs6Code: typeof l.hs6Code === "string" ? l.hs6Code.slice(0, 12) : null,
             dutyRate: Number.isFinite(Number(l.dutyRate)) ? Number(l.dutyRate) : null,
-            originCountry:
-              typeof l.originCountry === "string" ? l.originCountry.slice(0, 40) : null,
+            // Caller-supplied origin is ignored for the same reason.
+            originCountry: null,
             lineTotalCents: Math.max(0, Math.round(Number(l.lineTotalCents) || 0)),
           };
         })
@@ -231,8 +231,9 @@ serve(async (req) => {
       goodsCents: goodsAmount,
       shippingCents: freightForTaxCents,
       goodsEurCents: currency.toUpperCase() === "EUR" ? goodsAmount : null,
-      shipFromCountry:
-        typeof body?.shipFromCountry === "string" ? body.shipFromCountry.toUpperCase() : null,
+      // Never trust a caller-supplied ship-from country: it could unlock
+      // intra-EU treatment and skip import clearance. Null = import path.
+      shipFromCountry: null,
       lines: customsLines,
     });
     const taxCents = treatment.taxCents;
