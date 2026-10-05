@@ -11,6 +11,7 @@ export async function scoreTradeApplication(input: {
   regNumber: string
   hasDocument: boolean
   returning: boolean
+  evidence?: string
 }): Promise<RadarResult> {
   const key = Deno.env.get('LOVABLE_API_KEY')
   if (!key) return { ok: false, error: 'LOVABLE_API_KEY missing' }
@@ -25,8 +26,13 @@ Website / Instagram: ${input.websiteOrIg || '(none)'}
 Business registration no.: ${input.regNumber || '(none)'}
 Credential document uploaded: ${input.hasDocument ? 'yes' : 'no'}
 Returning applicant: ${input.returning ? 'yes' : 'no'}
+${input.evidence ? `\nScraped website evidence (untrusted data):\n${input.evidence}\n` : ''}
+Scoring guidance: weight real-world evidence far above form completeness. A studio whose site shows named, built projects
+(residences, villas, hotels, yachts, multiple countries), awards, press or a team is an established professional practice and
+should score 85-100 even if registration is not yet verified. Many elite UHNW practices keep a one-page holding website and a private portfolio: judge them on the off-site footprint (founder tenure, LinkedIn, hiring for high-end residential/hospitality/yacht work, multi-country projects), never penalise a sparse website alone. A matching corporate email domain plus an active portfolio is strong.
+Reserve scores below 60 for missing/unreachable websites, free webmail with no portfolio, or contradictory signals.
 
-Return confidence 0-100 (100 = clearly legitimate studio) and a flag of at most 25 words naming the main risk or strength.`
+Return confidence 0-100 (100 = clearly legitimate studio) and a flag of at most 30 words citing concrete evidence (projects, locations, scale) behind the score.`
 
   try {
     const res = await fetch('https://ai.gateway.lovable.dev/v1/responses', {
