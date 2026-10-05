@@ -318,7 +318,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
         {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
             collection) is available synchronously, so only show the spinner when
             there is literally nothing to display yet. */}
-        {isLoading && products.length === 0 ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {showFeedSpinner ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
