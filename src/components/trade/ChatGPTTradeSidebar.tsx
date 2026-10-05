@@ -35,7 +35,7 @@ const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
 const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
-function TradeSidebarFeed() {
+function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
   const { user, profile } = useAuth();
   const { currentStudio, canEdit, loading: studioLoading } = useStudio();
   const { projects, loading: projectsLoading, refresh: refreshProjects } = useProjects({ activeOnly: true });
@@ -89,7 +89,9 @@ function TradeSidebarFeed() {
   };
 
   const stageToProject = async (project: Project) => {
-    if (!selectedProduct || !user || saving || !canEdit) return;
+    // In optimistic mode (auth handshake still pending) the local mock folders
+    // stay clickable; actual staging waits for the live session to resolve.
+    if (!selectedProduct || !user || saving || (!canEdit && !optimistic)) return;
     setSaving(true);
     try {
       const productId = await resolveProductId(selectedProduct);
@@ -353,7 +355,7 @@ function TradeSidebarFeed() {
             <p className="mb-3 font-body text-[10px] uppercase text-muted-foreground">Select active workspace workflow:</p>
             {projects.length ? (
               <div className="max-h-[38dvh] overflow-y-auto">
-                {projects.map((project) => <Button key={project.id} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => stageToProject(project)} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
+                {projects.map((project) => <Button key={project.id} variant="ghost" type="button" disabled={saving || (!canEdit && !optimistic)} onClick={() => stageToProject(project)} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
                   <span className="min-w-0 whitespace-normal break-words">{project.name}</span>
                 </Button>)}
               </div>
@@ -402,8 +404,21 @@ function TradeSidebarFeed() {
 export default function ChatGPTTradeSidebar() {
   const { user, loading, rolesLoaded, isAdmin, isTradeUser } = useAuth();
   const location = useLocation();
-  if (loading || !rolesLoaded) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
-  if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
-  if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
-  return <TradeSidebarFeed />;
+  // Force the auth gate to clear after 500ms: inside a third-party embed the
+  // session handshake can stay pending forever (partitioned storage / auth
+  // challenge), so we fall back to the static catalogue cache immediately
+  // instead of spinning. If auth resolves signed-out afterwards, the redirect
+  // below still runs on the next render.
+  const [gateTimedOut, setGateTimedOut] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setGateTimedOut(true), 500);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const authPending = loading || !rolesLoaded;
+  if (authPending && !gateTimedOut) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
+  if (!authPending) {
+    if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
+    if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
+  }
+  return <TradeSidebarFeed optimistic={authPending} />;
 }
