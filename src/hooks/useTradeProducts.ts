@@ -29,7 +29,7 @@ type LiveTradeProduct = TradeProduct & {
 };
 
 const normalizeHiddenPart = (value: string | null | undefined) =>
-  (value || "").trim().toLowerCase();
+  (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 
 const brandVariants = (rawBrand: string) => {
   const raw = (rawBrand || "").trim();
@@ -65,7 +65,10 @@ async function fetchHiddenProductKeys(): Promise<Set<string>> {
   }
   for (const t of (trade ?? []) as Array<Record<string, any>>) {
     if (!t.brand_name || !t.product_name) continue;
-    for (const b of brandVariants(t.brand_name)) keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
+    for (const b of brandVariants(t.brand_name)) {
+      keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
+      keys.add(`brand::${normalizeHiddenPart(b)}`);
+    }
   }
   return keys;
 }
@@ -181,11 +184,18 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
       } satisfies LiveTradeProduct,
     ];
   });
+  // A brand counts as fully hidden only when it has no visible trade_products left;
+  // drop the brand marker otherwise so static cards of partly-hidden brands stay.
+  for (const row of (tradeRows ?? []) as Array<Record<string, any>>) {
+    for (const b of brandVariants(row.brand_name || "")) hiddenKeys.delete(`brand::${normalizeHiddenPart(b)}`);
+  }
   return { products, hiddenKeys };
 }
 
 const keyOf = (p: TradeProduct) =>
   `${p.brand_name.trim().toLowerCase()}::${p.product_name.trim().toLowerCase()}`;
+const hiddenKeyOf = (p: TradeProduct) =>
+  `${normalizeHiddenPart(p.brand_name)}::${normalizeHiddenPart(p.product_name)}`;
 
 /**
  * Returns merged static + live trade products, brands, and helpers.
@@ -208,10 +218,14 @@ export function useTradeProducts() {
     const merged = new Map<string, TradeProduct>();
     for (const p of staticProducts) {
       // Static (hardcoded) cards must respect products hidden in the database.
-      if (dbHiddenKeys?.has(keyOf(p))) continue;
+      if (dbHiddenKeys?.has(hiddenKeyOf(p))) continue;
+      if (dbHiddenKeys?.has(`brand::${normalizeHiddenPart(p.brand_name)}`)) continue;
       merged.set(keyOf(p), p);
     }
     for (const p of liveProducts) {
+      // Live curator picks must also respect trade_products hidden in the DB.
+      if (dbHiddenKeys?.has(hiddenKeyOf(p))) continue;
+      if (dbHiddenKeys?.has(`brand::${normalizeHiddenPart(p.brand_name)}`)) continue;
       const key = keyOf(p);
       const existing = merged.get(key);
       const { hasExplicitCategory, hasExplicitSubcategory, ...liveProduct } = p;
