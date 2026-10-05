@@ -11724,6 +11724,17 @@ export type Database = {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
+      list_curator_pick_versions: {
+        Args: { _designer_id?: string; _pick_id?: string }
+        Returns: {
+          audit_id: string
+          changed_by: string
+          created_at: string
+          operation: string
+          pick_id: string
+          snapshot: Json
+        }[]
+      }
       log_outreach_click: {
         Args: { _agent: string; _channel: string; _hook: string; _lead: string }
         Returns: undefined
@@ -11991,6 +12002,10 @@ export type Database = {
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
       resolve_trade_email: { Args: { p_identifier: string }; Returns: string }
+      restore_curator_pick_version: {
+        Args: { _audit_id: string }
+        Returns: string
+      }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
