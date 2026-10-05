@@ -335,6 +335,14 @@ const TradeLayout = () => {
   const didMountShellRef = useRef(false);
   if (!loading) didMountShellRef.current = true;
   const showInitialLoader = loading && !didMountShellRef.current;
+  // If the first load hangs (database outage), swap the spinner for a clear
+  // outage screen with a retry action instead of spinning forever.
+  const [loaderStalled, setLoaderStalled] = useState(false);
+  useEffect(() => {
+    if (!showInitialLoader) { setLoaderStalled(false); return; }
+    const t = window.setTimeout(() => setLoaderStalled(true), 12000);
+    return () => window.clearTimeout(t);
+  }, [showInitialLoader]);
   const { showTradePrice } = useTradePriceMode();
   const { currentStudio } = useStudio();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -402,6 +410,31 @@ const TradeLayout = () => {
   useRealtimeTables("trade_quotes", () => void fetchSubmittedCount(), isAdmin);
 
   if (showInitialLoader) {
+    if (loaderStalled) {
+      return (
+        <div role="alert" className="min-h-screen bg-background flex items-center justify-center px-6">
+          <div className="max-w-md text-center">
+            <p className="font-body text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Maison Affluency — Trade Portal</p>
+            <h1 className="mt-4 font-display text-3xl text-foreground">We can't reach the studio right now</h1>
+            <p className="mt-4 font-body text-sm leading-relaxed text-muted-foreground">
+              Your account and workspace couldn't be loaded because our servers aren't responding.
+              Nothing has been lost — your projects, quotes and boards are safe. Please try again in a moment.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-8 inline-flex items-center justify-center rounded-full bg-foreground px-6 py-2.5 font-body text-[11px] uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+            >
+              Retry connection
+            </button>
+            <p className="mt-6 flex items-center justify-center gap-2 font-body text-[11px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" aria-hidden />
+              Still trying automatically in the background
+            </p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <DotCircleLoader size="md" />
