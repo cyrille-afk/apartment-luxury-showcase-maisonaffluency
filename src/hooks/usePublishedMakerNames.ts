@@ -10,7 +10,8 @@ export function usePublishedMakerNames(): string[] | null {
     queryKey: ["published-maker-names"],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("published_maker_names");
+      // Cast: generated types lag the live RPC until the next types refresh.
+      const { data, error } = await supabase.rpc("published_maker_names" as never);
       if (error) throw error;
       return (data as string[]) ?? null;
     },
