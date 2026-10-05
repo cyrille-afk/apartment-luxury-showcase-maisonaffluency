@@ -1,9 +1,13 @@
 // ChatGPT extension tool: get_synced_projects.
 // Returns the signed-in member's active project folders, exactly as RLS
 // exposes them in the portal (same scope as the /trade dashboard list).
+// Folder names are deduplicated case-insensitively: rows that differ only in
+// casing/whitespace collapse to one entry carrying the most recently used
+// casing, and stage_product_to_project resolves names with the same rule.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { normalizeFolderName } from '../_shared/projectFolders.ts'
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -45,9 +49,16 @@ Deno.serve(async (req) => {
   const { data, error } = await query
   if (error) return json({ error: 'Could not load project folders' }, 500)
 
-  const folders = (data ?? [])
-    .filter((p) => typeof p.name === 'string' && p.name.trim().length > 0)
-    .map((p) => ({ projectId: p.id, name: p.name, synced: true }))
+  // Group-by on the normalized name: first row wins (list is updated_at-desc),
+  // so duplicates and casing variants collapse to one canonical folder.
+  const unique = new Map<string, { projectId: string; name: string; synced: boolean }>()
+  for (const p of data ?? []) {
+    if (typeof p.name !== 'string' || !p.name.trim().length) continue
+    const key = normalizeFolderName(p.name)
+    if (!unique.has(key)) {
+      unique.set(key, { projectId: p.id, name: p.name.trim(), synced: true })
+    }
+  }
 
-  return json(folders)
+  return json([...unique.values()])
 })

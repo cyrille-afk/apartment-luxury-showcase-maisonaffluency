@@ -2,9 +2,12 @@
 // Executes the verified data handshake: validates the bearer token, the
 // catalogue product and the target project folder, then writes the staged
 // piece to the member's board exactly as the in-portal sidebar does.
+// Folder names resolve case-insensitively against the same normalization
+// rule used by get_synced_projects (supabase/functions/_shared/projectFolders.ts).
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { normalizeFolderName, pickCanonicalFolder } from '../_shared/projectFolders.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -70,13 +73,19 @@ Deno.serve(async (req) => {
   }
 
   // 2. Target folder must be an active project visible to this member.
-  const { data: project, error: projectError } = await scoped
+  //    Name matching is case/whitespace-insensitive so "DE BEERS", "De Beers"
+  //    and "de beers" all resolve to the same folder; the most recently
+  //    updated matching row is the canonical one (same rule as the folder list).
+  const { data: candidateProjects, error: projectError } = await scoped
     .from('projects')
     .select('id, name, status, studio_id, client_name')
-    .eq('name', targetWorkflow)
-    .maybeSingle()
+    .eq('status', 'active')
+    .order('updated_at', { ascending: false })
   if (projectError) return json({ error: 'Could not verify project folder' }, 500)
-  if (!project || project.status !== 'active') {
+  const project = candidateProjects
+    ? pickCanonicalFolder(candidateProjects as { name: string }[], targetWorkflow)
+    : undefined
+  if (!project) {
     return json({
       status: 'rejected', targetWorkflow,
       message: `Rejected: no active project folder named "${targetWorkflow}" is synced for this member.`,
@@ -128,8 +137,9 @@ Deno.serve(async (req) => {
   return json({
     status: 'staged',
     boardItemId,
-    targetWorkflow,
+    // Canonical folder name as it exists in the portal, not the caller's casing.
+    targetWorkflow: project.name.trim(),
     verifiedAt: new Date().toISOString(),
-    message: `Success: ${product.product_name} added to ${project.name}`,
+    message: `Success: ${product.product_name} added to ${project.name.trim()}`,
   })
 })
