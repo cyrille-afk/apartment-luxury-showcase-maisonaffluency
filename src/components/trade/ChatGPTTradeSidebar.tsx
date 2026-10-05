@@ -29,10 +29,33 @@ type StagedItem = { productId: string; projectId: string; projectName: string; p
 const priceKey = (brand: string, title: string) =>
   `${slugify(normalizeBrandToParent(brand))}::${slugify(title)}`;
 
-// Local workspace fallbacks shown while the live project handshake is still
-// initializing, so the staging drawer is never trapped behind a spinner.
+/** Local workspace fallbacks shown while the live project handshake is still
+// initializing, so the staging drawer is never trapped behind a spinner. */
 const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
 const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+
+/** CSS-only skeleton card mirroring the real feed card's structure, so the
+ *  sidebar shows instant structural feedback before any data resolves. */
+const SidebarCardSkeleton = () => (
+  <div className="bg-card p-2.5" aria-hidden="true">
+    <div className="aspect-[5/4] w-full animate-pulse bg-muted/50" />
+    <div className="flex items-start justify-between gap-3 px-1 pt-3 pb-1">
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="h-2.5 w-1/3 animate-pulse rounded-sm bg-muted/60" />
+        <div className="h-3.5 w-2/3 animate-pulse rounded-sm bg-muted/50" />
+      </div>
+      <div className="h-2.5 w-16 shrink-0 animate-pulse rounded-sm bg-muted/50" />
+    </div>
+    <div className="mt-1 h-3 w-28 animate-pulse rounded-sm bg-muted/40" />
+  </div>
+);
+
+const SidebarFeedSkeleton = ({ count = 5 }: { count?: number }) => (
+  <div className="flex flex-col gap-5" role="status" aria-busy="true" aria-live="polite" aria-label="Loading the collection">
+    {Array.from({ length: count }).map((_, i) => <SidebarCardSkeleton key={i} />)}
+    <span className="sr-only">Loading the collection…</span>
+  </div>
+);
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
