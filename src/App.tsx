@@ -366,8 +366,9 @@ function ScrollToTopOnNavigate() {
       (window.matchMedia?.("(max-width: 767px)").matches ||
         window.matchMedia?.("(display-mode: standalone)").matches ||
         (window.navigator as any).standalone === true);
+    const requiresStableTop = location.pathname === "/trade/the-collection";
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const smooth = !isLockedDesignersLanding && state?.smoothScroll !== false && !prefersReduced;
+    const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
     const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
     // Defer one frame so the new route mounts before we animate — prevents the
     // browser from snapping mid-transition when React commits the new tree.
@@ -452,6 +453,7 @@ function PreviewViewContinuity() {
   const anchorIdRef = useRef<string | undefined>(undefined);
 
   const isLockedDesignersLanding = location.pathname === "/designers" && !location.search;
+  const requiresStableTop = location.pathname === "/trade/the-collection";
 
 
   useEffect(() => {
@@ -508,7 +510,7 @@ function PreviewViewContinuity() {
 
   useEffect(() => {
     if (!isPreviewOrDev()) return;
-    if (isLockedDesignersLanding) {
+    if (isLockedDesignersLanding || requiresStableTop) {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       try { localStorage.removeItem(PREVIEW_VIEW_STATE_KEY); } catch { /* noop */ }
       return;
@@ -533,7 +535,7 @@ function PreviewViewContinuity() {
     } catch {
       /* noop */
     }
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, requiresStableTop]);
 
   return null;
 }

@@ -1,5 +1,5 @@
-- Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
-- Felix advances before gallery load; greeting tracks tour state. Share fixed regional tiers with dashboard; eligibility stays EUR-ledger based.
+- Trade owns breadcrumbs; Collection opens at top with sticky tabs. Shortcuts use latest RLS-visible board/hub.
+- Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 <!-- LOVABLE:BEGIN -->
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
