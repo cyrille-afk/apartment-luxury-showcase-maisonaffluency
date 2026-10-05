@@ -14,10 +14,9 @@ const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 const trackProductUrl = (slug: string, pickId: string) =>
   `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
 const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
-// Interactive visual panel (the ChatGPTTradeSidebar view) that renders the same
-// catalogue as a rich editorial sidebar inside the trade portal. Advertised as an
-// MCP resource_link so clients know a companion UI exists for these results.
-const TRADE_SIDEBAR_PANEL_URL = `${SITE_ORIGIN}/trade/concierge/sidebar`;
+// The visual companion panel is delivered natively by the ChatGPT-facing
+// endpoint (mcp-chatgpt function) as an OpenAI `text/html+skybridge` UI
+// template — no links are advertised in this tool's payload.
 
 function getClient() {
   const url = process.env.SUPABASE_URL!;
