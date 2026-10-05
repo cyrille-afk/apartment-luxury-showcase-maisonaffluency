@@ -49,13 +49,17 @@ describe('Trade application notifications', () => {
     await expect(declineAndDeleteTradeApplication(account)).rejects.toThrow('record was kept');
     expect(mocks.remove).not.toHaveBeenCalled();
   });
-  it('sends a separate internal alert to each admin mailbox after the applicant notice', async () => {
-    await updateTradeApplication(account, 'approved');
-    const alerts = mocks.invoke.mock.calls.slice(1).map((c) => c[1].body);
-    expect(alerts.map((b) => b.templateName)).toEqual(['application-decision-alert-concierge', 'application-decision-alert-cyrille']);
-    expect(alerts.every((b) => !('recipientEmail' in b))).toBe(true);
-    expect(alerts[0].idempotencyKey).toBe('application-decision-alert-concierge-approved-application-1');
-    expect(alerts[0].templateData).toMatchObject({ decision: 'approved', applicantEmail: account.email, companyName: 'Atelier' });
+  it('sends an exact copy of the applicant letter to each admin mailbox', async () => {
+    await updateTradeApplication(account, 'approved', { subject: 'Welcome, Atelier', body: 'Dear Jane,\n\nPersonal note.' });
+    const [main, ...copies] = mocks.invoke.mock.calls.map((c) => c[1].body);
+    expect(copies.map((b) => b.templateName)).toEqual(['trade-approval-copy-concierge', 'trade-approval-copy-cyrille']);
+    expect(copies.every((b) => !('recipientEmail' in b))).toBe(true);
+    expect(copies[0].idempotencyKey).toBe('trade-approval-copy-concierge-application-1');
+    copies.forEach((b) => expect(b.templateData).toEqual(main.templateData));
+  });
+  it('copies decline letters with the rejection template', async () => {
+    await declineAndDeleteTradeApplication(account);
+    expect(mocks.invoke.mock.calls.slice(1).map((c) => c[1].body.templateName)).toEqual(['trade-rejection-copy-concierge', 'trade-rejection-copy-cyrille']);
   });
   it('sends no admin alert when the applicant notice fails', async () => {
     mocks.invoke.mockResolvedValue({ error: new Error('offline') });

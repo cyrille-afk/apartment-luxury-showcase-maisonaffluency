@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
 
   // Only privileged callers reach trade notices above. Validate edited copy
   // before any suppression/token/queue writes; templates escape text via React.
-  if (templateName === 'trade-approval' || templateName === 'trade-rejection') {
+  if (/^trade-(approval|rejection)(-copy-(concierge|cyrille))?$/.test(templateName)) {
     const { subjectText, bodyText } = templateData
     if ((subjectText !== undefined && (typeof subjectText !== 'string' || !subjectText.trim() || subjectText.length > 200 || /[\r\n]/.test(subjectText))) ||
         (bodyText !== undefined && (typeof bodyText !== 'string' || !bodyText.trim() || bodyText.length > 20000))) {
