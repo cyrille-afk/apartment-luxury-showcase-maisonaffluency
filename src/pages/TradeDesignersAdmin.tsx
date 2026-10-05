@@ -32,6 +32,7 @@ import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
 import SwatchSyncDialog from "@/components/admin/SwatchSyncDialog";
 import { CuratorPickHistoryDialog, DeletedPicksDialog } from "@/components/admin/CuratorPickHistory";
 import { History } from "lucide-react";
+import MakerSelect from "@/components/admin/MakerSelect";
 
 // Pilot: surface inline Fabrics & Finishes editor only for these picks for now.
 const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
@@ -647,6 +648,21 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
             </div>
             {expandedPickId === pick.id && (
               <div className="mt-3 space-y-2">
+                <div>
+                  <label className="text-[10px] text-muted-foreground">Maker (published profile)</label>
+                  <MakerSelect
+                    value={designerId}
+                    onChange={async (newId, name) => {
+                      if (newId === designerId) return;
+                      if (!window.confirm(`Move "${pick.title}" to ${name}?`)) return;
+                      const { error } = await supabase.from("designer_curator_picks").update({ designer_id: newId } as any).eq("id", pick.id);
+                      if (error) { toast({ title: "Move failed", description: error.message, variant: "destructive" }); return; }
+                      setPicks((prev) => prev.filter((p) => p.id !== pick.id));
+                      queryClient.invalidateQueries();
+                      toast({ title: `Moved to ${name}` });
+                    }}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Title</label>
