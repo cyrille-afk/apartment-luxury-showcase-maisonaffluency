@@ -425,8 +425,13 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
       await loadPicks();
+    } else if (["sort_order", "image_url", "hover_image_url"].includes(field)) {
+      queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
+      queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
+      queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
+      queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
     }
-  }, [loadPicks, toast]);
+  }, [loadPicks, toast, queryClient]);
 
   const flushPendingWrites = useCallback(() => {
     const entries = Array.from(pendingWritesRef.current.values());
@@ -501,6 +506,10 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       )
     );
     queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
+    queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
+    queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
+    queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
+    queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
   };
 
   const PICKS_PAGE_SIZE = 12;

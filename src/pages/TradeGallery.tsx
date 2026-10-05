@@ -50,7 +50,7 @@ const TradeGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const { allProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -413,7 +413,9 @@ const TradeGallery = () => {
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
   const canonicalProducts = useMemo(() => {
     if (!routeBrandSlug || !galleryDesigner || galleryDesigner.trade_only) return null;
-    const byId = new Map(allProducts.map((product) => [product.id, product]));
+    // The merged grid deduplicates by brand/title. Resolve saved pick IDs from
+    // the live rows as well so no public card disappears due to a name collision.
+    const byId = new Map([...allProducts, ...liveProducts].map((product) => [product.id, product]));
     return galleryPicks.flatMap((pick) => {
       const product = byId.get(pick.id);
       if (!product || isTradeProductMarkedHidden(product, hiddenTradeProductIds)) return [];
@@ -426,7 +428,7 @@ const TradeGallery = () => {
       if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
-  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
+  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
   const filtered = useMemo(
     () => {
       if (canonicalProducts) return canonicalProducts;
