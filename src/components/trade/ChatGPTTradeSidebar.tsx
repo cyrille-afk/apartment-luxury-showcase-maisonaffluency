@@ -4,7 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, FolderPlus, Package, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
