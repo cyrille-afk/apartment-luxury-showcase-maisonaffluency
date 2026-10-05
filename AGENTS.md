@@ -1,6 +1,6 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
-- Admin application actions persist review metadata before registered app-email sends; decline-and-delete queues the notice before removing the applicant, with stable per-application/template idempotency keys — failures must not erase the only retryable record.
-- Admin approval/decline buttons open local draft review without side effects; confirmation alone invokes application actions, and shared plain-text copy/parser feeds the preview and escaped registered email templates so edits preserve branding without accepting HTML.
+- Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the retryable record.
+- Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — edits keep branding, no HTML.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 <!-- LOVABLE:BEGIN -->
@@ -12,7 +12,7 @@
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting, and auth redirects to /trade/login must carry `?next=`; a failed or pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked against getSession) must not demote a valid session.
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
-- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the previous load never stayed responsive for 5s, open with nothing expanded — prevents a hung restore from re-freezing on every reload.
+- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops restore re-freeze loops.
 - Curator Notes: product pages use a full-width vertical list (lead note tinted panel); the lightbox uses three columns (lead header tinted) — distinct contexts.
 - Keep supplier PDFs labelled Fabric & Finishes in the finish-document menu, separate from general spec sheets, so adding a source PDF does not replace the generated swatch-selection PDF or mislabel it in the Trade workspace.
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.

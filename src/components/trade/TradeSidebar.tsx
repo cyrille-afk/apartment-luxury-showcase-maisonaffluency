@@ -50,27 +50,60 @@ export function TradeSidebar() {
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
-  // Approved trade accounts and admins use the Curated Showroom dashboard only.
-  const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
+  const { isAdmin: liveIsAdmin, isTradeUser, applicationStatus, signOut, profile, user, rolesLoaded } = useAuth();
+  // Last-known navigation access, cached per user. Used only while the live
+  // lookup is pending/failing (e.g. a database outage) so links don't vanish.
+  // Presentation only — pages and RLS still enforce real access.
+  const navCacheKey = user?.id ? `ma-sidebar-access-v1:${user.id}` : null;
+  const cachedAccess = (() => {
+    if (!navCacheKey) return null;
+    try { return JSON.parse(localStorage.getItem(navCacheKey) || "null") as { admin: boolean; trade: boolean; beta: boolean } | null; } catch { return null; }
+  })();
+  const usingCache = !rolesLoaded && !!cachedAccess;
+  const isAdmin = rolesLoaded ? liveIsAdmin : liveIsAdmin || !!cachedAccess?.admin;
+  const liveTradeAccess = liveIsAdmin || isTradeUser || applicationStatus === "approved";
+  const hasTradeAccess = rolesLoaded ? liveTradeAccess : liveTradeAccess || !!cachedAccess?.trade;
   // Beta Feedboard is restricted to admins and authorized beta members.
-  const [isBetaMember, setIsBetaMember] = useState(false);
+  const [isBetaMember, setIsBetaMember] = useState<boolean | null>(null);
+  const [betaLookupFailed, setBetaLookupFailed] = useState(false);
   useEffect(() => {
-    if (!user?.id || isAdmin) return;
+    if (!user?.id || liveIsAdmin) return;
     let cancelled = false;
     supabase
       .from("beta_members" as never)
       .select("user_id")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setIsBetaMember(!!data);
-      });
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) { setBetaLookupFailed(true); return; }
+        setBetaLookupFailed(false);
+        setIsBetaMember(!!data);
+      }, () => { if (!cancelled) setBetaLookupFailed(true); });
     return () => {
       cancelled = true;
     };
-  }, [user?.id, isAdmin]);
-  const canSeeBetaFeedboard = isAdmin || isBetaMember;
+  }, [user?.id, liveIsAdmin, rolesLoaded]);
+  const betaKnown = isBetaMember ?? !!cachedAccess?.beta;
+  const canSeeBetaFeedboard = isAdmin || betaKnown;
+  useEffect(() => {
+    if (!navCacheKey || !rolesLoaded) return;
+    try {
+      localStorage.setItem(navCacheKey, JSON.stringify({
+        admin: liveIsAdmin,
+        trade: liveTradeAccess,
+        beta: liveIsAdmin ? !!cachedAccess?.beta : isBetaMember ?? !!cachedAccess?.beta,
+      }));
+    } catch { /* storage unavailable */ }
+  }, [navCacheKey, rolesLoaded, liveIsAdmin, liveTradeAccess, isBetaMember]);
+  // Show a connection notice only after a short grace period, so normal loads don't flash it.
+  const [lookupSlow, setLookupSlow] = useState(false);
+  useEffect(() => {
+    if (rolesLoaded || !user?.id) { setLookupSlow(false); return; }
+    const t = window.setTimeout(() => setLookupSlow(true), 4000);
+    return () => window.clearTimeout(t);
+  }, [rolesLoaded, user?.id]);
+  const connectionIssue = !!user?.id && (lookupSlow || betaLookupFailed);
   const visibleTopItems = (
     hasTradeAccess
       ? topItems.filter((i) => i.url !== "/trade/me")
@@ -491,6 +524,24 @@ export function TradeSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-4">
+        {connectionIssue && (
+          <div
+            role="status"
+            aria-live="polite"
+            title="Connection to the studio database is interrupted. Showing your last known menu; retrying automatically."
+            className={`mb-3 flex items-start gap-2 rounded-sm border border-border bg-muted/60 px-2.5 py-2 ${collapsed ? "justify-center" : ""}`}
+          >
+            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--gold))] animate-pulse" aria-hidden />
+            {!collapsed && (
+              <span className="font-body text-[10px] uppercase leading-snug tracking-[0.14em] text-muted-foreground">
+                Reconnecting…
+                <span className="mt-0.5 block normal-case tracking-normal text-[10px]">
+                  {usingCache || cachedAccess ? "Showing your last known menu" : "Some links may be unavailable"}
+                </span>
+              </span>
+            )}
+          </div>
+        )}
         {profile && (
           <div className={`flex items-center gap-2.5 mb-2 ${collapsed ? "justify-center" : ""}`}>
             <div className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border flex items-center justify-center shrink-0">
