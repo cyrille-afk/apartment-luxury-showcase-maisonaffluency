@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, MessageSquare, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
   TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -36,6 +36,7 @@ const topItems: NavItem[] = [
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
+  { title: "BETA FEEDBOARD", url: "/trade/beta-feedboard", icon: MessageSquare },
   { title: "Settings", url: "/trade/settings", icon: Settings },
 ];
 
@@ -159,6 +160,12 @@ export function TradeSidebar() {
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
+                      {item.url === "/trade/beta-feedboard" && (
+                        <span className="relative ml-auto flex h-2 w-2" aria-hidden>
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500/60" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
