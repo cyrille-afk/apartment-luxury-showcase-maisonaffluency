@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import Gallery from "@/components/Gallery";
-import ProductImageSearch from "@/components/trade/ProductImageSearch";
+import VisualSearchPanel from "@/components/trade/VisualSearchPanel";
 import ShowroomDesignerDirectory from "@/components/trade/ShowroomDesignerDirectory";
 import { cn } from "@/lib/utils";
 import GallerySkeleton from "@/components/trade/GallerySkeleton";
@@ -190,17 +190,7 @@ const TradeShowroom = () => {
             }}
           />
         ) : (
-          <ProductImageSearch
-            onSelectImage={(result) => {
-              handleHotspotAddToQuote({
-                product_name: result.title,
-                designer_name: null,
-                product_image_url: result.imageUrl,
-                materials: null,
-                dimensions: null,
-              });
-            }}
-          />
+          <VisualSearchPanel />
         )}
       </div>
 
