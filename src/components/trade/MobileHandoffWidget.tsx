@@ -19,8 +19,8 @@ export function MobileHandoffWidget() {
   }, []);
 
   useEffect(() => {
-    // Decorative preview — encodes the site homepage, not the magic link.
-    QRCode.toDataURL(`${window.location.origin}/trade`, {
+    // Decorative preview — encodes the production site, never the preview/dev host.
+    QRCode.toDataURL("https://maisonaffluency.com/trade", {
       margin: 1,
       width: 160,
       errorCorrectionLevel: "L",
