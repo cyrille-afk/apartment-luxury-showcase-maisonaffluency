@@ -73,13 +73,19 @@ Deno.serve(async (req) => {
   }
 
   // 2. Target folder must be an active project visible to this member.
-  const { data: project, error: projectError } = await scoped
+  //    Name matching is case/whitespace-insensitive so "DE BEERS", "De Beers"
+  //    and "de beers" all resolve to the same folder; the most recently
+  //    updated matching row is the canonical one (same rule as the folder list).
+  const { data: candidateProjects, error: projectError } = await scoped
     .from('projects')
     .select('id, name, status, studio_id, client_name')
-    .eq('name', targetWorkflow)
-    .maybeSingle()
+    .eq('status', 'active')
+    .order('updated_at', { ascending: false })
   if (projectError) return json({ error: 'Could not verify project folder' }, 500)
-  if (!project || project.status !== 'active') {
+  const project = candidateProjects
+    ? pickCanonicalFolder(candidateProjects as { name: string }[], targetWorkflow)
+    : undefined
+  if (!project) {
     return json({
       status: 'rejected', targetWorkflow,
       message: `Rejected: no active project folder named "${targetWorkflow}" is synced for this member.`,
