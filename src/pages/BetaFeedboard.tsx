@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
-import { Maximize, Minus, Plus, Upload, X, ImageIcon } from "lucide-react";
+import { Download, Maximize, Minus, Plus, Upload, X, ImageIcon } from "lucide-react";
 import { TransformWrapper, TransformComponent, useControls } from "react-zoom-pan-pinch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -136,9 +136,11 @@ export default function BetaFeedboard() {
   );
 }
 
+const controlBtnClass = "cursor-pointer rounded-full p-2 text-foreground transition-colors hover:bg-muted disabled:opacity-50";
+
 function TransformUtils() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
-  const btn = "cursor-pointer rounded-full p-2 text-foreground transition-colors hover:bg-muted";
+  const btn = controlBtnClass;
   return (
     <>
       <button type="button" aria-label="Zoom in" title="Zoom in" className={btn} onClick={() => zoomIn(0.5)}>
@@ -157,11 +159,35 @@ function TransformUtils() {
 function EntryCard({ entry }: { entry: Entry }) {
   const [url, setUrl] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   useEffect(() => {
     if (!entry.screenshot_path) return;
     supabase.storage.from("beta-feedback").createSignedUrl(entry.screenshot_path, 300)
       .then(({ data }) => setUrl(data?.signedUrl ?? null));
   }, [entry.screenshot_path]);
+
+  const downloadImage = async () => {
+    if (!url || downloading) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ext = blob.type.split("/")[1]?.split(";")[0] || "png";
+      a.href = objectUrl;
+      a.download = `beta-screenshot-${entry.id.slice(0, 8)}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      toast.error("Could not download screenshot");
+    } finally {
+      setDownloading(false);
+    }
+  };
   return (
     <article className="p-4">
       <h3 className="font-body text-sm font-medium break-words">{entry.title}</h3>
@@ -217,6 +243,17 @@ function EntryCard({ entry }: { entry: Entry }) {
               </p>
               <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
                 <TransformUtils />
+                <span className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+                <button
+                  type="button"
+                  aria-label="Download screenshot"
+                  title="Download full-resolution image"
+                  className={controlBtnClass}
+                  disabled={downloading}
+                  onClick={downloadImage}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
           </TransformWrapper>
