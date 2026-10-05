@@ -28,8 +28,50 @@ type LiveTradeProduct = TradeProduct & {
   hasExplicitSubcategory: boolean;
 };
 
-async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
-  const [{ data, error }, { data: tradeRows, error: tradeError }] = await Promise.all([
+const normalizeHiddenPart = (value: string | null | undefined) =>
+  (value || "").trim().toLowerCase();
+
+const brandVariants = (rawBrand: string) => {
+  const raw = (rawBrand || "").trim();
+  return Array.from(new Set([
+    raw,
+    raw.includes(" - ") ? raw.split(" - ")[0].trim() : raw,
+    raw.includes(" - ") ? raw.split(" - ").slice(1).join(" - ").trim() : raw,
+    normalizeBrandToParent(raw),
+  ].filter(Boolean)));
+};
+
+/**
+ * Keys (brand::title) of products an admin has hidden in the database.
+ * Used to suppress the matching hardcoded static cards, which otherwise
+ * re-introduce hidden products into the Trade Gallery and brand dropdown.
+ */
+async function fetchHiddenProductKeys(): Promise<Set<string>> {
+  const [{ data: picks }, { data: trade }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("title, designers(name)")
+      .eq("is_hidden", true),
+    supabase
+      .from("trade_products")
+      .select("product_name, brand_name")
+      .eq("is_hidden", true),
+  ]);
+  const keys = new Set<string>();
+  for (const p of (picks ?? []) as Array<Record<string, any>>) {
+    const d = Array.isArray(p.designers) ? p.designers[0] : p.designers;
+    if (!d?.name || !p.title) continue;
+    for (const b of brandVariants(d.name)) keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(p.title)}`);
+  }
+  for (const t of (trade ?? []) as Array<Record<string, any>>) {
+    if (!t.brand_name || !t.product_name) continue;
+    for (const b of brandVariants(t.brand_name)) keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
+  }
+  return keys;
+}
+
+async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hiddenKeys: Set<string> }> {
+  const [{ data, error }, { data: tradeRows, error: tradeError }, hiddenKeys] = await Promise.all([
     supabase
       .from("designer_curator_picks")
       .select(`
@@ -64,6 +106,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, lead_time, origin, description, category, subcategory")
       .eq("is_active", true)
       .eq("is_hidden", false),
+    fetchHiddenProductKeys(),
   ]);
 
   if (error) throw error;
