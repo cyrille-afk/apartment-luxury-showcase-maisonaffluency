@@ -1,4 +1,5 @@
 import { safeOrigin } from "../_shared/safeOrigin.ts";
+import { canSendAccountInvite } from "./inviteGate.ts";
 // Frictionless quote/customisation intake for the public product modal.
 //
 // Actions:
@@ -231,7 +232,7 @@ Deno.serve(async (req) => {
       .select("id")
       .ilike("email", email)
       .limit(1);
-    if ((existing?.length ?? 0) === 0) {
+    if ((existing?.length ?? 0) === 0 && await canSendAccountInvite(supabase, req.headers.get("authorization"))) {
       const origin = (() => {
         try {
           return safeOrigin(pageUrl || null);
