@@ -27,8 +27,7 @@ const priceKey = (brand: string, title: string) =>
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed() {
   const { allProducts, categories, isLoading } = useTradeProducts();
-  const { discountPct } = useTradeDiscount();
-  const { showTradePrice } = useTradePriceMode();
+  const { showTradePrice, discountPct, tierLabel } = useTradePriceMode();
   const caps = useBrandDiscountCaps();
   const [currency] = useTradeDisplayCurrency();
   const fxRates = useFxRates();
@@ -95,7 +94,7 @@ function TradeSidebarFeed() {
     const fraction = showTradePrice ? effectiveDiscountForBrand(discountPct, product.brand_name, caps).pct : 0;
     const cents = Math.round(price.cents * (1 - fraction));
     const amount = formatPriceConverted(cents, price.currency, currency, fxRates);
-    return `${showTradePrice ? "Trade " : ""}${price.prefix ? `${price.prefix} ` : ""}${amount}`;
+    return `${showTradePrice ? `${tierLabel} ` : ""}${price.prefix ? `${price.prefix} ` : ""}${amount}`;
   };
 
   return (
