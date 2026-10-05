@@ -35,7 +35,7 @@ const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
 const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
-function TradeSidebarFeed() {
+function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
   const { user, profile } = useAuth();
   const { currentStudio, canEdit, loading: studioLoading } = useStudio();
   const { projects, loading: projectsLoading, refresh: refreshProjects } = useProjects({ activeOnly: true });
@@ -402,8 +402,21 @@ function TradeSidebarFeed() {
 export default function ChatGPTTradeSidebar() {
   const { user, loading, rolesLoaded, isAdmin, isTradeUser } = useAuth();
   const location = useLocation();
-  if (loading || !rolesLoaded) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
-  if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
-  if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
-  return <TradeSidebarFeed />;
+  // Force the auth gate to clear after 500ms: inside a third-party embed the
+  // session handshake can stay pending forever (partitioned storage / auth
+  // challenge), so we fall back to the static catalogue cache immediately
+  // instead of spinning. If auth resolves signed-out afterwards, the redirect
+  // below still runs on the next render.
+  const [gateTimedOut, setGateTimedOut] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setGateTimedOut(true), 500);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const authPending = loading || !rolesLoaded;
+  if (authPending && !gateTimedOut) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
+  if (!authPending) {
+    if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
+    if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
+  }
+  return <TradeSidebarFeed optimistic={authPending} />;
 }
