@@ -137,8 +137,9 @@ Deno.serve(async (req) => {
   return json({
     status: 'staged',
     boardItemId,
-    targetWorkflow,
+    // Canonical folder name as it exists in the portal, not the caller's casing.
+    targetWorkflow: project.name.trim(),
     verifiedAt: new Date().toISOString(),
-    message: `Success: ${product.product_name} added to ${project.name}`,
+    message: `Success: ${product.product_name} added to ${project.name.trim()}`,
   })
 })
