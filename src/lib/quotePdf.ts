@@ -22,6 +22,7 @@ import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
+import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -193,24 +194,16 @@ export interface QuotePdfArgs {
   } | null;
   /** Replaces itemized products and ordinary totals with a top-down budget matrix. */
   ceilingBudget?: CeilingBudgetInput | null;
+  formatting?: { locale: PdfLocalePreset };
 }
 
 
 
 
-const currencySymbol = (c: string) => ({ SGD: "S$", USD: "US$", EUR: "EUR ", GBP: "GBP " } as Record<string, string>)[c] || `${c} `;
+const fmtMoney = (cents: number | null | undefined, currency: string, locale?: string) =>
+  formatPdfMoney(cents, currency, locale);
 
-const fmtMoney = (cents: number | null | undefined, currency: string): string => {
-  if (cents == null) return "TBD";
-  const sym = currencySymbol(currency);
-  return `${sym}${new Intl.NumberFormat("en-GB", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(cents / 100)}`;
-};
-
-const fmtDate = (d: Date) =>
-  d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const fmtDate = (d: Date, locale?: string) => formatPdfDate(d, locale);
 
 const CURRENCY_CODES = new Set(["HKD", "USD", "EUR", "GBP", "SGD", "AED", "CHF", "AUD", "CAD", "JPY", "CNY"]);
 
@@ -506,7 +499,7 @@ function drawSignatureSeal(
   doc.setFontSize(6.5);
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
   doc.text(args.quoteNumber, cx, cy + 14, { align: "center" });
-  doc.text(fmtDate(args.createdAt).toUpperCase(), cx, cy + 22, { align: "center" });
+  doc.text(fmtDate(args.createdAt, args.formatting?.locale).toUpperCase(), cx, cy + 22, { align: "center" });
 
   // caption under seal
   doc.setFont("helvetica", "italic");
@@ -543,7 +536,7 @@ function drawSignatureSeal(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-  doc.text(`Signed ${fmtDate(args.createdAt)}`, rx, y + 66);
+  doc.text(`Signed ${fmtDate(args.createdAt, args.formatting?.locale)}`, rx, y + 66);
 
   // Client acceptance (only for priced / submitted / confirmed; skip draft)
   if (status !== "draft") {
@@ -684,7 +677,7 @@ function drawCompanyAndMeta(
     clientLines = splitClient(args.clientName);
   }
   const metaRows = [
-    [["DATE", fmtDate(args.createdAt)], ["EXPIRY", fmtDate(args.expiryAt)]],
+    [["DATE", fmtDate(args.createdAt, args.formatting?.locale)], ["EXPIRY", fmtDate(args.expiryAt, args.formatting?.locale)]],
     [["CLIENT", clientLines], ["PROJECT", [args.projectName || "—"]]],
   ] as Array<Array<[string, string[] | string]>>;
   metaRows.forEach((row, rIdx) => {
@@ -1129,17 +1122,17 @@ function drawTable(
         line.sourceUnitPriceCents != null;
       if (showSource) {
         doc.text(
-          fmtMoney(line.sourceUnitPriceCents!, srcCcy),
+          fmtMoney(line.sourceUnitPriceCents!, srcCcy, args.formatting?.locale),
           xUnit + colUnit - 4,
           y + 20,
           { align: "right" },
         );
       } else {
-        doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+        doc.text(fmtMoney(line.unitPriceCents, args.currency, args.formatting?.locale), xUnit + colUnit - 4, y + 20, { align: "right" });
       }
     }
     doc.setFont("helvetica", "bold");
-    doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
+    doc.text(fmtMoney(line.lineTotalCents, args.currency, args.formatting?.locale), rowRight - 4, y + 20, { align: "right" });
 
     y += rowH;
     // separator
@@ -1252,8 +1245,8 @@ function drawCeilingBudgetSummary(
     doc.text(row.label, M + 16, cy);
     doc.setTextColor(row.final ? JADE[0] : FG[0], row.final ? JADE[1] : FG[1], row.final ? JADE[2] : FG[2]);
     const amount = row.value < 0
-      ? `- ${fmtMoney(Math.abs(row.value), args.currency)}`
-      : fmtMoney(row.value, args.currency);
+      ? `- ${fmtMoney(Math.abs(row.value), args.currency, args.formatting?.locale)}`
+      : fmtMoney(row.value, args.currency, args.formatting?.locale);
     doc.text(amount, right - 16, cy, { align: "right" });
     cy += rowH;
   }
@@ -1268,12 +1261,12 @@ function drawCeilingBudgetSummary(
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
   doc.text("60% deposit due on confirmation", M + 16, cy + 6);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text(fmtMoney(depositCents, args.currency), right - 16, cy + 6, { align: "right" });
+  doc.text(fmtMoney(depositCents, args.currency, args.formatting?.locale), right - 16, cy + 6, { align: "right" });
   cy += paymentRowH;
   doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
   doc.text("40% balance before shipment", M + 16, cy + 6);
   doc.setTextColor(FG[0], FG[1], FG[2]);
-  doc.text(fmtMoney(balanceCents, args.currency), right - 16, cy + 6, { align: "right" });
+  doc.text(fmtMoney(balanceCents, args.currency, args.formatting?.locale), right - 16, cy + 6, { align: "right" });
 
   return y + blockH + 12;
 }
@@ -1290,7 +1283,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
   // Additional charges (crating, hand-loading, surcharges) are NOT discountable.
   // They render as full lines after the Net subtotal / before shipping.
   const extrasList = totals.extrasList;
-  rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency) });
+  rows.push({ label: "Subtotal", value: fmtMoney(args.subtotalCents, args.currency, args.formatting?.locale) });
   const discountCents = totals.discountCents;
   if (discountCents > 0) {
     const pctTxt = `${(args.tradeDiscountPct * 100).toFixed(args.tradeDiscountPct * 100 % 1 === 0 ? 0 : 1)}%`;
@@ -1298,19 +1291,19 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
       label: args.tierLabel
         ? `Trade discount — ${args.tierLabel} (${pctTxt})`
         : `Trade discount (${pctTxt})`,
-      value: `- ${fmtMoney(discountCents, args.currency)}`,
+      value: `- ${fmtMoney(discountCents, args.currency, args.formatting?.locale)}`,
       muted: true,
     });
   }
   const afterDiscount = totals.afterDiscount;
   if (discountCents > 0) {
-    rows.push({ label: "Net subtotal", value: fmtMoney(afterDiscount, args.currency) });
+    rows.push({ label: "Net subtotal", value: fmtMoney(afterDiscount, args.currency, args.formatting?.locale) });
   }
   // Additional charges (non-discountable) — rendered after Net subtotal as full lines.
   extrasList.forEach((e) => {
     rows.push({
       label: e.label || "Additional charge",
-      value: `+ ${fmtMoney(e.amountCents, args.currency)}`,
+      value: `+ ${fmtMoney(e.amountCents, args.currency, args.formatting?.locale)}`,
     });
   });
   if ((args.insurancePremiumCents || 0) > 0) {
@@ -1318,7 +1311,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
       label: args.insuranceLabel
         ? `Insurance — ${args.insuranceLabel}${args.insuranceRateBps ? ` (${(args.insuranceRateBps / 100).toFixed(2)}%)` : ""}`
         : "Insurance",
-      value: `+ ${fmtMoney(args.insurancePremiumCents!, args.currency)}`,
+      value: `+ ${fmtMoney(args.insurancePremiumCents!, args.currency, args.formatting?.locale)}`,
       muted: true,
     });
   }
@@ -1326,7 +1319,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
   if (args.gstEnabled) {
     rows.push({
       label: `GST (${args.gstRate}%)`,
-      value: `+ ${fmtMoney(gstCents, args.currency)}`,
+      value: `+ ${fmtMoney(gstCents, args.currency, args.formatting?.locale)}`,
       muted: true,
     });
   }
@@ -1337,7 +1330,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
       : "Shipping estimate";
     rows.push({
       label: `${baseLabel}${args.shippingShipmentCount && args.shippingShipmentCount > 1 ? ` (${args.shippingShipmentCount} shipments)` : ""}`,
-      value: `+ ${fmtMoney(shippingEstimateCents, args.currency)}`,
+      value: `+ ${fmtMoney(shippingEstimateCents, args.currency, args.formatting?.locale)}`,
       muted: true,
     });
     // Per-mode breakdown — only when the quote mixes multiple modes.
@@ -1349,7 +1342,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
       args.shippingModeBreakdown.forEach((m) => {
         rows.push({
           label: `   · ${m.modeLabel}${m.shipmentCount > 1 ? ` (${m.shipmentCount} shipments)` : ""}`,
-          value: fmtMoney(m.cents, args.currency),
+          value: fmtMoney(m.cents, args.currency, args.formatting?.locale),
           muted: true,
         });
       });
@@ -1404,7 +1397,7 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
   doc.setFontSize(11);
   doc.setTextColor(JADE[0], JADE[1], JADE[2]);
   doc.text("Order total", x + 14, cy);
-  doc.text(fmtMoney(grand, args.currency), x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(grand, args.currency, args.formatting?.locale), x + blockW - 14, cy, { align: "right" });
   cy += 18;
 
   // deposit / balance
@@ -1412,11 +1405,11 @@ function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals,
   doc.setFontSize(9);
   doc.setTextColor(FG[0], FG[1], FG[2]);
   doc.text(`${depositPctLabel} deposit due now`, x + 14, cy);
-  doc.text(fmtMoney(deposit, args.currency), x + blockW - 14, cy, { align: "right" });
+  doc.text(fmtMoney(deposit, args.currency, args.formatting?.locale), x + blockW - 14, cy, { align: "right" });
   cy += 14;
   if (showBalanceRow) {
     doc.text(`${balancePctLabel} balance before shipment`, x + 14, cy);
-    doc.text(fmtMoney(balance, args.currency), x + blockW - 14, cy, { align: "right" });
+    doc.text(fmtMoney(balance, args.currency, args.formatting?.locale), x + blockW - 14, cy, { align: "right" });
     cy += 16;
   } else {
     cy += 2;
@@ -1728,7 +1721,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
       : "Shipping and FX are estimates at quote date and are locked in if the deposit is received within 7 days of issue. Otherwise, around 2 weeks before the end of the lead time, Maison Affluency re-quotes freight at live carrier rates and FX, then emails the balance invoice unless the admin overrides the schedule.",
     "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
     "Lead times start from receipt of cleared deposit and finalised specifications.",
-    `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
+    `Quote valid until ${fmtDate(args.expiryAt, args.formatting?.locale)}. Pricing in ${args.currency} unless otherwise stated.`,
     "Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.",
   ];
   terms.forEach((t) => {

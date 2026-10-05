@@ -63,8 +63,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("GOOGLE_CSE_API_KEY");
-    const cx = Deno.env.get("GOOGLE_CSE_CX");
+    const apiKey = Deno.env.get("GOOGLE_CSE_API_KEY")?.trim();
+    const rawCx = Deno.env.get("GOOGLE_CSE_CX")?.trim();
+    // The dashboard secret may contain a human-readable label followed by the
+    // actual Programmable Search Engine ID. Google only accepts the final ID.
+    const cx = rawCx?.includes(":") ? rawCx.slice(rawCx.lastIndexOf(":") + 1).trim() : rawCx;
 
     if (!apiKey) {
       throw new Error("GOOGLE_CSE_API_KEY is not configured");
@@ -85,11 +88,22 @@ Deno.serve(async (req) => {
     });
 
     const res = await fetch(`https://www.googleapis.com/customsearch/v1?${params}`);
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
 
     if (!res.ok) {
-      console.error("Google CSE API error:", JSON.stringify(data));
-      throw new Error(`Google CSE API error [${res.status}]: ${data?.error?.message || "Unknown error"}`);
+      const providerStatus = data?.error?.status || "UPSTREAM_ERROR";
+      console.error("Google CSE API error:", res.status, providerStatus);
+      // Provider configuration/quota failures must not surface as an uncaught
+      // app runtime crash. The UI receives a controlled, retryable empty state.
+      return new Response(JSON.stringify({
+        results: [],
+        totalResults: "0",
+        nextStart: null,
+        error: "Image search is temporarily unavailable. Please try again later.",
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const results = (data.items || []).map((item: any) => ({
@@ -114,8 +128,13 @@ Deno.serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error("Google image search error:", error);
-    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
-      status: 500,
+    return new Response(JSON.stringify({
+      results: [],
+      totalResults: "0",
+      nextStart: null,
+      error: "Image search is temporarily unavailable. Please try again later.",
+    }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
