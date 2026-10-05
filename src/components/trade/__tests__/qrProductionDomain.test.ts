@@ -19,7 +19,6 @@ const QR_FILES = [
   "src/components/trade/InstallNativeAppCard.tsx",
   "src/components/trade/MobileContinuityBanner.tsx",
   "src/components/trade/SyncToMobileButton.tsx",
-  "supabase/functions/trade-mobile-magic-link/index.ts",
 ];
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
@@ -43,5 +42,11 @@ describe("Trade dashboard QR codes are production-locked", () => {
     const src = read("supabase/functions/trade-mobile-magic-link/index.ts");
     expect(src).toMatch(/const PRODUCTION_ORIGIN = "https:\/\/maisonaffluency\.com"/);
     expect(src).toMatch(/new URL\("\/trade\/launch", PRODUCTION_ORIGIN\)/);
+    // The CORS allowlist may name preview hosts; the URL builder itself must not.
+    const start = src.indexOf("function buildHandoffUrl");
+    const end = src.indexOf("\n}\n", start);
+    const body = src.slice(start, end);
+    expect(body.length).toBeGreaterThan(0);
+    for (const pattern of FORBIDDEN) expect(body).not.toMatch(pattern);
   });
 });
