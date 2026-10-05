@@ -477,7 +477,7 @@ const TradeGallery = () => {
   return (
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
-    <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto">
+    <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto bg-[hsl(var(--trade-gallery-bg))]">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
@@ -622,15 +622,15 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className={cn("grid gap-x-4 gap-y-8 sm:gap-x-6 lg:gap-x-8 lg:gap-y-10", density === "compact" ? "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(260px,1fr))]" : "grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]")}>
+        <div className={cn("grid gap-x-4 gap-y-10 sm:gap-x-6 lg:gap-x-8 lg:gap-y-14", density === "compact" ? "grid-cols-2 md:grid-cols-3 gap-y-8 lg:gap-y-10" : "grid-cols-2 md:grid-cols-3")}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group relative transition-colors">
-                <div className="aspect-square bg-muted/30 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+              <div key={product.id} className="group relative bg-card p-2 sm:p-3">
+                <div className="aspect-square bg-muted/20 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
@@ -739,17 +739,20 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                {/* Description in portal tooltip */}
                  <div className="flex flex-col pt-3 sm:pt-4 pb-4 text-left">
-                   <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
-                     {product.brand_name}
-                   </p>
-                   <h3 className="mt-1 min-h-[2.5rem] font-display text-[15px] leading-snug text-foreground sm:text-lg line-clamp-2">
+                   <div className="flex items-baseline justify-between gap-3">
+                     <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
+                       {product.brand_name}
+                     </p>
+                     {renderPriceDisplay(price, "font-sans text-[10px] uppercase tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap justify-end shrink-0 text-right", product.brand_name) || (
+                       <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted-foreground shrink-0">Price upon Request</span>
+                     )}
+                   </div>
+                   <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
                    </h3>
-                   {isAdmin ? (
+                   {isAdmin && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
-                       {renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap", product.brand_name)}
                        <InlinePriceEditor
                          productName={product.product_name}
                          brandName={product.brand_name.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product.brand_name}
@@ -761,8 +764,6 @@ const TradeGallery = () => {
                          onPriceUpdated={() => refreshPrices()}
                        />
                      </div>
-                   ) : (
-                     renderPriceDisplay(price, "font-sans text-[11px] tracking-[0.14em] mt-auto pt-3 inline-flex items-start gap-1.5 flex-wrap", product.brand_name)
                    )}
                  </div>
               </div>
