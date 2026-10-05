@@ -54,6 +54,14 @@ const TradeGallery = () => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const publishedMakerNames = usePublishedMakerNames();
+  // Restrict the dropdown to published profiles with products so the list
+  // matches the live maker count; spelling variants resolve via normalizeBrandToParent.
+  const dropdownBrands = useMemo(() => {
+    if (!publishedMakerNames) return brands;
+    const published = new Set(publishedMakerNames);
+    return brands.filter((b) => published.has(b) || published.has(normalizeBrandToParent(b)));
+  }, [brands, publishedMakerNames]);
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
