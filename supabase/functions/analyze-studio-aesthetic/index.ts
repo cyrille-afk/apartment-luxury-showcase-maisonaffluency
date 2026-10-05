@@ -140,9 +140,15 @@ async function scrape(url: string): Promise<ScrapeResult> {
       const html = String(d.html ?? "");
       const JUNK = /\.svg(\?|$)|sprite|logo|icon|avatar|favicon|placeholder|spacer|pixel|blank\.|loading\.|1x1|tracking|badge|button|arrow|facebook|fb-|instagram|linkedin|twitter|x-logo|youtube|pinterest|tiktok|whatsapp|social|share/i;
       const JUNK_HOST = /(^|\.)((static|scontent|platform|connect)\.)?(facebook|fbcdn|instagram|cdninstagram|linkedin|licdn|twitter|twimg|youtube|ytimg|pinterest|pinimg|tiktok|tiktokcdn|whatsapp)\./i;
+      // Drop tiny images (social glyphs, spacers) declared small in the URL,
+      // e.g. Wix "w_39,h_39" or query "?w=32".
+      const isTiny = (src: string) => {
+        const dims = [...src.matchAll(/[?&/,_](?:w|h|width|height)[=_](\d{1,4})/gi)].map((d) => Number(d[1]));
+        return dims.length > 0 && Math.max(...dims) < 150;
+      };
       for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
         const src = m[1];
-        if (!/^https:\/\//.test(src) || JUNK.test(src)) continue;
+        if (!/^https:\/\//.test(src) || JUNK.test(src) || isTiny(src)) continue;
         try { if (JUNK_HOST.test(new URL(src).hostname)) continue; } catch { continue; }
         images.add(src);
         if (images.size >= MAX_IMAGES * 2) break;
