@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
@@ -21,6 +22,7 @@ interface DraftQuote {
 type ViewTab = "gallery" | "designers" | "search";
 
 const TradeShowroom = () => {
+  const makerCount = usePublishedMakerCount();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();

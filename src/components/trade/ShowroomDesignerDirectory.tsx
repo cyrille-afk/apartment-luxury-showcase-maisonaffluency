@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 /**
  * Showroom → Designers & Makers.
  *
@@ -37,6 +38,7 @@ const ShowroomDesignerDirectory = ({
   onSelectDesigner: (designer: DirectoryDesigner) => void;
 }) => {
   const [letter, setLetter] = useState<string | null>(null);
+  const liveMakerCount = usePublishedMakerCount();
 
   const { data: designers = [], isLoading } = useQuery({
     queryKey: ["showroom-designer-directory"],
@@ -117,7 +119,7 @@ const ShowroomDesignerDirectory = ({
           );
         })}
         <span className="ml-auto pl-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-          {designers.length} Makers
+          {liveMakerCount ?? designers.length} Makers
         </span>
       </div>
 

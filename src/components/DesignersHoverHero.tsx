@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 /**
  * Editorial hover hero for the public /designers directory.
  *
@@ -650,6 +651,8 @@ function HeroBgLayer({
 
 
 const DesignersHoverHero = () => {
+  const makerCount = usePublishedMakerCount();
+  const makerCountLabel = makerCount ?? "…";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const warmProfile = async (slug: string) => {
