@@ -29,6 +29,11 @@ type StagedItem = { productId: string; projectId: string; projectName: string; p
 const priceKey = (brand: string, title: string) =>
   `${slugify(normalizeBrandToParent(brand))}::${slugify(title)}`;
 
+// Local workspace fallbacks shown while the live project handshake is still
+// initializing, so the staging drawer is never trapped behind a spinner.
+const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
+const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed() {
   const { user, profile } = useAuth();
@@ -297,7 +302,10 @@ function TradeSidebarFeed() {
         </div>
       )}
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-4 pb-8 pt-5" aria-live="polite">
-        {isLoading ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
+            collection) is available synchronously, so only show the spinner when
+            there is literally nothing to display yet. */}
+        {isLoading && products.length === 0 ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
@@ -343,13 +351,26 @@ function TradeSidebarFeed() {
           </div>}
           <div className="px-4 pb-7 pt-4">
             <p className="mb-3 font-body text-[10px] uppercase text-muted-foreground">Select active workspace workflow:</p>
-            {studioLoading || projectsLoading ? <div className="flex justify-center py-6"><DotCircleLoader size="sm" /></div> : projects.length ? (
+            {projects.length ? (
               <div className="max-h-[38dvh] overflow-y-auto">
                 {projects.map((project) => <Button key={project.id} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => stageToProject(project)} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
                   <span className="min-w-0 whitespace-normal break-words">{project.name}</span>
                 </Button>)}
               </div>
-            ) : <p className="py-3 font-body text-xs text-muted-foreground">No active projects yet.</p>}
+            ) : (
+              // Local workspace fallbacks while the live project handshake initializes.
+              <div className="max-h-[38dvh] overflow-y-auto">
+                {LOCAL_WORKFLOW_FOLDERS.map((name) => <Button key={name} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => {
+                  const resolved = projects.find((p) => normalizeFolderName(p.name) === normalizeFolderName(name));
+                  if (resolved) { void stageToProject(resolved); return; }
+                  toast.info("Workspace is still syncing — please retry in a moment.");
+                }} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
+                  <span className="min-w-0 whitespace-normal break-words">{name}</span>
+                  {(studioLoading || projectsLoading) && <span className="ml-auto shrink-0 pl-3 text-[9px] uppercase text-muted-foreground">Syncing…</span>}
+                </Button>)}
+                {!studioLoading && !projectsLoading && <p className="py-3 font-body text-xs text-muted-foreground">No active projects yet.</p>}
+              </div>
+            )}
             {!creating ? <Button variant="ghost" type="button" disabled={!canEdit || studioLoading || saving} onClick={() => setCreating(true)} className="mt-2 h-11 w-full justify-start gap-2 px-0 font-body text-xs text-foreground"><FolderPlus className="size-4" /> Create New Project Workflow</Button> : (
               <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void createAndStage(); }}>
                 <input autoFocus aria-label="New project name" value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} placeholder="Project name" className="min-w-0 flex-1 border-b border-border bg-transparent px-1 py-2 font-body text-sm text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
