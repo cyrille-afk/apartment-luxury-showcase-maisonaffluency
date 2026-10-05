@@ -44,6 +44,7 @@ import { template as funnelPaymentReceivedInternal } from './funnel-payment-rece
 import { template as depositClearedInternal } from './deposit-cleared-internal.tsx'
 import { template as queueJobParked } from './queue-job-parked.tsx'
 import { template as webhookWorkerUnhealthy } from './webhook-worker-unhealthy.tsx'
+import { conciergeTemplate as decisionAlertConcierge, cyrilleTemplate as decisionAlertCyrille } from './application-decision-alert.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -82,4 +83,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'deposit-cleared-internal': depositClearedInternal,
   'queue-job-parked': queueJobParked,
   'webhook-worker-unhealthy': webhookWorkerUnhealthy,
+  'application-decision-alert-concierge': decisionAlertConcierge,
+  'application-decision-alert-cyrille': decisionAlertCyrille,
 }

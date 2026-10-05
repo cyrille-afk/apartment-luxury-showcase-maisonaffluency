@@ -21,7 +21,7 @@ describe('Trade application notifications', () => {
   });
   it('persists approval before sending the registered personalised template', async () => {
     await expect(updateTradeApplication(account, 'approved')).resolves.toEqual({ notified: true });
-    expect(mocks.events).toEqual(['update', 'email']);
+    expect(mocks.events).toEqual(['update', 'email', 'email', 'email']);
     expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ status: 'approved', reviewed_by: 'reviewer' }));
     expect(mocks.invoke).toHaveBeenCalledWith('send-transactional-email', { body: {
       templateName: 'trade-approval', recipientEmail: account.email, idempotencyKey: 'trade-approval-application-1',
@@ -30,7 +30,7 @@ describe('Trade application notifications', () => {
   });
   it('records rejection and queues the editorial decline before deleting', async () => {
     await declineAndDeleteTradeApplication(account);
-    expect(mocks.events).toEqual(['update', 'email', 'delete']);
+    expect(mocks.events).toEqual(['update', 'email', 'email', 'email', 'delete']);
     expect(mocks.invoke.mock.calls[0][1].body.templateName).toBe('trade-rejection');
     expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected' }));
   });
@@ -49,6 +49,19 @@ describe('Trade application notifications', () => {
     await expect(declineAndDeleteTradeApplication(account)).rejects.toThrow('record was kept');
     expect(mocks.remove).not.toHaveBeenCalled();
   });
+  it('sends a separate internal alert to each admin mailbox after the applicant notice', async () => {
+    await updateTradeApplication(account, 'approved');
+    const alerts = mocks.invoke.mock.calls.slice(1).map((c) => c[1].body);
+    expect(alerts.map((b) => b.templateName)).toEqual(['application-decision-alert-concierge', 'application-decision-alert-cyrille']);
+    expect(alerts.every((b) => !('recipientEmail' in b))).toBe(true);
+    expect(alerts[0].idempotencyKey).toBe('application-decision-alert-concierge-approved-application-1');
+    expect(alerts[0].templateData).toMatchObject({ decision: 'approved', applicantEmail: account.email, companyName: 'Atelier' });
+  });
+  it('sends no admin alert when the applicant notice fails', async () => {
+    mocks.invoke.mockResolvedValue({ error: new Error('offline') });
+    await updateTradeApplication(account, 'approved');
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+  });
   it('does not send on hold or repeat approval', async () => {
     await updateTradeApplication(account, 'on_hold');
     await updateTradeApplication({ ...account, status: 'approved' }, 'approved');
@@ -56,12 +69,12 @@ describe('Trade application notifications', () => {
   });
   it('retries a retained rejection with the same email idempotency key', async () => {
     await declineAndDeleteTradeApplication({ ...account, status: 'rejected' });
-    expect(mocks.events).toEqual(['update', 'email', 'delete']);
+    expect(mocks.events).toEqual(['update', 'email', 'email', 'email', 'delete']);
     expect(mocks.invoke.mock.calls[0][1].body.idempotencyKey).toBe('trade-rejection-application-1');
   });
   it('sends edited copy through escaped template props only after persisting', async () => {
     await updateTradeApplication(account, 'approved', { subject: 'Welcome, Atelier', body: 'Dear Jane,\n\nA personal welcome.' });
-    expect(mocks.events).toEqual(['update', 'email']);
+    expect(mocks.events).toEqual(['update', 'email', 'email', 'email']);
     expect(mocks.invoke.mock.calls[0][1].body.templateData).toEqual({ name: 'Jane Smith', companyName: 'Atelier', subjectText: 'Welcome, Atelier', bodyText: 'Dear Jane,\n\nA personal welcome.' });
   });
   it('rejects empty drafts before changing any application record', async () => {
