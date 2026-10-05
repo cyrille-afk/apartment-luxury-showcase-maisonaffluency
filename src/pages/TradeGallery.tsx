@@ -32,6 +32,7 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
+import { usePublishedMakerNames } from "@/hooks/usePublishedMakerNames";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
@@ -53,6 +54,13 @@ const TradeGallery = () => {
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const publishedMakerNames = usePublishedMakerNames();
+  // Drive the dropdown from the live published-profile list so it always
+  // matches the maker count; fall back to product-derived brands while loading.
+  const dropdownBrands = useMemo(() => {
+    if (publishedMakerNames) return publishedMakerNames;
+    return brands;
+  }, [brands, publishedMakerNames]);
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -579,7 +587,7 @@ const TradeGallery = () => {
               </div>
             ) : (
               <AlphabetDesignerPicker
-                brands={brands}
+                brands={dropdownBrands}
                 value={selectedBrand}
                 onChange={handleBrandChange}
                 selectClassName={`${filterInputClass} text-[16px] sm:text-sm`}
