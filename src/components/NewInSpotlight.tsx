@@ -402,11 +402,11 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
           <div className="grid grid-cols-2 gap-x-10 items-start w-full">
             {/* Left Column — constrained editorial hero */}
             <div className="flex flex-col">
-              <div className="aspect-[16/10] max-h-[300px] w-full overflow-hidden bg-[hsl(var(--canvas))]">
+              <div className="flex h-[280px] w-full items-center justify-center overflow-hidden bg-[hsl(var(--canvas))]">
                 <CldPicture
                   src={portraitImage}
                   alt={`${displayName} portrait`}
-                  className="w-full h-full object-cover"
+                  className="max-h-full max-w-full object-contain"
                   style={{ objectPosition: (designer as any).hero_image_position || "center" }}
                 />
               </div>
