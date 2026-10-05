@@ -6337,7 +6337,12 @@ export type Database = {
       }
       projects: {
         Row: {
+          ceiling_currency: string | null
+          ceiling_ledger_enabled: boolean
+          ceiling_tier_label: string | null
+          ceiling_trade_discount_pct: number | null
           client_id: string | null
+          client_markup_pct: number | null
           client_name: string
           color: string
           cover_image_url: string | null
@@ -6352,13 +6357,19 @@ export type Database = {
           studio_id: string | null
           style: string | null
           tags: string[]
+          target_ceiling_cents: number | null
           target_completion_date: string | null
           trade_multiplier: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          ceiling_currency?: string | null
+          ceiling_ledger_enabled?: boolean
+          ceiling_tier_label?: string | null
+          ceiling_trade_discount_pct?: number | null
           client_id?: string | null
+          client_markup_pct?: number | null
           client_name?: string
           color?: string
           cover_image_url?: string | null
@@ -6373,13 +6384,19 @@ export type Database = {
           studio_id?: string | null
           style?: string | null
           tags?: string[]
+          target_ceiling_cents?: number | null
           target_completion_date?: string | null
           trade_multiplier?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          ceiling_currency?: string | null
+          ceiling_ledger_enabled?: boolean
+          ceiling_tier_label?: string | null
+          ceiling_trade_discount_pct?: number | null
           client_id?: string | null
+          client_markup_pct?: number | null
           client_name?: string
           color?: string
           cover_image_url?: string | null
@@ -6394,6 +6411,7 @@ export type Database = {
           studio_id?: string | null
           style?: string | null
           tags?: string[]
+          target_ceiling_cents?: number | null
           target_completion_date?: string | null
           trade_multiplier?: number
           updated_at?: string
@@ -10372,7 +10390,12 @@ export type Database = {
         Row: {
           admin_notes: string | null
           billing_mode: Database["public"]["Enums"]["billing_mode"]
+          ceiling_currency: string | null
+          ceiling_ledger_mode: string
+          ceiling_tier_label: string | null
+          ceiling_trade_discount_pct: number | null
           client_id: string | null
+          client_markup_pct: number | null
           client_name: string | null
           client_pdf_download_token: string
           client_pdf_path: string | null
@@ -10421,13 +10444,19 @@ export type Database = {
           status: string
           studio_id: string | null
           submitted_at: string | null
+          target_ceiling_cents: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           admin_notes?: string | null
           billing_mode?: Database["public"]["Enums"]["billing_mode"]
+          ceiling_currency?: string | null
+          ceiling_ledger_mode?: string
+          ceiling_tier_label?: string | null
+          ceiling_trade_discount_pct?: number | null
           client_id?: string | null
+          client_markup_pct?: number | null
           client_name?: string | null
           client_pdf_download_token?: string
           client_pdf_path?: string | null
@@ -10476,13 +10505,19 @@ export type Database = {
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
+          target_ceiling_cents?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           admin_notes?: string | null
           billing_mode?: Database["public"]["Enums"]["billing_mode"]
+          ceiling_currency?: string | null
+          ceiling_ledger_mode?: string
+          ceiling_tier_label?: string | null
+          ceiling_trade_discount_pct?: number | null
           client_id?: string | null
+          client_markup_pct?: number | null
           client_name?: string | null
           client_pdf_download_token?: string
           client_pdf_path?: string | null
@@ -10531,6 +10566,7 @@ export type Database = {
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
+          target_ceiling_cents?: number | null
           updated_at?: string
           user_id?: string
         }

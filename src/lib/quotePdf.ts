@@ -21,6 +21,7 @@ import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
 import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -190,6 +191,8 @@ export interface QuotePdfArgs {
     appliedAt: Date;
     pairs: Array<{ src: string; tgt: string; rate: number; source?: string | null }>;
   } | null;
+  /** Replaces itemized products and ordinary totals with a top-down budget matrix. */
+  ceilingBudget?: CeilingBudgetInput | null;
 }
 
 
@@ -319,12 +322,19 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   // ---- Company address block (left) + meta (right)
   y = drawCompanyAndMeta(doc, args, M, y, contentW);
 
-  // ---- Line items table (with thumbnails)
-  y = drawTable(doc, args, M, y, contentW, pageH, productImages, finishSwatchImages, fabricSwatchImages, finishSwatchNames);
+  if (args.ceilingBudget) {
+    // Ceiling-ledger documents intentionally replace the product table and
+    // conventional totals; the rest of the branded document remains intact.
+    y = ensureSpace(doc, y, 184, pageH);
+    y = drawCeilingBudgetSummary(doc, args, M, y, contentW);
+  } else {
+    // ---- Line items table (with thumbnails)
+    y = drawTable(doc, args, M, y, contentW, pageH, productImages, finishSwatchImages, fabricSwatchImages, finishSwatchNames);
 
-  // ---- Totals block (right aligned)
-  y = ensureSpace(doc, y, 220, pageH);
-  y = drawTotals(doc, args, quoteTotals, M, y, contentW);
+    // ---- Totals block (right aligned)
+    y = ensureSpace(doc, y, 220, pageH);
+    y = drawTotals(doc, args, quoteTotals, M, y, contentW);
+  }
 
   // ---- FX audit line (compliance) — shown whenever a snapshot was passed,
   //      even if all rates are identity, so the client sees a timestamped
@@ -343,7 +353,7 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
 
 
   // ---- Trade Tiers ladder — separate card, explains the discount rate
-  if (args.tradeDiscountApplied && args.tierBreakdown && args.tierBreakdown.length > 0) {
+  if (!args.ceilingBudget && args.tradeDiscountApplied && args.tierBreakdown && args.tierBreakdown.length > 0) {
     const need = 30 + args.tierBreakdown.length * 13;
     y = ensureSpace(doc, y, need, pageH);
     y = drawTierBlock(doc, args, M, y, contentW);
@@ -1158,6 +1168,19 @@ export interface ComputedQuoteTotals {
 }
 
 export function computeQuoteTotals(args: QuotePdfArgs): ComputedQuoteTotals {
+  if (args.ceilingBudget) {
+    const ceiling = calculateCeilingBudget(args.ceilingBudget);
+    return Object.freeze({
+      extrasList: Object.freeze([]),
+      extrasTotalCents: 0,
+      discountCents: ceiling.tradeSourcingMarkdownCents,
+      afterDiscount: ceiling.netPurchasingBudgetCents,
+      insuranceCents: 0,
+      gstCents: 0,
+      shippingEstimateCents: 0,
+      grand: ceiling.targetCeilingCents,
+    });
+  }
   const extrasList = (args.extras || []).filter((e) => (e?.amountCents || 0) !== 0);
   const extrasTotalCents = extrasList.reduce((s, e) => s + (e.amountCents || 0), 0);
   const discountCents = args.tradeDiscountApplied
@@ -1181,6 +1204,78 @@ export function computeQuoteTotals(args: QuotePdfArgs): ComputedQuoteTotals {
     shippingEstimateCents,
     grand,
   });
+}
+
+function drawCeilingBudgetSummary(
+  doc: jsPDF,
+  args: QuotePdfArgs,
+  M: number,
+  y: number,
+  contentW: number,
+): number {
+  if (!args.ceilingBudget) return y;
+  const budget = calculateCeilingBudget(args.ceilingBudget);
+  const rowH = 28;
+  const paymentRowH = 22;
+  const blockH = 42 + rowH * 5 + paymentRowH * 2 + 34;
+  const right = M + contentW;
+
+  doc.setFillColor(250, 249, 246);
+  doc.rect(M, y, contentW, blockH, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+  doc.text("TARGET CEILING BUDGET SUMMARY", M + 16, y + 22, { charSpace: 1.1 });
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.35);
+  doc.line(M + 16, y + 32, right - 16, y + 32);
+
+  const tier = budget.tierLabel ? `${budget.tierLabel} ` : "";
+  const rows = [
+    { label: "Target Client Ceiling Budget", value: budget.targetCeilingCents, primary: true },
+    { label: `Designer Net Profit Margin (${budget.clientMarkupPct.toFixed(2)}%)`, value: budget.designerNetProfitCents },
+    { label: "Max Allowed Designer Cost", value: budget.maxDesignerCostCents },
+    { label: `Trade Sourcing Markdown (${tier}${budget.tradeDiscountPct.toFixed(2)}%)`, value: -budget.tradeSourcingMarkdownCents },
+    { label: "Net Purchasing Sourcing Budget", value: budget.netPurchasingBudgetCents, final: true },
+  ];
+
+  let cy = y + 54;
+  for (const row of rows) {
+    if (row.final) {
+      doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+      doc.setLineWidth(0.6);
+      doc.line(M + 16, cy - 12, right - 16, cy - 12);
+    }
+    doc.setFont("helvetica", row.primary || row.final ? "bold" : "normal");
+    doc.setFontSize(row.primary || row.final ? 10.5 : 9.5);
+    doc.setTextColor(row.primary || row.final ? FG[0] : MUTED[0], row.primary || row.final ? FG[1] : MUTED[1], row.primary || row.final ? FG[2] : MUTED[2]);
+    doc.text(row.label, M + 16, cy);
+    doc.setTextColor(row.final ? JADE[0] : FG[0], row.final ? JADE[1] : FG[1], row.final ? JADE[2] : FG[2]);
+    const amount = row.value < 0
+      ? `- ${fmtMoney(Math.abs(row.value), args.currency)}`
+      : fmtMoney(row.value, args.currency);
+    doc.text(amount, right - 16, cy, { align: "right" });
+    cy += rowH;
+  }
+
+  const depositCents = Math.round(budget.targetCeilingCents * 0.6);
+  const balanceCents = budget.targetCeilingCents - depositCents;
+  doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+  doc.setLineWidth(0.35);
+  doc.line(M + 16, cy - 10, right - 16, cy - 10);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("60% deposit due on confirmation", M + 16, cy + 6);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text(fmtMoney(depositCents, args.currency), right - 16, cy + 6, { align: "right" });
+  cy += paymentRowH;
+  doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+  doc.text("40% balance before shipment", M + 16, cy + 6);
+  doc.setTextColor(FG[0], FG[1], FG[2]);
+  doc.text(fmtMoney(balanceCents, args.currency), right - 16, cy + 6, { align: "right" });
+
+  return y + blockH + 12;
 }
 
 function drawTotals(doc: jsPDF, args: QuotePdfArgs, totals: ComputedQuoteTotals, M: number, y: number, contentW: number): number {

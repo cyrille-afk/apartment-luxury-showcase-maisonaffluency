@@ -50,6 +50,7 @@ import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { calculateCeilingBudget } from "@/lib/ceilingBudget";
 
 // null = no override (fall back to product default); 0 = In Stock; >0 = explicit weeks
 const getLeadWeeksOverride = (value: number | null): number | null =>
@@ -475,6 +476,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [manualShipSending, setManualShipSending] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [ceilingMode, setCeilingMode] = useState<"inherit" | "itemized" | "target_ceiling">("inherit");
+  const [quoteCeilingCents, setQuoteCeilingCents] = useState<number | null>(null);
+  const [quoteMarkupPct, setQuoteMarkupPct] = useState<number | null>(null);
+  const [quoteCeilingDiscountPct, setQuoteCeilingDiscountPct] = useState<number | null>(null);
+  const [quoteCeilingTierLabel, setQuoteCeilingTierLabel] = useState<string | null>(null);
+  const [projectCeilingDefaults, setProjectCeilingDefaults] = useState<{
+    enabled: boolean;
+    targetCents: number | null;
+    markupPct: number | null;
+    discountPct: number | null;
+    tierLabel: string | null;
+  } | null>(null);
   // Ship-to / Incoterm (separate from Bill-to/Client)
   const INCOTERMS = ["EXW", "FCA", "FOB", "CIF", "CIP", "DAP", "DDP", "DPU"] as const;
   type Incoterm = (typeof INCOTERMS)[number];
@@ -706,7 +719,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id, size_variants), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes, ceiling_ledger_mode, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -980,6 +993,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       const q = quoteRes.data as any;
+      setCeilingMode(q?.ceiling_ledger_mode === "itemized" || q?.ceiling_ledger_mode === "target_ceiling" ? q.ceiling_ledger_mode : "inherit");
+      setQuoteCeilingCents(q?.target_ceiling_cents == null ? null : Number(q.target_ceiling_cents));
+      setQuoteMarkupPct(q?.client_markup_pct == null ? null : Number(q.client_markup_pct));
+      setQuoteCeilingDiscountPct(q?.ceiling_trade_discount_pct == null ? null : Number(q.ceiling_trade_discount_pct));
+      setQuoteCeilingTierLabel(q?.ceiling_tier_label ?? null);
       if (q?.insurance_enabled !== undefined) setInsuranceEnabled(!!q.insurance_enabled);
       if (q?.insurance_tier) setInsuranceTier(q.insurance_tier as InsuranceTier);
       if (q?.insurance_rate_bps != null) setInsuranceRateBps(q.insurance_rate_bps);
@@ -1214,9 +1232,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   // Fetch project name when projectId changes
   useEffect(() => {
-    if (!projectId) { setProjectName(null); return; }
-    (supabase.from as any)("projects").select("name").eq("id", projectId).maybeSingle().then(({ data }: any) => {
+    if (!projectId) { setProjectName(null); setProjectCeilingDefaults(null); return; }
+    (supabase.from as any)("projects").select("name, ceiling_ledger_enabled, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label").eq("id", projectId).maybeSingle().then(({ data }: any) => {
       setProjectName(data?.name ?? null);
+      setProjectCeilingDefaults(data ? {
+        enabled: Boolean(data.ceiling_ledger_enabled),
+        targetCents: data.target_ceiling_cents == null ? null : Number(data.target_ceiling_cents),
+        markupPct: data.client_markup_pct == null ? null : Number(data.client_markup_pct),
+        discountPct: data.ceiling_trade_discount_pct == null ? null : Number(data.ceiling_trade_discount_pct),
+        tierLabel: data.ceiling_tier_label ?? null,
+      } : null);
     });
   }, [projectId]);
 
@@ -1918,6 +1943,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       projectName: projectName || null,
       currency,
       lines,
+      ceilingBudget: ceilingBudgetActive && effectiveCeilingCents > 0
+        ? {
+            targetCeilingCents: effectiveCeilingCents,
+            clientMarkupPct: effectiveCeilingMarkupPct,
+            tradeDiscountPct: effectiveCeilingDiscountPct,
+            tierLabel: effectiveCeilingTierLabel,
+          }
+        : null,
       subtotalCents,
       tradeDiscountPct,
       tradeDiscountApplied: discountApplies,
@@ -1951,7 +1984,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         const cifBase = goodsAfterDiscountCents + liveFreightCents;
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
-      depositPct: computeWeightedDepositPct(
+      depositPct: ceilingBudgetActive ? 0.6 : computeWeightedDepositPct(
         items.map((it) => {
           const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
           const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
@@ -2333,6 +2366,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ? Math.round(screenTaxBaseCents * gstRate / 100)
     : 0;
   const screenShippingCents = freightInQuoteCcyCents;
+  const ceilingBudgetActive = ceilingMode === "target_ceiling" || (ceilingMode === "inherit" && Boolean(projectCeilingDefaults?.enabled));
+  const effectiveCeilingCents = quoteCeilingCents ?? projectCeilingDefaults?.targetCents ?? 0;
+  const effectiveCeilingMarkupPct = quoteMarkupPct ?? projectCeilingDefaults?.markupPct ?? 15;
+  const effectiveCeilingDiscountPct = quoteCeilingDiscountPct ?? projectCeilingDefaults?.discountPct ?? tradeDiscountPct * 100;
+  const effectiveCeilingTierLabel = quoteCeilingTierLabel ?? projectCeilingDefaults?.tierLabel ?? tierLabel;
+  const ceilingBudget = calculateCeilingBudget({
+    targetCeilingCents: effectiveCeilingCents,
+    clientMarkupPct: effectiveCeilingMarkupPct,
+    tradeDiscountPct: effectiveCeilingDiscountPct,
+    tierLabel: effectiveCeilingTierLabel,
+  });
   const screenOrderTotalCents = screenTaxBaseCents + screenTaxCents + screenShippingCents;
   const screenDepositCents = Math.round(screenOrderTotalCents * depositPctLive);
 
@@ -3185,6 +3229,129 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {isDraft && !clientSafe && (
+          <div className="border-b border-border px-4 py-4 md:px-6 lg:px-8 print:hidden">
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="space-y-1">
+                <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Proforma ledger</span>
+                <select
+                  value={ceilingMode}
+                  onChange={async (event) => {
+                    const mode = event.target.value as "inherit" | "itemized" | "target_ceiling";
+                    setCeilingMode(mode);
+                    await supabase.from("trade_quotes").update({ ceiling_ledger_mode: mode }).eq("id", quoteId);
+                  }}
+                  className="h-9 min-w-44 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                >
+                  <option value="inherit">Project default</option>
+                  <option value="itemized">Itemized products</option>
+                  <option value="target_ceiling">Target ceiling</option>
+                </select>
+              </label>
+              {ceilingBudgetActive && (
+                <>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Target ceiling ({currency})</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={effectiveCeilingCents ? effectiveCeilingCents / 100 : ""}
+                      onChange={(event) => setQuoteCeilingCents(event.target.value ? Math.round(Number(event.target.value) * 100) : null)}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ target_ceiling_cents: quoteCeilingCents, ceiling_currency: currency }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-40 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Client markup %</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={effectiveCeilingMarkupPct}
+                      onChange={(event) => setQuoteMarkupPct(Number(event.target.value))}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ client_markup_pct: quoteMarkupPct }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-28 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Trade discount %</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={effectiveCeilingDiscountPct}
+                      onChange={(event) => setQuoteCeilingDiscountPct(Number(event.target.value))}
+                      onBlur={async () => {
+                        await supabase.from("trade_quotes").update({ ceiling_trade_discount_pct: quoteCeilingDiscountPct, ceiling_tier_label: effectiveCeilingTierLabel }).eq("id", quoteId);
+                      }}
+                      className="h-9 w-28 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                    />
+                  </label>
+                  {projectId && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const { error } = await supabase.from("projects").update({
+                          ceiling_ledger_enabled: true,
+                          target_ceiling_cents: effectiveCeilingCents,
+                          ceiling_currency: currency,
+                          client_markup_pct: effectiveCeilingMarkupPct,
+                          ceiling_trade_discount_pct: effectiveCeilingDiscountPct,
+                          ceiling_tier_label: effectiveCeilingTierLabel,
+                        }).eq("id", projectId);
+                        if (error) {
+                          toast({ title: "Project default not saved", description: error.message, variant: "destructive" });
+                          return;
+                        }
+                        setProjectCeilingDefaults({
+                          enabled: true,
+                          targetCents: effectiveCeilingCents,
+                          markupPct: effectiveCeilingMarkupPct,
+                          discountPct: effectiveCeilingDiscountPct,
+                          tierLabel: effectiveCeilingTierLabel,
+                        });
+                        toast({ title: "Project ceiling default saved" });
+                      }}
+                      className="h-9 rounded-md border border-border px-3 font-body text-[10px] uppercase tracking-widest text-foreground transition-colors hover:bg-muted"
+                    >
+                      Save as project default
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {ceilingBudgetActive && effectiveCeilingCents > 0 && (
+          <div className="border-b border-border bg-muted/20 px-4 py-6 md:px-6 lg:px-8">
+            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+              <h2 className="font-body text-[11px] uppercase tracking-widest text-foreground">Target Ceiling Budget Summary</h2>
+              <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">{effectiveCeilingTierLabel} {effectiveCeilingDiscountPct.toFixed(2)}%</span>
+            </div>
+            <div className="ml-auto max-w-xl space-y-2 font-body text-xs">
+              {[
+                ["Target Client Ceiling Budget", ceilingBudget.targetCeilingCents],
+                [`Designer Net Profit Margin (${effectiveCeilingMarkupPct.toFixed(2)}%)`, ceilingBudget.designerNetProfitCents],
+                ["Max Allowed Designer Cost", ceilingBudget.maxDesignerCostCents],
+                [`Trade Sourcing Markdown (${effectiveCeilingTierLabel} ${effectiveCeilingDiscountPct.toFixed(2)}%)`, -ceilingBudget.tradeSourcingMarkdownCents],
+                ["Net Purchasing Sourcing Budget", ceilingBudget.netPurchasingBudgetCents],
+              ].map(([label, value], index) => (
+                <div key={String(label)} className={cn("flex justify-between gap-8", index === 4 ? "border-t border-foreground pt-3 text-foreground" : "text-muted-foreground")}>
+                  <span>{label}</span>
+                  <span className="tabular-nums text-foreground">{Number(value) < 0 ? "− " : ""}{currencySymbol(currency)} {formatPriceRaw(Math.abs(Number(value)), currency)}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
