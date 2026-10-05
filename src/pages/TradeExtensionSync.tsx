@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
 import { Check, CheckCircle2, FolderKanban, Plug, RefreshCw } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
+import type { ProjectStagingPayload } from "@/lib/projectStagingMessage";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const EXTENSION_ORIGIN = "/trade/concierge/sidebar";
 const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
@@ -9,6 +12,26 @@ const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
 export default function TradeExtensionSync() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
   const [lastSync, setLastSync] = useState<string | null>(null);
+  const [catalogueOpen, setCatalogueOpen] = useState(false);
+  const [syncNotice, setSyncNotice] = useState("");
+
+  const recordVerifiedSync = useCallback((payload: ProjectStagingPayload) => {
+    const formatted = new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    try { localStorage.setItem(LAST_SYNC_KEY, formatted); } catch { /* local storage unavailable */ }
+    setLastSync(formatted);
+    setSyncNotice(`Success: ${payload.productName} routed to ${payload.targetWorkflow} and verified in core records.`);
+  }, []);
+
+  useDashboardDataSync({
+    onVerified: recordVerifiedSync,
+    showToast: false,
+  });
+
+  useEffect(() => {
+    if (!syncNotice) return;
+    const timer = window.setTimeout(() => setSyncNotice(""), 4200);
+    return () => window.clearTimeout(timer);
+  }, [syncNotice]);
 
   useEffect(() => {
     const read = () => {
@@ -28,6 +51,15 @@ export default function TradeExtensionSync() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
+      {syncNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed top-6 z-[70] max-w-sm border border-border bg-background px-4 py-3 font-body text-xs text-foreground shadow-lg transition-[right] ${catalogueOpen ? "right-[384px]" : "right-6"}`}
+        >
+          {syncNotice}
+        </div>
+      )}
       <div>
         <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
           ChatGPT Extension Integration
@@ -124,19 +156,41 @@ export default function TradeExtensionSync() {
               any active folder — they appear on your dashboard instantly.
             </p>
           </div>
-          <Link
-            to={EXTENSION_ORIGIN}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 font-body text-sm text-foreground hover:bg-muted/50 hover:border-foreground/20 transition-all"
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCatalogueOpen(true)}
+            className="gap-2"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Open Catalogue
-          </Link>
+          </Button>
         </div>
         <div className="mt-4 flex items-center gap-2 font-body text-[11px] uppercase tracking-widest text-emerald-600">
           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
           All active folders receiving staged records
         </div>
       </section>
+
+      <Sheet open={catalogueOpen} onOpenChange={setCatalogueOpen}>
+        <SheetContent
+          side="right"
+          aria-describedby={undefined}
+          overlayClassName="bg-foreground/20 backdrop-blur-[1px]"
+          className="w-[360px] max-w-[360px] gap-0 border-l border-border bg-[hsl(var(--trade-gallery-bg))] p-0 shadow-2xl sm:max-w-[360px] [&>button]:right-2 [&>button]:top-1.5 [&>button]:p-1.5 [&>button_svg]:size-4"
+        >
+          <div className="flex h-11 shrink-0 items-center border-b border-border bg-muted px-4 pr-12">
+            <SheetTitle className="font-body text-[11px] font-medium text-muted-foreground">
+              ChatGPT Sidebar Sandbox Mode
+            </SheetTitle>
+          </div>
+          <iframe
+            title="ChatGPT Trade Sidebar preview"
+            src={EXTENSION_ORIGIN}
+            className="block h-[calc(100dvh-2.75rem)] w-full border-0 bg-[hsl(var(--trade-gallery-bg))]"
+          />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

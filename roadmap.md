@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Embed the AI Extension catalogue in a fixed 360px sandbox drawer and verify staged project records before confirming sync on the parent page.
+
 - [x] Label localized starter projects as samples and let members turn them into real projects without losing their folders or boards.
 
 - [x] Seed an empty first-time project workspace with a regional sample folder and synchronize Felix Step 4 with its title.

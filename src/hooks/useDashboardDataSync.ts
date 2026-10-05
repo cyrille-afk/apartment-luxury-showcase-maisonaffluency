@@ -1,15 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { parseProjectStagingMessage, type ProjectStagingPayload } from "@/lib/projectStagingMessage";
 
+interface DashboardDataSyncOptions {
+  onVerified?: (payload: ProjectStagingPayload) => void;
+  successMessage?: string | ((payload: ProjectStagingPayload) => string);
+  showToast?: boolean;
+}
+
 /** Receives same-origin sidebar notifications and reconciles them with RLS-visible saved items. */
-export function useDashboardDataSync() {
+export function useDashboardDataSync(options: DashboardDataSyncOptions = {}) {
   const { user } = useAuth();
   const { currentStudio } = useStudio();
   const [itemsByProject, setItemsByProject] = useState<Record<string, ProjectStagingPayload[]>>({});
+  const onVerifiedRef = useRef(options.onVerified);
+  const successMessageRef = useRef(options.successMessage);
+
+  onVerifiedRef.current = options.onVerified;
+  successMessageRef.current = options.successMessage;
 
   useEffect(() => {
     setItemsByProject({});
@@ -44,11 +55,17 @@ export function useDashboardDataSync() {
         return { ...previous, [payload.projectId]: [...list, verified] };
       });
       window.dispatchEvent(new Event("concierge:artifacts-changed"));
-      toast.success("Database Sync Complete: Project records refreshed via Trade Concierge Extension.");
+      onVerifiedRef.current?.(verified);
+      if (options.showToast !== false) {
+        const message = successMessageRef.current;
+        toast.success(typeof message === "function"
+          ? message(verified)
+          : message || "Database Sync Complete: Project records refreshed via Trade Concierge Extension.");
+      }
     };
     window.addEventListener("message", onMessage);
     return () => { mounted = false; window.removeEventListener("message", onMessage); };
-  }, [user?.id, currentStudio?.id]);
+  }, [user?.id, currentStudio?.id, options.showToast]);
 
   return itemsByProject;
 }
