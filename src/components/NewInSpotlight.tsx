@@ -129,7 +129,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
         subtitle: p.subtitle,
         image_url: p.image_url,
         hover_image_url: p.hover_image_url,
-        brand_name: brandLabelOverride || designer.name,
+        brand_name: pickSubtitleBrand(p) || brandLabelOverride || designer.name,
         materials: p.materials,
         materials_description: (p as any).materials_description ?? null,
         dimensions: p.dimensions,
