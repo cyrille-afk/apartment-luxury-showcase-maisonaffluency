@@ -90,20 +90,17 @@ const APPROVAL_BENEFITS_BASE = [
     "description": "An in-app assistant trained exclusively on our catalogue for instant recommendations.",
     "details": []
   },
-  {
-    "title": "Trade payouts",
-    "description": "Choose how your studio gets paid on every quote.",
-    "details": [
-      "Agent commission (EU / Asia default): your client pays full MSRP and you receive a commission payout after delivery.",
-      "Net buy (US / CA / MX default): your firm pays MSRP minus your tier discount on a white-label invoice.",
-      "Country-aware defaults: US / Canada / Mexico default to net buy; the rest of the world defaults to agent commission.",
-      "Per-quote override: flip billing mode on any individual quote when the project calls for it.",
-      "Resale certificates: upload state-issued US resale certificates to unlock net-buy shipments to those states.",
-      "Stripe Connect: agent commissions paid directly to your linked studio payout account."
-    ]
-  }
 ] as const;
-export function createApplicationDraft(status: 'approved' | 'rejected', name?: string | null, company?: string | null): NotificationDraft {
+
+/** Full benefit list with the Trade Payouts block resolved for the applicant's country. */
+export function approvalBenefits(country?: string | null): readonly ApprovalBenefit[] {
+  return [...APPROVAL_BENEFITS_BASE, payoutsBenefit(country)];
+}
+
+/** Default (non-North-American) benefit list, kept for backwards compatibility. */
+export const APPROVAL_BENEFITS = approvalBenefits();
+
+export function createApplicationDraft(status: 'approved' | 'rejected', name?: string | null, company?: string | null, country?: string | null): NotificationDraft {
   const greeting = name ? `Dear ${name},` : 'Dear Applicant,';
   if (status === 'rejected') return { subject: REJECTION_SUBJECT, body: [greeting,
     `Thank you for your interest in the Maison Affluency Trade Program${company ? ` on behalf of ${company}` : ''}, and for taking the time to introduce your practice to us.`,
