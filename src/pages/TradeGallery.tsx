@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
+import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ const TradeGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
     return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
