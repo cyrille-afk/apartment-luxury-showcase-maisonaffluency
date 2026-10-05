@@ -6322,6 +6322,7 @@ export type Database = {
           created_at: string
           email: string
           first_name: string
+          has_accepted_trade_nda: boolean
           has_seen_trade_intro: boolean
           id: string
           last_name: string
@@ -6329,6 +6330,7 @@ export type Database = {
           preferred_currency: string | null
           referred_by_studio_id: string | null
           trade_id: string | null
+          trade_nda_accepted_at: string | null
           trade_status: string | null
           trade_tier: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents: number
@@ -6346,6 +6348,7 @@ export type Database = {
           created_at?: string
           email: string
           first_name?: string
+          has_accepted_trade_nda?: boolean
           has_seen_trade_intro?: boolean
           id: string
           last_name?: string
@@ -6353,6 +6356,7 @@ export type Database = {
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
           trade_id?: string | null
+          trade_nda_accepted_at?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
@@ -6372,6 +6376,7 @@ export type Database = {
           created_at?: string
           email?: string
           first_name?: string
+          has_accepted_trade_nda?: boolean
           has_seen_trade_intro?: boolean
           id?: string
           last_name?: string
@@ -6379,6 +6384,7 @@ export type Database = {
           preferred_currency?: string | null
           referred_by_studio_id?: string | null
           trade_id?: string | null
+          trade_nda_accepted_at?: string | null
           trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
