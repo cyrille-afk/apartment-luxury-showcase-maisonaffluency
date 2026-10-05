@@ -349,7 +349,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
               <article key={`${product.brand_name}-${product.product_name}-${product.id}`} className="group min-w-0 bg-card p-2.5">
                 <Link to={productUrl(product)} state={{ from: location.pathname }} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`View ${product.product_name}`}>
                 <div className="flex aspect-[5/4] w-full items-center justify-center overflow-hidden bg-[hsl(var(--product-canvas))]">
-                  {product.image_url ? <img src={product.image_url} alt={product.product_name} loading="lazy" decoding="async" className="h-full w-full object-contain object-center p-3 transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none" /> : <Package className="size-6 text-muted-foreground/50" aria-hidden="true" />}
+                  {product.image_url ? <img src={optimizeImageUrl(product.image_url, "f_auto,q_auto,w_400,dpr_auto,c_limit")} alt={product.product_name} loading="lazy" decoding="async" width={400} height={320} sizes="400px" className="h-full w-full object-contain object-center p-3 transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none" /> : <Package className="size-6 text-muted-foreground/50" aria-hidden="true" />}
                 </div>
                 <div className="flex min-w-0 items-start justify-between gap-3 px-1 pt-3 pb-1">
                   <div className="min-w-0 flex-1">
