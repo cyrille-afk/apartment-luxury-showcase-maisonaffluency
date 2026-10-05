@@ -96,6 +96,7 @@ const TradeDescriptionWriter = lazy(() => import("./pages/TradeDescriptionWriter
 const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const ChatGPTTradeSidebar = lazy(() => import("./components/trade/ChatGPTTradeSidebar"));
+const TradeExtensionSync = lazy(() => import("./pages/TradeExtensionSync"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCountry"));
 
@@ -795,6 +796,7 @@ const App = () => {
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/trade/concierge/sidebar" element={<Suspense fallback={<PageLoadingSkeleton />}><ChatGPTTradeSidebar /></Suspense>} />
+                  <Route path="/trade/extension-sync" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeExtensionSync /></Suspense>} />
                   <Route path="/trade-faq" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeFaqPage /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade-program/apply" element={<TradeApplyRedirect />} />
