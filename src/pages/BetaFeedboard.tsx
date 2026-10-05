@@ -174,12 +174,31 @@ function EntryCard({ entry }: { entry: Entry }) {
           >
             <X className="h-4 w-4" />
           </button>
-          <img
-            src={url}
-            alt="Screenshot full view"
-            className="max-h-[90vh] max-w-[92vw] cursor-default border border-border object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <TransformWrapper
+            minScale={1}
+            maxScale={8}
+            doubleClick={{ mode: "toggle", step: 2 }}
+            wheel={{ step: 0.15 }}
+            pinch={{ step: 5 }}
+            centerOnInit
+          >
+            <div
+              className="relative flex max-h-[90vh] max-w-[92vw] cursor-default flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TransformComponent wrapperClass="!h-[80vh] !max-w-[92vw]" contentClass="!max-w-[92vw]">
+                <img
+                  src={url}
+                  alt="Screenshot full view"
+                  className="max-h-[80vh] max-w-[92vw] select-none border border-border object-contain shadow-2xl"
+                  draggable={false}
+                />
+              </TransformComponent>
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
+                <TransformUtils />
+              </div>
+            </div>
+          </TransformWrapper>
         </div>,
         document.body
       )}
