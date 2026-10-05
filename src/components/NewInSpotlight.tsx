@@ -61,6 +61,8 @@ interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
   variant?: "default" | "underlaid";
+  /** Render only the shared designer portrait/biography header, without the public product grid. */
+  profileOnly?: boolean;
   /** Render these picks instead of the designer's own (e.g. Arnold Madsen → Dagmar's Clam pieces). */
   picksOverride?: DesignerCuratorPick[];
   /** Brand line + lightbox attribution used with picksOverride. */
@@ -73,7 +75,7 @@ interface NewInSpotlightProps {
   pageDesignerName?: string | null;
 }
 
-const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride, pageDesignerName }: NewInSpotlightProps) => {
+const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", profileOnly = false, picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride, pageDesignerName }: NewInSpotlightProps) => {
   const navigate = useNavigate();
   const hasOverride = Array.isArray(picksOverride);
   const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
@@ -478,14 +480,16 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
           </div>
 
           {/* Full-width Curators' Picks — independent from either hero column */}
-          <div className="mt-4 w-full">
-            {renderCuratorsPicksSection({
-              barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
-              titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
-              mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
-              mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
-            })}
-          </div>
+          {!profileOnly && (
+            <div className="mt-4 w-full">
+              {renderCuratorsPicksSection({
+                barClassName: "flex justify-between items-center w-full border-b border-neutral-100 py-2 mt-2 mb-3 text-[11px] uppercase tracking-widest text-neutral-800",
+                titleClassName: "hidden md:block font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-800",
+                mobileBadgeClassName: "px-4 py-1.5 rounded-full border border-neutral-800/20 bg-neutral-800/5 md:hidden",
+                mobileTitleClassName: "font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-neutral-800 font-semibold",
+              })}
+            </div>
+          )}
         </section>
       )}
 
@@ -628,27 +632,31 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
       </section>
 
       {/* Separator */}
-      <div className={cn(
-        "max-w-[1380px] mx-auto px-6",
-        isUnderlaid && "md:hidden"
-      )}>
-        <div className="border-t border-border/40" />
-      </div>
+      {!profileOnly && (
+        <>
+          <div className={cn(
+            "max-w-[1380px] mx-auto px-6",
+            isUnderlaid && "md:hidden"
+          )}>
+            <div className="border-t border-border/40" />
+          </div>
 
-      {/* Curators' Picks */}
-      <section className={cn(
-        "max-w-[1380px] mx-auto px-6 pt-4 md:pt-6 pb-6 md:pb-24",
-        isUnderlaid && "md:hidden"
-      )}>
-        {renderCuratorsPicksSection()}
-      </section>
+          {/* Curators' Picks */}
+          <section className={cn(
+            "max-w-[1380px] mx-auto px-6 pt-4 md:pt-6 pb-6 md:pb-24",
+            isUnderlaid && "md:hidden"
+          )}>
+            {renderCuratorsPicksSection()}
+          </section>
 
-      <PublicProductLightbox
-        product={lightboxItem}
-        allPicks={lightboxRelatedItems}
-        onClose={() => setLightboxItem(null)}
-        onSelectRelated={(item) => setLightboxItem(item)}
-      />
+          <PublicProductLightbox
+            product={lightboxItem}
+            allPicks={lightboxRelatedItems}
+            onClose={() => setLightboxItem(null)}
+            onSelectRelated={(item) => setLightboxItem(item)}
+          />
+        </>
+      )}
     </>
   );
 };
