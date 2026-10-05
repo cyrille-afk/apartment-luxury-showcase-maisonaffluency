@@ -1,7 +1,35 @@
 export type NotificationDraft = { subject: string; body: string };
 export const APPROVAL_SUBJECT = 'Welcome to the Maison Affluency Trade Program';
 export const REJECTION_SUBJECT = 'Maison Affluency Trade Program — Application Update';
-export const APPROVAL_BENEFITS = [
+
+/** Net-buy defaults and US resale-certificate rules apply only to US / CA / MX applicants. */
+export const isNorthAmerica = (country?: string | null) =>
+  ['US', 'CA', 'MX'].includes((country ?? '').trim().toUpperCase());
+
+const PAYOUTS_ROW_COPY = 'Your studio defaults to our Agent Commission model (your client pays full MSRP and you receive your trade commission payout directly after delivery via Stripe Connect). When your project calls for it, you retain full operational flexibility to flip any individual quote to a Net Buy model (paying MSRP minus your tier discount on a clean, white-label invoice) right inside your dashboard.';
+
+type ApprovalBenefit = { title: string; description: string; details: readonly string[] };
+
+/** Country-aware Trade Payouts block: condensed agent-commission copy for SG/ROW, full net-buy rules only for US/CA/MX. */
+export function payoutsBenefit(country?: string | null): ApprovalBenefit {
+  if (!isNorthAmerica(country)) {
+    return { title: 'Trade Payouts & Billing Flex', description: PAYOUTS_ROW_COPY, details: [] };
+  }
+  return {
+    title: 'Trade payouts',
+    description: 'Choose how your studio gets paid on every quote.',
+    details: [
+      'Agent commission (EU / Asia default): your client pays full MSRP and you receive a commission payout after delivery.',
+      'Net buy (US / CA / MX default): your firm pays MSRP minus your tier discount on a white-label invoice.',
+      'Country-aware defaults: US / Canada / Mexico default to net buy; the rest of the world defaults to agent commission.',
+      'Per-quote override: flip billing mode on any individual quote when the project calls for it.',
+      'Resale certificates: upload state-issued US resale certificates to unlock net-buy shipments to those states.',
+      'Stripe Connect: agent commissions paid directly to your linked studio payout account.',
+    ],
+  };
+}
+
+const APPROVAL_BENEFITS_BASE = [
   {
     "title": "Trade pricing & bespoke quotations",
     "description": "Preferential trade discount applied across the catalogue, plus tailored quotations for larger scopes.",
