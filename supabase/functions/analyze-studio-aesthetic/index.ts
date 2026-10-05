@@ -178,6 +178,30 @@ async function scrape(url: string): Promise<ScrapeResult> {
   return { text, images: [...images].slice(0, MAX_IMAGES), notes, screenshots, links: [...links] };
 }
 
+// Off-site footprint (LinkedIn, press, directories, job posts) — many top
+// studios run a one-page holding site and keep the portfolio private.
+async function webFootprint(studio: string, domain: string | null): Promise<string> {
+  const key = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!key || !studio) return "";
+  const name = studio.replace(/\b(pte\.?|ltd\.?|llc|inc\.?|limited|sarl|gmbh)\b/gi, "").trim();
+  const queries = [`"${name}" architecture interior design`, `"${name}" founder principal architect projects`];
+  if (domain) queries.push(`"${domain}"`);
+  const out: string[] = [];
+  for (const q of queries) {
+    try {
+      const res = await fetchWithRetry("https://api.firecrawl.dev/v1/search", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, limit: 6, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
+      });
+      if (!res.ok) continue;
+      const d = (await res.json().catch(() => null))?.data ?? [];
+      for (const r of d) out.push(`[${r.url}] ${r.title ?? ""}: ${String(r.description ?? "")} ${String(r.markdown ?? "").slice(0, 1200)}`);
+    } catch { /* */ }
+  }
+  return [...new Set(out)].join("\n").slice(0, 12000);
+}
+
 const PERSONAL = /^(gmail|googlemail|yahoo|hotmail|outlook|live|icloud|me|aol|proton|protonmail|qq|163|126|gmx|yandex|mail)\./i;
 
 async function gather(ref: string | null, email: string | null): Promise<ScrapeResult & { source: string | null }> {
@@ -404,13 +428,15 @@ serve(async (req) => {
   await logRun("complete");
 
   // Re-score the Radar with the scraped portfolio evidence, not just form fields.
+  const footprint = await webFootprint(account.studio_name ?? "", account.email?.split("@")[1] ?? null);
   const radar = await scoreTradeApplication({
     studio: account.studio_name ?? "", email: account.email ?? "", websiteOrIg: account.website_or_ig ?? "",
     regNumber: account.business_reg_number ?? "", hasDocument: false, returning: false,
     evidence: [
       `Aesthetic: ${parsed.aesthetic_label ?? ""} — ${parsed.aesthetic_summary ?? ""}`,
       `Pages read: ${sourceUrl}; ${notes.filter((n) => n.startsWith("deep-crawled")).join("")}`,
-      `Website text:\n${text.slice(0, 9000)}`,
+      `Website text:\n${text.slice(0, 6000)}`,
+      footprint ? `Off-site web footprint (LinkedIn, press, directories, job posts):\n${footprint}` : "",
     ].join("\n"),
   });
   if (radar.ok) await supabase.from("trade_accounts").update({
