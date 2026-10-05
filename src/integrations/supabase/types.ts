@@ -901,37 +901,46 @@ export type Database = {
         Row: {
           author_company: string | null
           author_name: string | null
+          browser: string | null
           created_at: string
           id: string
           lane: string
           observations: string | null
+          os: string | null
           screenshot_path: string | null
           title: string
           user_id: string
+          viewport_dims: string | null
           viewport_tag: string | null
         }
         Insert: {
           author_company?: string | null
           author_name?: string | null
+          browser?: string | null
           created_at?: string
           id?: string
           lane: string
           observations?: string | null
+          os?: string | null
           screenshot_path?: string | null
           title: string
           user_id?: string
+          viewport_dims?: string | null
           viewport_tag?: string | null
         }
         Update: {
           author_company?: string | null
           author_name?: string | null
+          browser?: string | null
           created_at?: string
           id?: string
           lane?: string
           observations?: string | null
+          os?: string | null
           screenshot_path?: string | null
           title?: string
           user_id?: string
+          viewport_dims?: string | null
           viewport_tag?: string | null
         }
         Relationships: []
