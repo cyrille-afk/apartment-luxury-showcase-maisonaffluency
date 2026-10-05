@@ -17,7 +17,25 @@ type Entry = {
   title: string;
   observations: string | null;
   screenshot_path: string | null;
+  author_name: string | null;
+  author_company: string | null;
+  viewport_tag: string | null;
   created_at: string;
+};
+
+const editorialDate = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+const viewportTag = () => {
+  const w = window.innerWidth;
+  return w < 768 ? "Mobile Viewport" : w <= 1024 ? "Tablet Viewport" : "Desktop Viewport";
 };
 
 const LANES: { key: Lane; title: string; hint: string }[] = [
