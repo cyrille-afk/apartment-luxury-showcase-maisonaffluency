@@ -59,4 +59,17 @@ describe('Trade application notifications', () => {
     expect(mocks.events).toEqual(['update', 'email', 'delete']);
     expect(mocks.invoke.mock.calls[0][1].body.idempotencyKey).toBe('trade-rejection-application-1');
   });
+  it('sends edited copy through escaped template props only after persisting', async () => {
+    await updateTradeApplication(account, 'approved', { subject: 'Welcome, Atelier', body: 'Dear Jane,\n\nA personal welcome.' });
+    expect(mocks.events).toEqual(['update', 'email']);
+    expect(mocks.invoke.mock.calls[0][1].body.templateData).toEqual({ name: 'Jane Smith', companyName: 'Atelier', subjectText: 'Welcome, Atelier', bodyText: 'Dear Jane,\n\nA personal welcome.' });
+  });
+  it('rejects empty drafts before changing any application record', async () => {
+    await expect(updateTradeApplication(account, 'approved', { subject: '', body: '' })).rejects.toThrow('valid subject');
+    expect(mocks.events).toEqual([]);
+  });
+  it('retries an approved notification with the same draft and stable key', async () => {
+    await updateTradeApplication({ ...account, status: 'approved' }, 'approved', { subject: 'Welcome', body: 'Dear Jane,' });
+    expect(mocks.invoke.mock.calls[0][1].body.idempotencyKey).toBe('trade-approval-application-1');
+  });
 });
