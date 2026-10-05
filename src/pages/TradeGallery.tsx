@@ -36,6 +36,8 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
 import GridDensityToggle from "@/components/GridDensityToggle";
+import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
+import { consumeProductBackRef } from "@/lib/designerBackRef";
 
 
 const slugifyForUrl = (s: string) =>
@@ -88,6 +90,20 @@ const TradeGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
+  const originatingProductPath = useMemo(() => {
+    const path = consumeProductBackRef(routeBrandSlug);
+    return path?.startsWith("/trade/products/") ? path : null;
+  }, [routeBrandSlug]);
+
+  const catalogueBreadcrumbs = useMemo<Crumb[]>(() => {
+    if (!routeBrandSlug) return [];
+    const designerName = galleryDesigner?.display_name || galleryDesigner?.name || routeBrandSlug.replace(/-/g, " ");
+    return [
+      { label: "Full Collection", to: "/trade/gallery" },
+      ...(originatingProductPath ? [{ label: "Return to Product", to: originatingProductPath }] : []),
+      { label: designerName },
+    ];
+  }, [galleryDesigner, originatingProductPath, routeBrandSlug]);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.trade_product_id) {
@@ -511,6 +527,9 @@ const TradeGallery = () => {
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
     <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto bg-[hsl(var(--trade-gallery-bg))]">
+      {catalogueBreadcrumbs.length > 0 && (
+        <Breadcrumbs items={catalogueBreadcrumbs} className="mb-5" />
+      )}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-[#E5E5E5]">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-light text-foreground">Trade Gallery</h1>
