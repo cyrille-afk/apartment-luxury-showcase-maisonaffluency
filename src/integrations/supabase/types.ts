@@ -897,6 +897,36 @@ export type Database = {
         }
         Relationships: []
       }
+      beta_feedback_entries: {
+        Row: {
+          created_at: string
+          id: string
+          lane: string
+          observations: string | null
+          screenshot_path: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lane: string
+          observations?: string | null
+          screenshot_path?: string | null
+          title: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lane?: string
+          observations?: string | null
+          screenshot_path?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       board_guest_sessions: {
         Row: {
           created_at: string
