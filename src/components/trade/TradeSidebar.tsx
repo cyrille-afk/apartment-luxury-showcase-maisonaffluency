@@ -173,8 +173,10 @@ export function TradeSidebar() {
                                    ? "nav-concierge"
                                    : item.url === "/trade/extension-sync"
                                      ? "sidebar-ai-sync"
-                                     : undefined
-                      }
+                                     : item.url === "/trade/beta-feedboard"
+                                       ? "sidebar-beta-feedboard"
+                                       : undefined
+                       }
                       className="flex items-center gap-3 px-3 py-3 font-body text-xs text-muted-foreground hover:text-foreground transition-colors border-l border-transparent"
                       activeClassName="text-foreground font-medium border-foreground"
                     >

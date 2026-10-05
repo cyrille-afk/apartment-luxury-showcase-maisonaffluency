@@ -238,6 +238,14 @@ const FELIX_STEPS: FelixStep[] = [
     dialogue:
       "To complete your multi-device workspace, scan this QR code with your phone — or tap Install Applicable App on mobile — to add the Maison Affluency Mobile Studio Concierge to your home screen. Your projects, pricing and staged pieces follow you to every site visit.",
   },
+  {
+    id: "beta-feedboard",
+    title: "FOUND A BUG OR HAVE AN IDEA?",
+    target: "sidebar-beta-feedboard",
+    route: "/trade/beta-feedboard",
+    dialogue:
+      "Log structural alignment errors, pricing calculation feedback, or custom layout requests right here. Your hardware device viewports, operating systems, and user signatures are tracked automatically to make debugging seamless.",
+  },
 ];
 
 /** Board presentation steps where the member's Client View choice is kept. */
@@ -256,8 +264,9 @@ const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeTools"),
   () => import("@/pages/TradeSettings"),
   () => import("@/pages/TradeConcierge"),
-  () => import("@/pages/TradeBoardBuilder"),
-];
+   () => import("@/pages/TradeBoardBuilder"),
+   () => import("@/pages/BetaFeedboard"),
+ ];
 let tourChunksWarmed = false;
 const warmTourRoutes = () => {
   if (tourChunksWarmed) return;
