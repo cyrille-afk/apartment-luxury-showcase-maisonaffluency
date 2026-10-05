@@ -744,7 +744,9 @@ const TradeGallery = () => {
                      <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
                        {product.brand_name}
                      </p>
-                     {renderPriceDisplay(price, "font-sans text-[10px] uppercase tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap justify-end shrink-0 text-right", product.brand_name)}
+                     {renderPriceDisplay(price, "font-sans text-[10px] uppercase tracking-[0.14em] inline-flex items-start gap-1.5 flex-wrap justify-end shrink-0 text-right", product.brand_name) || (
+                       <span className="font-sans text-[10px] uppercase tracking-[0.14em] text-muted-foreground shrink-0">Price upon Request</span>
+                     )}
                    </div>
                    <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
