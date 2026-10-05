@@ -2121,7 +2121,7 @@ const TradeProductPage: React.FC = () => {
               <div className="min-w-0">
                 {showTradePrice && (() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                 <Link
-                  to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                  to={designer.slug ? `/trade/gallery/${designer.slug}` : fallbackPath}
                   onClick={() => {
                     if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
                   }}
@@ -3083,7 +3083,7 @@ const TradeProductPage: React.FC = () => {
                   </p>
                   <h2 className="font-display text-2xl leading-tight">
                     <Link
-                      to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                      to={designer.slug ? `/trade/gallery/${designer.slug}` : fallbackPath}
                       onClick={() => {
                         if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
                       }}
@@ -3146,7 +3146,7 @@ const TradeProductPage: React.FC = () => {
                     </p>
                     <h2 className="font-display text-2xl md:text-3xl leading-tight mb-5">
                       <Link
-                        to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
+                        to={designer.slug ? `/trade/gallery/${designer.slug}` : fallbackPath}
                         onClick={() => {
                           if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
                         }}

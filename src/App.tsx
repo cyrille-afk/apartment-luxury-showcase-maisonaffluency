@@ -41,6 +41,12 @@ function ShowroomLegacyRedirect() {
   return <Navigate to={`/trade/the-collection${search}`} replace />;
 }
 
+function LegacyTradeDesignerRedirect() {
+  const { slug } = useParams<{ slug: string }>();
+  const { search } = useLocation();
+  return <Navigate to={slug ? `/trade/gallery/${slug}${search}` : `/trade/designers${search}`} replace />;
+}
+
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
@@ -185,7 +191,6 @@ const TradePriceDriftAudit = lazy(() => import("./pages/TradePriceDriftAudit"));
 const TradeInstagramAudit = lazy(() => import("./pages/TradeInstagramAudit"));
 const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
 const TradeClientProfiles = lazy(() => import("./pages/TradeClientProfiles"));
-const TradeAtelierProfile = lazy(() => import("./pages/TradeAtelierProfile"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NewIn = lazy(() => import("./pages/NewIn"));
 const Journal = lazy(() => import("./pages/Journal"));
@@ -947,7 +952,7 @@ const App = () => {
                     <Route path="admin/product-audit" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminProductAudit /></Suspense>} />
                     <Route path="admin/price-drift" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePriceDriftAudit /></Suspense>} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
-                    <Route path="designers/:slug" element={<TradeAtelierProfile />} />
+                    <Route path="designers/:slug" element={<LegacyTradeDesignerRedirect />} />
                     <Route path="products/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
                     <Route path="products/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal /></Suspense>} />
                     <Route path="boards" element={<Navigate to="/trade/projects?view=folders" replace />} />
