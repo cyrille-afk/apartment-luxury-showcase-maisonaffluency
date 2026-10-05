@@ -57,6 +57,22 @@ function inventoryBadgesForPick(pick: DesignerCuratorPick): string[] {
   return badges;
 }
 
+/**
+ * An editor/publisher subtitle ("Ooumm", "Haymann Editions") names the actual
+ * maker of the piece and outranks the designer's founder credit on the brand
+ * line. Attribution suffixes ("for X" / "by X"), years, re-edition notes and
+ * material/finish subtitles are never brands.
+ */
+function pickSubtitleBrand(pick: { title?: string | null; subtitle?: string | null }): string {
+  const raw = (pick?.subtitle || "").trim();
+  if (!raw) return "";
+  if (/^(for|by)\s+.+/i.test(raw)) return "";
+  if (/^\d{4}$/.test(raw) || /re-?edition$/i.test(raw)) return "";
+  if (isFinishSubtitle(raw)) return "";
+  return composeTitle(pick.title || "", raw).remainingSubtitle || raw;
+}
+
+
 interface NewInSpotlightProps {
   designer: Designer;
   showEyebrow?: boolean;
