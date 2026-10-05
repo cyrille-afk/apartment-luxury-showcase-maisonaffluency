@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
+import { updateTradeApplication, declineAndDeleteTradeApplication } from "@/lib/tradeApplicationActions";
 
 type Dna = VisualThemeDna & {
   status: string;
@@ -73,28 +74,18 @@ export default function TradeApplicationsQueue() {
 
   const setStatus = async (a: Account, status: Account["status"]) => {
     setBusy(a.id + status);
-    const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("trade_accounts")
-      .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: u.user?.id ?? null })
-      .eq("id", a.id);
-    setBusy(null);
-    if (error) return toast.error("Could not update the application.");
-    toast.success(`${a.studio_name ?? a.email} — ${STATUS_LABEL[status]}`);
-    if ((status === "approved" || status === "rejected") && a.status !== status) {
-      const { error: mailErr } = await supabase.functions.invoke("send-application-status", {
-        body: {
-          applicantEmail: a.email,
-          applicantName: a.contact_name ?? undefined,
-          companyName: a.studio_name ?? undefined,
-          status,
-        },
-      });
-      if (mailErr) toast.error("Status saved, but the notification email could not be sent.");
-      else toast.success(`Notification email sent to ${a.email}`);
+    try {
+      const { notified } = await updateTradeApplication(a, status);
+      toast.success(`${a.studio_name ?? a.email} — ${STATUS_LABEL[status]}`);
+      if (notified === false) toast.error("Status saved, but the notification email could not be queued.");
+      else if (notified) toast.success(`Notification email queued for ${a.email}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update the application.");
+    } finally {
+      setBusy(null);
+      qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
+      qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] });
     }
-    qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
-    qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] });
   };
 
   const rerun = async (a: Account) => {
@@ -115,20 +106,19 @@ export default function TradeApplicationsQueue() {
     if (!confirmed) return;
 
     setBusy(a.id + "delete");
-    const { error } = await supabase.from("trade_accounts").delete().eq("id", a.id);
-    setBusy(null);
-
-    if (error) {
-      toast.error("Could not delete the trade application.");
-      return;
+    try {
+      await declineAndDeleteTradeApplication(a);
+      toast.success("Decline email queued and trade application permanently deleted.");
+      navigate("/trade/admin/trade-applications", { replace: true });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete the trade application.");
+    } finally {
+      setBusy(null);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["trade-applications-queue"] }),
+        qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] }),
+      ]);
     }
-
-    await Promise.all([
-      qc.invalidateQueries({ queryKey: ["trade-applications-queue"] }),
-      qc.invalidateQueries({ queryKey: ["trade-time-to-approval"] }),
-    ]);
-    toast.success("Trade application permanently deleted.");
-    navigate("/trade/admin/trade-applications", { replace: true });
   };
 
   return (
