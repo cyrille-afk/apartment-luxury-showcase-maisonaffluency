@@ -18,6 +18,7 @@ import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyTog
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { supabase } from "@/integrations/supabase/client";
 import type { TradeProduct } from "@/lib/tradeProducts";
+import { PROJECT_STAGING_MESSAGE, type ProjectStagingPayload } from "@/lib/projectStagingMessage";
 
 const slugify = (value: string) => value.toLowerCase().normalize("NFD")
   .replace(/[\u0300-\u036f]/g, "").replace(/['’]/g, "")
@@ -30,7 +31,7 @@ const priceKey = (brand: string, title: string) =>
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { currentStudio, canEdit, loading: studioLoading } = useStudio();
   const { projects, loading: projectsLoading, refresh: refreshProjects } = useProjects({ activeOnly: true });
   const navigate = useNavigate();
@@ -105,11 +106,34 @@ function TradeSidebarFeed() {
       const { data: duplicate, error: duplicateError } = await supabase.from("client_board_items")
         .select("id").eq("board_id", boardId).eq("product_id", productId).limit(1).maybeSingle();
       if (duplicateError) throw duplicateError;
+      let boardItemId = duplicate?.id;
       if (!duplicate) {
-        const { error } = await supabase.from("client_board_items").insert({ board_id: boardId, product_id: productId } as never);
+        const { data, error } = await supabase.from("client_board_items")
+          .insert({ board_id: boardId, product_id: productId } as never).select("id").single();
         if (error) throw error;
+        boardItemId = data?.id;
       }
       recordStaged({ productId, projectId: project.id, projectName: project.name, productName: selectedProduct.product_name });
+      if (boardItemId && window.parent !== window) {
+        const payload: ProjectStagingPayload = {
+          productId,
+          productName: selectedProduct.product_name,
+          designer: selectedProduct.brand_name,
+          selectedMaterial: selectedProduct.materials?.trim() || "Not selected",
+          targetWorkflow: project.name,
+          timestamp: new Date().toISOString(),
+          stagedBy: [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Cyrille Delval",
+          projectId: project.id,
+          boardItemId,
+        };
+        // Do not send trade project data to a third-party embed or wildcard origin.
+        try {
+          if (window.parent.location.origin === window.location.origin) {
+            console.info("Outbound Extension Data -> Syncing with Maison Affluency Parent Portal Database", payload);
+            window.parent.postMessage({ type: PROJECT_STAGING_MESSAGE, payload }, window.location.origin);
+          }
+        } catch { /* cross-origin parent: save succeeded, but no message is sent */ }
+      }
       setNotice(`Success: ${selectedProduct.product_name} added to ${project.name}`);
       setSelectedProduct(null);
       setCreating(false);
