@@ -629,8 +629,8 @@ const TradeGallery = () => {
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="group relative bg-card p-2 sm:p-3">
-                <div className="aspect-square bg-muted/20 relative overflow-hidden cursor-pointer" onClick={() => openProductSheet(product)}>
+              <div key={product.id} className="group relative min-w-0">
+                <div className="relative aspect-square w-full overflow-hidden bg-[hsl(var(--product-canvas))] cursor-pointer" onClick={() => openProductSheet(product)}>
                   {product.image_url ? (
                     <>
                       <img
@@ -640,7 +640,7 @@ const TradeGallery = () => {
                         height={1000}
                         decoding="async"
                         className={cn(
-                          "absolute inset-0 w-full h-full object-cover object-center transition-all duration-700",
+                          "absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply p-6 transition-all duration-700",
                           product.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
                         )}
                         loading="lazy"
@@ -652,7 +652,7 @@ const TradeGallery = () => {
                           width={800}
                           height={1000}
                           decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
+                          className="absolute inset-0 w-full h-full object-contain object-center mix-blend-multiply p-6 opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105 group-hover:scale-100"
                           loading="lazy"
                         />
                       )}
@@ -739,7 +739,7 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                 <div className="flex flex-col pt-3 sm:pt-4 pb-4 text-left">
+                 <div className="flex flex-col pt-3 pb-4 text-left">
                    <div className="flex items-baseline justify-between gap-3">
                      <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
                        {product.brand_name}
