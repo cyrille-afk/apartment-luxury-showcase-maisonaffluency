@@ -18,12 +18,6 @@ export default defineTool({
       .number()
       .positive()
       .describe("Total retail (RRP) value of the selection, in any single currency."),
-    // Maison Affluency trade tiers: Platinum 15% / Gold 12% / Silver 10%.
-    const TIER_DISCOUNTS: Record<string, number> = {
-      "Platinum Tier": 15,
-      "Gold Tier": 12,
-      "Silver Tier": 10,
-    };
     tradeDiscountPercentage: z
       .union([z.number(), z.enum(["Platinum Tier", "Gold Tier", "Silver Tier"])])
       .default(15)
@@ -83,9 +77,6 @@ export default defineTool({
       `Client markup (${markup}%) ......... ${fmt(round2(suggestedClientPrice - totalCostToDesigner))}`,
       `Suggested client price ..... ${fmt(suggestedClientPrice)}`,
       `Designer net profit ........ ${fmt(designerNetProfit)}`,
-      "",
-      "All figures in the same currency as the retail value supplied.",
-    ].join("\n");
       "",
       "All figures in the same currency as the retail value supplied.",
     ].join("\n");
