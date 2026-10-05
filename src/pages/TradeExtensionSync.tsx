@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Activity, Check, CheckCircle2, Copy, FolderKanban, KeyRound, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
+import { Activity, Check, CheckCircle2, Copy, Download, FolderKanban, KeyRound, Plug, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import type { ProjectStagingPayload } from "@/lib/projectStagingMessage";
@@ -76,6 +76,24 @@ export default function TradeExtensionSync() {
     }
   }, [toast]);
 
+  const downloadPluginPackage = useCallback(() => {
+    fetch("/maison-affluency-plugin.zip")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "maison-affluency-plugin.zip";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      })
+      .catch((err) =>
+        toast({ title: "Download failed", description: String(err?.message ?? err), variant: "destructive" })
+      );
+  }, [toast]);
+
   const mcpEndpoint = health?.endpoint ?? "";
   const consentUrl = `${window.location.origin}${CONSENT_PATH}`;
 
@@ -124,14 +142,20 @@ export default function TradeExtensionSync() {
           {syncNotice}
         </div>
       )}
-      <div>
-        <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
-          ChatGPT Extension Integration
-        </h1>
-        <p className="font-body text-sm text-muted-foreground mt-1">
-          Connect the external ChatGPT trade frame to your active project folders and
-          stream staged pieces into the portal in real time.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
+            ChatGPT Extension Integration
+          </h1>
+          <p className="font-body text-sm text-muted-foreground mt-1">
+            Connect the external ChatGPT trade frame to your active project folders and
+            stream staged pieces into the portal in real time.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={downloadPluginPackage} className="gap-2">
+          <Download className="h-3.5 w-3.5" />
+          Download Plugin Package (.zip)
+        </Button>
       </div>
 
       {/* Connection status */}
