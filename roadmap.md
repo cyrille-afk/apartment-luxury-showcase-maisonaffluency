@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add editable approval/decline email draft review, verify no action before confirmation, and publish.
+- [x] Add editable approval/decline email draft review; 12 tests, clean compilation, rendered email checks and admin drawer interactions verified without real sends; publish requested.
 
 - [x] Route trade approvals to the branded template, send refined declines before deletion; seven action tests, email rendering, clean compilation and deployed-service checks passed.
 
