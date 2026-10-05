@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { Plus, Upload, X, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,6 +137,7 @@ export default function BetaFeedboard() {
 
 function EntryCard({ entry }: { entry: Entry }) {
   const [url, setUrl] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState(false);
   useEffect(() => {
     if (!entry.screenshot_path) return;
     supabase.storage.from("beta-feedback").createSignedUrl(entry.screenshot_path, 300)
@@ -145,7 +147,41 @@ function EntryCard({ entry }: { entry: Entry }) {
     <article className="p-4">
       <h3 className="font-body text-sm font-medium break-words">{entry.title}</h3>
       {entry.observations && <p className="mt-1 whitespace-pre-wrap break-words font-body text-xs text-muted-foreground">{entry.observations}</p>}
-      {url && <a href={url} target="_blank" rel="noreferrer"><img src={url} alt="Screenshot" className="mt-3 max-h-40 w-full border border-border object-contain" /></a>}
+      {url && (
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          aria-label="Open screenshot full size"
+          className="mt-3 block w-full cursor-pointer"
+        >
+          <img src={url} alt="Screenshot" className="max-h-40 w-full border border-border object-contain transition-opacity hover:opacity-90" />
+        </button>
+      )}
+      {lightbox && url && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-background/80 p-6 backdrop-blur-sm"
+          onClick={() => setLightbox(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Screenshot viewer"
+        >
+          <button
+            type="button"
+            aria-label="Close screenshot"
+            className="absolute right-6 top-6 cursor-pointer rounded-full border border-border bg-background/80 p-2 text-foreground transition-colors hover:bg-muted"
+            onClick={() => setLightbox(false)}
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <img
+            src={url}
+            alt="Screenshot full view"
+            className="max-h-[90vh] max-w-[92vw] cursor-default border border-border object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>,
+        document.body
+      )}
       <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-2">
         <div className="min-w-0">
           <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Logged by</p>
