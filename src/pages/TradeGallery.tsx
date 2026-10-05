@@ -588,7 +588,7 @@ const TradeGallery = () => {
               </div>
             ) : (
               <AlphabetDesignerPicker
-                brands={brands}
+                brands={dropdownBrands}
                 value={selectedBrand}
                 onChange={handleBrandChange}
                 selectClassName={`${filterInputClass} text-[16px] sm:text-sm`}
