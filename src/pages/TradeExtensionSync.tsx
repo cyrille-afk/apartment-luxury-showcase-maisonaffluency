@@ -1,13 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
-import { Check, CheckCircle2, FolderKanban, Plug, RefreshCw } from "lucide-react";
+import { Activity, Check, CheckCircle2, FolderKanban, Plug, RefreshCw, XCircle } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardDataSync } from "@/hooks/useDashboardDataSync";
 import type { ProjectStagingPayload } from "@/lib/projectStagingMessage";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
 
 const EXTENSION_ORIGIN = "/trade/concierge/sidebar";
 const LAST_SYNC_KEY = "trade-extension-last-sync-v1";
+
+type McpHealthReport = {
+  healthy: boolean;
+  endpoint: string;
+  checked_at: string;
+  checks: {
+    initialize: { ok: boolean; status: number | null; duration_ms: number; error: string | null; serverInfo: unknown };
+    tools_list: { ok: boolean; status: number | null; duration_ms: number; error: string | null };
+  };
+  tools: string[];
+  missing_expected_tools: string[];
+};
 
 export default function TradeExtensionSync() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
