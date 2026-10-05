@@ -11989,6 +11989,7 @@ export type Database = {
         }[]
       }
       published_maker_count: { Args: never; Returns: number }
+      published_maker_names: { Args: never; Returns: string[] }
       purge_rejected_trade_credentials_dispatch: {
         Args: never
         Returns: undefined
