@@ -349,16 +349,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pic
                   // A finish/material subtitle ("Clear", "Tarnished Silver") is a variant,
                   // never a brand — it must not replace the maker on the brand line.
                   const subtitleIsFinish = isFinishSubtitle(pick.subtitle);
-                  // An editor/publisher subtitle ("Ooumm", "Haymann Editions") names the
-                  // actual maker: it outranks the founder credit on the brand line.
-                  const rawSub = (pick.subtitle || "").trim();
-                  const subtitleBrand = rawSub
-                    && !editorSuffix
-                    && !subtitleIsFinish
-                    && !/^\d{4}$/.test(rawSub)
-                    && !/re-?edition$/i.test(rawSub)
-                    ? (composed.remainingSubtitle || rawSub)
-                    : "";
+                  const subtitleBrand = pickSubtitleBrand(pick);
                   const brandLine = (
                     brandLabelOverride
                     || attributedDesigner
