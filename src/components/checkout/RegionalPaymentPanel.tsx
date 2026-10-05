@@ -25,6 +25,8 @@ import {
 } from "@/config/tradePaymentChannels";
 import type { ProformaLine } from "@/lib/proformaInvoicePdf";
 import { resolveTaxTreatment, type BuyerType } from "@/config/taxRules";
+import { useStudio } from "@/hooks/useStudio";
+import { normalizePdfLocale } from "@/lib/pdfFormatting";
 
 export interface RegionalPaymentPanelProps {
   orderRef: string;
@@ -80,6 +82,7 @@ function CopyValue({ value }: { value: string }) {
 }
 
 export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
+  const { currentStudio } = useStudio();
   const {
     orderRef,
     regionTier,
@@ -169,6 +172,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
       buyerTaxId: treatment.buyerTaxId,
       totalCents,
       channel,
+      formatting: { locale: normalizePdfLocale(currentStudio?.pdf_locale) },
     });
 
   const recordOrder = async (): Promise<string | null> => {
