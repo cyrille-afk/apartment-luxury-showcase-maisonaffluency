@@ -136,9 +136,11 @@ export default function BetaFeedboard() {
   );
 }
 
+const controlBtnClass = "cursor-pointer rounded-full p-2 text-foreground transition-colors hover:bg-muted disabled:opacity-50";
+
 function TransformUtils() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
-  const btn = "cursor-pointer rounded-full p-2 text-foreground transition-colors hover:bg-muted";
+  const btn = controlBtnClass;
   return (
     <>
       <button type="button" aria-label="Zoom in" title="Zoom in" className={btn} onClick={() => zoomIn(0.5)}>
