@@ -4,7 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, FolderPlus, Package, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -29,10 +29,33 @@ type StagedItem = { productId: string; projectId: string; projectName: string; p
 const priceKey = (brand: string, title: string) =>
   `${slugify(normalizeBrandToParent(brand))}::${slugify(title)}`;
 
-// Local workspace fallbacks shown while the live project handshake is still
-// initializing, so the staging drawer is never trapped behind a spinner.
+/** Local workspace fallbacks shown while the live project handshake is still
+// initializing, so the staging drawer is never trapped behind a spinner. */
 const LOCAL_WORKFLOW_FOLDERS = ["Singapore GCB workflow", "Hamptons Project"];
 const normalizeFolderName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+
+/** CSS-only skeleton card mirroring the real feed card's structure, so the
+ *  sidebar shows instant structural feedback before any data resolves. */
+const SidebarCardSkeleton = () => (
+  <div className="bg-card p-2.5" aria-hidden="true">
+    <div className="aspect-[5/4] w-full animate-pulse bg-muted/50" />
+    <div className="flex items-start justify-between gap-3 px-1 pt-3 pb-1">
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="h-2.5 w-1/3 animate-pulse rounded-sm bg-muted/60" />
+        <div className="h-3.5 w-2/3 animate-pulse rounded-sm bg-muted/50" />
+      </div>
+      <div className="h-2.5 w-16 shrink-0 animate-pulse rounded-sm bg-muted/50" />
+    </div>
+    <div className="mt-1 h-3 w-28 animate-pulse rounded-sm bg-muted/40" />
+  </div>
+);
+
+const SidebarFeedSkeleton = ({ count = 5 }: { count?: number }) => (
+  <div className="flex flex-col gap-5" role="status" aria-busy="true" aria-live="polite" aria-label="Loading the collection">
+    {Array.from({ length: count }).map((_, i) => <SidebarCardSkeleton key={i} />)}
+    <span className="sr-only">Loading the collection…</span>
+  </div>
+);
 
 /** A catalogue view for a narrow, self-contained trade-concierge frame. */
 function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
@@ -246,7 +269,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
     );
   }, [allProducts, search, category]);
 
-  const showFeedSpinner = isLoading && !fetchTimedOut && products.length === 0;
+  const showSkeleton = products.length === 0 && (isLoading || pricesPending || !fetchTimedOut);
 
   const productUrl = (product: TradeProduct) => {
     if (product.trade_product_id) return `/trade/products/${product.trade_product_id}`;
@@ -316,9 +339,9 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
       )}
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-4 pb-8 pt-5" aria-live="polite">
         {/* Optimistic render: the static catalogue cache (e.g. the Alexander Lamont
-            collection) is available synchronously, so only show the spinner when
+            collection) is available synchronously, so only show the skeleton when
             there is literally nothing to display yet. */}
-        {showFeedSpinner ? <div className="flex justify-center py-16"><DotCircleLoader size="md" /></div> : products.length === 0 ? (
+        {showSkeleton ? <SidebarFeedSkeleton /> : products.length === 0 ? (
           <p className="py-12 text-center font-body text-sm text-muted-foreground">No pieces found.</p>
         ) : (
           <div className="flex flex-col gap-5">
@@ -326,7 +349,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
               <article key={`${product.brand_name}-${product.product_name}-${product.id}`} className="group min-w-0 bg-card p-2.5">
                 <Link to={productUrl(product)} state={{ from: location.pathname }} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`View ${product.product_name}`}>
                 <div className="flex aspect-[5/4] w-full items-center justify-center overflow-hidden bg-[hsl(var(--product-canvas))]">
-                  {product.image_url ? <img src={product.image_url} alt={product.product_name} loading="lazy" decoding="async" className="h-full w-full object-contain object-center p-3 transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none" /> : <Package className="size-6 text-muted-foreground/50" aria-hidden="true" />}
+                  {product.image_url ? <img src={optimizeImageUrl(product.image_url, "f_auto,q_auto,w_400,dpr_auto,c_limit")} alt={product.product_name} loading="lazy" decoding="async" width={400} height={320} sizes="400px" className="h-full w-full object-contain object-center p-3 transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none" /> : <Package className="size-6 text-muted-foreground/50" aria-hidden="true" />}
                 </div>
                 <div className="flex min-w-0 items-start justify-between gap-3 px-1 pt-3 pb-1">
                   <div className="min-w-0 flex-1">
@@ -358,7 +381,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
           </DrawerHeader>
           {selectedProduct && <div className="flex items-center gap-3 border-b border-border px-4 pb-4">
             <div className="flex size-16 shrink-0 items-center justify-center bg-[hsl(var(--product-canvas))]">
-              {selectedProduct.image_url ? <img src={selectedProduct.image_url} alt="" className="size-full object-contain p-1" /> : <Package className="size-5 text-muted-foreground" />}
+              {selectedProduct.image_url ? <img src={optimizeImageUrl(selectedProduct.image_url, "f_auto,q_auto,w_160,dpr_auto,c_limit")} alt="" loading="lazy" decoding="async" width={160} height={160} className="size-full object-contain p-1" /> : <Package className="size-5 text-muted-foreground" />}
             </div>
             <div className="min-w-0"><p className="font-body text-[10px] uppercase text-muted-foreground">{selectedProduct.brand_name}</p><p className="font-display text-base text-foreground">{selectedProduct.product_name}</p></div>
           </div>}
@@ -426,7 +449,7 @@ export default function ChatGPTTradeSidebar() {
     return () => window.clearTimeout(timer);
   }, []);
   const authPending = loading || !rolesLoaded;
-  if (authPending && !gateTimedOut) return <div className="flex h-screen items-center justify-center bg-[hsl(var(--trade-gallery-bg))]"><DotCircleLoader size="md" /></div>;
+  if (authPending && !gateTimedOut) return <div className="h-screen h-[100dvh] w-full max-w-[400px] overflow-hidden bg-[hsl(var(--trade-gallery-bg))] px-4 pt-6 text-foreground"><SidebarFeedSkeleton count={6} /></div>;
   if (!authPending) {
     if (!user) return <Navigate to={`/trade/login?next=${encodeURIComponent(location.pathname)}`} replace />;
     if (!isAdmin && !isTradeUser) return <Navigate to="/trade/me?restricted=1" replace />;
