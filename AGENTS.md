@@ -31,3 +31,4 @@
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Every edge-function deploy must pass scripts/edge-boot-check.ts before and scripts/edge-live-check.ts after; uptime-monitor probes checkout/payment functions every 5 min — a function that fails to boot is otherwise silent.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface from the static arrays.
+- The Extension Integration sandbox embeds the trade sidebar through its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
