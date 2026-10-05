@@ -28,8 +28,50 @@ type LiveTradeProduct = TradeProduct & {
   hasExplicitSubcategory: boolean;
 };
 
-async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
-  const [{ data, error }, { data: tradeRows, error: tradeError }] = await Promise.all([
+const normalizeHiddenPart = (value: string | null | undefined) =>
+  (value || "").trim().toLowerCase();
+
+const brandVariants = (rawBrand: string) => {
+  const raw = (rawBrand || "").trim();
+  return Array.from(new Set([
+    raw,
+    raw.includes(" - ") ? raw.split(" - ")[0].trim() : raw,
+    raw.includes(" - ") ? raw.split(" - ").slice(1).join(" - ").trim() : raw,
+    normalizeBrandToParent(raw),
+  ].filter(Boolean)));
+};
+
+/**
+ * Keys (brand::title) of products an admin has hidden in the database.
+ * Used to suppress the matching hardcoded static cards, which otherwise
+ * re-introduce hidden products into the Trade Gallery and brand dropdown.
+ */
+async function fetchHiddenProductKeys(): Promise<Set<string>> {
+  const [{ data: picks }, { data: trade }] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("title, designers(name)")
+      .eq("is_hidden", true),
+    supabase
+      .from("trade_products")
+      .select("product_name, brand_name")
+      .eq("is_hidden", true),
+  ]);
+  const keys = new Set<string>();
+  for (const p of (picks ?? []) as Array<Record<string, any>>) {
+    const d = Array.isArray(p.designers) ? p.designers[0] : p.designers;
+    if (!d?.name || !p.title) continue;
+    for (const b of brandVariants(d.name)) keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(p.title)}`);
+  }
+  for (const t of (trade ?? []) as Array<Record<string, any>>) {
+    if (!t.brand_name || !t.product_name) continue;
+    for (const b of brandVariants(t.brand_name)) keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
+  }
+  return keys;
+}
+
+async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hiddenKeys: Set<string> }> {
+  const [{ data, error }, { data: tradeRows, error: tradeError }, hiddenKeys] = await Promise.all([
     supabase
       .from("designer_curator_picks")
       .select(`
@@ -64,6 +106,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, lead_time, origin, description, category, subcategory")
       .eq("is_active", true)
       .eq("is_hidden", false),
+    fetchHiddenProductKeys(),
   ]);
 
   if (error) throw error;
@@ -85,7 +128,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
     }
   }
 
-  return ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
+  const products = ((data ?? []) as Array<Record<string, any>>).flatMap((pick) => {
     const designer = Array.isArray(pick.designers)
       ? pick.designers[0]
       : pick.designers;
@@ -138,6 +181,7 @@ async function fetchLiveProducts(): Promise<LiveTradeProduct[]> {
       } satisfies LiveTradeProduct,
     ];
   });
+  return { products, hiddenKeys };
 }
 
 const keyOf = (p: TradeProduct) =>
@@ -151,16 +195,22 @@ export function useTradeProducts() {
   const staticProducts = useMemo(() => getAllTradeProducts(), []);
   const { ids: hiddenIds } = useHiddenTradeProductIds();
 
-  const { data: liveProducts = [], isLoading: liveLoading, isFetching: liveFetching } = useQuery({
+  const { data: liveData, isLoading: liveLoading, isFetching: liveFetching } = useQuery({
     queryKey: ["trade-live-products"],
     queryFn: fetchLiveProducts,
     staleTime: 60_000,
   });
+  const liveProducts = useMemo(() => liveData?.products ?? [], [liveData]);
+  const dbHiddenKeys = liveData?.hiddenKeys;
 
 
   const mergedProducts = useMemo(() => {
     const merged = new Map<string, TradeProduct>();
-    for (const p of staticProducts) merged.set(keyOf(p), p);
+    for (const p of staticProducts) {
+      // Static (hardcoded) cards must respect products hidden in the database.
+      if (dbHiddenKeys?.has(keyOf(p))) continue;
+      merged.set(keyOf(p), p);
+    }
     for (const p of liveProducts) {
       const key = keyOf(p);
       const existing = merged.get(key);
@@ -217,7 +267,7 @@ export function useTradeProducts() {
     }
 
     return Array.from(merged.values());
-  }, [staticProducts, liveProducts]);
+  }, [staticProducts, liveProducts, dbHiddenKeys]);
 
   // Apply dev-only hidden-key filter (used by the duplicate banner so devs
   // can suppress unwanted near-duplicate cards from the live grid).
