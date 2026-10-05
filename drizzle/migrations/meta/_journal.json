@@ -918,6 +918,13 @@
       "when": 1791199077519,
       "tag": "0130_add_pdf_formatting_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1791203678928,
+      "tag": "0131_published_maker_count",
+      "breakpoints": true
     }
   ]
 }
