@@ -38,6 +38,7 @@ import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProj
 import GridDensityToggle from "@/components/GridDensityToggle";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
+import NewInSpotlight from "@/components/NewInSpotlight";
 
 
 const slugifyForUrl = (s: string) =>
@@ -527,6 +528,17 @@ const TradeGallery = () => {
     <>
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
     <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto bg-[hsl(var(--trade-gallery-bg))]">
+      {routeBrandSlug && galleryDesigner && !galleryDesigner.trade_only && (
+        <div className="mb-8 border-b border-border/40 pb-8 md:mb-10 md:pb-10">
+          <NewInSpotlight
+            designer={galleryDesigner}
+            showEyebrow={false}
+            variant="underlaid"
+            profileOnly
+            pageDesignerName={galleryDesigner.name}
+          />
+        </div>
+      )}
       {catalogueBreadcrumbs.length > 0 && (
         <Breadcrumbs items={catalogueBreadcrumbs} className="mb-5" />
       )}
