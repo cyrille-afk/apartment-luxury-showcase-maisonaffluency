@@ -225,6 +225,7 @@ export function useTradeProducts() {
     for (const p of liveProducts) {
       // Live curator picks must also respect trade_products hidden in the DB.
       if (dbHiddenKeys?.has(hiddenKeyOf(p))) continue;
+      if (dbHiddenKeys?.has(`brand::${normalizeHiddenPart(p.brand_name)}`)) continue;
       const key = keyOf(p);
       const existing = merged.get(key);
       const { hasExplicitCategory, hasExplicitSubcategory, ...liveProduct } = p;
