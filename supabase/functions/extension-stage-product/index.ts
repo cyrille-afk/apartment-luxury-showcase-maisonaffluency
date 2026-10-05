@@ -53,22 +53,68 @@ Deno.serve(async (req) => {
   })
 
   // 1. Product must exist in the trade catalogue, be visible, and match by name.
-  const { data: product, error: productError } = await scoped
+  //    The MCP catalogue tools (search_curator_picks / get_product) hand out
+  //    designer_curator_picks ids, so resolve those to their synced trade
+  //    product via source_pick_id before giving up.
+  let productNameCanonical = ''
+  let resolvedProductId = ''
+  const { data: directProduct, error: productError } = await scoped
     .from('trade_products')
     .select('id, product_name, is_hidden')
     .eq('id', productId)
     .maybeSingle()
   if (productError) return json({ error: 'Could not verify product' }, 500)
-  if (!product || product.is_hidden) {
+
+  if (directProduct && !directProduct.is_hidden) {
+    resolvedProductId = directProduct.id
+    productNameCanonical = String(directProduct.product_name)
+  } else {
+    const { data: pick, error: pickError } = await admin
+      .from('designer_curator_picks')
+      .select('id, title, is_hidden')
+      .eq('id', productId)
+      .maybeSingle()
+    if (pickError) return json({ error: 'Could not verify product' }, 500)
+    if (pick && !pick.is_hidden) {
+      const { data: linked, error: linkedError } = await scoped
+        .from('trade_products')
+        .select('id, product_name, is_hidden')
+        .eq('source_pick_id', pick.id)
+        .maybeSingle()
+      if (linkedError) return json({ error: 'Could not verify product' }, 500)
+      if (linked && !linked.is_hidden) {
+        resolvedProductId = linked.id
+        // Accept either the pick title or the synced trade product name.
+        const pickTitle = String(pick.title ?? '').trim().toLowerCase()
+        const tradeName = String(linked.product_name).trim().toLowerCase()
+        const given = productName.toLowerCase()
+        productNameCanonical = String(linked.product_name)
+        if (given !== pickTitle && given !== tradeName) {
+          return json({
+            status: 'rejected', targetWorkflow,
+            message: `Rejected: product name does not match the catalogue entry (${linked.product_name}).`,
+          })
+        }
+      } else if (String(pick.title ?? '').trim().toLowerCase() === productName.toLowerCase()) {
+        // Pick exists and matches by name but has no synced trade row yet:
+        // stage against the pick id directly (board items reference the pick).
+        resolvedProductId = pick.id
+        productNameCanonical = String(pick.title)
+      }
+    }
+  }
+
+  if (!resolvedProductId) {
     return json({
       status: 'rejected', targetWorkflow,
       message: `Rejected: no visible catalogue product matches id ${productId}.`,
     })
   }
-  if (String(product.product_name).trim().toLowerCase() !== productName.toLowerCase()) {
+  if (directProduct && !directProduct.is_hidden
+      && productNameCanonical.trim().toLowerCase() !== productName.toLowerCase()) {
     return json({
       status: 'rejected', targetWorkflow,
-      message: `Rejected: product name does not match the catalogue entry (${product.product_name}).`,
+      message: `Rejected: product name does not match the catalogue entry (${productNameCanonical}).`,
     })
   }
 
@@ -118,7 +164,7 @@ Deno.serve(async (req) => {
     .from('client_board_items')
     .select('id')
     .eq('board_id', boardId)
-    .eq('product_id', productId)
+    .eq('product_id', resolvedProductId)
     .limit(1)
     .maybeSingle()
   if (duplicateError) return json({ error: 'Could not verify staged pieces' }, 500)
@@ -127,7 +173,7 @@ Deno.serve(async (req) => {
   if (!duplicate) {
     const inserted = await scoped
       .from('client_board_items')
-      .insert({ board_id: boardId, product_id: productId } as never)
+      .insert({ board_id: boardId, product_id: resolvedProductId } as never)
       .select('id')
       .single()
     if (inserted.error || !inserted.data) return json({ error: 'Could not stage the piece' }, 500)
@@ -140,6 +186,6 @@ Deno.serve(async (req) => {
     // Canonical folder name as it exists in the portal, not the caller's casing.
     targetWorkflow: project.name.trim(),
     verifiedAt: new Date().toISOString(),
-    message: `Success: ${product.product_name} added to ${project.name.trim()}`,
+    message: `Success: ${productNameCanonical} added to ${project.name.trim()}`,
   })
 })
