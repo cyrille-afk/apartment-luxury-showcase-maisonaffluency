@@ -143,10 +143,16 @@ interface CurrencyToggleProps {
    * in the Trade Gallery filter bar.
    */
   minimal?: boolean;
+  /**
+   * Renders a single premium dropdown button labelled "CURRENCY: {active} ▾".
+   * Supersedes `minimal`/`compact` when set — used in the Trade Gallery
+   * toolbar to keep the strip flush and right-aligned.
+   */
+  variant?: "inline" | "minimal" | "dropdown";
 }
 
-export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false }: CurrencyToggleProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
+export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false, variant }: CurrencyToggleProps) {
+  const [menuOpen, setMenuOpen] = useState(false愰
 
   // Close the dropdown on outside click / Escape.
   useEffect(() => {
