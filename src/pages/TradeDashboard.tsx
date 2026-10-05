@@ -27,6 +27,7 @@ import { useTierVolumeLocale } from "@/hooks/useTierVolumeLocale";
 import { useStudio } from "@/hooks/useStudio";
 import { isSampleProject } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
+import { DashboardPwaBanner } from "@/components/trade/PwaInstall";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
 
 interface BrandFolder {
@@ -277,6 +278,7 @@ const TradeDashboard = () => {
     <div className="trade-dashboard w-full max-w-[1500px] mx-auto">
       <NewInquiriesAlert />
       <WhiteLabelTourBanner />
+      <DashboardPwaBanner />
       <div className="mb-10 md:mb-14 lg:mb-16 border-b border-border pb-7 md:pb-9">
         <div className="flex items-start justify-between gap-4">
           <div data-felix-target="greeting">
