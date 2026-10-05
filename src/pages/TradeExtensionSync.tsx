@@ -236,35 +236,55 @@ export default function TradeExtensionSync() {
         </div>
       </section>
 
-      {/* MCP endpoint health check */}
+      {/* Live OAuth connection status */}
       <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
-              MCP Endpoint Health
+              OAuth Connection Status
             </h2>
             <p className="font-body text-xs text-muted-foreground mt-1">
-              Verifies the public MCP server answers initialization and tool-list
-              requests — the same handshake ChatGPT runs when connecting.
+              Live state of the secure sign-in layer ChatGPT uses to reach your project
+              folders — checked automatically when this page opens.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={runHealthCheck}
-            disabled={healthLoading}
-            className="gap-2"
-          >
-            <Activity className={`h-3.5 w-3.5 ${healthLoading ? "animate-pulse" : ""}`} />
-            {healthLoading ? "Checking…" : "Run Health Check"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={runHealthCheck}
+              disabled={healthLoading}
+              className="gap-2"
+            >
+              <Activity className={`h-3.5 w-3.5 ${healthLoading ? "animate-pulse" : ""}`} />
+              {healthLoading ? "Testing…" : "Test Connection"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => mcpEndpoint && copyText("MCP endpoint", mcpEndpoint)}
+              disabled={!mcpEndpoint}
+              className="gap-2"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              Copy Endpoint
+            </Button>
+            <Button
+              type="button"
+              onClick={() => copyText("Consent screen", consentUrl)}
+              className="gap-2"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              Reconnect
+            </Button>
+          </div>
         </div>
 
         {healthError && (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
             <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
             <p className="font-body text-xs text-destructive">
-              Health check could not run: {healthError}
+              Connection test could not run: {healthError}
             </p>
           </div>
         )}
@@ -273,13 +293,13 @@ export default function TradeExtensionSync() {
           <div className="mt-4 space-y-3">
             <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${health.healthy ? "border-emerald-500/40 bg-emerald-500/10" : "border-destructive/40 bg-destructive/10"}`}>
               {health.healthy ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
               ) : (
                 <XCircle className="h-4 w-4 text-destructive shrink-0" />
               )}
               <div className="min-w-0">
                 <p className={`font-body text-sm font-medium ${health.healthy ? "text-emerald-700" : "text-destructive"}`}>
-                  {health.healthy ? "MCP endpoint healthy" : "MCP endpoint failing"}
+                  {health.healthy ? "OAuth layer healthy — ChatGPT can authenticate" : "OAuth layer failing — reconnect required"}
                 </p>
                 <p className="font-body text-[11px] text-muted-foreground break-all">
                   {health.endpoint} · checked {new Date(health.checked_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
@@ -287,10 +307,11 @@ export default function TradeExtensionSync() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {([
-                { label: "Initialization", check: health.checks.initialize },
-                { label: "Tool List", check: health.checks.tools_list },
+                { label: "Sign-In Challenge", check: health.checks.auth_challenge },
+                { label: "Resource Metadata", check: health.checks.protected_resource_metadata },
+                { label: "OAuth Discovery", check: health.checks.oauth_discovery },
               ] as const).map(({ label, check }) => (
                 <div key={label} className="rounded-xl border border-border bg-background px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -311,14 +332,18 @@ export default function TradeExtensionSync() {
               ))}
             </div>
 
-            {health.tools.length > 0 && (
-              <p className="font-body text-[11px] text-muted-foreground">
-                Tools advertised: {health.tools.join(", ")}
+            {health.healthy && (
+              <p className="font-body text-[11px] text-muted-foreground leading-relaxed">
+                To reconnect ChatGPT: open the connector's settings in ChatGPT, choose
+                Reconnect, sign in with your Maison Affluency account and approve access.
+                The consent screen is <span className="break-all">{consentUrl}</span> —
+                use Reconnect above to copy it.
               </p>
             )}
-            {health.missing_expected_tools.length > 0 && (
-              <p className="font-body text-[11px] text-destructive">
-                Missing expected tools: {health.missing_expected_tools.join(", ")}
+            {!health.healthy && (
+              <p className="font-body text-[11px] text-destructive leading-relaxed">
+                One or more OAuth checks failed. Re-run the test; if it persists, the
+                endpoint deployment may be stale — publish the latest version and retry.
               </p>
             )}
           </div>
