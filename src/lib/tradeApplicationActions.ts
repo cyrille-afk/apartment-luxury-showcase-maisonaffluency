@@ -35,7 +35,7 @@ async function notifyApplication(a: ApplicationRecord, status: 'approved' | 'rej
         templateName,
         recipientEmail: a.email,
         idempotencyKey: `${templateName}-${a.id}`,
-        templateData: { name: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined,
+        templateData: { name: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined, country: a.country ?? undefined,
           ...(draft ? { subjectText: draft.subject, bodyText: draft.body } : {}) },
       },
     });
