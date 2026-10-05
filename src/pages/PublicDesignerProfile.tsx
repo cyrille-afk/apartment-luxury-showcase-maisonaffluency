@@ -2070,20 +2070,22 @@ const PublicDesignerProfile = () => {
                         )}
                       </div>
 
-                      {/* Editorial text block — designer / product / price hierarchy */}
-                      <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
+                      {/* Editorial text block — designer / product / price hierarchy.
+                          Mobile: single vertical column so titles never truncate;
+                          sm+: unified split horizontal row. */}
+                      <div className="mt-3 flex w-full flex-col items-stretch gap-1 px-1 sm:h-12 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div className="flex min-w-0 flex-1 flex-col text-left">
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
                               to={`/designers/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70"
+                              className="block w-full break-words font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70 sm:truncate sm:whitespace-nowrap"
                             >
                               {cardBrandLabel || parentBrandName}
                             </Link>
                           ) : (
-                            <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
+                            <span className="block w-full break-words font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased sm:truncate sm:whitespace-nowrap">
                               {cardBrandLabel || parentBrandName || designer.name}
                             </span>
                           )}
