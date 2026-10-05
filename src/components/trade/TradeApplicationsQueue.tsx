@@ -21,6 +21,7 @@ type Account = {
   email: string;
   studio_name: string | null;
   contact_name: string | null;
+  country: string | null;
   website_or_ig: string | null;
   business_reg_number: string | null;
   status: "pending_review" | "on_hold" | "approved" | "rejected";

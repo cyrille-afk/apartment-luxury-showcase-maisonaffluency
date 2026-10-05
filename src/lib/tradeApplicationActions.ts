@@ -7,6 +7,7 @@ export type ApplicationRecord = {
   email: string;
   contact_name: string | null;
   studio_name: string | null;
+  country?: string | null;
   status: ApplicationStatus;
 };
 
