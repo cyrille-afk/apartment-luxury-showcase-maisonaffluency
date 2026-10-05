@@ -19,12 +19,16 @@ describe("trade designer navigation", () => {
     expect(source).toContain("`/trade/gallery/${slug}${search}`");
   });
 
-  it("shows full-collection and originating-product breadcrumbs in a designer catalogue", () => {
+  it("keeps only the shell breadcrumbs and compresses the title block in a designer catalogue", () => {
     const source = fs.readFileSync(path.join(projectRoot, "src/pages/TradeGallery.tsx"), "utf8");
 
-    expect(source).toContain('{ label: "Full Collection", to: "/trade/gallery" }');
-    expect(source).toContain('{ label: "Return to Product", to: originatingProductPath }');
-    expect(source).toContain('path?.startsWith("/trade/products/")');
-    expect(source).toContain("<Breadcrumbs items={catalogueBreadcrumbs}");
+    // No standalone catalogue breadcrumb strip: only the shell path remains
+    expect(source).not.toContain("catalogueBreadcrumbs");
+    expect(source).not.toContain("<Breadcrumbs");
+    // Compact editorial title block
+    expect(source).toContain('Trade Gallery</h1>');
+    // Default grid density initializes to 4-column
+    expect(source).toContain('|| "compact"');
+    expect(source).toContain('trade:gridDensity:v2');
   });
 });
