@@ -10,6 +10,7 @@ export interface TemplateEntry {
 }
 
 import { template as tradeApproval } from './trade-approval.tsx'
+import { template as tradeRejection } from './trade-rejection.tsx'
 import { template as tradeWelcomeAuto } from './trade-welcome-auto.tsx'
 import { template as tradeWelcomeFounder } from './trade-welcome-founder.tsx'
 import { template as welcomeRegistration } from './welcome-registration.tsx'
@@ -47,6 +48,7 @@ import { template as webhookWorkerUnhealthy } from './webhook-worker-unhealthy.t
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
+  'trade-rejection': tradeRejection,
   'trade-welcome-auto': tradeWelcomeAuto,
   'trade-welcome-founder': tradeWelcomeFounder,
   'welcome-registration': welcomeRegistration,
