@@ -138,7 +138,7 @@ async function forwardUpstream(req: Request, rpcMessage: unknown): Promise<Respo
   const headers = new Headers({
     "Content-Type": "application/json",
     // Force a buffered JSON response so this layer can patch the payload.
-    Accept: "application/json",
+    Accept: "application/json, text/event-stream",
   });
   const authHeader = req.headers.get("authorization");
   if (authHeader) headers.set("authorization", authHeader);
