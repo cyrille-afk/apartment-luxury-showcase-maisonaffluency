@@ -82,9 +82,11 @@ export function DashboardPwaBanner() {
   return (
     <section
       data-felix-target="pwa-banner"
-      className="mb-8 flex flex-col items-center gap-6 border border-foreground/40 bg-background p-6 sm:flex-row sm:items-center md:p-8"
+      className="mb-8 flex flex-col items-center gap-8 border border-foreground/40 bg-background p-6 sm:flex-row sm:items-center md:p-8"
     >
-      <PwaQr size={120} className="shrink-0" />
+      <div className="flex h-24 w-24 shrink-0 items-center justify-center">
+        <PwaQr size={96} className="h-24 w-24" />
+      </div>
       <div className="text-center sm:text-left">
         <h2 className="font-body text-xs uppercase tracking-[0.2em] text-foreground">
           Maison Affluency — Mobile Studio Concierge
