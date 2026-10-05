@@ -545,25 +545,6 @@ const TradeGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-      <div className="flex items-center justify-between gap-3 mt-6 mb-4">
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={cn("p-1.5 transition-colors", viewMode === "grid" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-            aria-label="Grid view"
-            title="Grid view"
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn("p-1.5 transition-colors", viewMode === "list" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-            aria-label="List view"
-            title="List view"
-          >
-            <List className="h-4 w-4" />
-          </button>
-        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDrawerOpen(true)}
