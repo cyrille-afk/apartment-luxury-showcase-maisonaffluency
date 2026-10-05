@@ -88,12 +88,21 @@ Deno.serve(async (req) => {
       };
 
       try {
-        const { data: blob, error: dlErr } = await supabase.storage
+        // New backups are gzipped (.json.gz); fall back to legacy plain .json.
+        let text: string | null = null;
+        const { data: gzBlob, error: gzErr } = await supabase.storage
           .from(BUCKET)
-          .download(`${latest}/${table}.json`);
-        if (dlErr) throw new Error(`download failed: ${dlErr.message}`);
-
-        const text = await blob.text();
+          .download(`${latest}/${table}.json.gz`);
+        if (!gzErr && gzBlob) {
+          const stream = gzBlob.stream().pipeThrough(new DecompressionStream("gzip"));
+          text = await new Response(stream).text();
+        } else {
+          const { data: blob, error: dlErr } = await supabase.storage
+            .from(BUCKET)
+            .download(`${latest}/${table}.json`);
+          if (dlErr) throw new Error(`download failed: ${dlErr.message}`);
+          text = await blob.text();
+        }
 
         let rows: any[];
         try {

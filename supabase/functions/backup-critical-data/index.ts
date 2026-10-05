@@ -23,6 +23,11 @@ const ALLOWED_TABLES = new Set([
   "journal_articles",
 ]);
 
+async function gzipText(text: string): Promise<Uint8Array> {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -97,13 +102,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const jsonContent = JSON.stringify(allRows, null, 2);
-    const filePath = `${timestamp}/${table}.json`;
+    // Compact JSON (no pretty-printing) then gzip — backup rows repeat the same
+    // column names thousands of times, so this typically shrinks files 5–10×.
+    const jsonContent = JSON.stringify(allRows);
+    const gzipped = await gzipText(jsonContent);
+    const filePath = `${timestamp}/${table}.json.gz`;
 
     const { error: uploadError } = await supabase.storage
       .from("backups")
-      .upload(filePath, new Blob([jsonContent], { type: "application/json" }), {
-        contentType: "application/json",
+      .upload(filePath, new Blob([gzipped], { type: "application/gzip" }), {
+        contentType: "application/gzip",
         upsert: true,
       });
 
@@ -114,7 +122,8 @@ Deno.serve(async (req) => {
       table,
       backup_date: timestamp,
       rows: allRows.length,
-      bytes: jsonContent.length,
+      bytes: gzipped.byteLength,
+      uncompressed_bytes: jsonContent.length,
       completed_at: new Date().toISOString(),
       status: "ok" as const,
     };
