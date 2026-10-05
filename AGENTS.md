@@ -1,15 +1,6 @@
-- Mobile homepage and /gallery use `Gallery`; desktop uses `InteractiveGalleryLookbook`.
-- Derive desktop side picks from photo hotspot coordinates against the public catalog, with image fallback; never expose trade-only picks.
-- Desktop gallery chevrons cross four photos, then wrap through seven rooms; leave mobile accordion untouched.
-- Hide desktop side picks only on first Living photo; keep all other one-column picks and curated order; preserve pins.
-- Desktop-only hotspot or side-pick exclusions must stay in `InteractiveGalleryLookbook`; never delete shared `gallery_hotspots` rows because the original mobile `Gallery` consumes them.
-- Gallery hotspot and finish dialogs use body portals to avoid clipping.
-- Fetch the two approved MicMac pins and side photos via scoped public RPC; never widen trade-only designer access.
-- Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Project shortcuts fall back to latest RLS-visible board/hub; Trade layout owns breadcrumbs.
 - Felix advances before gallery load; greeting tracks tour state. Share fixed regional tiers with dashboard; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
-- Room menu previews use room-specific percent pins and alternatives.
 <!-- LOVABLE:BEGIN -->
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
@@ -32,3 +23,4 @@
 - Every edge-function deploy must pass scripts/edge-boot-check.ts before and scripts/edge-live-check.ts after; uptime-monitor probes checkout/payment functions every 5 min — a function that fails to boot is otherwise silent.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface from the static arrays.
 - The Extension Integration sandbox embeds the trade sidebar through its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
+- The public MCP server advertises all four tools (search_curator_picks, get_product, get_synced_projects, stage_product_to_project); the two workflow tools forward the member's portal access_token to the extension edge functions, which own all auth/validation — the MCP layer never queries the database or logs the token.
