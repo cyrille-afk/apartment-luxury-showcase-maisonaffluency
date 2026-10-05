@@ -522,7 +522,7 @@ const TradeGallery = () => {
       <Helmet><title>Gallery — Trade Portal — Maison Affluency</title></Helmet>
     <div className="w-full max-w-7xl [@media(min-width:1440px)]:max-w-[min(90vw,1800px)] mx-auto bg-[hsl(var(--trade-gallery-bg))]">
       {routeBrandSlug && galleryDesigner && !galleryDesigner.trade_only && (
-        <div className="mb-8 border-b border-border/40 pb-8 md:mb-10 md:pb-10">
+        <div className="mb-4 border-b border-border/40 pb-4 md:mb-5 md:pb-5">
           <NewInSpotlight
             designer={galleryDesigner}
             showEyebrow={false}
@@ -547,7 +547,7 @@ const TradeGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-        <div className="flex items-center justify-end gap-2 mt-6 mb-4">
+        <div className="flex items-center justify-end gap-2 mt-2 mb-1">
           <button
             onClick={() => setDrawerOpen(true)}
             className="relative p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
@@ -565,7 +565,7 @@ const TradeGallery = () => {
       <DuplicateProductsBanner groups={duplicateGroups} />
 
       {/* Filters */}
-      <div className="flex flex-col gap-4 mb-6 border-b border-border pb-4 xl:flex-row xl:items-center">
+      <div className="flex flex-col gap-3 mb-4 border-b border-border pb-3 xl:flex-row xl:items-center">
         <div className="flex-1 min-w-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-border">
           <div className="relative flex-1 min-w-0 py-2 sm:py-0 px-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -650,8 +650,8 @@ const TradeGallery = () => {
         </div>
       ) : viewMode === "grid" ? (
         <div className={cn(
-          "grid grid-cols-2 gap-x-4 gap-y-10 transition-[grid-template-columns] duration-300 sm:gap-x-6 lg:gap-x-8 lg:gap-y-14",
-          density === "compact" ? "md:grid-cols-4 gap-y-8 lg:gap-y-10" : "md:grid-cols-3",
+          "grid grid-cols-2 gap-x-4 gap-y-6 transition-[grid-template-columns] duration-300 sm:gap-x-6 lg:gap-x-8 lg:gap-y-8",
+          density === "compact" ? "md:grid-cols-4 gap-y-5 lg:gap-y-6" : "md:grid-cols-3",
         )}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
@@ -769,7 +769,7 @@ const TradeGallery = () => {
                     )}
                   </div>
                 </div>
-                 <div className="flex flex-col pt-3 pb-4 text-left">
+                 <div className="flex flex-col pt-2 pb-1 text-left">
                    <div className="flex items-baseline justify-between gap-3">
                      <p className="font-sans text-[10px] uppercase tracking-[0.22em] text-muted-foreground line-clamp-1">
                        {product.brand_name}
