@@ -89,7 +89,9 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
   };
 
   const stageToProject = async (project: Project) => {
-    if (!selectedProduct || !user || saving || !canEdit) return;
+    // In optimistic mode (auth handshake still pending) the local mock folders
+    // stay clickable; actual staging waits for the live session to resolve.
+    if (!selectedProduct || !user || saving || (!canEdit && !optimistic)) return;
     setSaving(true);
     try {
       const productId = await resolveProductId(selectedProduct);
@@ -353,7 +355,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
             <p className="mb-3 font-body text-[10px] uppercase text-muted-foreground">Select active workspace workflow:</p>
             {projects.length ? (
               <div className="max-h-[38dvh] overflow-y-auto">
-                {projects.map((project) => <Button key={project.id} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => stageToProject(project)} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
+                {projects.map((project) => <Button key={project.id} variant="ghost" type="button" disabled={saving || (!canEdit && !optimistic)} onClick={() => stageToProject(project)} className="h-auto min-h-12 w-full justify-start rounded-none border-b border-border px-0 py-3 text-left font-body text-sm font-normal text-foreground hover:bg-muted/30">
                   <span className="min-w-0 whitespace-normal break-words">{project.name}</span>
                 </Button>)}
               </div>
