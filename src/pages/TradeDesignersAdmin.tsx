@@ -30,6 +30,8 @@ import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealth
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
 import SwatchSyncDialog from "@/components/admin/SwatchSyncDialog";
+import { CuratorPickHistoryDialog, DeletedPicksDialog } from "@/components/admin/CuratorPickHistory";
+import { History } from "lucide-react";
 
 // Pilot: surface inline Fabrics & Finishes editor only for these picks for now.
 const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
@@ -238,6 +240,8 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     pickup_address: string | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
+  const [historyPickId, setHistoryPickId] = useState<string | null>(null);
+  const [deletedOpen, setDeletedOpen] = useState(false);
   const [syncPickId, setSyncPickId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const expandedPickStorageKey = `designer_editor_expanded_pick_v1::${designerId}`;
@@ -378,7 +382,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this curator pick? This action cannot be undone.")) return;
+    if (!window.confirm("Delete this curator pick? You can bring it back later from \"Deleted products\".")) return;
     const { data, error } = await supabase
       .from("designer_curator_picks")
       .delete()
@@ -617,6 +621,13 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                 className="text-muted-foreground hover:text-foreground transition-colors p-1"
               >
                 {expandedPickId === pick.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={() => setHistoryPickId(pick.id)}
+                title="Version history"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              >
+                <History className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => handleDelete(pick.id)}
@@ -1464,6 +1475,21 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
         <Button variant="outline" size="sm" onClick={handleAdd}>
           <Plus className="w-3.5 h-3.5 mr-1" /> Add Pick
         </Button>
+        <Button variant="ghost" size="sm" onClick={() => setDeletedOpen(true)}>
+          <History className="w-3.5 h-3.5 mr-1" /> Deleted products
+        </Button>
+        <CuratorPickHistoryDialog
+          pickId={historyPickId}
+          open={!!historyPickId}
+          onOpenChange={(o) => { if (!o) setHistoryPickId(null); }}
+          onRestored={() => { void loadPicks(); }}
+        />
+        <DeletedPicksDialog
+          designerId={designerId}
+          open={deletedOpen}
+          onOpenChange={setDeletedOpen}
+          onRestored={() => { void loadPicks(); }}
+        />
         <CsvBulkUpload
           designerId={designerId}
           designerName={designerName}
