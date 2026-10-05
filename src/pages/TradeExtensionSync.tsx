@@ -207,6 +207,95 @@ export default function TradeExtensionSync() {
         </div>
       </section>
 
+      {/* MCP endpoint health check */}
+      <section className="rounded-2xl border border-border bg-muted/30 p-5 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-sm uppercase tracking-[0.15em] text-foreground">
+              MCP Endpoint Health
+            </h2>
+            <p className="font-body text-xs text-muted-foreground mt-1">
+              Verifies the public MCP server answers initialization and tool-list
+              requests — the same handshake ChatGPT runs when connecting.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={runHealthCheck}
+            disabled={healthLoading}
+            className="gap-2"
+          >
+            <Activity className={`h-3.5 w-3.5 ${healthLoading ? "animate-pulse" : ""}`} />
+            {healthLoading ? "Checking…" : "Run Health Check"}
+          </Button>
+        </div>
+
+        {healthError && (
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
+            <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+            <p className="font-body text-xs text-destructive">
+              Health check could not run: {healthError}
+            </p>
+          </div>
+        )}
+
+        {health && (
+          <div className="mt-4 space-y-3">
+            <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${health.healthy ? "border-emerald-500/40 bg-emerald-500/10" : "border-destructive/40 bg-destructive/10"}`}>
+              {health.healthy ? (
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+              ) : (
+                <XCircle className="h-4 w-4 text-destructive shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className={`font-body text-sm font-medium ${health.healthy ? "text-emerald-700" : "text-destructive"}`}>
+                  {health.healthy ? "MCP endpoint healthy" : "MCP endpoint failing"}
+                </p>
+                <p className="font-body text-[11px] text-muted-foreground break-all">
+                  {health.endpoint} · checked {new Date(health.checked_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {([
+                { label: "Initialization", check: health.checks.initialize },
+                { label: "Tool List", check: health.checks.tools_list },
+              ] as const).map(({ label, check }) => (
+                <div key={label} className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {check.ok ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    ) : (
+                      <XCircle className="h-3.5 w-3.5 text-destructive" />
+                    )}
+                    <span className="font-body text-xs font-medium text-foreground">{label}</span>
+                    <span className="ml-auto font-body text-[11px] text-muted-foreground">
+                      {check.status ?? "—"} · {check.duration_ms}ms
+                    </span>
+                  </div>
+                  {check.error && (
+                    <p className="mt-1.5 font-body text-[11px] text-destructive break-words">{check.error}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {health.tools.length > 0 && (
+              <p className="font-body text-[11px] text-muted-foreground">
+                Tools advertised: {health.tools.join(", ")}
+              </p>
+            )}
+            {health.missing_expected_tools.length > 0 && (
+              <p className="font-body text-[11px] text-destructive">
+                Missing expected tools: {health.missing_expected_tools.join(", ")}
+              </p>
+            )}
+          </div>
+        )}
+      </section>
+
       <Sheet open={catalogueOpen} onOpenChange={setCatalogueOpen}>
         <SheetContent
           side="right"
