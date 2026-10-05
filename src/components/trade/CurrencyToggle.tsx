@@ -152,11 +152,12 @@ interface CurrencyToggleProps {
 }
 
 export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false, variant }: CurrencyToggleProps) {
-  const [menuOpen, setMenuOpen] = useState(false愰
+  const [menuOpen, setMenuOpen] = useState(false);
+  const useDropdown = variant === "dropdown";
 
   // Close the dropdown on outside click / Escape.
   useEffect(() => {
-    if (!compact || !menuOpen) return;
+    if ((!compact && !useDropdown) || !menuOpen) return;
     const onDoc = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && !target.closest("[data-currency-menu]")) setMenuOpen(false);
