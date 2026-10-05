@@ -110,6 +110,7 @@ const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCount
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeQuoteReview = lazy(() => import("./pages/TradeQuoteReview"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
+const BetaFeedboard = lazy(() => import("./pages/BetaFeedboard"));
 const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
@@ -1018,6 +1019,7 @@ const App = () => {
                     <Route path="guides/:slug" element={<TradeGuideDetail />} />
                     <Route path="custom-requests" element={<TradeCustomRequests />} />
                     <Route path="calendar" element={<TradeFairCalendar />} />
+                    <Route path="beta-feedboard" element={<BetaFeedboard />} />
                     <Route path="settings" element={<TradeSettings />} />
                     <Route path="settings/studio" element={<TradeStudioSettings />} />
                   </Route>
