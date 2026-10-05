@@ -1,0 +1,1 @@
+GRANT SELECT (has_accepted_trade_nda, trade_nda_accepted_at), UPDATE (has_accepted_trade_nda, trade_nda_accepted_at) ON public.profiles TO authenticated;

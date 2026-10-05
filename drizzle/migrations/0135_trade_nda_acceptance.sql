@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS has_accepted_trade_nda boolean NOT NULL DEFAULT false, ADD COLUMN IF NOT EXISTS trade_nda_accepted_at timestamptz;
