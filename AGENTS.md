@@ -20,11 +20,9 @@
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false — keeps each project's curation separate.
 - Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements, including exit animations and portalled drawers, so route remounts cannot briefly reveal internal figures; it is not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
-- Every edge-function deploy must pass scripts/edge-boot-check.ts before and scripts/edge-live-check.ts after; uptime-monitor probes checkout/payment functions every 5 min — a function that fails to boot is otherwise silent.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface from the static arrays.
 - The Extension Integration sandbox embeds the trade sidebar through its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
-- The MCP server is an OAuth 2.1 resource server (backend OAuth server, consent at /.lovable/oauth/consent); the workflow tools forward ctx.getToken() to the extension edge functions, which own all auth/validation — no pasted tokens, the MCP layer never queries the database or logs the token.
-- Extension project-folder names are canonicalized through `supabase/functions/_shared/projectFolders.ts` (trim + collapse whitespace + lowercase); get_synced_projects dedupes to the most recently updated row per normalized name and stage_product_to_project resolves names with the same rule — DB casing variants must never split a folder for ChatGPT.
 - Top-down proforma ledgers inherit project defaults unless a quote explicitly selects itemized or target-ceiling mode; all ceiling arithmetic lives in `calculateCeilingBudget` so screen and PDF figures cannot drift.
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
+- Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
