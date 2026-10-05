@@ -35,6 +35,7 @@ type McpHealthReport = {
 
 export default function TradeExtensionSync() {
   const { projects: activeProjects } = useProjects({ activeOnly: true });
+  const { toast } = useToast();
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [catalogueOpen, setCatalogueOpen] = useState(false);
   const [syncNotice, setSyncNotice] = useState("");
@@ -49,17 +50,34 @@ export default function TradeExtensionSync() {
       const { data, error } = await supabase.functions.invoke("mcp-health-check");
       if (error) {
         setHealth(null);
-        setHealthError(error.message ?? "Health check request failed");
+        setHealthError(error.message ?? "Connection test request failed");
       } else {
         setHealth(data as McpHealthReport);
       }
     } catch (err) {
       setHealth(null);
-      setHealthError(err instanceof Error ? err.message : "Health check request failed");
+      setHealthError(err instanceof Error ? err.message : "Connection test request failed");
     } finally {
       setHealthLoading(false);
     }
   }, []);
+
+  // Live status on page load — the panel always reflects the current endpoint state.
+  useEffect(() => {
+    void runHealthCheck();
+  }, [runHealthCheck]);
+
+  const copyText = useCallback(async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({ title: `${label} copied`, description: value });
+    } catch {
+      toast({ title: "Copy failed", description: value, variant: "destructive" });
+    }
+  }, [toast]);
+
+  const mcpEndpoint = health?.endpoint ?? "";
+  const consentUrl = `${window.location.origin}${CONSENT_PATH}`;
 
   const recordVerifiedSync = useCallback((payload: ProjectStagingPayload) => {
     const formatted = new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
