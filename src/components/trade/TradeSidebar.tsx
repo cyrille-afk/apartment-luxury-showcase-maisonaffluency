@@ -53,9 +53,29 @@ export function TradeSidebar() {
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile, user } = useAuth();
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
-  const visibleTopItems = hasTradeAccess
-    ? topItems.filter((i) => i.url !== "/trade/me")
-    : topItems.filter((i) => i.url !== "/trade/concierge");
+  // Beta Feedboard is restricted to admins and authorized beta members.
+  const [isBetaMember, setIsBetaMember] = useState(false);
+  useEffect(() => {
+    if (!user?.id || isAdmin) return;
+    let cancelled = false;
+    supabase
+      .from("beta_members" as never)
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setIsBetaMember(!!data);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, isAdmin]);
+  const canSeeBetaFeedboard = isAdmin || isBetaMember;
+  const visibleTopItems = (
+    hasTradeAccess
+      ? topItems.filter((i) => i.url !== "/trade/me")
+      : topItems.filter((i) => i.url !== "/trade/concierge")
+  ).filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
