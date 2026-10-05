@@ -104,7 +104,6 @@ export function TradeSidebar() {
     return () => window.clearTimeout(t);
   }, [rolesLoaded, user?.id]);
   const connectionIssue = !!user?.id && (lookupSlow || betaLookupFailed);
-  if (typeof window !== "undefined" && window.location.hostname === "localhost") console.log("[sidebar-debug]", JSON.stringify({ rolesLoaded, lookupSlow, betaLookupFailed, liveIsAdmin }));
   const visibleTopItems = (
     hasTradeAccess
       ? topItems.filter((i) => i.url !== "/trade/me")
