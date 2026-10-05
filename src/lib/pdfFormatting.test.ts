@@ -23,5 +23,6 @@ describe("PDF formatting", () => {
     expect(currencySymbol("SGD")).toBe("S$");
     expect(currencySymbol("CAD")).toBe("C$");
     expect(normalizePdfLocale("unsupported")).toBe("en-GB");
+    expect(formatPdfMoney(-12345, "EUR", "en-GB")).toBe("-€ 123.45");
   });
 });

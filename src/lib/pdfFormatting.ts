@@ -50,7 +50,7 @@ export function formatPdfMoney(
     maximumFractionDigits: 2,
     useGrouping: true,
   }).format(Math.abs(cents) / 100);
-  const sign = cents < 0 ? "−" : "";
+  const sign = cents < 0 ? "-" : "";
   return `${sign}${currencySymbol(currency)} ${amount}`;
 }
 

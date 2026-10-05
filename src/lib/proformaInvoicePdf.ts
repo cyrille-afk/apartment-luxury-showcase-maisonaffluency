@@ -204,7 +204,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
       doc.setTextColor(index === 0 || index === rows.length - 1 ? FG[0] : MUTED[0], index === 0 || index === rows.length - 1 ? FG[1] : MUTED[1], index === 0 || index === rows.length - 1 ? FG[2] : MUTED[2]);
       doc.text(label, M + 14, budgetY);
       doc.setTextColor(FG[0], FG[1], FG[2]);
-      doc.text(amount < 0 ? `−${money(Math.abs(amount), args.currency, args.formatting?.locale)}` : money(amount, args.currency, args.formatting?.locale), right - 14, budgetY, { align: "right" });
+      doc.text(amount < 0 ? `- ${money(Math.abs(amount), args.currency, args.formatting?.locale)}` : money(amount, args.currency, args.formatting?.locale), right - 14, budgetY, { align: "right" });
       budgetY += 28;
     });
     y += 206;
@@ -264,7 +264,7 @@ export async function buildProformaInvoicePdf(args: ProformaArgs): Promise<jsPDF
   if (!args.ceilingBudget) {
     totalRow("Subtotal", money(args.subtotalCents, args.currency, args.formatting?.locale));
     if (args.discountCents > 0) {
-      totalRow(args.discountLabel || "Trade discount", `−${money(args.discountCents, args.currency, args.formatting?.locale)}`);
+      totalRow(args.discountLabel || "Trade discount", `- ${money(args.discountCents, args.currency, args.formatting?.locale)}`);
     }
     totalRow(
       args.shippingLabel || "Freight & white-glove delivery",

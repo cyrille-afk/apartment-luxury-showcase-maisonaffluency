@@ -3371,7 +3371,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 ] as [string, number][]).map(([label, value], index) => (
                   <div key={label} className={cn("flex justify-between gap-8", index === 0 && "pb-2 text-sm text-foreground", index === 4 ? "border-t border-foreground pt-3 text-foreground" : index !== 0 && "text-muted-foreground")}>
                     <span>{label}</span>
-                    <span className="tabular-nums text-foreground">{value < 0 ? "−" : ""}{formatPdfMoney(Math.abs(value), currency, effectivePdfLocale)}</span>
+                    <span className="tabular-nums text-foreground">{value < 0 ? "- " : ""}{formatPdfMoney(Math.abs(value), currency, effectivePdfLocale)}</span>
                   </div>
                 ))}
                 <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-3 text-muted-foreground">
