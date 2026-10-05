@@ -18,4 +18,13 @@ describe("trade designer navigation", () => {
     expect(source).toContain('path="designers/:slug" element={<LegacyTradeDesignerRedirect />}');
     expect(source).toContain("`/trade/gallery/${slug}${search}`");
   });
+
+  it("shows full-collection and originating-product breadcrumbs in a designer catalogue", () => {
+    const source = fs.readFileSync(path.join(projectRoot, "src/pages/TradeGallery.tsx"), "utf8");
+
+    expect(source).toContain('{ label: "Full Collection", to: "/trade/gallery" }');
+    expect(source).toContain('{ label: "Return to Product", to: originatingProductPath }');
+    expect(source).toContain('path?.startsWith("/trade/products/")');
+    expect(source).toContain("<Breadcrumbs items={catalogueBreadcrumbs}");
+  });
 });
