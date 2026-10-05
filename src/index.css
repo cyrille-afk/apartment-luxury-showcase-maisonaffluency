@@ -1140,3 +1140,8 @@ body.designer-directory-open nav[data-site-header] {
   -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
   mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
 }
+
+/* Trade asset protection: block selection & image drag, keep form fields usable */
+.trade-portal-shell { -webkit-user-select: none; user-select: none; }
+.trade-portal-shell img { -webkit-user-drag: none; user-drag: none; }
+.trade-portal-shell input, .trade-portal-shell textarea, .trade-portal-shell [contenteditable="true"] { -webkit-user-select: text; user-select: text; }

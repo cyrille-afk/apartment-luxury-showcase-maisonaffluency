@@ -29,6 +29,17 @@ import SeedOnboardingProject from "@/components/trade/SeedOnboardingProject";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
 import { SyncToMobileButton } from "@/components/trade/SyncToMobileButton";
 import { markMobileSeen } from "@/components/trade/MobileHandoffDialog";
+import { TradeWatermark, TradeNdaGate, useTradeShortcutBlocks } from "@/components/trade/TradeSecurityShell";
+
+function TradeSecurityLayer() {
+  useTradeShortcutBlocks();
+  return (
+    <>
+      <TradeWatermark />
+      <TradeNdaGate />
+    </>
+  );
+}
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -516,6 +527,7 @@ const TradeLayout = () => {
           </Suspense>
         </div>
       </div>
+      <TradeSecurityLayer />
       <Suspense fallback={null}>
          <FelixTour />
          <div data-trade-sensitive><CompareFab /><CompareDrawer /><AIConcierge /><ActivationWelcome /><QuickTour /><BriefWizard /><TradeCopilotOnboarding /></div>
