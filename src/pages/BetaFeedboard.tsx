@@ -164,8 +164,21 @@ function EntryDrawer({ lane, onClose, onSaved }: { lane: Lane | null; onClose: (
       if (error) { setSaving(false); return toast.error("Screenshot upload failed"); }
       screenshot_path = path;
     }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, company")
+      .eq("id", user.id)
+      .maybeSingle();
+    const author_name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || null;
     const { error } = await supabase.from("beta_feedback_entries").insert({
-      user_id: user.id, lane, title: title.trim().slice(0, 200), observations: obs.trim().slice(0, 5000) || null, screenshot_path,
+      user_id: user.id,
+      lane,
+      title: title.trim().slice(0, 200),
+      observations: obs.trim().slice(0, 5000) || null,
+      screenshot_path,
+      author_name,
+      author_company: profile?.company?.trim() || null,
+      viewport_tag: viewportTag(),
     });
     setSaving(false);
     if (error) return toast.error("Could not save entry");
