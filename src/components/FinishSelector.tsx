@@ -1202,8 +1202,26 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     onWoodFinishChange?.("Wood");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOolMinibar, shelfTiles.length]);
+  // A variant may call its metal axis "Hand-cast bronze" while the linked
+  // swatch is "Bronze Patina – Textured". When both axes explicitly name
+  // different materials, route unmatched swatches by their library category
+  // rather than folding the metal into the glass diffuser's orphan group.
+  const axisMaterial = (label: string | null | undefined) => {
+    const value = (label || "").toLowerCase();
+    if (/\bglass\b/.test(value)) return "Glass";
+    if (/\bmetal\b|\bbronze\b/.test(value)) return "Metal";
+    if (/\bwood\b/.test(value)) return "Wood";
+    if (/\bstone\b|\bmarble\b/.test(value)) return "Stone";
+    return null;
+  };
+  const baseMaterial = axisMaterial(axisBaseLabel || woodLabel);
+  const topMaterial = axisMaterial(topLabel);
+  const splitByAxisMaterial = !!topFilter && !!woodFilter && !!baseMaterial && !!topMaterial && baseMaterial !== topMaterial;
   const topTilesRaw = topFilter
-    ? allNonFabricTiles.filter((f) => topFilter(f.name) || isOolDrawerLeather(pickId, f.name))
+    ? allNonFabricTiles.filter((f) =>
+        (splitByAxisMaterial && f.category === topMaterial)
+        || (topFilter(f.name) && (!splitByAxisMaterial || f.category !== baseMaterial))
+        || isOolDrawerLeather(pickId, f.name))
     : [];
   const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
   // Shared-palette products (sharedBaseTopSwatches) keep the overlapping
