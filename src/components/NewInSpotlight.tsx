@@ -82,13 +82,13 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const { data: founderIsBrand = false } = useFounderIsBrand(
     isParentBrand ? undefined : designer.founder
   );
-  const { data: simplePicks = [] } = useDesignerPicks(hasOverride ? undefined : designer.id, { publicOnly: true });
+  const { data: simplePicks = [] } = useDesignerPicks(profileOnly || hasOverride ? undefined : designer.id, { publicOnly: true });
   const { data: attributedPicks = [] } = useAttributedDesignerPicks(
-    !hasOverride && !isParentBrand ? designer : undefined,
+    !profileOnly && !hasOverride && !isParentBrand ? designer : undefined,
     { publicOnly: true },
   );
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
-    isParentBrand ? designer : undefined,
+    !profileOnly && isParentBrand ? designer : undefined,
     { publicOnly: true }
   );
   const picks: DesignerCuratorPick[] = hasOverride
@@ -97,7 +97,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
       ? (groupedPicks as any as DesignerCuratorPick[])
       : [...simplePicks, ...attributedPicks];
 
-  const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
+  const { data: publicRrpMap = {} } = usePublicRrpMap(profileOnly ? [] : picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const dest = useShippingDestination();
   const isUnderlaid = variant === "underlaid";

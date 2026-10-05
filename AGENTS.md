@@ -1,4 +1,4 @@
-- Trade owns breadcrumbs; Collection opens top; designer links use `/trade/gallery/:slug`; shortcuts use latest visible board.
+- Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 <!-- LOVABLE:BEGIN -->
