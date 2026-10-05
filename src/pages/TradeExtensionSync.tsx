@@ -142,14 +142,20 @@ export default function TradeExtensionSync() {
           {syncNotice}
         </div>
       )}
-      <div>
-        <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
-          ChatGPT Extension Integration
-        </h1>
-        <p className="font-body text-sm text-muted-foreground mt-1">
-          Connect the external ChatGPT trade frame to your active project folders and
-          stream staged pieces into the portal in real time.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
+            ChatGPT Extension Integration
+          </h1>
+          <p className="font-body text-sm text-muted-foreground mt-1">
+            Connect the external ChatGPT trade frame to your active project folders and
+            stream staged pieces into the portal in real time.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={downloadPluginPackage} className="gap-2">
+          <Download className="h-3.5 w-3.5" />
+          Download Plugin Package (.zip)
+        </Button>
       </div>
 
       {/* Connection status */}
