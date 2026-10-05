@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, LayoutGrid, Grid2X2, Info } from "lucide-react";
+import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,7 @@ import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
+import GridDensityToggle from "@/components/GridDensityToggle";
 
 
 const slugifyForUrl = (s: string) =>
@@ -543,26 +544,6 @@ const TradeGallery = () => {
           >
             <List className="h-4 w-4" />
           </button>
-          {viewMode === "grid" && (
-            <div className="hidden md:flex items-center gap-0.5 ml-2">
-              <button
-                onClick={() => setDensity("comfortable")}
-                className={cn("p-1.5 transition-colors", density === "comfortable" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-                aria-label="Comfortable grid"
-                title="3-up grid"
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setDensity("compact")}
-                className={cn("p-1.5 transition-colors", density === "compact" ? "text-foreground" : "text-muted-foreground/40 hover:text-muted-foreground/60")}
-                aria-label="Compact grid"
-                title="6-up grid"
-              >
-                <Grid2X2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -583,7 +564,7 @@ const TradeGallery = () => {
       <DuplicateProductsBanner groups={duplicateGroups} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 border-b border-border pb-4">
+      <div className="flex flex-col gap-4 mb-6 border-b border-border pb-4 xl:flex-row xl:items-center">
         <div className="flex-1 min-w-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-border">
           <div className="relative flex-1 min-w-0 py-2 sm:py-0 px-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -642,8 +623,19 @@ const TradeGallery = () => {
             </div>
           )}
         </div>
-        <div className="shrink-0 py-2 sm:py-0 px-3 sm:px-0">
-          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} minimal />
+        <div className="flex min-w-0 shrink-0 items-center justify-between gap-4 px-3 py-2 sm:px-0 xl:w-auto xl:min-w-[31rem] xl:py-0">
+          <GridDensityToggle
+            value={density === "compact" ? 4 : 3}
+            onChange={(columns) => setDensity(columns === 4 ? "compact" : "comfortable")}
+            disabled={viewMode !== "grid"}
+            className="shrink-0"
+          />
+          <CurrencyToggle
+            value={displayCurrency}
+            onChange={setDisplayCurrency}
+            minimal
+            className="min-w-0 justify-end gap-x-2 lg:gap-x-3 xl:gap-x-4"
+          />
         </div>
       </div>
       {/* Content */}
@@ -656,7 +648,10 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className={cn("grid gap-x-4 gap-y-10 sm:gap-x-6 lg:gap-x-8 lg:gap-y-14", density === "compact" ? "grid-cols-2 md:grid-cols-3 gap-y-8 lg:gap-y-10" : "grid-cols-2 md:grid-cols-3")}>
+        <div className={cn(
+          "grid grid-cols-2 gap-x-4 gap-y-10 transition-[grid-template-columns] duration-300 sm:gap-x-6 lg:gap-x-8 lg:gap-y-14",
+          density === "compact" ? "md:grid-cols-4 gap-y-8 lg:gap-y-10" : "md:grid-cols-3",
+        )}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
