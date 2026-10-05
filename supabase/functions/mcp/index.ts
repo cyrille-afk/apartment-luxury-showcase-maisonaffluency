@@ -3,10 +3,10 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@2.0.4";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.0.4";
 
 // src/lib/mcp/tools/search-curator-picks.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@2.0.4";
+import { defineTool } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
 import { z } from "npm:zod@^3.25.76";
 var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
@@ -172,7 +172,7 @@ var search_curator_picks_default = defineTool({
 });
 
 // src/lib/mcp/tools/get-product.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@2.0.4";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
 import { z as z2 } from "npm:zod@^3.25.76";
 var CLICK_ORIGIN2 = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
@@ -274,7 +274,7 @@ var get_product_default = defineTool2({
 });
 
 // src/lib/mcp/tools/get-synced-projects.ts
-import { defineTool as defineTool3, ToolError } from "npm:@lovable.dev/mcp-js@2.0.4";
+import { defineTool as defineTool3, ToolError } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z3 } from "npm:zod@^3.25.76";
 var FUNCTIONS_ORIGIN = process.env.SUPABASE_URL;
 var SYNC_ENDPOINT = `${FUNCTIONS_ORIGIN}/functions/v1/extension-sync-projects`;
@@ -322,7 +322,7 @@ Use the exact folder name as targetWorkflow when staging.` : "No active project 
 });
 
 // src/lib/mcp/tools/stage-product-to-project.ts
-import { defineTool as defineTool4, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@2.0.4";
+import { defineTool as defineTool4, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z4 } from "npm:zod@^3.25.76";
 var FUNCTIONS_ORIGIN2 = process.env.SUPABASE_URL;
 var STAGE_ENDPOINT = `${FUNCTIONS_ORIGIN2}/functions/v1/extension-stage-product`;
@@ -398,5 +398,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@2.0.4/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.0.4/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
