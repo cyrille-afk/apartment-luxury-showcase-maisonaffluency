@@ -11988,6 +11988,7 @@ export type Database = {
           slug: string
         }[]
       }
+      published_maker_count: { Args: never; Returns: number }
       purge_rejected_trade_credentials_dispatch: {
         Args: never
         Returns: undefined

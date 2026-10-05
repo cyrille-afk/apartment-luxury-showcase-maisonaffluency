@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 /**
  * Single-field A–Z designer/maker picker for the Trade Gallery filter bar.
  *
@@ -88,7 +89,8 @@ const AlphabetDesignerPicker = ({
     };
   }, [open]);
 
-  const totalCount = brands.length;
+  const liveMakerCount = usePublishedMakerCount();
+  const totalCount = liveMakerCount ?? brands.length;
   const defaultAllLabel = allLabel ?? "All Designers & Makers";
   const buttonLabel =
     value === "all"

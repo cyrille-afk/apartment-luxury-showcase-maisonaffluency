@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { ShoppingCart, MapPin, Grid3X3, Search } from "lucide-react";
@@ -21,6 +22,7 @@ interface DraftQuote {
 type ViewTab = "gallery" | "designers" | "search";
 
 const TradeShowroom = () => {
+  const makerCount = usePublishedMakerCount();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -138,7 +140,7 @@ const TradeShowroom = () => {
                 The Collection
               </h1>
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70 mt-4">
-                A MATRICULATED INDEX OF 150+ COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
+                A MATRICULATED INDEX OF {makerCount ?? "…"} COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
               </p>
             </div>
             <button

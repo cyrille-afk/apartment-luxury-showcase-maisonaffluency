@@ -1,3 +1,4 @@
+import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
 /**
  * Editorial hover hero for the public /designers directory.
  *
@@ -650,6 +651,8 @@ function HeroBgLayer({
 
 
 const DesignersHoverHero = () => {
+  const makerCount = usePublishedMakerCount();
+  const makerCountLabel = makerCount ?? "…";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const warmProfile = async (slug: string) => {
@@ -1907,7 +1910,7 @@ const DesignersHoverHero = () => {
           )}
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
-          Search 150+ Designers
+          Search {makerCountLabel} Designers
         </button>
 
         {/* Live network footprint — sits beneath the search field */}
@@ -1916,7 +1919,7 @@ const DesignersHoverHero = () => {
           isMobileOrPwa ? "w-full" : "min-w-[340px] max-w-[360px]",
           isMobileOrPwa && "hidden"
         )}>
-          150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
+          {makerCountLabel} master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
 
         {/* Subtle divider separating the search utility from the Masters list */}
@@ -2409,7 +2412,7 @@ const DesignersHoverHero = () => {
           )}
         </div>
         <p className="mt-2.5 max-w-md text-center font-serif text-[11px] leading-relaxed text-white">
-          150+ master profiles live. Introducing new digital ateliers and exclusive collections weekly
+          {makerCountLabel} master profiles live. Introducing new digital ateliers and exclusive collections weekly
         </p>
       </div>
 
@@ -2487,7 +2490,7 @@ const DesignersHoverHero = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 150+ designers…"
+                  placeholder={`Search ${makerCountLabel} designers…`}
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
