@@ -7,7 +7,7 @@ info:
     through a verified data handshake against the main dashboard database.
   version: 1.0.0
 servers:
-  - url: https://www.maisonaffluency.com/functions/v1
+  - url: https://dcrauiygaezoduwdjmsm.supabase.co/functions/v1
 paths:
   /extension-sync-projects:
     get:
