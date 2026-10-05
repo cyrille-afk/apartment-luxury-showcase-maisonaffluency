@@ -381,7 +381,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
           </DrawerHeader>
           {selectedProduct && <div className="flex items-center gap-3 border-b border-border px-4 pb-4">
             <div className="flex size-16 shrink-0 items-center justify-center bg-[hsl(var(--product-canvas))]">
-              {selectedProduct.image_url ? <img src={selectedProduct.image_url} alt="" className="size-full object-contain p-1" /> : <Package className="size-5 text-muted-foreground" />}
+              {selectedProduct.image_url ? <img src={optimizeImageUrl(selectedProduct.image_url, "f_auto,q_auto,w_160,dpr_auto,c_limit")} alt="" loading="lazy" decoding="async" width={160} height={160} className="size-full object-contain p-1" /> : <Package className="size-5 text-muted-foreground" />}
             </div>
             <div className="min-w-0"><p className="font-body text-[10px] uppercase text-muted-foreground">{selectedProduct.brand_name}</p><p className="font-display text-base text-foreground">{selectedProduct.product_name}</p></div>
           </div>}
