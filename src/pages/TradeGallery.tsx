@@ -545,7 +545,7 @@ const TradeGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 mt-6 mb-4">
           <button
             onClick={() => setDrawerOpen(true)}
             className="relative p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
@@ -559,7 +559,6 @@ const TradeGallery = () => {
             )}
           </button>
         </div>
-      </div>
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
