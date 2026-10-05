@@ -32,6 +32,7 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
+import { usePublishedMakerNames } from "@/hooks/usePublishedMakerNames";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
