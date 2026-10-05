@@ -373,7 +373,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
             ) : (
               // Local workspace fallbacks while the live project handshake initializes.
               <div className="max-h-[38dvh] overflow-y-auto">
-                {LOCAL_WORKFLOW_FOLDERS.map((name) => <Button key={name} variant="ghost" type="button" disabled={saving || !canEdit} onClick={() => {
+                {LOCAL_WORKFLOW_FOLDERS.map((name) => <Button key={name} variant="ghost" type="button" disabled={saving || (!canEdit && !optimistic)} onClick={() => {
                   const resolved = projects.find((p) => normalizeFolderName(p.name) === normalizeFolderName(name));
                   if (resolved) { void stageToProject(resolved); return; }
                   toast.info("Workspace is still syncing — please retry in a moment.");
