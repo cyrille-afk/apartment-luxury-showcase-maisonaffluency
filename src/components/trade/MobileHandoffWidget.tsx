@@ -14,8 +14,8 @@ export function MobileHandoffWidget() {
   const [thumb, setThumb] = useState<string | null>(null);
 
   const redirectTo = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/trade/me`;
+    // Always target production — never the preview/dev host.
+    return "https://maisonaffluency.com/trade/me";
   }, []);
 
   useEffect(() => {
