@@ -212,6 +212,9 @@ function EntryCard({ entry }: { entry: Entry }) {
                   draggable={false}
                 />
               </TransformComponent>
+              <p className="pointer-events-none absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 whitespace-nowrap font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+                Scroll to zoom · drag to pan · double-click to toggle
+              </p>
               <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-background/90 p-1 shadow-lg backdrop-blur-sm">
                 <TransformUtils />
               </div>
