@@ -136,6 +136,24 @@ export default function BetaFeedboard() {
   );
 }
 
+function TransformUtils() {
+  const { zoomIn, zoomOut, resetTransform } = useControls();
+  const btn = "cursor-pointer rounded-full p-2 text-foreground transition-colors hover:bg-muted";
+  return (
+    <>
+      <button type="button" aria-label="Zoom in" title="Zoom in" className={btn} onClick={() => zoomIn(0.5)}>
+        <Plus className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" aria-label="Zoom out" title="Zoom out" className={btn} onClick={() => zoomOut(0.5)}>
+        <Minus className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" aria-label="Reset view" title="Reset view" className={btn} onClick={() => resetTransform()}>
+        <Maximize className="h-3.5 w-3.5" />
+      </button>
+    </>
+  );
+}
+
 function EntryCard({ entry }: { entry: Entry }) {
   const [url, setUrl] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState(false);
