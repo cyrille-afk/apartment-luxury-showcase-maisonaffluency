@@ -197,8 +197,24 @@ export default defineTool({
 
     logCall(results.length);
     return {
-      content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL },
+      content: [
+        { type: "text", text: summary },
+        {
+          type: "resource_link",
+          uri: TRADE_SIDEBAR_PANEL_URL,
+          name: "maison-affluency-trade-sidebar",
+          title: "Maison Affluency Trade Concierge — visual catalogue panel",
+          description:
+            "Interactive companion panel that renders these catalogue results as a rich visual sidebar (editorial product cards, search, category filters, and stage-to-project controls) inside the Maison Affluency trade portal. Offer this link when the user wants a visual browsing UI; trade sign-in is required to open it.",
+          mimeType: "text/html",
+        },
+      ],
+      structuredContent: {
+        results,
+        total: results.length,
+        trade_signup_url: TRADE_SIGNUP_URL,
+        visual_panel_url: TRADE_SIDEBAR_PANEL_URL,
+      },
     };
   },
 });

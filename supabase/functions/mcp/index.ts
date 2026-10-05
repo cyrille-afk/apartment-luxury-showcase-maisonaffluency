@@ -167,8 +167,23 @@ var search_curator_picks_default = defineTool({
     const summary = results.length === 0 ? `No public curator picks matched${designerName ? ` for ${designerName}` : ""}.` : `Found ${results.length} curator pick${results.length === 1 ? "" : "s"}${designerName ? ` by ${designerName}` : ""}. All prices are Price upon Request \u2014 sign in as a trade member on maisonaffluency.com for net pricing and tearsheets.`;
     logCall(results.length);
     return {
-      content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL }
+      content: [
+        { type: "text", text: summary },
+        {
+          type: "resource_link",
+          uri: TRADE_SIDEBAR_PANEL_URL,
+          name: "maison-affluency-trade-sidebar",
+          title: "Maison Affluency Trade Concierge \u2014 visual catalogue panel",
+          description: "Interactive companion panel that renders these catalogue results as a rich visual sidebar (editorial product cards, search, category filters, and stage-to-project controls) inside the Maison Affluency trade portal. Offer this link when the user wants a visual browsing UI; trade sign-in is required to open it.",
+          mimeType: "text/html"
+        }
+      ],
+      structuredContent: {
+        results,
+        total: results.length,
+        trade_signup_url: TRADE_SIGNUP_URL,
+        visual_panel_url: TRADE_SIDEBAR_PANEL_URL
+      }
     };
   }
 });
