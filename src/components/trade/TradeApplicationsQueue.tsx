@@ -9,6 +9,8 @@ import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication } from "@/lib/tradeApplicationActions";
+import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
+import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
 
 type Dna = VisualThemeDna & {
   status: string;
@@ -53,6 +55,13 @@ export default function TradeApplicationsQueue() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
+  const [review, setReview] = useState<{ account: Account; approval: boolean; draft: NotificationDraft } | null>(null);
+  const [draftError, setDraftError] = useState<string | null>(null);
+
+  const openReview = (account: Account, approval: boolean) => {
+    setDraftError(null);
+    setReview({ account, approval, draft: createApplicationDraft(approval ? 'approved' : 'rejected', account.contact_name, account.studio_name) });
+  };
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ["trade-applications-queue", showDone],
@@ -99,19 +108,27 @@ export default function TradeApplicationsQueue() {
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
   };
 
-  const declineAndDelete = async (a: Account) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this trade application metadata profile?",
-    );
-    if (!confirmed) return;
-
-    setBusy(a.id + "delete");
+  const confirmNotification = async (draft: NotificationDraft) => {
+    if (!review || busy !== null) return;
+    const a = review.account;
+    setDraftError(null);
+    setBusy(a.id + (review.approval ? "approved" : "delete"));
     try {
-      await declineAndDeleteTradeApplication(a);
-      toast.success("Decline email queued and trade application permanently deleted.");
-      navigate("/trade/admin/trade-applications", { replace: true });
+      if (review.approval) {
+        const result = await updateTradeApplication(a, 'approved', draft);
+        if (!result.notified) {
+          setReview(current => current ? { ...current, account: { ...a, status: 'approved' }, draft } : null);
+          throw new Error('Approval saved, but the email could not be queued. Your draft is kept here for retry.');
+        }
+        toast.success(`Approval notification queued for ${a.email}`);
+      } else {
+        await declineAndDeleteTradeApplication(a, draft);
+        toast.success("Decline email queued and trade application permanently deleted.");
+        navigate("/trade/admin/trade-applications", { replace: true });
+      }
+      setReview(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete the trade application.");
+      setDraftError(error instanceof Error ? error.message : "Could not send the notification.");
     } finally {
       setBusy(null);
       await Promise.all([
@@ -197,7 +214,7 @@ export default function TradeApplicationsQueue() {
 
                  <div className="flex flex-col gap-2 md:w-56">
                   <Button
-                    onClick={() => setStatus(a, "approved")}
+                    onClick={() => openReview(a, true)}
                     disabled={a.status === "approved" || busy !== null}
                     className="h-11 rounded-none text-[11px] uppercase tracking-[0.2em]"
                   >
@@ -227,7 +244,7 @@ export default function TradeApplicationsQueue() {
                      type="button"
                      variant="ghost"
                      size="sm"
-                     onClick={() => declineAndDelete(a)}
+                      onClick={() => openReview(a, false)}
                      disabled={busy !== null}
                      className="h-auto justify-start rounded-none px-0 py-1 text-xs font-medium tracking-wide text-neutral-400 antialiased transition-colors hover:bg-transparent hover:text-red-600"
                    >
@@ -254,6 +271,7 @@ export default function TradeApplicationsQueue() {
           })}
         </ul>
       )}
+      {review && <ApplicationNotificationDrawer key={`${review.account.id}-${review.approval}`} recipient={review.account.email} company={review.account.studio_name ?? review.account.email} approval={review.approval} initialDraft={review.draft} busy={busy !== null} error={draftError} onClose={() => setReview(null)} onSend={confirmNotification} />}
     </section>
   );
 }

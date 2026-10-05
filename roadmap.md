@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add editable approval/decline email draft review; 12 tests, clean compilation, rendered email checks and admin drawer interactions verified without real sends; publish requested.
+
 - [x] Route trade approvals to the branded template, send refined declines before deletion; seven action tests, email rendering, clean compilation and deployed-service checks passed.
 
 - [x] Embed the AI Extension catalogue in a fixed 360px sandbox drawer and verify staged project records before confirming sync on the parent page.

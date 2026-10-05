@@ -1,5 +1,6 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
 - Admin application actions persist review metadata before registered app-email sends; decline-and-delete queues the notice before removing the applicant, with stable per-application/template idempotency keys — failures must not erase the only retryable record.
+- Admin approval/decline buttons open local draft review without side effects; confirmation alone invokes application actions, and shared plain-text copy/parser feeds the preview and escaped registered email templates so edits preserve branding without accepting HTML.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 <!-- LOVABLE:BEGIN -->

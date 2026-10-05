@@ -5,15 +5,18 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { ApplicationDraftBody } from './application-draft-body.tsx'
 
 const SITE_NAME = "Maison Affluency"
 
 interface TradeApprovalProps {
   name?: string
   companyName?: string
+  bodyText?: string
+  subjectText?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, bodyText }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
@@ -28,7 +31,7 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
           />
         </Section>
         <Hr style={divider} />
-        <Heading style={h1}>
+        {bodyText ? <ApplicationDraftBody body={bodyText} approval /> : <><Heading style={h1}>
           {name ? `Dear ${name},` : 'Dear Applicant,'}
         </Heading>
         <Text style={text}>
@@ -116,6 +119,7 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
           Warm regards,<br />
           <strong>The {SITE_NAME} Team</strong>
         </Text>
+        </>}
         <Hr style={divider} />
         <table width="100%" cellPadding="0" cellSpacing="0" style={{ borderCollapse: 'collapse' as const }}>
           <tr>
@@ -165,7 +169,7 @@ const BenefitRow = ({ title, description, details }: BenefitRowProps) => (
 
 export const template = {
   component: TradeApprovalEmail,
-  subject: 'Welcome to the Maison Affluency Trade Program',
+  subject: (data: Record<string, unknown>) => typeof data.subjectText === 'string' ? data.subjectText : 'Welcome to the Maison Affluency Trade Program',
   displayName: 'Trade Program Approval',
   previewData: { name: 'Jane Smith', companyName: 'Atelier Design Co.' },
 } satisfies TemplateEntry
