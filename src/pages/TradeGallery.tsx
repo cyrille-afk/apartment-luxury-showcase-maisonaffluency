@@ -624,7 +624,7 @@ const TradeGallery = () => {
             </div>
           )}
         </div>
-        <div className="flex min-w-0 shrink-0 items-center justify-end gap-3 px-3 py-2 sm:px-0 xl:w-auto xl:min-w-[31rem] xl:py-0">
+        <div className="flex min-w-0 shrink-0 items-center justify-end gap-3 px-3 py-2 sm:px-0 xl:py-0">
           <GridDensityToggle
             value={density === "compact" ? 4 : 3}
             onChange={(columns) => setDensity(columns === 4 ? "compact" : "comfortable")}
@@ -634,8 +634,8 @@ const TradeGallery = () => {
           <CurrencyToggle
             value={displayCurrency}
             onChange={setDisplayCurrency}
-            minimal
-            className="min-w-0 justify-end gap-x-2 lg:gap-x-3 xl:gap-x-4"
+            variant="dropdown"
+            className="shrink-0"
           />
         </div>
       </div>

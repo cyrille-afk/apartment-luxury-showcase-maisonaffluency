@@ -143,14 +143,21 @@ interface CurrencyToggleProps {
    * in the Trade Gallery filter bar.
    */
   minimal?: boolean;
+  /**
+   * Renders a single premium dropdown button labelled "CURRENCY: {active} ▾".
+   * Supersedes `minimal`/`compact` when set — used in the Trade Gallery
+   * toolbar to keep the strip flush and right-aligned.
+   */
+  variant?: "inline" | "minimal" | "dropdown";
 }
 
-export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false }: CurrencyToggleProps) {
+export default function CurrencyToggle({ value, onChange, className = "", compact = false, minimal = false, variant }: CurrencyToggleProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const useDropdown = variant === "dropdown";
 
   // Close the dropdown on outside click / Escape.
   useEffect(() => {
-    if (!compact || !menuOpen) return;
+    if ((!compact && !useDropdown) || !menuOpen) return;
     const onDoc = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && !target.closest("[data-currency-menu]")) setMenuOpen(false);
@@ -164,7 +171,61 @@ export default function CurrencyToggle({ value, onChange, className = "", compac
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
     };
-  }, [compact, menuOpen]);
+  }, [compact, useDropdown, menuOpen]);
+
+  if (useDropdown) {
+    const activeLabel = OPTIONS.find((o) => o.value === value)?.label ?? String(value).toUpperCase();
+    return (
+      <div data-currency-menu className={cn("relative shrink-0", className)}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          aria-label={`Display currency: ${activeLabel}`}
+          className={cn(
+            "inline-flex items-center gap-2 whitespace-nowrap border border-border bg-background px-4 py-2.5",
+            "font-body text-[11px] uppercase tracking-[0.14em] transition-colors",
+            menuOpen ? "text-foreground border-foreground/40" : "text-foreground/70 hover:text-foreground",
+          )}
+        >
+          <span className="text-muted-foreground/70">Currency:</span>
+          <span className={cn(value === "original" ? "font-medium" : "font-medium")}>{activeLabel}</span>
+          <span aria-hidden="true" className={cn("text-[9px] leading-none transition-transform duration-200", menuOpen && "rotate-180")}>▾</span>
+        </button>
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full mt-1 z-50 min-w-[11rem] border border-border bg-background shadow-lg py-1"
+          >
+            {OPTIONS.map((opt) => {
+              const active = value === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  role="menuitem"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setMenuOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-4 px-4 py-2.5 text-left",
+                    "font-body text-[11px] uppercase tracking-[0.12em] transition-colors",
+                    active
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  )}
+                >
+                  {opt.label}
+                  {active && <span aria-hidden="true" className="text-[10px]">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (minimal) {
     return (
