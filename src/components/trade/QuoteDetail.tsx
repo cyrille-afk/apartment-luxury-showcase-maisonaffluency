@@ -13,6 +13,7 @@ import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
 import GuestPayLinkCard from "@/components/trade/GuestPayLinkCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand, MARGIN_CAP_TOOLTIP } from "@/lib/brandDiscountCap";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
@@ -51,6 +52,7 @@ import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import { calculateCeilingBudget } from "@/lib/ceilingBudget";
+import { PDF_LOCALE_LABELS, PDF_LOCALE_PRESETS, currencySymbol, formatPdfDate, formatPdfMoney, normalizePdfLocale, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 // null = no override (fall back to product default); 0 = In Stock; >0 = explicit weeks
 const getLeadWeeksOverride = (value: number | null): number | null =>
@@ -120,11 +122,6 @@ const formatPriceRaw = (cents: number | null, currency: string = "SGD") => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
-};
-
-const currencySymbol = (c: string) => {
-  const map: Record<string, string> = { SGD: "S$", USD: "US$", EUR: "€", GBP: "£", HKD: "HK$", CHF: "CHF", AED: "AED", AUD: "A$", CAD: "C$", JPY: "¥" };
-  return map[c] || c;
 };
 
 const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
@@ -418,6 +415,7 @@ const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
 
 const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack, onStatusChange }: QuoteDetailProps) => {
   const { user, isSuperAdmin } = useAuth();
+  const { currentStudio } = useStudio();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -429,6 +427,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [notes, setNotes] = useState(quoteNotes || "");
   const [adminNotes, setAdminNotes] = useState("");
   const [currency, setCurrency] = useState<Currency>("SGD");
+  const [quotePdfLocale, setQuotePdfLocale] = useState<PdfLocalePreset | null>(null);
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
   const [clientId, setClientId] = useState<string | null>(null);
@@ -637,8 +636,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   expiryDate.setMonth(expiryDate.getMonth() + 1);
 
 
-  const formatDate = (d: Date) =>
-    d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const effectivePdfLocale = quotePdfLocale ?? normalizePdfLocale(currentStudio?.pdf_locale);
+  const formatDate = (d: Date) => formatPdfDate(d, effectivePdfLocale);
 
   /** Convert cents from `fromCurrency` to `toCurrency` using live rates */
   const convertCents = (cents: number | null, fromCurrency: string, toCurrency: string): number | null => {
@@ -719,7 +718,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id, size_variants), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes, ceiling_ledger_mode, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes, ceiling_ledger_mode, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label, pdf_locale").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -963,6 +962,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
       setItems(loadedItems);
       if (quoteRes.data?.currency) setCurrency(quoteRes.data.currency as Currency);
+      setQuotePdfLocale(quoteRes.data?.pdf_locale ? normalizePdfLocale(quoteRes.data.pdf_locale) : null);
       // Backfill the FX lock the first time an unstamped quote is opened, so
       // every quote carries the rate it was priced at.
       {
@@ -1942,6 +1942,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       clientContact,
       projectName: projectName || null,
       currency,
+      formatting: { locale: effectivePdfLocale },
       lines,
       ceilingBudget: ceilingBudgetActive && effectiveCeilingCents > 0
         ? {
@@ -3236,6 +3237,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <div className="border-b border-border px-4 py-4 md:px-6 lg:px-8 print:hidden">
             <div className="flex flex-wrap items-end gap-4">
               <label className="space-y-1">
+                <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">PDF locale</span>
+                <select
+                  value={quotePdfLocale ?? "inherit"}
+                  onChange={async (event) => {
+                    const next = event.target.value === "inherit" ? null : normalizePdfLocale(event.target.value);
+                    setQuotePdfLocale(next);
+                    await supabase.from("trade_quotes").update({ pdf_locale: next }).eq("id", quoteId);
+                  }}
+                  className="h-9 min-w-56 rounded-md border border-input bg-background px-3 font-body text-xs text-foreground"
+                >
+                  <option value="inherit">Studio default — {PDF_LOCALE_LABELS[normalizePdfLocale(currentStudio?.pdf_locale)]}</option>
+                  {PDF_LOCALE_PRESETS.map((preset) => <option key={preset} value={preset}>{PDF_LOCALE_LABELS[preset]}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
                 <span className="block font-body text-[10px] uppercase tracking-widest text-muted-foreground">Proforma ledger</span>
                 <select
                   value={ceilingMode}
@@ -3355,17 +3371,17 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 ] as [string, number][]).map(([label, value], index) => (
                   <div key={label} className={cn("flex justify-between gap-8", index === 0 && "pb-2 text-sm text-foreground", index === 4 ? "border-t border-foreground pt-3 text-foreground" : index !== 0 && "text-muted-foreground")}>
                     <span>{label}</span>
-                    <span className="tabular-nums text-foreground">{value < 0 ? "− " : ""}{currencySymbol(currency)} {formatPriceRaw(Math.abs(value), currency)}</span>
+                    <span className="tabular-nums text-foreground">{value < 0 ? "−" : ""}{formatPdfMoney(Math.abs(value), currency, effectivePdfLocale)}</span>
                   </div>
                 ))}
                 <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border pt-3 text-muted-foreground">
                   <div className="flex justify-between gap-4">
                     <span>Deposit (60%)</span>
-                    <span className="tabular-nums text-foreground">{currencySymbol(currency)} {formatPriceRaw(Math.round(ceilingBudget.targetCeilingCents * 0.6), currency)}</span>
+                    <span className="tabular-nums text-foreground">{formatPdfMoney(Math.round(ceilingBudget.targetCeilingCents * 0.6), currency, effectivePdfLocale)}</span>
                   </div>
                   <div className="flex justify-between gap-4">
                     <span>Balance (40%)</span>
-                    <span className="tabular-nums text-foreground">{currencySymbol(currency)} {formatPriceRaw(ceilingBudget.targetCeilingCents - Math.round(ceilingBudget.targetCeilingCents * 0.6), currency)}</span>
+                    <span className="tabular-nums text-foreground">{formatPdfMoney(ceilingBudget.targetCeilingCents - Math.round(ceilingBudget.targetCeilingCents * 0.6), currency, effectivePdfLocale)}</span>
                   </div>
                 </div>
               </div>
