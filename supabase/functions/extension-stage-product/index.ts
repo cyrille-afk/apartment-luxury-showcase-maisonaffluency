@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
     .from('client_board_items')
     .select('id')
     .eq('board_id', boardId)
-    .eq('product_id', productId)
+    .eq('product_id', resolvedProductId)
     .limit(1)
     .maybeSingle()
   if (duplicateError) return json({ error: 'Could not verify staged pieces' }, 500)
@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
   if (!duplicate) {
     const inserted = await scoped
       .from('client_board_items')
-      .insert({ board_id: boardId, product_id: productId } as never)
+      .insert({ board_id: boardId, product_id: resolvedProductId } as never)
       .select('id')
       .single()
     if (inserted.error || !inserted.data) return json({ error: 'Could not stage the piece' }, 500)
@@ -186,6 +186,6 @@ Deno.serve(async (req) => {
     // Canonical folder name as it exists in the portal, not the caller's casing.
     targetWorkflow: project.name.trim(),
     verifiedAt: new Date().toISOString(),
-    message: `Success: ${product.product_name} added to ${project.name.trim()}`,
+    message: `Success: ${productNameCanonical} added to ${project.name.trim()}`,
   })
 })
