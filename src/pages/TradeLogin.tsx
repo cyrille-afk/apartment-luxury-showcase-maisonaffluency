@@ -29,18 +29,24 @@ const TradeLogin = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
+  // Destination to return to after sign-in — e.g. the OAuth consent screen
+  // the member was sent here from (ChatGPT extension approval). Only
+  // same-origin paths are honoured; anything else falls back to /trade.
+  const getReturnPath = () => {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("next") || params.get("redirect") || "";
+    return requested.startsWith("/") && !requested.startsWith("//") && !requested.startsWith("/trade/login")
+      ? requested
+      : "/trade";
+  };
+
   // Already signed in (e.g. returning from Google, or a reload restored this
   // screen) — step aside to the requested destination instead of trapping the
   // member on the sign-in form.
   useEffect(() => {
     if (authLoading || !user) return;
-    const params = new URLSearchParams(window.location.search);
-    const requested = params.get("next") || params.get("redirect") || "";
-    const safe = requested.startsWith("/") && !requested.startsWith("//") && !requested.startsWith("/trade/login")
-      ? requested
-      : "/trade";
     try { sessionStorage.removeItem("maison:oauth-return-path"); } catch { /* noop */ }
-    navigate(safe, { replace: true });
+    navigate(getReturnPath(), { replace: true });
   }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -84,7 +90,7 @@ const TradeLogin = () => {
       }
     }
 
-    navigate("/trade");
+    navigate(getReturnPath());
     setLoading(false);
   };
 
@@ -94,8 +100,9 @@ const TradeLogin = () => {
     try {
       ensureStorageHeadroom();
       // Mark the intended destination so the full-page redirect flow returns
-      // the member to the trade portal instead of the public homepage.
-      sessionStorage.setItem("maison:oauth-return-path", "/trade");
+      // the member where they were headed (e.g. the OAuth consent screen)
+      // instead of the public homepage.
+      sessionStorage.setItem("maison:oauth-return-path", getReturnPath());
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
@@ -104,8 +111,8 @@ const TradeLogin = () => {
         setGoogleError(result.error.message || "Google sign-in could not be completed.");
         return;
       }
-      // Popup flow: session is set — go straight into the trade portal.
-      navigate("/trade");
+      // Popup flow: session is set — go straight to the requested destination.
+      navigate(getReturnPath());
     } catch (err) {
       setGoogleError(err instanceof Error ? err.message : "Unexpected error");
     } finally {

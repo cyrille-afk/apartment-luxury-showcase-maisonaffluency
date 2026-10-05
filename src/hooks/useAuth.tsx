@@ -245,7 +245,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // to /trade/me?restricted=1.
         await fetchUserData(resolved.user.id, sbClient);
         const oauthReturnPath = sessionStorage.getItem("maison:oauth-return-path");
-        if (oauthReturnPath === "/trade") {
+        if (oauthReturnPath && oauthReturnPath.startsWith("/") && !oauthReturnPath.startsWith("//") && !oauthReturnPath.startsWith("/trade/login")) {
           sessionStorage.removeItem("maison:oauth-return-path");
           const p = window.location.pathname;
           // Only redirect from the landing/sign-in screens — never yank a
@@ -310,7 +310,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             // destination the sign-in page asked for.
             try {
               const returnPath = sessionStorage.getItem("maison:oauth-return-path");
-              if (returnPath === "/trade") {
+              if (returnPath && returnPath.startsWith("/") && !returnPath.startsWith("//") && !returnPath.startsWith("/trade/login")) {
                 sessionStorage.removeItem("maison:oauth-return-path");
                 const p = window.location.pathname;
                 const alreadyInPortal = p.startsWith("/trade") && !p.startsWith("/trade/login");
