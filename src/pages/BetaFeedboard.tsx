@@ -17,7 +17,25 @@ type Entry = {
   title: string;
   observations: string | null;
   screenshot_path: string | null;
+  author_name: string | null;
+  author_company: string | null;
+  viewport_tag: string | null;
   created_at: string;
+};
+
+const editorialDate = (iso: string) =>
+  new Date(iso).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+const viewportTag = () => {
+  const w = window.innerWidth;
+  return w < 768 ? "Mobile Viewport" : w <= 1024 ? "Tablet Viewport" : "Desktop Viewport";
 };
 
 const LANES: { key: Lane; title: string; hint: string }[] = [
@@ -98,9 +116,22 @@ function EntryCard({ entry }: { entry: Entry }) {
       <h3 className="font-body text-sm font-medium break-words">{entry.title}</h3>
       {entry.observations && <p className="mt-1 whitespace-pre-wrap break-words font-body text-xs text-muted-foreground">{entry.observations}</p>}
       {url && <a href={url} target="_blank" rel="noreferrer"><img src={url} alt="Screenshot" className="mt-3 max-h-40 w-full border border-border object-contain" /></a>}
-      <p className="mt-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-        {new Date(entry.created_at).toLocaleString()}
-      </p>
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-2">
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Logged by</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            {[entry.author_name, entry.author_company].filter(Boolean).join(" · ") || "—"}
+          </p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Captured</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{editorialDate(entry.created_at)}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground/70">Environment</p>
+          <p className="truncate font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{entry.viewport_tag ?? "—"}</p>
+        </div>
+      </div>
     </article>
   );
 }
@@ -133,8 +164,21 @@ function EntryDrawer({ lane, onClose, onSaved }: { lane: Lane | null; onClose: (
       if (error) { setSaving(false); return toast.error("Screenshot upload failed"); }
       screenshot_path = path;
     }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, company")
+      .eq("id", user.id)
+      .maybeSingle();
+    const author_name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ").trim() || null;
     const { error } = await supabase.from("beta_feedback_entries").insert({
-      user_id: user.id, lane, title: title.trim().slice(0, 200), observations: obs.trim().slice(0, 5000) || null, screenshot_path,
+      user_id: user.id,
+      lane,
+      title: title.trim().slice(0, 200),
+      observations: obs.trim().slice(0, 5000) || null,
+      screenshot_path,
+      author_name,
+      author_company: profile?.company?.trim() || null,
+      viewport_tag: viewportTag(),
     });
     setSaving(false);
     if (error) return toast.error("Could not save entry");

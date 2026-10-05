@@ -899,6 +899,8 @@ export type Database = {
       }
       beta_feedback_entries: {
         Row: {
+          author_company: string | null
+          author_name: string | null
           created_at: string
           id: string
           lane: string
@@ -906,8 +908,11 @@ export type Database = {
           screenshot_path: string | null
           title: string
           user_id: string
+          viewport_tag: string | null
         }
         Insert: {
+          author_company?: string | null
+          author_name?: string | null
           created_at?: string
           id?: string
           lane: string
@@ -915,14 +920,33 @@ export type Database = {
           screenshot_path?: string | null
           title: string
           user_id?: string
+          viewport_tag?: string | null
         }
         Update: {
+          author_company?: string | null
+          author_name?: string | null
           created_at?: string
           id?: string
           lane?: string
           observations?: string | null
           screenshot_path?: string | null
           title?: string
+          user_id?: string
+          viewport_tag?: string | null
+        }
+        Relationships: []
+      }
+      beta_members: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
           user_id?: string
         }
         Relationships: []
