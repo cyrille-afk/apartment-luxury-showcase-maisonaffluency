@@ -43,6 +43,7 @@ function ShowroomLegacyRedirect() {
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const TradeFaqPage = lazy(() => import("./pages/TradeFaqPage"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 import GallerySkeleton from "./components/trade/GallerySkeleton";

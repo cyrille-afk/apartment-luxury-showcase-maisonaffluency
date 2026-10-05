@@ -13,12 +13,8 @@ export default defineTool({
   name: "get_synced_projects",
   title: "List synced project folders",
   description:
-    "Returns the Maison Affluency trade member's active project workflow folders (e.g. 'Singapore GCB workflow', 'Hamptons Project') that the extension can stage products into. ALWAYS call this before `stage_product_to_project` so the targetWorkflow name matches an existing folder. Requires the member's portal access token: sign in as a trade member on maisonaffluency.com to obtain it. Without a valid token the tool returns an authentication error.",
+    "Returns the Maison Affluency trade member's active project workflow folders (e.g. 'Singapore GCB workflow', 'Hamptons Project') that the extension can stage products into. ALWAYS call this before `stage_product_to_project` so the targetWorkflow name matches an existing folder. Authenticates automatically as the connected trade member.",
   inputSchema: {
-    access_token: z
-      .string()
-      .min(20)
-      .describe("The trade member's Maison Affluency portal access token (JWT) obtained by signing in on maisonaffluency.com."),
     limit: z
       .number()
       .int()
@@ -28,10 +24,14 @@ export default defineTool({
       .describe("Maximum number of active project folders to return. Defaults to all active folders."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ access_token, limit }) => {
+  handler: async ({ limit }, ctx) => {
     const url = new URL(SYNC_ENDPOINT);
     if (limit) url.searchParams.set("limit", String(limit));
 
+    // Verified OAuth token from the MCP request header (member approved once on
+    // maisonaffluency.com). Forwarded to the edge function; never logged.
+    const access_token = ctx.getToken();
+    if (!access_token) throw new ToolError("Sign in to Maison Affluency from ChatGPT's connector settings to use project tools.");
     let res: Response;
     try {
       res = await fetch(url.toString(), {
