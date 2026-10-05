@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Route trade approvals to the branded template, send refined declines before deletion, verify both paths and publish.
+
 - [x] Embed the AI Extension catalogue in a fixed 360px sandbox drawer and verify staged project records before confirming sync on the parent page.
 
 - [x] Label localized starter projects as samples and let members turn them into real projects without losing their folders or boards.
