@@ -17,7 +17,8 @@ import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/ca
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { Link, useNavigate } from "react-router-dom";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
-import { ROOM_LABELS, ROOM_MAP, type RoomSlug } from "@/lib/roomCategories";
+import { ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
+import { pickMatchesRoom, pickMatchesFilter } from "@/lib/roomMatching";
 import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { prefetchPublicProductPage } from "@/lib/publicProductPageQuery";
@@ -83,21 +84,6 @@ const designerSlugify = (s: string) =>
 const productHref = (pick: CuratorPick) =>
   `/products/${pick.slug || designerSlugify(pick.title + (pick.subtitle ? `-${pick.subtitle}` : ""))}`;
 
-// ─── SUB_TAGS mapping (same as FeaturedDesigners) ────────────────────────
-const SUB_TAGS: Record<string, string[]> = {
-  "Sofas": ["Sofa"], "Armchairs": ["Armchair", "Armchairs"], "Chairs": ["Chair"],
-  "Daybeds & Benches": ["Daybed", "Bench"], "Ottomans & Stools": ["Ottoman", "Stool"],
-  "Bar Stools": ["Bar Stool"], "Consoles": ["Console"], "Coffee Tables": ["Coffee Table"],
-  "Desks": ["Desk"], "Dining Tables": ["Dining Table"], "Side Tables": ["Side Table"],
-  "Wall Lights": ["Wall Light", "Wall Lamp", "Sconce"], "Ceiling Lights": ["Ceiling Light", "Chandelier", "Pendant", "Suspension"],
-  "Floor Lights": ["Floor Light", "Floor Lamp"], "Table Lights": ["Table Light", "Table Lamp", "Lantern"],
-  "Bookcases": ["Bookcase"], "Cabinets": ["Cabinet"],
-  "Hand-Knotted Rugs": ["Hand-Knotted Rug", "Textile"], "Hand-Tufted Rugs": ["Hand-Tufted Rug"],
-  "Hand-Woven Rugs": ["Hand-Woven Rug"], "Vases & Vessels": ["Vase", "Vessel"],
-  "Mirrors": ["Mirror"], "Books": ["Book"], "Candle Holders": ["Candle Holder"],
-  "Decorative Objects": ["Decorative Object", "Object", "Sculpture"],
-  "Centre Tables": ["Centre Table"],
-};
 
 type ProductItem = {
   pick: CuratorPick;
@@ -151,122 +137,6 @@ function buildProductList(atelierPicks: Record<string, { name: string; curatorPi
   }
 
   return items;
-}
-
-function normalizeLabel(value?: string): string {
-  return (value || "")
-    .toLowerCase()
-    .replace(/[’']/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b(\w+?)s\b/g, "$1");
-}
-
-function labelsMatch(a?: string, b?: string): boolean {
-  const na = normalizeLabel(a);
-  const nb = normalizeLabel(b);
-  if (!na || !nb) return false;
-  return na === nb || na.includes(nb) || nb.includes(na);
-}
-
-/** Stricter match for top-level categories — requires full-word boundary match
- *  to prevent "Table Lamp" from matching the "Tables" category. */
-function categoryMatch(pickValue?: string, category?: string): boolean {
-  const na = normalizeLabel(pickValue);
-  const nb = normalizeLabel(category);
-  if (!na || !nb) return false;
-  if (na === nb) return true;
-  // Check word-boundary match: "table" should match "table" but not "table lamp"
-  const regex = new RegExp(`(^|\\s)${nb.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`);
-  return regex.test(na);
-}
-
-/** Map top-level categories to the set of subcategory tags they contain,
- *  so "Tables" only matches Table-related subs, not "Table Lamp". */
-const CATEGORY_SUBCATS: Record<string, string[]> = {
-  "Seating": ["Sofas", "Armchairs", "Chairs", "Daybeds & Benches", "Ottomans & Stools"],
-  "Tables": ["Consoles", "Coffee Tables", "Desks", "Dining Tables", "Side Tables", "Centre Tables"],
-  "Storage": ["Bookcases", "Bars", "Buffets, Cabinets And Sideboards"],
-  "Bedroom": ["Bedding", "Beds", "Bedside Tables", "Sofa-Beds"],
-  "Lighting": ["Wall Lights", "Ceiling Lights", "Floor Lights", "Table Lights"],
-  "Rugs": ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs"],
-  "Décor": ["Vases & Vessels", "Mirrors", "Books", "Boxes", "Candle Holders", "Cushions & Throws", "Decorative Objects", "Desk Accessories", "Tableware & Linens", "Wall Décor"],
-};
-
-
-function pickMatchesFilter(pick: CuratorPick, category: string | null, subcategory: string | null): boolean {
-  if (!category && !subcategory) return true;
-
-  // Resolve effective subcategory using title-based inference as fallback,
-  // so picks with only a top-level category (e.g. "Tables") still match
-  // specific subcategory filters (e.g. "Coffee Tables") via their title.
-  const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
-  const effectiveSub = inferSubcategory(pick.category, pick.subcategory, inferenceText);
-
-  if (subcategory) {
-    const tags = SUB_TAGS[subcategory] || [subcategory];
-    return tags.some(tag =>
-      categoryMatch(pick.subcategory, tag) ||
-      categoryMatch(pick.subcategory, subcategory) ||
-      categoryMatch(pick.category, tag) ||
-      (pick.tags && pick.tags.some(t => categoryMatch(t, tag))) ||
-      categoryMatch(effectiveSub, tag) ||
-      categoryMatch(effectiveSub, subcategory)
-    );
-  }
-  // Top-level category: match against all its subcategory tags to avoid false positives
-  const subs = CATEGORY_SUBCATS[category!];
-  if (subs) {
-    return subs.some(sub => {
-      const tags = SUB_TAGS[sub] || [sub];
-      return tags.some(tag =>
-        categoryMatch(pick.subcategory, tag) ||
-        categoryMatch(pick.subcategory, sub) ||
-        categoryMatch(pick.category, tag) ||
-        (pick.tags && pick.tags.some(t => categoryMatch(t, tag))) ||
-        categoryMatch(effectiveSub, tag) ||
-        categoryMatch(effectiveSub, sub)
-      );
-    });
-  }
-  // Fallback: exact category match only (no tag matching to prevent cross-category leaks)
-  return categoryMatch(pick.category, category || undefined) || false;
-}
-
-const ROOM_CATEGORY_ALIASES: Record<string, string[]> = {
-  sofas: ["Sofas"],
-  armchairs: ["Armchairs"],
-  daybeds: ["Daybeds & Benches", "Daybed"],
-  benches: ["Daybeds & Benches", "Bench"],
-  "coffee-tables": ["Coffee Tables"],
-  "side-tables": ["Side Tables"],
-  credenzas: ["Buffets, Cabinets And Sideboards", "Credenza", "Sideboard"],
-  rugs: ["Hand-Knotted Rugs", "Hand-Tufted Rugs", "Hand-Woven Rugs", "Rug"],
-  "floor-lights": ["Floor Lights"],
-  "dining-tables": ["Dining Tables"],
-  chairs: ["Chairs"],
-  "bar-stools": ["Ottomans & Stools", "Bar Stool"],
-  "ceiling-lights": ["Ceiling Lights"],
-  beds: ["Beds"],
-  nightstands: ["Bedside Tables", "Nightstand"],
-  dressers: ["Dresser"],
-  wardrobes: ["Wardrobe"],
-  "table-lights": ["Table Lights"],
-  desks: ["Desks"],
-  "office-chairs": ["Office Chair", "Desk Chair"],
-  bookcases: ["Bookcases"],
-};
-
-function pickMatchesRoom(pick: CuratorPick, room: RoomSlug): boolean {
-  const inferenceText = [pick.title, pick.subtitle].filter(Boolean).join(" ");
-  const effectiveSub = inferSubcategory(pick.category, pick.subcategory, inferenceText);
-  const values = [pick.category, pick.subcategory, effectiveSub, pick.title, ...(pick.tags || [])];
-
-  return ROOM_MAP[room].some((roomCategory) =>
-    (ROOM_CATEGORY_ALIASES[roomCategory] || [roomCategory]).some((alias) =>
-      values.some((value) => categoryMatch(value, alias)),
-    ),
-  );
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -340,7 +210,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
@@ -449,7 +319,7 @@ function singularizeSub(s: string): string {
   }, []);
 
   const rawFiltered = useMemo(() => {
-    if (!category && !subcategory && !textQuery && !roomSlug) return [];
+    if (!category && !subcategory && !textQuery && !roomSlug && !showAll) return [];
 
     // Scope results based on which section triggered the filter
     const sectionFilter = filterSource === 'collectibles' ? 'collectibles'
@@ -484,7 +354,7 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory]);
+  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory, showAll]);
 
   const roomOptions = useMemo(() => {
     const options = {} as RoomFacetOptions;
@@ -539,9 +409,9 @@ function singularizeSub(s: string): string {
   // its own filtered grid inline, so showing both creates a duplicate.
   if (!roomSlug && sectionScope === "designers" && activeScope === "designers") return null;
 
-  if (!isActive) return null;
+  if (!isActive && !showAll) return null;
 
-  const filterLabel = roomSlug ? `${ROOM_LABELS[roomSlug]}${roomSubcategory || roomCategory ? ` — ${roomSubcategory || roomCategory}` : ""}` : subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
+  const filterLabel = roomSlug ? `${ROOM_LABELS[roomSlug]}${roomSubcategory || roomCategory ? ` — ${roomSubcategory || roomCategory}` : ""}` : showAll ? "Full Catalogue" : subcategory || category || (textQuery ? `Search: “${textQuery}”` : "");
 
   // Build breadcrumbs (Home → Category → Subcategory) when a category filter is active.
   const crumbs: Crumb[] = (() => {
@@ -586,7 +456,7 @@ function singularizeSub(s: string): string {
               </span>
             ) : (
               <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-                {roomSlug ? (
+                {roomSlug || showAll ? (
                   <>
                     Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
                     {masterCatalogCount || allProducts.length} total available in the master catalogue
@@ -639,7 +509,7 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
-            {roomSlug ? (
+            {roomSlug || (showAll && !isActive) ? (
               <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
             ) : (
             <button
