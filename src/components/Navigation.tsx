@@ -263,10 +263,9 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
             <div key={link.slug} className="group mb-6 last:mb-0">
               <div className="flex items-center gap-2.5 border-b border-border pb-2">
                 <Button type="button" variant="ghost" onClick={() => (selectedRoom === index ? onRoomNavigate(link.slug) : setSelectedRoom(index))} className="h-auto min-h-8 justify-start gap-2.5 rounded-none px-0 py-1 text-left font-body text-xs uppercase tracking-widest hover:bg-transparent">
-                  <span className={cn("size-1.5 shrink-0 rounded-full transition-all", selectedRoom === index ? "scale-100 bg-foreground" : "scale-0 bg-transparent")} />
-                  <span className={cn("transition-opacity hover:opacity-80", selectedRoom === index ? "font-extrabold text-foreground underline underline-offset-4" : "font-bold text-muted-foreground")}>{link.label}</span>
+                  <span className={cn("size-1.5 shrink-0 rounded-full transition-all duration-200", selectedRoom === index ? "scale-100 bg-foreground" : "scale-0 bg-transparent")} />
+                  <span className={cn("tracking-wider transition-colors hover:opacity-80", selectedRoom === index ? "font-semibold text-foreground" : "font-medium text-muted-foreground/80")}>{link.label}</span>
                 </Button>
-                {selectedRoom === index && <span className="text-[9px] font-bold lowercase tracking-wider text-muted-foreground">(viewing)</span>}
               </div>
               {roomOpen && (
                 <div className="ml-1.5 flex flex-col space-y-1 border-l border-border/60 pl-4 pt-6">
