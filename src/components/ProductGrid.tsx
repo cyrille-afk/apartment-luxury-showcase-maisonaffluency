@@ -14,7 +14,8 @@ import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
-import { cldResponsiveImg } from "@/lib/cloudinary";
+import CatalogCardImages from "@/components/product/CatalogCardImages";
+import { useCatalogBatches } from "@/hooks/useCatalogBatches";
 import { Link, useNavigate } from "react-router-dom";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 import { ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
@@ -381,17 +382,17 @@ function singularizeSub(s: string): string {
     return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
   }) : rawFiltered, [rawFiltered, roomSlug, roomFacets]);
 
-  const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image));
+  // Avoid eager tonal-analysis downloads for hundreds of off-batch photos.
+  const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image), { cachedOnly: true });
   const filtered = useMemo(
     () => curateGrid(facetFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
-  const { data: publicRrpMap = {} } = usePublicRrpMap(filtered.map((item) => item.pick.id));
+  const batchKey = JSON.stringify([roomSlug, roomCategory, roomSubcategory, category, subcategory, textQuery, filterSource, roomFacets, filtered.map((item) => item.pick.id || `${item.designerId}:${item.pick.title}`)]);
+  const { renderedItems, hasMore, sentinelRef } = useCatalogBatches(filtered, batchKey);
+  const { data: publicRrpMap = {} } = usePublicRrpMap(renderedItems.map((item) => item.pick.id));
   const isActive = Boolean(category || subcategory || textQuery || roomSlug);
-
-  // Hover images are fetched only when the shopper shows intent.
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
@@ -543,13 +544,11 @@ function singularizeSub(s: string): string {
           transition={{ duration: 0.4 }}
           className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (gridCols === 4 ? 'md:grid-cols-3 lg:grid-cols-4' : 'lg:grid-cols-3') : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
         >
-          {filtered.map((item, idx) => (
-            <motion.div
-              key={`${item.designerId}-${item.pick.title}-${idx}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
-               className={`group flex h-full cursor-pointer flex-col ${roomSlug ? "" : "justify-between"}`}
+          {renderedItems.map((item) => (
+            <div
+              key={item.pick.id || `${item.designerId}-${item.pick.title}`}
+              data-catalog-card
+               className={`group flex h-full cursor-pointer flex-col [contain:layout_style] ${roomSlug ? "" : "justify-between"}`}
               tabIndex={0}
               role="link"
               aria-label={`View ${item.pick.title} product details`}
@@ -557,35 +556,18 @@ function singularizeSub(s: string): string {
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") openItem(item);
               }}
-              onMouseEnter={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
-              onMouseLeave={() => setHoveredIdx((cur) => (cur === idx ? null : cur))}
-              onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
+              onMouseEnter={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); }}
+              onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); }}
               onTouchStart={() => prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title))}
             >
               <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--product-canvas))]">
-                <img
-                  {...cldResponsiveImg(item.pick.image, {
-                    widths: [300, 400, 600, 800],
-                     sizes: `(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`,
-                  })}
+                <CatalogCardImages
+                  primary={item.pick.image}
+                  alternate={item.pick.hoverImage}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                   className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"} ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
-                  loading="lazy"
-                  decoding="async"
+                  sizes={`(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`}
+                  room={Boolean(roomSlug)}
                 />
-                {/* Hover image mounts only on hover/focus so it isn't fetched upfront */}
-                {item.pick.hoverImage && hoveredIdx === idx && (
-                  <img
-                    {...cldResponsiveImg(item.pick.hoverImage, {
-                      widths: [300, 400, 600, 800],
-                       sizes: `(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`,
-                    })}
-                    alt={`${item.pick.title} by ${item.designerName} — alternate view`}
-                     className={`absolute inset-0 m-auto object-contain object-center mix-blend-multiply opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105 ${roomSlug ? "h-full w-full p-6" : "max-h-[80%] max-w-[80%]"}`}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                )}
                 <button
                   type="button"
                   onClick={(event) => {
@@ -658,10 +640,11 @@ function singularizeSub(s: string): string {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </motion.div>
         </div>
+        {hasMore && <div ref={sentinelRef} data-catalog-sentinel aria-hidden="true" className="h-1 w-full" />}
         {!dbPicksLoading && filtered.length === 0 && (
           <p className="py-20 text-center font-body text-sm text-muted-foreground">
             No pieces are currently available for this room.

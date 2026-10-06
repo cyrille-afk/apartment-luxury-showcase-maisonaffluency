@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add 24-piece catalogue batches and decoded alternate-image hover swaps; six regression tests passed, full live scroll reached 589 current pieces, hover made no image request, filter reset and broken-image fallback verified.
+
 - [x] Add editable approval/decline email draft review; 12 tests, clean compilation, rendered email checks and admin drawer interactions verified without real sends; publish requested.
 
 - [x] Route trade approvals to the branded template, send refined declines before deletion; seven action tests, email rendering, clean compilation and deployed-service checks passed.
