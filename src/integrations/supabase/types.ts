@@ -11867,6 +11867,7 @@ export type Database = {
         Args: { _country: string }
         Returns: Database["public"]["Enums"]["region_tier"]
       }
+      master_catalogue_raw_count: { Args: never; Returns: number }
       match_catalog: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
