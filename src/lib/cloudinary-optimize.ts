@@ -40,7 +40,13 @@ export function optimizeImageUrl(
     // Check if transforms already present (first path segment before version)
     const firstSegment = rest.split("/")[0];
     if (HAS_TRANSFORMS_RE.test(firstSegment)) {
-      // Already has transforms — skip
+      // Already has transforms. If no format was chosen, add f_auto so
+      // PNG originals are never delivered as raw PNG (Cloudinary then
+      // serves AVIF/WebP, or JPG for non-transparent PNGs).
+      if (!/(^|,)f_/.test(firstSegment)) {
+        const rest2 = rest.slice(firstSegment.length);
+        return `${prefix}${firstSegment},f_auto${rest2}`;
+      }
       return url;
     }
     const versioned = /^v\d+\//.test(rest) ? rest : `v1/${rest}`;
