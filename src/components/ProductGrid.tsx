@@ -7,7 +7,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 import { cn } from "@/lib/utils";
 import { useCompare } from "@/contexts/CompareContext";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useDbCuratorPicks, useMasterCatalogCount } from "@/hooks/useDbCuratorPicks";
 import { useQueryClient } from "@tanstack/react-query";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
@@ -343,6 +343,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
+  const { data: masterCatalogCount } = useMasterCatalogCount();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const destination = useShippingDestination();
@@ -585,14 +586,20 @@ function singularizeSub(s: string): string {
               </span>
             ) : (
               <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-                {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
-                  roomSlug ? 'the collection'
-                  :
-                  filterSource === 'collectibles' ? 'Collectible Design'
-                  : filterSource === 'brands' ? 'all Ateliers'
-                  : filterSource === 'designers' ? 'all Designers'
-                  : 'all collections'
-                }
+                {roomSlug ? (
+                  <>
+                    Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
+                    {masterCatalogCount || allProducts.length} total available in the master catalogue
+                  </>
+                ) : (
+                  <>
+                    {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across{" "}
+                    {filterSource === 'collectibles' ? 'Collectible Design'
+                      : filterSource === 'brands' ? 'all Ateliers'
+                      : filterSource === 'designers' ? 'all Designers'
+                      : 'all collections'}
+                  </>
+                )}
               </p>
             )}
 
