@@ -1,5 +1,6 @@
 import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { ensureCommunicationCopies } from '../_shared/communicationCopies.ts'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -325,6 +326,9 @@ Deno.serve(async (req) => {
       }
 
       try {
+        // Central queue coverage includes templates, raw HTML and database alerts.
+        // Queue copies first: a partial failure retries with stable per-staff keys.
+        await ensureCommunicationCopies(supabase, queue, payload)
         const unsubscribeToken =
           payload.unsubscribe_token || (await resolveUnsubscribeToken(supabase, payload.to))
         await sendLovableEmail(
