@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Default Full Catalogue to closed filters and four columns; verify open/close and refresh behaviour.
+
 - [x] Replace legacy communication addresses with live concierge/trade addresses; seven email services deployed and checked, seven tests pass, displayed links verified without sending test emails; account identities unchanged.
 - [x] Automatically copy concierge/trade app emails to Cyrille and Gregoire; nine tests passed, recipient suppression and stable retry keys verified, shared queue worker deployed and live-checked without test sends.
 

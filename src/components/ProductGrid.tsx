@@ -242,7 +242,12 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
-  const [roomFiltersOpen, setRoomFiltersOpen] = useState(true);
+  const [roomFiltersOpen, setRoomFiltersOpen] = useState(() => !showAll);
+  const toggleCatalogueFilters = () => {
+    const nextOpen = !roomFiltersOpen;
+    setRoomFiltersOpen(nextOpen);
+    setGridCols(nextOpen ? 3 : 4);
+  };
   const [roomFacets, setRoomFacets] = useState<RoomFacetValues>(EMPTY_ROOM_FACETS);
   const gridRef = useRef<HTMLElement>(null);
   // Shop by Room: open the category-discovery lightbox variant instead of navigating.
@@ -538,8 +543,8 @@ function singularizeSub(s: string): string {
           </div>
         </div>
 
-        {showAll && <Button variant="outline" size="icon-sm" className="mb-5 hidden md:inline-flex" aria-label={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} title={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} aria-expanded={roomFiltersOpen} aria-controls="catalogue-filters" onClick={() => setRoomFiltersOpen((open) => !open)}><SlidersHorizontal className="size-4" /></Button>}
-        <div className={roomSlug || showAll ? `md:flex md:items-start ${roomSlug || roomFiltersOpen ? "md:gap-6 lg:gap-8" : ""}` : ""}>
+        {showAll && <Button variant="outline" size="icon-sm" className="mb-5 hidden md:inline-flex" aria-label={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} title={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} aria-expanded={roomFiltersOpen} aria-controls="catalogue-filters" onClick={toggleCatalogueFilters}><SlidersHorizontal className="size-4" /></Button>}
+        <div className={roomSlug || showAll ? `md:flex md:items-start transition-[gap] duration-300 motion-reduce:transition-none ${roomSlug || roomFiltersOpen ? "md:gap-6 lg:gap-8" : "md:gap-0"}` : ""}>
         {(roomSlug || showAll) && <RoomCollectionFilters
           fullCatalogue={showAll}
           options={roomOptions}
