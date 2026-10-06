@@ -234,7 +234,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const toggleCategory = (key: string) => setOpenCategoryKey((prev) => (prev === key ? null : key));
   void activeCategory; void onSelectCategory;
   const roomSlug = (roomFlyouts[room]?.[0]?.slug ?? null) as RoomSlug | null;
-  const { data: masterCatalogCount } = useMasterCatalogCount();
+  const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const { data: roomCounts } = useRoomMenuCounts(roomSlug, roomNavigation[room]);
   return (
    <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
@@ -243,7 +243,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <button type="button" onClick={onFullCatalogue} className="group flex w-full flex-col items-start rounded-none px-0 py-1 text-left">
           <span className="font-body text-xs font-extrabold uppercase tracking-widest text-foreground transition-opacity group-hover:opacity-80">All Categories</span>
           <span className="mt-0.5 font-body text-[11px] tracking-wide text-muted-foreground transition-opacity group-hover:opacity-80">
-            Full Catalogue{typeof masterCatalogCount === "number" ? ` (${masterCatalogCount})` : ""}
+            Full Catalogue{typeof rawCatalogCount === "number" ? ` (${rawCatalogCount})` : ""}
           </span>
         </button>
         <div className="mb-6 mt-4 border-b border-border" />
