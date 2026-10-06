@@ -31,7 +31,7 @@ export default function RoomCollectionFilters({
   onChange: (key: RoomFacet, value: string | null) => void;
   onClear: () => void;
 }) {
-  const [openState, setOpenState] = useState(true);
+  const [openState, setOpenState] = useState(() => !fullCatalogue);
   const open = openProp ?? openState;
   const setOpen = (v: boolean) => { setOpenState(v); onOpenChange?.(v); };
   const [mobileOpen, setMobileOpen] = useState(false);
