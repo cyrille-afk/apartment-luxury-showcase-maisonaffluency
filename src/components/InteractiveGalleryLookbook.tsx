@@ -675,7 +675,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       </header>
 
       {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto mt-6 max-w-[1500px] border-y border-border/60 px-4 py-4 md:mt-8 md:px-10 md:py-5">
-        <div className="flex min-h-10 snap-x snap-mandatory items-center gap-9 overflow-x-auto scroll-smooth whitespace-nowrap px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-12 lg:gap-16">
+        <div className="flex min-h-10 snap-x snap-mandatory items-center gap-9 overflow-x-auto scroll-smooth whitespace-nowrap px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-10 lg:gap-12">
           {ribbonItems.map((item) => (
             <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-10 shrink-0 snap-start rounded-none border-b px-1 pb-2 pt-0 font-body text-[11px] uppercase tracking-[0.3em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
