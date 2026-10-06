@@ -589,7 +589,7 @@ function singularizeSub(s: string): string {
                 {roomSlug ? (
                   <>
                     Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
-                    {allProducts.length} total available in the master catalogue
+                    {masterCatalogCount || allProducts.length} total available in the master catalogue
                   </>
                 ) : (
                   <>
