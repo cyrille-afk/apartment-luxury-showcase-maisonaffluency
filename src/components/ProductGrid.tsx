@@ -585,14 +585,20 @@ function singularizeSub(s: string): string {
               </span>
             ) : (
               <p className="font-body text-sm text-[hsl(var(--accent))] mt-1">
-                {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across {
-                  roomSlug ? 'the collection'
-                  :
-                  filterSource === 'collectibles' ? 'Collectible Design'
-                  : filterSource === 'brands' ? 'all Ateliers'
-                  : filterSource === 'designers' ? 'all Designers'
-                  : 'all collections'
-                }
+                {roomSlug ? (
+                  <>
+                    Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
+                    {allProducts.length} total available in the master catalogue
+                  </>
+                ) : (
+                  <>
+                    {filtered.length} {filtered.length === 1 ? "piece" : "pieces"} across{" "}
+                    {filterSource === 'collectibles' ? 'Collectible Design'
+                      : filterSource === 'brands' ? 'all Ateliers'
+                      : filterSource === 'designers' ? 'all Designers'
+                      : 'all collections'}
+                  </>
+                )}
               </p>
             )}
 
