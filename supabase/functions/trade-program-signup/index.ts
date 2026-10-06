@@ -3,7 +3,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTradeRequestWhatsApp } from '../_shared/twilioWhatsAppSender.ts'
 import { scoreTradeApplication } from '../_shared/tradeRadar.ts'
 
-const ADMIN_EMAILS = ['concierge@myaffluency.com', 'cyrille@maisonaffluency.com']
+const ADMIN_EMAILS = ['concierge@maisonaffluency.com', 'cyrille@maisonaffluency.com']
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

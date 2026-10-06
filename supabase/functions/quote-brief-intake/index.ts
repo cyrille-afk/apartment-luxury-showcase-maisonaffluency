@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
     .invoke("send-transactional-email", {
       body: {
         templateName: "inquiry-notification",
-        recipientEmail: "concierge@myaffluency.com",
+        recipientEmail: "concierge@maisonaffluency.com",
         idempotencyKey: `brief-notify-${inquiryId}`,
         templateData: {
           name: derivedName,

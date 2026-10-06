@@ -82,7 +82,7 @@ export const template = {
   component: Email,
   subject: (data: Record<string, any>) =>
     `Manual shipping quote: ${data?.productName || 'Item'} (${data?.quoteNumber || '—'})`,
-  to: 'concierge@myaffluency.com',
+  to: 'concierge@maisonaffluency.com',
   displayName: 'Manual Shipping Quote Request (Internal)',
   previewData: {
     quoteNumber: 'Q-2026-0042',

@@ -7,7 +7,7 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
-const REPLY_TO = "concierge@myaffluency.com"
+const REPLY_TO = "concierge@maisonaffluency.com"
 
 interface Props {
   firstName?: string

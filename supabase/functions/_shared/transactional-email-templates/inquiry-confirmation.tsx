@@ -47,7 +47,7 @@ const InquiryConfirmationEmail = ({ name, message }: Props) => (
 
         <Text style={text}>
           In the meantime, should you have any urgent questions, please write to us at{' '}
-          <a href="mailto:concierge@myaffluency.com" style={link}>concierge@myaffluency.com</a>.
+          <a href="mailto:concierge@maisonaffluency.com" style={link}>concierge@maisonaffluency.com</a>.
         </Text>
 
         <Text style={footer}>

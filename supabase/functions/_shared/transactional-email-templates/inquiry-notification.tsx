@@ -68,7 +68,7 @@ export const template = {
     const c = data?.company ? ` — ${data.company}` : ''
     return data?.subject || `New Inquiry from ${n}${c}`
   },
-  to: 'concierge@myaffluency.com',
+  to: 'concierge@maisonaffluency.com',
   displayName: 'Inquiry Notification (Internal)',
   previewData: {
     name: 'Alexandra Chen',

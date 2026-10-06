@@ -82,7 +82,7 @@ export default function ManualQuoteForm({ productTitle, designerName, onDone, on
         .filter(Boolean)
         .join("\n")
     );
-    window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${mailBody}`;
+    window.location.href = `mailto:concierge@maisonaffluency.com?subject=${subject}&body=${mailBody}`;
 
     toast({
       title: "Enquiry Sent",

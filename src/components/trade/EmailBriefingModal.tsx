@@ -52,7 +52,7 @@ Warm regards,
 
 Cyrille Delval
 Founder & Managing Director, Maison Affluency
-Singapore, District 9 | concierge@myaffluency.com`;
+Singapore, District 9 | concierge@maisonaffluency.com`;
 
 const EmailBriefingModal = ({ open, onOpenChange, leadId, studioName, founderName, email, onSent }: Props) => {
   const { user } = useAuth();

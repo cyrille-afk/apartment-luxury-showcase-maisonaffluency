@@ -159,7 +159,7 @@ const ProductPage = () => {
     ],
   };
 
-  const enquiryMailto = `mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Enquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in the ${product.product_name} by ${product.brand_name}.\n\nCould you please provide more information?\n\nThank you.`)}`;
+  const enquiryMailto = `mailto:concierge@maisonaffluency.com?subject=${encodeURIComponent(`Enquiry: ${product.product_name} by ${product.brand_name}`)}&body=${encodeURIComponent(`Hi,\n\nI'm interested in the ${product.product_name} by ${product.brand_name}.\n\nCould you please provide more information?\n\nThank you.`)}`;
   const fromPath = (location.state as { from?: string } | null)?.from;
 
   return (
@@ -342,7 +342,7 @@ const ProductPage = () => {
                   <p>Brand: {product.brand_name}</p>
                   {product.materials && <p>Materials: {product.materials}</p>}
                   {product.dimensions && <p>Dimensions: {product.dimensions}</p>}
-                  <p>Book a private viewing at our Singapore showroom — concierge@myaffluency.com</p>
+                  <p>Book a private viewing at our Singapore showroom — concierge@maisonaffluency.com</p>
                 </div>
               </noscript>
             </div>
