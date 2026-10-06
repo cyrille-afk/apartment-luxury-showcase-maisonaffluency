@@ -83,6 +83,7 @@ const SPACES: Space[] = [
 ];
 
 const large = (id: string) => cloudinaryUrl(id, { width: 1920, quality: "auto:good" });
+const displayImage = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good" });
 const thumb = (id: string) => cloudinaryUrl(id, { width: 320, height: 220, crop: "fill", gravity: "auto", quality: "auto" });
 const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 const createGalleryPages = (space: Space): GalleryPage[] =>
@@ -253,7 +254,7 @@ function GalleryTour() {
             controls={hasStarted}
             playsInline
             preload="none"
-            poster={large("bespoke-sofa_gxidtx")}
+            poster={displayImage("bespoke-sofa_gxidtx")}
             onClick={() => {
               if (videoRef.current?.paused) playImmersively();
             }}
@@ -263,7 +264,7 @@ function GalleryTour() {
           </video>
           {!hasStarted && (
             <img
-              src={large("bespoke-sofa_gxidtx")}
+              src={displayImage("bespoke-sofa_gxidtx")}
               alt=""
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 aspect-video h-full w-full object-cover"
@@ -728,7 +729,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             return <>
                          <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
                            <img
-                             src={large(pageScene.id)}
+                             src={displayImage(pageScene.id)}
                              alt={`${space.label} — ${pageScene.title}`}
                              onLoad={(event) => {
                                 markSceneLoaded(pageScene.id);

@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 import ShareMenu from "@/components/ShareMenu";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const CANONICAL_URL = "https://www.maisonaffluency.com/apartment-tour";
 const SITE_URL = "https://www.maisonaffluency.com";
@@ -145,7 +146,7 @@ const ApartmentTour = () => {
             src={VIDEO_URL}
             controls
             playsInline
-            poster={OG_IMAGE}
+            poster={cloudinaryUrl("bespoke-sofa_gxidtx", { width: 1200, height: 630, gravity: "auto", quality: "auto:good" })}
             className="w-full rounded-sm shadow-2xl"
             style={{ aspectRatio: "16/9" }}
           />

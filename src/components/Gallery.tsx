@@ -725,15 +725,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     emblaApi.scrollTo(currentItemIndex, true);
   }, [emblaApi, isMobile, lightboxOpen, currentSectionIndex]);
 
-  // Preload first section's gallery images only (visible on initial load)
-  useEffect(() => {
-    if (galleryExperiences.length > 0) {
-      galleryExperiences[0].items.forEach(item => {
-        const img = new Image();
-        img.src = item.image;
-      });
-    }
-  }, []);
+  // Visible images load through their responsive img props. Do not preload
+  // fixed-width originals here: that duplicates the browser's srcSet request.
 
   // Listen for category changes from Navigation
   useEffect(() => {
