@@ -7,7 +7,7 @@ import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesign
 import { collectibleDesigners } from "@/components/Collectibles";
 import { cn } from "@/lib/utils";
 import { useCompare } from "@/contexts/CompareContext";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useDbCuratorPicks, useMasterCatalogCount } from "@/hooks/useDbCuratorPicks";
 import { useQueryClient } from "@tanstack/react-query";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
