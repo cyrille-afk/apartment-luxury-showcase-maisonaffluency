@@ -37,7 +37,9 @@ import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
-import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useDbCuratorPicks, useMasterCatalogCount } from "@/hooks/useDbCuratorPicks";
+import { useRoomMenuCounts } from "@/hooks/useRoomMenuCounts";
+import type { RoomSlug } from "@/lib/roomCategories";
 import { preloadImage } from "@/lib/curatorPickPreload";
 // Interaction-only surfaces: loaded on demand so the header does not drag the
 // auth/OAuth + hover-preview code into the first-paint bundle.
@@ -219,10 +221,11 @@ interface RoomDropdownPanelProps {
   onSelectCategory: (index: number) => void;
   onCategoryNavigate: (roomSlug: string, category: string, subcategory?: string) => void;
   onRoomNavigate: (slug: string) => void;
+  onFullCatalogue: () => void;
   onPieceNavigate: (href: string) => void;
 }
 
-const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate, onPieceNavigate }: RoomDropdownPanelProps) => {
+const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryNavigate, onRoomNavigate, onFullCatalogue, onPieceNavigate }: RoomDropdownPanelProps) => {
   const [selectedRoom, setSelectedRoom] = useState(0);
   // Single active category: opening one closes any other (across all rooms).
   const [openCategoryKey, setOpenCategoryKey] = useState<string | null>(null);
@@ -230,10 +233,20 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
   const [openRooms, setOpenRooms] = useState<Record<number, boolean>>({});
   const toggleCategory = (key: string) => setOpenCategoryKey((prev) => (prev === key ? null : key));
   void activeCategory; void onSelectCategory;
+  const roomSlug = (roomFlyouts[room]?.[0]?.slug ?? null) as RoomSlug | null;
+  const { data: masterCatalogCount } = useMasterCatalogCount();
+  const { data: roomCounts } = useRoomMenuCounts(roomSlug, roomNavigation[room]);
   return (
    <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
      <div className="w-52 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
       <div className="flex flex-col">
+        <button type="button" onClick={onFullCatalogue} className="group flex w-full flex-col items-start rounded-none px-0 py-1 text-left">
+          <span className="font-body text-xs font-extrabold uppercase tracking-widest text-foreground transition-opacity group-hover:opacity-80">All Categories</span>
+          <span className="mt-0.5 font-body text-[11px] tracking-wide text-muted-foreground transition-opacity group-hover:opacity-80">
+            Full Catalogue{typeof masterCatalogCount === "number" ? ` (${masterCatalogCount})` : ""}
+          </span>
+        </button>
+        <div className="mb-6 mt-4 border-b border-border" />
         <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
           {roomFlyouts[room]?.map((link, index) => {
@@ -263,7 +276,10 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
                         aria-expanded={hasItems ? isOpen : undefined}
                         className={cn("group flex min-h-8 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-sm px-2 py-1.5 text-left font-body text-xs transition-all hover:bg-transparent hover:font-medium hover:text-foreground", isOpen ? "font-medium text-foreground" : "font-normal text-muted-foreground")}
                       >
-                        {item.label}
+                        <span className="flex-1">{item.label}</span>
+                        {typeof roomCounts?.[item.label] === "number" && roomCounts[item.label] > 0 && (
+                          <span className="text-[9px] font-normal tabular-nums tracking-wider text-muted-foreground/70">{roomCounts[item.label]}</span>
+                        )}
                         {hasItems && <ChevronRight className={cn("size-2.5 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90 text-foreground")} strokeWidth={1.25} />}
                       </Button>
                       {isOpen && (
@@ -1331,7 +1347,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
 
                   {room !== "decor" && room !== "lighting" && megaMenuOpen && activeRoomMenu === room && (
                     <div ref={megaMenuRef} data-room-menu={room} className="absolute left-1/2 top-full z-50 mt-1 w-[min(56rem,calc(100vw-48px))] bg-background shadow-xl" style={{ translate: "-50% 0" }}>
-                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onPieceNavigate={navigateToPiece} />
+                      <RoomDropdownPanel room={room} activeCategory={activeRoomCategory} onSelectCategory={setActiveRoomCategory} onCategoryNavigate={navigateToRoomCategory} onRoomNavigate={navigateToRoom} onFullCatalogue={() => { setMegaMenuOpen(false); setActiveRoomMenu(null); navigate("/search?view=grid"); }} onPieceNavigate={navigateToPiece} />
                     </div>
                   )}
 

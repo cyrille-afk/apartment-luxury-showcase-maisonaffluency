@@ -276,13 +276,16 @@ export default function RoomSearch() {
             {!searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
             <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
           </>
-        ) : (
+        ) : roomParam ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>
             <p className="mt-3 font-body text-sm text-muted-foreground">
               Choose a room from the menu to browse the collection.
             </p>
           </div>
+        ) : (
+          // No room param: the full catalogue grid (All Categories entry point).
+          <ProductGrid compactTop showAll />
         )}
       </main>
       <Footer />
