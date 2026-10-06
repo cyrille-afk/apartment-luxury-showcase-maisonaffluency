@@ -10,6 +10,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
 import { clearDarkIosChrome, setImageIosChrome } from "@/lib/iosChrome";
 
+import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -834,7 +835,7 @@ const TradeLanding = () => {
           {/* Full-bleed background image */}
           <div className="absolute inset-0">
             <img
-              src={studioAfterImg}
+              src={optimizeImageUrl(studioAfterImg, "f_auto,q_auto,w_1600,c_limit")}
               alt=""
               className="w-full h-full object-cover"
               loading="lazy"
@@ -871,7 +872,7 @@ const TradeLanding = () => {
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-background mb-3">Your Drawing</p>
                 <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
-                    src={studioBeforeImg}
+                    src={optimizeImageUrl(studioBeforeImg, "f_auto,q_auto,w_900,c_limit")}
                     alt="Architectural floor plan sketch"
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -889,7 +890,7 @@ const TradeLanding = () => {
                 <p className="font-body text-[10px] tracking-[0.2em] uppercase text-background mb-3">3D Studio Result</p>
                 <div className="aspect-[4/3] rounded-sm overflow-hidden border border-background/10">
                   <img
-                    src={studioAfterImg}
+                    src={optimizeImageUrl(studioAfterImg, "f_auto,q_auto,w_900,c_limit")}
                     alt="3D furnished room visualization"
                     className="w-full h-full object-cover"
                     loading="lazy"
