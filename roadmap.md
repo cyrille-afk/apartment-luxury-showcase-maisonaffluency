@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Crop the 16 supplied Atelier Pendhapa finishes, add shared library records and Anemos links; all 16 images verified on public, Trade and Material Library pages without runtime errors.
+
 - [x] Default Full Catalogue to closed filters and four columns; live open/close, density-change recovery, refresh, aligned edges and no overflow verified.
 
 - [x] Replace legacy communication addresses with live concierge/trade addresses; seven email services deployed and checked, seven tests pass, displayed links verified without sending test emails; account identities unchanged.
