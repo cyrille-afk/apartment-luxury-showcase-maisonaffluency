@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Heart, X, Scale } from "lucide-react";
+import { Heart, X, Scale, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import GridDensityToggle from "@/components/GridDensityToggle";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { featuredDesigners, type CuratorPick } from "@/components/FeaturedDesigners";
@@ -33,8 +34,8 @@ import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomF
 import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
 
-const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, handmade: null, material: null };
-const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "handmade", "material"];
+const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, craft: null, handmade: null, material: null };
+const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "craft", "handmade", "material"];
 
 function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
   const pick = item.pick;
@@ -44,6 +45,17 @@ function roomFacetValues(item: ProductItem): Record<RoomFacet, string[]> {
     // Dagmar's founder owns the house; he is not a designer credit on its pieces.
     designer: Array.from(new Set([item.designerName, item.reeditionBy === "Aaron Fitzgerald" ? undefined : item.reeditionBy, item.attributedDesigner].filter(Boolean) as string[])),
     leadTime: pick.lead_time ? [pick.lead_time.trim()] : [],
+    craft: Array.from(new Set([
+      ...(pick.tags || []).filter((tag) => /marquetry|lacquer|weav|knott|carv|cast|blown|glassblow|ceramic|woodwork|metalwork|upholster|embroid|forg/i.test(tag)),
+      ...[
+        ["Marquetry", /marquetry/i], ["Lacquerwork", /lacquer/i],
+        ["Hand Knotting", /hand[- ]knott/i], ["Hand Weaving", /hand[- ]wov|hand[- ]weav/i],
+        ["Glassblowing", /blown glass|glass[- ]blow/i], ["Carving", /carv/i],
+        ["Casting", /cast(?:ing| bronze| brass| aluminium)/i],
+        ["Ceramics", /ceramic|porcelain|stoneware|earthenware/i],
+        ["Upholstery", /upholster/i],
+      ].filter(([, pattern]) => (pattern as RegExp).test(pick.materials || "")).map(([label]) => label as string),
+    ])),
     handmade: originToCountries(pick.origin),
     material: roomMaterialCategories(pick.materials, pick.title),
   };
@@ -377,10 +389,10 @@ function singularizeSub(s: string): string {
   }, [rawFiltered, roomFacets]);
   const availableRoomMaterials = useMemo(() => new Set(rawFiltered.flatMap((item) => roomMaterialCategories(item.pick.materials, item.pick.title))), [rawFiltered]);
   const catalogMaterials = useMemo(() => new Set(allProducts.flatMap((item) => roomMaterialCategories(item.pick.materials, item.pick.title))), [allProducts]);
-  const facetFiltered = useMemo(() => roomSlug ? rawFiltered.filter((item) => {
+  const facetFiltered = useMemo(() => roomSlug || showAll ? rawFiltered.filter((item) => {
     const facets = roomFacetValues(item);
     return ROOM_FACET_KEYS.every((key) => !roomFacets[key] || facets[key].includes(roomFacets[key]));
-  }) : rawFiltered, [rawFiltered, roomSlug, roomFacets]);
+  }) : rawFiltered, [rawFiltered, roomSlug, showAll, roomFacets]);
 
   // Avoid eager tonal-analysis downloads for hundreds of off-batch photos.
   const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image), { cachedOnly: true });
@@ -513,7 +525,7 @@ function singularizeSub(s: string): string {
               </TooltipProvider>
             </div>}
             {roomSlug || showAll ? (
-              <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
+              <GridDensityToggle value={showAll && roomFiltersOpen ? 3 : gridCols} onChange={(next) => { setGridCols(next); if (showAll && next === 4) setRoomFiltersOpen(false); }} />
             ) : showAll && !isActive ? null : (
             <button
               onClick={handleClearFilter}
@@ -526,8 +538,10 @@ function singularizeSub(s: string): string {
           </div>
         </div>
 
-        <div className={roomSlug ? "md:flex md:items-start md:gap-6 lg:gap-8" : ""}>
-        {roomSlug && <RoomCollectionFilters
+        {showAll && <Button variant="outline" size="icon-sm" className="mb-5 hidden md:inline-flex" aria-label={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} title={roomFiltersOpen ? "Hide catalogue filters" : "Show catalogue filters"} aria-expanded={roomFiltersOpen} aria-controls="catalogue-filters" onClick={() => setRoomFiltersOpen((open) => !open)}><SlidersHorizontal className="size-4" /></Button>}
+        <div className={roomSlug || showAll ? `md:flex md:items-start ${roomSlug || roomFiltersOpen ? "md:gap-6 lg:gap-8" : ""}` : ""}>
+        {(roomSlug || showAll) && <RoomCollectionFilters
+          fullCatalogue={showAll}
           options={roomOptions}
           availableMaterials={availableRoomMaterials}
           catalogMaterials={catalogMaterials}
@@ -542,7 +556,7 @@ function singularizeSub(s: string): string {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (gridCols === 4 ? 'md:grid-cols-3 lg:grid-cols-4' : 'lg:grid-cols-3') : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300`}
+          className={`grid min-w-0 flex-1 grid-cols-2 ${roomSlug ? (gridCols === 4 ? 'md:grid-cols-3 lg:grid-cols-4' : 'lg:grid-cols-3') : showAll && roomFiltersOpen ? 'md:grid-cols-3' : gridCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4 md:gap-6 transition-all duration-300 motion-reduce:transition-none`}
         >
           {renderedItems.map((item) => (
             <div

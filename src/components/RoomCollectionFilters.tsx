@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export type RoomFacet = "category" | "designer" | "leadTime" | "handmade" | "material";
+export type RoomFacet = "category" | "designer" | "leadTime" | "craft" | "handmade" | "material";
 export type RoomFacetValues = Record<RoomFacet, string | null>;
 export type RoomFacetOptions = Record<RoomFacet, string[]>;
 
@@ -13,14 +13,16 @@ const FACETS: { key: RoomFacet; label: string }[] = [
   { key: "category", label: "Categories" },
   { key: "designer", label: "Designers/Artists" },
   { key: "leadTime", label: "Lead Time" },
+  { key: "craft", label: "Craft Type" },
   { key: "handmade", label: "Handcrafted in" },
   { key: "material", label: "Materials" },
 ];
 
 export default function RoomCollectionFilters({
-  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange,
+  options, availableMaterials, catalogMaterials, values, onChange, onClear, open: openProp, onOpenChange, fullCatalogue = false,
 }: {
   open?: boolean;
+  fullCatalogue?: boolean;
   onOpenChange?: (open: boolean) => void;
   options: RoomFacetOptions;
   availableMaterials: Set<string>;
@@ -44,7 +46,7 @@ export default function RoomCollectionFilters({
         <X className="size-3" /> Clear All Filters {activeCount > 0 && `(${activeCount})`}
       </Button>
       <Accordion type="multiple" defaultValue={[]} className="w-full">
-        {FACETS.map(({ key, label }) => (
+        {FACETS.filter(({ key }) => fullCatalogue ? key !== "leadTime" : key !== "craft").map(({ key, label }) => (
           <AccordionItem key={key} value={key} className="border-border">
             <AccordionTrigger className="py-3 text-left font-body text-[11px] font-medium uppercase tracking-wider text-foreground hover:no-underline [&>svg]:size-3">
               {label}{values[key] && <span className="ml-auto mr-2 size-1.5 rounded-full bg-primary" />}
@@ -54,7 +56,7 @@ export default function RoomCollectionFilters({
                 <label key={value} className={`flex items-start gap-2 py-1.5 font-body text-xs ${key === "material" && !availableMaterials.has(value) ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer text-foreground"}`}>
                   <Checkbox checked={values[key] === value} disabled={key === "material" && !availableMaterials.has(value)} onCheckedChange={() => onChange(key, values[key] === value ? null : value)} className="mt-0.5 size-4 rounded-none" />
                   <span className="min-w-0 flex-1 break-words">{value}</span>
-                  {key === "material" && !availableMaterials.has(value) && <span className="shrink-0 text-[9px] text-muted-foreground">{catalogMaterials.has(value) ? "None in this room" : "No pieces yet"}</span>}
+                   {key === "material" && !availableMaterials.has(value) && <span className="shrink-0 text-[9px] text-muted-foreground">{catalogMaterials.has(value) ? fullCatalogue ? "None in this selection" : "None in this room" : "No pieces yet"}</span>}
                 </label>
               )) : <p className="py-2 font-body text-xs text-muted-foreground">No catalogued options</p>}
             </AccordionContent>
@@ -75,11 +77,11 @@ export default function RoomCollectionFilters({
           {content}
         </SheetContent>
       </Sheet>
-      <aside aria-label="Collection filters" className={`hidden shrink-0 md:block ${open ? "w-48 lg:w-56" : "w-10"}`}>
+      <aside id={fullCatalogue ? "catalogue-filters" : undefined} aria-label="Collection filters" aria-hidden={fullCatalogue && !open ? true : undefined} className={`hidden shrink-0 overflow-hidden transition-[width] duration-300 motion-reduce:transition-none md:block ${open ? "w-48 lg:w-56" : fullCatalogue ? "w-0" : "w-10"}`}>
         <div className="sticky top-[calc(var(--header-h)+1rem)] max-h-[calc(100vh-var(--header-h)-2rem)] overflow-y-auto pr-2">
-          <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3 border border-border">
+          {!fullCatalogue && <Button variant="ghost" size="icon-sm" onClick={() => setOpen(!open)} title={open ? "Collapse filters" : "Expand filters"} aria-label={open ? "Collapse filters" : "Expand filters"} className="mb-3 border border-border">
             {open ? <ChevronRight className="rotate-180" /> : <SlidersHorizontal />}
-          </Button>
+          </Button>}
           {open && content}
         </div>
       </aside>
