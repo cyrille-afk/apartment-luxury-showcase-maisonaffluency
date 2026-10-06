@@ -37,7 +37,7 @@ import diningRoomAmbient from "@/assets/dining-room.jpg";
 import intimateDiningAmbient from "@/assets/intimate-dining.jpg";
 import calmingBedroomAmbient from "@/assets/master-suite.jpg";
 import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
-import { useDbCuratorPicks, useMasterCatalogCount } from "@/hooks/useDbCuratorPicks";
+import { useMasterCatalogRawCount } from "@/hooks/useDbCuratorPicks";
 import { useRoomMenuCounts } from "@/hooks/useRoomMenuCounts";
 import type { RoomSlug } from "@/lib/roomCategories";
 import { preloadImage } from "@/lib/curatorPickPreload";
