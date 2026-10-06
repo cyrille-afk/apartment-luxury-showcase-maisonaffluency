@@ -343,6 +343,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
 const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
+  const { data: masterCatalogCount } = useMasterCatalogCount();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const destination = useShippingDestination();
