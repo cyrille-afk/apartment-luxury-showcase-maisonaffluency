@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Crop the 16 supplied Atelier Pendhapa finishes, add shared library records and Anemos links, and verify public/Trade display.
+- [x] Crop the 16 supplied Atelier Pendhapa finishes, add shared library records and Anemos links; all 16 images verified on public, Trade and Material Library pages without runtime errors.
 
 - [x] Default Full Catalogue to closed filters and four columns; live open/close, density-change recovery, refresh, aligned edges and no overflow verified.
 
