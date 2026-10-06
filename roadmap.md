@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Replace legacy communication addresses with live concierge/trade addresses, deploy affected email services, and verify contacts without sending test emails.
+- [x] Replace legacy communication addresses with live concierge/trade addresses; seven email services deployed and checked, seven tests pass, displayed links verified without sending test emails; account identities unchanged.
 
 - [x] Restore the Full Catalogue collapsible filter drawer with five groups; live selection/clearing and three/four-column hide/show verified, six loading regressions pass.
 
