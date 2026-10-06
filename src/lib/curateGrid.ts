@@ -104,10 +104,12 @@ function measure(url: string): Promise<Tone | undefined> {
 }
 
 /** Returns a tone lookup for image URLs, measured once and cached locally. */
-export function useImageTones(urls: string[]): Record<string, Tone> {
+export function useImageTones(urls: string[], options?: { cachedOnly?: boolean }): Record<string, Tone> {
   const key = urls.join("|");
+  const cachedOnly = options?.cachedOnly ?? false;
   const [, bump] = useState(0);
   useEffect(() => {
+    if (cachedOnly) return;
     let alive = true;
     const todo = urls.filter((u) => u && !(u in mem));
     if (!todo.length) return;
@@ -115,6 +117,6 @@ export function useImageTones(urls: string[]): Record<string, Tone> {
       .then(() => { persist(); if (alive) bump((x) => x + 1); });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, cachedOnly]);
   return mem;
 }
