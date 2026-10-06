@@ -282,6 +282,26 @@ function GalleryTour() {
           )}
         </div>
       </div>
+      <div aria-label="About the Maison Affluency residence" className="mx-auto mt-9 max-w-[76ch] space-y-5 px-2 font-body text-base font-light leading-relaxed text-foreground md:mt-12 md:space-y-6 md:px-0 md:leading-7">
+        <p className="text-lg leading-relaxed">
+          In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows.
+        </p>
+        <p>
+          This is in this neighborhood, which blends architectural opulence with the historic, lush greenery of the UNESCO-listed Singapore Botanic Gardens that Maison Affluency unveils its first residence.
+        </p>
+        <p>
+          Located on the 16th floor of a condominium, this large private residence, high above the city, offers seven curated rooms in which collectible design and fine furniture are lived with, not displayed.
+        </p>
+        <p>
+          Each room is composed as a complete interior: bespoke seating and hand-knotted rugs, sculptural lighting in alabaster and hand-blown glass, marquetry desks, artist ceramics and re-editions of twentieth-century masterworks, all made by the ateliers we represent.
+        </p>
+        <p>
+          The pages that follow document the residence room by room. Every piece is listed with its maker, materials and dimensions, and its recommended retail price in Singapore dollars. Pieces marked Price upon Request are unique works, custom commissions or made-to-measure editions quoted individually.
+        </p>
+        <p>
+          Every piece can be ordered in bespoke dimensions, finishes and fabrics. Our advisors accompany architects, interior designers and private collectors from selection through white-glove installation, worldwide.
+        </p>
+      </div>
     </motion.div>
   );
 }
