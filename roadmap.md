@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Reused ten existing Pendhapa marble swatches for Deepah without duplicates; all ten photos verified on public and Trade pages without runtime errors.
+
 - [x] Crop the 16 supplied Atelier Pendhapa finishes, add shared library records and Anemos links; all 16 images verified on public, Trade and Material Library pages without runtime errors.
 
 - [x] Default Full Catalogue to closed filters and four columns; live open/close, density-change recovery, refresh, aligned edges and no overflow verified.
