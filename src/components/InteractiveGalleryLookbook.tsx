@@ -287,16 +287,10 @@ function GalleryTour() {
         className="mx-auto mt-12 w-full max-w-[1216px] space-y-7 px-3 font-display text-lg font-normal leading-relaxed text-[#1a1a1a] md:mt-16 md:space-y-8 md:px-8 md:text-xl md:leading-relaxed"
       >
         <p>
-          In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows.
+          In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows. It is within this neighborhood, which blends architectural opulence with the historic, lush greenery of the UNESCO-listed Singapore Botanic Gardens that Maison Affluency unveils its first residence.
         </p>
         <p>
-          It is within this neighborhood, which blends architectural opulence with the historic, lush greenery of the UNESCO-listed Singapore Botanic Gardens that Maison Affluency unveils its first residence.
-        </p>
-        <p>
-          Located on the 16th floor of a condominium, this large private residence, high above the city, offers seven curated rooms in which collectible design and fine furniture are lived with, not displayed.
-        </p>
-        <p>
-          Each room is composed as a complete interior: bespoke seating and hand-knotted rugs, sculptural lighting in alabaster and hand-blown glass, marquetry desks, artist ceramics and re-editions of twentieth-century masterworks, all made by the ateliers we represent.
+          Located on the 16th floor of a condominium, this large private residence, high above the city, offers seven curated rooms in which collectible design and fine furniture are lived with, not displayed. Each room is composed as a complete interior: bespoke seating and hand-knotted rugs, sculptural lighting in alabaster and hand-blown glass, marquetry desks, artist ceramics and re-editions of twentieth-century masterworks, all made by the ateliers we represent.
         </p>
         <p>
           The pages that follow document the residence room by room. Every piece is listed with its maker, materials and dimensions, and its recommended retail price in Singapore dollars. Pieces marked Price upon Request are unique works, custom commissions or made-to-measure editions quoted individually.
