@@ -282,8 +282,11 @@ function GalleryTour() {
           )}
         </div>
       </div>
-      <div aria-label="About the Maison Affluency residence" className="mx-auto mt-10 max-w-5xl space-y-7 px-4 font-display text-lg font-normal leading-loose text-foreground md:mt-14 md:space-y-8 md:px-0 md:text-xl md:leading-loose">
-        <p className="text-xl leading-relaxed md:text-2xl md:leading-relaxed">
+      <div
+        aria-label="About the Maison Affluency residence"
+        className="mx-auto mt-10 max-w-5xl space-y-7 px-4 font-display text-lg font-normal leading-relaxed text-[#1a1a1a] md:mt-14 md:space-y-8 md:px-0 md:text-xl md:leading-relaxed"
+      >
+        <p>
           In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows.
         </p>
         <p>
