@@ -214,6 +214,7 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
+  const { data: rawCatalogCount } = useMasterCatalogRawCount();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const destination = useShippingDestination();
@@ -459,7 +460,8 @@ function singularizeSub(s: string): string {
                 {roomSlug || showAll ? (
                   <>
                     Showing {filtered.length} curated {filtered.length === 1 ? "piece" : "pieces"} out of{" "}
-                    {masterCatalogCount || allProducts.length} total available in the master catalogue
+                    {masterCatalogCount || allProducts.length} published pieces currently browseable
+                    {rawCatalogCount ? ` from ${rawCatalogCount} total` : ""} in the master catalogue
                   </>
                 ) : (
                   <>
