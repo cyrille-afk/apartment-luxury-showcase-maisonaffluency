@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
           Date.now() - created > 15 * 60 * 1000
         ) return deny(403, 'Forbidden')
       } else if (templateName === 'manual-shipping-quote-request' && callerId) {
-        recipientEmail = 'concierge@myaffluency.com'
+        recipientEmail = 'concierge@maisonaffluency.com'
       } else {
         return deny(callerId ? 403 : 401, callerId ? 'Forbidden' : 'Unauthorized')
       }

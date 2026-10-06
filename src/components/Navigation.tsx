@@ -344,11 +344,11 @@ const contactOptions = [
     }
   },
   {
-    label: "concierge@myaffluency.com",
+    label: "concierge@maisonaffluency.com",
     icon: Mail,
     action: () => {
       trackCTA.email("Navigation");
-      window.location.href = 'mailto:concierge@myaffluency.com';
+      window.location.href = 'mailto:concierge@maisonaffluency.com';
     }
   },
 ];

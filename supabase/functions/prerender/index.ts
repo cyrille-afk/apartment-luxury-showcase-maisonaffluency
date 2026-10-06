@@ -292,7 +292,7 @@ Deno.serve(async (req) => {
 
       <h2>Contact</h2>
       <p>
-        Email: <a href="mailto:concierge@myaffluency.com">concierge@myaffluency.com</a><br/>
+        Email: <a href="mailto:concierge@maisonaffluency.com">concierge@maisonaffluency.com</a><br/>
         Phone: <a href="tel:+6591393850">+65 9139 3850</a><br/>
         Open Monday–Saturday, 10 AM – 7 PM
       </p>
@@ -306,7 +306,7 @@ Deno.serve(async (req) => {
       "description": description,
       "url": SITE,
       "telephone": "+6591393850",
-      "email": "concierge@myaffluency.com",
+      "email": "concierge@maisonaffluency.com",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "SG",

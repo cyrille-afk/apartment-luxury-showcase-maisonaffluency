@@ -123,7 +123,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
           form.message ? `\nMessage: ${form.message}` : '',
         ].filter(Boolean).join('\n')
       );
-      window.location.href = `mailto:concierge@myaffluency.com?subject=${subject}&body=${mailBody}`;
+      window.location.href = `mailto:concierge@maisonaffluency.com?subject=${subject}&body=${mailBody}`;
 
       // Track quote request in GA4
       trackEngagement.quoteRequest(productName || "Unknown", designerName || "Unknown");

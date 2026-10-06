@@ -459,8 +459,8 @@ const TradeLayout = () => {
           </p>
           <p className="font-body text-xs text-muted-foreground">
             Questions? Contact us at{" "}
-            <a href="mailto:concierge@myaffluency.com" className="underline underline-offset-4">
-              concierge@myaffluency.com
+            <a href="mailto:concierge@maisonaffluency.com" className="underline underline-offset-4">
+              concierge@maisonaffluency.com
             </a>
           </p>
         </div>
@@ -476,8 +476,8 @@ const TradeLayout = () => {
           <p className="font-body text-sm text-muted-foreground mb-6">
             Unfortunately, your trade application was not approved at this time. Please contact us for more information.
           </p>
-          <a href="mailto:concierge@myaffluency.com" className="font-body text-sm text-foreground underline underline-offset-4">
-            concierge@myaffluency.com
+          <a href="mailto:concierge@maisonaffluency.com" className="font-body text-sm text-foreground underline underline-offset-4">
+            concierge@maisonaffluency.com
           </a>
         </div>
       </div>

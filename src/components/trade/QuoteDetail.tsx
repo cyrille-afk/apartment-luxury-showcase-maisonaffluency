@@ -5355,7 +5355,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 const { error } = await supabase.functions.invoke("send-transactional-email", {
                   body: {
                     templateName: "manual-shipping-quote-request",
-                    recipientEmail: "concierge@myaffluency.com",
+                    recipientEmail: "concierge@maisonaffluency.com",
                     idempotencyKey: `manual-ship-${quoteNumber}-${it.id}-${Date.now()}`,
                     
                     templateData: {

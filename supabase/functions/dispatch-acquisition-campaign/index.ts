@@ -104,7 +104,7 @@ function renderTemplateA(lead: Lead, _designers: string, link = `${SITE}/trade-p
     `Your studio&rsquo;s unique onboarding token and priority access gateway have been initialized here:`,
     `<a href="${esc(link)}" style="display:inline-block;padding:13px 26px;background:#1A1A1A;color:#FAF9F6;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Bespoke Onboarding Access Key</a>`,
     `We look forward to establishing an elite procurement standard for your global teams.`,
-    `Warm regards,<br />Cyrille Delval<br />Founder &amp; Managing Director, Maison Affluency<br />Singapore, District 9 | <a href="mailto:concierge@myaffluency.com" style="color:#1A1A1A;">concierge@myaffluency.com</a>`,
+    `Warm regards,<br />Cyrille Delval<br />Founder &amp; Managing Director, Maison Affluency<br />Singapore, District 9 | <a href="mailto:concierge@maisonaffluency.com" style="color:#1A1A1A;">concierge@maisonaffluency.com</a>`,
   ]);
 }
 

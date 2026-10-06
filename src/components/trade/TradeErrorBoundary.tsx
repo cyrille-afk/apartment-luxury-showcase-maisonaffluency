@@ -57,8 +57,8 @@ class TradeErrorBoundary extends Component<Props, State> {
         </div>
         <p className="font-body text-xs text-muted-foreground mt-16">
           Persistent issues?{" "}
-          <a href="mailto:concierge@myaffluency.com" className="underline underline-offset-4 hover:text-foreground transition-colors">
-            concierge@myaffluency.com
+          <a href="mailto:concierge@maisonaffluency.com" className="underline underline-offset-4 hover:text-foreground transition-colors">
+            concierge@maisonaffluency.com
           </a>
         </p>
       </div>
