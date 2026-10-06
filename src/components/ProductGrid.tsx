@@ -562,7 +562,7 @@ function singularizeSub(s: string): string {
               onFocus={() => { prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title)); setHoveredIdx(idx); }}
               onTouchStart={() => prefetchPublicProductPage(queryClient, undefined, item.pick.slug || designerSlugify(item.pick.title))}
             >
-              <div className={`relative w-full aspect-square overflow-hidden ${roomSlug ? "bg-[hsl(var(--product-canvas))]" : "bg-[hsl(var(--collection-card-canvas))]"}`}>
+              <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--product-canvas))]">
                 <img
                   {...cldResponsiveImg(item.pick.image, {
                     widths: [300, 400, 600, 800],
