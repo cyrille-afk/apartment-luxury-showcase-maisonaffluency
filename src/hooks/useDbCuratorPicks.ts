@@ -204,3 +204,22 @@ export function useMasterCatalogCount() {
   });
 }
 
+/**
+ * Raw backend total of the master catalogue (673 today), including pieces from
+ * unpublished / trade-only makers that visitors cannot browse. Read through a
+ * security-definer RPC because RLS limits the client head-count to published
+ * rows — see useMasterCatalogCount for the browseable figure.
+ */
+export function useMasterCatalogRawCount() {
+  return useQuery({
+    queryKey: ["master-catalog-raw-count"] as const,
+    staleTime: 30 * 60_000,
+    gcTime: 60 * 60_000,
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await (supabase.rpc as any)("master_catalogue_raw_count");
+      if (error) throw error;
+      return typeof data === "number" ? data : Number(data) || 0;
+    },
+  });
+}
+
