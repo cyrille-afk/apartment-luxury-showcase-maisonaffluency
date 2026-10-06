@@ -242,9 +242,9 @@ function GalleryTour() {
 
   return (
     <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-[1500px] px-4 pb-12 pt-7 md:px-10 md:pb-16 md:pt-9">
-      <div className="mx-auto mb-7 max-w-6xl text-center md:mb-9">
-        <p className="font-body text-xs font-bold uppercase tracking-[0.28em] text-muted-foreground">Maison Affluency · Singapore</p>
-        <p className="mx-auto mt-3 w-full text-center font-body text-[11px] leading-relaxed tracking-[0.08em] text-muted-foreground md:whitespace-nowrap">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship</p>
+      <div className="mx-auto mb-10 mt-8 max-w-6xl text-center md:mb-14 md:mt-10">
+        <p className="font-display text-sm font-normal uppercase tracking-[0.35em] text-foreground md:text-base">Maison Affluency · Singapore</p>
+        <p className="mx-auto mt-5 w-full text-center font-body text-[11px] font-light leading-relaxed tracking-[0.12em] text-muted-foreground md:whitespace-nowrap">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship</p>
       </div>
       <div className="w-full bg-muted/30 p-3 md:p-8">
         <div className="relative mx-auto aspect-video w-full max-w-6xl overflow-hidden bg-foreground">
@@ -284,7 +284,7 @@ function GalleryTour() {
       </div>
       <div
         aria-label="About the Maison Affluency residence"
-        className="mx-auto mt-10 max-w-5xl space-y-7 px-4 font-display text-lg font-normal leading-relaxed text-[#1a1a1a] md:mt-14 md:space-y-8 md:px-0 md:text-xl md:leading-relaxed"
+        className="mx-auto mt-12 w-full max-w-[1216px] space-y-7 px-3 font-display text-lg font-normal leading-relaxed text-[#1a1a1a] md:mt-16 md:space-y-8 md:px-8 md:text-xl md:leading-relaxed"
       >
         <p>
           In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows.
@@ -674,10 +674,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
         </h2>
       </header>
 
-      {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto max-w-[1280px] border-y border-border/60 py-1 md:py-2">
-        <div className="flex min-h-9 snap-x snap-mandatory items-center gap-7 overflow-x-auto scroll-smooth whitespace-nowrap px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-9 md:px-6">
+      {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto mt-6 max-w-[1500px] border-y border-border/60 px-4 py-4 md:mt-8 md:px-10 md:py-5">
+        <div className="flex min-h-10 snap-x snap-mandatory items-center gap-9 overflow-x-auto scroll-smooth whitespace-nowrap px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-10 lg:gap-12">
           {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-9 shrink-0 snap-start rounded-none border-b px-0 font-body text-[10px] uppercase tracking-[0.24em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-10 shrink-0 snap-start rounded-none border-b px-1 pb-2 pt-0 font-body text-[11px] uppercase tracking-[0.3em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
               {item.label}
             </Button>
           ))}
