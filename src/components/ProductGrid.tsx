@@ -439,7 +439,7 @@ function singularizeSub(s: string): string {
   return (
     <>
     <section ref={gridRef} id="product-grid" className={`bg-background scroll-header-offset ${compactTop ? "pt-4 pb-12 md:pb-16" : "py-12 md:py-16"}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className={`${roomSlug ? "max-w-7xl" : "max-w-[1500px]"} mx-auto px-4 md:px-8`}>
         {/* Breadcrumbs */}
         {crumbs.length > 1 && <Breadcrumbs items={crumbs} className="mb-4" />}
         {/* Header */}
@@ -511,9 +511,9 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
-            {roomSlug || (showAll && !isActive) ? (
+            {roomSlug ? (
               <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
-            ) : (
+            ) : showAll && !isActive ? null : (
             <button
               onClick={handleClearFilter}
               className="flex items-center gap-1.5 px-5 py-2 rounded-full border border-[hsl(var(--gold))] bg-white shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] font-body text-xs uppercase tracking-[0.15em] text-foreground transition-all duration-300"
