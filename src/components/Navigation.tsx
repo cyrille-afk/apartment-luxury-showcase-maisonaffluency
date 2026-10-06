@@ -240,13 +240,19 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
    <div className="relative flex min-h-[470px] items-start overflow-visible bg-[hsl(var(--collection-card-canvas))]">
      <div className="w-52 shrink-0 self-stretch border-r border-border/60 py-6 pl-6 pr-4">
       <div className="flex flex-col">
-        <button type="button" onClick={onFullCatalogue} className="group flex w-full flex-col items-start rounded-none px-0 py-1 text-left">
-          <span className="font-body text-xs font-extrabold uppercase tracking-widest text-foreground transition-opacity group-hover:opacity-80">All Categories</span>
-          <span className="mt-0.5 font-body text-[11px] tracking-wide text-muted-foreground transition-opacity group-hover:opacity-80">
+        <button
+          type="button"
+          onClick={onFullCatalogue}
+          className="group -mx-3 -my-2 flex w-[calc(100%+1.5rem)] flex-col items-start rounded-none px-3 py-3 text-left transition-colors duration-200 hover:bg-[hsl(var(--accent))]/40 focus-visible:bg-[hsl(var(--accent))]/40 focus-visible:outline-none"
+        >
+          <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground transition-colors group-hover:text-primary">
+            All Categories
+          </span>
+          <span className="mt-1 font-body text-[10px] italic tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">
             Full Catalogue{typeof rawCatalogCount === "number" ? ` (${rawCatalogCount})` : ""}
           </span>
         </button>
-        <div className="mb-6 mt-4 border-b border-border" />
+        <div className="mb-6 mt-5 border-b border-border/50" />
         <div className="mb-6 font-body text-xs font-bold uppercase tracking-widest text-muted-foreground">Shop By Room</div>
         <div className="flex flex-col">
           {roomFlyouts[room]?.map((link, index) => {
