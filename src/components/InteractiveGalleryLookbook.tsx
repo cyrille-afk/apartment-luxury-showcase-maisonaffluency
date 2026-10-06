@@ -242,7 +242,7 @@ function GalleryTour() {
 
   return (
     <motion.div key="tour" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto max-w-[1500px] px-4 pb-12 pt-7 md:px-10 md:pb-16 md:pt-9">
-      <div className="mx-auto mb-10 mt-8 max-w-6xl text-center md:mb-14 md:mt-10">
+      <div className="mx-auto mb-10 mt-4 max-w-6xl text-center md:mb-14 md:mt-5">
         <p className="font-display text-sm font-normal uppercase tracking-[0.35em] text-foreground md:text-base">Maison Affluency · Singapore</p>
         <p className="mx-auto mt-5 w-full text-center font-body text-[11px] font-light leading-relaxed tracking-[0.12em] text-muted-foreground md:whitespace-nowrap">A private walkthrough of collectible design, bespoke interiors and artisan craftsmanship</p>
       </div>
@@ -669,18 +669,20 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   return (
     <section aria-label="Interactive Gallery" className={`bg-background text-foreground ${discoveryRoom ? "pb-4" : "pb-16"}`}>
       <header className={`flex items-center justify-center px-6 text-center ${discoveryRoom ? "min-h-20 md:min-h-14 pb-4 pt-7 md:pb-1.5 md:pt-3.5" : "pt-6 pb-2 md:pt-5 md:pb-1.5"}`}>
-        <h2 className={`font-body text-[9px] font-medium uppercase tracking-[0.25em] text-muted-foreground ${discoveryRoom ? "md:translate-y-px" : ""}`}>
+        <h2 className={`font-body text-[11px] font-medium uppercase tracking-[0.25em] text-foreground/75 md:text-xs ${discoveryRoom ? "md:translate-y-px" : ""}`}>
           {activeTitle}
         </h2>
       </header>
 
       {!discoveryRoom && <nav aria-label="Gallery timeline" className="mx-auto mt-6 max-w-[1500px] border-y border-border/60 px-4 py-4 md:mt-8 md:px-10 md:py-5">
-        <div className="flex min-h-10 snap-x snap-mandatory items-center gap-9 overflow-x-auto scroll-smooth whitespace-nowrap px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:gap-10 lg:gap-12">
-          {ribbonItems.map((item) => (
-            <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-10 shrink-0 snap-start rounded-none border-b px-1 pb-2 pt-0 font-body text-[11px] uppercase tracking-[0.3em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
-              {item.label}
-            </Button>
-          ))}
+        <div className="flex min-h-10 snap-x snap-mandatory overflow-x-auto scroll-smooth whitespace-nowrap px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex w-max items-center gap-9 md:gap-10 lg:gap-12">
+            {ribbonItems.map((item) => (
+              <Button key={item.key} type="button" variant="ghost" onClick={item.onClick} aria-current={item.active ? "page" : undefined} className={`h-10 shrink-0 snap-start rounded-none border-b px-1 pb-2 pt-0 font-body text-[11px] uppercase tracking-[0.3em] ${item.active ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"}`}>
+                {item.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </nav>}
 
