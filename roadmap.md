@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Crop Viola Calacatta marble and add its Pendhapa library entry and Deepah finish link; photo verified on public and Trade pages without runtime errors.
+
 - [x] Crop Natural teak, Dark teak and Black teak; add three Pendhapa library entries and Deepah links without duplicates; verify all photos on public and Trade pages.
 
 - [x] Reused ten existing Pendhapa marble swatches for Deepah without duplicates; all ten photos verified on public and Trade pages without runtime errors.
