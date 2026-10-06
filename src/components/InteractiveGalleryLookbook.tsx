@@ -282,12 +282,12 @@ function GalleryTour() {
           )}
         </div>
       </div>
-      <div aria-label="About the Maison Affluency residence" className="mx-auto mt-9 max-w-[76ch] space-y-5 px-2 font-body text-base font-light leading-relaxed text-foreground md:mt-12 md:space-y-6 md:px-0 md:leading-7">
-        <p className="text-lg leading-relaxed">
+      <div aria-label="About the Maison Affluency residence" className="mx-auto mt-10 max-w-5xl space-y-7 px-4 font-display text-lg font-normal leading-loose text-foreground md:mt-14 md:space-y-8 md:px-0 md:text-xl md:leading-loose">
+        <p className="text-xl leading-relaxed md:text-2xl md:leading-relaxed">
           In Singapore, District 10 stands as the pinnacle of Prestige, an affluent residential enclave where a dense concentration of foreign embassies and ultra-luxury high-rises seamlessly coexist with the sprawling of estates of Good Class Bungalows.
         </p>
         <p>
-          This is in this neighborhood, which blends architectural opulence with the historic, lush greenery of the UNESCO-listed Singapore Botanic Gardens that Maison Affluency unveils its first residence.
+          It is within this neighborhood, which blends architectural opulence with the historic, lush greenery of the UNESCO-listed Singapore Botanic Gardens that Maison Affluency unveils its first residence.
         </p>
         <p>
           Located on the 16th floor of a condominium, this large private residence, high above the city, offers seven curated rooms in which collectible design and fine furniture are lived with, not displayed.
