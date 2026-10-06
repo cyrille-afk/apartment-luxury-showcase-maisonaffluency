@@ -26,7 +26,7 @@ import { getTradeProgramShareUrl, TRADE_PROGRAM_SHARE_IMAGE } from "@/lib/tradeS
 // verified to serve Trade Program tags to crawlers (see src/lib/tradeShareUrl.ts).
 const TRADE_PROGRAM_SHARE_URL = getTradeProgramShareUrl();
 const TRADE_PROGRAM_HERO_IMAGE = cloudinaryUrl("dining-room_ey0bu5", { width: 800, quality: "auto:good" });
-const TRADE_PROGRAM_CTA_IMAGE = cloudinaryUrl("v1773968016/ImgWeb_S25_PDW_Newsletter001_Article_03_1120x600_image002_Factory-_C2_A9GregSevaz_0_m5hi1i", { width: 1200, crop: "limit", quality: "auto:good", gravity: "auto" });
+const TRADE_PROGRAM_CTA_IMAGE = cloudinaryUrl("v1773968016/ImgWeb_S25_PDW_Newsletter001_Article_03_1120x600_image002_Factory-_C2_A9GregSevaz_0_m5hi1i", { width: 1200, crop: "limit", quality: "auto:good" });
 
 const tradeApplicationSchema = z.object({
   email: z.string().trim().email().max(254),
