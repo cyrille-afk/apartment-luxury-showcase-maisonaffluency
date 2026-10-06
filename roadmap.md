@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] Replace legacy communication addresses with live concierge/trade addresses; seven email services deployed and checked, seven tests pass, displayed links verified without sending test emails; account identities unchanged.
-- [ ] Automatically copy concierge/trade app emails to Cyrille and Gregoire; verify recipient safety, retry behaviour and deploy.
+- [x] Automatically copy concierge/trade app emails to Cyrille and Gregoire; nine tests passed, recipient suppression and stable retry keys verified, shared queue worker deployed and live-checked without test sends.
 
 - [x] Restore the Full Catalogue collapsible filter drawer with five groups; live selection/clearing and three/four-column hide/show verified, six loading regressions pass.
 
