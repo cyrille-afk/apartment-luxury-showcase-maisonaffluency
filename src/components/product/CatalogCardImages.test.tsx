@@ -7,11 +7,11 @@ describe("catalogue alternate readiness", () => {
   const props = { primary: "/primary.jpg", alternate: "/alternate.jpg", alt: "Chair", sizes: "25vw", room: false };
   it("preloads the hidden image on mount and gates swaps on successful decoding", async () => {
     const decode = vi.fn().mockResolvedValue(undefined);
-    vi.spyOn(HTMLImageElement.prototype, "decode").mockImplementation(decode);
+    Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: decode });
     const { container } = render(<CatalogCardImages {...props} />);
     const images = container.querySelectorAll("img");
     expect(images).toHaveLength(2);
-    expect(images[1].loading).toBe("eager");
+    expect(images[1].getAttribute("loading")).toBe("eager");
     expect(images[1].getAttribute("fetchpriority")).toBe("low");
     expect(images[0].className).not.toContain("group-hover:opacity-0");
     Object.defineProperty(images[1], "naturalWidth", { value: 600 });
@@ -22,7 +22,7 @@ describe("catalogue alternate readiness", () => {
     expect(images[1].className).toContain("group-focus-visible:opacity-100");
   });
   it("keeps the primary visible on failed alternate decoding", async () => {
-    vi.spyOn(HTMLImageElement.prototype, "decode").mockRejectedValue(new Error("broken photo"));
+    Object.defineProperty(HTMLImageElement.prototype, "decode", { configurable: true, value: vi.fn().mockRejectedValue(new Error("broken photo")) });
     const { container } = render(<CatalogCardImages {...props} />);
     const images = container.querySelectorAll("img");
     fireEvent.load(images[1]);
