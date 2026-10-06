@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Restore the Full Catalogue collapsible filter drawer, five filter groups, clear control and adaptive three/four-column layout; verify live.
+- [x] Restore the Full Catalogue collapsible filter drawer with five groups; live selection/clearing and three/four-column hide/show verified, six loading regressions pass.
 
 - [x] Add 24-piece catalogue batches and decoded alternate-image hover swaps; six regression tests passed, full live scroll reached 589 current pieces, hover made no image request, filter reset and broken-image fallback verified.
 
