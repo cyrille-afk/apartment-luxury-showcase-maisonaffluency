@@ -187,17 +187,15 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
 
 /**
  * Total published picks in the master catalogue (before profile-only splits
- * and parent/child dedupe). Anonymous visitors read the count from the cached
- * manifest; signed-in trade users use a cheap head-count query.
+ * and parent/child dedupe). Always a cheap head-count against the public
+ * catalogue view — the cached manifest only carries the browsable subset.
  */
 export function useMasterCatalogCount() {
   return useQuery({
     queryKey: ["master-catalog-count"] as const,
-    staleTime: 10 * 60_000,
-    gcTime: 30 * 60_000,
+    staleTime: 30 * 60_000,
+    gcTime: 60 * 60_000,
     queryFn: async (): Promise<number> => {
-      const cachedCatalog = await getCachedCatalog();
-      if (cachedCatalog) return cachedCatalog.picks.length;
       const { count } = await supabase
         .from("designer_curator_picks_public" as any)
         .select("id", { count: "exact", head: true });
