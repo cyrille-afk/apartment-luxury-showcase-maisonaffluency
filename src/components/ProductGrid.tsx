@@ -478,7 +478,7 @@ function singularizeSub(s: string): string {
           </div>
           <div className="flex items-center gap-3">
             {/* Grid columns toggle — desktop only */}
-            {!roomSlug && <div className="hidden md:block">
+            {!roomSlug && !showAll && <div className="hidden md:block">
               <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -511,7 +511,7 @@ function singularizeSub(s: string): string {
               </Tooltip>
               </TooltipProvider>
             </div>}
-            {roomSlug ? (
+            {roomSlug || showAll ? (
               <GridDensityToggle value={gridCols} onChange={(next) => setGridCols(next)} />
             ) : showAll && !isActive ? null : (
             <button
