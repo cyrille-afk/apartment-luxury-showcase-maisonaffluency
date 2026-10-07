@@ -1520,6 +1520,13 @@ const PublicProductPageContent: React.FC = () => {
   const [creationOpen, setCreationOpen] = useState(false);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
   const productScrollRef = React.useRef<HTMLDivElement | null>(null);
+  // State mirror of the scroll region so the shrink listener re-attaches once
+  // the region mounts (it renders only after the product loads).
+  const [productScrollEl, setProductScrollEl] = useState<HTMLDivElement | null>(null);
+  const setProductScrollNode = React.useCallback((node: HTMLDivElement | null) => {
+    productScrollRef.current = node;
+    setProductScrollEl(node);
+  }, []);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
   // Never scroll when it's already (partly) visible — doing so pushed the
@@ -1611,7 +1618,9 @@ const PublicProductPageContent: React.FC = () => {
     let ticking = false;
     const measure = () => {
       ticking = false;
-      const y = productScrollRef.current?.scrollTop ?? window.scrollY;
+      // Read whichever surface actually scrolls (inner region on phones,
+      // window when the region is display:contents).
+      const y = Math.max(productScrollEl?.scrollTop ?? 0, window.scrollY);
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
       // expand again only right at the very top of the page.
@@ -1643,21 +1652,22 @@ const PublicProductPageContent: React.FC = () => {
       window.requestAnimationFrame(measure);
     };
     measure();
-    const scrollTarget = productScrollRef.current ?? window;
-    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    productScrollEl?.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
     window.addEventListener("touchmove", armExpansion, { passive: true });
     window.addEventListener("wheel", armExpansion, { passive: true });
     window.addEventListener("keydown", armExpansion);
     return () => {
-      scrollTarget.removeEventListener("scroll", onScroll);
+      productScrollEl?.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", armExpansion);
       window.removeEventListener("touchmove", armExpansion);
       window.removeEventListener("wheel", armExpansion);
       window.removeEventListener("keydown", armExpansion);
     };
 
-  }, []);
+  }, [productScrollEl]);
 
   // When the image collapses, the whole page shifts up by the height it lost.
   // Compensate the scroll offset by that delta so the designer name, product
@@ -2437,7 +2447,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <div ref={productScrollRef} data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
+        <div ref={setProductScrollNode} data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
         <main className="w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
