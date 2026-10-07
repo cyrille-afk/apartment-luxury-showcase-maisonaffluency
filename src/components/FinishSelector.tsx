@@ -1363,8 +1363,24 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!picked.top && selectedTopId !== topHit?.id && (topHit || photoLedFinishes)) setSelectedTopId(topHit?.id ?? null);
     const coverHit = hit(visibleCoverTiles);
     if (!picked.cover && selectedCoverId !== coverHit?.id && (coverHit || photoLedFinishes)) setSelectedCoverId(coverHit?.id ?? null);
+    // Third-or-later material dropdowns (e.g. Lacquer after Wood + Stone)
+    // follow the photo on screen exactly like the first two.
+    if (extraCategoryGroups.length > 0) {
+      setExtraSplitIds((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        extraCategoryGroups.forEach((g) => {
+          if (picked[`split:${g.key}`]) return;
+          const h = hit(g.tiles);
+          if (!h && !photoLedFinishes) return;
+          const id = h?.id ?? null;
+          if ((prev[g.key] ?? null) !== id) { next[g.key] = id; changed = true; }
+        });
+        return changed ? next : prev;
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGalleryIndex, fabrics, isOolMinibar, photoLedFinishes, frameTiles.length, drawerTiles.length]);
+  }, [currentGalleryIndex, fabrics, isOolMinibar, photoLedFinishes, frameTiles.length, drawerTiles.length, extraCategoryGroups.length]);
 
 
 
@@ -1380,7 +1396,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
     splitExtraKey?: string;
   }) => {
-    const axis = args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
+    const axis = args.splitExtraKey !== undefined ? `split:${args.splitExtraKey}` : args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
     const pictured = picturedMatches(args.tiles, axis);
     const headerNames = pictured.length > 1 ? pictured.map((f) => f.name).join(" · ") : args.selectedName;
     return (
