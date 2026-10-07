@@ -28,6 +28,10 @@ type Props = {
   onSelect: (instanceId: string) => void;
   onTransform: (instanceId: string, position: [number, number, number], rotation: [number, number, number]) => void;
   onDragStateChange: (dragging: boolean) => void;
+  /** When false the piece is display-only: no drag, no gizmos. Defaults to true. */
+  isEditable?: boolean;
+  /** Optional non-uniform scale; overrides `object.scale` when provided. */
+  scaleVector?: [number, number, number];
 };
 
 type LoadedMaps = {
@@ -245,7 +249,7 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector }: Props) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl } = useThree();
@@ -275,6 +279,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     onSelect(object.instanceId);
+    if (!isEditable) return;
     const hit = floorHit();
     if (!hit || !groupRef.current) return;
     offsetRef.current.set(
@@ -331,7 +336,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       }}
       position={[object.position[0], object.position[1] ?? 0, object.position[2]]}
       rotation={object.rotation}
-      scale={object.scale}
+      scale={scaleVector ?? object.scale}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
@@ -344,7 +349,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   return (
     <>
       {content}
-      {selected && groupNode && (
+      {isEditable && selected && groupNode && (
         <>
           {/* Floor-plane arrows: X / Z translation only. */}
           <TransformControls
