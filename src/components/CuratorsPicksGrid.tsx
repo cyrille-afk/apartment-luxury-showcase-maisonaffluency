@@ -162,7 +162,7 @@ const Card = memo(function Card({
             <p className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-sans text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--picks-fg))] antialiased transition-colors duration-300 ease-in-out hover:opacity-70">
               <span className="relative inline-block max-w-full pb-1 align-bottom">
                 {item.designer}
-                <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover/designer:scale-x-100 motion-reduce:transition-none" />
+                <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 group-hover/designer:scale-x-100 motion-reduce:transition-none" />
               </span>
             </p>
           )}
