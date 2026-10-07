@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add all eight existing lacquer swatches to Astra Dining Table without duplicates; verify public and Trade photos.
+- [x] Add all eight existing lacquer swatches to Astra Dining Table without duplicates; all photos verified on public and Trade pages.
 
 - [x] Crop Viola Calacatta marble and add its Pendhapa library entry and Deepah finish link; photo verified on public and Trade pages without runtime errors.
 
