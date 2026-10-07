@@ -1229,9 +1229,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const baseMaterial = axisMaterial(axisBaseLabel || woodLabel);
   const topMaterial = axisMaterial(topLabel);
   const splitByAxisMaterial = !!topFilter && !!woodFilter && !!baseMaterial && !!topMaterial && baseMaterial !== topMaterial;
+  // Base axis values that are all wood species (e.g. Oak / Teak) while the top
+  // axis names no wood: every non-wood swatch belongs to the top axis, so
+  // stone/ceramic finishes never fall into the wood (Frame) dropdown.
+  const WOOD_SPECIES = /\b(oak|teak|walnut|ash|wood|beech|maple|cherry|elm|mahogany|ebony|birch|pine|cedar|iroko|sapele)\b/i;
+  const baseAxisIsWood = !!woodFilter && !!topFilter
+    && (baseAxisOptions || []).filter((o) => o && o.trim()).length > 0
+    && (baseAxisOptions || []).filter((o) => o && o.trim()).every((o) => WOOD_SPECIES.test(o))
+    && !(topAxisOptions || []).some((o) => WOOD_SPECIES.test(o || ""));
   const topTilesRaw = topFilter
     ? allNonFabricTiles.filter((f) =>
-        (splitByAxisMaterial && f.category === topMaterial)
+        (baseAxisIsWood && f.category !== "Wood")
+        || (splitByAxisMaterial && f.category === topMaterial)
         || (topFilter(f.name) && (!splitByAxisMaterial || f.category !== baseMaterial))
         || isOolDrawerLeather(pickId, f.name))
     : [];
@@ -1482,7 +1491,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const baseAxisLabel = (() => {
     if (categoryGroups) return categoryGroups[0].label;
-    if (axisModeActive && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
+    if ((axisModeActive || baseAxisIsWood) && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
     const isTable = !!productTitle && /\btable\b/i.test(productTitle);
     const cats = visibleWoodTiles.map((t) => (t.category || "").trim().toLowerCase());
