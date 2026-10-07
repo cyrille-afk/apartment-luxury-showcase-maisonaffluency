@@ -71,3 +71,17 @@ describe("auto-raise flagged viewpoints", () => {
     expect(autoRaiseFlaggedNodes(scene, high).nodes).toEqual(high);
   });
 });
+
+describe("sideways shift for ceiling-stuck viewpoints", () => {
+  it("clears a tall door that raising cannot fix, and leaves clear paths unchanged", async () => {
+    const { autoShiftFlaggedNodes, autoRaiseFlaggedNodes } = await import("./customCameraPaths");
+    const tallDoor = { ...scene, architecturalAnchors: [{ type: "door" as const, position: [0, 1.5, 0] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: [1, 5, 0.5] as [number, number, number] }] };
+    const stuck = [{ position: [-2, 3.0, 0], target: [0, 0.6, 0] }, { position: [2, 3.0, 0], target: [0, 0.6, 0] }] as CustomPathNode[];
+    expect(autoRaiseFlaggedNodes(tallDoor, stuck).conflicts.length).toBeGreaterThan(0);
+    const r = autoShiftFlaggedNodes(tallDoor, stuck);
+    expect(r.conflicts).toEqual([]);
+    expect(r.nodes.every((n) => Math.abs(n.position[0]) <= 3.2 && Math.abs(n.position[2]) <= 2.6)).toBe(true);
+    const clear = [{ position: [-2, 2.4, -2], target: [0, 0.6, 0] }, { position: [2, 2.4, -2], target: [0, 0.6, 0] }] as CustomPathNode[];
+    expect(autoShiftFlaggedNodes(tallDoor, clear).nodes).toEqual(clear);
+  });
+});

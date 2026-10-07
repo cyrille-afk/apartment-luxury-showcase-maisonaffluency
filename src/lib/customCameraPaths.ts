@@ -190,3 +190,40 @@ export function autoRaiseFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
   }
   return { nodes: out, conflicts };
 }
+
+/**
+ * For viewpoints still flagged after raising (e.g. tall doors), nudge them sideways —
+ * perpendicular to the path direction, alternating sides with growing steps — accepting
+ * only moves that reduce the conflict count. Room-clamped; returns remaining conflicts.
+ */
+export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: CustomPathNode[], step = 0.15, maxIter = 30) {
+  const { width: W, length: L } = scene.roomDimensions;
+  const clampX = (x: number) => THREE.MathUtils.clamp(x, -W / 2 + 0.4, W / 2 - 0.4);
+  const clampZ = (z: number) => THREE.MathUtils.clamp(z, -L / 2 + 0.4, L / 2 - 0.4);
+  let out = nodes.map((n) => ({ position: [...n.position] as Vec3, target: [...n.target] as Vec3 }));
+  let conflicts = checkPathClearance(scene, buildCustomCinematicPath(scene, out));
+  const score = (cs: ClearanceConflict[]) => cs.reduce((s, c) => s + 1000 + (c.toPct - c.fromPct), 0);
+  let best = score(conflicts);
+  for (let it = 0; it < maxIter && conflicts.length && out.length > 1; it++) {
+    const last = out.length - 1;
+    const magnitude = step * (1 + Math.floor(it / 2));
+    const side = it % 2 === 0 ? 1 : -1;
+    // Shift every flagged viewpoint together, perpendicular to the local path direction,
+    // so multi-node and straight two-node paths can both escape an obstacle. Keep growing
+    // the offset until the path fully exits the obstacle — partial moves rarely shrink the
+    // flagged span, so only a genuinely better score is kept, but the search continues.
+    const trial = out.map((n, i) => {
+      const pct = (i / last) * 100;
+      if (!conflicts.some((c) => pct >= c.fromPct - 100 / last && pct <= c.toPct + 100 / last)) return n;
+      const prev = out[Math.max(0, i - 1)].position, next = out[Math.min(last, i + 1)].position;
+      const dx = next[0] - prev[0], dz = next[2] - prev[2];
+      const len = Math.hypot(dx, dz) || 1;
+      const p = n.position;
+      return { ...n, position: [+clampX(p[0] + (-dz / len) * side * magnitude).toFixed(3), p[1], +clampZ(p[2] + (dx / len) * side * magnitude).toFixed(3)] as Vec3 };
+    });
+    const c = checkPathClearance(scene, buildCustomCinematicPath(scene, trial));
+    const s = score(c);
+    if (s < best) { out = trial; conflicts = c; best = s; }
+  }
+  return { nodes: out, conflicts };
+}
