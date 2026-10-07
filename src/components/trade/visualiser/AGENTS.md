@@ -1,0 +1,1 @@
+- AI layout pipeline: `AICuratedSceneSchema` (src/types/aiCuratedScene.ts) is the single contract between the layout generator and `AICuratedEnvironment`; financialSummary is always recomputed from curatedAssets via `summarise` so the ledger can't drift.
