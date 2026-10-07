@@ -2,9 +2,11 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Clapperboard, Copy, Film, Link2, Loader2, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
+import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { useCinematicPath } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
+import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel } from "@/lib/cinematicPlayback";
+import { Slider } from "@/components/ui/slider";
 import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -172,9 +174,26 @@ const TradeAILayoutStudio = () => {
   }, []);
 
   const [walking, setWalking] = useState(false);
+  const [walkActive, setWalkActive] = useState(false);
+  const [walkTime, setWalkTime] = useState(0);
+  const [walkSpeed, setWalkSpeed] = useState(1);
+  const [walkSeek, setWalkSeek] = useState({ id: 0, time: 0 });
   const [exporting, setExporting] = useState(false);
   const cinematic = useCinematicPath(scene);
-  useEffect(() => { setWalking(false); }, [cinematic]);
+  const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
+  useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [cinematic]);
+  const seekWalk = (time: number) => {
+    setWalkTime(time);
+    setWalkSeek((s) => ({ id: s.id + 1, time }));
+  };
+  const startWalk = () => {
+    setSelectedId(null);
+    seekWalk(0);
+    setWalkActive(true);
+    setWalking(true);
+  };
+  const stopWalk = () => { setWalking(false); setWalkActive(false); setWalkTime(0); };
+  const finishWalk = useCallback(() => { setWalking(false); }, []);
   const exportVideo = async () => {
     if (!scene || !cinematic) return;
     setExporting(true);
@@ -350,9 +369,9 @@ const TradeAILayoutStudio = () => {
 
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
         {scene && (
-          <div className="absolute right-3 top-3 z-10 flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => { setSelectedId(null); setWalking((w) => !w); }} disabled={!cinematic}>
-              <Film className="mr-1.5 h-3.5 w-3.5" />{walking ? "Stop walkthrough" : "Preview Walkthrough Animation"}
+          <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+            <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic}>
+              <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
@@ -365,15 +384,35 @@ const TradeAILayoutStudio = () => {
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
             <PerspectiveCamera makeDefault fov={45} near={0.05} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
-            <OrbitControls makeDefault enabled={!dragging && !walking} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
+            <OrbitControls makeDefault enabled={!dragging && !walkActive} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walking} />
-            <CinematicCameraRig path={cinematic} playing={walking} onDone={() => setWalking(false)} />
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive} />
+            <CinematicCameraRig path={cinematic} enabled={walkActive} playing={walking} speed={walkSpeed}
+              seek={walkSeek} onTimeChange={setWalkTime} onDone={finishWalk} />
           </Canvas>
+        )}
+        {walkActive && cinematic && (
+          <div role="group" aria-label="Walkthrough playback controls" className="absolute inset-x-3 bottom-3 z-10 space-y-3 border border-border bg-background/95 p-3 shadow-sm">
+            <Slider thumbLabel="Walkthrough timeline" min={0} max={walkDuration} step={0.1} value={[walkTime]}
+              onValueChange={([time]) => { if (time !== undefined) { setWalking(false); seekWalk(time); } }} />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="icon" variant="ghost" aria-label={walking ? "Pause walkthrough" : "Resume walkthrough"}
+                title={walking ? "Pause walkthrough" : "Resume walkthrough"}
+                onClick={() => { if (!walking && walkTime >= walkDuration - 0.1) seekWalk(0); setWalking((w) => !w); }}>
+                {walking ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+              <Button size="icon" variant="ghost" aria-label="Stop walkthrough" title="Stop walkthrough" onClick={stopWalk}><Square className="h-3.5 w-3.5" /></Button>
+              <output aria-label="Walkthrough time" className="text-xs tabular-nums text-muted-foreground">{playbackTimeLabel(walkTime)} / {playbackTimeLabel(walkDuration)}</output>
+              <Select value={String(walkSpeed)} onValueChange={(value) => setWalkSpeed(Number(value))}>
+                <SelectTrigger aria-label="Playback speed" className="ml-auto h-8 w-[88px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{[0.5, 0.75, 1, 1.5, 2].map((speed) => <SelectItem key={speed} value={String(speed)}>{speed}×</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
         )}
       </div>
 
