@@ -1615,6 +1615,19 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         <div className="border-t border-border/60">
           {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
           {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top", topAxisLabel, mobileTopOpen, () => setMobileTopOpen((v) => !v))}
+          {extraCategoryGroups.map((g) => (
+            <div key={`split-extra-mobile-${g.key}`}>
+              {renderInlineAxisCarousel(
+                g.tiles,
+                extraSplitIds[g.key] ?? null,
+                (id: string) => setExtraSplitIds((prev) => ({ ...prev, [g.key]: id })),
+                "Top",
+                g.label,
+                !!openExtraSplits[g.key],
+                () => setOpenExtraSplits((prev) => ({ ...prev, [g.key]: !prev[g.key] }))
+              )}
+            </div>
+          ))}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
@@ -1709,6 +1722,22 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           glyph: pickFinishGlyph(visibleTopTiles, topLabel),
           tileKind: "top",
         })}
+      {showWoodSection && extraCategoryGroups.map((g) => (
+        <div key={`split-extra-${g.key}`}>
+          {renderAccordion({
+            isOpen: !!openExtraSplits[g.key],
+            onToggle: () => setOpenExtraSplits((prev) => ({ ...prev, [g.key]: !prev[g.key] })),
+            label: g.label,
+            selectedName: (extraSplitIds[g.key]
+              ? fabrics.find((f) => f.id === extraSplitIds[g.key])?.name
+              : null) ?? null,
+            tiles: g.tiles,
+            glyph: pickFinishGlyph(g.tiles, null),
+            tileKind: "top",
+            splitExtraKey: g.key,
+          })}
+        </div>
+      ))}
       {visibleCoverTiles.length > 0 &&
         renderAccordion({
           isOpen: openCover,
