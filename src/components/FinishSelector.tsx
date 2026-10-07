@@ -1303,6 +1303,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // (e.g. Wood + Lacquer on a combined "A & B" variant) get one dropdown per
   // group, labelled like the Pictured Finishes strip, instead of one lumped list.
   const categoryGroups = (() => {
+    console.log("CGDBG", JSON.stringify({axisModeActive, hideBaseAccordion, wf: !!woodFilter, tf: !!topFilter, top: topTiles.length, wood: woodTiles.map((f) => f.raw_category || f.category)}));
     if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion || woodFilter || topFilter) return null;
     if (topTiles.length > 0 || woodTiles.length < 2) return null;
     const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
