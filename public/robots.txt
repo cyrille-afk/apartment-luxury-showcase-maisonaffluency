@@ -99,3 +99,4 @@ User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://www.maisonaffluency.com/sitemap.xml
+Disallow: /layout/
