@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Add slow-orbit and furniture-tour presets; eight tests pass, browser pause/seek/resume/switch verified without page errors, selected paths export correctly.
 
 - [x] Add the eight existing cropped Pendhapa wood finishes to Astra without duplicates; all eight photos verified on public and Trade pages.
 
