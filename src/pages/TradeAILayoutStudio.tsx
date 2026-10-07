@@ -230,6 +230,11 @@ const TradeAILayoutStudio = () => {
   const samplerRef = useRef<CameraSampler | null>(null);
   const layoutKey = current?.id ?? null;
   const loadCustomPaths = useCallback(async () => {
+    const moved = await syncLocalPathsToAccount().catch(() => new Map<string, string>());
+    if (moved.size) {
+      setActiveCustomId((id) => (id && moved.has(id) ? moved.get(id)! : id));
+      toast.success(`${moved.size} browser-only camera path${moved.size > 1 ? "s" : ""} synced to your account`);
+    }
     const local = readLocalPaths(layoutKey ?? "unsaved").map((p) => ({ ...p, source: "local" as const }));
     const [layout, account] = await Promise.all([
       layoutKey ? listLayoutPaths(layoutKey).catch(() => []) : Promise.resolve([]),
