@@ -1,18 +1,19 @@
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, RefreshCw, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AICuratedEnvironment from "@/components/trade/visualiser/AICuratedEnvironment";
-import { DEFAULT_BRIEF, catalogueName, generateRoomLayout, summarise, type LayoutBrief } from "@/lib/mockAiLayoutService";
+import { DEFAULT_BRIEF, fetchLiveCatalogue, generateRoomLayout, repriceScene, summarise, toAsset, type LayoutBrief, type LiveCatalogueItem } from "@/lib/mockAiLayoutService";
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
+const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
 const TradeAILayoutStudio = () => {
@@ -21,16 +22,66 @@ const TradeAILayoutStudio = () => {
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [catalogue, setCatalogue] = useState<LiveCatalogueItem[]>([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [catError, setCatError] = useState<string | null>(null);
+  const [skipped, setSkipped] = useState<string[]>([]);
+  const byId = useMemo(() => new Map(catalogue.map((c) => [c.componentId, c])), [catalogue]);
+
+  const loadCatalogue = useCallback(async () => {
+    setCatLoading(true);
+    setCatError(null);
+    try {
+      const live = await fetchLiveCatalogue();
+      setCatalogue(live);
+      // Products changed upstream → re-price the current layout.
+      setScene((s) => (s ? repriceScene(s, live) : s));
+      return live;
+    } catch (e) {
+      setCatError(e instanceof Error ? e.message : "Could not load catalogue prices");
+      return null;
+    } finally {
+      setCatLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void loadCatalogue(); }, [loadCatalogue]);
 
   const generate = async () => {
     setLoading(true);
     setSelectedId(null);
     try {
-      setScene(await generateRoomLayout(brief));
+      const live = (await loadCatalogue()) ?? catalogue;
+      const { scene: next, skipped: miss } = await generateRoomLayout(brief, live);
+      setScene(next);
+      setSkipped(miss);
     } finally {
       setLoading(false);
     }
   };
+
+  const withLedger = (next: AICuratedSceneSchema) => ({ ...next, financialSummary: summarise(next) });
+
+  const swapAsset = (index: number, componentId: string) => {
+    const item = byId.get(componentId);
+    if (!item) return;
+    setScene((s) => s && withLedger({
+      ...s,
+      curatedAssets: s.curatedAssets.map((a, i) => (i === index ? toAsset(item, a.position, a.rotation, a.scale) : a)),
+    }));
+  };
+
+  const removeAsset = (index: number) => {
+    setSelectedId(null);
+    setScene((s) => s && withLedger({ ...s, curatedAssets: s.curatedAssets.filter((_, i) => i !== index) }));
+  };
+
+  // Budget edits apply to the live ledger immediately.
+  useEffect(() => {
+    setScene((s) => s && s.financialSummary.totalBudget !== brief.totalBudget
+      ? withLedger({ ...s, financialSummary: { ...s.financialSummary, totalBudget: brief.totalBudget } })
+      : s);
+  }, [brief.totalBudget]);
 
   const onAssetTransform = useCallback((index: number, position: Vec3, rotation: Vec3) => {
     setScene((s) => {
@@ -57,7 +108,12 @@ const TradeAILayoutStudio = () => {
         <div>
           <p className={micro}>AI Ingestion</p>
           <h1 className="mt-1 font-serif text-2xl">Curated Room Layout</h1>
-          <p className="mt-1 text-xs text-muted-foreground">Mock pipeline — test pricing, not live RRPs.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {catLoading ? "Loading live catalogue prices…" : catError ? `Prices unavailable: ${catError}` : `Live RRPs · ${catalogue.filter((c) => c.available).length} of ${catalogue.length} pieces available`}
+          </p>
+          <Button variant="ghost" size="sm" className="mt-1 h-7 px-2 text-xs" onClick={() => void loadCatalogue()} disabled={catLoading}>
+            <RefreshCw className={`mr-1 h-3 w-3 ${catLoading ? "animate-spin" : ""}`} /> Refresh prices
+          </Button>
         </div>
 
         <section className="space-y-3">
@@ -99,7 +155,7 @@ const TradeAILayoutStudio = () => {
               </div>
             ))}
           </div>
-          <Button className="w-full" onClick={generate} disabled={loading}>
+          <Button className="w-full" onClick={generate} disabled={loading || catLoading || !!catError}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             Generate Room Layout
           </Button>
@@ -119,12 +175,31 @@ const TradeAILayoutStudio = () => {
           <section className="space-y-1">
             <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
             <ul className="divide-y divide-border text-xs">
-              {scene.curatedAssets.map((a, i) => (
-                <li key={`${a.sku}-${i}`} className="flex justify-between py-1.5">
-                  <span>{catalogueName(a.sku)}</span><span className="text-muted-foreground">{eur(a.priceAtCuration)}</span>
-                </li>
-              ))}
+              {scene.curatedAssets.map((a, i) => {
+                const item = byId.get(a.componentId);
+                const options = catalogue.filter((c) => c.role === item?.role && c.available && c.price != null);
+                return (
+                  <li key={`${a.componentId}-${i}`} className="py-2">
+                    <div className="flex items-center gap-2">
+                      <Select value={a.componentId} onValueChange={(v) => swapAsset(i, v)}>
+                        <SelectTrigger className="h-8 flex-1 text-xs"><SelectValue placeholder={a.sku} /></SelectTrigger>
+                        <SelectContent>
+                          {options.map((c) => (
+                            <SelectItem key={c.componentId} value={c.componentId} className="text-xs">{c.name} · {eur(c.price ?? 0)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="w-20 text-right">{item?.price != null ? eur(a.priceAtCuration) : "Price upon Request"}</span>
+                      <button aria-label="Remove piece" onClick={() => removeAsset(i)} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+                    </div>
+                    <p className={`mt-0.5 ${item && !item.available ? "text-destructive" : "text-muted-foreground"}`}>
+                      {!item ? "Not in live catalogue" : !item.available ? "No longer available" : item.leadWeeks ? `${stockLabel(item.stockStatus)} · ${item.leadWeeks[0]}–${item.leadWeeks[1]} weeks` : stockLabel(item.stockStatus)}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
+            {skipped.length > 0 && <p className="pt-1 text-xs text-muted-foreground">Skipped: {skipped.join(", ")}</p>}
           </section>
         )}
       </aside>

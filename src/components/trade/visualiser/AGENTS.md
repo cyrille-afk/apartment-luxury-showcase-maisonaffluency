@@ -1,1 +1,2 @@
 - AI layout pipeline: `AICuratedSceneSchema` (src/types/aiCuratedScene.ts) is the single contract between the layout generator and `AICuratedEnvironment`; financialSummary is always recomputed from curatedAssets via `summarise` so the ledger can't drift.
+- AI layout prices come live from approved-member pricing (trade_product_pricing via source_pick_id, falling back to trade_products) plus effective_product_availability; unpriced pieces are Price upon Request and never placed — budgets reflect real RRPs.
