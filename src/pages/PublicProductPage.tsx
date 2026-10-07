@@ -1520,6 +1520,13 @@ const PublicProductPageContent: React.FC = () => {
   const [creationOpen, setCreationOpen] = useState(false);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
   const productScrollRef = React.useRef<HTMLDivElement | null>(null);
+  // State mirror of the scroll region so the shrink listener re-attaches once
+  // the region mounts (it renders only after the product loads).
+  const [productScrollEl, setProductScrollEl] = useState<HTMLDivElement | null>(null);
+  const setProductScrollNode = React.useCallback((node: HTMLDivElement | null) => {
+    productScrollRef.current = node;
+    setProductScrollEl(node);
+  }, []);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
   // Never scroll when it's already (partly) visible — doing so pushed the
