@@ -418,6 +418,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_curated_layouts: {
+        Row: {
+          brief: Json
+          created_at: string
+          id: string
+          is_shared: boolean
+          products: Json
+          scene: Json
+          share_token: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brief?: Json
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          products?: Json
+          scene: Json
+          share_token?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          brief?: Json
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          products?: Json
+          scene?: Json
+          share_token?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_model_pricing: {
         Row: {
           created_at: string
@@ -11752,6 +11791,15 @@ export type Database = {
           created: string
           id: number
           status_code: number
+        }[]
+      }
+      get_shared_ai_layout: {
+        Args: { _token: string }
+        Returns: {
+          products: Json
+          scene: Json
+          title: string
+          updated_at: string
         }[]
       }
       get_shared_board: { Args: { _token: string }; Returns: Json }
