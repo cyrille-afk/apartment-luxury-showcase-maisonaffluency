@@ -39,6 +39,33 @@ export function buildCustomCinematicPath(scene: AICuratedSceneSchema, nodes: Cus
     durationSec: Math.max(12, nodes.length * 4, curve.getLength() / 0.45) };
 }
 
+export interface ClearanceConflict { label: string; kind: "furniture" | "window" | "door" | "wall_opening"; fromPct: number; toPct: number }
+
+/** Conservative boxes: furniture uses SceneObject's 1.4m GLB fit (as presets do); anchors their unit box. */
+export function checkPathClearance(scene: AICuratedSceneSchema, path: CinematicPath | null, margin = 0.2, steps = 400): ClearanceConflict[] {
+  if (!path) return [];
+  const boxes = [
+    ...scene.curatedAssets.map((a) => ({ label: a.sku, kind: "furniture" as const, box: new THREE.Box3(new THREE.Vector3(-0.7, 0, -0.7), new THREE.Vector3(0.7, 1.4, 0.7))
+      .applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(...a.position), new THREE.Quaternion().setFromEuler(new THREE.Euler(...a.rotation)), new THREE.Vector3(...a.scale))) })),
+    ...scene.architecturalAnchors.map((a, i) => ({ label: `${a.type.replace("_", " ")} ${i + 1}`, kind: a.type, box: new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(0.5, 0.5, 0.5))
+      .applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(...a.position), new THREE.Quaternion().setFromEuler(new THREE.Euler(...a.rotation)), new THREE.Vector3(...a.scale))) })),
+  ].map((b) => ({ ...b, box: b.box.expandByScalar(margin) }));
+  const points = path.curve.getSpacedPoints(steps);
+  const out: ClearanceConflict[] = [];
+  for (const b of boxes) {
+    let start = -1;
+    points.forEach((p, i) => {
+      const hit = b.box.containsPoint(p);
+      if (hit && start < 0) start = i;
+      if ((!hit || i === points.length - 1) && start >= 0) {
+        out.push({ label: b.label, kind: b.kind, fromPct: Math.round(start / steps * 100), toPct: Math.round((hit ? i : i - 1) / steps * 100) });
+        start = -1;
+      }
+    });
+  }
+  return out.sort((a, b) => a.fromPct - b.fromPct);
+}
+
 /** Natural-language description → nodes, derived from the validated preset matching its keywords. */
 export function nodesFromDescription(scene: AICuratedSceneSchema, text: string): CustomPathNode[] {
   const t = text.toLowerCase();
