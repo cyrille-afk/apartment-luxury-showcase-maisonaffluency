@@ -118,15 +118,38 @@ export async function persistCustomPath(mode: StorageMode, path: CustomCameraPat
   return clean;
 }
 
+/** Last camera-path sync outcome, kept in this browser so the studio can show it. */
+export interface PathSyncStatus { lastSyncAt: string | null; lastMoved: number; pendingRetry: string[] }
+const PATH_SYNC_STATUS_KEY = "ma_camera_path_sync_status_v1";
+
+export function readPathSyncStatus(): PathSyncStatus {
+  try {
+    const raw: unknown = JSON.parse(window.localStorage.getItem(PATH_SYNC_STATUS_KEY) ?? "null");
+    if (raw && typeof raw === "object") {
+      const r = raw as Partial<PathSyncStatus>;
+      return { lastSyncAt: typeof r.lastSyncAt === "string" ? r.lastSyncAt : null,
+        lastMoved: typeof r.lastMoved === "number" ? r.lastMoved : 0,
+        pendingRetry: Array.isArray(r.pendingRetry) ? r.pendingRetry.filter((n): n is string => typeof n === "string") : [] };
+    }
+  } catch { /* fall through */ }
+  return { lastSyncAt: null, lastMoved: 0, pendingRetry: [] };
+}
+
+function writePathSyncStatus(status: PathSyncStatus) {
+  try { window.localStorage.setItem(PATH_SYNC_STATUS_KEY, JSON.stringify(status)); } catch { /* storage blocked */ }
+}
+
 /**
  * Upload every "This browser only" path (all layouts) to the signed-in account library,
  * removing each local copy only after its insert succeeds. Returns old local id → new account id.
+ * Records the outcome (time, moved count, names still pending) for the sync status indicator.
  */
 export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
   const moved = new Map<string, string>();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user) return moved;
   const keys = Object.keys(window.localStorage).filter((k) => k.startsWith(LOCAL_PREFIX));
+  const pending: string[] = [];
   for (const key of keys) {
     const layoutId = key.slice(LOCAL_PREFIX.length);
     const remaining: CustomCameraPath[] = [];
@@ -136,9 +159,11 @@ export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
         .select("id").single();
       if (error || !data) remaining.push(p); else moved.set(p.id, data.id);
     }
+    pending.push(...remaining.map((p) => p.name || "Custom path"));
     if (remaining.length) window.localStorage.setItem(key, JSON.stringify(remaining));
     else window.localStorage.removeItem(key);
   }
+  writePathSyncStatus({ lastSyncAt: new Date().toISOString(), lastMoved: moved.size, pendingRetry: pending });
   return moved;
 }
 
