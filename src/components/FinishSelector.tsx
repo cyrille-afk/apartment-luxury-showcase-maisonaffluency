@@ -784,10 +784,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
-    const picturedAxis = isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isFrameGroup ? "frame" : isTopGroup ? "top" : "wood";
-    const picturedTiles = isFabricGroup ? visibleFabricTiles : isCoverGroup ? visibleCoverTiles : isFrameGroup ? frameTiles : isTopGroup ? visibleTopTiles : visibleWoodTiles;
+    const splitGroup = splitExtraKey !== undefined ? extraCategoryGroups.find((g) => g.key === splitExtraKey) : undefined;
+    const picturedAxis = splitGroup ? `split:${splitGroup.key}` : isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isFrameGroup ? "frame" : isTopGroup ? "top" : "wood";
+    const picturedTiles = splitGroup ? splitGroup.tiles : isFabricGroup ? visibleFabricTiles : isCoverGroup ? visibleCoverTiles : isFrameGroup ? frameTiles : isTopGroup ? visibleTopTiles : visibleWoodTiles;
     const picturedIds = picturedMatches(picturedTiles, picturedAxis);
-    const isSelected = picturedIds.length > 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
+    const isSelected = picturedIds.length >= 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
     const setSelected = isFrameGroup
       ? setSelectedFrameId
       : isSecondaryFabricGroup
@@ -807,7 +808,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own
         // selection highlight, and it drives the combined variant value.
         setExtraSplitIds((prev) => ({ ...prev, [splitExtraKey]: f.id }));
-        userPickedAxesRef.current.top = true;
+        userPickedAxesRef.current[`split:${splitExtraKey}`] = true;
         onWoodFinishChange?.(f.name);
       } else if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
