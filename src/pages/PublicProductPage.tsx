@@ -1621,6 +1621,7 @@ const PublicProductPageContent: React.FC = () => {
       // Read whichever surface actually scrolls (inner region on phones,
       // window when the region is display:contents).
       const y = Math.max(productScrollEl?.scrollTop ?? 0, window.scrollY);
+      if (typeof window !== "undefined" && (window as any).__shrinkDebug) console.log("SHRINKDBG", y, hasInteractedRef.current, !!productScrollEl);
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
       // expand again only right at the very top of the page.
