@@ -242,6 +242,7 @@ const TradeAILayoutStudio = () => {
       listAccountPaths().catch(() => []),
     ]);
     setCustomPaths([...layout.map((p) => ({ ...p, source: "layout" as const })), ...account.map((p) => ({ ...p, source: "account" as const })), ...local]);
+    setPathSyncStatus(readPathSyncStatus());
   }, [layoutKey]);
   useEffect(() => { void loadCustomPaths(); }, [loadCustomPaths]);
   const activeCustom = customPaths.find((p) => p.id === activeCustomId) ?? null;
