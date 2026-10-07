@@ -1,8 +1,9 @@
+import { supabase } from "@/integrations/supabase/client";
 import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
 
 /**
- * Client-side mock of the AI layout pipeline. GLBs are real catalogue models;
- * prices are MOCK figures for testing the R3F loop only — never display as RRP.
+ * Client-side layout generator. Placement is mocked; prices and availability are
+ * live from the trade catalogue (approved-member pricing, never the public view).
  */
 export interface LayoutBrief {
   roomType: "living" | "lounge" | "salon";
@@ -11,21 +12,83 @@ export interface LayoutBrief {
   roomDimensions: AICuratedSceneSchema["roomDimensions"];
 }
 
-const GLB = "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/glb-models";
+export type Role = "anchor" | "seat" | "table" | "accent" | "light";
 
-type CatalogueItem = Omit<CuratedAsset, "position" | "rotation" | "scale"> & { name: string; role: "anchor" | "seat" | "table" | "accent" | "light" };
+export interface LiveCatalogueItem {
+  componentId: string;
+  sku: string;
+  name: string;
+  role: Role;
+  glbUrl: string;
+  /** EUR RRP; null = Price upon Request (excluded from budget). */
+  price: number | null;
+  stockStatus: string | null;
+  leadWeeks: [number, number] | null;
+  available: boolean;
+}
 
-export const MOCK_CATALOGUE: CatalogueItem[] = [
-  { sku: "MOP-SANDY-COVE-SOFA", componentId: "ffd33487-bb3d-4d18-80ee-1e35b858738e", name: "Sandy Cove Sofa", role: "anchor", priceAtCuration: 18400, glbUrl: `${GLB}/ffd33487-bb3d-4d18-80ee-1e35b858738e/w-190-d-108-h-70-sh-40-cm-com-fabric-1783390163774.glb` },
-  { sku: "MOP-PRAIA-GRANJA-CT", componentId: "f198902d-aa9e-41d8-8630-bad4226aaa45", name: "Praia da Granja Coffee Table", role: "table", priceAtCuration: 9600, glbUrl: `${GLB}/f198902d-aa9e-41d8-8630-bad4226aaa45/rectangle---w-128-x-d-83-x-h-34-cm-1783392485221.glb` },
-  { sku: "MOP-RUA-LEBLON", componentId: "cd3c22d9-cd6c-488a-aff0-d6776c8a742f", name: "Rua Leblon Lounge Chair", role: "seat", priceAtCuration: 8900, glbUrl: `${GLB}/cd3c22d9-cd6c-488a-aff0-d6776c8a742f/1783386690528.glb` },
-  { sku: "MOP-FRENCHMEN-ST-AC", componentId: "353547c3-ea0c-4d59-b79a-21b761bfb291", name: "Frenchmen Street Armchair", role: "seat", priceAtCuration: 6200, glbUrl: `${GLB}/353547c3-ea0c-4d59-b79a-21b761bfb291/1783389210646.glb` },
-  { sku: "MOP-MADISON-AVE-ST", componentId: "8a072491-e699-44ee-ac6b-51838d7514ed", name: "Madison Avenue Side Table", role: "accent", priceAtCuration: 3400, glbUrl: `${GLB}/8a072491-e699-44ee-ac6b-51838d7514ed/default-1783392434931.glb` },
-  { sku: "MOP-BOND-ST-STOOL", componentId: "938efe1a-8744-47e9-9d1d-dbd00634ab1a", name: "Bond Street Stool", role: "accent", priceAtCuration: 2800, glbUrl: `${GLB}/938efe1a-8744-47e9-9d1d-dbd00634ab1a/1783389292330.glb` },
-  { sku: "MOP-CINNAMON-GDN-FL", componentId: "163af529-08b9-4391-9a48-03663261c085", name: "Cinnamon Gardens Floor Lamp", role: "light", priceAtCuration: 4700, glbUrl: `${GLB}/163af529-08b9-4391-9a48-03663261c085/-55-h-156-cm-1783393125349.glb` },
-];
+/** Layout roles for the pieces the generator knows how to place. */
+const ROLES: Record<string, Role> = {
+  "ffd33487-bb3d-4d18-80ee-1e35b858738e": "anchor", // Sandy Cove Sofa
+  "f198902d-aa9e-41d8-8630-bad4226aaa45": "table", // Praia da Granja Coffee Table
+  "cd3c22d9-cd6c-488a-aff0-d6776c8a742f": "seat", // Rua Leblon
+  "353547c3-ea0c-4d59-b79a-21b761bfb291": "seat", // Frenchmen Street Armchair
+  "2816322a-94f6-49e7-a70f-4a8c15292d5a": "seat", // Frenchmen Street Lounge Chair
+  "8a072491-e699-44ee-ac6b-51838d7514ed": "accent", // Madison Avenue Side Table
+  "938efe1a-8744-47e9-9d1d-dbd00634ab1a": "accent", // Bond Street Stool
+  "163af529-08b9-4391-9a48-03663261c085": "light", // Cinnamon Gardens Floor Lamp
+};
 
-export const catalogueName = (sku: string) => MOCK_CATALOGUE.find((c) => c.sku === sku)?.name ?? sku;
+const UNAVAILABLE = new Set(["discontinued", "out_of_stock", "unavailable", "sold_out"]);
+const cleanName = (n: string) => n.replace(/\s+by Yabu Pushelberg$/i, "").trim();
+
+/** Loads live price + availability for every placeable piece. Requires an approved trade session. */
+export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
+  const ids = Object.keys(ROLES);
+  const { data: products, error } = await supabase
+    .from("trade_products")
+    .select("id, product_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden")
+    .in("id", ids);
+  if (error) throw error;
+
+  const pickIds = (products ?? []).map((p) => p.source_pick_id).filter(Boolean) as string[];
+  const { data: pricing } = pickIds.length
+    ? await supabase.from("trade_product_pricing").select("pick_id, trade_price_cents").in("pick_id", pickIds)
+    : { data: [] as { pick_id: string; trade_price_cents: number | null }[] };
+  const pickPrice = new Map((pricing ?? []).map((r) => [r.pick_id, r.trade_price_cents]));
+
+  return Promise.all(
+    (products ?? [])
+      .filter((p) => p.glb_url)
+      .map(async (p) => {
+        let stockStatus: string | null = null;
+        let leadWeeks: [number, number] | null = null;
+        try {
+          const { data } = await (supabase as any).rpc("effective_product_availability", { _product_id: p.id });
+          const row = data?.[0];
+          if (row) {
+            stockStatus = row.stock_status ?? null;
+            if (row.lead_weeks_min != null) leadWeeks = [row.lead_weeks_min, row.lead_weeks_max ?? row.lead_weeks_min];
+          }
+        } catch {
+          /* availability unknown — treat as orderable */
+        }
+        const cents = (p.source_pick_id && pickPrice.get(p.source_pick_id)) || p.trade_price_cents || 0;
+        const available = p.is_active !== false && !p.is_hidden && !UNAVAILABLE.has((stockStatus ?? "").toLowerCase());
+        return {
+          componentId: p.id,
+          sku: p.sku || p.id,
+          name: cleanName(p.product_name),
+          role: ROLES[p.id],
+          glbUrl: p.glb_url as string,
+          price: cents > 0 && (p.currency ?? "EUR") === "EUR" ? cents / 100 : null,
+          stockStatus,
+          leadWeeks,
+          available,
+        } satisfies LiveCatalogueItem;
+      }),
+  );
+}
 
 export const DEFAULT_BRIEF: LayoutBrief = {
   roomType: "living",
@@ -37,35 +100,53 @@ export const DEFAULT_BRIEF: LayoutBrief = {
 const UNIT: Vec3 = [1, 1, 1];
 const rand = (seed: number) => () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
-/** Places the conversation group around the room centre, then fills by priority within budget. */
-export async function generateRoomLayout(brief: LayoutBrief, seed = Date.now()): Promise<AICuratedSceneSchema> {
-  await new Promise((r) => setTimeout(r, 900)); // simulate inference latency
+export const toAsset = (item: LiveCatalogueItem, position: Vec3, rotation: Vec3, scale: Vec3 = UNIT): CuratedAsset => ({
+  sku: item.sku,
+  componentId: item.componentId,
+  glbUrl: item.glbUrl,
+  priceAtCuration: item.price ?? 0,
+  position,
+  rotation,
+  scale,
+});
+
+/** Places a conversation group, using only available, priced pieces that fit the budget. */
+export async function generateRoomLayout(
+  brief: LayoutBrief,
+  catalogue: LiveCatalogueItem[],
+  seed = Date.now(),
+): Promise<{ scene: AICuratedSceneSchema; skipped: string[] }> {
   const rnd = rand(Math.max(1, Math.floor(seed) % 2147483646));
   const { width: W, length: L, height: H } = brief.roomDimensions;
   const jitter = () => (rnd() - 0.5) * 0.3;
-  const by = (sku: string) => MOCK_CATALOGUE.find((c) => c.sku === sku)!;
+  const usable = catalogue.filter((c) => c.available && c.price != null);
+  const pick = (role: Role, prefer?: (c: LiveCatalogueItem) => boolean) => {
+    const pool = usable.filter((c) => c.role === role);
+    return pool.find((c) => prefer?.(c)) ?? pool[0];
+  };
 
-  const lounge = brief.style === "sculptural" ? "MOP-RUA-LEBLON" : "MOP-FRENCHMEN-ST-AC";
-  const plan: Array<{ sku: string; position: Vec3; rotation: Vec3 }> = [
-    { sku: "MOP-SANDY-COVE-SOFA", position: [jitter(), 0, -L * 0.22], rotation: [0, 0, 0] },
-    { sku: "MOP-PRAIA-GRANJA-CT", position: [jitter(), 0, 0.15], rotation: [0, 0, 0] },
-    { sku: lounge, position: [-1.7, 0, 0.9 + jitter()], rotation: [0, Math.PI * 0.75, 0] },
-    { sku: lounge, position: [1.7, 0, 0.9 + jitter()], rotation: [0, -Math.PI * 0.75, 0] },
-    { sku: "MOP-MADISON-AVE-ST", position: [1.55, 0, -L * 0.22], rotation: [0, 0, 0] },
-    { sku: "MOP-CINNAMON-GDN-FL", position: [-W / 2 + 0.6, 0, -L / 2 + 0.6], rotation: [0, Math.PI / 4, 0] },
-    { sku: "MOP-BOND-ST-STOOL", position: [W / 2 - 0.9, 0, L / 2 - 1.1], rotation: [0, rnd() * Math.PI, 0] },
+  const seat = pick("seat", (c) => (brief.style === "sculptural" ? /leblon/i.test(c.name) : /armchair/i.test(c.name)));
+  const plan: Array<{ item?: LiveCatalogueItem; role: Role; position: Vec3; rotation: Vec3 }> = [
+    { role: "anchor", item: pick("anchor"), position: [jitter(), 0, -L * 0.22], rotation: [0, 0, 0] },
+    { role: "table", item: pick("table"), position: [jitter(), 0, 0.15], rotation: [0, 0, 0] },
+    { role: "seat", item: seat, position: [-1.7, 0, 0.9 + jitter()], rotation: [0, Math.PI * 0.75, 0] },
+    { role: "seat", item: seat, position: [1.7, 0, 0.9 + jitter()], rotation: [0, -Math.PI * 0.75, 0] },
+    { role: "accent", item: pick("accent", (c) => /side table/i.test(c.name)), position: [1.55, 0, -L * 0.22], rotation: [0, 0, 0] },
+    { role: "light", item: pick("light"), position: [-W / 2 + 0.6, 0, -L / 2 + 0.6], rotation: [0, Math.PI / 4, 0] },
+    { role: "accent", item: pick("accent", (c) => /stool/i.test(c.name)), position: [W / 2 - 0.9, 0, L / 2 - 1.1], rotation: [0, rnd() * Math.PI, 0] },
   ];
 
   let spend = 0;
+  const skipped: string[] = [];
   const curatedAssets: CuratedAsset[] = [];
   for (const p of plan) {
-    const item = by(p.sku);
-    if (spend + item.priceAtCuration > brief.totalBudget) continue; // honour the ceiling
-    spend += item.priceAtCuration;
-    curatedAssets.push({ sku: item.sku, componentId: item.componentId, glbUrl: item.glbUrl, priceAtCuration: item.priceAtCuration, position: p.position, rotation: p.rotation, scale: UNIT });
+    if (!p.item) { skipped.push(`No available ${p.role}`); continue; }
+    if (spend + (p.item.price ?? 0) > brief.totalBudget) { skipped.push(`${p.item.name} (over budget)`); continue; }
+    spend += p.item.price ?? 0;
+    curatedAssets.push(toAsset(p.item, p.position, p.rotation));
   }
 
-  return {
+  const scene: AICuratedSceneSchema = {
     roomDimensions: { width: W, length: L, height: H },
     architecturalAnchors: [
       { type: "window", position: [0, 1.5, -L / 2], rotation: [0, 0, 0], scale: [2.4, 1.8, 0.1] },
@@ -75,7 +156,16 @@ export async function generateRoomLayout(brief: LayoutBrief, seed = Date.now()):
     curatedAssets,
     financialSummary: { totalBudget: brief.totalBudget, allocatedSpend: spend, remainingBuffer: brief.totalBudget - spend },
   };
+  return { scene, skipped };
 }
+
+/** Re-prices every asset from the live catalogue, then recomputes the ledger. */
+export const repriceScene = (scene: AICuratedSceneSchema, catalogue: LiveCatalogueItem[]): AICuratedSceneSchema => {
+  const byId = new Map(catalogue.map((c) => [c.componentId, c]));
+  const curatedAssets = scene.curatedAssets.map((a) => ({ ...a, priceAtCuration: byId.get(a.componentId)?.price ?? 0 }));
+  const next = { ...scene, curatedAssets };
+  return { ...next, financialSummary: summarise(next) };
+};
 
 /** Recomputes the ledger after edits so it never drifts from curatedAssets. */
 export const summarise = (scene: AICuratedSceneSchema): AICuratedSceneSchema["financialSummary"] => {
