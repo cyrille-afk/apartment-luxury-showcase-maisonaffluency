@@ -13,6 +13,7 @@ import { DEFAULT_BRIEF, fetchLiveCatalogue, generateRoomLayout, repriceScene, su
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
+const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
 const TradeAILayoutStudio = () => {
@@ -192,7 +193,7 @@ const TradeAILayoutStudio = () => {
                       <button aria-label="Remove piece" onClick={() => removeAsset(i)} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
                     </div>
                     <p className={`mt-0.5 ${item && !item.available ? "text-destructive" : "text-muted-foreground"}`}>
-                      {!item ? "Not in live catalogue" : !item.available ? "No longer available" : item.leadWeeks ? `${item.stockStatus ?? "Made to order"} · ${item.leadWeeks[0]}–${item.leadWeeks[1]} weeks` : (item.stockStatus ?? "Available")}
+                      {!item ? "Not in live catalogue" : !item.available ? "No longer available" : item.leadWeeks ? `${stockLabel(item.stockStatus)} · ${item.leadWeeks[0]}–${item.leadWeeks[1]} weeks` : stockLabel(item.stockStatus)}
                     </p>
                   </li>
                 );
