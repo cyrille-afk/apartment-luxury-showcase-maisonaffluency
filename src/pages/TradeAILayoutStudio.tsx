@@ -183,7 +183,10 @@ const TradeAILayoutStudio = () => {
   const [walkPreset, setWalkPreset] = useState<CinematicPreset>("sweep");
   const cinematic = useCinematicPath(scene, 24, walkPreset);
   const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
-  useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [cinematic]);
+  useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [scene]);
+  useEffect(() => {
+    if (!cinematic) { setWalking(false); setWalkActive(false); setWalkTime(0); }
+  }, [cinematic]);
   const seekWalk = useCallback((time: number, restart = false) => {
     setWalkTime(time);
     setWalkSeek((s) => ({ id: s.id + 1, time, restart }));
@@ -395,7 +398,7 @@ const TradeAILayoutStudio = () => {
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
             <Select value={walkPreset} onValueChange={(value) => {
               const preset = CINEMATIC_PRESETS.find((p) => p.value === value);
-              if (preset) { stopWalk(); setWalkPreset(preset.value); }
+              if (preset) setWalkPreset(preset.value);
             }}>
               <SelectTrigger aria-label="Camera path preset" className="h-9 w-[180px] bg-background text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>{CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>

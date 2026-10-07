@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Blend camera preset changes during playback; verify continuity, pause/resume, rapid switching and completion.
 - [x] Add walkthrough keyboard shortcuts and continuous replay; 11 tests pass, browser pause/resume/restart/speed/typing protection/loop-on/loop-off verified.
 - [x] Add slow-orbit and furniture-tour presets; eight tests pass, browser pause/seek/resume/switch verified without page errors, selected paths export correctly.
 

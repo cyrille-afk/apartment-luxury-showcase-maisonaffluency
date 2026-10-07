@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { CinematicPath } from "@/hooks/useCinematicPath";
-import { advancePlayback, CINEMATIC_ENTRY_SECONDS } from "@/lib/cinematicPlayback";
+import { advancePlayback, cameraTransitionBlend, remapPlaybackTime, CINEMATIC_ENTRY_SECONDS, CINEMATIC_TRANSITION_SECONDS } from "@/lib/cinematicPlayback";
 
 /** Gentle cosine ramps, constant-speed cruise. */
 export const cinematicProgress = (t: number) => {
@@ -34,8 +34,10 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
   const scratch = useRef(new THREE.PerspectiveCamera());
   const forward = useRef(new THREE.Vector3());
   const lookTarget = useRef(new THREE.Vector3());
+  const previousPath = useRef<CinematicPath | null>(null);
+  const transition = useRef<{ time: number; position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null);
   useFrame((_state, delta) => {
-    if (!enabled || !path) { active.current = false; return; }
+    if (!enabled || !path) { active.current = false; transition.current = null; previousPath.current = path; return; }
     if (!active.current) {
       elapsed.current = 0;
       lastSeek.current = -1;
@@ -43,12 +45,24 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       from.current.copy(camera.position);
       orientation.current.copy(camera.quaternion);
       active.current = true;
+      previousPath.current = path;
+      transition.current = null;
+    }
+    const pathChanged = previousPath.current !== path;
+    if (pathChanged) {
+      const previous = previousPath.current;
+      if (previous) elapsed.current = remapPlaybackTime(elapsed.current, previous.durationSec, path.durationSec);
+      transition.current = { time: 0, position: camera.position.clone(), quaternion: camera.quaternion.clone() };
+      previousPath.current = path;
+      onTimeChange(elapsed.current);
+      lastReport.current = elapsed.current;
     }
     const entrySec = CINEMATIC_ENTRY_SECONDS;
     const duration = entrySec + path.durationSec;
     lookTarget.current.copy(path.target);
     const seeking = lastSeek.current !== seek.id;
     if (seeking) {
+      transition.current = null;
       if (seek.restart) {
         from.current.copy(camera.position);
         orientation.current.copy(camera.quaternion);
@@ -56,7 +70,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       elapsed.current = THREE.MathUtils.clamp(seek.time, 0, duration);
       lastSeek.current = seek.id;
     } else if (!playing) return;
-    if (playing && !seeking) elapsed.current = advancePlayback(elapsed.current, delta, speed, duration);
+    if (playing && !seeking && !pathChanged) elapsed.current = advancePlayback(elapsed.current, delta, speed, duration);
     if (elapsed.current < entrySec) {
       const t = elapsed.current / entrySec;
       const blend = t * t * t * (t * (t * 6 - 15) + 10);
@@ -71,6 +85,15 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       if (path.lookAtCurve) lookTarget.current.copy(path.lookAtCurve.getPoint(path.curve.getUtoTmapping(progress, 0)));
       camera.lookAt(lookTarget.current);
     }
+    const blending = transition.current;
+    if (blending) {
+      if (playing && !pathChanged) blending.time = advancePlayback(blending.time, delta, speed, CINEMATIC_TRANSITION_SECONDS);
+      const blend = cameraTransitionBlend(blending.time);
+      // Convex interpolation stays within the same validated room/height envelope.
+      camera.position.lerpVectors(blending.position, camera.position, blend);
+      camera.quaternion.slerpQuaternions(blending.quaternion, camera.quaternion, blend);
+      if (blending.time >= CINEMATIC_TRANSITION_SECONDS) transition.current = null;
+    }
     // Resume OrbitControls without a target/orientation jump, including manual Stop.
     if (controls) {
       camera.getWorldDirection(forward.current);
@@ -80,7 +103,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       lastReport.current = elapsed.current;
       onTimeChange(elapsed.current);
     }
-    if (playing && elapsed.current >= duration) onDone();
+    if (playing && elapsed.current >= duration && !transition.current) onDone();
   });
   return null;
 }
