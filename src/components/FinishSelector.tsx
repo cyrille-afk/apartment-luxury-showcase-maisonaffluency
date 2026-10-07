@@ -849,7 +849,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else if (isFrameGroup) {
         const frame = frameOptions?.find((option) => f.name.toLowerCase().startsWith(option.toLowerCase()));
         if (frame) onFrameFinishChange?.(frame);
-      } else if (isTopGroup && categorySplit) {
+      } else if (isTopGroup && categoryGroups) {
         // Category-split single-axis product: both dropdowns describe the same
         // combined variant, so the second group drives the base axis too.
         onWoodFinishChange?.(f.name);
@@ -1365,6 +1365,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     emptyNote?: string;
     glyph: string;
     tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
+    splitExtraKey?: string;
   }) => {
     const axis = args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
     const pictured = picturedMatches(args.tiles, axis);
@@ -1477,7 +1478,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .join(" / ");
 
   const baseAxisLabel = (() => {
-    if (categorySplit) return categorySplit.firstLabel;
+    if (categoryGroups) return categoryGroups[0].label;
     if (axisModeActive && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
     const isTable = !!productTitle && /\btable\b/i.test(productTitle);
@@ -1489,7 +1490,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return "Select Your Finish";
   })();
   const topAxisLabel = (() => {
-    if (categorySplit) return categorySplit.secondLabel;
+    if (categoryGroups) return categoryGroups[1]?.label ?? "Select Your Top Finish";
     if (topLabel && topLabel.trim()) return topLabel.trim();
     const title = (productTitle || "").toLowerCase();
     const m = title.match(/\b(console|dining|coffee|cocktail|side|writing|desk|bedside|conference)\s+table\b/);
