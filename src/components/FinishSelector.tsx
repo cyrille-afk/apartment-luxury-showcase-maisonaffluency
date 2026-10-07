@@ -748,6 +748,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame",
     rugComponent?: string,
     shape?: "tile" | "square",
+    splitExtraKey?: string,
   ) => {
 
     const isCom = f.id === "__com__";
@@ -778,6 +779,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       ? selectedCoverId === f.id
       : isFrameGroup
       ? selectedFrameId === f.id
+      : splitExtraKey !== undefined
+      ? (extraSplitIds[splitExtraKey] ?? null) === f.id
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
@@ -799,7 +802,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
     const handlePick = () => {
       if (isDisabled) return;
-      if (isRugGroup) {
+      if (splitExtraKey !== undefined) {
+        // Third-or-later category group on a category-split product (e.g.
+        // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own
+        // selection highlight, and it drives the combined variant value.
+        setExtraSplitIds((prev) => ({ ...prev, [splitExtraKey]: f.id }));
+        userPickedAxesRef.current.top = true;
+        onWoodFinishChange?.(f.name);
+      } else if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
         userPickedAxesRef.current[`rug:${component}`] = true;
@@ -1055,6 +1065,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const [openWood, setOpenWood] = useState(false);
   const [openTop, setOpenTop] = useState(false);
+  const [openExtraSplits, setOpenExtraSplits] = useState<Record<string, boolean>>({});
+  const [extraSplitIds, setExtraSplitIds] = useState<Record<string, string | null>>({});
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
