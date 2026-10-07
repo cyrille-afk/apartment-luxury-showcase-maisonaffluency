@@ -748,6 +748,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     kindOverride?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame",
     rugComponent?: string,
     shape?: "tile" | "square",
+    splitExtraKey?: string,
   ) => {
 
     const isCom = f.id === "__com__";
@@ -778,6 +779,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       ? selectedCoverId === f.id
       : isFrameGroup
       ? selectedFrameId === f.id
+      : splitExtraKey !== undefined
+      ? (extraSplitIds[splitExtraKey] ?? null) === f.id
       : isTopGroup
       ? selectedTopId === f.id
       : selectedWoodId === f.id;
@@ -799,7 +802,14 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
     const handlePick = () => {
       if (isDisabled) return;
-      if (isRugGroup) {
+      if (splitExtraKey !== undefined) {
+        // Third-or-later category group on a category-split product (e.g.
+        // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own
+        // selection highlight, and it drives the combined variant value.
+        setExtraSplitIds((prev) => ({ ...prev, [splitExtraKey]: f.id }));
+        userPickedAxesRef.current.top = true;
+        onWoodFinishChange?.(f.name);
+      } else if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
         setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
         userPickedAxesRef.current[`rug:${component}`] = true;
@@ -839,7 +849,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else if (isFrameGroup) {
         const frame = frameOptions?.find((option) => f.name.toLowerCase().startsWith(option.toLowerCase()));
         if (frame) onFrameFinishChange?.(frame);
-      } else if (isTopGroup && categorySplit) {
+      } else if (isTopGroup && categoryGroups) {
         // Category-split single-axis product: both dropdowns describe the same
         // combined variant, so the second group drives the base axis too.
         onWoodFinishChange?.(f.name);
@@ -1055,6 +1065,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   const [openWood, setOpenWood] = useState(false);
   const [openTop, setOpenTop] = useState(false);
+  const [openExtraSplits, setOpenExtraSplits] = useState<Record<string, boolean>>({});
+  const [extraSplitIds, setExtraSplitIds] = useState<Record<string, string | null>>({});
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
@@ -1290,25 +1302,25 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // Single-axis products whose finishes span exactly two material groups
   // (e.g. Wood + Lacquer on a combined "A & B" variant) get one dropdown per
   // group, labelled like the Pictured Finishes strip, instead of one lumped list.
-  const categorySplit = (() => {
+  const categoryGroups = (() => {
     if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion || woodFilter || topFilter) return null;
     if (topTiles.length > 0 || woodTiles.length < 2) return null;
     const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
     const order: string[] = [];
     woodTiles.forEach((f) => { const k = keyOf(f); if (k && !order.includes(k)) order.push(k); });
-    if (order.length !== 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
-    return {
-      first: woodTiles.filter((f) => keyOf(f) === order[0]),
-      second: woodTiles.filter((f) => keyOf(f) === order[1]),
-      firstLabel: `Select Your ${order[0]} Finish`,
-      secondLabel: `Select Your ${order[1]} Finish`,
-    };
+    if (order.length < 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
+    return order.map((k) => ({
+      key: k,
+      label: `Select Your ${k} Finish`,
+      tiles: woodTiles.filter((f) => keyOf(f) === k),
+    }));
   })();
   // OOL 77 Mini bar shows exactly two finish dropdowns (Frame + Drawer). Its
   // Shelf axis has a single value ("Wood") so it is auto-committed below
   // instead of rendering as a third accordion.
-  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categorySplit ? categorySplit.first : woodTiles;
-  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categorySplit ? categorySplit.second : topTiles;
+  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categoryGroups ? categoryGroups[0].tiles : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categoryGroups ? (categoryGroups[1]?.tiles ?? []) : topTiles;
+  const extraCategoryGroups = categoryGroups ? categoryGroups.slice(2) : [];
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
@@ -1353,6 +1365,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     emptyNote?: string;
     glyph: string;
     tileKind?: "fabric" | "fabricSecondary" | "cover" | "base" | "top" | "rug" | "frame";
+    splitExtraKey?: string;
   }) => {
     const axis = args.tileKind === "fabric" ? "fabric" : args.tileKind === "cover" ? "cover" : args.tileKind === "frame" ? "frame" : args.tileKind === "top" ? "top" : "wood";
     const pictured = picturedMatches(args.tiles, axis);
@@ -1408,7 +1421,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       )}
       {isMobile && args.tiles.length > 0 && (
         <div className="flex gap-3 overflow-x-auto -mx-1 px-1 pt-2 pb-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "square"))}
+          {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "square", args.splitExtraKey))}
         </div>
 
       )}
@@ -1425,7 +1438,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                 "sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-3 md:gap-4 sm:overflow-visible sm:mx-0 sm:px-0 sm:[&>*]:w-auto"
               )}
             >
-              {args.tiles.map((f) => renderTile(f, args.tileKind))}
+              {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, undefined, args.splitExtraKey))}
             </div>
           ) : (
 
@@ -1465,7 +1478,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     .join(" / ");
 
   const baseAxisLabel = (() => {
-    if (categorySplit) return categorySplit.firstLabel;
+    if (categoryGroups) return categoryGroups[0].label;
     if (axisModeActive && axisBaseLabel && axisBaseLabel.trim()) return axisBaseLabel.trim();
     if (woodLabel && woodLabel.trim()) return woodLabel.trim();
     const isTable = !!productTitle && /\btable\b/i.test(productTitle);
@@ -1477,7 +1490,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return "Select Your Finish";
   })();
   const topAxisLabel = (() => {
-    if (categorySplit) return categorySplit.secondLabel;
+    if (categoryGroups) return categoryGroups[1]?.label ?? "Select Your Top Finish";
     if (topLabel && topLabel.trim()) return topLabel.trim();
     const title = (productTitle || "").toLowerCase();
     const m = title.match(/\b(console|dining|coffee|cocktail|side|writing|desk|bedside|conference)\s+table\b/);
@@ -1602,6 +1615,19 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         <div className="border-t border-border/60">
           {visibleWoodTiles.length > 0 && renderInlineAxisCarousel(visibleWoodTiles, selectedWoodId, setSelectedWoodId, "Base", baseAxisLabel, mobileBaseOpen, () => setMobileBaseOpen((v) => !v))}
           {visibleTopTiles.length > 0 && renderInlineAxisCarousel(visibleTopTiles, selectedTopId, setSelectedTopId, "Top", topAxisLabel, mobileTopOpen, () => setMobileTopOpen((v) => !v))}
+          {extraCategoryGroups.map((g) => (
+            <div key={`split-extra-mobile-${g.key}`}>
+              {renderInlineAxisCarousel(
+                g.tiles,
+                extraSplitIds[g.key] ?? null,
+                (id: string) => setExtraSplitIds((prev) => ({ ...prev, [g.key]: id })),
+                "Top",
+                g.label,
+                !!openExtraSplits[g.key],
+                () => setOpenExtraSplits((prev) => ({ ...prev, [g.key]: !prev[g.key] }))
+              )}
+            </div>
+          ))}
         </div>
       )}
       {isRugProduct && visibleFabricTiles.length > 0 ? (
@@ -1696,6 +1722,22 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           glyph: pickFinishGlyph(visibleTopTiles, topLabel),
           tileKind: "top",
         })}
+      {showWoodSection && extraCategoryGroups.map((g) => (
+        <div key={`split-extra-${g.key}`}>
+          {renderAccordion({
+            isOpen: !!openExtraSplits[g.key],
+            onToggle: () => setOpenExtraSplits((prev) => ({ ...prev, [g.key]: !prev[g.key] })),
+            label: g.label,
+            selectedName: (extraSplitIds[g.key]
+              ? fabrics.find((f) => f.id === extraSplitIds[g.key])?.name
+              : null) ?? null,
+            tiles: g.tiles,
+            glyph: pickFinishGlyph(g.tiles, null),
+            tileKind: "top",
+            splitExtraKey: g.key,
+          })}
+        </div>
+      ))}
       {visibleCoverTiles.length > 0 &&
         renderAccordion({
           isOpen: openCover,
