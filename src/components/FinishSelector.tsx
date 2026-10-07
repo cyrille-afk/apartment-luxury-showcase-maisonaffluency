@@ -1302,25 +1302,25 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // Single-axis products whose finishes span exactly two material groups
   // (e.g. Wood + Lacquer on a combined "A & B" variant) get one dropdown per
   // group, labelled like the Pictured Finishes strip, instead of one lumped list.
-  const categorySplit = (() => {
+  const categoryGroups = (() => {
     if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion || woodFilter || topFilter) return null;
     if (topTiles.length > 0 || woodTiles.length < 2) return null;
     const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
     const order: string[] = [];
     woodTiles.forEach((f) => { const k = keyOf(f); if (k && !order.includes(k)) order.push(k); });
-    if (order.length !== 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
-    return {
-      first: woodTiles.filter((f) => keyOf(f) === order[0]),
-      second: woodTiles.filter((f) => keyOf(f) === order[1]),
-      firstLabel: `Select Your ${order[0]} Finish`,
-      secondLabel: `Select Your ${order[1]} Finish`,
-    };
+    if (order.length < 2 || woodTiles.some((f) => !keyOf(f) || /^other$/i.test(keyOf(f)))) return null;
+    return order.map((k) => ({
+      key: k,
+      label: `Select Your ${k} Finish`,
+      tiles: woodTiles.filter((f) => keyOf(f) === k),
+    }));
   })();
   // OOL 77 Mini bar shows exactly two finish dropdowns (Frame + Drawer). Its
   // Shelf axis has a single value ("Wood") so it is auto-committed below
   // instead of rendering as a third accordion.
-  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categorySplit ? categorySplit.first : woodTiles;
-  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categorySplit ? categorySplit.second : topTiles;
+  const visibleWoodTiles   = isOolMinibar ? [] : axisModeActive ? axisBaseTiles : categoryGroups ? categoryGroups[0].tiles : woodTiles;
+  const visibleTopTiles    = isOolMinibar ? drawerTiles : axisModeActive ? axisTopTiles : categoryGroups ? (categoryGroups[1]?.tiles ?? []) : topTiles;
+  const extraCategoryGroups = categoryGroups ? categoryGroups.slice(2) : [];
   const visibleCoverTiles  = coverTiles;
 
   // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
