@@ -2449,7 +2449,7 @@ const PublicProductPageContent: React.FC = () => {
 
 
 
-        <div ref={productScrollRef} data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
+        <div ref={setProductScrollNode} data-product-scroll-region className="product-page-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto md:contents">
         <main className="w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
