@@ -447,7 +447,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                 <div className="mt-4 pt-3 border-t border-neutral-100 w-full flex flex-col">
                   <div className="pl-6 md:pl-10 flex flex-col items-center">
                     <div className="flex gap-3 items-center h-16 md:h-20 overflow-hidden flex-shrink-0 self-start w-full">
-                      {igWithImages.slice(0, 5).map((post) => (
+                      {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
                           href={post.post_url}
@@ -602,8 +602,8 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                   </div>
                   <div className="h-px flex-1 bg-foreground/15" />
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-1.5">
-                  {igWithImages.slice(0, 5).map((post, index) => (
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5">
+                  {igWithImages.slice(0, 6).map((post, index) => (
                     <a
                       key={post.id}
                       href={post.post_url}
