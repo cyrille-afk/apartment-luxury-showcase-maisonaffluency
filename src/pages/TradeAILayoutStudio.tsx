@@ -27,6 +27,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
+
+/** "just now" / "5 min ago" / "2 h ago" / "3 d ago" for the camera-path sync indicator. */
+function syncTimeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "just now";
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `${h} h ago`;
+  return `${Math.floor(h / 24)} d ago`;
+}
 const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => (
