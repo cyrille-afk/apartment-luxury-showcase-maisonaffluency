@@ -1,5 +1,37 @@
-import { describe, expect, it } from "vitest";
-import { advancePlayback, cameraTransitionBlend, remapPlaybackTime, playbackTimeLabel, steppedPlaybackSpeed, walkthroughShortcut } from "./cinematicPlayback";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { advancePlayback, cameraTransitionBlend, remapPlaybackTime, playbackTimeLabel, readWalkthroughPreferences, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_PREFERENCES_KEY, walkthroughShortcut } from "./cinematicPlayback";
+
+describe("walkthrough preferences", () => {
+  afterEach(() => { vi.restoreAllMocks(); window.localStorage.removeItem(WALKTHROUGH_PREFERENCES_KEY); });
+  it("restores defaults without saved preferences", () => {
+    window.localStorage.removeItem(WALKTHROUGH_PREFERENCES_KEY);
+    expect(readWalkthroughPreferences()).toEqual({ preset: "sweep", speed: 1, loop: false });
+  });
+  it("persists each supported preset, speed and both repeat states", () => {
+    for (const preset of ["sweep", "slow-orbit", "furniture-tour"] as const) {
+      for (const speed of [0.5, 0.75, 1, 1.5, 2]) {
+        for (const loop of [true, false]) {
+          saveWalkthroughPreferences({ preset, speed, loop });
+          expect(readWalkthroughPreferences()).toEqual({ preset, speed, loop });
+        }
+      }
+    }
+  });
+  it("falls back safely for corrupt or invalid settings", () => {
+    for (const raw of ["{broken", "null", "[]", '{"preset":"unknown","speed":99,"loop":"true"}']) {
+      window.localStorage.setItem(WALKTHROUGH_PREFERENCES_KEY, raw);
+      expect(readWalkthroughPreferences()).toEqual({ preset: "sweep", speed: 1, loop: false });
+    }
+    window.localStorage.setItem(WALKTHROUGH_PREFERENCES_KEY, '{"preset":"slow-orbit","speed":-1,"loop":true}');
+    expect(readWalkthroughPreferences()).toEqual({ preset: "slow-orbit", speed: 1, loop: true });
+  });
+  it("keeps playback usable when storage is blocked", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("quota"); });
+    expect(readWalkthroughPreferences()).toEqual({ preset: "sweep", speed: 1, loop: false });
+    expect(() => saveWalkthroughPreferences({ preset: "sweep", speed: 1, loop: false })).not.toThrow();
+  });
+});
 
 describe("walkthrough playback clock", () => {
   it("preserves route phase across preset durations and leaves entry intact", () => {

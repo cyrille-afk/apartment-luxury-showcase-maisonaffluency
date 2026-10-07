@@ -1,3 +1,5 @@
+import type { CinematicPreset } from "@/hooks/useCinematicPath";
+
 export const CINEMATIC_ENTRY_SECONDS = 2.5;
 export const CINEMATIC_TRANSITION_SECONDS = 3;
 
@@ -13,6 +15,28 @@ export function cameraTransitionBlend(time: number) {
   return Math.max(0, Math.min(1, t * t * t * (t * (t * 6 - 15) + 10)));
 }
 export const WALKTHROUGH_SPEEDS = [0.5, 0.75, 1, 1.5, 2];
+
+export const WALKTHROUGH_PREFERENCES_KEY = "ma_walkthrough_preferences_v1";
+export type WalkthroughPreferences = { preset: CinematicPreset; speed: number; loop: boolean };
+
+export function readWalkthroughPreferences(): WalkthroughPreferences {
+  const defaults: WalkthroughPreferences = { preset: "sweep", speed: 1, loop: false };
+  try {
+    const saved: unknown = JSON.parse(window.localStorage.getItem(WALKTHROUGH_PREFERENCES_KEY) ?? "null");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return defaults;
+    const value = saved as Record<string, unknown>;
+    return {
+      preset: value.preset === "sweep" || value.preset === "slow-orbit" || value.preset === "furniture-tour" ? value.preset : defaults.preset,
+      speed: typeof value.speed === "number" && WALKTHROUGH_SPEEDS.includes(value.speed) ? value.speed : defaults.speed,
+      loop: typeof value.loop === "boolean" ? value.loop : defaults.loop,
+    };
+  } catch { return defaults; }
+}
+
+export function saveWalkthroughPreferences(preferences: WalkthroughPreferences) {
+  try { window.localStorage.setItem(WALKTHROUGH_PREFERENCES_KEY, JSON.stringify(preferences)); }
+  catch { /* Storage restrictions must not interrupt playback. */ }
+}
 
 export function steppedPlaybackSpeed(speed: number, direction: number) {
   const index = WALKTHROUGH_SPEEDS.indexOf(speed);

@@ -5,7 +5,7 @@ import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@
 import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
-import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
+import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readWalkthroughPreferences, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { Slider } from "@/components/ui/slider";
 import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
 import { toast } from "sonner";
@@ -174,13 +174,17 @@ const TradeAILayoutStudio = () => {
   }, []);
 
   const [walking, setWalking] = useState(false);
+  const [walkPreferences] = useState(readWalkthroughPreferences);
   const [walkActive, setWalkActive] = useState(false);
   const [walkTime, setWalkTime] = useState(0);
-  const [walkSpeed, setWalkSpeed] = useState(1);
+  const [walkSpeed, setWalkSpeed] = useState(walkPreferences.speed);
   const [walkSeek, setWalkSeek] = useState({ id: 0, time: 0, restart: false });
-  const [walkLoop, setWalkLoop] = useState(false);
+  const [walkLoop, setWalkLoop] = useState(walkPreferences.loop);
   const [exporting, setExporting] = useState(false);
-  const [walkPreset, setWalkPreset] = useState<CinematicPreset>("sweep");
+  const [walkPreset, setWalkPreset] = useState<CinematicPreset>(walkPreferences.preset);
+  useEffect(() => {
+    saveWalkthroughPreferences({ preset: walkPreset, speed: walkSpeed, loop: walkLoop });
+  }, [walkPreset, walkSpeed, walkLoop]);
   const cinematic = useCinematicPath(scene, 24, walkPreset);
   const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
   useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [scene]);
