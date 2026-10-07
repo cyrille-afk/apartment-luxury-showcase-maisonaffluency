@@ -1421,7 +1421,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       )}
       {isMobile && args.tiles.length > 0 && (
         <div className="flex gap-3 overflow-x-auto -mx-1 px-1 pt-2 pb-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "square"))}
+          {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "square", args.splitExtraKey))}
         </div>
 
       )}
@@ -1438,7 +1438,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                 "sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-3 md:gap-4 sm:overflow-visible sm:mx-0 sm:px-0 sm:[&>*]:w-auto"
               )}
             >
-              {args.tiles.map((f) => renderTile(f, args.tileKind))}
+              {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, undefined, args.splitExtraKey))}
             </div>
           ) : (
 
