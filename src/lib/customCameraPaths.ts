@@ -209,7 +209,9 @@ export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
     const magnitude = step * (1 + Math.floor(it / 2));
     const side = it % 2 === 0 ? 1 : -1;
     // Shift every flagged viewpoint together, perpendicular to the local path direction,
-    // so multi-node and straight two-node paths can both escape an obstacle.
+    // so multi-node and straight two-node paths can both escape an obstacle. Keep growing
+    // the offset until the path fully exits the obstacle — partial moves rarely shrink the
+    // flagged span, so only a genuinely better score is kept, but the search continues.
     const trial = out.map((n, i) => {
       const pct = (i / last) * 100;
       if (!conflicts.some((c) => pct >= c.fromPct - 100 / last && pct <= c.toPct + 100 / last)) return n;
@@ -221,7 +223,7 @@ export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
     });
     const c = checkPathClearance(scene, buildCustomCinematicPath(scene, trial));
     const s = score(c);
-    if (s < best) { out = trial; conflicts = c; best = s; } else if (it > 1) break;
+    if (s < best) { out = trial; conflicts = c; best = s; }
   }
   return { nodes: out, conflicts };
 }
