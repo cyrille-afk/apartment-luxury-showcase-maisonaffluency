@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import AICuratedEnvironment from "@/components/trade/visualiser/AICuratedEnvironment";
 import { DEFAULT_BRIEF, fetchLiveCatalogue, generateRoomLayout, repriceScene, summarise, toAsset, type LayoutBrief, type LiveCatalogueItem } from "@/lib/mockAiLayoutService";
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
+import { Textarea } from "@/components/ui/textarea";
+import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
@@ -33,6 +35,8 @@ const TradeAILayoutStudio = () => {
   const [current, setCurrent] = useState<SavedLayout | null>(null);
   const [saved, setSaved] = useState<SavedLayout[]>([]);
   const [saving, setSaving] = useState(false);
+  const [briefText, setBriefText] = useState("Warm minimalism, neutral tones, budget €50,000");
+  const [curation, setCuration] = useState<CurationResult | null>(null);
 
   const refreshSaved = useCallback(async () => {
     try { setSaved(await listLayouts()); } catch { /* list stays empty */ }
@@ -122,6 +126,16 @@ const TradeAILayoutStudio = () => {
     }
   };
 
+  const runCuration = () => {
+    const result = curate(briefText, catalogue, brief.totalBudget);
+    setCuration(result);
+    setSelectedId(null);
+    setCurrent(null);
+    setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
+    if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
+    setScene(sceneFromCuration(result, brief));
+  };
+
   const withLedger = (next: AICuratedSceneSchema) => ({ ...next, financialSummary: summarise(next) });
 
   const swapAsset = (index: number, componentId: string) => {
@@ -160,7 +174,7 @@ const TradeAILayoutStudio = () => {
     setBrief((b) => ({ ...b, roomDimensions: { ...b.roomDimensions, [k]: Math.max(3, Math.min(20, Number(v) || 0)) } }));
 
   return (
-    <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[360px_1fr]">
+    <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[340px_1fr] xl:grid-cols-[340px_1fr_320px]">
       <Helmet>
         <title>AI Layout Studio | Maison Affluency Trade</title>
         <meta name="robots" content="noindex" />
@@ -330,6 +344,55 @@ const TradeAILayoutStudio = () => {
           </Canvas>
         )}
       </div>
+
+      <aside className="space-y-5 border border-border bg-card p-6" aria-label="Curation Breakdown">
+        <div>
+          <p className={micro}>Curation matrix</p>
+          <h2 className="mt-1 font-serif text-xl">Curation Breakdown</h2>
+        </div>
+        <div className="space-y-2">
+          <Textarea value={briefText} onChange={(e) => setBriefText(e.target.value)} rows={3} maxLength={2000}
+            className="resize-none text-xs" placeholder="e.g. Warm minimalism, neutral tones, budget €50,000" />
+          <Button className="w-full" variant="outline" onClick={runCuration} disabled={catLoading || !!catError || !briefText.trim()}>
+            <Sparkles className="mr-2 h-4 w-4" /> Curate from brief
+          </Button>
+        </div>
+        {curation && (() => {
+          const util = curation.utilisation * 100;
+          return (
+            <>
+              <div className="flex flex-wrap gap-1">
+                {(curation.parsed.styleTokens.length ? curation.parsed.styleTokens : ["No style detected"]).map((t) => (
+                  <span key={t} className="border border-border px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{t}</span>
+                ))}
+              </div>
+              <ul className="divide-y divide-border text-xs">
+                {curation.selected.map((r, i) => (
+                  <li key={`${r.item.componentId}-${i}`} className="flex items-start justify-between gap-3 py-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{r.item.name}</p>
+                      <p className="truncate text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{r.item.sku} · {r.role} · {Math.round(r.score * 100)}% match</p>
+                    </div>
+                    <span className="shrink-0 tabular-nums">{eur(r.item.price ?? 0)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="space-y-2 border-t border-border pt-3">
+                <div className="flex items-baseline justify-between">
+                  <span className={micro}>Allocation</span>
+                  <span className="font-serif text-lg tabular-nums">{eur(curation.total)}</span>
+                </div>
+                <Progress value={Math.min(100, util)} />
+                <p className="text-xs text-muted-foreground">
+                  {util.toFixed(1)}% of the {eur(curation.budget)} threshold · {eur(curation.budget - curation.total)} remaining
+                </p>
+                {curation.unmet.length > 0 && <p className="text-xs text-destructive">No eligible piece for: {curation.unmet.join(", ")}</p>}
+                {curation.parsed.budget == null && <p className="text-xs text-muted-foreground">No budget in brief — using the panel budget.</p>}
+              </div>
+            </>
+          );
+        })()}
+      </aside>
     </div>
   );
 };
