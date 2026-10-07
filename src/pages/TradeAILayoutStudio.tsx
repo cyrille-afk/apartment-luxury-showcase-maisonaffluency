@@ -540,7 +540,7 @@ const TradeAILayoutStudio = () => {
               <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
                 {pathSyncStatus.pendingRetry.length > 0 ? (
                   <>
-                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
+                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
                     <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
                   </>
                 ) : (
