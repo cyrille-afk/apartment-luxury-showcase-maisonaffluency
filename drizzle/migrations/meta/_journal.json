@@ -995,6 +995,13 @@
       "when": 1791369040346,
       "tag": "0141_curation_matching_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1791379001174,
+      "tag": "0142_custom_camera_paths",
+      "breakpoints": true
     }
   ]
 }

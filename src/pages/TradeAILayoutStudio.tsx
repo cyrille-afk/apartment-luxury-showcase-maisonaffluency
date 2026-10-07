@@ -1,10 +1,13 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
+import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
+import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
+import { buildCustomCinematicPath, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readWalkthroughPreferences, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { Slider } from "@/components/ui/slider";
 import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
@@ -185,8 +188,69 @@ const TradeAILayoutStudio = () => {
   useEffect(() => {
     saveWalkthroughPreferences({ preset: walkPreset, speed: walkSpeed, loop: walkLoop });
   }, [walkPreset, walkSpeed, walkLoop]);
-  const cinematic = useCinematicPath(scene, 24, walkPreset);
+  const presetCinematic = useCinematicPath(scene, 24, walkPreset);
+  // Custom path authoring
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [storageOpen, setStorageOpen] = useState(false);
+  const [authorMode, setAuthorMode] = useState<PathMode | null>(null);
+  const [authorNodes, setAuthorNodes] = useState<CustomPathNode[]>([]);
+  const [authorText, setAuthorText] = useState<string | undefined>();
+  const [drawHeight, setDrawHeight] = useState(1.8);
+  const [pathName, setPathName] = useState("My walkthrough");
+  const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
+  const [activeCustomId, setActiveCustomId] = useState<string | null>(null);
+  const samplerRef = useRef<CameraSampler | null>(null);
+  const layoutKey = current?.id ?? null;
+  const loadCustomPaths = useCallback(async () => {
+    const local = readLocalPaths(layoutKey ?? "unsaved").map((p) => ({ ...p, source: "local" as const }));
+    const [layout, account] = await Promise.all([
+      layoutKey ? listLayoutPaths(layoutKey).catch(() => []) : Promise.resolve([]),
+      listAccountPaths().catch(() => []),
+    ]);
+    setCustomPaths([...layout.map((p) => ({ ...p, source: "layout" as const })), ...account.map((p) => ({ ...p, source: "account" as const })), ...local]);
+  }, [layoutKey]);
+  useEffect(() => { void loadCustomPaths(); }, [loadCustomPaths]);
+  const activeCustom = customPaths.find((p) => p.id === activeCustomId) ?? null;
+  const customCinematic = useMemo(() => (scene && activeCustom ? buildCustomCinematicPath(scene, activeCustom.nodes) : null), [scene, activeCustom]);
+  const cinematic = activeCustom ? customCinematic : presetCinematic;
   const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
+  const onPathModeSelect = (mode: PathMode, customText?: string) => {
+    setBuilderOpen(false);
+    setWalking(false); setWalkActive(false);
+    setAuthorText(customText);
+    if (mode === "text" && scene) {
+      const nodes = nodesFromDescription(scene, customText ?? "");
+      setAuthorNodes(nodes);
+      if (nodes.length < 2) { toast.error("Couldn't build a safe path from that description"); return; }
+      setAuthorMode("capture"); // review/refine the generated nodes in the capture panel
+      toast.success(`Built ${nodes.length} viewpoints from your description — adjust, then save`);
+      return;
+    }
+    setAuthorNodes([]);
+    setAuthorMode(mode);
+  };
+  const addViewpoint = () => {
+    const node = samplerRef.current?.();
+    if (node) setAuthorNodes((n) => [...n, node]);
+  };
+  const moveNode = (i: number, d: number) => setAuthorNodes((n) => {
+    const j = i + d; if (j < 0 || j >= n.length) return n;
+    const next = [...n]; const a = next[i]; const b = next[j];
+    if (a && b) { next[i] = b; next[j] = a; }
+    return next;
+  });
+  const onStoragePreferenceSubmit = async (mode: StorageMode, customText?: string) => {
+    if (!scene) return;
+    const path: CustomCameraPath = { id: crypto.randomUUID(), name: pathName, mode: authorText ? "text" : authorMode ?? "capture", nodes: authorNodes, description: authorText };
+    try {
+      const saved = await persistCustomPath(mode, path, layoutKey, customText);
+      toast.success(mode === "layout" ? "Path saved with this layout" : mode === "account" ? "Path saved to your library" : "Path saved in this browser");
+      setStorageOpen(false); setAuthorMode(null); setAuthorNodes([]);
+      await loadCustomPaths();
+      if (mode !== "account") setActiveCustomId(saved.id);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Could not save path"); }
+  };
+  const authorPreview = useMemo(() => (scene && authorNodes.length > 1 ? buildCustomCinematicPath(scene, authorNodes) : null), [scene, authorNodes]);
   useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [scene]);
   useEffect(() => {
     if (!cinematic) { setWalking(false); setWalkActive(false); setWalkTime(0); }
@@ -400,14 +464,21 @@ const TradeAILayoutStudio = () => {
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
-            <Select value={walkPreset} onValueChange={(value) => {
+            <Select value={activeCustomId ? `custom:${activeCustomId}` : walkPreset} onValueChange={(value) => {
+              if (value.startsWith("custom:")) { setActiveCustomId(value.slice(7)); return; }
               const preset = CINEMATIC_PRESETS.find((p) => p.value === value);
-              if (preset) setWalkPreset(preset.value);
+              if (preset) { setActiveCustomId(null); setWalkPreset(preset.value); }
             }}>
-              <SelectTrigger aria-label="Camera path preset" className="h-9 w-[180px] bg-background text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>{CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+              <SelectTrigger aria-label="Camera path preset" className="h-9 w-[200px] bg-background text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                {customPaths.map((p) => <SelectItem key={`${p.source}-${p.id}`} value={`custom:${p.id}`}>{p.name} · {p.source === "layout" ? "layout" : p.source === "account" ? "library" : "browser"}</SelectItem>)}
+              </SelectContent>
             </Select>
-            <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic}>
+            <Button size="sm" variant="secondary" onClick={() => setBuilderOpen(true)} disabled={walkActive || !!authorMode}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />Custom path
+            </Button>
+            <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic || !!authorMode}>
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
@@ -420,18 +491,58 @@ const TradeAILayoutStudio = () => {
         )}
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
-            <PerspectiveCamera makeDefault fov={45} near={0.05} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
-            <OrbitControls makeDefault enabled={!dragging && !walkActive} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
+            {authorMode === "draw"
+              ? <FloorPlanDrawLayer width={scene.roomDimensions.width} length={scene.roomDimensions.length}
+                  onPick={(x, z) => setAuthorNodes((n) => [...n, { position: [x, drawHeight, z], target: clusterCentre(scene) }])} />
+              : <PerspectiveCamera makeDefault fov={45} near={0.05} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />}
+            <OrbitControls makeDefault enabled={!dragging && !walkActive} enableRotate={authorMode !== "draw"} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive} />
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode} />
             <CinematicCameraRig path={cinematic} enabled={walkActive} playing={walking} speed={walkSpeed}
               seek={walkSeek} onTimeChange={setWalkTime} onDone={finishWalk} />
+            <CameraSamplerBridge samplerRef={samplerRef} />
+            {authorMode && <PathNodesGuide nodes={authorNodes} />}
           </Canvas>
         )}
+        {authorMode && scene && (
+          <div role="group" aria-label="Custom path builder" className="absolute bottom-3 left-3 z-10 w-[300px] space-y-3 border border-border bg-background/95 p-3 text-xs shadow-sm">
+            <p className={micro}>{authorMode === "draw" ? "Draw on floor plan" : "Capture viewpoints"}</p>
+            <p className="text-muted-foreground">{authorMode === "draw" ? "Click the floor to drop points. Each new point uses the height below." : "Frame the view, then add it. The camera glides through points in order."}</p>
+            <Input aria-label="Path name" value={pathName} maxLength={120} onChange={(e) => setPathName(e.target.value)} className="h-8 text-xs" />
+            {authorMode === "draw" && (
+              <Label className="flex items-center gap-2">Height (m)
+                <Input type="number" step={0.1} min={0.5} max={scene.roomDimensions.height - 0.2} value={drawHeight} className="h-8 w-20 text-xs"
+                  onChange={(e) => setDrawHeight(Math.max(0.5, Math.min(scene.roomDimensions.height - 0.2, Number(e.target.value) || 1.8)))} />
+              </Label>
+            )}
+            {authorMode === "capture" && <Button size="sm" className="w-full" onClick={addViewpoint}><Camera className="mr-1.5 h-3.5 w-3.5" />Add Viewpoint</Button>}
+            <ol className="max-h-40 space-y-1 overflow-auto">
+              {authorNodes.map((n, i) => (
+                <li key={i} className="flex items-center gap-1">
+                  <span className="w-5 tabular-nums text-muted-foreground">{i + 1}</span>
+                  <span className="flex-1 tabular-nums">{n.position.map((v) => v.toFixed(1)).join(", ")}</span>
+                  {authorMode === "draw" && <Input aria-label={`Point ${i + 1} height`} type="number" step={0.1} value={n.position[1]} className="h-6 w-14 px-1 text-xs"
+                    onChange={(e) => { const y = Math.max(0.5, Math.min(scene.roomDimensions.height - 0.2, Number(e.target.value) || 1.8)); setAuthorNodes((all) => all.map((m, j) => j === i ? { ...m, position: [m.position[0], y, m.position[2]] } : m)); }} />}
+                  <Button size="icon" variant="ghost" className="h-6 w-6" aria-label={`Move point ${i + 1} up`} onClick={() => moveNode(i, -1)}><ArrowUp className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" aria-label={`Move point ${i + 1} down`} onClick={() => moveNode(i, 1)}><ArrowDown className="h-3 w-3" /></Button>
+                  <Button size="icon" variant="ghost" className="h-6 w-6" aria-label={`Delete point ${i + 1}`} onClick={() => setAuthorNodes((all) => all.filter((_, j) => j !== i))}><Trash2 className="h-3 w-3" /></Button>
+                </li>
+              ))}
+            </ol>
+            <p className="text-muted-foreground">{authorNodes.length < 2 ? "Add at least 2 points." : authorPreview ? `${authorNodes.length} points · ${Math.round(authorPreview.durationSec)}s` : "Points too close together."}</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" onClick={() => { setAuthorMode(null); setAuthorNodes([]); }}>Cancel</Button>
+              <Button size="sm" className="ml-auto" disabled={!authorPreview} onClick={() => setStorageOpen(true)}><Save className="mr-1.5 h-3.5 w-3.5" />Save path</Button>
+            </div>
+          </div>
+        )}
+        <CustomPathBuilderModal open={builderOpen} onOpenChange={setBuilderOpen} onPathModeSelect={onPathModeSelect} />
+        <PathStoragePreferencesModal open={storageOpen} onOpenChange={setStorageOpen} layoutSaved={!!current?.id}
+          onBack={() => setStorageOpen(false)} onStoragePreferenceSubmit={(m, t) => void onStoragePreferenceSubmit(m, t)} />
         {walkActive && cinematic && (
           <div role="group" aria-label="Walkthrough playback controls" className="absolute inset-x-3 bottom-3 z-10 space-y-3 border border-border bg-background/95 p-3 shadow-sm">
             <Slider thumbLabel="Walkthrough timeline" min={0} max={walkDuration} step={0.1} value={[walkTime]}
