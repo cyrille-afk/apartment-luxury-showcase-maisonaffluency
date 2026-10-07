@@ -29,3 +29,4 @@
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
+- AI layout pipeline: `AICuratedSceneSchema` (src/types/aiCuratedScene.ts) is the single contract between the layout generator and `AICuratedEnvironment`; financialSummary is always recomputed from curatedAssets via `summarise` so the ledger can't drift.

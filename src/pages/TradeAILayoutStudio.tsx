@@ -135,7 +135,7 @@ const TradeAILayoutStudio = () => {
         )}
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
-            <PerspectiveCamera makeDefault fov={45} position={[scene.roomDimensions.width * 0.9, scene.roomDimensions.height * 1.6, scene.roomDimensions.length * 1.1]} />
+            <PerspectiveCamera makeDefault fov={45} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
             <OrbitControls makeDefault enabled={!dragging} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
