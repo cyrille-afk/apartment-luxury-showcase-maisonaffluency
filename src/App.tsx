@@ -154,6 +154,7 @@ const TradeTools = lazy(() => import("./pages/TradeTools"));
 
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeVisualiser = lazy(() => import("./pages/TradeVisualiser"));
+const TradeAILayoutStudio = lazy(() => import("./pages/TradeAILayoutStudio"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
 const TradeProvenance = lazy(() => import("./pages/TradeProvenance"));
@@ -921,6 +922,7 @@ const App = () => {
                     <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
                     <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
+                    <Route path="ai-layout" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAILayoutStudio /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
                     <Route path="journal" element={<TradeJournal />} />
                     <Route path="provenance" element={<TradeProvenance />} />

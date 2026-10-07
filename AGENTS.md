@@ -13,7 +13,7 @@
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting, and auth redirects to /trade/login must carry `?next=`; a failed or pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked against getSession) must not demote a valid session.
 - Never register a blocking beforeunload prompt (preventDefault/returnValue) for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops restore re-freeze loops.
-- Curator Notes: product pages use a full-width vertical list (lead note tinted panel); the lightbox uses three columns (lead header tinted) — distinct contexts.
+- Curator Notes: product pages = full-width list; lightbox = three columns.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
 - Match each slash-separated explicit product category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without allowing generic tags to override primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
@@ -29,3 +29,4 @@
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
+- AI layout pipeline rules live in src/components/trade/visualiser/AGENTS.md.
