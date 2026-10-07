@@ -361,9 +361,12 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                           <Link
                             to={`/designers/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased hover:underline underline-offset-4 decoration-foreground/40 transition-colors"
+                            className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70"
                           >
-                            {brandLine}
+                            <span className="relative inline-block max-w-full pb-1 align-bottom">
+                              {brandLine}
+                              <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover/designer:scale-x-100 motion-reduce:transition-none" />
+                            </span>
                           </Link>
                          ) : brandLine ? (
                           <span className="block w-full truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased">
