@@ -2,7 +2,10 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import { Copy, Link2, Loader2, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { deleteLayout, listLayouts, saveLayout, setShared, shareUrl, snapshotProducts, type SavedLayout } from "@/lib/aiLayoutStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +29,64 @@ const TradeAILayoutStudio = () => {
   const [catLoading, setCatLoading] = useState(true);
   const [catError, setCatError] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<string[]>([]);
+  const [title, setTitle] = useState("Living room proposal");
+  const [current, setCurrent] = useState<SavedLayout | null>(null);
+  const [saved, setSaved] = useState<SavedLayout[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const refreshSaved = useCallback(async () => {
+    try { setSaved(await listLayouts()); } catch { /* list stays empty */ }
+  }, []);
+  useEffect(() => { void refreshSaved(); }, [refreshSaved]);
+
+  const save = async (asNew = false) => {
+    if (!scene) return;
+    setSaving(true);
+    try {
+      const row = await saveLayout({ id: asNew ? undefined : current?.id, title, brief, scene, products: snapshotProducts(scene, catalogue) });
+      setCurrent(row);
+      toast.success("Layout saved");
+      void refreshSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save layout");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleShare = async (on: boolean) => {
+    if (!current) return;
+    try {
+      // Re-save first so the client sees the latest pieces and budget.
+      if (on && scene) await saveLayout({ id: current.id, title, brief, scene, products: snapshotProducts(scene, catalogue) });
+      await setShared(current.id, on);
+      setCurrent({ ...current, is_shared: on });
+      void refreshSaved();
+      if (on) { await navigator.clipboard?.writeText(shareUrl(current.share_token)).catch(() => {}); toast.success("Share link copied"); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not update sharing");
+    }
+  };
+
+  const openSaved = (l: SavedLayout) => {
+    setCurrent(l);
+    setTitle(l.title);
+    setBrief(l.brief);
+    setSelectedId(null);
+    setSkipped([]);
+    setScene(catalogue.length ? repriceScene(l.scene, catalogue) : l.scene);
+  };
+
+  const removeSaved = async (l: SavedLayout) => {
+    try {
+      await deleteLayout(l.id);
+      if (current?.id === l.id) setCurrent(null);
+      void refreshSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete layout");
+    }
+  };
+
   const byId = useMemo(() => new Map(catalogue.map((c) => [c.componentId, c])), [catalogue]);
 
   const loadCatalogue = useCallback(async () => {
@@ -50,6 +111,7 @@ const TradeAILayoutStudio = () => {
   const generate = async () => {
     setLoading(true);
     setSelectedId(null);
+    setCurrent(null);
     try {
       const live = (await loadCatalogue()) ?? catalogue;
       const { scene: next, skipped: miss } = await generateRoomLayout(brief, live);
@@ -170,6 +232,53 @@ const TradeAILayoutStudio = () => {
             <div><dt className="text-muted-foreground">Buffer</dt><dd className={fin && fin.remainingBuffer < 0 ? "text-destructive" : ""}>{eur(fin?.remainingBuffer ?? brief.totalBudget)}</dd></div>
           </dl>
         </section>
+
+        {scene && (
+          <section className="space-y-2">
+            <p className={micro}>Save &amp; share</p>
+            <Input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="Layout title" />
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => save()} disabled={saving}>
+                {saving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}{current ? "Save changes" : "Save layout"}
+              </Button>
+              {current && <Button size="sm" variant="ghost" onClick={() => save(true)} disabled={saving}>Save as new</Button>}
+            </div>
+            {current && (
+              <div className="space-y-2 border border-border p-3">
+                <label className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-1.5"><Link2 className="h-3.5 w-3.5" /> Read-only client link</span>
+                  <Switch checked={current.is_shared} onCheckedChange={toggleShare} aria-label="Share with client" />
+                </label>
+                {current.is_shared && (
+                  <div className="flex items-center gap-2">
+                    <Input readOnly value={shareUrl(current.share_token)} className="h-8 text-xs" />
+                    <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="Copy link"
+                      onClick={() => navigator.clipboard?.writeText(shareUrl(current.share_token)).then(() => toast.success("Link copied"))}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {saved.length > 0 && (
+          <section className="space-y-1">
+            <p className={micro}>Saved layouts ({saved.length})</p>
+            <ul className="divide-y divide-border text-xs">
+              {saved.map((l) => (
+                <li key={l.id} className="flex items-center gap-2 py-1.5">
+                  <button className="flex-1 truncate text-left hover:underline" onClick={() => openSaved(l)}>
+                    {l.title}{current?.id === l.id ? " ·" : ""}
+                  </button>
+                  {l.is_shared && <Link2 className="h-3 w-3 text-muted-foreground" aria-label="Shared" />}
+                  <button aria-label="Delete layout" onClick={() => removeSaved(l)} className="text-muted-foreground hover:text-foreground"><Trash2 className="h-3.5 w-3.5" /></button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {scene && (
           <section className="space-y-1">

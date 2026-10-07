@@ -16,12 +16,14 @@ interface Props {
   /** Index-addressed so edits flow back into the schema. */
   onAssetTransform: (index: number, position: Vec3, rotation: Vec3) => void;
   onDragStateChange: (dragging: boolean) => void;
+  /** False for read-only client links. */
+  isEditable?: boolean;
 }
 
 const instanceIdFor = (index: number, sku: string) => `ai-${index}-${sku}`;
 
 /** Renders an AICuratedSceneSchema inside an R3F <Canvas>: room shell, anchors and editable assets. */
-const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange }: Props) => {
+const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true }: Props) => {
   const { width: W, length: L, height: H } = schema.roomDimensions;
 
   const objects = useMemo<PlacedObject[]>(
@@ -70,7 +72,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             key={instanceIdFor(i, asset.sku)}
             object={objects[i]}
             scaleVector={asset.scale}
-            isEditable={true}
+            isEditable={isEditable}
             selected={selectedId === instanceIdFor(i, asset.sku)}
             onSelect={onSelect}
             onTransform={(_id, position, rotation) => onAssetTransform(i, position, rotation)}
