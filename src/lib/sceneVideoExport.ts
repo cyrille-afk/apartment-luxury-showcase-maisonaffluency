@@ -19,7 +19,7 @@ export interface SceneVideoPayload {
     architecturalAnchors: AICuratedSceneSchema["architecturalAnchors"];
     assets: Array<Omit<AICuratedSceneSchema["curatedAssets"][number], "priceAtCuration">>;
   };
-  camera: { fovDeg: number; durationSec: number; fps: number; lookAt: [number, number, number]; path: Array<[number, number, number]> };
+  camera: { fovDeg: number; durationSec: number; fps: number; lookAt: [number, number, number]; lookAtPath?: Array<[number, number, number]>; path: Array<[number, number, number]> };
   render: { provider: "runway-gen3" | "luma"; style: "hyper-photorealistic"; aspectRatio: "16:9" };
 }
 
@@ -34,7 +34,7 @@ export function buildSceneVideoPayload(scene: AICuratedSceneSchema, path: Cinema
       architecturalAnchors: scene.architecturalAnchors,
       assets: scene.curatedAssets.map(({ priceAtCuration: _p, ...a }) => a),
     },
-    camera: { fovDeg, durationSec: path.durationSec, fps: 24, lookAt: path.target.toArray() as [number, number, number], path: path.samples },
+    camera: { fovDeg, durationSec: path.durationSec, fps: 24, lookAt: path.target.toArray() as [number, number, number], lookAtPath: path.lookAtSamples, path: path.samples },
     render: { provider: "runway-gen3", style: "hyper-photorealistic", aspectRatio: "16:9" },
   };
 }

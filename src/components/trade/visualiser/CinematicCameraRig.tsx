@@ -33,6 +33,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
   const orientation = useRef(new THREE.Quaternion());
   const scratch = useRef(new THREE.PerspectiveCamera());
   const forward = useRef(new THREE.Vector3());
+  const lookTarget = useRef(new THREE.Vector3());
   useFrame((_state, delta) => {
     if (!enabled || !path) { active.current = false; return; }
     if (!active.current) {
@@ -45,6 +46,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
     }
     const entrySec = CINEMATIC_ENTRY_SECONDS;
     const duration = entrySec + path.durationSec;
+    lookTarget.current.copy(path.target);
     const seeking = lastSeek.current !== seek.id;
     if (seeking) {
       elapsed.current = THREE.MathUtils.clamp(seek.time, 0, duration);
@@ -60,13 +62,15 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       camera.quaternion.slerpQuaternions(orientation.current, scratch.current.quaternion, blend);
     } else {
       const t = Math.min(1, (elapsed.current - entrySec) / path.durationSec);
-      camera.position.copy(path.curve.getPointAt(cinematicProgress(t)));
-      camera.lookAt(path.target);
+      const progress = cinematicProgress(t);
+      camera.position.copy(path.curve.getPointAt(progress));
+      if (path.lookAtCurve) lookTarget.current.copy(path.lookAtCurve.getPoint(path.curve.getUtoTmapping(progress, 0)));
+      camera.lookAt(lookTarget.current);
     }
     // Resume OrbitControls without a target/orientation jump, including manual Stop.
     if (controls) {
       camera.getWorldDirection(forward.current);
-      controls.target.copy(camera.position).addScaledVector(forward.current, camera.position.distanceTo(path.target));
+      controls.target.copy(camera.position).addScaledVector(forward.current, camera.position.distanceTo(lookTarget.current));
     }
     if (seeking || Math.abs(elapsed.current - lastReport.current) >= 0.1 || elapsed.current >= duration) {
       lastReport.current = elapsed.current;

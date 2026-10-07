@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
-import { useCinematicPath } from "@/hooks/useCinematicPath";
+import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel } from "@/lib/cinematicPlayback";
 import { Slider } from "@/components/ui/slider";
@@ -179,7 +179,8 @@ const TradeAILayoutStudio = () => {
   const [walkSpeed, setWalkSpeed] = useState(1);
   const [walkSeek, setWalkSeek] = useState({ id: 0, time: 0 });
   const [exporting, setExporting] = useState(false);
-  const cinematic = useCinematicPath(scene);
+  const [walkPreset, setWalkPreset] = useState<CinematicPreset>("sweep");
+  const cinematic = useCinematicPath(scene, 24, walkPreset);
   const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
   useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [cinematic]);
   const seekWalk = (time: number) => {
@@ -370,6 +371,13 @@ const TradeAILayoutStudio = () => {
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+            <Select value={walkPreset} onValueChange={(value) => {
+              const preset = CINEMATIC_PRESETS.find((p) => p.value === value);
+              if (preset) { stopWalk(); setWalkPreset(preset.value); }
+            }}>
+              <SelectTrigger aria-label="Camera path preset" className="h-9 w-[180px] bg-background text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>{CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}</SelectContent>
+            </Select>
             <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic}>
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
