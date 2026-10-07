@@ -1303,7 +1303,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // (e.g. Wood + Lacquer on a combined "A & B" variant) get one dropdown per
   // group, labelled like the Pictured Finishes strip, instead of one lumped list.
   const categoryGroups = (() => {
-    if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion || woodFilter || topFilter) return null;
+    // Axis filters that match no swatch (e.g. "Base in Teak & Top in Marble 1"
+    // vs library names) don't group anything, so fall back to material groups.
+    if (isOolMinibar || isRugProduct || axisModeActive || hideBaseAccordion) return null;
+    if (woodFilter && woodTiles.some((f) => woodFilter(f.name))) return null;
     if (topTiles.length > 0 || woodTiles.length < 2) return null;
     const keyOf = (f: Fabric) => (f.raw_category || f.category || "").trim();
     const order: string[] = [];
