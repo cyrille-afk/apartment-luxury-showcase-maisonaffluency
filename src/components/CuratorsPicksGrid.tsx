@@ -159,8 +159,11 @@ const Card = memo(function Card({
       <div className="mt-3 flex h-12 w-full items-start justify-between gap-4 px-1">
         <div className="flex min-w-0 flex-1 flex-col text-left">
           {item.designer && (
-            <p className="block w-full truncate whitespace-nowrap font-sans text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--picks-fg))] antialiased">
-              {item.designer}
+            <p className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-sans text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--picks-fg))] antialiased transition-colors duration-300 ease-in-out hover:opacity-70">
+              <span className="relative inline-block max-w-full pb-1 align-bottom">
+                {item.designer}
+                <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover/designer:scale-x-100 motion-reduce:transition-none" />
+              </span>
             </p>
           )}
           <h3 className="mt-0.5 line-clamp-1 font-sans text-xs font-medium leading-snug text-[hsl(var(--picks-muted))] antialiased">
