@@ -8,7 +8,8 @@ import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
 import { buildCustomCinematicPath, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode } from "@/lib/customCameraPaths";
-import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readWalkthroughPreferences, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
+import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
+import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
 import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
 import { toast } from "sonner";
@@ -198,7 +199,25 @@ const TradeAILayoutStudio = () => {
   const [drawHeight, setDrawHeight] = useState(1.8);
   const [pathName, setPathName] = useState("My walkthrough");
   const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
-  const [activeCustomId, setActiveCustomId] = useState<string | null>(null);
+  const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
+  // Cross-device sync: account row wins on load; local stays the offline fallback.
+  const prefsHydrated = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetchRemoteWalkthroughPreferences().then((remote) => {
+      if (cancelled) return;
+      if (remote) { setWalkPreset(remote.preset); setWalkSpeed(remote.speed); setWalkLoop(remote.loop); setActiveCustomId(remote.customPathId); }
+    }).catch(() => { /* offline: keep local */ }).finally(() => { if (!cancelled) prefsHydrated.current = true; });
+    return () => { cancelled = true; };
+  }, []);
+  useEffect(() => {
+    saveCustomPathPreference(activeCustomId);
+    if (!prefsHydrated.current) return;
+    const t = window.setTimeout(() => {
+      pushRemoteWalkthroughPreferences({ preset: walkPreset, speed: walkSpeed, loop: walkLoop, customPathId: activeCustomId }).catch(() => { /* retried on next change */ });
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [walkPreset, walkSpeed, walkLoop, activeCustomId]);
   const samplerRef = useRef<CameraSampler | null>(null);
   const layoutKey = current?.id ?? null;
   const loadCustomPaths = useCallback(async () => {
