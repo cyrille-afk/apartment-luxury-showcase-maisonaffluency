@@ -7,7 +7,7 @@ import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hoo
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
-import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode, syncLocalPathsToAccount } from "@/lib/customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
@@ -572,7 +572,15 @@ const TradeAILayoutStudio = () => {
               ))}
             </ol>
             <p className="text-muted-foreground">{authorNodes.length < 2 ? "Add at least 2 points." : authorPreview ? `${authorNodes.length} points · ${Math.round(authorPreview.durationSec)}s` : "Points too close together."}</p>
-            {authorPreview && (authorConflicts.length ? <ClearanceWarning conflicts={authorConflicts} /> : <p className="text-muted-foreground">✓ Clear of furniture and room openings</p>)}
+            {authorPreview && (authorConflicts.length ? <>
+              <ClearanceWarning conflicts={authorConflicts} />
+              <Button size="sm" variant="outline" className="w-full" onClick={() => {
+                const r = autoRaiseFlaggedNodes(scene, authorNodes);
+                setAuthorNodes(r.nodes);
+                if (r.conflicts.length) toast.warning(`Raised to the ceiling limit — ${r.conflicts.length} spot${r.conflicts.length > 1 ? "s" : ""} still flagged; move those points sideways`);
+                else toast.success("Flagged viewpoints raised — path is now clear");
+              }}>Raise flagged viewpoints</Button>
+            </> : <p className="text-muted-foreground">✓ Clear of furniture and room openings</p>)}
             <div className="flex gap-2">
               <Button size="sm" variant="ghost" onClick={() => { setAuthorMode(null); setAuthorNodes([]); }}>Cancel</Button>
               <Button size="sm" className="ml-auto" disabled={!authorPreview} onClick={() => setStorageOpen(true)}><Save className="mr-1.5 h-3.5 w-3.5" />Save path</Button>

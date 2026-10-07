@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { buildCustomCinematicPath, checkPathClearance, nodesFromDescription, persistCustomPath, readLocalPaths } from "./customCameraPaths";
+import { type CustomPathNode, buildCustomCinematicPath, checkPathClearance, nodesFromDescription, persistCustomPath, readLocalPaths } from "./customCameraPaths";
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 
 const scene: AICuratedSceneSchema = {
@@ -43,5 +43,17 @@ describe("custom path clearance", () => {
     const withDoor = { ...scene, architecturalAnchors: [{ type: "door" as const, position: [0, 1, 2] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: [1, 2, 0.5] as [number, number, number] }] };
     const path = buildCustomCinematicPath(withDoor, [{ position: [-1, 1, 2], target: [0, 0, 0] }, { position: [1, 1, 2], target: [0, 0, 0] }]);
     expect(checkPathClearance(withDoor, path).some((h) => h.kind === "door")).toBe(true);
+  });
+});
+
+describe("auto-raise flagged viewpoints", () => {
+  it("lifts a low path over the sofa and leaves clear paths unchanged", async () => {
+    const { autoRaiseFlaggedNodes } = await import("./customCameraPaths");
+    const low = [{ position: [-2, 0.8, -1.3], target: [0, 0.6, 0] }, { position: [2, 0.8, -1.3], target: [0, 0.6, 0] }] as CustomPathNode[];
+    const r = autoRaiseFlaggedNodes(scene, low);
+    expect(r.conflicts).toEqual([]);
+    expect(r.nodes.every((n) => n.position[1] > 0.8 && n.position[1] <= 3.0)).toBe(true);
+    const high = [{ position: [-2, 2.4, -1.3], target: [0, 0.6, 0] }, { position: [2, 2.4, -1.3], target: [0, 0.6, 0] }] as CustomPathNode[];
+    expect(autoRaiseFlaggedNodes(scene, high).nodes).toEqual(high);
   });
 });
