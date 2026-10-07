@@ -25,6 +25,10 @@ export interface LiveCatalogueItem {
   stockStatus: string | null;
   leadWeeks: [number, number] | null;
   available: boolean;
+  /** design_style_tokens ∪ style_tags, used by curationEngine. */
+  styleTokens: string[];
+  /** Bounding box in metres, when recorded. */
+  dimensionsCubic: { w: number; d: number; h: number } | null;
 }
 
 /** Layout roles for the pieces the generator knows how to place. */
@@ -47,7 +51,7 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
   const ids = Object.keys(ROLES);
   const { data: products, error } = await supabase
     .from("trade_products")
-    .select("id, product_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden")
+    .select("id, product_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic")
     .in("id", ids);
   if (error) throw error;
 
@@ -85,6 +89,11 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
           stockStatus,
           leadWeeks,
           available,
+          styleTokens: Array.from(new Set([...(p.design_style_tokens ?? []), ...(p.style_tags ?? [])])),
+          dimensionsCubic: (() => {
+            const d = p.dimensions_cubic as { w?: number; d?: number; h?: number } | null;
+            return d && [d.w, d.d, d.h].every((n) => typeof n === "number") ? { w: d.w!, d: d.d!, h: d.h! } : null;
+          })(),
         } satisfies LiveCatalogueItem;
       }),
   );

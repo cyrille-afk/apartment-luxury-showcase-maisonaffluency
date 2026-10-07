@@ -9933,7 +9933,9 @@ export type Database = {
           default_ship_mode: string | null
           depth_mm: number | null
           description: string | null
+          design_style_tokens: string[]
           dimensions: string | null
+          dimensions_cubic: Json | null
           duty_rate: number | null
           embedded_at: string | null
           embedding: string | null
@@ -10007,7 +10009,9 @@ export type Database = {
           default_ship_mode?: string | null
           depth_mm?: number | null
           description?: string | null
+          design_style_tokens?: string[]
           dimensions?: string | null
+          dimensions_cubic?: Json | null
           duty_rate?: number | null
           embedded_at?: string | null
           embedding?: string | null
@@ -10081,7 +10085,9 @@ export type Database = {
           default_ship_mode?: string | null
           depth_mm?: number | null
           description?: string | null
+          design_style_tokens?: string[]
           dimensions?: string | null
+          dimensions_cubic?: Json | null
           duty_rate?: number | null
           embedded_at?: string | null
           embedding?: string | null
