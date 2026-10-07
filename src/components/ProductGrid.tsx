@@ -643,10 +643,13 @@ function singularizeSub(s: string): string {
                   <Link
                     to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
-                     className={`block w-full font-body font-semibold uppercase text-foreground antialiased hover:text-foreground/70 transition-colors ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
-                  >
-                    {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
-                  </Link>
+                     className={`group block w-full font-body font-semibold uppercase text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70 ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
+                   >
+                     <span className="relative inline-block max-w-full pb-1 align-bottom">
+                       {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
+                       <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 motion-reduce:transition-none" />
+                     </span>
+                   </Link>
                    <h3 className={`mt-0.5 font-body font-medium leading-snug text-muted-foreground antialiased ${roomSlug ? "line-clamp-2 text-[11px] md:text-xs" : "line-clamp-1 text-xs"}`}>
                     {subcategory === "Dining Tables" && !item.pick.title.toLowerCase().includes("table")
                       ? `${item.pick.title} Table`
