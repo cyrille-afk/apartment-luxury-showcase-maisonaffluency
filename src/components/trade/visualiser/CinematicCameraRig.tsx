@@ -35,6 +35,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
   const forward = useRef(new THREE.Vector3());
   const lookTarget = useRef(new THREE.Vector3());
   const previousPath = useRef<CinematicPath | null>(null);
+  const destinationOrientation = useRef(new THREE.Quaternion());
   const transition = useRef<{ time: number; position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null);
   useFrame((_state, delta) => {
     if (!enabled || !path) { active.current = false; transition.current = null; previousPath.current = path; return; }
@@ -91,7 +92,8 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
       const blend = cameraTransitionBlend(blending.time);
       // Convex interpolation stays within the same validated room/height envelope.
       camera.position.lerpVectors(blending.position, camera.position, blend);
-      camera.quaternion.slerpQuaternions(blending.quaternion, camera.quaternion, blend);
+      destinationOrientation.current.copy(camera.quaternion);
+      camera.quaternion.slerpQuaternions(blending.quaternion, destinationOrientation.current, blend);
       if (blending.time >= CINEMATIC_TRANSITION_SECONDS) transition.current = null;
     }
     // Resume OrbitControls without a target/orientation jump, including manual Stop.
