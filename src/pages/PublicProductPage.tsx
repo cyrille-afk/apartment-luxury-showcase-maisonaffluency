@@ -2655,7 +2655,7 @@ const PublicProductPageContent: React.FC = () => {
                         <Link
                           to={`/designers/${designer.slug}`}
                           onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                          className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
+                          className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 hover:underline underline-offset-[6px] decoration-[0.5px] transition-colors"
                         >
                           {designerDisplay}
                         </Link>
@@ -2748,7 +2748,7 @@ const PublicProductPageContent: React.FC = () => {
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
+                        className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 hover:underline underline-offset-[6px] decoration-[0.5px] transition-colors"
                       >
                         {designerDisplay}
                       </Link>
