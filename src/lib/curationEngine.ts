@@ -103,8 +103,9 @@ export function curate(text: string, catalogue: LiveCatalogueItem[], fallbackBud
       return;
     }
     const options = pool.filter((r) => r.item.role === roles[i] && !rows.includes(r));
-    if (!options.length) return walk(i + 1, rows, cost, value); // role unmet
-    for (const o of options) walk(i + 1, [...rows, o], cost + (o.item.price ?? 0), value + o.score);
+    // Skipping a role is allowed (e.g. budget too tight) but coverage dominates value.
+    walk(i + 1, rows, cost, value);
+    for (const o of options) walk(i + 1, [...rows, o], cost + (o.item.price ?? 0), value + 10 + o.score);
   };
   walk(0, [], 0, 0);
 
