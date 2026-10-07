@@ -421,6 +421,7 @@ export type Database = {
       ai_curated_layouts: {
         Row: {
           brief: Json
+          camera_paths: Json
           created_at: string
           id: string
           is_shared: boolean
@@ -433,6 +434,7 @@ export type Database = {
         }
         Insert: {
           brief?: Json
+          camera_paths?: Json
           created_at?: string
           id?: string
           is_shared?: boolean
@@ -445,6 +447,7 @@ export type Database = {
         }
         Update: {
           brief?: Json
+          camera_paths?: Json
           created_at?: string
           id?: string
           is_shared?: boolean
@@ -11053,6 +11056,36 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_saved_camera_paths: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          mode: string
+          name: string
+          nodes: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          mode: string
+          name: string
+          nodes?: Json
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          mode?: string
+          name?: string
+          nodes?: Json
           user_id?: string
         }
         Relationships: []
