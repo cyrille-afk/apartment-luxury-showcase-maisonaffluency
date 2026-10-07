@@ -7,7 +7,7 @@ import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hoo
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
-import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode } from "@/lib/customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode, syncLocalPathsToAccount } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
@@ -230,6 +230,11 @@ const TradeAILayoutStudio = () => {
   const samplerRef = useRef<CameraSampler | null>(null);
   const layoutKey = current?.id ?? null;
   const loadCustomPaths = useCallback(async () => {
+    const moved = await syncLocalPathsToAccount().catch(() => new Map<string, string>());
+    if (moved.size) {
+      setActiveCustomId((id) => (id && moved.has(id) ? moved.get(id)! : id));
+      toast.success(`${moved.size} browser-only camera path${moved.size > 1 ? "s" : ""} synced to your account`);
+    }
     const local = readLocalPaths(layoutKey ?? "unsaved").map((p) => ({ ...p, source: "local" as const }));
     const [layout, account] = await Promise.all([
       layoutKey ? listLayoutPaths(layoutKey).catch(() => []) : Promise.resolve([]),

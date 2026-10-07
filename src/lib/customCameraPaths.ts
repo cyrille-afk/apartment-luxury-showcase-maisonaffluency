@@ -117,3 +117,27 @@ export async function persistCustomPath(mode: StorageMode, path: CustomCameraPat
   }
   return clean;
 }
+
+/**
+ * Upload every "This browser only" path (all layouts) to the signed-in account library,
+ * removing each local copy only after its insert succeeds. Returns old local id → new account id.
+ */
+export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
+  const moved = new Map<string, string>();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return moved;
+  const keys = Object.keys(window.localStorage).filter((k) => k.startsWith(LOCAL_PREFIX));
+  for (const key of keys) {
+    const layoutId = key.slice(LOCAL_PREFIX.length);
+    const remaining: CustomCameraPath[] = [];
+    for (const p of readLocalPaths(layoutId)) {
+      const { data, error } = await supabase.from("user_saved_camera_paths")
+        .insert({ name: (p.name || "Custom path").slice(0, 120), mode: p.mode, nodes: sanitize(p.nodes) as unknown as Json, description: p.description?.slice(0, 1000) ?? null })
+        .select("id").single();
+      if (error || !data) remaining.push(p); else moved.set(p.id, data.id);
+    }
+    if (remaining.length) window.localStorage.setItem(key, JSON.stringify(remaining));
+    else window.localStorage.removeItem(key);
+  }
+  return moved;
+}
