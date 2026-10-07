@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add all eight existing lacquer swatches to Astra Dining Table without duplicates; verify public and Trade photos.
+
 - [x] Crop Viola Calacatta marble and add its Pendhapa library entry and Deepah finish link; photo verified on public and Trade pages without runtime errors.
 
 - [x] Crop Natural teak, Dark teak and Black teak; add three Pendhapa library entries and Deepah links without duplicates; verify all photos on public and Trade pages.
