@@ -141,3 +141,27 @@ export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
   }
   return moved;
 }
+
+/**
+ * Raise only the viewpoints near flagged stretches in 0.1 m steps (ceiling-capped) until the path
+ * clears or nothing more can move. Returns the new nodes and any conflicts that still remain.
+ */
+export function autoRaiseFlaggedNodes(scene: AICuratedSceneSchema, nodes: CustomPathNode[], step = 0.1, maxIter = 40) {
+  const ceiling = scene.roomDimensions.height - 0.2;
+  let out = nodes.map((n) => ({ position: [...n.position] as Vec3, target: [...n.target] as Vec3 }));
+  let conflicts = checkPathClearance(scene, buildCustomCinematicPath(scene, out));
+  for (let it = 0; it < maxIter && conflicts.length && out.length > 1; it++) {
+    const last = out.length - 1;
+    let moved = false;
+    out = out.map((n, i) => {
+      const pct = (i / last) * 100;
+      const near = conflicts.some((c) => pct >= c.fromPct - 100 / last && pct <= c.toPct + 100 / last);
+      if (!near || n.position[1] >= ceiling) return n;
+      moved = true;
+      return { ...n, position: [n.position[0], +Math.min(ceiling, n.position[1] + step).toFixed(3), n.position[2]] as Vec3 };
+    });
+    if (!moved) break;
+    conflicts = checkPathClearance(scene, buildCustomCinematicPath(scene, out));
+  }
+  return { nodes: out, conflicts };
+}
