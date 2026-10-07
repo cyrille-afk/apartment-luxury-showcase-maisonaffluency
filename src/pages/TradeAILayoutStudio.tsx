@@ -524,6 +524,18 @@ const TradeAILayoutStudio = () => {
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
             </Button>
+            {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
+              <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
+                {pathSyncStatus.pendingRetry.length > 0 ? (
+                  <>
+                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
+                    <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
+                  </>
+                ) : (
+                  <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+                )}
+              </p>
+            )}
           </div>
         )}
         {!scene && !loading && (
