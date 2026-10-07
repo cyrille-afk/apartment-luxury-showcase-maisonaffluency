@@ -190,3 +190,38 @@ export function autoRaiseFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
   }
   return { nodes: out, conflicts };
 }
+
+/**
+ * For viewpoints still flagged after raising (e.g. tall doors), nudge them sideways —
+ * perpendicular to the path direction, alternating sides with growing steps — accepting
+ * only moves that reduce the conflict count. Room-clamped; returns remaining conflicts.
+ */
+export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: CustomPathNode[], step = 0.15, maxIter = 30) {
+  const { width: W, length: L } = scene.roomDimensions;
+  const clampX = (x: number) => THREE.MathUtils.clamp(x, -W / 2 + 0.4, W / 2 - 0.4);
+  const clampZ = (z: number) => THREE.MathUtils.clamp(z, -L / 2 + 0.4, L / 2 - 0.4);
+  let out = nodes.map((n) => ({ position: [...n.position] as Vec3, target: [...n.target] as Vec3 }));
+  let conflicts = checkPathClearance(scene, buildCustomCinematicPath(scene, out));
+  for (let it = 0; it < maxIter && conflicts.length && out.length > 1; it++) {
+    const last = out.length - 1;
+    const magnitude = step * (1 + Math.floor(it / 2));
+    const side = it % 2 === 0 ? 1 : -1;
+    let improved = false;
+    for (let i = 0; i <= last && conflicts.length; i++) {
+      const pct = (i / last) * 100;
+      if (!conflicts.some((c) => pct >= c.fromPct - 100 / last && pct <= c.toPct + 100 / last)) continue;
+      const prev = out[Math.max(0, i - 1)].position, next = out[Math.min(last, i + 1)].position;
+      const dx = next[0] - prev[0], dz = next[2] - prev[2];
+      const len = Math.hypot(dx, dz) || 1;
+      const px = (-dz / len) * side * magnitude, pz = (dx / len) * side * magnitude;
+      const p = out[i].position;
+      const trial = out.map((n, j) => j === i
+        ? { ...n, position: [+clampX(p[0] + px).toFixed(3), p[1], +clampZ(p[2] + pz).toFixed(3)] as Vec3 }
+        : n);
+      const c = checkPathClearance(scene, buildCustomCinematicPath(scene, trial));
+      if (c.length < conflicts.length) { out = trial; conflicts = c; improved = true; }
+    }
+    if (!improved) break;
+  }
+  return { nodes: out, conflicts };
+}
