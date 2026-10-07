@@ -808,7 +808,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Wood + Lacquer + Stone): mirrors the split-top behaviour — its own
         // selection highlight, and it drives the combined variant value.
         setExtraSplitIds((prev) => ({ ...prev, [splitExtraKey]: f.id }));
-        userPickedAxesRef.current.top = true;
+        userPickedAxesRef.current[`split:${splitExtraKey}`] = true;
         onWoodFinishChange?.(f.name);
       } else if (isRugGroup) {
         const component = rugComponent || getRugComponent(f.name);
