@@ -787,7 +787,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const picturedAxis = isFabricGroup ? "fabric" : isCoverGroup ? "cover" : isFrameGroup ? "frame" : isTopGroup ? "top" : "wood";
     const picturedTiles = isFabricGroup ? visibleFabricTiles : isCoverGroup ? visibleCoverTiles : isFrameGroup ? frameTiles : isTopGroup ? visibleTopTiles : visibleWoodTiles;
     const picturedIds = picturedMatches(picturedTiles, picturedAxis);
-    const isSelected = picturedIds.length > 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
+    const isSelected = picturedIds.length >= 1 ? picturedIds.some((item) => item.id === f.id) : selectedByChoice;
     const setSelected = isFrameGroup
       ? setSelectedFrameId
       : isSecondaryFabricGroup
