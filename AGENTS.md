@@ -28,3 +28,4 @@
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
+- Public swatch mirror (`product_fabric_swatches_public`) refreshes only affected picks via statement triggers with transition tables; never TRUNCATE-rebuild on edits — the exclusive lock blocked readers and timed out admin saves.
