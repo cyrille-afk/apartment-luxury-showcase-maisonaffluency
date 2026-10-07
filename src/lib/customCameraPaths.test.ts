@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { type CustomPathNode, buildCustomCinematicPath, checkPathClearance, nodesFromDescription, persistCustomPath, readLocalPaths } from "./customCameraPaths";
+import { type CustomPathNode, buildCustomCinematicPath, checkPathClearance, nodesFromDescription, persistCustomPath, readLocalPaths, readPathSyncStatus } from "./customCameraPaths";
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 
 const scene: AICuratedSceneSchema = {
@@ -43,6 +43,20 @@ describe("custom path clearance", () => {
     const withDoor = { ...scene, architecturalAnchors: [{ type: "door" as const, position: [0, 1, 2] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: [1, 2, 0.5] as [number, number, number] }] };
     const path = buildCustomCinematicPath(withDoor, [{ position: [-1, 1, 2], target: [0, 0, 0] }, { position: [1, 1, 2], target: [0, 0, 0] }]);
     expect(checkPathClearance(withDoor, path).some((h) => h.kind === "door")).toBe(true);
+  });
+});
+
+describe("path sync status", () => {
+  it("defaults to never-synced and parses a stored status", () => {
+    expect(readPathSyncStatus()).toEqual({ lastSyncAt: null, lastMoved: 0, pendingRetry: [] });
+    window.localStorage.setItem("ma_camera_path_sync_status_v1", JSON.stringify({ lastSyncAt: "2026-10-07T20:00:00.000Z", lastMoved: 2, pendingRetry: ["Loft path"] }));
+    expect(readPathSyncStatus()).toEqual({ lastSyncAt: "2026-10-07T20:00:00.000Z", lastMoved: 2, pendingRetry: ["Loft path"] });
+  });
+  it("falls back to defaults on corrupt or partial data", () => {
+    window.localStorage.setItem("ma_camera_path_sync_status_v1", "not json");
+    expect(readPathSyncStatus()).toEqual({ lastSyncAt: null, lastMoved: 0, pendingRetry: [] });
+    window.localStorage.setItem("ma_camera_path_sync_status_v1", JSON.stringify({ lastMoved: "x", pendingRetry: [1, "ok"] }));
+    expect(readPathSyncStatus()).toEqual({ lastSyncAt: null, lastMoved: 0, pendingRetry: ["ok"] });
   });
 });
 

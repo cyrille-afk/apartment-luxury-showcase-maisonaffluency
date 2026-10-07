@@ -7,7 +7,7 @@ import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hoo
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
-import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes } from "@/lib/customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, readPathSyncStatus, type CustomCameraPath, type CustomPathNode, type PathMode, type PathSyncStatus, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
@@ -27,6 +27,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
+
+/** "just now" / "5 min ago" / "2 h ago" / "3 d ago" for the camera-path sync indicator. */
+function syncTimeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "just now";
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `${h} h ago`;
+  return `${Math.floor(h / 24)} d ago`;
+}
 const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => (
@@ -208,6 +220,7 @@ const TradeAILayoutStudio = () => {
   const [drawHeight, setDrawHeight] = useState(1.8);
   const [pathName, setPathName] = useState("My walkthrough");
   const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
+  const [pathSyncStatus, setPathSyncStatus] = useState<PathSyncStatus>(readPathSyncStatus);
   const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
   // Cross-device sync: account row wins on load; local stays the offline fallback.
   const prefsHydrated = useRef(false);
@@ -241,6 +254,7 @@ const TradeAILayoutStudio = () => {
       listAccountPaths().catch(() => []),
     ]);
     setCustomPaths([...layout.map((p) => ({ ...p, source: "layout" as const })), ...account.map((p) => ({ ...p, source: "account" as const })), ...local]);
+    setPathSyncStatus(readPathSyncStatus());
   }, [layoutKey]);
   useEffect(() => { void loadCustomPaths(); }, [loadCustomPaths]);
   const activeCustom = customPaths.find((p) => p.id === activeCustomId) ?? null;
@@ -522,6 +536,18 @@ const TradeAILayoutStudio = () => {
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
             </Button>
+            {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
+              <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
+                {pathSyncStatus.pendingRetry.length > 0 ? (
+                  <>
+                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
+                    <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
+                  </>
+                ) : (
+                  <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+                )}
+              </p>
+            )}
           </div>
         )}
         {!scene && !loading && (
