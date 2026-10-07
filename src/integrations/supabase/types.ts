@@ -11090,6 +11090,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_walkthrough_preferences: {
+        Row: {
+          custom_path_id: string | null
+          loop: boolean
+          preset: string
+          speed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          custom_path_id?: string | null
+          loop?: boolean
+          preset?: string
+          speed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          custom_path_id?: string | null
+          loop?: boolean
+          preset?: string
+          speed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_audit_log: {
         Row: {
           actor: string

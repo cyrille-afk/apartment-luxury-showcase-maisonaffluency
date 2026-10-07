@@ -38,6 +38,28 @@ export function saveWalkthroughPreferences(preferences: WalkthroughPreferences) 
   catch { /* Storage restrictions must not interrupt playback. */ }
 }
 
+/** Selected custom path id lives alongside the preset prefs (null = use preset). */
+export const WALKTHROUGH_CUSTOM_PATH_KEY = "ma_walkthrough_custom_path_v1";
+export function readCustomPathPreference(): string | null {
+  try { const v = window.localStorage.getItem(WALKTHROUGH_CUSTOM_PATH_KEY); return v && v.length <= 64 ? v : null; } catch { return null; }
+}
+export function saveCustomPathPreference(id: string | null) {
+  try { if (id) window.localStorage.setItem(WALKTHROUGH_CUSTOM_PATH_KEY, id); else window.localStorage.removeItem(WALKTHROUGH_CUSTOM_PATH_KEY); } catch { /* ignore */ }
+}
+
+/** Validate a cross-device row with the same rules as local storage. */
+export function parseRemotePreferences(row: unknown): (WalkthroughPreferences & { customPathId: string | null }) | null {
+  if (!row || typeof row !== "object") return null;
+  const r = row as Record<string, unknown>;
+  const speed = Number(r.speed);
+  return {
+    preset: r.preset === "slow-orbit" || r.preset === "furniture-tour" ? r.preset : "sweep",
+    speed: WALKTHROUGH_SPEEDS.includes(speed) ? speed : 1,
+    loop: r.loop === true,
+    customPathId: typeof r.custom_path_id === "string" && r.custom_path_id.length <= 64 ? r.custom_path_id : null,
+  };
+}
+
 export function steppedPlaybackSpeed(speed: number, direction: number) {
   const index = WALKTHROUGH_SPEEDS.indexOf(speed);
   return WALKTHROUGH_SPEEDS[Math.max(0, Math.min(WALKTHROUGH_SPEEDS.length - 1, index + direction))] ?? 1;
