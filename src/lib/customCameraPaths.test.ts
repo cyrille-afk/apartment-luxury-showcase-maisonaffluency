@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { buildCustomCinematicPath, nodesFromDescription, persistCustomPath, readLocalPaths } from "./customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, nodesFromDescription, persistCustomPath, readLocalPaths } from "./customCameraPaths";
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 
 const scene: AICuratedSceneSchema = {
@@ -28,5 +28,20 @@ describe("custom camera paths", () => {
     await persistCustomPath("local", { id: "a", name: "Test", mode: "capture", nodes: [{ position: [0, 2, 0], target: [0, 0, 0] }, { position: [1, 2, 0], target: [0, 0, 0] }] }, "L1");
     expect(readLocalPaths("L1")).toHaveLength(1);
     expect(readLocalPaths("L2")).toHaveLength(0);
+  });
+});
+
+describe("custom path clearance", () => {
+  it("flags a path through furniture and clears an elevated one", () => {
+    const low = buildCustomCinematicPath(scene, [{ position: [-2, 0.8, -1.3], target: [0, 0.6, 0] }, { position: [2, 0.8, -1.3], target: [0, 0.6, 0] }]);
+    const hits = checkPathClearance(scene, low);
+    expect(hits.map((h) => h.label)).toContain("Sofa");
+    const high = buildCustomCinematicPath(scene, [{ position: [-2, 2.4, -1.3], target: [0, 0.6, 0] }, { position: [2, 2.4, -1.3], target: [0, 0.6, 0] }]);
+    expect(checkPathClearance(scene, high)).toEqual([]);
+  });
+  it("flags architectural anchors", () => {
+    const withDoor = { ...scene, architecturalAnchors: [{ type: "door" as const, position: [0, 1, 2] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: [1, 2, 0.5] as [number, number, number] }] };
+    const path = buildCustomCinematicPath(withDoor, [{ position: [-1, 1, 2], target: [0, 0, 0] }, { position: [1, 1, 2], target: [0, 0, 0] }]);
+    expect(checkPathClearance(withDoor, path).some((h) => h.kind === "door")).toBe(true);
   });
 });

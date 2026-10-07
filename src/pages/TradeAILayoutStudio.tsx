@@ -29,6 +29,15 @@ import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEn
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const stockLabel = (s: string | null) => (s ? s.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Available");
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => (
+  <div role="alert" className="border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">
+    <p className="font-medium">May pass through {conflicts.length === 1 ? "1 object" : `${conflicts.length} objects`}:</p>
+    <ul className="mt-1 space-y-0.5">
+      {conflicts.slice(0, 5).map((c, i) => <li key={i}>{c.label} · {c.fromPct === c.toPct ? `${c.fromPct}%` : `${c.fromPct}–${c.toPct}%`} along the path</li>)}
+    </ul>
+    <p className="mt-1 text-muted-foreground">Raise or move nearby points to clear it.</p>
+  </div>
+);
 
 const TradeAILayoutStudio = () => {
   const [brief, setBrief] = useState<LayoutBrief>(DEFAULT_BRIEF);
