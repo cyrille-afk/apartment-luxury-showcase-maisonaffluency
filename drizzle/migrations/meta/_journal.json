@@ -974,6 +974,13 @@
       "when": 1791251218891,
       "tag": "0138_studio_activation_alert_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1791340161883,
+      "tag": "0139_incremental_fabric_swatch_sync",
+      "breakpoints": true
     }
   ]
 }

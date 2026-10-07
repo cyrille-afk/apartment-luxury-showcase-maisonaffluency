@@ -417,21 +417,42 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
   // pressure (audit log + mirror triggers) by ~10-20x on long text fields.
   const pendingWritesRef = useRef<Map<string, { id: string; field: string; value: any; timer: number }>>(new Map());
 
-  const persistPickField = useCallback(async (id: string, field: string, value: any) => {
-    const { error } = await supabase
-      .from("designer_curator_picks")
-      .update({ [field]: value } as any)
-      .eq("id", id);
+  // Writes to the same pick are chained so parallel field saves never queue
+  // on the same row lock (which surfaced as "statement timeout"). A timeout
+  // is retried once before the user sees an error.
+  const pickWriteChainRef = useRef<Map<string, Promise<void>>>(new Map());
 
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-      await loadPicks();
-    } else if (["sort_order", "image_url", "hover_image_url"].includes(field)) {
-      queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
-      queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
-      queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
-      queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
-    }
+  const persistPickField = useCallback((id: string, field: string, value: any) => {
+    const run = async () => {
+      const attempt = () =>
+        supabase
+          .from("designer_curator_picks")
+          .update({ [field]: value } as any)
+          .eq("id", id);
+
+      let { error } = await attempt();
+      if (error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
+        await new Promise((r) => setTimeout(r, 800));
+        ({ error } = await attempt());
+      }
+
+      if (error) {
+        toast({ title: "Save failed", description: error.message, variant: "destructive" });
+        await loadPicks();
+      } else if (["sort_order", "image_url", "hover_image_url"].includes(field)) {
+        queryClient.invalidateQueries({ queryKey: ["designer-picks"] });
+        queryClient.invalidateQueries({ queryKey: ["designer-grouped-picks"] });
+        queryClient.invalidateQueries({ queryKey: ["designer-attributed-picks"] });
+        queryClient.invalidateQueries({ queryKey: ["trade-live-products"] });
+      }
+    };
+    const prev = pickWriteChainRef.current.get(id) ?? Promise.resolve();
+    const next = prev.then(run, run);
+    pickWriteChainRef.current.set(id, next);
+    void next.finally(() => {
+      if (pickWriteChainRef.current.get(id) === next) pickWriteChainRef.current.delete(id);
+    });
+    return next;
   }, [loadPicks, toast, queryClient]);
 
   const flushPendingWrites = useCallback(() => {

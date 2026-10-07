@@ -12113,6 +12113,10 @@ export type Database = {
         }
         Returns: Json
       }
+      refresh_product_fabric_swatches_for_picks: {
+        Args: { _pick_ids: string[] }
+        Returns: undefined
+      }
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }
       remap_product_descriptors: { Args: never; Returns: number }
       resolve_trade_email: { Args: { p_identifier: string }; Returns: string }
