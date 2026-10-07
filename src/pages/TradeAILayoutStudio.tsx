@@ -2,10 +2,10 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
-import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel } from "@/lib/cinematicPlayback";
+import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { Slider } from "@/components/ui/slider";
 import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
 import { toast } from "sonner";
@@ -177,24 +177,46 @@ const TradeAILayoutStudio = () => {
   const [walkActive, setWalkActive] = useState(false);
   const [walkTime, setWalkTime] = useState(0);
   const [walkSpeed, setWalkSpeed] = useState(1);
-  const [walkSeek, setWalkSeek] = useState({ id: 0, time: 0 });
+  const [walkSeek, setWalkSeek] = useState({ id: 0, time: 0, restart: false });
+  const [walkLoop, setWalkLoop] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [walkPreset, setWalkPreset] = useState<CinematicPreset>("sweep");
   const cinematic = useCinematicPath(scene, 24, walkPreset);
   const walkDuration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
   useEffect(() => { setWalking(false); setWalkActive(false); setWalkTime(0); }, [cinematic]);
-  const seekWalk = (time: number) => {
+  const seekWalk = useCallback((time: number, restart = false) => {
     setWalkTime(time);
-    setWalkSeek((s) => ({ id: s.id + 1, time }));
-  };
+    setWalkSeek((s) => ({ id: s.id + 1, time, restart }));
+  }, []);
   const startWalk = () => {
     setSelectedId(null);
-    seekWalk(0);
+    seekWalk(0, true);
     setWalkActive(true);
     setWalking(true);
   };
   const stopWalk = () => { setWalking(false); setWalkActive(false); setWalkTime(0); };
-  const finishWalk = useCallback(() => { setWalking(false); }, []);
+  const restartWalk = useCallback(() => { seekWalk(0, true); setWalking(true); }, [seekWalk]);
+  const toggleWalk = useCallback(() => {
+    if (!walking && walkTime >= walkDuration - 0.1) seekWalk(0, true);
+    setWalking((w) => !w);
+  }, [walking, walkTime, walkDuration, seekWalk]);
+  const finishWalk = useCallback(() => {
+    if (walkLoop) restartWalk();
+    else setWalking(false);
+  }, [walkLoop, restartWalk]);
+  useEffect(() => {
+    if (!walkActive) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const action = walkthroughShortcut(event);
+      if (!action) return;
+      event.preventDefault();
+      if (action === "toggle") toggleWalk();
+      else if (action === "restart") restartWalk();
+      else setWalkSpeed((speed) => steppedPlaybackSpeed(speed, action === "faster" ? 1 : -1));
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [walkActive, toggleWalk, restartWalk]);
   const exportVideo = async () => {
     if (!scene || !cinematic) return;
     setExporting(true);
@@ -409,15 +431,17 @@ const TradeAILayoutStudio = () => {
               onValueChange={([time]) => { if (time !== undefined) { setWalking(false); seekWalk(time); } }} />
             <div className="flex flex-wrap items-center gap-2">
               <Button size="icon" variant="ghost" aria-label={walking ? "Pause walkthrough" : "Resume walkthrough"}
-                title={walking ? "Pause walkthrough" : "Resume walkthrough"}
-                onClick={() => { if (!walking && walkTime >= walkDuration - 0.1) seekWalk(0); setWalking((w) => !w); }}>
+                aria-keyshortcuts="Space" title={walking ? "Pause walkthrough (Space)" : "Resume walkthrough (Space)"}
+                onClick={toggleWalk}>
                 {walking ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </Button>
+              <Button size="icon" variant="ghost" aria-label="Restart walkthrough" aria-keyshortcuts="R" title="Restart walkthrough (R)" onClick={restartWalk}><RotateCcw className="h-4 w-4" /></Button>
+              <Button size="icon" variant={walkLoop ? "secondary" : "ghost"} aria-label="Loop walkthrough" aria-pressed={walkLoop} title="Continuous replay" onClick={() => setWalkLoop((loop) => !loop)}><Repeat className="h-4 w-4" /></Button>
               <Button size="icon" variant="ghost" aria-label="Stop walkthrough" title="Stop walkthrough" onClick={stopWalk}><Square className="h-3.5 w-3.5" /></Button>
               <output aria-label="Walkthrough time" className="text-xs tabular-nums text-muted-foreground">{playbackTimeLabel(walkTime)} / {playbackTimeLabel(walkDuration)}</output>
               <Select value={String(walkSpeed)} onValueChange={(value) => setWalkSpeed(Number(value))}>
-                <SelectTrigger aria-label="Playback speed" className="ml-auto h-8 w-[88px]"><SelectValue /></SelectTrigger>
-                <SelectContent>{[0.5, 0.75, 1, 1.5, 2].map((speed) => <SelectItem key={speed} value={String(speed)}>{speed}×</SelectItem>)}</SelectContent>
+                <SelectTrigger aria-label="Playback speed" title="Playback speed (− / + or [ / ])" className="ml-auto h-8 w-[88px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{WALKTHROUGH_SPEEDS.map((speed) => <SelectItem key={speed} value={String(speed)}>{speed}×</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>

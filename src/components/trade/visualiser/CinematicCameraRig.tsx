@@ -19,7 +19,7 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
   enabled: boolean;
   playing: boolean;
   speed: number;
-  seek: { id: number; time: number };
+  seek: { id: number; time: number; restart?: boolean };
   onTimeChange: (time: number) => void;
   onDone: () => void;
 }) {
@@ -49,6 +49,10 @@ export default function CinematicCameraRig({ path, enabled, playing, speed, seek
     lookTarget.current.copy(path.target);
     const seeking = lastSeek.current !== seek.id;
     if (seeking) {
+      if (seek.restart) {
+        from.current.copy(camera.position);
+        orientation.current.copy(camera.quaternion);
+      }
       elapsed.current = THREE.MathUtils.clamp(seek.time, 0, duration);
       lastSeek.current = seek.id;
     } else if (!playing) return;
