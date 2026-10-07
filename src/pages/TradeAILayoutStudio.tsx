@@ -7,7 +7,7 @@ import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hoo
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
-import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, type CustomCameraPath, type CustomPathNode, type PathMode, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes } from "@/lib/customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, readPathSyncStatus, type CustomCameraPath, type CustomPathNode, type PathMode, type PathSyncStatus, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
@@ -208,6 +208,7 @@ const TradeAILayoutStudio = () => {
   const [drawHeight, setDrawHeight] = useState(1.8);
   const [pathName, setPathName] = useState("My walkthrough");
   const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
+  const [pathSyncStatus, setPathSyncStatus] = useState<PathSyncStatus>(readPathSyncStatus);
   const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
   // Cross-device sync: account row wins on load; local stays the offline fallback.
   const prefsHydrated = useRef(false);
