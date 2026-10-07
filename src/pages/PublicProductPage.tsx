@@ -1608,8 +1608,8 @@ const PublicProductPageContent: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
-    const armExpansion = () => {
     console.log("SHRINKEFFECT", !!productScrollEl);
+    const armExpansion = () => {
       hasInteractedRef.current = true;
       if (galleryCompactRef.current) compactCanExpandRef.current = true;
     };
