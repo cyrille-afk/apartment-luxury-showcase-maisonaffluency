@@ -1,4 +1,17 @@
 export const CINEMATIC_ENTRY_SECONDS = 2.5;
+export const CINEMATIC_TRANSITION_SECONDS = 3;
+
+/** Preserve route phase rather than restarting when a preset has a new duration. */
+export function remapPlaybackTime(time: number, previousDuration: number, nextDuration: number) {
+  if (time < CINEMATIC_ENTRY_SECONDS) return Math.max(0, time);
+  const phase = Math.max(0, Math.min(1, (time - CINEMATIC_ENTRY_SECONDS) / previousDuration));
+  return CINEMATIC_ENTRY_SECONDS + phase * nextDuration;
+}
+
+export function cameraTransitionBlend(time: number) {
+  const t = Math.max(0, Math.min(1, time / CINEMATIC_TRANSITION_SECONDS));
+  return Math.max(0, Math.min(1, t * t * t * (t * (t * 6 - 15) + 10)));
+}
 export const WALKTHROUGH_SPEEDS = [0.5, 0.75, 1, 1.5, 2];
 
 export function steppedPlaybackSpeed(speed: number, direction: number) {
