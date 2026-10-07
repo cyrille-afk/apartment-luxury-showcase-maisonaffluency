@@ -163,4 +163,4 @@
 - [x] OOL 77 Mini bar: curated preset combinations (4 one-tap chips) + reduced to Frame + Drawer dropdowns only (Shelf auto-committed); regression test added (FinishSelector.ool-minibar.test.tsx).
 
 - [x] Felix tour Steps 4–5: Client Project Folders (Projects & Interventions sidebar, Singapore GCB copy) and Real-Time Tier Tracking (new dashboard Tier Volume Tracker widget); Back/NEXT verified live.
-- [ ] Add walkthrough pause/resume, timeline seeking, speed selection, and verify browser playback states.
+- [x] Add walkthrough pause/resume, timeline seeking, speed selection; browser pause/seek/resume/replay/stop verified, six tests pass.
