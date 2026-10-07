@@ -365,7 +365,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                           >
                             <span className="relative inline-block max-w-full pb-1 align-bottom">
                               {brandLine}
-                              <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover/designer:scale-x-100 motion-reduce:transition-none" />
+                              <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 group-hover/designer:scale-x-100 motion-reduce:transition-none" />
                             </span>
                           </Link>
                          ) : brandLine ? (

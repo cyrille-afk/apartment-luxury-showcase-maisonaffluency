@@ -647,7 +647,7 @@ function singularizeSub(s: string): string {
                    >
                      <span className="relative inline-block max-w-full pb-1 align-bottom">
                        {item.designerName.includes(' - ') ? item.designerName.split(' - ')[0].trim() : item.designerName}
-                       <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover/designer:scale-x-100 motion-reduce:transition-none" />
+                       <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-in-out group-hover:scale-x-100 group-hover/designer:scale-x-100 motion-reduce:transition-none" />
                      </span>
                    </Link>
                    <h3 className={`mt-0.5 font-body font-medium leading-snug text-muted-foreground antialiased ${roomSlug ? "line-clamp-2 text-[11px] md:text-xs" : "line-clamp-1 text-xs"}`}>
