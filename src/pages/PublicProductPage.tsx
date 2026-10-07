@@ -1525,7 +1525,7 @@ const PublicProductPageContent: React.FC = () => {
   const [productScrollEl, setProductScrollEl] = useState<HTMLDivElement | null>(null);
   const setProductScrollNode = React.useCallback((node: HTMLDivElement | null) => {
     productScrollRef.current = node;
-    setProductScrollEl(node);
+    setProductScrollEl(node); console.log("SHRINKREF", !!node);
   }, []);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
@@ -1609,6 +1609,7 @@ const PublicProductPageContent: React.FC = () => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
     const armExpansion = () => {
+    console.log("SHRINKEFFECT", !!productScrollEl);
       hasInteractedRef.current = true;
       if (galleryCompactRef.current) compactCanExpandRef.current = true;
     };
