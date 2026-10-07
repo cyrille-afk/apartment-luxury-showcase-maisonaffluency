@@ -2,7 +2,10 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { Copy, Link2, Loader2, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
+import { Clapperboard, Copy, Film, Link2, Loader2, RefreshCw, Save, Sparkles, Trash2, X } from "lucide-react";
+import { useCinematicPath } from "@/hooks/useCinematicPath";
+import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
+import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { deleteLayout, listLayouts, saveLayout, setShared, shareUrl, snapshotProducts, type SavedLayout } from "@/lib/aiLayoutStore";
@@ -168,6 +171,23 @@ const TradeAILayoutStudio = () => {
     });
   }, []);
 
+  const [walking, setWalking] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const cinematic = useCinematicPath(scene);
+  const exportVideo = async () => {
+    if (!scene || !cinematic) return;
+    setExporting(true);
+    try {
+      const r = await exportSceneToVideoAPI(scene, cinematic, briefText);
+      if (r.status === "dry-run") {
+        console.info("[video export] dry run payload", r.payload);
+        toast.success(`Render payload ready (${r.payload.camera.path.length} camera points) — webhook not bound yet`);
+      } else toast.success("Render requested");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Render request failed");
+    } finally { setExporting(false); }
+  };
+
   const fin = scene?.financialSummary;
   const pct = fin ? Math.min(100, (fin.allocatedSpend / fin.totalBudget) * 100) : 0;
   const dim = (k: keyof LayoutBrief["roomDimensions"], v: string) =>
@@ -328,19 +348,30 @@ const TradeAILayoutStudio = () => {
       </aside>
 
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
+        {scene && (
+          <div className="absolute right-3 top-3 z-10 flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => { setSelectedId(null); setWalking((w) => !w); }} disabled={!cinematic}>
+              <Film className="mr-1.5 h-3.5 w-3.5" />{walking ? "Stop walkthrough" : "Preview Walkthrough Animation"}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
+              {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
+            </Button>
+          </div>
+        )}
         {!scene && !loading && (
           <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">Set a brief and generate a layout.</div>
         )}
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
             <PerspectiveCamera makeDefault fov={45} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
-            <OrbitControls makeDefault enabled={!dragging} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
+            <OrbitControls makeDefault enabled={!dragging && !walking} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
               onAssetTransform={onAssetTransform} onDragStateChange={setDragging} />
+            <CinematicCameraRig path={cinematic} playing={walking} onDone={() => setWalking(false)} />
           </Canvas>
         )}
       </div>
