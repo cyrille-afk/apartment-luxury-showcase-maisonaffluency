@@ -174,6 +174,7 @@ const TradeAILayoutStudio = () => {
   const [walking, setWalking] = useState(false);
   const [exporting, setExporting] = useState(false);
   const cinematic = useCinematicPath(scene);
+  useEffect(() => { setWalking(false); }, [cinematic]);
   const exportVideo = async () => {
     if (!scene || !cinematic) return;
     setExporting(true);
@@ -363,14 +364,14 @@ const TradeAILayoutStudio = () => {
         )}
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
-            <PerspectiveCamera makeDefault fov={45} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
+            <PerspectiveCamera makeDefault fov={45} near={0.05} position={[scene.roomDimensions.width * 1.3, scene.roomDimensions.height * 2.2, scene.roomDimensions.length * 1.6]} />
             <OrbitControls makeDefault enabled={!dragging && !walking} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} />
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walking} />
             <CinematicCameraRig path={cinematic} playing={walking} onDone={() => setWalking(false)} />
           </Canvas>
         )}
