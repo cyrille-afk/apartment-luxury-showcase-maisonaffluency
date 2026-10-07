@@ -39,6 +39,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /layout/
 Disallow: /shared/
 Disallow: /api/
 Disallow: /trade/admin
@@ -99,4 +100,3 @@ User-agent: cohere-ai
 Disallow: /
 
 Sitemap: https://www.maisonaffluency.com/sitemap.xml
-Disallow: /layout/
