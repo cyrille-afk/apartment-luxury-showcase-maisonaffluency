@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add the eight existing cropped Pendhapa wood finishes to Astra without duplicates; verify photos on public and Trade pages.
+- [x] Add the eight existing cropped Pendhapa wood finishes to Astra without duplicates; all eight photos verified on public and Trade pages.
 
 - [x] Add all eight existing lacquer swatches to Astra Dining Table without duplicates; all photos verified on public and Trade pages.
 
