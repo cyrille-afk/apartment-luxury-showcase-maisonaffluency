@@ -168,3 +168,4 @@
 
 - [x] Felix tour Steps 4–5: Client Project Folders (Projects & Interventions sidebar, Singapore GCB copy) and Real-Time Tier Tracking (new dashboard Tier Volume Tracker widget); Back/NEXT verified live.
 - [x] Add walkthrough pause/resume, timeline seeking, speed selection; browser pause/seek/resume/replay/stop verified, six tests pass.
+- [x] Camera-path sync history filters: All / Failed / Successful toggle with per-filter counts; active filter marked aria-pressed; verified live (2 failed, 4 successful).
