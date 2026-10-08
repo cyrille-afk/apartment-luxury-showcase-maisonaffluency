@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -11,6 +11,13 @@ import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
 import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
 import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
+import {
+  buildPortalStats,
+  filterAccountsByPortalActivity,
+  portalFilterCounts,
+  type PortalFilter,
+  type PortalStats,
+} from "@/lib/portalEmailActivity";
 
 type Dna = VisualThemeDna & {
   status: string;
@@ -31,6 +38,14 @@ type Account = {
   radar_status: string | null;
   studio_aesthetic_dna: Dna | Dna[] | null;
 };
+
+const EMPTY_PORTAL_STATS: PortalStats = { clicked: {}, sent: new Set<string>() };
+
+const PORTAL_FILTERS: [PortalFilter, string][] = [
+  ["all", "All studios"],
+  ["opened", "Opened from email"],
+  ["not_opened", "Not opened"],
+];
 
 function priorityFor(score: number | null): { label: "High" | "Medium" | "Low"; variant: "default" | "secondary" | "destructive" } {
   if (score === null) return { label: "Low", variant: "secondary" };
@@ -56,6 +71,7 @@ export default function TradeApplicationsQueue() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
+  const [portalFilter, setPortalFilter] = useState<PortalFilter>("all");
   const [review, setReview] = useState<{ account: Account; approval: boolean; draft: NotificationDraft; resendAttempt?: string } | null>(null);
   const [draftError, setDraftError] = useState<string | null>(null);
 
@@ -65,7 +81,7 @@ export default function TradeApplicationsQueue() {
   };
 
   const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ["trade-applications-queue", showDone],
+    queryKey: ["trade-applications-queue", showDone, portalFilter],
     refetchInterval: 30_000,
     queryFn: async () => {
       let q = supabase
@@ -75,29 +91,52 @@ export default function TradeApplicationsQueue() {
         )
         .order("created_at", { ascending: false })
         .limit(200);
-      if (!showDone) q = q.in("status", ["pending_review", "on_hold"]);
+      // Portal-activity filters only make sense once a studio has been emailed,
+      // so decided applications have to be in scope for them to return anything.
+      if (!showDone && portalFilter === "all") q = q.in("status", ["pending_review", "on_hold"]);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as Account[];
     },
   });
 
-  const { data: portalClicks = {} } = useQuery({
-    queryKey: ["trade-portal-email-clicks"],
+  const { data: portalStats = EMPTY_PORTAL_STATS } = useQuery({
+    queryKey: ["trade-portal-email-activity"],
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("email_portal_links")
-        .select("recipient_email, click_count, last_clicked_at").gt("click_count", 0).limit(1000);
+      const { data, error } = await supabase
+        .from("email_portal_links")
+        .select("recipient_email, click_count, last_clicked_at")
+        .order("created_at", { ascending: false })
+        .limit(1000);
       if (error) throw error;
-      const byEmail: Record<string, { count: number; last: string }> = {};
-      for (const r of data ?? []) {
-        const k = r.recipient_email.toLowerCase();
-        const cur = byEmail[k] ?? { count: 0, last: "" };
-        byEmail[k] = { count: cur.count + r.click_count, last: (r.last_clicked_at ?? "") > cur.last ? r.last_clicked_at! : cur.last };
-      }
-      return byEmail;
+      return buildPortalStats(data ?? []);
     },
   });
+
+  const visibleAccounts = useMemo(
+    () => filterAccountsByPortalActivity(accounts, portalStats, portalFilter),
+    [accounts, portalStats, portalFilter],
+  );
+  // Chip counts stay accurate in the "open only" view, where decided studios are not listed.
+  const { data: allAccountEmails = [] } = useQuery({
+    queryKey: ["trade-applications-queue-emails"],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trade_accounts")
+        .select("email")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as { email: string }[];
+    },
+  });
+
+  const portalCounts = useMemo(
+    () => portalFilterCounts(allAccountEmails, portalStats),
+    [allAccountEmails, portalStats],
+  );
 
   const setStatus = async (a: Account, status: Account["status"]) => {
     setBusy(a.id + status);
@@ -165,24 +204,50 @@ export default function TradeApplicationsQueue() {
           <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Inbound</p>
           <h2 className="font-serif text-2xl tracking-tight text-foreground">Trade Applications</h2>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowDone((v) => !v)}
-          className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
-        >
-          {showDone ? "Show open only" : "Show approved & rejected"}
-        </button>
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by portal email activity">
+            {PORTAL_FILTERS.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setPortalFilter(key)}
+                aria-pressed={portalFilter === key}
+                className={
+                  "border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] " +
+                  (portalFilter === key
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:text-foreground")
+                }
+              >
+                {label}
+                {key === "opened" && portalCounts.opened > 0 ? ` (${portalCounts.opened})` : ""}
+                {key === "not_opened" && portalCounts.notOpened > 0 ? ` (${portalCounts.notOpened})` : ""}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDone((v) => !v)}
+            className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {showDone ? "Show open only" : "Show approved & rejected"}
+          </button>
+        </div>
       </header>
 
       {isLoading ? (
         <div className="flex items-center gap-2 px-6 py-8 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading applications…
         </div>
-      ) : accounts.length === 0 ? (
-        <p className="px-6 py-8 text-sm text-muted-foreground">No applications awaiting review.</p>
+      ) : visibleAccounts.length === 0 ? (
+        <p className="px-6 py-8 text-sm text-muted-foreground">
+          {accounts.length === 0
+            ? "No applications awaiting review."
+            : "No applications match this filter."}
+        </p>
       ) : (
         <ul className="divide-y divide-border">
-          {accounts.map((a) => {
+          {visibleAccounts.map((a) => {
             const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
             return (
               <li key={a.id} className="bg-background">
@@ -197,12 +262,13 @@ export default function TradeApplicationsQueue() {
                   {a.contact_name && <div className="text-muted-foreground">{a.contact_name}</div>}
                   <div className="text-muted-foreground">{a.email}</div>
                   {(() => {
-                    const c = portalClicks[a.email.toLowerCase()];
+                    const key = a.email.toLowerCase();
+                    const c = portalStats.clicked[key];
                     return c ? (
                       <div className="text-[11px] text-foreground">
                         Opened portal from email · {c.count} click{c.count === 1 ? "" : "s"} · last {new Date(c.last).toLocaleString()}
                       </div>
-                    ) : a.status === "approved" ? (
+                    ) : portalStats.sent.has(key) ? (
                       <div className="text-[11px] text-muted-foreground">Portal link not yet opened</div>
                     ) : null;
                   })()}
