@@ -89,7 +89,7 @@ test.describe("Trade activation journey", () => {
     const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", uid);
     expect((roles ?? []).map((r) => r.role)).toContain("trade_user");
 
-    const { data: profile } = await sb.from("profiles").select("trade_status").eq("user_id", uid).maybeSingle();
+    const { data: profile } = await sb.from("profiles").select("trade_status").eq("id", uid).maybeSingle();
     expect(profile?.trade_status).toBe("approved");
 
     // 7. Fresh browser sign-in with the new password reaches the portal.
