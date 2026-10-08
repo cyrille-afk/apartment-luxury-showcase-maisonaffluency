@@ -519,10 +519,12 @@ const TradeAILayoutStudio = () => {
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading ? "Generating layout..." : "Generate Room Layout"}
           </Button>
+          {videoStatus?.isAdmin && (
           <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || catLoading || !!catError}>
             {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {aiLoading ? "AI architect arranging..." : "Generate with AI architect"}
           </Button>
+          )}
         </section>
 
         <section className="space-y-2">
