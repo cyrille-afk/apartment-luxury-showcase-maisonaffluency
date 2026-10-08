@@ -33,6 +33,7 @@ import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
 import LayoutPieceCompare from "@/components/trade/visualiser/LayoutPieceCompare";
 import { buildFurnishingSchedulePdf, downloadBlob } from "@/lib/furnishingSchedulePdf";
+import ClientSchedulePreview from "@/components/trade/visualiser/ClientSchedulePreview";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -69,6 +70,7 @@ const TradeAILayoutStudio = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [clientPreviewRows, setClientPreviewRows] = useState<import("@/lib/furnishingSchedulePdf").ScheduleRow[] | null>(null);
   const [dragging, setDragging] = useState(false);
   const [catalogue, setCatalogue] = useState<LiveCatalogueItem[]>([]);
   const [catLoading, setCatLoading] = useState(true);
