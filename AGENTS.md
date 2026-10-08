@@ -1,5 +1,5 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
-- Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
+- Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, text left.
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
 - Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
@@ -7,7 +7,7 @@
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
-- No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
+- No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers — one catalogue, one layout.
 - Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view — preserves price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
