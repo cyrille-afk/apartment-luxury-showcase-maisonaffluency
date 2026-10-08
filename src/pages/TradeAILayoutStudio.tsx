@@ -632,12 +632,22 @@ const TradeAILayoutStudio = () => {
                   else toast.success("Flagged viewpoints raised — path is now clear");
                 }}>Raise flagged viewpoints</Button>
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => {
-                  const r = autoShiftFlaggedNodes(scene, authorNodes);
+                  const r = autoShiftFlaggedNodes(scene, authorNodes, 0.15, 30, shiftDirection);
                   setAuthorNodes(r.nodes);
                   if (r.conflicts.length) toast.warning(`Shifted as far as the room allows — ${r.conflicts.length} spot${r.conflicts.length > 1 ? "s" : ""} still flagged; move those points by hand`);
                   else toast.success("Flagged viewpoints shifted sideways — path is now clear");
                 }}>Shift sideways</Button>
               </div>
+              <Label className="flex items-center gap-2">Shift direction
+                <Select value={shiftDirection} onValueChange={(v) => setShiftDirection(v as ShiftDirection)}>
+                  <SelectTrigger aria-label="Shift direction" className="h-8 flex-1 bg-background text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto (try both sides)</SelectItem>
+                    <SelectItem value="left">Left of path</SelectItem>
+                    <SelectItem value="right">Right of path</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Label>
             </> : <p className="text-muted-foreground">✓ Clear of furniture and room openings</p>)}
             <div className="flex gap-2">
               <Button size="sm" variant="ghost" onClick={() => { setAuthorMode(null); setAuthorNodes([]); }}>Cancel</Button>
