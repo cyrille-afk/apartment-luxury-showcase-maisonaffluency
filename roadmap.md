@@ -171,4 +171,4 @@
 - [x] Add walkthrough pause/resume, timeline seeking, speed selection; browser pause/seek/resume/replay/stop verified, six tests pass.
 - [x] Camera-path sync history filters: All / Failed / Successful toggle with per-filter counts; active filter marked aria-pressed; verified live (2 failed, 4 successful).
 
-- [ ] Add side-by-side shared camera route comparison and verify previews, durations and selection live.
+- [x] Add side-by-side shared camera route comparison; four diagrams and durations, explicit selection, Escape dismissal, screenshot and clean build verified live.
