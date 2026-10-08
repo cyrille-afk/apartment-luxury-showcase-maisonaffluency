@@ -32,3 +32,4 @@
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet off-domain guard: DB trigger `flag_offdomain_spec_sheet` on trade_products + designer_curator_picks logs violations to content_audit_log (`spec_sheet_offdomain_flag`); allowed hosts: maisonaffluency.com, project storage, Cloudinary.
+- Walkthrough video access is decided only in the `video-generate` edge function via supabase/functions/_shared/videoAccess.ts; credits change only through service-role RPCs (consume/refund/grant_video_pass) so studios cannot edit their own balance.
