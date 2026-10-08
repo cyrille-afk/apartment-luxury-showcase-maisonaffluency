@@ -43,6 +43,8 @@ interface FFEItem {
   quantity: number;
   unit_price_cents: number | null;
   price_source: "quote" | "catalogue" | null;
+  price_differs_from_catalogue: boolean;
+  catalogue_price_cents: number | null;
   rrp_price_cents: number | null;
   currency: string;
   sku: string | null;
@@ -73,7 +75,17 @@ const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
 
 // Shows the unit price with a badge marking whether it was saved on the
 // quote line or fell back to the catalogue price.
-function UnitPriceWithSource({ cents, source }: { cents: number; source: "quote" | "catalogue" | null }) {
+function UnitPriceWithSource({
+  cents,
+  source,
+  differsFromCatalogue = false,
+  catalogueCents = null,
+}: {
+  cents: number;
+  source: "quote" | "catalogue" | null;
+  differsFromCatalogue?: boolean;
+  catalogueCents?: number | null;
+}) {
   const isQuote = source === "quote";
   return (
     <span className="inline-flex items-center gap-1.5">
@@ -87,6 +99,15 @@ function UnitPriceWithSource({ cents, source }: { cents: number; source: "quote"
       >
         {isQuote ? "Quote" : "Catalogue"}
       </span>
+      {differsFromCatalogue && catalogueCents != null && (
+        <span
+          className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
+          title={`Saved line price differs from the current catalogue price (€${(catalogueCents / 100).toFixed(0)})`}
+        >
+          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+          Differs
+        </span>
+      )}
     </span>
   );
 }
