@@ -515,14 +515,18 @@ const TradeAILayoutStudio = () => {
           <section className="space-y-1">
             <div className="flex items-center justify-between">
               <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
-              <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
-                onClick={() => {
-                  const rows = scene.curatedAssets.map((a) => {
-                    const item = byId.get(a.componentId);
-                    return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
-                  });
-                  downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
-                }}>Export schedule PDF</button>
+              <div className="flex items-center gap-3">
+                <button type="button" disabled={compareIds.length < 2} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  onClick={() => setCompareOpen(true)}>Compare selected ({compareIds.length})</button>
+                <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  onClick={() => {
+                    const rows = scene.curatedAssets.map((a) => {
+                      const item = byId.get(a.componentId);
+                      return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
+                    });
+                    downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
+                  }}>Export schedule PDF</button>
+              </div>
             </div>
             <ul className="divide-y divide-border text-xs">
               {scene.curatedAssets.map((a, i) => {
@@ -531,6 +535,9 @@ const TradeAILayoutStudio = () => {
                 return (
                   <li key={`${a.componentId}-${i}`} className="py-2">
                     <div className="flex items-center gap-2">
+                      <input type="checkbox" aria-label={`Compare ${item?.name ?? a.sku}`} className="h-3.5 w-3.5 shrink-0 accent-primary"
+                        checked={compareIds.includes(`ai-${i}-${a.sku}`)}
+                        onChange={(e) => setCompareIds((ids) => e.target.checked ? [...ids, `ai-${i}-${a.sku}`] : ids.filter((id) => id !== `ai-${i}-${a.sku}`))} />
                       <Select value={a.componentId} onValueChange={(v) => swapAsset(i, v)}>
                         <SelectTrigger className="h-8 flex-1 text-xs"><SelectValue placeholder={a.sku} /></SelectTrigger>
                         <SelectContent>
