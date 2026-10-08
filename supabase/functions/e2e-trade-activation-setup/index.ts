@@ -47,12 +47,18 @@ Deno.serve(async (req) => {
   try {
     if (body.action === "cleanup") {
       const email = String(body.email ?? "").toLowerCase();
-      if (!EMAIL_RE.test(email)) return json({ error: "Only disposable test addresses can be removed" }, 400);
+      if (!EMAIL_RE.test(email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
       await cleanup(svc, email);
       return json({ ok: true });
     }
     if (body.action !== "create") return json({ error: "Unknown action" }, 400);
-    const email = `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+    // An explicit email may be supplied for a controlled, operator-requested run
+    // (e.g. an inbox the owner controls). Without one, a disposable address is used.
+    const requested = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const email = requested && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requested)
+      ? requested
+      : `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+    await cleanup(svc, email);
     const { error } = await svc.from("trade_accounts").insert({ email, status: "approved" });
     if (error) throw new Error(`Could not create test application: ${error.message}`);
     const link = new URL(await prepareTradeActivation(svc, email));
