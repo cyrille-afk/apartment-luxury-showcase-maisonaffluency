@@ -9,9 +9,10 @@ import type { TemplateEntry } from './registry.tsx'
 interface Props {
   userName?: string
   companyName?: string
+  email?: string
 }
 
-const StudioActivationAlertEmail = ({ userName = 'A trade member', companyName = 'their studio' }: Props) => (
+const StudioActivationAlertEmail = ({ userName = 'A trade member', companyName = 'their studio', email }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>New studio activation — {userName} ({companyName})</Preview>
@@ -21,9 +22,8 @@ const StudioActivationAlertEmail = ({ userName = 'A trade member', companyName =
         <Text style={eyebrow}>New Studio Activation</Text>
         <Section style={box}>
           <Text style={text}>
-            {userName} from {companyName} has successfully authorized their workspace
-            session, signed the secure studio agreement, and initialized their live
-            portal account.
+            {userName} from {companyName}{email ? ` (${email})` : ''} has set a password
+            and activated their trade account. They now have access to the trade portal.
           </Text>
         </Section>
         <Hr style={divider} />
