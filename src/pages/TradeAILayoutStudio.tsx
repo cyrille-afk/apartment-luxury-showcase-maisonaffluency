@@ -120,6 +120,8 @@ const TradeAILayoutStudio = () => {
     setTitle(l.title);
     setBrief(l.brief);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setSkipped([]);
     setScene(catalogue.length ? repriceScene(l.scene, catalogue) : l.scene);
     setOverviewRevision((r) => r + 1);
@@ -161,6 +163,8 @@ const TradeAILayoutStudio = () => {
   const generate = async () => {
     setLoading(true);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setCurrent(null);
     try {
       const live = (await loadCatalogue()) ?? catalogue;
@@ -177,6 +181,8 @@ const TradeAILayoutStudio = () => {
     const result = curate(briefText, catalogue, brief.totalBudget);
     setCuration(result);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setCurrent(null);
     setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
     if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
@@ -197,6 +203,9 @@ const TradeAILayoutStudio = () => {
 
   const removeAsset = (index: number) => {
     setSelectedId(null);
+    // Instance ids are index-based, so removing a piece invalidates the compare selection.
+    setCompareIds([]);
+    setCompareOpen(false);
     setScene((s) => s && withLedger({ ...s, curatedAssets: s.curatedAssets.filter((_, i) => i !== index) }));
   };
 
