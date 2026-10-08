@@ -23,7 +23,7 @@ const VERDICT: Record<Verdict, { label: string; hint: string; variant: "destruct
 const DAYS = [7, 30, 90];
 
 export default function TradeAdminEmailDeliverability() {
-  const { user, isAdmin, rolesLoaded } = useAuth() as ReturnType<typeof useAuth> & { rolesLoaded?: boolean };
+  const { user, isAdmin, rolesLoaded } = useAuth();
   const [days, setDays] = useState(30);
   const enabled = !!user && isAdmin;
 
@@ -50,7 +50,7 @@ export default function TradeAdminEmailDeliverability() {
   const reports = useMemo(() => (q.data ? buildRecipientReports(q.data.rows, q.data.suppressions) : []), [q.data]);
   const issues = reports.filter((r) => r.verdict !== "healthy").length;
 
-  if (rolesLoaded === false) return <div className="p-10"><Loader2 className="h-5 w-5 animate-spin" /></div>;
+  if (!rolesLoaded) return <div className="p-10"><Loader2 className="h-5 w-5 animate-spin" /></div>;
   if (!enabled) return <div className="p-10 text-muted-foreground">Admins only.</div>;
 
   return (
