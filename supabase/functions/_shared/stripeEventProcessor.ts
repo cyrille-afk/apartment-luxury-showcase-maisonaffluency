@@ -165,6 +165,15 @@ export async function processStripeEvent(supabase: Supa, stripe: Stripe, event: 
     const paymentType = session.metadata?.payment_type || "deposit";
     const userIdMeta = session.metadata?.user_id;
 
+    // ===== €15 Single Video Pass → credit video token balance (idempotent per session) =====
+    if (session.metadata?.kind === "video_pass") {
+      if (session.payment_status !== "paid" || !userIdMeta) return;
+      const { error } = await supabase.rpc("grant_video_pass", { _session: session.id, _user: userIdMeta, _credits: 1 });
+      if (error) throw new Error(`grant_video_pass failed: ${error.message}`);
+      console.log(`${LOG} Video pass credited for ${userIdMeta} (${session.id})`);
+      return;
+    }
+
     // ===== Sales funnel card payment (metadata.cardId) =====
     const funnelCardId = session.metadata?.cardId;
     if (funnelCardId && session.payment_status === "paid") {
