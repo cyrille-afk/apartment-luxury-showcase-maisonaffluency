@@ -1,6 +1,6 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
-- Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the retryable record.
+- Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the record.
 - Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
@@ -20,7 +20,7 @@
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id), restored per user+project via localStorage keys; the floating Felix lists only workspace=false.
-- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts cannot reveal internal figures; not an authorization boundary.
+- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts can't reveal internal figures; not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — else hidden products resurface.
 - The Extension Integration sandbox embeds the trade sidebar via its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
