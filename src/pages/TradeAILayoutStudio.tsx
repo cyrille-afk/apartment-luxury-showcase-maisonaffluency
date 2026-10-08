@@ -445,7 +445,7 @@ const TradeAILayoutStudio = () => {
       const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload } });
       if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
       if (error || data?.error) throw new Error(data?.error || error?.message);
-      if (data?.status === "dry-run") toast.success(`Render payload ready (${payload.camera.path.length} camera points) — render service not connected yet, no credit used`);
+      if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
       else toast.success("Render requested");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Render request failed");
