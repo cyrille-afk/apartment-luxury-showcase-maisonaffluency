@@ -1030,6 +1030,13 @@
       "when": 1791427585040,
       "tag": "0146_flag_offdomain_spec_sheet_links",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1791446054874,
+      "tag": "0147_email_portal_click_tracking",
+      "breakpoints": true
     }
   ]
 }
