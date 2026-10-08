@@ -216,12 +216,16 @@ export function autoRaiseFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
   return { nodes: out, conflicts };
 }
 
+/** Preferred side for the sideways shift: "auto" alternates both, "left"/"right" fix one side (relative to travel direction). */
+export type ShiftDirection = "auto" | "left" | "right";
+
 /**
  * For viewpoints still flagged after raising (e.g. tall doors), nudge them sideways —
- * perpendicular to the path direction, alternating sides with growing steps — accepting
- * only moves that reduce the conflict count. Room-clamped; returns remaining conflicts.
+ * perpendicular to the path direction — accepting only moves that reduce the conflict
+ * count. "auto" alternates sides with growing steps; "left"/"right" stay on the chosen
+ * side and grow the offset each iteration. Room-clamped; returns remaining conflicts.
  */
-export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: CustomPathNode[], step = 0.15, maxIter = 30) {
+export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: CustomPathNode[], step = 0.15, maxIter = 30, direction: ShiftDirection = "auto") {
   const { width: W, length: L } = scene.roomDimensions;
   const clampX = (x: number) => THREE.MathUtils.clamp(x, -W / 2 + 0.4, W / 2 - 0.4);
   const clampZ = (z: number) => THREE.MathUtils.clamp(z, -L / 2 + 0.4, L / 2 - 0.4);
@@ -231,8 +235,8 @@ export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
   let best = score(conflicts);
   for (let it = 0; it < maxIter && conflicts.length && out.length > 1; it++) {
     const last = out.length - 1;
-    const magnitude = step * (1 + Math.floor(it / 2));
-    const side = it % 2 === 0 ? 1 : -1;
+    const magnitude = direction === "auto" ? step * (1 + Math.floor(it / 2)) : step * (1 + it);
+    const side = direction === "auto" ? (it % 2 === 0 ? 1 : -1) : (direction === "left" ? -1 : 1);
     // Shift every flagged viewpoint together, perpendicular to the local path direction,
     // so multi-node and straight two-node paths can both escape an obstacle. Keep growing
     // the offset until the path fully exits the obstacle — partial moves rarely shrink the
