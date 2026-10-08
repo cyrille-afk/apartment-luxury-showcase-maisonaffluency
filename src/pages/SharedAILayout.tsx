@@ -151,7 +151,7 @@ const SharedAILayout = () => {
           <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
           <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
           <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
-          <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
+          <AICuratedEnvironment schema={scene} pieceNames={new Map(products.map((item) => [item.componentId, item.name]))} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
             <RoomOverviewCamera revision={token} view={cameraView} enabled={!active} />
           </AICuratedEnvironment>
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
