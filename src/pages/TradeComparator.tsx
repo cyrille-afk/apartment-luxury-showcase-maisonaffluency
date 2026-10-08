@@ -1,9 +1,12 @@
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { buildComparisonPdf } from "@/lib/comparisonPdf";
+import { downloadBlob } from "@/lib/furnishingSchedulePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Search, X, Heart, ChevronDown } from "lucide-react";
+import { Search, X, Heart, ChevronDown, Bookmark, Link2, FileDown, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -58,6 +61,49 @@ export default function TradeComparator() {
 
   const removeFromCompare = (id: string) => {
     setCompareList((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const queryClient = useQueryClient();
+  const { discountPct } = useTradePriceMode();
+  const [shortlistName, setShortlistName] = useState("");
+  const { data: shortlists = [], refetch: refetchShortlists } = useQuery({
+    queryKey: ["comparator-shortlists", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("comparator_shortlists").select("id, name, items, share_token, created_at").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+  const saveShortlist = async () => {
+    if (!user || compareList.length === 0) return;
+    // Public-safe snapshot only: no prices are stored, so shared links can never leak trade figures.
+    const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url }));
+    const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, name: shortlistName.trim() || "Shortlist", items });
+    if (error) { toast.error("Could not save shortlist"); return; }
+    setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists();
+  };
+  const openShortlist = (items: any) => {
+    const ids: string[] = (items || []).map((i: any) => i.id);
+    setCompareList(ids.map((id) => liveProducts.find((p) => p.id === id)).filter(Boolean).slice(0, 4) as TradeProduct[]);
+  };
+  const shareShortlist = async (token: string) => {
+    await navigator.clipboard.writeText(`https://www.maisonaffluency.com/shortlist/${token}`);
+    toast.success("Client link copied — shows pieces without prices");
+  };
+  const deleteShortlist = async (id: string) => {
+    await supabase.from("comparator_shortlists").delete().eq("id", id);
+    refetchShortlists();
+  };
+  const exportPdf = () => {
+    const fmt = (c: number | null, cur = "EUR") => c == null ? "Price upon Request" : new Intl.NumberFormat("en-IE", { style: "currency", currency: cur, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
+    const pieces = compareList.map((p) => {
+      const pricing = queryClient.getQueryData<any>(["trade-product-pricing", p.id]);
+      const prices = pricing ? comparatorPrices(pricing, discountPct) : { retail: null, trade: null };
+      const cur = pricing?.currency || "EUR";
+      return { name: p.product_name, values: { brand_name: p.brand_name, category: p.category, dimensions: p.dimensions ?? "", materials: p.materials ?? "", lead_time: p.lead_time ?? "", rrp_price_cents: fmt(prices.retail, cur), trade_price_cents: fmt(prices.trade, cur) } };
+    });
+    downloadBlob(buildComparisonPdf(pieces, FIELDS, showTradePrice ? "Product Comparison (Trade)" : "Product Comparison"), "product-comparison.pdf");
   };
 
   const comparisonSlots = Array.from({ length: 4 }, (_, index) => compareList[index] ?? null);
@@ -162,6 +208,22 @@ export default function TradeComparator() {
               </div>;
             })}
           </div>
+        </section>
+
+        <section className="flex flex-col gap-3 border-b border-border pb-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input value={shortlistName} onChange={(e) => setShortlistName(e.target.value)} placeholder="Shortlist name (e.g. client, project)" aria-label="Shortlist name" className="h-9 w-72 font-body text-sm" />
+            <Button size="sm" variant="outline" onClick={saveShortlist} disabled={compareList.length === 0}><Bookmark className="mr-2 h-3.5 w-3.5" />Save shortlist</Button>
+            <Button size="sm" variant="outline" onClick={exportPdf} disabled={compareList.length === 0}><FileDown className="mr-2 h-3.5 w-3.5" />Export comparison PDF</Button>
+          </div>
+          {shortlists.length > 0 && <ul className="flex flex-wrap gap-2" aria-label="Saved shortlists">
+            {shortlists.map((s: any) => (
+              <li key={s.id} className="flex items-center gap-1 border border-border px-2 py-1">
+                <Button variant="ghost" size="sm" className="h-7 px-2 font-body text-xs" onClick={() => openShortlist(s.items)}>{s.name} ({(s.items || []).length})</Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Copy client link for ${s.name}`} onClick={() => shareShortlist(s.share_token)}><Link2 className="h-3.5 w-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete ${s.name}`} onClick={() => deleteShortlist(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+              </li>))}
+          </ul>}
         </section>
 
         <div className="overflow-x-auto border border-border rounded-lg">
