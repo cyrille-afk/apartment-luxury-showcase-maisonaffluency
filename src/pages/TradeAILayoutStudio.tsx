@@ -31,6 +31,7 @@ import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
+import LayoutPieceCompare from "@/components/trade/visualiser/LayoutPieceCompare";
 import { buildFurnishingSchedulePdf, downloadBlob } from "@/lib/furnishingSchedulePdf";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
@@ -66,6 +67,8 @@ const TradeAILayoutStudio = () => {
   useEffect(() => { setCameraView("overview"); }, [overviewRevision]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [catalogue, setCatalogue] = useState<LiveCatalogueItem[]>([]);
   const [catLoading, setCatLoading] = useState(true);
@@ -117,6 +120,8 @@ const TradeAILayoutStudio = () => {
     setTitle(l.title);
     setBrief(l.brief);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setSkipped([]);
     setScene(catalogue.length ? repriceScene(l.scene, catalogue) : l.scene);
     setOverviewRevision((r) => r + 1);
@@ -158,6 +163,8 @@ const TradeAILayoutStudio = () => {
   const generate = async () => {
     setLoading(true);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setCurrent(null);
     try {
       const live = (await loadCatalogue()) ?? catalogue;
@@ -174,6 +181,8 @@ const TradeAILayoutStudio = () => {
     const result = curate(briefText, catalogue, brief.totalBudget);
     setCuration(result);
     setSelectedId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
     setCurrent(null);
     setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
     if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
@@ -194,6 +203,9 @@ const TradeAILayoutStudio = () => {
 
   const removeAsset = (index: number) => {
     setSelectedId(null);
+    // Instance ids are index-based, so removing a piece invalidates the compare selection.
+    setCompareIds([]);
+    setCompareOpen(false);
     setScene((s) => s && withLedger({ ...s, curatedAssets: s.curatedAssets.filter((_, i) => i !== index) }));
   };
 
@@ -503,14 +515,18 @@ const TradeAILayoutStudio = () => {
           <section className="space-y-1">
             <div className="flex items-center justify-between">
               <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
-              <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
-                onClick={() => {
-                  const rows = scene.curatedAssets.map((a) => {
-                    const item = byId.get(a.componentId);
-                    return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
-                  });
-                  downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
-                }}>Export schedule PDF</button>
+              <div className="flex items-center gap-3">
+                <button type="button" disabled={compareIds.length < 2} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  onClick={() => setCompareOpen(true)}>Compare selected ({compareIds.length})</button>
+                <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  onClick={() => {
+                    const rows = scene.curatedAssets.map((a) => {
+                      const item = byId.get(a.componentId);
+                      return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
+                    });
+                    downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
+                  }}>Export schedule PDF</button>
+              </div>
             </div>
             <ul className="divide-y divide-border text-xs">
               {scene.curatedAssets.map((a, i) => {
@@ -519,6 +535,9 @@ const TradeAILayoutStudio = () => {
                 return (
                   <li key={`${a.componentId}-${i}`} className="py-2">
                     <div className="flex items-center gap-2">
+                      <input type="checkbox" aria-label={`Compare ${item?.name ?? a.sku}`} className="h-3.5 w-3.5 shrink-0 accent-primary"
+                        checked={compareIds.includes(`ai-${i}-${a.sku}`)}
+                        onChange={(e) => setCompareIds((ids) => e.target.checked ? [...ids, `ai-${i}-${a.sku}`] : ids.filter((id) => id !== `ai-${i}-${a.sku}`))} />
                       <Select value={a.componentId} onValueChange={(v) => swapAsset(i, v)}>
                         <SelectTrigger className="h-8 flex-1 text-xs"><SelectValue placeholder={a.sku} /></SelectTrigger>
                         <SelectContent>
@@ -544,6 +563,19 @@ const TradeAILayoutStudio = () => {
 
       <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
         {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} manufacturer={selectedPiece?.manufacturer} productUrl={selectedPiece?.productUrl} onClose={() => setSelectedId(null)} />}
+        {compareOpen && scene && (
+          <LayoutPieceCompare
+            pieces={compareIds.flatMap((id) => {
+              const idx = scene.curatedAssets.findIndex((a, i) => `ai-${i}-${a.sku}` === id);
+              if (idx < 0) return [];
+              const a = scene.curatedAssets[idx];
+              const item = byId.get(a.componentId);
+              return [{ id, name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null }];
+            })}
+            onRemove={(id) => setCompareIds((ids) => ids.filter((x) => x !== id))}
+            onClose={() => setCompareOpen(false)}
+          />
+        )}
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
             <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={walkActive || !!authorMode || dragging}
