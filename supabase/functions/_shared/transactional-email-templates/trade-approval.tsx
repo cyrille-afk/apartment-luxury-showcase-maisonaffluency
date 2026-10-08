@@ -10,6 +10,9 @@ import { payoutsBenefit } from '../applicationNotificationCopy.ts'
 
 const SITE_NAME = "Maison Affluency"
 
+const portalHref = (activationUrl?: string, portalRef?: string) =>
+  activationUrl || `https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`
+
 interface TradeApprovalProps {
   name?: string
   companyName?: string
@@ -101,10 +104,14 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUr
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href={activationUrl || `https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`}>
+          <Button style={button} href={portalHref(activationUrl, portalRef)}>
             Access Your Trade Portal
           </Button>
         </Section>
+        <Text style={plainLinkNote}>
+          If the button above does not work, copy and paste this link into your browser:<br />
+          <a href={portalHref(activationUrl, portalRef)} style={plainLink}>{portalHref(activationUrl, portalRef)}</a>
+        </Text>
         <Text style={text}>
           A dedicated Client Advisor will reach out to you shortly to introduce themselves and discuss how we can best support your projects.
         </Text>
@@ -182,7 +189,9 @@ const benefitTitle = { color: '#1a1a1a', fontSize: '15px', fontWeight: 'bold' as
 const benefitText = { color: '#333333', fontSize: '14px', lineHeight: '1.6', margin: '0', fontFamily: "Georgia, 'Playfair Display', serif" }
 const detailList = { color: '#333333', fontSize: '13px', lineHeight: '1.6', margin: '8px 0 0 18px', paddingLeft: '14px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const detailItem = { marginBottom: '4px' }
-const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
+const buttonSection = { textAlign: 'center' as const, margin: '32px 0 12px' }
+const plainLinkNote = { color: '#888888', fontSize: '12px', lineHeight: '1.7', margin: '0 0 28px', textAlign: 'center' as const, wordBreak: 'break-all' as const }
+const plainLink = { color: '#1a1a1a', fontSize: '12px', textDecoration: 'underline' as const }
 const button = {
   display: 'inline-block',
   padding: '14px 32px',
