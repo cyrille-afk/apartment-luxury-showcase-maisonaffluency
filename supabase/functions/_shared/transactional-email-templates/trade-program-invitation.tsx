@@ -94,11 +94,43 @@ const Email = ({ firstName, name, portalRef }: Props) => {
   )
 }
 
+const portalUrlFor = (portalRef?: string) =>
+  `https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`
+
+const plainText = (data: Record<string, any>) => {
+  const firstName = (typeof data.firstName === 'string' && data.firstName.trim())
+    || (typeof data.name === 'string' && data.name.trim().split(/\s+/)[0])
+    || 'Design Professional'
+  const portalUrl = portalUrlFor(typeof data.portalRef === 'string' ? data.portalRef : undefined)
+  return [
+    'MAISON AFFLUENCY — Unique by Design',
+    '',
+    `Dear ${firstName},`,
+    '',
+    'Thank you for your interest in the Maison Affluency Trade Program. We have successfully received the application details for your studio.',
+    '',
+    'We are currently completing a specialized fine-tuning phase for our advanced Trade suite, design tools, and custom AI curatorial assistant. This expanded system is scheduled to fully deploy alongside our exhibition calendar for Design Miami Paris from October 20–25, 2026.',
+    '',
+    'While direct system credentials conclude, your firm has been assigned priority tier status. For any immediate projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at concierge@maisonaffluency.com.',
+    '',
+    'ACCESS YOUR TRADE PORTAL',
+    portalUrl,
+    '',
+    'Warm regards,',
+    'The Concierge Team',
+    '',
+    '—',
+    'Maison Affluency Singapore',
+    'Unique by Design',
+  ].join('\n')
+}
+
 export const template = {
   component: Email,
   subject: 'Maison Affluency Trade Program — Application Received',
   displayName: 'Trade Program Application Received',
   previewData: { firstName: 'Alexandra', email: 'studio@example.com', companyName: 'Studio Example' },
+  text: plainText,
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif' }
