@@ -168,6 +168,7 @@ const SharedAILayout = () => {
                 <SelectContent>{WALKTHROUGH_SPEEDS.map((s) => <SelectItem key={s} value={String(s)}>{s}×</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <p className="text-[10px] text-muted-foreground">Space pause/resume · R restart · −/+ speed</p>
           </div>
         )}
       </div>
