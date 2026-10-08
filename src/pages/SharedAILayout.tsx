@@ -131,7 +131,7 @@ const SharedAILayout = () => {
             <SelectTrigger aria-label="Camera path" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               {paths.map((p) => <SelectItem key={p.id} value={`custom:${p.id}`}>{p.name}</SelectItem>)}
-              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
+              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Button size="sm" variant="secondary" onClick={active ? stop : start} disabled={!cinematic}>
