@@ -52,7 +52,13 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
     if (body.action !== "create") return json({ error: "Unknown action" }, 400);
-    const email = `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+    // An explicit email may be supplied for a controlled, operator-requested run
+    // (e.g. an inbox the owner controls). Without one, a disposable address is used.
+    const requested = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const email = requested && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requested)
+      ? requested
+      : `e2e-activation-${crypto.randomUUID()}@${DOMAIN}`;
+    await cleanup(svc, email);
     const { error } = await svc.from("trade_accounts").insert({ email, status: "approved" });
     if (error) throw new Error(`Could not create test application: ${error.message}`);
     const link = new URL(await prepareTradeActivation(svc, email));
