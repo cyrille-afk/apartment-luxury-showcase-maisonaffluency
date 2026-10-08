@@ -6,13 +6,20 @@ export interface ScheduleRow {
   manufacturer?: string | null;
   priceEur: number | null;
   dimensions?: string | null;
+  /** Clickable sourcing link rendered under the piece name. */
+  productUrl?: string | null;
+}
+
+export interface SchedulePdfOptions {
+  /** Client-ready schedules use public product links and never carry trade routes. */
+  clientReady?: boolean;
 }
 
 export function scheduleTotalEur(rows: ScheduleRow[]): number {
   return rows.reduce((sum, r) => sum + (r.priceEur ?? 0), 0);
 }
 
-export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string): Blob {
+export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string, options: SchedulePdfOptions = {}): Blob {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const money = (eur: number | null) => formatPdfMoney(eur == null ? null : Math.round(eur * 100), "EUR", "en-GB", "Price upon Request");
   doc.setFont("helvetica", "bold");
@@ -20,7 +27,7 @@ export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string): 
   doc.text("MAISON AFFLUENCY", 15, 18);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text(`Furnishing Schedule — ${title}`, 15, 26);
+  doc.text(options.clientReady ? `Furnishing Schedule — ${title}` : `Furnishing Schedule — ${title} (Trade)`, 15, 26);
   doc.setFontSize(9);
   doc.text(formatPdfDate(new Date(), "en-GB"), 195, 18, { align: "right" });
 
@@ -38,10 +45,16 @@ export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string): 
   rows.forEach((r, i) => {
     const name = doc.splitTextToSize(r.manufacturer ? `${r.name}\n${r.manufacturer}` : r.name, 64);
     const dims = doc.splitTextToSize((r.dimensions || "Dimensions upon request").replace(/\s*\n\s*/g, " / "), 70);
-    const h = Math.max(name.length, dims.length) * 4.5 + 3;
+    const linkLines = r.productUrl ? 1 : 0;
+    const h = Math.max(name.length + linkLines, dims.length) * 4.5 + 3;
     if (y + h > 280) { doc.addPage(); y = 20; header(); }
     doc.text(String(i + 1), cols[0], y);
     doc.text(name, cols[1], y);
+    if (r.productUrl) {
+      doc.setTextColor(31, 78, 121);
+      doc.textWithLink("View product", cols[1], y + name.length * 4.5, { url: r.productUrl });
+      doc.setTextColor(0, 0, 0);
+    }
     doc.text(dims, cols[2], y);
     doc.text(money(r.priceEur), cols[4], y, { align: "right" });
     y += h;
