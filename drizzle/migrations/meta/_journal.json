@@ -1044,6 +1044,13 @@
       "when": 1791461496497,
       "tag": "0148_comparator_shortlists",
       "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1791464605537,
+      "tag": "0149_quote_item_catalogue_price_fallback",
+      "breakpoints": true
     }
   ]
 }
