@@ -2,6 +2,7 @@ import * as React from "npm:react@18.3.1";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { TEMPLATES } from "../_shared/transactional-email-templates/registry.tsx";
+import { welcomeDesignerData } from "../_shared/welcomeDesignerCount.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,7 +64,7 @@ Deno.serve(async (req) => {
   if (!entry) return json(404, { error: "template_not_found" });
 
   try {
-    const props = templateData ?? entry.previewData ?? {};
+    const props = await welcomeDesignerData(admin, templateName, templateData ?? entry.previewData ?? {});
     const html = await renderAsync(React.createElement(entry.component, props));
     const subject =
       typeof entry.subject === "function" ? entry.subject(props) : entry.subject;
