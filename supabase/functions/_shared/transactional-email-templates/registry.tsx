@@ -7,6 +7,9 @@ export interface TemplateEntry {
   to?: string
   displayName?: string
   previewData?: Record<string, any>
+  // Optional curated plain-text body. When present it replaces the
+  // auto-generated text part derived from the HTML render.
+  text?: string | ((data: Record<string, any>) => string)
 }
 
 import { template as tradeApproval } from './trade-approval.tsx'

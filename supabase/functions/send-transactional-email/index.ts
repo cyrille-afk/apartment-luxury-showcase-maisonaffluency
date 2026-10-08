@@ -414,10 +414,12 @@ Deno.serve(async (req) => {
   const html = await renderAsync(
     React.createElement(template.component, templateData)
   )
-  const plainText = await renderAsync(
-    React.createElement(template.component, templateData),
-    { plainText: true }
-  )
+  const plainText = template.text
+    ? (typeof template.text === 'function' ? template.text(templateData) : template.text)
+    : await renderAsync(
+      React.createElement(template.component, templateData),
+      { plainText: true }
+    )
 
   // Resolve subject — supports static string or dynamic function
   const resolvedSubject =
