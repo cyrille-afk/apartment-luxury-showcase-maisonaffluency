@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { updateTradeApplication, declineAndDeleteTradeApplication } from './tradeApplicationActions';
+import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from './tradeApplicationActions';
 
 const mocks = vi.hoisted(() => ({ invoke: vi.fn(), single: vi.fn(), update: vi.fn(), remove: vi.fn(), events: [] as string[] }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
@@ -18,6 +18,24 @@ describe('Trade application notifications', () => {
     vi.clearAllMocks(); mocks.events.length = 0;
     mocks.single.mockResolvedValue({ data: { id: account.id }, error: null });
     mocks.invoke.mockResolvedValue({ data: { success: true, queued: true }, error: null });
+  });
+  it('resends activation with a fresh key without changing approval', async () => {
+    const draft = { subject: 'Welcome', body: 'Dear Jane,' };
+    await resendTradeActivation({ ...account, status: 'approved' }, draft, 'new-attempt');
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.invoke.mock.calls[0][1].body.idempotencyKey).toBe('trade-approval-application-1-new-attempt');
+    expect(mocks.invoke.mock.calls[1][1].body.idempotencyKey).toBe('trade-approval-copy-concierge-application-1-new-attempt');
+  });
+  it('retains the same resend key on retry and reports sending failure', async () => {
+    mocks.invoke.mockResolvedValue({ error: new Error('offline') });
+    const draft = { subject: 'Welcome', body: 'Dear Jane,' };
+    for (let i = 0; i < 2; i++) await expect(resendTradeActivation({ ...account, status: 'approved' }, draft, 'retry-attempt')).resolves.toEqual({ notified: false });
+    expect(mocks.invoke.mock.calls.every(c => c[1].body.idempotencyKey === 'trade-approval-application-1-retry-attempt')).toBe(true);
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+  it('blocks resend for unapproved applicants', async () => {
+    await expect(resendTradeActivation(account, { subject: 'Welcome', body: 'Dear Jane,' }, 'attempt')).rejects.toThrow('Only approved');
+    expect(mocks.invoke).not.toHaveBeenCalled();
   });
   it('persists approval before sending the registered personalised template', async () => {
     await expect(updateTradeApplication(account, 'approved')).resolves.toEqual({ notified: true });

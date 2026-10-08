@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Restore activation resend for approved studios and verify Studio 1–10's drawer and production activation page before sending.
 - [x] Add actual camera-route thumbnails and speed-aware estimated durations to the shared-layout path menu; verified all four sample routes, selection, and 2× estimates live without page errors.
 - [x] Persist walkthrough camera path, playback speed and repeat settings; 17 tests pass, browser reload restored Slow orbit / 1.5× / repeat on, confirmed in screenshots. Extended navigation checks were limited by preview rendering stalls.
 - [x] Blend camera preset changes during playback; 13 tests pass, browser position/rotation continuity, safe bounds, pause/resume, rapid switching, speed and loop verified without page errors.

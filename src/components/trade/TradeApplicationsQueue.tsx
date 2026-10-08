@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
-import { updateTradeApplication, declineAndDeleteTradeApplication } from "@/lib/tradeApplicationActions";
+import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
 import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
 import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
 
@@ -56,12 +56,12 @@ export default function TradeApplicationsQueue() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
-  const [review, setReview] = useState<{ account: Account; approval: boolean; draft: NotificationDraft } | null>(null);
+  const [review, setReview] = useState<{ account: Account; approval: boolean; draft: NotificationDraft; resendAttempt?: string } | null>(null);
   const [draftError, setDraftError] = useState<string | null>(null);
 
   const openReview = (account: Account, approval: boolean) => {
     setDraftError(null);
-    setReview({ account, approval, draft: createApplicationDraft(approval ? 'approved' : 'rejected', account.contact_name, account.studio_name, account.country) });
+    setReview({ account, approval, draft: createApplicationDraft(approval ? 'approved' : 'rejected', account.contact_name, account.studio_name, account.country), ...(approval && account.status === 'approved' ? { resendAttempt: crypto.randomUUID() } : {}) });
   };
 
   const { data: accounts = [], isLoading } = useQuery({
@@ -116,12 +116,14 @@ export default function TradeApplicationsQueue() {
     setBusy(a.id + (review.approval ? "approved" : "delete"));
     try {
       if (review.approval) {
-        const result = await updateTradeApplication(a, 'approved', draft);
+        const result = review.resendAttempt
+          ? await resendTradeActivation(a, draft, review.resendAttempt)
+          : await updateTradeApplication(a, 'approved', draft);
         if (!result.notified) {
           setReview(current => current ? { ...current, account: { ...a, status: 'approved' }, draft } : null);
-          throw new Error('Approval saved, but the email could not be queued. Your draft is kept here for retry.');
+          throw new Error('Studio remains approved, but the email could not be queued. Your draft is kept here for retry.');
         }
-        toast.success(`Approval notification queued for ${a.email}`);
+        toast.success(`Activation email queued for ${a.email}`);
       } else {
         await declineAndDeleteTradeApplication(a, draft);
         toast.success("Decline email queued and trade application permanently deleted.");
@@ -216,11 +218,11 @@ export default function TradeApplicationsQueue() {
                  <div className="flex flex-col gap-2 md:w-56">
                   <Button
                     onClick={() => openReview(a, true)}
-                    disabled={a.status === "approved" || busy !== null}
+                    disabled={busy !== null}
                     className="h-11 rounded-none text-[11px] uppercase tracking-[0.2em]"
                   >
                     {busy === a.id + "approved" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                    Approve Trade Account
+                    {a.status === 'approved' ? 'Resend activation email' : 'Approve Trade Account'}
                   </Button>
                   <Button
                     variant="outline"
