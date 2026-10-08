@@ -40,6 +40,7 @@ Allow: /
 User-agent: *
 Allow: /
 Disallow: /layout/
+Disallow: /shortlist/
 Disallow: /shared/
 Disallow: /api/
 Disallow: /trade/admin
