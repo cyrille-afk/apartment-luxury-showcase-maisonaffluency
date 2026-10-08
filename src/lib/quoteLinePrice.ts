@@ -7,18 +7,29 @@ export type QuoteLinePriceSource = "quote" | "catalogue" | null;
 export interface ResolvedQuoteLinePrice {
   unit_price_cents: number | null;
   price_source: QuoteLinePriceSource;
+  /** True when a saved line price differs from the current catalogue price. */
+  price_differs_from_catalogue: boolean;
+  /** The current catalogue price, when one exists. */
+  catalogue_price_cents: number | null;
 }
 
 export function resolveQuoteLinePrice(
   lineUnitPriceCents: number | null | undefined,
   product: { trade_price_cents?: number | null; rrp_price_cents?: number | null } | null | undefined,
 ): ResolvedQuoteLinePrice {
-  if (lineUnitPriceCents != null) {
-    return { unit_price_cents: lineUnitPriceCents, price_source: "quote" };
-  }
   const catalogue = product?.trade_price_cents || product?.rrp_price_cents || null;
+  if (lineUnitPriceCents != null) {
+    return {
+      unit_price_cents: lineUnitPriceCents,
+      price_source: "quote",
+      price_differs_from_catalogue: catalogue != null && lineUnitPriceCents !== catalogue,
+      catalogue_price_cents: catalogue,
+    };
+  }
   return {
     unit_price_cents: catalogue,
     price_source: catalogue != null ? "catalogue" : null,
+    price_differs_from_catalogue: false,
+    catalogue_price_cents: catalogue,
   };
 }
