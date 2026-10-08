@@ -510,6 +510,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         subcategory: p.subcategory || null,
         pdf_url: p.pdf_url || null,
         pdf_urls: (p.pdf_urls as any) || null,
+        slug: (p as any).slug ?? null,
         designer_slug: designerInfo?.slug || null,
         size_variants: (p.size_variants as any) || null,
         variant_placeholder: p.variant_placeholder || null,

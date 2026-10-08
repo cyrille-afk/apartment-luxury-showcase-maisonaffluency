@@ -69,6 +69,8 @@ export interface PublicLightboxItem {
   pdf_url?: string | null;
   pdf_urls?: PdfEntry[] | null;
   designer_slug?: string | null;
+  /** Stored canonical product slug; preferred over title-derived slugs. */
+  slug?: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
   variant_placeholder?: string | null;
   base_axis_label?: string | null;
@@ -636,7 +638,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     /^(?:oiled|fumed)\s+/i.test(product.subtitle || "");
   const productPageSlug = isDagmarClamChairFinishCard
     ? "clam-chair"
-    : slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : ""));
+    : (product.slug || slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : "")));
   const productPageHref = product.is_catalog_item !== false && productPageDesignerSlug
     ? `/designers/${productPageDesignerSlug}/${productPageSlug}`
     : null;

@@ -79,6 +79,7 @@ const toRoomLightboxItem = (item: ProductItem): PublicLightboxItem => {
     description: p.description ?? null,
     category: p.category ?? null,
     subcategory: sub,
+    slug: p.slug ?? null,
     designer_slug: designerSlugify(item.designerId || item.designerName),
     size_variants: p.size_variants ?? null,
     variant_placeholder: p.variant_placeholder ?? null,

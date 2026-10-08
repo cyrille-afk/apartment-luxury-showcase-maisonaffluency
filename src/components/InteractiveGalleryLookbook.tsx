@@ -426,6 +426,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
         image_url: pick.image_url,
         hover_image_url: pick.hover_image_url || null,
         brand_name: designer?.name || "Maison Affluency",
+        slug: pick.slug ?? null,
         designer_slug: designer?.slug || null,
         materials: pick.materials || null,
         materials_description: pick.materials_description || null,

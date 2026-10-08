@@ -2161,6 +2161,7 @@ const PublicDesignerProfile = () => {
           subcategory: p.subcategory,
           pdf_url: p.pdf_url || ((p.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
           pdf_urls: p.pdf_urls as PdfEntry[] | undefined,
+          slug: (p as any).slug ?? null,
           designer_slug: isArnoldMadsenProfile ? "dagmar-london" : (p as AttributedCuratorPick).designer_slug || designer?.slug || null,
           size_variants: (p as any).size_variants ?? null,
           variant_placeholder: (p as any).variant_placeholder ?? null,
