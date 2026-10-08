@@ -18,7 +18,7 @@ export async function completeTradeActivation(service: SupabaseClient, userId: s
   const { data: auth, error: authError } = await service.auth.admin.getUserById(userId)
   const email = auth?.user?.email?.toLowerCase()
   if (authError || !email || !auth.user?.email_confirmed_at) throw new Error('Verify your activation email first')
-  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name').eq('email', email).maybeSingle()
+  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name,country').eq('email', email).maybeSingle()
   if (error || account?.status !== 'approved' || (account.user_id && account.user_id !== userId)) throw new Error('An approved application is required')
   const checked = (result: { error: unknown }) => { if (result.error) throw new Error('Could not activate your trade access. Please retry.') }
   checked(await service.from('profiles').update({ trade_status: 'approved' }).eq('id', userId))
