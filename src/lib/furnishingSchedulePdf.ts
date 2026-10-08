@@ -6,13 +6,20 @@ export interface ScheduleRow {
   manufacturer?: string | null;
   priceEur: number | null;
   dimensions?: string | null;
+  /** Clickable sourcing link rendered under the piece name. */
+  productUrl?: string | null;
+}
+
+export interface SchedulePdfOptions {
+  /** Client-ready schedules use public product links and never carry trade routes. */
+  clientReady?: boolean;
 }
 
 export function scheduleTotalEur(rows: ScheduleRow[]): number {
   return rows.reduce((sum, r) => sum + (r.priceEur ?? 0), 0);
 }
 
-export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string): Blob {
+export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string, options: SchedulePdfOptions = {}): Blob {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const money = (eur: number | null) => formatPdfMoney(eur == null ? null : Math.round(eur * 100), "EUR", "en-GB", "Price upon Request");
   doc.setFont("helvetica", "bold");
