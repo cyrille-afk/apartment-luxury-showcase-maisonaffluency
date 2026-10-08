@@ -28,6 +28,9 @@ import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEn
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
+import { anchorsForPrompt, buildArchitectCatalog, validateArchitectLayout, type ArchitectOutput } from "@/lib/aiArchitectLayout";
+import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { supabase } from "@/integrations/supabase/client";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
@@ -76,6 +79,8 @@ const TradeAILayoutStudio = () => {
   const [catLoading, setCatLoading] = useState(true);
   const [catError, setCatError] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const { discountPct } = useTradePriceMode();
   const [title, setTitle] = useState("Living room proposal");
   const [current, setCurrent] = useState<SavedLayout | null>(null);
   const [saved, setSaved] = useState<SavedLayout[]>([]);
@@ -176,6 +181,41 @@ const TradeAILayoutStudio = () => {
       setSkipped(miss);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // AI architect: the model proposes, validateArchitectLayout decides. Any rule break → deterministic layout.
+  const generateWithAI = async () => {
+    setAiLoading(true);
+    setSelectedId(null); setCompareIds([]); setCompareOpen(false); setCurrent(null);
+    try {
+      const live = (await loadCatalogue()) ?? catalogue;
+      const fallback = generateRoomLayoutMatrix(brief, live);
+      const anchors = fallback.scene.architecturalAnchors;
+      const { width: W, length: L, height: H } = brief.roomDimensions;
+      const rows = buildArchitectCatalog(live, discountPct);
+      const { data, error } = await supabase.functions.invoke("ai-architect-layout", {
+        body: {
+          room_dimensions: { width_m: W, length_m: L, height_m: H },
+          architectural_anchors: anchorsForPrompt(anchors, W, L),
+          client_brief: { room_type: brief.roomType, design_aesthetic: brief.style, budget_eur: brief.totalBudget },
+          available_catalog: rows,
+        },
+      });
+      const out = (data as { layout?: ArchitectOutput } | null)?.layout;
+      const result = out ? validateArchitectLayout(out, brief, live, rows, anchors) : null;
+      if (result?.ok && result.scene) {
+        setScene(result.scene);
+        setSkipped([`AI layout · trade spend €${result.tradeSpend.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of €${brief.totalBudget.toLocaleString("en-GB")}`]);
+        toast.success("AI layout placed and checked");
+      } else {
+        setScene(fallback.scene);
+        setSkipped(result ? result.errors.map((e) => `AI rejected: ${e}`) : [error?.message ?? "AI unavailable"]);
+        toast.warning("AI layout broke a room rule — showing the standard layout instead");
+      }
+      setOverviewRevision((r) => r + 1);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -453,6 +493,10 @@ const TradeAILayoutStudio = () => {
           <Button className="w-full" onClick={generate} disabled={loading || catLoading || !!catError}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading ? "Generating layout..." : "Generate Room Layout"}
+          </Button>
+          <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || catLoading || !!catError}>
+            {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {aiLoading ? "AI architect arranging..." : "Generate with AI architect"}
           </Button>
         </section>
 
