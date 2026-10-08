@@ -829,6 +829,7 @@ const App = () => {
                   <Route path="/designers" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesigners /></Suspense>} />
                   <Route path="/designers/stephane-cg" element={<LegacyStephGcRedirect />} />
                   <Route path="/designers/stephane-cg/:productSlug" element={<LegacyStephGcRedirect />} />
+                  <Route path="/designers/alexander-lamont/untitled-piece" element={<Navigate to="/designers/alexander-lamont/geo-table-lamp" replace />} />
                   <Route path="/designers/:slug/biography" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerBiography /></Suspense>} />
                   <Route path="/designers/:slug/:productSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPageContainer isInsideTradePortal={false} /></Suspense>} />
 
