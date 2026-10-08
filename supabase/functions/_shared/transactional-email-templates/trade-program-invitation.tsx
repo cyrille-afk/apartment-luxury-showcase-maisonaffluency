@@ -13,9 +13,10 @@ interface Props {
   name?: string
   email?: string
   companyName?: string
+  portalRef?: string
 }
 
-const Email = ({ firstName, name }: Props) => {
+const Email = ({ firstName, name, portalRef }: Props) => {
   const resolvedFirstName = firstName?.trim() || name?.trim().split(/\s+/)[0] || 'Design Professional'
 
   return (
@@ -50,7 +51,7 @@ const Email = ({ firstName, name }: Props) => {
           </Text>
 
           <Section style={buttonSection}>
-            <Button style={button} href="https://www.maisonaffluency.com/trade/login?next=/trade/dashboard">
+            <Button style={button} href={`https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`}>
               Access Your Trade Portal
             </Button>
           </Section>

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
+import { recordEmailPortalClick } from "@/lib/emailPortalClick";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
 // stays charcoal/grayscale and reads as part of the brand, not a vendor badge.
@@ -28,6 +29,7 @@ const TradeLogin = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
+  useState(() => recordEmailPortalClick());
 
   // Destination to return to after sign-in — e.g. the OAuth consent screen
   // the member was sent here from (ChatGPT extension approval). Only
