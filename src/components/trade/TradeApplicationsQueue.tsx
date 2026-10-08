@@ -81,7 +81,7 @@ export default function TradeApplicationsQueue() {
   };
 
   const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ["trade-applications-queue", showDone],
+    queryKey: ["trade-applications-queue", showDone, portalFilter],
     refetchInterval: 30_000,
     queryFn: async () => {
       let q = supabase
@@ -91,7 +91,9 @@ export default function TradeApplicationsQueue() {
         )
         .order("created_at", { ascending: false })
         .limit(200);
-      if (!showDone) q = q.in("status", ["pending_review", "on_hold"]);
+      // Portal-activity filters only make sense once a studio has been emailed,
+      // so decided applications have to be in scope for them to return anything.
+      if (!showDone && portalFilter === "all") q = q.in("status", ["pending_review", "on_hold"]);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as unknown as Account[];
@@ -116,9 +118,24 @@ export default function TradeApplicationsQueue() {
     () => filterAccountsByPortalActivity(accounts, portalStats, portalFilter),
     [accounts, portalStats, portalFilter],
   );
+  // Chip counts stay accurate in the "open only" view, where decided studios are not listed.
+  const { data: allAccountEmails = [] } = useQuery({
+    queryKey: ["trade-applications-queue-emails"],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trade_accounts")
+        .select("email")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as { email: string }[];
+    },
+  });
+
   const portalCounts = useMemo(
-    () => portalFilterCounts(accounts, portalStats),
-    [accounts, portalStats],
+    () => portalFilterCounts(allAccountEmails, portalStats),
+    [allAccountEmails, portalStats],
   );
 
   const setStatus = async (a: Account, status: Account["status"]) => {
