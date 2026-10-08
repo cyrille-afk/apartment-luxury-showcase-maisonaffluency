@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
+import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -59,6 +60,8 @@ const TradeAILayoutStudio = () => {
   const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
   const [overviewRevision, setOverviewRevision] = useState(0);
+  const [cameraView, setCameraView] = useState("overview");
+  useEffect(() => { setCameraView("overview"); }, [overviewRevision]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -528,6 +531,8 @@ const TradeAILayoutStudio = () => {
       <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+            <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={walkActive || !!authorMode || dragging}
+              pieces={scene.curatedAssets.map((a, i) => ({ id: `ai-${i}-${a.sku}`, name: byId.get(a.componentId)?.name ?? a.sku }))} />
             <Select value={activeCustomId ? `custom:${activeCustomId}` : walkPreset} onValueChange={(value) => {
               if (value.startsWith("custom:")) { setActiveCustomId(value.slice(7)); return; }
               const preset = CINEMATIC_PRESETS.find((p) => p.value === value);
@@ -624,7 +629,7 @@ const TradeAILayoutStudio = () => {
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
               onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
-              <RoomOverviewCamera revision={overviewRevision} enabled={!walkActive && !authorMode && !dragging} />
+              <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging} />
             </AICuratedEnvironment>
             <CinematicCameraRig path={cinematic} enabled={walkActive} playing={walking} speed={walkSpeed}
               seek={walkSeek} onTimeChange={setWalkTime} onDone={finishWalk} />

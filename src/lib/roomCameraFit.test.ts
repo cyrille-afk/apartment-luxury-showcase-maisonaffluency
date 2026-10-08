@@ -3,6 +3,16 @@ import { Box3, PerspectiveCamera, Vector3 } from "three";
 import { fitRoomCamera } from "./roomCameraFit";
 
 describe("room overview framing", () => {
+  it("frames an individual perimeter lamp tightly instead of fitting the whole room", () => {
+    const lamp = new Box3(new Vector3(-3.3, 0, -4.2), new Vector3(-2.7, 1.4, -3.6));
+    const room = new Box3(new Vector3(-3.3, 0, -4.2), new Vector3(3, 3.4, 4));
+    const close = fitRoomCamera(lamp, 1);
+    const overview = fitRoomCamera(room, 1);
+    expect(close.target.x).toBeCloseTo(-3);
+    expect(close.target.y).toBeCloseTo(0.7);
+    expect(close.target.z).toBeCloseTo(-3.9);
+    expect(close.position.distanceTo(close.target)).toBeLessThan(overview.position.distanceTo(overview.target) / 3);
+  });
   it("keeps every corner visible through landscape, portrait and narrow-window resizes", () => {
     const bounds = new Box3(new Vector3(-3.3, 0, -4.2), new Vector3(3, 3.4, 4));
     const camera = new PerspectiveCamera(45, 1, 0.05, 200);
