@@ -41,6 +41,7 @@ interface FFEItem {
   materials: string | null;
   quantity: number;
   unit_price_cents: number | null;
+  price_source: "quote" | "catalogue" | null;
   rrp_price_cents: number | null;
   currency: string;
   sku: string | null;
@@ -68,6 +69,26 @@ interface FFEItem {
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
+
+// Shows the unit price with a badge marking whether it was saved on the
+// quote line or fell back to the catalogue price.
+function UnitPriceWithSource({ cents, source }: { cents: number; source: "quote" | "catalogue" | null }) {
+  const isQuote = source === "quote";
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      €{(cents / 100).toFixed(0)}
+      <span
+        className={
+          "rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide " +
+          (isQuote ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+        }
+        title={isQuote ? "Price saved on the quote line" : "Price taken from the catalogue"}
+      >
+        {isQuote ? "Quote" : "Catalogue"}
+      </span>
+    </span>
+  );
+}
 
 type FFEColumnKey =
   | "image" | "po" | "cost_code" | "item" | "brand" | "project" | "client" | "studio"
@@ -409,6 +430,12 @@ export default function TradeFFESchedule() {
           unit_price_cents:
             item.unit_price_cents ??
             ((p as any)?.trade_price_cents || (p as any)?.rrp_price_cents || null),
+          price_source:
+            item.unit_price_cents != null
+              ? ("quote" as const)
+              : (p as any)?.trade_price_cents || (p as any)?.rrp_price_cents
+                ? ("catalogue" as const)
+                : null,
           rrp_price_cents: p?.rrp_price_cents ?? null,
           currency: p?.currency || "EUR",
           sku: p?.sku || null,
@@ -923,7 +950,7 @@ export default function TradeFFESchedule() {
                               {isColVisible("client") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.client_name} /></td>}
                               {isColVisible("studio") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={item.studio_name} /></td>}
                               {isColVisible("qty") && <td className={`${tableDensity.td} text-center font-body ${tableDensity.qty} text-foreground`}>{item.quantity}</td>}
-                              {isColVisible("unit_trade") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums`}>{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(0)}` : "TBD"}</td>}
+                              {isColVisible("unit_trade") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-foreground tabular-nums`}>{item.unit_price_cents ? <UnitPriceWithSource cents={item.unit_price_cents} source={item.price_source} /> : "TBD"}</td>}
                               {isColVisible("total") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} font-medium text-foreground tabular-nums`}>{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(0)}` : "TBD"}</td>}
                               {isColVisible("lead") && <td className={`whitespace-nowrap ${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}>{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>}
                               {isColVisible("stage") && <td className={`${tableDensity.td} font-body ${tableDensity.body} text-muted-foreground`}><TruncatedCellText value={STAGE_LABEL[item.kanban_status || ""] || item.kanban_status} /></td>}
