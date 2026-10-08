@@ -46,7 +46,23 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
         <div className="space-y-2"><Label htmlFor="notification-subject">Subject</Label><Input id="notification-subject" value={draft.subject} maxLength={200} disabled={busy} onChange={e => setDraft(d => ({ ...d, subject: e.target.value }))} /></div>
         <div className="space-y-2"><Label htmlFor="notification-body">Email body</Label><Textarea id="notification-body" className="min-h-[320px] font-serif text-sm leading-relaxed" value={draft.body} maxLength={20000} disabled={busy} onChange={e => setDraft(d => ({ ...d, body: e.target.value }))} /></div>
         <section aria-label="Email layout preview" className="border-t border-border pt-6">
-          <h3 className="mb-6 text-xs uppercase text-muted-foreground">Email Preview</h3>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <h3 className="text-xs uppercase text-muted-foreground">Email Preview</h3>
+            <div role="group" aria-label="Preview format" className="flex gap-1 rounded-full border border-border p-1">
+              {(['styled', 'plain'] as const).map(mode => (
+                <button key={mode} type="button" aria-pressed={previewMode === mode} onClick={() => setPreviewMode(mode)}
+                  className={`rounded-full px-3 py-1 text-xs uppercase transition-colors ${previewMode === mode ? 'bg-moodboard-ink text-card' : 'text-muted-foreground hover:text-foreground'}`}>
+                  {mode === 'styled' ? 'Styled' : 'Plain text'}
+                </button>
+              ))}
+            </div>
+          </div>
+          {previewMode === 'plain' ? (
+            <div className="mx-auto max-w-[600px]">
+              <p className="mb-3 text-xs text-muted-foreground">Exactly what text-only email clients receive, based on your edits above.</p>
+              <pre className="whitespace-pre-wrap break-words rounded-md border border-border bg-muted/40 p-4 font-mono text-[13px] leading-relaxed text-foreground">{plainTextPreview}</pre>
+            </div>
+          ) : (
           <div className="mx-auto max-w-[600px] font-serif text-foreground">
             <img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Affluency — Unique by Design" className="mx-auto mb-8 h-auto w-[420px] max-w-full" />
             <hr className="mb-6 border-border" />
