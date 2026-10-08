@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Add recorded manufacturer names and product-page links to selected room pieces in studio and shared views; verify sourcing links live.
+- [x] Add recorded manufacturer names and product-page links to selected room pieces; all three trade sourcing buttons open correct product pages live without page errors; new shared snapshots retain manufacturer and public product links.
 - [x] Show selected generated-piece name, RRP and recorded dual-unit dimensions in studio and shared views; live selection verified for all three pieces, direct lamp-model selection and dismissal pass without page errors; sofa/table dimensions are not recorded.
 - [x] Add item-name labels above generated room pieces in studio and shared client views; live generation at 1620×1186 shows all three names without overlap or page errors.
 - [x] Add full-room and per-piece close-up camera presets; six framing tests pass, browser screenshots verify overview, sofa/table/lamp close-ups and portrait lamp framing; extended return-flow browser checks timed out.
