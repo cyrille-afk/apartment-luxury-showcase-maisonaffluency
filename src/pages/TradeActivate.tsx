@@ -14,7 +14,7 @@ const TradeActivate = () => {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [email, setEmail] = useState('');
-  const legacy = Boolean(params.get('token'));
+  const [legacy] = useState(() => Boolean(params.get('token')));
   const valid = /^[a-f0-9]{64}$/i.test(params.get('token_hash') || params.get('token') || '');
 
   const begin = async () => {
