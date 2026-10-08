@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Add a plain-text trade portal link beneath the welcome email button; live deployed preview renders both the button and the copyable URL under it, no emails sent.
+
 - [x] Replace the welcome email's fixed designer total with the live published count; seven tests pass, both deployed services healthy, live preview matches 101 and overrides stale input without sending emails.
 - [x] Replace the welcome email's fixed tax/VAT claim with recorded verification; nine tests pass and all six deployed preview cases verified without sending emails.
 - [ ] Verify approved-applicant email delivery → password setup → fresh sign-in → Trade portal: activation page published and live browser verified Oct 8; full journey still needs a controlled test recipient. 25 regression tests pass; no applicant emails sent or passwords changed.

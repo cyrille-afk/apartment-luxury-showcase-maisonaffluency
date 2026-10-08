@@ -7,6 +7,8 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 const SITE_NAME = "Maison Affluency"
+const PORTAL_URL = "https://www.maisonaffluency.com/trade/login?next=/trade/dashboard"
+
 
 interface TradeWelcomeAutoProps {
   name?: string
@@ -64,10 +66,15 @@ const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus, desig
           your dashboard trade portal.
         </Text>
         <Section style={buttonSection}>
-          <Button style={button} href="https://www.maisonaffluency.com/trade/login?next=/trade/dashboard">
+          <Button style={button} href={PORTAL_URL}>
             Enter your trade portal
           </Button>
         </Section>
+        <Text style={plainLinkNote}>
+          If the button above does not work, copy and paste this link into your browser:<br />
+          <a href={PORTAL_URL} style={plainLink}>{PORTAL_URL}</a>
+        </Text>
+
         <Text style={text}>We look forward to supporting your upcoming spaces.</Text>
         <Text style={footer}>
           Warm regards,<br />
@@ -112,7 +119,11 @@ const logo = { margin: '0 auto' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
-const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
+const plainLinkNote = { color: '#888888', fontSize: '12px', lineHeight: '1.7', margin: '0 0 28px', textAlign: 'center' as const, wordBreak: 'break-all' as const }
+const plainLink = { color: '#1a1a1a', fontSize: '12px', textDecoration: 'underline' as const }
+const buttonSection = { textAlign: 'center' as const, margin: '32px 0 12px' }
+
+
 const button = {
   display: 'inline-block',
   padding: '16px 32px',
