@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Replace the welcome email's fixed tax/VAT claim with recorded verification; nine tests pass and all six deployed preview cases verified without sending emails.
 - [ ] Verify approved-applicant email delivery → password setup → fresh sign-in → Trade portal: activation page published and live browser verified Oct 8; full journey still needs a controlled test recipient. 25 regression tests pass; no applicant emails sent or passwords changed.
 - [x] Restore approved-studio activation resend; Studio 1–10 drawer opened and cancelled live, 20 tests pass, no email sent.
 - [x] Publish activation before emailing Studio 1–10: published /trade/activate now renders Activate your trade access and Continue activation; verified live Oct 8. No resend sent.
