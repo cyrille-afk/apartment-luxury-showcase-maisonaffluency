@@ -440,6 +440,7 @@ Deno.serve(async (req) => {
   })
 
   if (enqueueError) {
+    await supabase.from('email_send_log').update({ status: 'failed', error_message: 'Failed to enqueue email' }).eq('message_id', messageId);
     console.error('Failed to enqueue email', {
       error: enqueueError,
       templateName
