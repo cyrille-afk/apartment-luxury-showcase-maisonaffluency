@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveQuoteLinePrice } from "./quoteLinePrice";
+import { resolveQuoteLinePrice, cataloguePriceDifference } from "./quoteLinePrice";
 
 describe("resolveQuoteLinePrice", () => {
   it("keeps the saved line price and marks it as quote-sourced", () => {
@@ -45,5 +45,25 @@ describe("resolveQuoteLinePrice", () => {
     const r = resolveQuoteLinePrice(800000, { trade_price_cents: null, rrp_price_cents: null });
     expect(r.price_differs_from_catalogue).toBe(false);
     expect(r.catalogue_price_cents).toBeNull();
+  });
+});
+
+describe("cataloguePriceDifference", () => {
+  it("returns a positive amount and percentage when the line is above the catalogue", () => {
+    const d = cataloguePriceDifference(904100, 800000);
+    expect(d.amountCents).toBe(104100);
+    expect(d.pct).toBeCloseTo(13.0125, 4);
+  });
+
+  it("returns a negative amount and percentage when the line is below the catalogue", () => {
+    const d = cataloguePriceDifference(534100, 904100);
+    expect(d.amountCents).toBe(-370000);
+    expect(d.pct).toBeCloseTo(-40.9247, 3);
+  });
+
+  it("returns zero when the prices match", () => {
+    const d = cataloguePriceDifference(904100, 904100);
+    expect(d.amountCents).toBe(0);
+    expect(d.pct).toBe(0);
   });
 });
