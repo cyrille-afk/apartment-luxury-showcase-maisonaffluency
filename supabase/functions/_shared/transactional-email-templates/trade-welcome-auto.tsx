@@ -12,9 +12,10 @@ interface TradeWelcomeAutoProps {
   name?: string
   companyName?: string
   country?: string
+  taxVatStatus?: string
 }
 
-const TradeWelcomeAutoEmail = ({ name, companyName, country }: TradeWelcomeAutoProps) => (
+const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus }: TradeWelcomeAutoProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your global trade profile is now fully active</Preview>
@@ -51,7 +52,7 @@ const TradeWelcomeAutoEmail = ({ name, companyName, country }: TradeWelcomeAutoP
           <Text style={detailsTitle}>Your Account Details:</Text>
           <Text style={detailLine}>• Registered Studio: {companyName || '—'}</Text>
           <Text style={detailLine}>• Verified Region: {country || '—'}</Text>
-          <Text style={detailLine}>• Tax/VAT Status: Exempt/Validated</Text>
+          <Text style={detailLine}>• Tax/VAT Status: {taxVatStatus || 'Not recorded'}</Text>
         </Section>
 
         <Text style={text}>
