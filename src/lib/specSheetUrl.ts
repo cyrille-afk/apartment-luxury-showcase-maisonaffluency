@@ -1,5 +1,5 @@
 /**
- * Build a clean in-app spec sheet viewer URL.
+ * Build a canonical spec sheet viewer URL, independent of the preview origin.
  * Only brand + product appear prominently, with optional sheet metadata for multi-PDF resolution.
  */
 export function buildSpecSheetUrl(
@@ -16,5 +16,5 @@ export function buildSpecSheetUrl(
   if (typeof sheetIndex === "number" && Number.isFinite(sheetIndex)) {
     params.set("sheetIndex", String(sheetIndex));
   }
-  return `/trade/spec-sheet?${params.toString()}`;
+  return `https://maisonaffluency.com/trade/spec-sheet?${params.toString()}`;
 }
