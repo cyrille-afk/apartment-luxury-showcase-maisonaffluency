@@ -24,3 +24,30 @@ export function comparatorPrices(row: { trade_price_cents: number | null; rrp_pr
   if (!retail || retail <= 0) return { retail: null, trade: null };
   return { retail, trade: applyTradeDiscount(retail, discountPct) };
 }
+
+/**
+ * Resolves public product routes (/designers/<designer>/<piece>) for curator-pick ids.
+ * Used to snapshot client-safe links into saved shortlists.
+ */
+export async function resolvePublicUrlsByPickIds(pickIds: string[]): Promise<Map<string, string>> {
+  const ids = Array.from(new Set(pickIds.filter(Boolean)));
+  if (ids.length === 0) return new Map();
+  const { data: picks, error } = await supabase
+    .from("designer_curator_picks_public")
+    .select("id, slug, designer_id")
+    .in("id", ids);
+  if (error || !picks) return new Map();
+  const designerIds = [...new Set(picks.map((p) => p.designer_id).filter((id): id is string => Boolean(id)))];
+  const { data: designers } = designerIds.length
+    ? await supabase.from("designers").select("id, slug").in("id", designerIds)
+    : { data: [] as { id: string; slug: string }[] };
+  const designerSlugs = new Map((designers ?? []).map((d) => [d.id, d.slug]));
+  const urls = new Map<string, string>();
+  for (const p of picks) {
+    const designerSlug = p.designer_id ? designerSlugs.get(p.designer_id) : null;
+    if (designerSlug && p.slug) {
+      urls.set(p.id, `/designers/${encodeURIComponent(designerSlug)}/${encodeURIComponent(p.slug)}`);
+    }
+  }
+  return urls;
+}
