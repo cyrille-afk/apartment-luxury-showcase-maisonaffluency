@@ -44,8 +44,8 @@ async function alertActivation(service: SupabaseClient, account: { id: string; s
     await service.from('admin_alert_log').insert({ channel: 'email', event: 'trade_account_activated', payload: { trade_account_id: account.id, email, to },
       status: error ? 'failed' : 'sent', error: error ? String(error.message ?? error).slice(0, 500) : null })
   }
-  const { data: admins } = await service.rpc('get_admin_user_ids')
-  const ids = ((admins ?? []) as Array<string | { user_id: string }>).map((a) => typeof a === 'string' ? a : a.user_id).filter(Boolean)
+  const { data: admins } = await service.from('user_roles').select('user_id').in('role', ['admin', 'super_admin'])
+  const ids = [...new Set((admins ?? []).map((a: { user_id: string }) => a.user_id))]
   if (ids.length) await service.from('notifications').insert(ids.map((user_id) => ({ user_id, type: 'trade_activation',
     title: `${studio} activated their trade account`, message: `${person} (${email}) set a password and now has trade portal access.`,
     link: '/trade/admin/trade-applications', metadata: { trade_account_id: account.id } })))
