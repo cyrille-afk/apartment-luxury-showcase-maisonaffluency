@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AICuratedSceneSchema, CuratedAsset, Vec3 } from "@/types/aiCuratedScene";
+import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
 /**
  * Client-side layout generator. Placement is mocked; prices and availability are
@@ -30,6 +31,9 @@ export interface LiveCatalogueItem {
   /** Bounding box in metres, when recorded. */
   dimensionsCubic: { w: number; d: number; h: number } | null;
   dimensions?: string | null;
+  manufacturer?: string | null;
+  productUrl?: string | null;
+  publicProductUrl?: string | null;
 }
 
 /** Layout roles for the pieces the generator knows how to place. */
@@ -52,7 +56,7 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
   const ids = Object.keys(ROLES);
   const { data: products, error } = await supabase
     .from("trade_products")
-    .select("id, product_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions")
+    .select("id, product_name, brand_name, sku, glb_url, trade_price_cents, currency, source_pick_id, is_active, is_hidden, design_style_tokens, style_tags, dimensions_cubic, dimensions")
     .in("id", ids);
   if (error) throw error;
 
@@ -61,6 +65,20 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
     ? await supabase.from("trade_product_pricing").select("pick_id, trade_price_cents").in("pick_id", pickIds)
     : { data: [] as { pick_id: string; trade_price_cents: number | null }[] };
   const pickPrice = new Map((pricing ?? []).map((r) => [r.pick_id, r.trade_price_cents]));
+  const { data: picks, error: pickError } = pickIds.length
+    ? await supabase.from("designer_curator_picks_public").select("id, slug, designer_id").in("id", pickIds)
+    : { data: [], error: null };
+  if (pickError) throw pickError;
+  const designerIds = [...new Set((picks ?? []).map((p) => p.designer_id).filter((id): id is string => Boolean(id)))];
+  const { data: designers, error: designerError } = designerIds.length
+    ? await supabase.from("designers").select("id, slug").in("id", designerIds)
+    : { data: [], error: null };
+  if (designerError) throw designerError;
+  const designerSlugs = new Map((designers ?? []).map((d) => [d.id, d.slug]));
+  const publicUrls = new Map((picks ?? []).map((p) => {
+    const designerSlug = p.designer_id ? designerSlugs.get(p.designer_id) : null;
+    return [p.id, designerSlug && p.slug ? `/designers/${encodeURIComponent(designerSlug)}/${encodeURIComponent(p.slug)}` : null];
+  }));
 
   return Promise.all(
     (products ?? [])
@@ -92,6 +110,9 @@ export async function fetchLiveCatalogue(): Promise<LiveCatalogueItem[]> {
           available,
           styleTokens: Array.from(new Set([...(p.design_style_tokens ?? []), ...(p.style_tags ?? [])])),
           dimensions: p.dimensions,
+          manufacturer: normalizeBrandToParent(p.brand_name) || null,
+          productUrl: `/trade/products/${encodeURIComponent(p.source_pick_id || p.id)}`,
+          publicProductUrl: p.source_pick_id ? publicUrls.get(p.source_pick_id) ?? null : null,
           dimensionsCubic: (() => {
             const d = p.dimensions_cubic as { w?: number; d?: number; h?: number } | null;
             return d && typeof d.w === "number" && typeof d.d === "number" && typeof d.h === "number" ? { w: d.w, d: d.d, h: d.h } : null;
