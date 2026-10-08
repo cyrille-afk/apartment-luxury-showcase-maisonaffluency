@@ -78,6 +78,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
             {approval && lastBenefit < 0 && portalAction}
             <hr className="my-6 border-border" /><p className="text-right text-xs text-muted-foreground">Maison Affluency Singapore<br /><em>Unique by Design</em></p>
           </div>
+          )}
         </section>
       </div>
       <footer className="shrink-0 space-y-3 border-t border-border pt-4">
