@@ -221,6 +221,8 @@ const TradeAILayoutStudio = () => {
   const [pathName, setPathName] = useState("My walkthrough");
   const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
   const [pathSyncStatus, setPathSyncStatus] = useState<PathSyncStatus>(readPathSyncStatus);
+  const [pathSyncHistory, setPathSyncHistory] = useState<PathSyncHistoryEntry[]>(readPathSyncHistory);
+  const [syncHistoryOpen, setSyncHistoryOpen] = useState(false);
   const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
   // Cross-device sync: account row wins on load; local stays the offline fallback.
   const prefsHydrated = useRef(false);
@@ -255,6 +257,7 @@ const TradeAILayoutStudio = () => {
     ]);
     setCustomPaths([...layout.map((p) => ({ ...p, source: "layout" as const })), ...account.map((p) => ({ ...p, source: "account" as const })), ...local]);
     setPathSyncStatus(readPathSyncStatus());
+    setPathSyncHistory(readPathSyncHistory());
   }, [layoutKey]);
   useEffect(() => { void loadCustomPaths(); }, [loadCustomPaths]);
   const activeCustom = customPaths.find((p) => p.id === activeCustomId) ?? null;
