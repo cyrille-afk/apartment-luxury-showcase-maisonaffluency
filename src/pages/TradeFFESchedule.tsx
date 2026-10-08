@@ -361,10 +361,14 @@ export default function TradeFFESchedule() {
       const { data: productsRaw } = await supabase
         .from("trade_products")
         .select(
-          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url, image_url"
+          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, trade_price_cents, source_pick_id, spec_sheet_url, image_url"
         )
         .in("id", productIds);
-      const products = await fillTradeProductImageFallbacks((productsRaw || []) as any[]);
+      const productsPriced = (await hydrateQuotePricesFromPicks(
+        ((productsRaw || []) as any[]).map((p) => ({ p })),
+        "p",
+      )).map((x: any) => x.p);
+      const products = await fillTradeProductImageFallbacks(productsPriced);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
@@ -400,7 +404,10 @@ export default function TradeFFESchedule() {
           dimensions: p?.dimensions || null,
           materials: p?.materials || null,
           quantity: item.quantity,
-          unit_price_cents: item.unit_price_cents,
+          // Saved line price wins; otherwise fall back to the catalogue price.
+          unit_price_cents:
+            item.unit_price_cents ??
+            ((p as any)?.trade_price_cents || (p as any)?.rrp_price_cents || null),
           rrp_price_cents: p?.rrp_price_cents ?? null,
           currency: p?.currency || "EUR",
           sku: p?.sku || null,
