@@ -28,7 +28,7 @@ import {
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { resolveQuoteLinePrice } from "@/lib/quoteLinePrice";
+import { resolveQuoteLinePrice, cataloguePriceDifference } from "@/lib/quoteLinePrice";
 import QuoteLineDrawer, { type QuoteLineDrawerItem } from "@/components/trade/QuoteLineDrawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
