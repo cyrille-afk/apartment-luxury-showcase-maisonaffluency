@@ -29,5 +29,5 @@
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry/card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
-- AI layout rules: src/components/trade/visualiser/AGENTS.md; safe presets export matching look-at samples; preset switches blend poses, retain playback state.
+- AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet off-domain guard: DB trigger `flag_offdomain_spec_sheet` on trade_products + designer_curator_picks logs violations to content_audit_log (`spec_sheet_offdomain_flag`); allowed hosts: maisonaffluency.com, project storage, Cloudinary.
