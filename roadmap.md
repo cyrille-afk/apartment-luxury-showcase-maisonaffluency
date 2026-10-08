@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Add a plain-text trade portal link beneath the button in the invitation and approval emails; four deployed preview cases render the copyable URL with tracking intact, no emails sent.
 - [x] Add a plain-text trade portal link beneath the welcome email button; live deployed preview renders both the button and the copyable URL under it, no emails sent.
 
 - [x] Replace the welcome email's fixed designer total with the live published count; seven tests pass, both deployed services healthy, live preview matches 101 and overrides stale input without sending emails.
