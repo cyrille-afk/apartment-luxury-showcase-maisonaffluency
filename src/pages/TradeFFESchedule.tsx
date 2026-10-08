@@ -580,6 +580,7 @@ export default function TradeFFESchedule() {
           status: "Confirmed",
           supplier: item.brand_name,
           notes: item.category || "",
+          price_source: item.price_source,
         };
       });
 

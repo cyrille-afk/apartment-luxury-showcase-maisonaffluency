@@ -153,6 +153,7 @@ export async function buildProcurementWorkbook(input: ExportInput): Promise<Blob
       status: l.status,
       supplier: l.supplier,
       notes: l.notes,
+      priceSrc: l.price_source === "quote" ? "Quote" : l.price_source === "catalogue" ? "Catalogue" : "—",
     });
   });
 
