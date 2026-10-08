@@ -1,9 +1,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
+import { Clock, Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
+import { buildCinematicPath, CINEMATIC_PRESETS, type CinematicPreset } from "@/hooks/useCinematicPath";
+import CameraPathPreview from "@/components/trade/visualiser/CameraPathPreview";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CINEMATIC_ENTRY_SECONDS, WALKTHROUGH_SPEEDS, playbackTimeLabel, steppedPlaybackSpeed, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { buildCustomCinematicPath, type CustomPathNode } from "@/lib/customCameraPaths";
@@ -58,12 +59,16 @@ const SharedAILayout = () => {
   const selectedLabel = selectedPath?.name ?? CINEMATIC_PRESETS.find((p) => p.value === choice)?.label;
   const describeCustomPath = (p: { nodes: CustomPathNode[] }) => `A curated route through ${p.nodes.length} saved viewpoints.`;
   const selectedDescription = selectedPath ? describeCustomPath(selectedPath) : pathDescriptions[choice as CinematicPreset];
-  const presetPath = useCinematicPath(scene, 24, (isCustom ? "sweep" : choice) as CinematicPreset);
-  const customPath = useMemo(() => {
-    const p = paths.find((x) => `custom:${x.id}` === choice);
-    return scene && p ? buildCustomCinematicPath(scene, p.nodes) : null;
-  }, [scene, paths, choice]);
-  const cinematic = isCustom ? customPath : presetPath;
+  const pathOptions = useMemo(() => scene ? [
+    ...(data?.camera_paths ?? []).map((p) => ({
+      value: `custom:${p.id}`, label: p.name,
+      description: `A curated route through ${p.nodes.length} saved viewpoints.`,
+      path: buildCustomCinematicPath(scene, p.nodes),
+    })),
+    ...CINEMATIC_PRESETS.map((p) => ({ ...p, description: pathDescriptions[p.value],
+      path: buildCinematicPath(scene, 120, 24, p.value) })),
+  ] : [], [scene, data?.camera_paths]);
+  const cinematic = pathOptions.find((p) => p.value === choice)?.path ?? null;
   const duration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
   const doSeek = useCallback((t: number, restart = false) => { setTime(t); setSeek((s) => ({ id: s.id + 1, time: t, restart })); }, []);
   const start = () => { doSeek(0, true); setActive(true); setPlaying(true); };
@@ -139,9 +144,20 @@ const SharedAILayout = () => {
         <div className="absolute left-3 right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
           <Select value={choice} onValueChange={setChoice}>
             <SelectTrigger aria-label="Camera path" aria-describedby="camera-path-description" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue>{selectedLabel}</SelectValue></SelectTrigger>
-            <SelectContent className="w-[320px] max-w-[calc(100vw-2rem)]">
-              {paths.map((p) => <SelectItem key={p.id} value={`custom:${p.id}`} textValue={p.name} className="py-2"><span className="block text-xs font-medium">{p.name}</span><span className="mt-0.5 block text-xs text-muted-foreground">{describeCustomPath(p)}</span></SelectItem>)}
-              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value} textValue={p.label} className="py-2"><span className="block text-xs font-medium">{p.label}</span><span className="mt-0.5 block text-xs text-muted-foreground">{pathDescriptions[p.value]}</span></SelectItem>)}
+            <SelectContent className="w-[400px] max-w-[calc(100vw-2rem)]">
+              {pathOptions.map((p) => <SelectItem key={p.value} value={p.value} textValue={p.label} disabled={!p.path} className="py-2 [&>span:last-child]:w-full">
+                <span className="flex items-center gap-3">
+                  <CameraPathPreview scene={scene} path={p.path} name={p.label} />
+                  <span className="min-w-0 flex-1 whitespace-normal">
+                    <span className="block text-xs font-medium">{p.label}</span>
+                    <span className="mt-1 flex items-center gap-1 text-[11px] tabular-nums text-muted-foreground">
+                      <Clock aria-hidden="true" className="h-3 w-3 shrink-0" />
+                      {p.path ? `≈ ${playbackTimeLabel(Math.ceil((p.path.durationSec + CINEMATIC_ENTRY_SECONDS) / speed))} · ${speed}×` : "Unavailable"}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">{p.description}</span>
+                  </span>
+                </span>
+              </SelectItem>)}
             </SelectContent>
           </Select>
           <Button size="sm" variant="secondary" onClick={active ? stop : start} disabled={!cinematic}>
