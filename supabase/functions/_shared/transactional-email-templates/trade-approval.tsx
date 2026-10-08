@@ -16,9 +16,10 @@ interface TradeApprovalProps {
   country?: string
   bodyText?: string
   subjectText?: string
+  activationUrl?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUrl }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
@@ -33,7 +34,7 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeAppro
           />
         </Section>
         <Hr style={divider} />
-        {bodyText ? <ApplicationDraftBody body={bodyText} approval /> : <><Heading style={h1}>
+        {bodyText ? <ApplicationDraftBody body={bodyText} approval activationUrl={activationUrl} /> : <><Heading style={h1}>
           {name ? `Dear ${name},` : 'Dear Applicant,'}
         </Heading>
         <Text style={text}>
@@ -41,7 +42,7 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeAppro
           {companyName ? <> for <strong>{companyName}</strong></> : ''} to the {SITE_NAME} Trade Program has been approved.
         </Text>
         <Text style={introText}>
-          Your account is now active. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.
+          Your application is approved. Use the button below to securely set your password and activate sign-in access. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.
         </Text>
 
         <table width="100%" cellPadding="0" cellSpacing="0" style={benefitsTable}>
@@ -99,7 +100,7 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText }: TradeAppro
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href="https://www.maisonaffluency.com/trade/login">
+          <Button style={button} href={activationUrl || "https://www.maisonaffluency.com/trade/login"}>
             Access Your Trade Portal
           </Button>
         </Section>

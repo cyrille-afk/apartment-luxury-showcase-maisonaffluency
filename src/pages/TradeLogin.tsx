@@ -178,7 +178,7 @@ const TradeLogin = () => {
               name="password"
               autoComplete="current-password"
               required
-              placeholder="Password / Verification Key"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
