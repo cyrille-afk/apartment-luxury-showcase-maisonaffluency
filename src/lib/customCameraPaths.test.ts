@@ -106,4 +106,16 @@ describe("sideways shift for ceiling-stuck viewpoints", () => {
     const clear = [{ position: [-2, 2.4, -2], target: [0, 0.6, 0] }, { position: [2, 2.4, -2], target: [0, 0.6, 0] }] as CustomPathNode[];
     expect(autoShiftFlaggedNodes(tallDoor, clear).nodes).toEqual(clear);
   });
+  it("honours a fixed left/right preference and stays on that side", async () => {
+    const { autoShiftFlaggedNodes } = await import("./customCameraPaths");
+    const tallDoor = { ...scene, architecturalAnchors: [{ type: "door" as const, position: [0, 1.5, 0] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: [1, 5, 0.5] as [number, number, number] }] };
+    const stuck = [{ position: [-2, 3.0, 0], target: [0, 0.6, 0] }, { position: [2, 3.0, 0], target: [0, 0.6, 0] }] as CustomPathNode[];
+    // Path travels +x; left of travel is -z, right is +z.
+    const left = autoShiftFlaggedNodes(tallDoor, stuck, 0.15, 30, "left");
+    expect(left.conflicts).toEqual([]);
+    expect(left.nodes.every((n) => n.position[2] <= 0)).toBe(true);
+    const right = autoShiftFlaggedNodes(tallDoor, stuck, 0.15, 30, "right");
+    expect(right.conflicts).toEqual([]);
+    expect(right.nodes.every((n) => n.position[2] >= 0)).toBe(true);
+  });
 });
