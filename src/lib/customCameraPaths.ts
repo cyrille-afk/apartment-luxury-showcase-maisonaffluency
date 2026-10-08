@@ -186,7 +186,9 @@ export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
     if (remaining.length) window.localStorage.setItem(key, JSON.stringify(remaining));
     else window.localStorage.removeItem(key);
   }
-  writePathSyncStatus({ lastSyncAt: new Date().toISOString(), lastMoved: moved.size, pendingRetry: pending });
+  const at = new Date().toISOString();
+  writePathSyncStatus({ lastSyncAt: at, lastMoved: moved.size, pendingRetry: pending });
+  appendPathSyncHistory({ at, moved: moved.size, failed: pending });
   return moved;
 }
 
