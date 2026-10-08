@@ -31,6 +31,7 @@ import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
+import { buildFurnishingSchedulePdf, downloadBlob } from "@/lib/furnishingSchedulePdf";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -500,7 +501,17 @@ const TradeAILayoutStudio = () => {
 
         {scene && (
           <section className="space-y-1">
-            <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
+            <div className="flex items-center justify-between">
+              <p className={micro}>Curated pieces ({scene.curatedAssets.length})</p>
+              <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                onClick={() => {
+                  const rows = scene.curatedAssets.map((a) => {
+                    const item = byId.get(a.componentId);
+                    return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
+                  });
+                  downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
+                }}>Export schedule PDF</button>
+            </div>
             <ul className="divide-y divide-border text-xs">
               {scene.curatedAssets.map((a, i) => {
                 const item = byId.get(a.componentId);
