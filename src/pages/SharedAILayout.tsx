@@ -39,6 +39,7 @@ const SharedAILayout = () => {
 
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
+  const [guideOpen, setGuideOpen] = useState(true);
   const [active, setActive] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
