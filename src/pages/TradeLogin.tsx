@@ -137,7 +137,7 @@ const TradeLogin = () => {
         <meta name="twitter:title" content="Trade Account Sign In — Maison Affluency" />
         <meta name="twitter:description" content="Exclusive access for architects and interior designers to trade pricing, spec sheets, and curated collections." />
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1773468211/FHMPRJ-033_W26_SCENE_5.jpg_rfvh62.jpg" />
-        <meta name="robots" content="index, follow" />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {/* Brand mark pinned to the upper-left corner, RH-style */}
