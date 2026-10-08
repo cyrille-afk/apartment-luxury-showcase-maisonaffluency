@@ -522,10 +522,18 @@ const TradeAILayoutStudio = () => {
                   onClick={() => {
                     const rows = scene.curatedAssets.map((a) => {
                       const item = byId.get(a.componentId);
-                      return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null };
+                      return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null, productUrl: item?.productUrl ? `https://www.maisonaffluency.com${item.productUrl}` : null };
                     });
                     downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout"), "furnishing-schedule.pdf");
                   }}>Export schedule PDF</button>
+                <button type="button" disabled={!scene.curatedAssets.length} className="text-xs underline underline-offset-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  onClick={() => {
+                    const rows = scene.curatedAssets.map((a) => {
+                      const item = byId.get(a.componentId);
+                      return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null, productUrl: item?.publicProductUrl ? `https://www.maisonaffluency.com${item.publicProductUrl}` : null };
+                    });
+                    downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout", { clientReady: true }), "furnishing-schedule-client.pdf");
+                  }}>Export client PDF</button>
               </div>
             </div>
             <ul className="divide-y divide-border text-xs">
