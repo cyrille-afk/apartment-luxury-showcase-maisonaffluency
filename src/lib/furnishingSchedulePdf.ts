@@ -45,10 +45,16 @@ export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string, o
   rows.forEach((r, i) => {
     const name = doc.splitTextToSize(r.manufacturer ? `${r.name}\n${r.manufacturer}` : r.name, 64);
     const dims = doc.splitTextToSize((r.dimensions || "Dimensions upon request").replace(/\s*\n\s*/g, " / "), 70);
-    const h = Math.max(name.length, dims.length) * 4.5 + 3;
+    const linkLines = r.productUrl ? 1 : 0;
+    const h = Math.max(name.length + linkLines, dims.length) * 4.5 + 3;
     if (y + h > 280) { doc.addPage(); y = 20; header(); }
     doc.text(String(i + 1), cols[0], y);
     doc.text(name, cols[1], y);
+    if (r.productUrl) {
+      doc.setTextColor(31, 78, 121);
+      doc.textWithLink("View product", cols[1], y + name.length * 4.5, { url: r.productUrl });
+      doc.setTextColor(0, 0, 0);
+    }
     doc.text(dims, cols[2], y);
     doc.text(money(r.priceEur), cols[4], y, { align: "right" });
     y += h;
