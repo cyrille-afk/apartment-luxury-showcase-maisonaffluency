@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx'
+import { prepareTradeActivation } from '../_shared/tradeActivation.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -379,6 +380,20 @@ Deno.serve(async (req) => {
     )
   }
 
+  if (templateName === 'trade-approval') {
+    const { data: prior, error: priorError } = await supabase.from('email_send_log')
+      .select('id').eq('template_name', templateName).eq('recipient_email', effectiveRecipient)
+      .contains('metadata', { idempotency_key: idempotencyKey }).in('status', ['pending', 'sent']).limit(1)
+    if (priorError) return new Response(JSON.stringify({ error: 'Could not verify notification retry' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    if (prior?.length) return new Response(JSON.stringify({ success: true, queued: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    try { templateData = { ...templateData, activationUrl: await prepareTradeActivation(supabase, effectiveRecipient) } }
+    catch (error) {
+      return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Could not prepare activation' }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+  } else if (templateName.startsWith('trade-approval-copy-')) {
+    delete templateData.activationUrl
+  }
+
   // 4. Render React Email template to HTML and plain text
   const html = await renderAsync(
     React.createElement(template.component, templateData)
@@ -403,6 +418,7 @@ Deno.serve(async (req) => {
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
+    metadata: { idempotency_key: idempotencyKey },
   })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {

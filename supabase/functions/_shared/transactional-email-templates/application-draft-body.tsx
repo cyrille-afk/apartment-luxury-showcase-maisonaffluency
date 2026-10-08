@@ -2,7 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import { Heading, Text, Section, Button } from 'npm:@react-email/components@0.0.22'
 import { parseDraftBody } from '../applicationNotificationCopy.ts'
 
-export function ApplicationDraftBody({ body, approval }: { body: string; approval: boolean }) {
+export function ApplicationDraftBody({ body, approval, activationUrl }: { body: string; approval: boolean; activationUrl?: string }) {
   const blocks = parseDraftBody(body)
   const lastBenefit = blocks.map(b => b.kind).lastIndexOf('benefit')
   return <>
@@ -15,14 +15,14 @@ export function ApplicationDraftBody({ body, approval }: { body: string; approva
           </td>
         </tr></tbody></table>
         : <Text style={{ ...text, whiteSpace: 'pre-wrap', ...(approval && block.kind === 'intro' ? { fontStyle: 'italic' } : {}) }}>{block.text}</Text>}
-      {approval && i === lastBenefit && <PortalAction />}
+      {approval && i === lastBenefit && <PortalAction activationUrl={activationUrl} />}
     </React.Fragment>)}
-    {approval && lastBenefit < 0 && <PortalAction />}
+    {approval && lastBenefit < 0 && <PortalAction activationUrl={activationUrl} />}
   </>
 }
 
-const PortalAction = () => <Section style={{ textAlign: 'center', margin: '32px 0' }}>
-  <Button href="https://www.maisonaffluency.com/trade/login" style={button}>Access Your Trade Portal</Button>
+const PortalAction = ({ activationUrl }: { activationUrl?: string }) => <Section style={{ textAlign: 'center', margin: '32px 0' }}>
+  <Button href={activationUrl || "https://www.maisonaffluency.com/trade/login"} style={button}>Access Your Trade Portal</Button>
 </Section>
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px' }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
