@@ -540,16 +540,36 @@ const TradeAILayoutStudio = () => {
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
             </Button>
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
-              <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
-                {pathSyncStatus.pendingRetry.length > 0 ? (
-                  <>
-                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
-                    <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
-                  </>
-                ) : (
-                  <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+              <div className="w-full space-y-1">
+                <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
+                  {pathSyncStatus.pendingRetry.length > 0 ? (
+                    <>
+                      <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
+                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
+                    </>
+                  ) : (
+                    <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+                  )}
+                  {pathSyncHistory.length > 0 && (
+                    <button type="button" aria-expanded={syncHistoryOpen} aria-label="Camera path sync history"
+                      className="underline underline-offset-2 hover:text-foreground"
+                      onClick={() => setSyncHistoryOpen((v) => !v)}>
+                      {syncHistoryOpen ? "Hide history" : "History"}
+                    </button>
+                  )}
+                </p>
+                {syncHistoryOpen && pathSyncHistory.length > 0 && (
+                  <ul aria-label="Recent camera path syncs" className="ml-auto w-fit space-y-0.5 text-right text-[11px] text-muted-foreground">
+                    {pathSyncHistory.map((e) => (
+                      <li key={e.at}>
+                        {syncTimeAgo(e.at)} — {e.failed.length > 0
+                          ? <span className="text-amber-600">{e.moved} synced, {e.failed.length} failed ({e.failed.join(", ")})</span>
+                          : <span>{e.moved > 0 ? `${e.moved} path${e.moved > 1 ? "s" : ""} synced` : "Up to date"}</span>}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </p>
+              </div>
             )}
           </div>
         )}
