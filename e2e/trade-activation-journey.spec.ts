@@ -13,6 +13,10 @@
  *   PW_BASE_URL=https://www.maisonaffluency.com \
  *   npx playwright test e2e/trade-activation-journey.spec.ts --project=desktop-chrome
  *
+ * Or fully automated (CI): set E2E_SETUP_TOKEN and the test creates a disposable
+ * approved applicant on e2e.maisonaffluency.test, gets a fresh link (no email is
+ * sent), runs the journey, then deletes the applicant.
+ *
  * Skipped when the env vars are missing so CI stays green.
  */
 import { test, expect } from "@playwright/test";
@@ -33,12 +37,42 @@ function loadDotEnv(path = ".env"): Record<string, string> {
 }
 
 const env = { ...loadDotEnv(), ...process.env } as Record<string, string | undefined>;
-const LINK = env.E2E_ACTIVATION_URL;
-const EMAIL = env.E2E_ACTIVATION_EMAIL?.trim().toLowerCase();
+let LINK = env.E2E_ACTIVATION_URL;
+let EMAIL = env.E2E_ACTIVATION_EMAIL?.trim().toLowerCase();
+const SETUP_TOKEN = env.E2E_SETUP_TOKEN;
+const SETUP_URL = `${env.VITE_SUPABASE_URL}/functions/v1/e2e-trade-activation-setup`;
+let disposable = false;
+
+async function setupCall(body: Record<string, unknown>) {
+  const res = await fetch(SETUP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+      "x-e2e-setup-token": SETUP_TOKEN!,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Test setup failed (${res.status}): ${data.error ?? "unknown"}`);
+  return data;
+}
 const PASSWORD = env.E2E_ACTIVATION_PASSWORD || `Ma-e2e-${Date.now()}-Activate!`;
 
 test.describe("Trade activation journey", () => {
-  test.skip(!LINK || !EMAIL, "Set E2E_ACTIVATION_URL and E2E_ACTIVATION_EMAIL from a fresh approval email");
+  test.skip(!SETUP_TOKEN && (!LINK || !EMAIL), "Set E2E_SETUP_TOKEN (disposable applicant) or E2E_ACTIVATION_URL + E2E_ACTIVATION_EMAIL");
+
+  test.beforeAll(async () => {
+    if (!SETUP_TOKEN || (LINK && EMAIL)) return;
+    const made = await setupCall({ action: "create" });
+    EMAIL = made.email;
+    LINK = `https://www.maisonaffluency.com${made.path}`;
+    disposable = true;
+  });
+
+  test.afterAll(async () => {
+    if (disposable && EMAIL) await setupCall({ action: "cleanup", email: EMAIL });
+  });
 
   test("email link → set password → trade portal access", async ({ page, baseURL }) => {
     test.setTimeout(120_000);

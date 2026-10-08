@@ -1,0 +1,37 @@
+name: Trade activation journey E2E
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  activation:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    # Fork PRs have no secrets; the test skips itself there.
+    env:
+      E2E_SETUP_TOKEN: ${{ secrets.E2E_SETUP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run build
+      - name: Run activation journey (disposable applicant)
+        run: bunx playwright test e2e/trade-activation-journey.spec.ts --project=desktop-chrome
+      - name: Run against production
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          PW_BASE_URL: https://www.maisonaffluency.com
+        run: bunx playwright test e2e/trade-activation-journey.spec.ts --project=desktop-chrome
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: trade-activation-report
+          path: playwright-report
+          retention-days: 7
+          if-no-files-found: ignore
