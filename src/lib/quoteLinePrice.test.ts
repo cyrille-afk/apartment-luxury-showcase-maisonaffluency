@@ -58,7 +58,7 @@ describe("cataloguePriceDifference", () => {
   it("returns a negative amount and percentage when the line is below the catalogue", () => {
     const d = cataloguePriceDifference(534100, 904100);
     expect(d.amountCents).toBe(-370000);
-    expect(d.pct).toBeCloseTo(-40.9256, 3);
+    expect(d.pct).toBeCloseTo(-40.9247, 3);
   });
 
   it("returns zero when the prices match", () => {
