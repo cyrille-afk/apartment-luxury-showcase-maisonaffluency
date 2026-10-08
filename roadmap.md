@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Verify approved-applicant email delivery → password setup → fresh sign-in → Trade portal: published /trade/activate redirects to /trade-program (live browser confirmed Oct 8, 04:44 UTC); needs GitHub sync/publication and a controlled test recipient. 25 regression tests pass; Studio 1–10 remains approved with no sign-in account; no emails sent or passwords changed.
 - [x] Restore approved-studio activation resend; Studio 1–10 drawer opened and cancelled live, 20 tests pass, no email sent.
 - [ ] Publish activation before emailing Studio 1–10: live /trade/activate still redirects to /trade-program; then verify the published page and confirm resend.
 - [x] Add actual camera-route thumbnails and speed-aware estimated durations to the shared-layout path menu; verified all four sample routes, selection, and 2× estimates live without page errors.
