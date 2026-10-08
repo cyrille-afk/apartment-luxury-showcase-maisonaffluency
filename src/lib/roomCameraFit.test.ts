@@ -8,7 +8,9 @@ describe("room overview framing", () => {
     const room = new Box3(new Vector3(-3.3, 0, -4.2), new Vector3(3, 3.4, 4));
     const close = fitRoomCamera(lamp, 1);
     const overview = fitRoomCamera(room, 1);
-    expect(close.target.toArray()).toEqual([-3, 0.7, -3.9000000000000004]);
+    expect(close.target.x).toBeCloseTo(-3);
+    expect(close.target.y).toBeCloseTo(0.7);
+    expect(close.target.z).toBeCloseTo(-3.9);
     expect(close.position.distanceTo(close.target)).toBeLessThan(overview.position.distanceTo(overview.target) / 3);
   });
   it("keeps every corner visible through landscape, portrait and narrow-window resizes", () => {
