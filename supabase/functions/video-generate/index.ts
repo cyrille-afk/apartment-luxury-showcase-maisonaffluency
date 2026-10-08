@@ -55,7 +55,6 @@ Deno.serve(async (req) => {
     const webhook = Deno.env.get("VIDEO_RENDER_WEBHOOK_URL");
     const payload = body?.payload;
     if (!payload || typeof payload !== "object") return json({ error: "Missing render payload" }, 400);
-    if (!webhook) return json({ status: "dry-run", charged: false, ...summary });
 
     let consumed: string | null = null;
     if (access.consumes) {
@@ -65,10 +64,17 @@ Deno.serve(async (req) => {
       consumed = src as string;
     }
     try {
-      const res = await fetch(webhook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`Render service failed (${res.status})`);
-      const response = await res.json().catch(() => null);
-      return json({ status: "queued", charged: !!consumed, response });
+      let response: unknown;
+      if (webhook) {
+        const res = await fetch(webhook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error(`Render service failed (${res.status})`);
+        response = await res.json().catch(() => null);
+      } else {
+        // Mock render service until a real provider is connected.
+        if (body?.simulate_failure === true) throw new Error("Mock render service failed");
+        response = { mock: true, job_id: `mock_${crypto.randomUUID()}`, status: "queued", eta_seconds: 90 };
+      }
+      return json({ status: "queued", charged: !!consumed, source: consumed, mock: !webhook, response });
     } catch (e) {
       if (consumed) await db.rpc("refund_video_credit", { _user: userId, _source: consumed });
       return json({ error: e instanceof Error ? e.message : "Render failed", refunded: !!consumed }, 502);
