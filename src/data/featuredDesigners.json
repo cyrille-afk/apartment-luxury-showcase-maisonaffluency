@@ -9,6 +9,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775836403/ORS_Bookshelf-2_i39enz.jpg"
   },
   {
+    "id": "3efb1180-115f-4188-a3b1-95d36cc289f9",
+    "slug": "pierre-bonnefille",
+    "name": "Pierre Bonnefille",
+    "founder": null,
+    "hero_image_url": "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784360734/img-122_lxteqt.jpg"
+  },
+  {
     "id": "5d99b52f-4197-485e-a74b-eabb3292ef2a",
     "slug": "garnier-linker",
     "name": "Garnier & Linker",
@@ -213,7 +222,7 @@
     "founder": null,
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/alexander-lamont_t5j1nw",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780453180/Casque-Bar-Cabinet_1500x1500_v9cq04.jpg"
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776570930/Casque-Bar-Cabinet-Amethyst-Ombre%CC%81-Havana_08_alexander-lamont_i4rpxe.jpg"
   },
   {
     "id": "7a13d2f8-07a2-40cc-82ec-4292ceb633b5",
@@ -241,15 +250,6 @@
     "hero_image_url": "https://static-assets.artlogic.net/w_1200,c_limit,f_auto,fl_lossy,q_auto/ws-studiotashtego/usr/images/artists/group_images_override/items/10/10541d24e04242f080b6445044490b40/hd-reportage-atelier-demichelis-_-emmanuelle-braun-photographe-17.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
-  },
-  {
-    "id": "3efb1180-115f-4188-a3b1-95d36cc289f9",
-    "slug": "pierre-bonnefille",
-    "name": "Pierre Bonnefille",
-    "founder": null,
-    "hero_image_url": "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784360734/img-122_lxteqt.jpg"
   },
   {
     "id": "c86a4c71-6f61-4de8-81ea-cc910e8978f0",
