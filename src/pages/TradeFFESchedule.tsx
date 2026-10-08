@@ -409,6 +409,12 @@ export default function TradeFFESchedule() {
           unit_price_cents:
             item.unit_price_cents ??
             ((p as any)?.trade_price_cents || (p as any)?.rrp_price_cents || null),
+          price_source:
+            item.unit_price_cents != null
+              ? ("quote" as const)
+              : (p as any)?.trade_price_cents || (p as any)?.rrp_price_cents
+                ? ("catalogue" as const)
+                : null,
           rrp_price_cents: p?.rrp_price_cents ?? null,
           currency: p?.currency || "EUR",
           sku: p?.sku || null,
