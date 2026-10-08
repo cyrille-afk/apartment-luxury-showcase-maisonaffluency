@@ -2,10 +2,12 @@ import type { CinematicPath } from "@/hooks/useCinematicPath";
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 
 /** Top-down route diagram generated from the same samples used by playback. */
-export default function CameraPathPreview({ scene, path, name }: {
+export default function CameraPathPreview({ scene, path, name, className = "h-[72px] w-24 shrink-0" }: {
   scene: AICuratedSceneSchema;
   path: CinematicPath | null;
   name: string;
+  /** Size classes; the diagram scales with the viewBox so large variants stay sharp. */
+  className?: string;
 }) {
   const { width, length } = scene.roomDimensions;
   const unit = Math.min(82 / width, 58 / length);
@@ -14,7 +16,7 @@ export default function CameraPathPreview({ scene, path, name }: {
   const last = path?.samples[path.samples.length - 1];
   return (
     <svg role="img" aria-label={`${name} route preview`} viewBox="0 0 96 72"
-      className="h-[72px] w-24 shrink-0 rounded-sm border border-border bg-muted/30">
+      className={`${className} rounded-sm border border-border bg-muted/30`}>
       <rect x={48 - width * unit / 2} y={36 - length * unit / 2} width={width * unit} height={length * unit}
         className="fill-background stroke-border" />
       {scene.curatedAssets.map((asset, i) => {
