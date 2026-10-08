@@ -100,7 +100,7 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUr
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href={activationUrl || "https://www.maisonaffluency.com/trade/login"}>
+          <Button style={button} href={activationUrl || "https://www.maisonaffluency.com/trade/login?next=/trade/dashboard"}>
             Access Your Trade Portal
           </Button>
         </Section>
