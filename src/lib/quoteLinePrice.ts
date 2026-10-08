@@ -33,3 +33,19 @@ export function resolveQuoteLinePrice(
     catalogue_price_cents: catalogue,
   };
 }
+
+export interface CataloguePriceDifference {
+  /** line price minus catalogue price, in cents. Positive = line is above catalogue. */
+  amountCents: number;
+  /** Percentage difference relative to the catalogue price. */
+  pct: number;
+}
+
+export function cataloguePriceDifference(
+  lineUnitPriceCents: number,
+  catalogueCents: number,
+): CataloguePriceDifference {
+  const amountCents = lineUnitPriceCents - catalogueCents;
+  const pct = catalogueCents === 0 ? (amountCents === 0 ? 0 : 100) : (amountCents / catalogueCents) * 100;
+  return { amountCents, pct };
+}
