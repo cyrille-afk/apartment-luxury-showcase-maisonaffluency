@@ -442,14 +442,18 @@ const TradeAILayoutStudio = () => {
     setExporting(true);
     try {
       const payload = buildSceneVideoPayload(scene, cinematic, briefText);
-      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload } });
+      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload, snapshot: captureSnapshot() } });
       if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
       if (error || data?.error) throw new Error(data?.error || error?.message);
       if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
-      else toast.success("Render requested");
+      else toast.success(`Render started${data?.response?.job_id ? ` (job ${data.response.job_id})` : ""}${data?.charged ? " — 1 credit used" : ""}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Render request failed");
     } finally { setExporting(false); void refreshVideoStatus(); }
+  };
+  const captureSnapshot = (): string | undefined => {
+    const c = document.querySelector<HTMLCanvasElement>('canvas[data-engine]:not([aria-label])') ?? document.querySelector<HTMLCanvasElement>("canvas");
+    try { return c?.toDataURL("image/jpeg", 0.85); } catch { return undefined; }
   };
   const exportVideo = () => { if (videoLocked) setUnlockOpen(true); else void runVideo(); };
 
@@ -749,7 +753,7 @@ const TradeAILayoutStudio = () => {
           </Canvas>
         )}
         {scene && (
-          <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
+          <Canvas shadows dpr={[1, 1.5]} gl={{ preserveDrawingBuffer: true }} onPointerMissed={() => setSelectedId(null)}>
             {authorMode === "draw"
               ? <FloorPlanDrawLayer width={scene.roomDimensions.width} length={scene.roomDimensions.length}
                   onPick={(x, z) => setAuthorNodes((n) => [...n, { position: [x, drawHeight, z], target: clusterCentre(scene) }])} />
