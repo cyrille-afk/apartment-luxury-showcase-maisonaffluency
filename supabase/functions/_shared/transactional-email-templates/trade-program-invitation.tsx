@@ -2,7 +2,7 @@
 
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Hr, Section, Img, Link,
+  Body, Container, Head, Heading, Html, Preview, Text, Hr, Section, Img, Link, Button,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 
@@ -48,6 +48,12 @@ const Email = ({ firstName, name }: Props) => {
             While direct system credentials conclude, your firm has been assigned priority tier status. For any immediate projects requiring trade quotes, high-resolution visual assets, or logistical curation, please reply directly to this thread or reach our desk at{' '}
             <Link href="mailto:concierge@maisonaffluency.com" style={link}>concierge@maisonaffluency.com</Link>.
           </Text>
+
+          <Section style={buttonSection}>
+            <Button style={button} href="https://www.maisonaffluency.com/trade/login?next=/trade/dashboard">
+              Access Your Trade Portal
+            </Button>
+          </Section>
 
           <Text style={signature}>
             Warm regards,<br />
@@ -96,5 +102,17 @@ const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 2
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: 'Georgia, "Times New Roman", serif' }
 const paragraph = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
 const link = { color: '#1a1a1a', textDecoration: 'underline' }
+const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
+const button = {
+  display: 'inline-block',
+  padding: '14px 32px',
+  backgroundColor: '#1a1a1a',
+  color: '#ffffff',
+  textDecoration: 'none',
+  fontSize: '13px',
+  letterSpacing: '0.15em',
+  textTransform: 'uppercase' as const,
+  borderRadius: '24px',
+}
 const signature = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: 'Georgia, "Times New Roman", serif' }
