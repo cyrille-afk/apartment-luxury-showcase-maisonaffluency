@@ -46,6 +46,13 @@ const SharedAILayout = () => {
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
   const [guideOpen, setGuideOpen] = useState(true);
+  const [lightbox, setLightbox] = useState<(typeof pathOptions)[number] | null>(null);
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
   const [active, setActive] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -147,7 +154,12 @@ const SharedAILayout = () => {
             <SelectContent className="w-[400px] max-w-[calc(100vw-2rem)]">
               {pathOptions.map((p) => <SelectItem key={p.value} value={p.value} textValue={p.label} disabled={!p.path} className="py-2 [&>span:last-child]:w-full">
                 <span className="flex items-center gap-3">
-                  <CameraPathPreview scene={scene} path={p.path} name={p.label} />
+                  <button type="button" aria-label={`Enlarge ${p.label} route preview`}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setLightbox(p); }}
+                    className="shrink-0 cursor-zoom-in">
+                    <CameraPathPreview scene={scene} path={p.path} name={p.label} />
+                  </button>
                   <span className="min-w-0 flex-1 whitespace-normal">
                     <span className="block text-xs font-medium">{p.label}</span>
                     <span className="mt-1 flex items-center gap-1 text-[11px] tabular-nums text-muted-foreground">
@@ -195,6 +207,33 @@ const SharedAILayout = () => {
               </Select>
             </div>
             <p className="text-[10px] text-muted-foreground">Space pause/resume · R restart · −/+ speed</p>
+          </div>
+        )}
+        {lightbox && (
+          <div role="dialog" aria-modal="true" aria-label={`${lightbox.label} route preview`}
+            className="fixed inset-0 z-50 grid place-items-center bg-background/95 p-6"
+            onClick={() => setLightbox(null)}>
+            <div className="relative w-full max-w-xl border border-border bg-card p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
+              <button aria-label="Close route preview" onClick={() => setLightbox(null)}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+              <p className={micro}>Route preview</p>
+              <h2 className="mt-1 font-serif text-xl">{lightbox.label}</h2>
+              <div className="mt-4 flex justify-center">
+                <CameraPathPreview scene={scene} path={lightbox.path} name={lightbox.label}
+                  className="aspect-[4/3] h-[min(56vh,560px)] w-auto" />
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">{lightbox.description}</p>
+              {lightbox.path && (
+                <p className="mt-1 flex items-center gap-1 text-[11px] tabular-nums text-muted-foreground">
+                  <Clock aria-hidden="true" className="h-3 w-3 shrink-0" />
+                  {`≈ ${playbackTimeLabel(Math.ceil((lightbox.path.durationSec + CINEMATIC_ENTRY_SECONDS) / speed))} at ${speed}×`}
+                </p>
+              )}
+              <Button size="sm" className="mt-4 w-full" disabled={!lightbox.path}
+                onClick={() => { setChoice(lightbox.value); setLightbox(null); }}>
+                Use this route
+              </Button>
+            </div>
           </div>
         )}
       </div>
