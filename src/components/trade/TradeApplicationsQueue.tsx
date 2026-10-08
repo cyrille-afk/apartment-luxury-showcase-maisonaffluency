@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -11,6 +11,13 @@ import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
 import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
 import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
+import {
+  buildPortalStats,
+  filterAccountsByPortalActivity,
+  portalFilterCounts,
+  type PortalFilter,
+  type PortalStats,
+} from "@/lib/portalEmailActivity";
 
 type Dna = VisualThemeDna & {
   status: string;
@@ -31,6 +38,14 @@ type Account = {
   radar_status: string | null;
   studio_aesthetic_dna: Dna | Dna[] | null;
 };
+
+const EMPTY_PORTAL_STATS: PortalStats = { clicked: {}, sent: new Set<string>() };
+
+const PORTAL_FILTERS: [PortalFilter, string][] = [
+  ["all", "All studios"],
+  ["opened", "Opened from email"],
+  ["not_opened", "Not opened"],
+];
 
 function priorityFor(score: number | null): { label: "High" | "Medium" | "Low"; variant: "default" | "secondary" | "destructive" } {
   if (score === null) return { label: "Low", variant: "secondary" };
@@ -56,6 +71,7 @@ export default function TradeApplicationsQueue() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [showDone, setShowDone] = useState(false);
+  const [portalFilter, setPortalFilter] = useState<PortalFilter>("all");
   const [review, setReview] = useState<{ account: Account; approval: boolean; draft: NotificationDraft; resendAttempt?: string } | null>(null);
   const [draftError, setDraftError] = useState<string | null>(null);
 
@@ -82,22 +98,28 @@ export default function TradeApplicationsQueue() {
     },
   });
 
-  const { data: portalClicks = {} } = useQuery({
-    queryKey: ["trade-portal-email-clicks"],
+  const { data: portalStats = EMPTY_PORTAL_STATS } = useQuery({
+    queryKey: ["trade-portal-email-activity"],
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("email_portal_links")
-        .select("recipient_email, click_count, last_clicked_at").gt("click_count", 0).limit(1000);
+      const { data, error } = await supabase
+        .from("email_portal_links")
+        .select("recipient_email, click_count, last_clicked_at")
+        .order("created_at", { ascending: false })
+        .limit(1000);
       if (error) throw error;
-      const byEmail: Record<string, { count: number; last: string }> = {};
-      for (const r of data ?? []) {
-        const k = r.recipient_email.toLowerCase();
-        const cur = byEmail[k] ?? { count: 0, last: "" };
-        byEmail[k] = { count: cur.count + r.click_count, last: (r.last_clicked_at ?? "") > cur.last ? r.last_clicked_at! : cur.last };
-      }
-      return byEmail;
+      return buildPortalStats(data ?? []);
     },
   });
+
+  const visibleAccounts = useMemo(
+    () => filterAccountsByPortalActivity(accounts, portalStats, portalFilter),
+    [accounts, portalStats, portalFilter],
+  );
+  const portalCounts = useMemo(
+    () => portalFilterCounts(accounts, portalStats),
+    [accounts, portalStats],
+  );
 
   const setStatus = async (a: Account, status: Account["status"]) => {
     setBusy(a.id + status);
