@@ -1,7 +1,7 @@
 // Walkthrough video guard. Checks tier/credits server-side before any render.
 // mode "status" → access summary only. mode "render" → consume (if needed), call the
 // render service, refund on any failure. While VIDEO_RENDER_WEBHOOK_URL is unset the
-// render is a dry run and nothing is charged.
+// render uses a built-in mock service (credits still consumed, refunded on failure).
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { currentMonth, decideVideoAccess, goldIncludedLeft, normalizeTier, VIDEO_PASS_PRICE_EUR } from "../_shared/videoAccess.ts";
 
