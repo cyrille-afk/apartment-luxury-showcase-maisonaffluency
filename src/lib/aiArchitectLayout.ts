@@ -1,5 +1,5 @@
 import type { AICuratedSceneSchema, ArchitecturalAnchor } from "@/types/aiCuratedScene";
-import { applyTradeDiscount } from "@/lib/tradePricing";
+import { applyTradeDiscount } from "@/lib/productPricing";
 import { footprint } from "@/lib/roomLayoutMatrix";
 import { toAsset, type LayoutBrief, type LiveCatalogueItem, type Role } from "@/lib/mockAiLayoutService";
 
