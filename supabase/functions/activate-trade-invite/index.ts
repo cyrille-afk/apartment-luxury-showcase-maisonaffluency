@@ -3,15 +3,9 @@
 // Takes the activation token (an `acquisition_leads.id`), provisions/promotes the
 // studio's trade workspace and returns a one-time magic-link token hash the
 // browser exchanges for a session. No secrets ever reach the client.
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { completeTradeActivation } from "../_shared/tradeActivation.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -32,23 +26,31 @@ function splitName(full: string | null): { first: string; last: string } {
   return { first: parts[0], last: parts.slice(1).join(" ") };
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
     const body = await req.json().catch(() => ({}));
-    const token = String((body as { token?: unknown }).token ?? "").trim();
-    if (!TOKEN_RE.test(token)) {
-      return json({ error: "invalid_token" }, 400);
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anon = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!url || !key || !anon) return json({ error: "Server configuration error" }, 500);
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    if (body.action === "complete") {
+      const bearer = req.headers.get("Authorization")?.replace(/^Bearer /, "");
+      if (!bearer) return json({ error: "Unauthorized" }, 401);
+      const verifier = createClient(url, anon);
+      const { data, error } = await verifier.auth.getClaims(bearer);
+      const id = data?.claims?.sub;
+      if (error || !id) return json({ error: "Unauthorized" }, 401);
+      try { return json(await completeTradeActivation(supabase, id)); }
+      catch { return json({ error: "Could not activate approved trade access. Please retry or contact trade@maisonaffluency.com." }, 403); }
     }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } },
-    );
+    const token = String((body as { token?: unknown }).token ?? "").trim();
+    if (!TOKEN_RE.test(token)) return json({ error: "invalid_token" }, 400);
 
     const { data: lead, error: leadErr } = await supabase
       .from("acquisition_leads")
@@ -111,7 +113,7 @@ serve(async (req) => {
 
     // Mint the one-time sign-in token (also resolves the user when unknown).
     const linked = await supabase.auth.admin.generateLink({
-      type: "magiclink",
+      type: "recovery",
       email,
     });
     if (linked.error || !linked.data?.properties?.hashed_token) {
