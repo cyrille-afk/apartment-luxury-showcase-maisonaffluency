@@ -148,7 +148,7 @@ const SharedAILayout = () => {
         </section>
       </aside>
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
-        {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} onClose={() => setSelectedId(null)} />}
+        {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} manufacturer={selectedPiece?.manufacturer} productUrl={selectedPiece?.productUrl} onClose={() => setSelectedId(null)} />}
         <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
           <PerspectiveCamera makeDefault fov={45} near={0.05} position={[r.width * 1.3, r.height * 2.2, r.length * 1.6]} />
           <OrbitControls makeDefault enabled={!active} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />

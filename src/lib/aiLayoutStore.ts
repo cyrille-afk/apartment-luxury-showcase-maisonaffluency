@@ -10,6 +10,8 @@ export interface LayoutProductSnapshot {
   price: number | null;
   availability: string;
   dimensions?: string | null;
+  manufacturer?: string | null;
+  productUrl?: string | null;
 }
 
 export interface SavedLayout {
@@ -33,7 +35,7 @@ export const snapshotProducts = (scene: AICuratedSceneSchema, catalogue: LiveCat
   const byId = new Map(catalogue.map((c) => [c.componentId, c]));
   return scene.curatedAssets.map((a) => {
     const c = byId.get(a.componentId);
-    return { componentId: a.componentId, name: c?.name ?? a.sku, price: c?.price ?? (a.priceAtCuration || null), availability: statusLabel(c), dimensions: c?.dimensions ?? null };
+    return { componentId: a.componentId, name: c?.name ?? a.sku, price: c?.price ?? (a.priceAtCuration || null), availability: statusLabel(c), dimensions: c?.dimensions ?? null, manufacturer: c?.manufacturer ?? null, productUrl: c?.publicProductUrl ?? null };
   });
 };
 
