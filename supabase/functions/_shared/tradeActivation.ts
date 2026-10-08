@@ -18,12 +18,35 @@ export async function completeTradeActivation(service: SupabaseClient, userId: s
   const { data: auth, error: authError } = await service.auth.admin.getUserById(userId)
   const email = auth?.user?.email?.toLowerCase()
   if (authError || !email || !auth.user?.email_confirmed_at) throw new Error('Verify your activation email first')
-  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id').eq('email', email).maybeSingle()
+  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name').eq('email', email).maybeSingle()
   if (error || account?.status !== 'approved' || (account.user_id && account.user_id !== userId)) throw new Error('An approved application is required')
   const checked = (result: { error: unknown }) => { if (result.error) throw new Error('Could not activate your trade access. Please retry.') }
   checked(await service.from('profiles').update({ trade_status: 'approved' }).eq('id', userId))
   checked(await service.from('trade_profiles').upsert({ user_id: userId, approval_status: 'approved' }, { onConflict: 'user_id' }))
   checked(await service.from('trade_accounts').update({ user_id: userId }).eq('id', account.id).eq('status', 'approved'))
   checked(await service.from('user_roles').upsert({ user_id: userId, role: 'trade_user' }, { onConflict: 'user_id,role', ignoreDuplicates: true }))
+  if (!account.user_id) await alertActivation(service, account, email).catch((e) => console.error('activation alert failed', e))
   return { ok: true }
+}
+
+const ADMIN_EMAILS = ['cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com']
+
+/** First activation only: email each admin (one recipient per send) + in-app notice. Never blocks access. */
+async function alertActivation(service: SupabaseClient, account: { id: string; studio_name?: string | null; contact_name?: string | null }, email: string) {
+  const studio = account.studio_name || email
+  const person = account.contact_name || email
+  for (const to of ADMIN_EMAILS) {
+    const { error } = await service.functions.invoke('send-transactional-email', { body: {
+      templateName: 'studio-activation-alert', recipientEmail: to,
+      idempotencyKey: `studio-activation-alert-${account.id}-${to}`,
+      templateData: { userName: person, companyName: studio, email },
+    } })
+    await service.from('admin_alert_log').insert({ channel: 'email', event: 'trade_account_activated', payload: { trade_account_id: account.id, email, to },
+      status: error ? 'failed' : 'sent', error: error ? String(error.message ?? error).slice(0, 500) : null })
+  }
+  const { data: admins } = await service.rpc('get_admin_user_ids')
+  const ids = ((admins ?? []) as Array<string | { user_id: string }>).map((a) => typeof a === 'string' ? a : a.user_id).filter(Boolean)
+  if (ids.length) await service.from('notifications').insert(ids.map((user_id) => ({ user_id, type: 'trade_activation',
+    title: `${studio} activated their trade account`, message: `${person} (${email}) set a password and now has trade portal access.`,
+    link: '/trade/admin/trade-applications', metadata: { trade_account_id: account.id } })))
 }
