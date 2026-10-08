@@ -1,7 +1,7 @@
 # Roadmap
-- [ ] Verify approved-applicant email delivery → password setup → fresh sign-in → Trade portal: published /trade/activate redirects to /trade-program (live browser confirmed Oct 8, 04:44 UTC); needs GitHub sync/publication and a controlled test recipient. 25 regression tests pass; Studio 1–10 remains approved with no sign-in account; no emails sent or passwords changed.
+- [ ] Verify approved-applicant email delivery → password setup → fresh sign-in → Trade portal: activation page published and live browser verified Oct 8; full journey still needs a controlled test recipient. 25 regression tests pass; no applicant emails sent or passwords changed.
 - [x] Restore approved-studio activation resend; Studio 1–10 drawer opened and cancelled live, 20 tests pass, no email sent.
-- [ ] Publish activation before emailing Studio 1–10: live /trade/activate still redirects to /trade-program; then verify the published page and confirm resend.
+- [x] Publish activation before emailing Studio 1–10: published /trade/activate now renders Activate your trade access and Continue activation; verified live Oct 8. No resend sent.
 - [x] Add actual camera-route thumbnails and speed-aware estimated durations to the shared-layout path menu; verified all four sample routes, selection, and 2× estimates live without page errors.
 - [x] Persist walkthrough camera path, playback speed and repeat settings; 17 tests pass, browser reload restored Slow orbit / 1.5× / repeat on, confirmed in screenshots. Extended navigation checks were limited by preview rendering stalls.
 - [x] Blend camera preset changes during playback; 13 tests pass, browser position/rotation continuity, safe bounds, pause/resume, rapid switching, speed and loop verified without page errors.
@@ -177,4 +177,4 @@
 - [x] Add side-by-side shared camera route comparison; four diagrams and durations, explicit selection, Escape dismissal, screenshot and clean build verified live.
 
 - [x] Implement approved-applicant one-time activation links, secure password setup, profile reuse, and retry states; 27 tests and live invalid-link checks pass.
-- [ ] Publish/sync activation page and verify a real applicant email-to-password-to-sign-in journey; blocked on frontend publication and an applicant activation email (none sent during testing).
+- [ ] Verify a real applicant email-to-password-to-sign-in journey; activation page publication verified, but still needs a controlled recipient and activation email (none sent during testing).
