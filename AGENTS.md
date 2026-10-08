@@ -30,3 +30,5 @@
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; safe presets export matching look-at samples. Preset switches blend poses and retain playback state to avoid interruption.
+
+- Spec-sheet off-domain guard: DB trigger `flag_offdomain_spec_sheet` on trade_products + designer_curator_picks logs violations to content_audit_log (operation `spec_sheet_offdomain_flag`); allowed hosts: maisonaffluency.com, project storage, res.cloudinary.com.
