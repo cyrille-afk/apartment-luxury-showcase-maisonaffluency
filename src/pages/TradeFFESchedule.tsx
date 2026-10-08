@@ -69,6 +69,26 @@ interface FFEItem {
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
 
+// Shows the unit price with a badge marking whether it was saved on the
+// quote line or fell back to the catalogue price.
+function UnitPriceWithSource({ cents, source }: { cents: number; source: "quote" | "catalogue" | null }) {
+  const isQuote = source === "quote";
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      €{(cents / 100).toFixed(0)}
+      <span
+        className={
+          "rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide " +
+          (isQuote ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+        }
+        title={isQuote ? "Price saved on the quote line" : "Price taken from the catalogue"}
+      >
+        {isQuote ? "Quote" : "Catalogue"}
+      </span>
+    </span>
+  );
+}
+
 type FFEColumnKey =
   | "image" | "po" | "cost_code" | "item" | "brand" | "project" | "client" | "studio"
   | "qty" | "unit_trade" | "total" | "lead" | "stage" | "expected" | "required" | "slack" | "quote";
