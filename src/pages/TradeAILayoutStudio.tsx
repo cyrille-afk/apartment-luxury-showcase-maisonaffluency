@@ -372,7 +372,7 @@ const TradeAILayoutStudio = () => {
   const dim = setDimension;
 
   return (
-    <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[340px_1fr] xl:grid-cols-[340px_1fr_320px]">
+    <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)_320px]">
       <Helmet>
         <title>AI Layout Studio | Maison Affluency Trade</title>
         <meta name="robots" content="noindex" />
@@ -525,7 +525,7 @@ const TradeAILayoutStudio = () => {
         )}
       </aside>
 
-      <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
+      <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
             <Select value={activeCustomId ? `custom:${activeCustomId}` : walkPreset} onValueChange={(value) => {

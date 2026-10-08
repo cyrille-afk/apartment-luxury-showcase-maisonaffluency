@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { useThree } from "@react-three/fiber";
+import { useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Box3, PerspectiveCamera } from "three";
 import type { OrbitControls } from "three-stdlib";
 import { fitRoomCamera } from "@/lib/roomCameraFit";
@@ -8,7 +8,8 @@ import { fitRoomCamera } from "@/lib/roomCameraFit";
 export default function RoomOverviewCamera({ revision, enabled = true }: { revision: string | number; enabled?: boolean }) {
   const { camera, controls, scene, size, invalidate } = useThree();
   const fitted = useRef("");
-  useEffect(() => {
+  // Fit after resize/projection updates, before the next rendered frame.
+  useFrame(() => {
     if (!enabled || !(camera instanceof PerspectiveCamera) || !controls || !size.width || !size.height) return;
     const key = `${revision}:${size.width}:${size.height}:${camera.uuid}`;
     if (fitted.current === key) return;
@@ -18,6 +19,7 @@ export default function RoomOverviewCamera({ revision, enabled = true }: { revis
     const bounds = new Box3().setFromObject(room);
     if (bounds.isEmpty()) return;
     const fit = fitRoomCamera(bounds, size.width / size.height, camera.fov);
+    camera.aspect = size.width / size.height;
     camera.position.copy(fit.position);
     camera.far = fit.far;
     camera.lookAt(fit.target);
@@ -27,6 +29,6 @@ export default function RoomOverviewCamera({ revision, enabled = true }: { revis
     orbit.update();
     fitted.current = key;
     invalidate();
-  }, [camera, controls, enabled, invalidate, revision, scene, size.width, size.height]);
+  });
   return null;
 }
