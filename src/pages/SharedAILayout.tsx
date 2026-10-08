@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Film, Pause, Play, Repeat, RotateCcw, Square } from "lucide-react";
+import { Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,6 +39,7 @@ const SharedAILayout = () => {
 
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
+  const [guideOpen, setGuideOpen] = useState(true);
   const [active, setActive] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -138,6 +139,20 @@ const SharedAILayout = () => {
             <Film className="mr-1.5 h-3.5 w-3.5" />{active ? "Stop walkthrough" : "Play walkthrough"}
           </Button>
         </div>
+        {!active && guideOpen && cinematic && (
+          <div role="note" aria-label="Walkthrough guide" className="absolute bottom-3 left-3 z-10 max-w-[280px] border border-border bg-background/95 p-3 shadow-sm">
+            <div className="flex items-start justify-between gap-2">
+              <p className="flex items-center gap-1.5 font-serif text-xs uppercase tracking-[0.15em]">Guided tour</p>
+              <button aria-label="Dismiss walkthrough guide" onClick={() => setGuideOpen(false)} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+            </div>
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              <li>Press <span className="font-medium text-foreground">Play walkthrough</span> (top right) to start the camera tour.</li>
+              <li>While playing: pause, scrub the timeline, restart, loop, or change speed from the bar below.</li>
+              <li>Keyboard: <span className="font-medium text-foreground">Space</span> pause/resume · <span className="font-medium text-foreground">R</span> restart · <span className="font-medium text-foreground">− / +</span> speed.</li>
+              <li>Choose a different camera route from the path menu, or drag the room to look around when stopped.</li>
+            </ul>
+          </div>
+        )}
         {active && cinematic && (
           <div role="group" aria-label="Walkthrough playback controls" className="absolute inset-x-3 bottom-3 z-10 space-y-3 border border-border bg-background/95 p-3 shadow-sm">
             <Slider thumbLabel="Walkthrough timeline" min={0} max={duration} step={0.1} value={[time]}
@@ -153,6 +168,7 @@ const SharedAILayout = () => {
                 <SelectContent>{WALKTHROUGH_SPEEDS.map((s) => <SelectItem key={s} value={String(s)}>{s}×</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <p className="text-[10px] text-muted-foreground">Space pause/resume · R restart · −/+ speed</p>
           </div>
         )}
       </div>
