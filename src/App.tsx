@@ -1,3 +1,4 @@
+import AdminOnly from "@/components/trade/AdminOnly";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import { GlobalCanonical } from "@/components/GlobalCanonical";
@@ -929,7 +930,7 @@ const App = () => {
                     <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
                     <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
-                    <Route path="ai-layout" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAILayoutStudio /></Suspense>} />
+                    <Route path="ai-layout" element={<Suspense fallback={<PageLoadingSkeleton />}><AdminOnly><TradeAILayoutStudio /></AdminOnly></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
                     <Route path="journal" element={<TradeJournal />} />
                     <Route path="provenance" element={<TradeProvenance />} />
