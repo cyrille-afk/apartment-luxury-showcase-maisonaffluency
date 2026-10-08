@@ -13,7 +13,7 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
-import { comparatorDesignerGroups, comparatorPrices } from "@/lib/comparatorCatalogue";
+import { comparatorDesignerGroups, comparatorPrices, resolvePublicUrlsByPickIds } from "@/lib/comparatorCatalogue";
 import { useAuth } from "@/hooks/useAuth";
 
 function ComparisonPrice({ product, net }: { product: TradeProduct | null; net: boolean }) {
@@ -78,7 +78,8 @@ export default function TradeComparator() {
   const saveShortlist = async () => {
     if (!user || compareList.length === 0) return;
     // Public-safe snapshot only: no prices are stored, so shared links can never leak trade figures.
-    const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url }));
+    const publicUrls = await resolvePublicUrlsByPickIds(compareList.map((p) => p.id));
+    const items = compareList.map((p) => ({ id: p.id, product_name: p.product_name, brand_name: p.brand_name, category: p.category, dimensions: p.dimensions, materials: p.materials, lead_time: p.lead_time ?? null, image_url: p.image_url, public_url: publicUrls.get(p.id) ?? null }));
     const { error } = await supabase.from("comparator_shortlists").insert({ user_id: user.id, name: shortlistName.trim() || "Shortlist", items });
     if (error) { toast.error("Could not save shortlist"); return; }
     setShortlistName(""); toast.success("Shortlist saved"); refetchShortlists();
