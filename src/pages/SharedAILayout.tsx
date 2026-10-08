@@ -1,4 +1,12 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Film, Pause, Play, Repeat, RotateCcw, Square } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
+import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
+import { CINEMATIC_ENTRY_SECONDS, WALKTHROUGH_SPEEDS, playbackTimeLabel, steppedPlaybackSpeed, walkthroughShortcut } from "@/lib/cinematicPlayback";
+import { buildCustomCinematicPath, type CustomPathNode } from "@/lib/customCameraPaths";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
@@ -11,7 +19,7 @@ import type { LayoutProductSnapshot } from "@/lib/aiLayoutStore";
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
-type Shared = { title: string; scene: AICuratedSceneSchema; products: LayoutProductSnapshot[]; updated_at: string };
+type Shared = { title: string; scene: AICuratedSceneSchema; products: LayoutProductSnapshot[]; updated_at: string; camera_paths?: { id: string; name: string; nodes: CustomPathNode[] }[] };
 
 /** Read-only client view of a saved AI layout, opened by its unguessable share link. */
 const SharedAILayout = () => {
@@ -29,7 +37,40 @@ const SharedAILayout = () => {
     })();
   }, [token]);
 
-  if (state !== "ready" || !data) {
+  const scene = data?.scene ?? null;
+  const [choice, setChoice] = useState<string>("sweep");
+  const [active, setActive] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [time, setTime] = useState(0);
+  const [speed, setSpeed] = useState(1);
+  const [loop, setLoop] = useState(false);
+  const [seek, setSeek] = useState({ id: 0, time: 0, restart: false });
+  const paths = data?.camera_paths ?? [];
+  useEffect(() => { if (paths[0]) setChoice(`custom:${paths[0].id}`); }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const isCustom = choice.startsWith("custom:");
+  const presetPath = useCinematicPath(scene, 24, (isCustom ? "sweep" : choice) as CinematicPreset);
+  const customPath = useMemo(() => {
+    const p = paths.find((x) => `custom:${x.id}` === choice);
+    return scene && p ? buildCustomCinematicPath(scene, p.nodes) : null;
+  }, [scene, paths, choice]);
+  const cinematic = isCustom ? customPath : presetPath;
+  const duration = cinematic ? cinematic.durationSec + CINEMATIC_ENTRY_SECONDS : 0;
+  const doSeek = useCallback((t: number, restart = false) => { setTime(t); setSeek((s) => ({ id: s.id + 1, time: t, restart })); }, []);
+  const start = () => { doSeek(0, true); setActive(true); setPlaying(true); };
+  const stop = () => { setActive(false); setPlaying(false); setTime(0); };
+  const restart = useCallback(() => { doSeek(0, true); setPlaying(true); }, [doSeek]);
+  const toggle = useCallback(() => { if (!playing && time >= duration - 0.1) doSeek(0, true); setPlaying((p) => !p); }, [playing, time, duration, doSeek]);
+  const done = useCallback(() => { if (loop) restart(); else setPlaying(false); }, [loop, restart]);
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (e: KeyboardEvent) => {
+      const a = walkthroughShortcut(e); if (!a) return; e.preventDefault();
+      if (a === "toggle") toggle(); else if (a === "restart") restart(); else setSpeed((s) => steppedPlaybackSpeed(s, a === "faster" ? 1 : -1));
+    };
+    window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
+  }, [active, toggle, restart]);
+
+  if (state !== "ready" || !data || !scene) {
     return (
       <div className="grid min-h-[60vh] place-items-center px-6 text-sm text-muted-foreground">
         <Helmet><title>Room Layout | Maison Affluency</title><meta name="robots" content="noindex, nofollow" /></Helmet>
@@ -38,7 +79,7 @@ const SharedAILayout = () => {
     );
   }
 
-  const { scene, products } = data;
+  const { products } = data;
   const fin = scene.financialSummary;
   const r = scene.roomDimensions;
 
@@ -76,14 +117,44 @@ const SharedAILayout = () => {
       </aside>
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
         <Canvas shadows dpr={[1, 1.5]}>
-          <PerspectiveCamera makeDefault fov={45} position={[r.width * 1.3, r.height * 2.2, r.length * 1.6]} />
-          <OrbitControls makeDefault maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
+          <PerspectiveCamera makeDefault fov={45} near={0.05} position={[r.width * 1.3, r.height * 2.2, r.length * 1.6]} />
+          <OrbitControls makeDefault enabled={!active} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
           <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
           <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
           <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false} />
+          <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
         </Canvas>
+        <div className="absolute right-3 top-3 z-10 flex gap-2">
+          <Select value={choice} onValueChange={setChoice}>
+            <SelectTrigger aria-label="Camera path" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {paths.map((p) => <SelectItem key={p.id} value={`custom:${p.id}`}>{p.name}</SelectItem>)}
+              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="secondary" onClick={active ? stop : start} disabled={!cinematic}>
+            <Film className="mr-1.5 h-3.5 w-3.5" />{active ? "Stop walkthrough" : "Play walkthrough"}
+          </Button>
+        </div>
+        {active && cinematic && (
+          <div role="group" aria-label="Walkthrough playback controls" className="absolute inset-x-3 bottom-3 z-10 space-y-3 border border-border bg-background/95 p-3 shadow-sm">
+            <Slider thumbLabel="Walkthrough timeline" min={0} max={duration} step={0.1} value={[time]}
+              onValueChange={([t]) => { if (t !== undefined) { setPlaying(false); doSeek(t); } }} />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="icon" variant="ghost" aria-label={playing ? "Pause walkthrough" : "Resume walkthrough"} aria-keyshortcuts="Space" onClick={toggle}>{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}</Button>
+              <Button size="icon" variant="ghost" aria-label="Restart walkthrough" aria-keyshortcuts="R" onClick={restart}><RotateCcw className="h-4 w-4" /></Button>
+              <Button size="icon" variant={loop ? "secondary" : "ghost"} aria-label="Loop walkthrough" aria-pressed={loop} onClick={() => setLoop((l) => !l)}><Repeat className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label="Stop walkthrough" onClick={stop}><Square className="h-3.5 w-3.5" /></Button>
+              <output aria-label="Walkthrough time" className="text-xs tabular-nums text-muted-foreground">{playbackTimeLabel(time)} / {playbackTimeLabel(duration)}</output>
+              <Select value={String(speed)} onValueChange={(v) => setSpeed(Number(v))}>
+                <SelectTrigger aria-label="Playback speed" className="ml-auto h-8 w-[88px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{WALKTHROUGH_SPEEDS.map((s) => <SelectItem key={s} value={String(s)}>{s}×</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
