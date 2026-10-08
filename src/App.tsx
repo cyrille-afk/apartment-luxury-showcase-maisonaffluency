@@ -91,6 +91,7 @@ const TradeAdminQueue = lazy(() => import("./pages/TradeAdminQueue"));
 const TradeAdminPrivacyRequests = lazy(() => import("./pages/TradeAdminPrivacyRequests"));
 const TradeAdminSubProcessors = lazy(() => import("./pages/TradeAdminSubProcessors"));
 const TradeAdminOutbound = lazy(() => import("./pages/TradeAdminOutbound"));
+const TradeAdminEmailDeliverability = lazy(() => import("./pages/TradeAdminEmailDeliverability"));
 const TradeAdminKpiLedger = lazy(() => import("./pages/TradeAdminKpiLedger"));
 const TradeAdminAcquisitions = lazy(() => import("./pages/TradeAdminAcquisitions"));
 const TradeAdminFelixUsage = lazy(() => import("./pages/TradeAdminFelixUsage"));
@@ -908,6 +909,7 @@ const App = () => {
                     <Route path="admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
                     <Route path="admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
                     <Route path="admin/acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
+                    <Route path="admin/email-deliverability" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminEmailDeliverability /></Suspense>} />
                     <Route path="admin/kpi-ledger" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminKpiLedger /></Suspense>} />
                     <Route path="admin/client-acquisitions" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminAcquisitions /></Suspense>} />
                     <Route path="admin/felix-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminFelixUsage /></Suspense>} />
