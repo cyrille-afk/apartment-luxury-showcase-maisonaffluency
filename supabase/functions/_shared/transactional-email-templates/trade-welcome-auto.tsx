@@ -13,9 +13,10 @@ interface TradeWelcomeAutoProps {
   companyName?: string
   country?: string
   taxVatStatus?: string
+  designerCount?: number
 }
 
-const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus }: TradeWelcomeAutoProps) => (
+const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus, designerCount }: TradeWelcomeAutoProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your global trade profile is now fully active</Preview>
@@ -37,8 +38,10 @@ const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus }: Tra
         <Text style={text}>
           Your credentials have been verified, and your global trade profile is now fully active.
           When logged into your account at maisonaffluency.com, your exclusive trade pricing and net
-          rates will automatically apply across our entire catalog of over 170 exceptional
-          international designers.
+          rates will automatically apply across our entire catalog of{' '}
+          {typeof designerCount === 'number' && Number.isSafeInteger(designerCount) && designerCount > 0
+            ? `${designerCount.toLocaleString('en-US')} exceptional international ${designerCount === 1 ? 'designer' : 'designers'}`
+            : 'exceptional international designers'}.
         </Text>
         <Text style={text}>
           To streamline your active commissions, you now have unrestricted access to our proprietary
