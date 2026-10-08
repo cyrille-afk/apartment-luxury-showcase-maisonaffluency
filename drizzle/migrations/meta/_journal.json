@@ -1051,6 +1051,13 @@
       "when": 1791464605537,
       "tag": "0149_quote_item_catalogue_price_fallback",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1791489002503,
+      "tag": "0150_fix_offdomain_spec_sheet_trigger",
+      "breakpoints": true
     }
   ]
 }
