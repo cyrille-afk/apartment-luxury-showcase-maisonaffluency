@@ -236,7 +236,7 @@ export function autoShiftFlaggedNodes(scene: AICuratedSceneSchema, nodes: Custom
   for (let it = 0; it < maxIter && conflicts.length && out.length > 1; it++) {
     const last = out.length - 1;
     const magnitude = direction === "auto" ? step * (1 + Math.floor(it / 2)) : step * (1 + it);
-    const side = direction === "auto" ? (it % 2 === 0 ? 1 : -1) : (direction === "left" ? 1 : -1);
+    const side = direction === "auto" ? (it % 2 === 0 ? 1 : -1) : (direction === "left" ? -1 : 1);
     // Shift every flagged viewpoint together, perpendicular to the local path direction,
     // so multi-node and straight two-node paths can both escape an obstacle. Keep growing
     // the offset until the path fully exits the obstacle — partial moves rarely shrink the
