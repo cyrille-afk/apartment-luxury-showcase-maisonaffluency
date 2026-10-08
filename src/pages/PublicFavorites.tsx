@@ -195,6 +195,7 @@ const PublicFavorites = () => {
         subcategory: p.subcategory,
         pdf_url: p.pdf_url,
         pdf_urls: (p.pdf_urls as any) ?? null,
+        slug: (p as any).slug ?? null,
         designer_slug: p.designer_slug || null,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,

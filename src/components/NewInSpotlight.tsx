@@ -126,6 +126,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
         subcategory: (p as any).subcategory ?? null,
         pdf_url: p.pdf_url || ((p as any).pdf_urls as any[] | null)?.[0]?.url || null,
         pdf_urls: ((p as any).pdf_urls as any) ?? null,
+        slug: (p as any).slug ?? null,
         designer_slug: pickDesignerSlugOverride || designer.slug,
         size_variants: (p as any).size_variants ?? null,
         variant_placeholder: (p as any).variant_placeholder ?? null,
