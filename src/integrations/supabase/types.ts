@@ -11274,6 +11274,51 @@ export type Database = {
           },
         ]
       }
+      video_credits: {
+        Row: {
+          gold_month: string | null
+          gold_month_used: number
+          updated_at: string
+          user_id: string
+          video_tokens_balance: number
+        }
+        Insert: {
+          gold_month?: string | null
+          gold_month_used?: number
+          updated_at?: string
+          user_id: string
+          video_tokens_balance?: number
+        }
+        Update: {
+          gold_month?: string | null
+          gold_month_used?: number
+          updated_at?: string
+          user_id?: string
+          video_tokens_balance?: number
+        }
+        Relationships: []
+      }
+      video_pass_purchases: {
+        Row: {
+          created_at: string
+          credits: number
+          stripe_session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          stripe_session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          stripe_session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_watch_events: {
         Row: {
           created_at: string
@@ -11731,6 +11776,10 @@ export type Database = {
           retry_in: number
         }[]
       }
+      consume_video_credit: {
+        Args: { _gold: boolean; _month: string; _user: string }
+        Returns: string
+      }
       contractor_add_board_item: {
         Args: { _product_id: string; _token: string }
         Returns: string
@@ -11966,6 +12015,10 @@ export type Database = {
       }
       get_trade_only_collectible_slugs: { Args: never; Returns: string[] }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
+      grant_video_pass: {
+        Args: { _credits: number; _session: string; _user: string }
+        Returns: boolean
+      }
       guest_inquiry_add_contact: {
         Args: { _email: string; _guest_key: string; _whatsapp: string }
         Returns: boolean
@@ -12296,6 +12349,10 @@ export type Database = {
       }
       refresh_product_fabric_swatches_for_picks: {
         Args: { _pick_ids: string[] }
+        Returns: undefined
+      }
+      refund_video_credit: {
+        Args: { _source: string; _user: string }
         Returns: undefined
       }
       release_ingestion_lease: { Args: { _owner: string }; Returns: undefined }

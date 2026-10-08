@@ -11,7 +11,9 @@ import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, c
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
-import { exportSceneToVideoAPI } from "@/lib/sceneVideoExport";
+import { buildSceneVideoPayload } from "@/lib/sceneVideoExport";
+import VideoUnlockModal from "@/components/trade/visualiser/VideoUnlockModal";
+import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { deleteLayout, listLayouts, saveLayout, setShared, shareUrl, snapshotProducts, type SavedLayout } from "@/lib/aiLayoutStore";
@@ -415,19 +417,41 @@ const TradeAILayoutStudio = () => {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [walkActive, toggleWalk, restartWalk]);
-  const exportVideo = async () => {
+  type VideoStatus = { tier: string; isAdmin: boolean; balance: number; goldIncludedLeft: number; unlimited: boolean; allowed: boolean };
+  const [videoStatus, setVideoStatus] = useState<VideoStatus | null>(null);
+  const [unlockOpen, setUnlockOpen] = useState(false);
+  const refreshVideoStatus = useCallback(async () => {
+    const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "status" } });
+    if (data && typeof data.allowed === "boolean") setVideoStatus(data as VideoStatus);
+  }, []);
+  useEffect(() => {
+    const sid = new URLSearchParams(window.location.search).get("video_pass");
+    (async () => {
+      if (sid) {
+        const { data } = await supabase.functions.invoke("video-pass-checkout", { body: { mode: "verify", session_id: sid } });
+        if (data?.granted) toast.success("Video Pass added — 1 credit ready");
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      await refreshVideoStatus();
+    })();
+  }, [refreshVideoStatus]);
+  const videoLocked = !!videoStatus && !videoStatus.allowed;
+  const runVideo = async () => {
     if (!scene || !cinematic) return;
+    setUnlockOpen(false);
     setExporting(true);
     try {
-      const r = await exportSceneToVideoAPI(scene, cinematic, briefText);
-      if (r.status === "dry-run") {
-        console.info("[video export] dry run payload", r.payload);
-        toast.success(`Render payload ready (${r.payload.camera.path.length} camera points) — webhook not bound yet`);
-      } else toast.success("Render requested");
+      const payload = buildSceneVideoPayload(scene, cinematic, briefText);
+      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload } });
+      if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      if (data?.status === "dry-run") toast.success(`Render payload ready (${payload.camera.path.length} camera points) — render service not connected yet, no credit used`);
+      else toast.success("Render requested");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Render request failed");
-    } finally { setExporting(false); }
+    } finally { setExporting(false); void refreshVideoStatus(); }
   };
+  const exportVideo = () => { if (videoLocked) setUnlockOpen(true); else void runVideo(); };
 
   const fin = scene?.financialSummary;
   const pct = fin ? Math.min(100, (fin.allocatedSpend / fin.totalBudget) * 100) : 0;
@@ -495,10 +519,12 @@ const TradeAILayoutStudio = () => {
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {loading ? "Generating layout..." : "Generate Room Layout"}
           </Button>
+          {videoStatus?.isAdmin && (
           <Button variant="outline" className="w-full" onClick={generateWithAI} disabled={aiLoading || loading || catLoading || !!catError}>
             {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {aiLoading ? "AI architect arranging..." : "Generate with AI architect"}
           </Button>
+          )}
         </section>
 
         <section className="space-y-2">
@@ -654,8 +680,11 @@ const TradeAILayoutStudio = () => {
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
-              {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
+              {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : videoLocked ? <Lock className="mr-1.5 h-3.5 w-3.5" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Generate Walkthrough Video
+              {videoStatus?.unlimited && <span className="ml-2 border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.14em]">Cinematic HD Render</span>}
+              {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
+            <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
               <div className="w-full space-y-1">
                 <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
