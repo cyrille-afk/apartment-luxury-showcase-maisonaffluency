@@ -14,7 +14,24 @@ type Props = {
 
 export default function ApplicationNotificationDrawer({ recipient, company, approval, initialDraft, busy, error, onClose, onSend }: Props) {
   const [draft, setDraft] = useState(initialDraft);
+  const [previewMode, setPreviewMode] = useState<'styled' | 'plain'>('styled');
   const blocks = parseDraftBody(draft.body);
+  // Mirrors the plain-text part built by the trade-approval/trade-rejection
+  // templates when an admin-edited draft body is present (bodyText branch).
+  const plainTextPreview = [
+    'MAISON AFFLUENCY — Unique by Design',
+    '',
+    draft.body.trim(),
+    ...(approval ? [
+      '',
+      'ACTIVATE YOUR TRADE ACCESS',
+      'https://www.maisonaffluency.com/trade/activate?token_hash=…&type=recovery',
+    ] : []),
+    '',
+    '—',
+    'Maison Affluency Singapore',
+    'Unique by Design',
+  ].join('\n');
   const lastBenefit = blocks.map(b => b.kind).lastIndexOf('benefit');
   const valid = draft.subject.trim().length > 0 && draft.subject.length <= 200 && !/[\r\n]/.test(draft.subject) && draft.body.trim().length > 0 && draft.body.length <= 20000;
   const portalAction = <div className="my-8 text-center"><span className="inline-block rounded-full bg-moodboard-ink px-8 py-4 text-xs uppercase text-card">Access Your Trade Portal</span></div>;
@@ -29,7 +46,23 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
         <div className="space-y-2"><Label htmlFor="notification-subject">Subject</Label><Input id="notification-subject" value={draft.subject} maxLength={200} disabled={busy} onChange={e => setDraft(d => ({ ...d, subject: e.target.value }))} /></div>
         <div className="space-y-2"><Label htmlFor="notification-body">Email body</Label><Textarea id="notification-body" className="min-h-[320px] font-serif text-sm leading-relaxed" value={draft.body} maxLength={20000} disabled={busy} onChange={e => setDraft(d => ({ ...d, body: e.target.value }))} /></div>
         <section aria-label="Email layout preview" className="border-t border-border pt-6">
-          <h3 className="mb-6 text-xs uppercase text-muted-foreground">Email Preview</h3>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <h3 className="text-xs uppercase text-muted-foreground">Email Preview</h3>
+            <div role="group" aria-label="Preview format" className="flex gap-1 rounded-full border border-border p-1">
+              {(['styled', 'plain'] as const).map(mode => (
+                <button key={mode} type="button" aria-pressed={previewMode === mode} onClick={() => setPreviewMode(mode)}
+                  className={`rounded-full px-3 py-1 text-xs uppercase transition-colors ${previewMode === mode ? 'bg-moodboard-ink text-card' : 'text-muted-foreground hover:text-foreground'}`}>
+                  {mode === 'styled' ? 'Styled' : 'Plain text'}
+                </button>
+              ))}
+            </div>
+          </div>
+          {previewMode === 'plain' ? (
+            <div className="mx-auto max-w-[600px]">
+              <p className="mb-3 text-xs text-muted-foreground">Exactly what text-only email clients receive, based on your edits above.</p>
+              <pre className="whitespace-pre-wrap break-words rounded-md border border-border bg-muted/40 p-4 font-mono text-[13px] leading-relaxed text-foreground">{plainTextPreview}</pre>
+            </div>
+          ) : (
           <div className="mx-auto max-w-[600px] font-serif text-foreground">
             <img src="https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/affluency-email-wordmark.jpg" alt="Affluency — Unique by Design" className="mx-auto mb-8 h-auto w-[420px] max-w-full" />
             <hr className="mb-6 border-border" />
@@ -45,6 +78,7 @@ export default function ApplicationNotificationDrawer({ recipient, company, appr
             {approval && lastBenefit < 0 && portalAction}
             <hr className="my-6 border-border" /><p className="text-right text-xs text-muted-foreground">Maison Affluency Singapore<br /><em>Unique by Design</em></p>
           </div>
+          )}
         </section>
       </div>
       <footer className="shrink-0 space-y-3 border-t border-border pt-4">
