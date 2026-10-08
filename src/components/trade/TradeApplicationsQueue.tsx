@@ -187,24 +187,50 @@ export default function TradeApplicationsQueue() {
           <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Inbound</p>
           <h2 className="font-serif text-2xl tracking-tight text-foreground">Trade Applications</h2>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowDone((v) => !v)}
-          className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
-        >
-          {showDone ? "Show open only" : "Show approved & rejected"}
-        </button>
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by portal email activity">
+            {PORTAL_FILTERS.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setPortalFilter(key)}
+                aria-pressed={portalFilter === key}
+                className={
+                  "border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] " +
+                  (portalFilter === key
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:text-foreground")
+                }
+              >
+                {label}
+                {key === "opened" && portalCounts.opened > 0 ? ` (${portalCounts.opened})` : ""}
+                {key === "not_opened" && portalCounts.notOpened > 0 ? ` (${portalCounts.notOpened})` : ""}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDone((v) => !v)}
+            className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {showDone ? "Show open only" : "Show approved & rejected"}
+          </button>
+        </div>
       </header>
 
       {isLoading ? (
         <div className="flex items-center gap-2 px-6 py-8 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading applications…
         </div>
-      ) : accounts.length === 0 ? (
-        <p className="px-6 py-8 text-sm text-muted-foreground">No applications awaiting review.</p>
+      ) : visibleAccounts.length === 0 ? (
+        <p className="px-6 py-8 text-sm text-muted-foreground">
+          {accounts.length === 0
+            ? "No applications awaiting review."
+            : "No applications match this filter."}
+        </p>
       ) : (
         <ul className="divide-y divide-border">
-          {accounts.map((a) => {
+          {visibleAccounts.map((a) => {
             const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
             return (
               <li key={a.id} className="bg-background">
@@ -219,12 +245,13 @@ export default function TradeApplicationsQueue() {
                   {a.contact_name && <div className="text-muted-foreground">{a.contact_name}</div>}
                   <div className="text-muted-foreground">{a.email}</div>
                   {(() => {
-                    const c = portalClicks[a.email.toLowerCase()];
+                    const key = a.email.toLowerCase();
+                    const c = portalStats.clicked[key];
                     return c ? (
                       <div className="text-[11px] text-foreground">
                         Opened portal from email · {c.count} click{c.count === 1 ? "" : "s"} · last {new Date(c.last).toLocaleString()}
                       </div>
-                    ) : a.status === "approved" ? (
+                    ) : portalStats.sent.has(key) ? (
                       <div className="text-[11px] text-muted-foreground">Portal link not yet opened</div>
                     ) : null;
                   })()}
