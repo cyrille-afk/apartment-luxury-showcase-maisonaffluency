@@ -532,8 +532,9 @@ const TradeAILayoutStudio = () => {
                       const item = byId.get(a.componentId);
                       return { name: item?.name ?? a.sku, manufacturer: item?.manufacturer ?? null, dimensions: item?.dimensions ?? null, priceEur: item?.price != null ? a.priceAtCuration : null, productUrl: item?.publicProductUrl ? `https://www.maisonaffluency.com${item.publicProductUrl}` : null };
                     });
-                    downloadBlob(buildFurnishingSchedulePdf(rows, "Curated Room Layout", { clientReady: true }), "furnishing-schedule-client.pdf");
-                  }}>Export client PDF</button>
+                    setClientPreviewRows(rows);
+                  }}>Preview client PDF</button>
+                <ClientSchedulePreview rows={clientPreviewRows} title="Curated Room Layout" open={!!clientPreviewRows} onOpenChange={(v) => { if (!v) setClientPreviewRows(null); }} />
               </div>
             </div>
             <ul className="divide-y divide-border text-xs">
