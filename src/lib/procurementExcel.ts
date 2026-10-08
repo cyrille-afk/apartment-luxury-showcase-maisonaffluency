@@ -32,6 +32,8 @@ export interface ProcurementLine {
   status: string;
   supplier: string;
   notes: string;
+  /** Where the unit trade price came from: saved on the quote line or catalogue fallback. */
+  price_source?: "quote" | "catalogue" | null;
 }
 
 export interface ProcurementProjectMeta {
@@ -121,6 +123,7 @@ export async function buildProcurementWorkbook(input: ExportInput): Promise<Blob
     { header: "Status", key: "status", width: 14 },
     { header: "Supplier", key: "supplier", width: 22 },
     { header: "Notes", key: "notes", width: 30 },
+    { header: "Price Source", key: "priceSrc", width: 12 },
   ];
   styleHeader(ffe.getRow(1));
 
@@ -150,6 +153,7 @@ export async function buildProcurementWorkbook(input: ExportInput): Promise<Blob
       status: l.status,
       supplier: l.supplier,
       notes: l.notes,
+      priceSrc: l.price_source === "quote" ? "Quote" : l.price_source === "catalogue" ? "Catalogue" : "—",
     });
   });
 
