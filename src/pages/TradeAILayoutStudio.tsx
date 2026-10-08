@@ -628,6 +628,7 @@ const TradeAILayoutStudio = () => {
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
+              pieceNames={new Map(catalogue.map((item) => [item.componentId, item.name]))}
               onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
               <RoomOverviewCamera revision={overviewRevision} view={cameraView} enabled={!walkActive && !authorMode && !dragging} />
             </AICuratedEnvironment>

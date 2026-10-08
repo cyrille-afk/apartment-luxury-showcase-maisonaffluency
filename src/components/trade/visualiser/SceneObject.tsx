@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGLTF, useTexture, TransformControls } from "@react-three/drei";
+import { Html, useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -32,6 +32,8 @@ type Props = {
   isEditable?: boolean;
   /** Optional non-uniform scale; overrides `object.scale` when provided. */
   scaleVector?: [number, number, number];
+  /** Name-only annotation for generated room pieces; never includes pricing. */
+  label?: string;
 };
 
 type LoadedMaps = {
@@ -210,7 +212,7 @@ function useFittedModel(
   }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial]);
 }
 
-const ModelBody = ({ object }: { object: PlacedObject }) => {
+const ModelBody = ({ object, label }: { object: PlacedObject; label?: string }) => {
   const model = useFittedModel(
     object.id,
     object.glb_url ?? "",
@@ -219,6 +221,11 @@ const ModelBody = ({ object }: { object: PlacedObject }) => {
     object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
     object.upholsteryMaterial ?? null,
   );
+  const labelPosition = useMemo<[number, number, number]>(() => {
+    const bounds = new THREE.Box3().setFromObject(model);
+    const centre = bounds.getCenter(new THREE.Vector3());
+    return [centre.x, bounds.max.y + 0.18, centre.z];
+  }, [model]);
   useEffect(() => () => {
     // Only dispose materials we cloned — the cached GLTF originals are shared
     // across every instance and disposing them renders later clones black.
@@ -231,7 +238,14 @@ const ModelBody = ({ object }: { object: PlacedObject }) => {
       });
     });
   }, [model]);
-  return <primitive object={model} />;
+  return <>
+    <primitive object={model} />
+    {label && <Html position={labelPosition} center zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
+      <span data-room-piece-label={object.instanceId} className="block w-36 rounded border border-border bg-background/95 px-2 py-1.5 text-center text-[11px] leading-snug text-foreground shadow-sm break-words select-none">
+        {label}
+      </span>
+    </Html>}
+  </>;
 };
 
 const ImageBody = ({ url, name }: { url: string; name: string }) => {
@@ -249,7 +263,7 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label }: Props) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl } = useThree();
@@ -265,7 +279,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   }, [object.position]);
 
   const body = object.glb_url
-    ? <ModelBody object={object} />
+    ? <ModelBody object={object} label={label} />
     : object.image_url
       ? <ImageBody url={object.image_url} name={object.product_name} />
       : null;
