@@ -19,6 +19,7 @@ import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 import type { LayoutProductSnapshot } from "@/lib/aiLayoutStore";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
+import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
@@ -49,6 +50,9 @@ const SharedAILayout = () => {
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
   const [cameraView, setCameraView] = useState("overview");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedAsset = scene?.curatedAssets.find((a, i) => `ai-${i}-${a.sku}` === selectedId);
+  const selectedPiece = data?.products.find((p) => p.componentId === selectedAsset?.componentId);
   useEffect(() => { setCameraView("overview"); }, [token]);
   const [guideOpen, setGuideOpen] = useState(true);
   const [comparisonOpen, setComparisonOpen] = useState(false);
@@ -144,14 +148,15 @@ const SharedAILayout = () => {
         </section>
       </aside>
       <div className="relative h-[70vh] min-h-[520px] border border-border bg-muted/30">
-        <Canvas shadows dpr={[1, 1.5]}>
+        {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} onClose={() => setSelectedId(null)} />}
+        <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
           <PerspectiveCamera makeDefault fov={45} near={0.05} position={[r.width * 1.3, r.height * 2.2, r.length * 1.6]} />
           <OrbitControls makeDefault enabled={!active} maxPolarAngle={Math.PI / 2.05} target={[0, 0.5, 0]} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
           <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
           <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
-          <AICuratedEnvironment schema={scene} pieceNames={new Map(products.map((item) => [item.componentId, item.name]))} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
+          <AICuratedEnvironment schema={scene} pieceNames={new Map(products.map((item) => [item.componentId, item.name]))} selectedId={selectedId} onSelect={setSelectedId} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
             <RoomOverviewCamera revision={token} view={cameraView} enabled={!active} />
           </AICuratedEnvironment>
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
