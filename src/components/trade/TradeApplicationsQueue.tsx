@@ -82,6 +82,23 @@ export default function TradeApplicationsQueue() {
     },
   });
 
+  const { data: portalClicks = {} } = useQuery({
+    queryKey: ["trade-portal-email-clicks"],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("email_portal_links")
+        .select("recipient_email, click_count, last_clicked_at").gt("click_count", 0).limit(1000);
+      if (error) throw error;
+      const byEmail: Record<string, { count: number; last: string }> = {};
+      for (const r of data ?? []) {
+        const k = r.recipient_email.toLowerCase();
+        const cur = byEmail[k] ?? { count: 0, last: "" };
+        byEmail[k] = { count: cur.count + r.click_count, last: (r.last_clicked_at ?? "") > cur.last ? r.last_clicked_at! : cur.last };
+      }
+      return byEmail;
+    },
+  });
+
   const setStatus = async (a: Account, status: Account["status"]) => {
     setBusy(a.id + status);
     try {
@@ -179,6 +196,16 @@ export default function TradeApplicationsQueue() {
                   </div>
                   {a.contact_name && <div className="text-muted-foreground">{a.contact_name}</div>}
                   <div className="text-muted-foreground">{a.email}</div>
+                  {(() => {
+                    const c = portalClicks[a.email.toLowerCase()];
+                    return c ? (
+                      <div className="text-[11px] text-foreground">
+                        Opened portal from email · {c.count} click{c.count === 1 ? "" : "s"} · last {new Date(c.last).toLocaleString()}
+                      </div>
+                    ) : a.status === "approved" ? (
+                      <div className="text-[11px] text-muted-foreground">Portal link not yet opened</div>
+                    ) : null;
+                  })()}
                   {a.website_or_ig && (
                     <a href={linkFor(a.website_or_ig)} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
                       {a.website_or_ig}
