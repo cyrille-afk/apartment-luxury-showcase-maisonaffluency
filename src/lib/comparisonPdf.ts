@@ -26,10 +26,11 @@ export function buildComparisonPdf(pieces: ComparisonPdfPiece[], rows: { key: st
   y += 4;
   for (const row of rows) {
     const cells = pieces.map((p) => doc.splitTextToSize(p.values[row.key] || "—", colW - 4));
-    const h = Math.max(...cells.map((c) => c.length), 1) * 4.5 + 3;
-    if (y + h > 195) { doc.addPage(); y = 20; }
     doc.setFont("helvetica", "bold"); doc.setFontSize(8);
-    doc.text(row.label.replace(/\u2212/g, "-").toUpperCase(), M, y);
+    const labelLines = doc.splitTextToSize(row.label.replace(/\u2212/g, "-").toUpperCase(), labelW - 6);
+    const h = Math.max(Math.max(...cells.map((c) => c.length), 1) * 4.5, labelLines.length * 4) + 3;
+    if (y + h > 195) { doc.addPage(); y = 20; }
+    doc.text(labelLines, M, y);
     doc.setFont("helvetica", "normal"); doc.setFontSize(9);
     cells.forEach((c, i) => doc.text(c, M + labelW + i * colW, y));
     y += h;
