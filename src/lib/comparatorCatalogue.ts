@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { applyTradeDiscount } from "@/lib/productPricing";
 import type { TradeProduct } from "@/lib/tradeProducts";
 
