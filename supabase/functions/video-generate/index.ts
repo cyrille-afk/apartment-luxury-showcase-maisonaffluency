@@ -65,7 +65,10 @@ Deno.serve(async (req) => {
     }
     try {
       let response: unknown;
-      if (webhook) {
+      const lumaKey = Deno.env.get("LUMA_API_KEY");
+      if (lumaKey) {
+        response = await executeLumaVideoGeneration(db, lumaKey, userId, body?.snapshot, String((payload as { brief?: string }).brief ?? ""));
+      } else if (webhook) {
         const res = await fetch(webhook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Render service failed (${res.status})`);
         response = await res.json().catch(() => null);
@@ -74,7 +77,7 @@ Deno.serve(async (req) => {
         if (body?.simulate_failure === true) throw new Error("Mock render service failed");
         response = { mock: true, job_id: `mock_${crypto.randomUUID()}`, status: "queued", eta_seconds: 90 };
       }
-      return json({ status: "queued", charged: !!consumed, source: consumed, mock: !webhook, response });
+      return json({ status: "queued", charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {
       if (consumed) await db.rpc("refund_video_credit", { _user: userId, _source: consumed });
       return json({ error: e instanceof Error ? e.message : "Render failed", refunded: !!consumed }, 502);
@@ -83,3 +86,34 @@ Deno.serve(async (req) => {
     return json({ error: e instanceof Error ? e.message : "Server error" }, 500);
   }
 });
+
+// Luma Dream Machine. Snapshot (canvas JPEG data URL) is stored privately and passed as a
+// 1-hour signed URL keyframe. Any throw here triggers the credit refund above.
+async function executeLumaVideoGeneration(
+  db: ReturnType<typeof createClient>, key: string, userId: string, snapshot: unknown, brief: string,
+) {
+  let keyframes: Record<string, unknown> | undefined;
+  if (typeof snapshot === "string" && snapshot.startsWith("data:image/jpeg;base64,")) {
+    const b64 = snapshot.slice(23);
+    if (b64.length > 6_000_000) throw new Error("Snapshot too large");
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const path = `video-snapshots/${userId}/${crypto.randomUUID()}.jpg`;
+    const up = await db.storage.from("trade-private").upload(path, bytes, { contentType: "image/jpeg" });
+    if (up.error) throw new Error(`Snapshot upload failed: ${up.error.message}`);
+    const { data: signed, error } = await db.storage.from("trade-private").createSignedUrl(path, 3600);
+    if (error || !signed) throw new Error("Snapshot link failed");
+    keyframes = { frame0: { type: "image", url: signed.signedUrl } };
+  }
+  const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      prompt: `Cinematic interior design walkthrough film, ${brief.slice(0, 1500)}. Ultra-luxury living environment, magazine-ready bounce lighting, soft ray-traced shadows drifting across furniture fabrics, 8k resolution, photorealistic textures, smooth steadicam tracking movement.`,
+      aspect_ratio: "16:9",
+      ...(keyframes ? { keyframes } : {}),
+    }),
+  });
+  if (!res.ok) throw new Error(`Luma API error (${res.status}): ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return { job_id: data.id, status: data.state ?? "queued" };
+}
