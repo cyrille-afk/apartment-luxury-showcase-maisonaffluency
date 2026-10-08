@@ -27,7 +27,7 @@ export function buildFurnishingSchedulePdf(rows: ScheduleRow[], title: string, o
   doc.text("MAISON AFFLUENCY", 15, 18);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text(`Furnishing Schedule — ${title}`, 15, 26);
+  doc.text(options.clientReady ? `Furnishing Schedule — ${title}` : `Furnishing Schedule — ${title} (Trade)`, 15, 26);
   doc.setFontSize(9);
   doc.text(formatPdfDate(new Date(), "en-GB"), 195, 18, { align: "right" });
 
