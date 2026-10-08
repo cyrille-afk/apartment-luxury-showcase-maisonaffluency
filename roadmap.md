@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Show selected generated-piece name, RRP and recorded dual-unit dimensions in studio and shared views; live selection verified for all three pieces, direct lamp-model selection and dismissal pass without page errors; sofa/table dimensions are not recorded.
 - [x] Add item-name labels above generated room pieces in studio and shared client views; live generation at 1620×1186 shows all three names without overlap or page errors.
 - [x] Add full-room and per-piece close-up camera presets; six framing tests pass, browser screenshots verify overview, sofa/table/lamp close-ups and portrait lamp framing; extended return-flow browser checks timed out.
 - [x] Add an opened/not-opened portal-email filter to the trade applications queue; eight tests pass, live queue filtered studio 1:10 vs Wecraft correctly, temporary tracking rows removed afterwards.

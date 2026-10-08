@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Html, useGLTF, useTexture, TransformControls } from "@react-three/drei";
+import { Button } from "@/components/ui/button";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -212,7 +213,7 @@ function useFittedModel(
   }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial]);
 }
 
-const ModelBody = ({ object, label }: { object: PlacedObject; label?: string }) => {
+const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: string; onSelect: (id: string) => void }) => {
   const model = useFittedModel(
     object.id,
     object.glb_url ?? "",
@@ -240,10 +241,10 @@ const ModelBody = ({ object, label }: { object: PlacedObject; label?: string }) 
   }, [model]);
   return <>
     <primitive object={model} />
-    {label && <Html position={labelPosition} center zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
-      <span data-room-piece-label={object.instanceId} className="block w-36 rounded border border-border bg-background/95 px-2 py-1.5 text-center text-[11px] leading-snug text-foreground shadow-sm break-words select-none">
+    {label && <Html position={labelPosition} center zIndexRange={[5, 0]}>
+      <Button variant="outline" aria-label={`Select ${label}`} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect(object.instanceId); }} data-room-piece-label={object.instanceId} className="h-auto w-36 whitespace-normal bg-background/95 px-2 py-1.5 text-center text-[11px] leading-snug text-foreground shadow-sm break-words select-none">
         {label}
-      </span>
+      </Button>
     </Html>}
   </>;
 };
@@ -279,7 +280,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   }, [object.position]);
 
   const body = object.glb_url
-    ? <ModelBody object={object} label={label} />
+    ? <ModelBody object={object} label={label} onSelect={onSelect} />
     : object.image_url
       ? <ImageBody url={object.image_url} name={object.product_name} />
       : null;

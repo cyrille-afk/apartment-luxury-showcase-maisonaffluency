@@ -30,6 +30,7 @@ import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
+import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -131,6 +132,8 @@ const TradeAILayoutStudio = () => {
   };
 
   const byId = useMemo(() => new Map(catalogue.map((c) => [c.componentId, c])), [catalogue]);
+  const selectedAsset = scene?.curatedAssets.find((a, i) => `ai-${i}-${a.sku}` === selectedId);
+  const selectedPiece = selectedAsset ? byId.get(selectedAsset.componentId) : undefined;
 
   const loadCatalogue = useCallback(async () => {
     setCatLoading(true);
@@ -529,6 +532,7 @@ const TradeAILayoutStudio = () => {
       </aside>
 
       <div className="relative h-[70vh] min-h-[520px] min-w-0 border border-border bg-muted/30">
+        {selectedAsset && <SelectedPieceDetails name={selectedPiece?.name ?? selectedAsset.sku} price={selectedPiece?.price ?? null} dimensions={selectedPiece?.dimensions ?? null} onClose={() => setSelectedId(null)} />}
         {scene && (
           <div className="absolute inset-x-3 top-3 z-10 flex flex-wrap justify-end gap-2">
             <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={walkActive || !!authorMode || dragging}
