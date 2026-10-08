@@ -48,7 +48,7 @@ import { template as depositClearedInternal } from './deposit-cleared-internal.t
 import { template as queueJobParked } from './queue-job-parked.tsx'
 import { template as webhookWorkerUnhealthy } from './webhook-worker-unhealthy.tsx'
 import { template as studioActivationAlert } from './studio-activation-alert.tsx'
-import { approvalCopyConcierge, approvalCopyCyrille, rejectionCopyConcierge, rejectionCopyCyrille } from './application-decision-copy.tsx'
+import { approvalCopyConcierge, approvalCopyCyrille, approvalCopyGregoire, rejectionCopyConcierge, rejectionCopyCyrille, rejectionCopyGregoire } from './application-decision-copy.tsx'
 
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
@@ -90,6 +90,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'studio-activation-alert': studioActivationAlert,
   'trade-approval-copy-concierge': approvalCopyConcierge,
   'trade-approval-copy-cyrille': approvalCopyCyrille,
+  'trade-approval-copy-gregoire': approvalCopyGregoire,
   'trade-rejection-copy-concierge': rejectionCopyConcierge,
   'trade-rejection-copy-cyrille': rejectionCopyCyrille,
+  'trade-rejection-copy-gregoire': rejectionCopyGregoire,
 }

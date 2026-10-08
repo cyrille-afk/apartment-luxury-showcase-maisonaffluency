@@ -7,5 +7,7 @@ const copy = (t: TemplateEntry, to: string, label: string) => ({ ...t, to, displ
 
 export const approvalCopyConcierge = copy(tradeApproval, 'concierge@maisonaffluency.com', 'Trade approval')
 export const approvalCopyCyrille = copy(tradeApproval, 'cyrille@maisonaffluency.com', 'Trade approval')
+export const approvalCopyGregoire = copy(tradeApproval, 'gregoire@maisonaffluency.com', 'Trade approval')
 export const rejectionCopyConcierge = copy(tradeRejection, 'concierge@maisonaffluency.com', 'Trade decline')
 export const rejectionCopyCyrille = copy(tradeRejection, 'cyrille@maisonaffluency.com', 'Trade decline')
+export const rejectionCopyGregoire = copy(tradeRejection, 'gregoire@maisonaffluency.com', 'Trade decline')
