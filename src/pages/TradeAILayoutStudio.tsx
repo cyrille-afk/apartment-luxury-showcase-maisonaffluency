@@ -21,11 +21,13 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AICuratedEnvironment from "@/components/trade/visualiser/AICuratedEnvironment";
-import { DEFAULT_BRIEF, fetchLiveCatalogue, generateRoomLayout, repriceScene, summarise, toAsset, type LayoutBrief, type LiveCatalogueItem } from "@/lib/mockAiLayoutService";
+import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief, type LiveCatalogueItem } from "@/lib/mockAiLayoutService";
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
 import { cn } from "@/lib/utils";
+import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
+import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -53,7 +55,7 @@ const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => 
 );
 
 const TradeAILayoutStudio = () => {
-  const [brief, setBrief] = useState<LayoutBrief>(DEFAULT_BRIEF);
+  const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -149,7 +151,7 @@ const TradeAILayoutStudio = () => {
     setCurrent(null);
     try {
       const live = (await loadCatalogue()) ?? catalogue;
-      const { scene: next, skipped: miss } = await generateRoomLayout(brief, live);
+      const { scene: next, skipped: miss } = generateRoomLayoutMatrix(brief, live);
       setScene(next);
       setSkipped(miss);
     } finally {
@@ -362,8 +364,7 @@ const TradeAILayoutStudio = () => {
 
   const fin = scene?.financialSummary;
   const pct = fin ? Math.min(100, (fin.allocatedSpend / fin.totalBudget) * 100) : 0;
-  const dim = (k: keyof LayoutBrief["roomDimensions"], v: string) =>
-    setBrief((b) => ({ ...b, roomDimensions: { ...b.roomDimensions, [k]: Math.max(3, Math.min(20, Number(v) || 0)) } }));
+  const dim = setDimension;
 
   return (
     <div className="mx-auto grid max-w-[1500px] gap-6 px-6 py-8 lg:grid-cols-[340px_1fr] xl:grid-cols-[340px_1fr_320px]">
@@ -425,7 +426,7 @@ const TradeAILayoutStudio = () => {
           </div>
           <Button className="w-full" onClick={generate} disabled={loading || catLoading || !!catError}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate Room Layout
+            {loading ? "Generating layout..." : "Generate Room Layout"}
           </Button>
         </section>
 
@@ -598,7 +599,12 @@ const TradeAILayoutStudio = () => {
           </div>
         )}
         {!scene && !loading && (
-          <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">Set a brief and generate a layout.</div>
+          <Canvas dpr={[1, 1.5]} aria-label="Empty room grid">
+            <PerspectiveCamera makeDefault fov={45} position={[brief.roomDimensions.width * 1.1, Math.max(brief.roomDimensions.width, brief.roomDimensions.length) * 1.1, brief.roomDimensions.length * 1.3]} />
+            <OrbitControls makeDefault maxPolarAngle={Math.PI / 2.05} />
+            <ambientLight intensity={0.8} />
+            <gridHelper args={[10, 10]} scale={[brief.roomDimensions.width / 10, 1, brief.roomDimensions.length / 10]} />
+          </Canvas>
         )}
         {scene && (
           <Canvas shadows dpr={[1, 1.5]} onPointerMissed={() => setSelectedId(null)}>
