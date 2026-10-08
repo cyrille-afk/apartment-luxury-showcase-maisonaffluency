@@ -25,8 +25,8 @@
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface.
 - The Extension Integration sandbox embeds the trade sidebar via its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
 - Top-down proforma ledgers inherit project defaults unless a quote selects itemized or target-ceiling mode; all ceiling arithmetic lives in `calculateCeilingBudget` so screen and PDF figures cannot drift.
-- All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
-- Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
+- All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads can't drift.
+- Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry/card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; safe presets export matching look-at samples. Preset switches blend poses and retain playback state.
