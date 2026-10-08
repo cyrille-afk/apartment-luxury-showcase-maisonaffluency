@@ -427,15 +427,7 @@ export default function TradeFFESchedule() {
           materials: p?.materials || null,
           quantity: item.quantity,
           // Saved line price wins; otherwise fall back to the catalogue price.
-          unit_price_cents:
-            item.unit_price_cents ??
-            ((p as any)?.trade_price_cents || (p as any)?.rrp_price_cents || null),
-          price_source:
-            item.unit_price_cents != null
-              ? ("quote" as const)
-              : (p as any)?.trade_price_cents || (p as any)?.rrp_price_cents
-                ? ("catalogue" as const)
-                : null,
+          ...resolveQuoteLinePrice(item.unit_price_cents, p as any),
           rrp_price_cents: p?.rrp_price_cents ?? null,
           currency: p?.currency || "EUR",
           sku: p?.sku || null,
