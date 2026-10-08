@@ -172,3 +172,5 @@
 - [x] Camera-path sync history filters: All / Failed / Successful toggle with per-filter counts; active filter marked aria-pressed; verified live (2 failed, 4 successful).
 
 - [x] Add side-by-side shared camera route comparison; four diagrams and durations, explicit selection, Escape dismissal, screenshot and clean build verified live.
+
+- [ ] Activate approved trade applicants with one-time email links, secure password setup, existing profiles, and live verification.
