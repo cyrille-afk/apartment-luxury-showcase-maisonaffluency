@@ -1009,6 +1009,13 @@
       "when": 1791380338844,
       "tag": "0143_user_walkthrough_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 144,
+      "version": "7",
+      "when": 1791419739251,
+      "tag": "0144_migration",
+      "breakpoints": true
     }
   ]
 }
