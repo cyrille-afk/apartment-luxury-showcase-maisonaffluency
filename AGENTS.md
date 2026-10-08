@@ -11,14 +11,14 @@
 - Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view, to preserve price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
-- Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
-- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops restore re-freeze loops.
+- Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on code-update reloads.
+- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops re-freeze loops.
 - Curator Notes: product pages = full-width list; lightbox = three columns.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
 - Match each slash-separated explicit category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without generic tags overriding primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
-- Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check — no client-forged history.
+- Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false.
 - Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts cannot reveal internal figures; not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
