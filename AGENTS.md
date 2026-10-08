@@ -16,7 +16,7 @@
 - Curator Notes: product pages = full-width list; lightbox = 3 columns.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
 - Match each slash-separated explicit category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without generic tags overriding primary categories.
-- Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
+- Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id), restored per user+project via localStorage keys; the floating Felix lists only workspace=false.
