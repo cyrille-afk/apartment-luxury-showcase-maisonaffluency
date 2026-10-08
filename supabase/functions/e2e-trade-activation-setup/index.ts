@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   try {
     if (body.action === "cleanup") {
       const email = String(body.email ?? "").toLowerCase();
-      if (!EMAIL_RE.test(email)) return json({ error: "Only disposable test addresses can be removed" }, 400);
+      if (!EMAIL_RE.test(email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
       await cleanup(svc, email);
       return json({ ok: true });
     }
