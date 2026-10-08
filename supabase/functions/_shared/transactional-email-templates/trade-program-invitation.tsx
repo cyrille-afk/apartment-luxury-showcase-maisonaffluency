@@ -18,6 +18,7 @@ interface Props {
 
 const Email = ({ firstName, name, portalRef }: Props) => {
   const resolvedFirstName = firstName?.trim() || name?.trim().split(/\s+/)[0] || 'Design Professional'
+  const portalUrl = `https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`
 
   return (
     <Html lang="en" dir="ltr">
@@ -51,10 +52,15 @@ const Email = ({ firstName, name, portalRef }: Props) => {
           </Text>
 
           <Section style={buttonSection}>
-            <Button style={button} href={`https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`}>
+            <Button style={button} href={portalUrl}>
               Access Your Trade Portal
             </Button>
           </Section>
+          <Text style={plainLinkNote}>
+            If the button above does not work, copy and paste this link into your browser:<br />
+            <Link href={portalUrl} style={plainLink}>{portalUrl}</Link>
+          </Text>
+
 
           <Text style={signature}>
             Warm regards,<br />
@@ -103,7 +109,9 @@ const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 2
 const heading = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: 'Georgia, "Times New Roman", serif' }
 const paragraph = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
 const link = { color: '#1a1a1a', textDecoration: 'underline' }
-const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
+const buttonSection = { textAlign: 'center' as const, margin: '32px 0 12px' }
+const plainLinkNote = { color: '#888888', fontSize: '12px', lineHeight: '1.7', margin: '0 0 28px', textAlign: 'center' as const, wordBreak: 'break-all' as const }
+const plainLink = { color: '#1a1a1a', fontSize: '12px', textDecoration: 'underline' as const }
 const button = {
   display: 'inline-block',
   padding: '14px 32px',
