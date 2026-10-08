@@ -1,6 +1,6 @@
 - Trade owns breadcrumbs; Collection opens top; `/trade/gallery/:slug` shares the public profile header; shortcuts use latest.
 - Admin application actions save review metadata before app-email sends; decline-and-delete queues the notice before deleting, with stable per-application/template idempotency keys — failures must not erase the retryable record.
-- Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — edits keep branding, no HTML.
+- Approve/decline open a side-effect-free draft review; only confirmation runs actions; one shared plain-text copy/parser feeds preview and escaped templates — no HTML.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 - Felix/Benefits: max-w-[1500px] px-6; Felix left, results right, one useMoodboardSourcing; Benefits 50/50, left text.
 <!-- LOVABLE:BEGIN -->
@@ -10,7 +10,7 @@
 - No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
 - Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view, to preserve price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
-- Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; auth redirects to /trade/login must carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked against getSession) must not demote a valid session.
+- Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
 - Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on every code-update reload.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops restore re-freeze loops.
 - Curator Notes: product pages = full-width list; lightbox = three columns.
@@ -20,7 +20,7 @@
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check — no client-forged history.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false.
-- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so route remounts cannot briefly reveal internal figures; it is not an authorization boundary.
+- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts cannot reveal internal figures; not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface.
 - The Extension Integration sandbox embeds the trade sidebar through its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
