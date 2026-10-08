@@ -7,12 +7,12 @@
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
-- No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers — one catalogue, one layout.
+- No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
 - Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view — preserves price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
 - Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on code-update reloads.
-- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed — stops re-freeze loops.
+- Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed.
 - Curator Notes: product pages = full-width list; lightbox = three columns.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
 - Match each slash-separated explicit category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without generic tags overriding primary categories.
