@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Clock, Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
+import { Check, Clock, Columns2, Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { buildCinematicPath, CINEMATIC_PRESETS, type CinematicPreset } from "@/hooks/useCinematicPath";
@@ -46,6 +47,7 @@ const SharedAILayout = () => {
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
   const [guideOpen, setGuideOpen] = useState(true);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
   const [lightbox, setLightbox] = useState<(typeof pathOptions)[number] | null>(null);
   useEffect(() => {
     if (!lightbox) return;
@@ -149,6 +151,32 @@ const SharedAILayout = () => {
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
         </Canvas>
         <div className="absolute left-3 right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+          <Dialog open={comparisonOpen} onOpenChange={setComparisonOpen}>
+            <Button size="sm" variant="secondary" onClick={() => setComparisonOpen(true)} disabled={pathOptions.length < 2}>
+              <Columns2 className="mr-1.5 h-3.5 w-3.5" />Compare routes
+            </Button>
+            <DialogContent className="max-h-[85vh] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto" aria-describedby={undefined}>
+              <DialogTitle className="pr-6 font-serif text-xl">Compare camera routes</DialogTitle>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {pathOptions.map((p) => (
+                  <section key={p.value} aria-label={`${p.label} comparison`} className={`flex min-w-0 flex-col rounded-lg border p-4 ${choice === p.value ? "border-primary" : "border-border"}`}>
+                    <h3 className="min-h-12 break-words font-serif text-lg">{p.label}</h3>
+                    <CameraPathPreview scene={scene} path={p.path} name={p.label} className="aspect-[4/3] h-auto w-full shrink-0" />
+                    <p className="mt-3 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+                      <Clock aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                      {p.path ? `≈ ${playbackTimeLabel(Math.ceil((p.path.durationSec + CINEMATIC_ENTRY_SECONDS) / speed))} at ${speed}×` : "Unavailable"}
+                    </p>
+                    <p className="mb-4 mt-2 flex-1 text-sm text-muted-foreground">{p.description}</p>
+                    <Button size="sm" variant={choice === p.value ? "secondary" : "default"} disabled={!p.path}
+                      aria-label={`Use ${p.label} route`} onClick={() => { setChoice(p.value); setComparisonOpen(false); }}>
+                      {choice === p.value && <Check aria-hidden="true" className="mr-1.5 h-3.5 w-3.5" />}
+                      {choice === p.value ? "Selected route" : "Use this route"}
+                    </Button>
+                  </section>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
           <Select value={choice} onValueChange={setChoice}>
             <SelectTrigger aria-label="Camera path" aria-describedby="camera-path-description" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue>{selectedLabel}</SelectValue></SelectTrigger>
             <SelectContent className="w-[400px] max-w-[calc(100vw-2rem)]">
