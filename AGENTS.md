@@ -19,11 +19,11 @@
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable.
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check.
-- Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id) and restore per user+project via localStorage keys; the floating Felix lists only workspace=false.
+- Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id), restored per user+project via localStorage keys; the floating Felix lists only workspace=false.
 - Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts cannot reveal internal figures; not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — otherwise hidden products resurface.
-- The Extension Integration sandbox embeds the trade sidebar through its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
+- The Extension Integration sandbox embeds the trade sidebar via its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
 - Top-down proforma ledgers inherit project defaults unless a quote selects itemized or target-ceiling mode; all ceiling arithmetic lives in `calculateCeilingBudget` so screen and PDF figures cannot drift.
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads cannot drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry and card label.
