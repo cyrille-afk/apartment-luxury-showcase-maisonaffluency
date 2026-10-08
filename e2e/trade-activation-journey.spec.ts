@@ -11,7 +11,7 @@
  *   E2E_ACTIVATION_URL='https://www.maisonaffluency.com/trade/activate?token_hash=…&type=recovery' \
  *   E2E_ACTIVATION_EMAIL='test-inbox@example.com' \
  *   PW_BASE_URL=https://www.maisonaffluency.com \
- *   bunx playwright test e2e/trade-activation-journey.spec.ts --project=desktop-chrome
+ *   npx playwright test e2e/trade-activation-journey.spec.ts --project=desktop-chrome
  *
  * Skipped when the env vars are missing so CI stays green.
  */
