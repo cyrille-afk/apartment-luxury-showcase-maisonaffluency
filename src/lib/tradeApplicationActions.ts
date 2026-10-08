@@ -12,29 +12,35 @@ export type ApplicationRecord = {
 };
 
 /** Exact copy of the applicant's letter to each admin mailbox (one recipient per send). Never blocks the applicant notice. */
-async function copyAdmins(a: ApplicationRecord, base: string, templateData: Record<string, unknown>) {
+async function copyAdmins(a: ApplicationRecord, base: string, templateData: Record<string, unknown>, attempt?: string) {
   await Promise.all(['concierge', 'cyrille'].map((who) => {
     const templateName = `${base}-copy-${who}`;
     return supabase.functions.invoke('send-transactional-email', {
-      body: { templateName, idempotencyKey: `${templateName}-${a.id}`, templateData },
+      body: { templateName, idempotencyKey: `${templateName}-${a.id}${attempt ? `-${attempt}` : ''}`, templateData },
     }).catch(() => null);
   }));
 }
 
-async function notifyApplication(a: ApplicationRecord, status: 'approved' | 'rejected', draft?: NotificationDraft) {
+async function notifyApplication(a: ApplicationRecord, status: 'approved' | 'rejected', draft?: NotificationDraft, attempt?: string) {
   const templateName = status === 'approved' ? 'trade-approval' : 'trade-rejection';
   try {
     const templateData = { name: a.contact_name ?? undefined, companyName: a.studio_name ?? undefined, country: a.country ?? undefined,
       ...(draft ? { subjectText: draft.subject, bodyText: draft.body } : {}) };
     const { data, error } = await supabase.functions.invoke('send-transactional-email', {
-      body: { templateName, recipientEmail: a.email, idempotencyKey: `${templateName}-${a.id}`, templateData },
+      body: { templateName, recipientEmail: a.email, idempotencyKey: `${templateName}-${a.id}${attempt ? `-${attempt}` : ''}`, templateData },
     });
     if (error || data?.success !== true) return false;
-    await copyAdmins(a, templateName, templateData);
+    await copyAdmins(a, templateName, templateData, attempt);
     return true;
   } catch {
     return false;
   }
+}
+
+export async function resendTradeActivation(a: ApplicationRecord, draft: NotificationDraft, attempt: string) {
+  if (a.status !== 'approved') throw new Error('Only approved studios can receive activation access.');
+  if (!/^[a-zA-Z0-9-]{1,100}$/.test(attempt) || !draft.subject.trim() || draft.subject.length > 200 || /[\r\n]/.test(draft.subject) || !draft.body.trim() || draft.body.length > 20000) throw new Error('Please provide a valid activation email.');
+  return { notified: await notifyApplication(a, 'approved', draft, attempt) };
 }
 
 export async function updateTradeApplication(a: ApplicationRecord, status: ApplicationStatus, draft?: NotificationDraft) {

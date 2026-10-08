@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Restore approved-studio activation resend; Studio 1–10 drawer opened and cancelled live, 20 tests pass, no email sent.
+- [ ] Publish activation before emailing Studio 1–10: live /trade/activate still redirects to /trade-program; then verify the published page and confirm resend.
 - [x] Add actual camera-route thumbnails and speed-aware estimated durations to the shared-layout path menu; verified all four sample routes, selection, and 2× estimates live without page errors.
 - [x] Persist walkthrough camera path, playback speed and repeat settings; 17 tests pass, browser reload restored Slow orbit / 1.5× / repeat on, confirmed in screenshots. Extended navigation checks were limited by preview rendering stalls.
 - [x] Blend camera preset changes during playback; 13 tests pass, browser position/rotation continuity, safe bounds, pause/resume, rapid switching, speed and loop verified without page errors.
