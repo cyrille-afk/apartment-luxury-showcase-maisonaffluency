@@ -11862,6 +11862,7 @@ export type Database = {
       get_shared_ai_layout: {
         Args: { _token: string }
         Returns: {
+          camera_paths: Json
           products: Json
           scene: Json
           title: string

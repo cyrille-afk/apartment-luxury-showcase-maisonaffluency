@@ -1016,6 +1016,13 @@
       "when": 1791419739251,
       "tag": "0144_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1791422588194,
+      "tag": "0145_shared_layout_camera_paths",
+      "breakpoints": true
     }
   ]
 }
