@@ -14,7 +14,24 @@ type Props = {
 
 export default function ApplicationNotificationDrawer({ recipient, company, approval, initialDraft, busy, error, onClose, onSend }: Props) {
   const [draft, setDraft] = useState(initialDraft);
+  const [previewMode, setPreviewMode] = useState<'styled' | 'plain'>('styled');
   const blocks = parseDraftBody(draft.body);
+  // Mirrors the plain-text part built by the trade-approval/trade-rejection
+  // templates when an admin-edited draft body is present (bodyText branch).
+  const plainTextPreview = [
+    'MAISON AFFLUENCY — Unique by Design',
+    '',
+    draft.body.trim(),
+    ...(approval ? [
+      '',
+      'ACTIVATE YOUR TRADE ACCESS',
+      'https://www.maisonaffluency.com/trade/activate?token_hash=…&type=recovery',
+    ] : []),
+    '',
+    '—',
+    'Maison Affluency Singapore',
+    'Unique by Design',
+  ].join('\n');
   const lastBenefit = blocks.map(b => b.kind).lastIndexOf('benefit');
   const valid = draft.subject.trim().length > 0 && draft.subject.length <= 200 && !/[\r\n]/.test(draft.subject) && draft.body.trim().length > 0 && draft.body.length <= 20000;
   const portalAction = <div className="my-8 text-center"><span className="inline-block rounded-full bg-moodboard-ink px-8 py-4 text-xs uppercase text-card">Access Your Trade Portal</span></div>;
