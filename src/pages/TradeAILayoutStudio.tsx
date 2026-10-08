@@ -7,7 +7,7 @@ import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hoo
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
 import { CameraSamplerBridge, FloorPlanDrawLayer, PathNodesGuide, type CameraSampler } from "@/components/trade/visualiser/PathAuthoringTools";
-import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, readPathSyncStatus, type CustomCameraPath, type CustomPathNode, type PathMode, type PathSyncStatus, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes, autoShiftFlaggedNodes } from "@/lib/customCameraPaths";
+import { buildCustomCinematicPath, checkPathClearance, type ClearanceConflict, clusterCentre, listAccountPaths, listLayoutPaths, nodesFromDescription, persistCustomPath, readLocalPaths, readPathSyncStatus, readPathSyncHistory, type PathSyncHistoryEntry, type CustomCameraPath, type CustomPathNode, type PathMode, type PathSyncStatus, type StorageMode, syncLocalPathsToAccount, autoRaiseFlaggedNodes, autoShiftFlaggedNodes } from "@/lib/customCameraPaths";
 import { CINEMATIC_ENTRY_SECONDS, playbackTimeLabel, readCustomPathPreference, readWalkthroughPreferences, saveCustomPathPreference, saveWalkthroughPreferences, steppedPlaybackSpeed, WALKTHROUGH_SPEEDS, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { fetchRemoteWalkthroughPreferences, pushRemoteWalkthroughPreferences } from "@/lib/walkthroughPreferenceSync";
 import { Slider } from "@/components/ui/slider";
@@ -221,6 +221,8 @@ const TradeAILayoutStudio = () => {
   const [pathName, setPathName] = useState("My walkthrough");
   const [customPaths, setCustomPaths] = useState<Array<CustomCameraPath & { source: "layout" | "account" | "local" }>>([]);
   const [pathSyncStatus, setPathSyncStatus] = useState<PathSyncStatus>(readPathSyncStatus);
+  const [pathSyncHistory, setPathSyncHistory] = useState<PathSyncHistoryEntry[]>(readPathSyncHistory);
+  const [syncHistoryOpen, setSyncHistoryOpen] = useState(false);
   const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
   // Cross-device sync: account row wins on load; local stays the offline fallback.
   const prefsHydrated = useRef(false);
@@ -255,6 +257,7 @@ const TradeAILayoutStudio = () => {
     ]);
     setCustomPaths([...layout.map((p) => ({ ...p, source: "layout" as const })), ...account.map((p) => ({ ...p, source: "account" as const })), ...local]);
     setPathSyncStatus(readPathSyncStatus());
+    setPathSyncHistory(readPathSyncHistory());
   }, [layoutKey]);
   useEffect(() => { void loadCustomPaths(); }, [loadCustomPaths]);
   const activeCustom = customPaths.find((p) => p.id === activeCustomId) ?? null;
@@ -537,16 +540,36 @@ const TradeAILayoutStudio = () => {
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Export for video render
             </Button>
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
-              <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
-                {pathSyncStatus.pendingRetry.length > 0 ? (
-                  <>
-                    <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
-                    <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
-                  </>
-                ) : (
-                  <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+              <div className="w-full space-y-1">
+                <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
+                  {pathSyncStatus.pendingRetry.length > 0 ? (
+                    <>
+                      <span className="text-amber-600">{pathSyncStatus.pendingRetry.length} path{pathSyncStatus.pendingRetry.length > 1 ? "s" : ""} still need{pathSyncStatus.pendingRetry.length > 1 ? "" : "s"} syncing ({pathSyncStatus.pendingRetry.join(", ")})</span>
+                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => void loadCustomPaths()}>Retry now</button>
+                    </>
+                  ) : (
+                    <span>Camera paths synced {pathSyncStatus.lastSyncAt ? syncTimeAgo(pathSyncStatus.lastSyncAt) : ""}{pathSyncStatus.lastMoved > 0 ? ` · ${pathSyncStatus.lastMoved} uploaded` : ""}</span>
+                  )}
+                  {pathSyncHistory.length > 0 && (
+                    <button type="button" aria-expanded={syncHistoryOpen} aria-label="Camera path sync history"
+                      className="underline underline-offset-2 hover:text-foreground"
+                      onClick={() => setSyncHistoryOpen((v) => !v)}>
+                      {syncHistoryOpen ? "Hide history" : "History"}
+                    </button>
+                  )}
+                </p>
+                {syncHistoryOpen && pathSyncHistory.length > 0 && (
+                  <ul aria-label="Recent camera path syncs" className="ml-auto w-fit space-y-0.5 text-right text-[11px] text-muted-foreground">
+                    {pathSyncHistory.map((e) => (
+                      <li key={e.at}>
+                        {syncTimeAgo(e.at)} — {e.failed.length > 0
+                          ? <span className="text-amber-600">{e.moved} synced, {e.failed.length} failed ({e.failed.join(", ")})</span>
+                          : <span>{e.moved > 0 ? `${e.moved} path${e.moved > 1 ? "s" : ""} synced` : "Up to date"}</span>}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </p>
+              </div>
             )}
           </div>
         )}

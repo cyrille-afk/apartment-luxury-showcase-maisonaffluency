@@ -60,6 +60,28 @@ describe("path sync status", () => {
   });
 });
 
+describe("path sync history", () => {
+  it("defaults to empty and parses stored entries newest-first", async () => {
+    const { readPathSyncHistory } = await import("./customCameraPaths");
+    expect(readPathSyncHistory()).toEqual([]);
+    window.localStorage.setItem("ma_camera_path_sync_history_v1", JSON.stringify([
+      { at: "2026-10-08T00:00:00.000Z", moved: 2, failed: [] },
+      { at: "2026-10-07T20:00:00.000Z", moved: 1, failed: ["Loft path"] },
+    ]));
+    const h = readPathSyncHistory();
+    expect(h).toHaveLength(2);
+    expect(h[0]).toEqual({ at: "2026-10-08T00:00:00.000Z", moved: 2, failed: [] });
+    expect(h[1].failed).toEqual(["Loft path"]);
+  });
+  it("falls back to [] on corrupt data and drops malformed entries", async () => {
+    const { readPathSyncHistory } = await import("./customCameraPaths");
+    window.localStorage.setItem("ma_camera_path_sync_history_v1", "not json");
+    expect(readPathSyncHistory()).toEqual([]);
+    window.localStorage.setItem("ma_camera_path_sync_history_v1", JSON.stringify([{ at: 1 }, { at: "2026-10-08T00:00:00.000Z", moved: 0, failed: [] }]));
+    expect(readPathSyncHistory()).toHaveLength(1);
+  });
+});
+
 describe("auto-raise flagged viewpoints", () => {
   it("lifts a low path over the sofa and leaves clear paths unchanged", async () => {
     const { autoRaiseFlaggedNodes } = await import("./customCameraPaths");

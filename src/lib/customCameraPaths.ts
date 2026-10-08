@@ -139,6 +139,29 @@ function writePathSyncStatus(status: PathSyncStatus) {
   try { window.localStorage.setItem(PATH_SYNC_STATUS_KEY, JSON.stringify(status)); } catch { /* storage blocked */ }
 }
 
+/** One camera-path sync attempt: when it ran, how many paths uploaded, and which failed. */
+export interface PathSyncHistoryEntry { at: string; moved: number; failed: string[] }
+const PATH_SYNC_HISTORY_KEY = "ma_camera_path_sync_history_v1";
+const PATH_SYNC_HISTORY_MAX = 10;
+
+/** Recent sync attempts, newest first (capped at 10). Graceful fallback to [] on corrupt data. */
+export function readPathSyncHistory(): PathSyncHistoryEntry[] {
+  try {
+    const raw: unknown = JSON.parse(window.localStorage.getItem(PATH_SYNC_HISTORY_KEY) ?? "null");
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((e): e is PathSyncHistoryEntry =>
+      !!e && typeof e === "object" && typeof (e as PathSyncHistoryEntry).at === "string" &&
+      typeof (e as PathSyncHistoryEntry).moved === "number" && Array.isArray((e as PathSyncHistoryEntry).failed) &&
+      (e as PathSyncHistoryEntry).failed.every((f) => typeof f === "string")).slice(0, PATH_SYNC_HISTORY_MAX);
+  } catch { return []; }
+}
+
+function appendPathSyncHistory(entry: PathSyncHistoryEntry) {
+  try {
+    window.localStorage.setItem(PATH_SYNC_HISTORY_KEY, JSON.stringify([entry, ...readPathSyncHistory()].slice(0, PATH_SYNC_HISTORY_MAX)));
+  } catch { /* storage blocked */ }
+}
+
 /**
  * Upload every "This browser only" path (all layouts) to the signed-in account library,
  * removing each local copy only after its insert succeeds. Returns old local id → new account id.
@@ -163,7 +186,9 @@ export async function syncLocalPathsToAccount(): Promise<Map<string, string>> {
     if (remaining.length) window.localStorage.setItem(key, JSON.stringify(remaining));
     else window.localStorage.removeItem(key);
   }
-  writePathSyncStatus({ lastSyncAt: new Date().toISOString(), lastMoved: moved.size, pendingRetry: pending });
+  const at = new Date().toISOString();
+  writePathSyncStatus({ lastSyncAt: at, lastMoved: moved.size, pendingRetry: pending });
+  appendPathSyncHistory({ at, moved: moved.size, failed: pending });
   return moved;
 }
 
