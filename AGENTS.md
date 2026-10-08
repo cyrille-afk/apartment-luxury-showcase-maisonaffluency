@@ -8,7 +8,7 @@
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectible designers/pieces live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
-- Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view, to preserve price visibility.
+- Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view — preserves price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
 - Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on code-update reloads.
@@ -28,6 +28,6 @@
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads can't drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry/card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
-- `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
+- `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves before.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; safe presets export matching look-at samples; preset switches blend poses and retain playback state.
 - Spec-sheet off-domain guard: DB trigger `flag_offdomain_spec_sheet` on trade_products + designer_curator_picks logs violations to content_audit_log (`spec_sheet_offdomain_flag`); allowed hosts: maisonaffluency.com, project storage, res.cloudinary.com.
