@@ -41,6 +41,7 @@ interface FFEItem {
   materials: string | null;
   quantity: number;
   unit_price_cents: number | null;
+  price_source: "quote" | "catalogue" | null;
   rrp_price_cents: number | null;
   currency: string;
   sku: string | null;
