@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AICuratedEnvironment from "@/components/trade/visualiser/AICuratedEnvironment";
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 import type { LayoutProductSnapshot } from "@/lib/aiLayoutStore";
+import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
@@ -147,7 +148,9 @@ const SharedAILayout = () => {
           <directionalLight position={[5, 10, 5]} intensity={1.1} castShadow />
           <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
           <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
-          <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false} />
+          <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
+            <RoomOverviewCamera revision={token} enabled={!active} />
+          </AICuratedEnvironment>
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
         </Canvas>
         <div className="absolute left-3 right-3 top-3 z-10 flex flex-wrap justify-end gap-2">

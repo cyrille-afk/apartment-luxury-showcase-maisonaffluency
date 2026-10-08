@@ -28,6 +28,7 @@ import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEn
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
+import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -57,6 +58,7 @@ const ClearanceWarning = ({ conflicts }: { conflicts: ClearanceConflict[] }) => 
 const TradeAILayoutStudio = () => {
   const { brief, setBrief, setDimension } = useAiLayoutForm();
   const [scene, setScene] = useState<AICuratedSceneSchema | null>(null);
+  const [overviewRevision, setOverviewRevision] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -112,6 +114,7 @@ const TradeAILayoutStudio = () => {
     setSelectedId(null);
     setSkipped([]);
     setScene(catalogue.length ? repriceScene(l.scene, catalogue) : l.scene);
+    setOverviewRevision((r) => r + 1);
   };
 
   const removeSaved = async (l: SavedLayout) => {
@@ -153,6 +156,7 @@ const TradeAILayoutStudio = () => {
       const live = (await loadCatalogue()) ?? catalogue;
       const { scene: next, skipped: miss } = generateRoomLayoutMatrix(brief, live);
       setScene(next);
+      setOverviewRevision((r) => r + 1);
       setSkipped(miss);
     } finally {
       setLoading(false);
@@ -167,6 +171,7 @@ const TradeAILayoutStudio = () => {
     setSkipped(result.matrix.filter((r) => !r.eligible).map((r) => `${r.item.name} (${r.reason})`));
     if (result.parsed.budget) setBrief((b) => ({ ...b, totalBudget: result.budget }));
     setScene(sceneFromCuration(result, brief));
+    setOverviewRevision((r) => r + 1);
   };
 
   const withLedger = (next: AICuratedSceneSchema) => ({ ...next, financialSummary: summarise(next) });
@@ -618,7 +623,9 @@ const TradeAILayoutStudio = () => {
             <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
             <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
             <AICuratedEnvironment schema={scene} selectedId={selectedId} onSelect={setSelectedId}
-              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode} />
+              onAssetTransform={onAssetTransform} onDragStateChange={setDragging} isEditable={!walkActive && !authorMode}>
+              <RoomOverviewCamera revision={overviewRevision} enabled={!walkActive && !authorMode && !dragging} />
+            </AICuratedEnvironment>
             <CinematicCameraRig path={cinematic} enabled={walkActive} playing={walking} speed={walkSpeed}
               seek={walkSeek} onTimeChange={setWalkTime} onDone={finishWalk} />
             <CameraSamplerBridge samplerRef={samplerRef} />

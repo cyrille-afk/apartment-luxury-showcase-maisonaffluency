@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, type ReactNode } from "react";
 import { Html } from "@react-three/drei";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { AICuratedSceneSchema, ArchitecturalAnchor, Vec3 } from "@/types/aiCuratedScene";
@@ -18,12 +18,14 @@ interface Props {
   onDragStateChange: (dragging: boolean) => void;
   /** False for read-only client links. */
   isEditable?: boolean;
+  /** Runs only after all furniture has loaded. */
+  children?: ReactNode;
 }
 
 const instanceIdFor = (index: number, sku: string) => `ai-${index}-${sku}`;
 
 /** Renders an AICuratedSceneSchema inside an R3F <Canvas>: room shell, anchors and editable assets. */
-const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true }: Props) => {
+const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, onDragStateChange, isEditable = true, children }: Props) => {
   const { width: W, length: L, height: H } = schema.roomDimensions;
 
   const objects = useMemo<PlacedObject[]>(
@@ -44,7 +46,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
   );
 
   return (
-    <group>
+    <group name="curated-room">
       {/* Room shell: floor + two back walls, so the camera can see in. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.001, 0]}>
         <planeGeometry args={[W, L]} />
@@ -79,6 +81,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             onDragStateChange={onDragStateChange}
           />
         ))}
+        {children}
       </Suspense>
     </group>
   );
