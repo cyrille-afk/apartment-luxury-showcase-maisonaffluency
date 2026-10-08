@@ -18,6 +18,11 @@ import type { LayoutProductSnapshot } from "@/lib/aiLayoutStore";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+const pathDescriptions: Record<CinematicPreset, string> = {
+  sweep: "A sweeping overview of the room and its furniture arrangement.",
+  "slow-orbit": "A leisurely full circle around the furniture, with views from every side.",
+  "furniture-tour": "A piece-by-piece tour, starting with the sofa and focusing on each furnishing.",
+};
 
 type Shared = { title: string; scene: AICuratedSceneSchema; products: LayoutProductSnapshot[]; updated_at: string; camera_paths?: { id: string; name: string; nodes: CustomPathNode[] }[] };
 
@@ -49,6 +54,10 @@ const SharedAILayout = () => {
   const paths = data?.camera_paths ?? [];
   useEffect(() => { if (paths[0]) setChoice(`custom:${paths[0].id}`); }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
   const isCustom = choice.startsWith("custom:");
+  const selectedPath = paths.find((p) => `custom:${p.id}` === choice);
+  const selectedLabel = selectedPath?.name ?? CINEMATIC_PRESETS.find((p) => p.value === choice)?.label;
+  const describeCustomPath = (p: { nodes: CustomPathNode[] }) => `A curated route through ${p.nodes.length} saved viewpoints.`;
+  const selectedDescription = selectedPath ? describeCustomPath(selectedPath) : pathDescriptions[choice as CinematicPreset];
   const presetPath = useCinematicPath(scene, 24, (isCustom ? "sweep" : choice) as CinematicPreset);
   const customPath = useMemo(() => {
     const p = paths.find((x) => `custom:${x.id}` === choice);
@@ -127,17 +136,18 @@ const SharedAILayout = () => {
           <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false} />
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
         </Canvas>
-        <div className="absolute right-3 top-3 z-10 flex gap-2">
+        <div className="absolute left-3 right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
           <Select value={choice} onValueChange={setChoice}>
-            <SelectTrigger aria-label="Camera path" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {paths.map((p) => <SelectItem key={p.id} value={`custom:${p.id}`}>{p.name}</SelectItem>)}
-              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+            <SelectTrigger aria-label="Camera path" aria-describedby="camera-path-description" className="h-8 w-[180px] bg-background/95 text-xs"><SelectValue>{selectedLabel}</SelectValue></SelectTrigger>
+            <SelectContent className="w-[320px] max-w-[calc(100vw-2rem)]">
+              {paths.map((p) => <SelectItem key={p.id} value={`custom:${p.id}`} textValue={p.name} className="py-2"><span className="block text-xs font-medium">{p.name}</span><span className="mt-0.5 block text-xs text-muted-foreground">{describeCustomPath(p)}</span></SelectItem>)}
+              {CINEMATIC_PRESETS.map((p) => <SelectItem key={p.value} value={p.value} textValue={p.label} className="py-2"><span className="block text-xs font-medium">{p.label}</span><span className="mt-0.5 block text-xs text-muted-foreground">{pathDescriptions[p.value]}</span></SelectItem>)}
             </SelectContent>
           </Select>
           <Button size="sm" variant="secondary" onClick={active ? stop : start} disabled={!cinematic}>
             <Film className="mr-1.5 h-3.5 w-3.5" />{active ? "Stop walkthrough" : "Play walkthrough"}
           </Button>
+          <p id="camera-path-description" aria-live="polite" className="max-w-[340px] basis-full bg-background/95 px-3 py-2 text-xs text-muted-foreground sm:basis-auto">{selectedDescription}</p>
         </div>
         {!active && guideOpen && cinematic && (
           <div role="note" aria-label="Walkthrough guide" className="absolute bottom-3 left-3 z-10 max-w-[280px] border border-border bg-background/95 p-3 shadow-sm">
