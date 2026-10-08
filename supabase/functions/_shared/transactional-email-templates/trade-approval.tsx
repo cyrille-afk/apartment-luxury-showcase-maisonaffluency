@@ -167,11 +167,91 @@ const BenefitRow = ({ title, description, details }: BenefitRowProps) => (
   </tr>
 )
 
+const plainText = (data: Record<string, any>) => {
+  const name = typeof data.name === 'string' ? data.name : undefined
+  const companyName = typeof data.companyName === 'string' ? data.companyName : undefined
+  const country = typeof data.country === 'string' ? data.country : undefined
+  const activationUrl = typeof data.activationUrl === 'string' ? data.activationUrl : undefined
+  const portalRef = typeof data.portalRef === 'string' ? data.portalRef : undefined
+  const link = portalHref(activationUrl, portalRef)
+
+  // When an admin-edited draft body exists, it is the authoritative copy —
+  // send it as-is with the portal/activation link appended.
+  if (typeof data.bodyText === 'string' && data.bodyText.trim()) {
+    return [
+      'MAISON AFFLUENCY — Unique by Design',
+      '',
+      data.bodyText.trim(),
+      '',
+      activationUrl ? 'ACTIVATE YOUR TRADE ACCESS' : 'ACCESS YOUR TRADE PORTAL',
+      link,
+      '',
+      '—',
+      `${SITE_NAME} Singapore`,
+      'Unique by Design',
+    ].join('\n')
+  }
+
+  const benefitLines = (b: { title: string; description: string; details?: string[] }) =>
+    [`◆ ${b.title}`, b.description, ...(b.details ?? []).map(d => `  • ${d}`)].join('\n')
+
+  return [
+    'MAISON AFFLUENCY — Unique by Design',
+    '',
+    name ? `Dear ${name},` : 'Dear Applicant,',
+    '',
+    `We are pleased to inform you that your application${companyName ? ` for ${companyName}` : ''} to the ${SITE_NAME} Trade Program has been approved.`,
+    '',
+    "Your application is approved. Use the link below to securely set your password and activate sign-in access. As a member of the Trade Program, your studio enters a refined ecosystem of sourcing, tooling, and commercial infrastructure designed for the world's most discerning design firms.",
+    '',
+    'YOUR TRADE PROGRAM BENEFITS',
+    '',
+    benefitLines({ title: 'Trade pricing & bespoke quotations', description: 'Preferential trade discount applied across the catalogue, plus tailored quotations for larger scopes.' }),
+    '',
+    benefitLines({ title: 'Dedicated Client Advisor', description: 'A single point of contact for sourcing, lead times, logistics, and white-glove project support.' }),
+    '',
+    benefitLines({ title: 'Custom & bespoke requests', description: 'Commission modifications or entirely bespoke pieces directly with our ateliers and designers.' }),
+    '',
+    benefitLines({ title: 'Curated product library', description: 'Access to European, Japanese and American ateliers, collectible design, and material archives.' }),
+    '',
+    benefitLines({ title: 'CAD & 3D Files', description: 'Trade-only technical downloads where the maker supplies them: DWG, DXF, 3DS, SKP, RFA, OBJ, FBX, STEP, IGES. Requires sign-in and appears only on eligible product pages.' }),
+    '',
+    benefitLines({ title: 'Samples & swatches', description: 'Request finish and fabric samples shipped to your studio for client presentations.' }),
+    '',
+    benefitLines({ title: 'Consolidated, fully insured shipping', description: 'Worldwide DDP or DAP, with one landed quote covering freight, customs, and duties.' }),
+    '',
+    benefitLines({ title: 'Branded quote & tearsheet builder', description: "Export white-labelled PDFs and share tearsheets under your studio's identity." }),
+    '',
+    benefitLines({ title: 'White-label client boards', description: 'Private shareable boards for your clients under your logo and studio name.' }),
+    '',
+    benefitLines({ title: 'Project folders & mood board studio', description: 'Organise sourcing by project and build mood boards with AI assistance.' }),
+    '',
+    benefitLines({ title: '3D Studio', description: 'Turn architectural drawings into furnished 3D visualisations to present to clients.' }),
+    '',
+    benefitLines({ title: 'AI Concierge', description: 'An in-app assistant trained exclusively on our catalogue for instant recommendations.' }),
+    '',
+    benefitLines(payoutsBenefit(country)),
+    '',
+    activationUrl ? 'ACTIVATE YOUR TRADE ACCESS' : 'ACCESS YOUR TRADE PORTAL',
+    link,
+    '',
+    'A dedicated Client Advisor will reach out to you shortly to introduce themselves and discuss how we can best support your projects.',
+    '',
+    'Warm regards,',
+    `The ${SITE_NAME} Team`,
+    '',
+    '—',
+    `${SITE_NAME} Singapore`,
+    'Unique by Design',
+  ].join('\n')
+}
+
 export const template = {
   component: TradeApprovalEmail,
   subject: (data: Record<string, unknown>) => typeof data.subjectText === 'string' ? data.subjectText : 'Welcome to the Maison Affluency Trade Program',
   displayName: 'Trade Program Approval',
   previewData: { name: 'Jane Smith', companyName: 'Atelier Design Co.' },
+  text: plainText,
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "Georgia, 'Playfair Display', serif" }
