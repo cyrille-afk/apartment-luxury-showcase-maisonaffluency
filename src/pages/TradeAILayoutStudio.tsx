@@ -678,7 +678,7 @@ const TradeAILayoutStudio = () => {
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
-              {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : {videoLocked ? <Lock className="mr-1.5 h-3.5 w-3.5" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}{exporting ? null : null}Generate Walkthrough Video
+              {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : videoLocked ? <Lock className="mr-1.5 h-3.5 w-3.5" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Generate Walkthrough Video
               {videoStatus?.unlimited && <span className="ml-2 border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.14em]">Cinematic HD Render</span>}
               {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
