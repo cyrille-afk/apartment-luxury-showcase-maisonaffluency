@@ -150,6 +150,7 @@ const TradeReorder = lazy(() => import("./pages/TradeReorder"));
 const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter"));
 const TradeCPD = lazy(() => import("./pages/TradeCPD"));
 const TradeComparator = lazy(() => import("./pages/TradeComparator"));
+const SharedShortlist = lazy(() => import("./pages/SharedShortlist"));
 const TradeTools = lazy(() => import("./pages/TradeTools"));
 
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
@@ -861,6 +862,7 @@ const App = () => {
                   
                   <Route path="/pay/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><GuestPayPage /></Suspense>} />
                   <Route path="/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><ClientBoardViewer /></Suspense>} />
+                  <Route path="/shortlist/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedShortlist /></Suspense>} />
                   <Route path="/layout/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedAILayout /></Suspense>} />
 <Route path="/shared/board/:token" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedProcurementBoard /></Suspense>} />
                   <Route path="/shared/board/:projectSlug/:boardSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><SharedProcurementBoard /></Suspense>} />

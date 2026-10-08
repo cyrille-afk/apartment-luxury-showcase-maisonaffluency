@@ -2165,6 +2165,33 @@ export type Database = {
         }
         Relationships: []
       }
+      comparator_shortlists: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          name: string
+          share_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          share_token?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          share_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       competitor_designers: {
         Row: {
           created_at: string
@@ -11901,6 +11928,14 @@ export type Database = {
       }
       get_shared_board: { Args: { _token: string }; Returns: Json }
       get_shared_board_finishes: { Args: { _token: string }; Returns: Json }
+      get_shared_shortlist: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          items: Json
+          name: string
+        }[]
+      }
       get_studio_contact_email: {
         Args: { _studio_id: string }
         Returns: string
