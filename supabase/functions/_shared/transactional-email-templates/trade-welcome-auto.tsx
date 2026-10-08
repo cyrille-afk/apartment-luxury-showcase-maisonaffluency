@@ -64,7 +64,7 @@ const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus, desig
           your dashboard trade portal.
         </Text>
         <Section style={buttonSection}>
-          <Button style={button} href="https://www.maisonaffluency.com/trade/dashboard">
+          <Button style={button} href="https://www.maisonaffluency.com/trade/login?next=/trade/dashboard">
             Enter your trade portal
           </Button>
         </Section>
