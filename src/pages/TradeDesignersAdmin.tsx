@@ -21,6 +21,7 @@ import CloudUpload from "@/components/trade/CloudUpload";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
+import CatalogueSpecAudit from "@/components/admin/CatalogueSpecAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import BulkUrlPaste from "@/components/admin/BulkUrlPaste";
 import CratesEditor from "@/components/admin/CratesEditor";
@@ -2565,6 +2566,7 @@ const TradeDesignersAdmin = () => {
 
         {/* Completeness Audit */}
         <DesignerCompletenessAudit />
+        <CatalogueSpecAudit />
 
 
         <div className="space-y-3">
