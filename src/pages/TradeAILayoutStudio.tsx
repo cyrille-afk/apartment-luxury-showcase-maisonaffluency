@@ -25,6 +25,7 @@ import { DEFAULT_BRIEF, fetchLiveCatalogue, generateRoomLayout, repriceScene, su
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
+import { cn } from "@/lib/utils";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 
@@ -224,6 +225,7 @@ const TradeAILayoutStudio = () => {
   const [pathSyncStatus, setPathSyncStatus] = useState<PathSyncStatus>(readPathSyncStatus);
   const [pathSyncHistory, setPathSyncHistory] = useState<PathSyncHistoryEntry[]>(readPathSyncHistory);
   const [syncHistoryOpen, setSyncHistoryOpen] = useState(false);
+  const [syncHistoryFilter, setSyncHistoryFilter] = useState<"all" | "failed" | "ok">("all");
   const [activeCustomId, setActiveCustomId] = useState<string | null>(readCustomPathPreference);
   // Cross-device sync: account row wins on load; local stays the offline fallback.
   const prefsHydrated = useRef(false);
@@ -559,17 +561,38 @@ const TradeAILayoutStudio = () => {
                     </button>
                   )}
                 </p>
-                {syncHistoryOpen && pathSyncHistory.length > 0 && (
-                  <ul aria-label="Recent camera path syncs" className="ml-auto w-fit space-y-0.5 text-right text-[11px] text-muted-foreground">
-                    {pathSyncHistory.map((e) => (
-                      <li key={e.at}>
-                        {syncTimeAgo(e.at)} — {e.failed.length > 0
-                          ? <span className="text-amber-600">{e.moved} synced, {e.failed.length} failed ({e.failed.join(", ")})</span>
-                          : <span>{e.moved > 0 ? `${e.moved} path${e.moved > 1 ? "s" : ""} synced` : "Up to date"}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                {syncHistoryOpen && pathSyncHistory.length > 0 && (() => {
+                  const failed = pathSyncHistory.filter((e) => e.failed.length > 0);
+                  const ok = pathSyncHistory.filter((e) => e.failed.length === 0);
+                  const shown = syncHistoryFilter === "failed" ? failed : syncHistoryFilter === "ok" ? ok : pathSyncHistory;
+                  const opt = (v: "all" | "failed" | "ok", label: string, count: number) => (
+                    <button type="button" aria-pressed={syncHistoryFilter === v}
+                      className={cn("underline underline-offset-2", syncHistoryFilter === v ? "text-foreground" : "hover:text-foreground")}
+                      onClick={() => setSyncHistoryFilter(v)}>{label} ({count})</button>
+                  );
+                  return (
+                    <div className="ml-auto w-fit space-y-1 text-right">
+                      <div role="group" aria-label="Filter sync history" className="flex items-center justify-end gap-2 text-[11px] text-muted-foreground">
+                        {opt("all", "All", pathSyncHistory.length)}
+                        {opt("failed", "Failed", failed.length)}
+                        {opt("ok", "Successful", ok.length)}
+                      </div>
+                      {shown.length > 0 ? (
+                        <ul aria-label="Recent camera path syncs" className="space-y-0.5 text-[11px] text-muted-foreground">
+                          {shown.map((e) => (
+                            <li key={e.at}>
+                              {syncTimeAgo(e.at)} — {e.failed.length > 0
+                                ? <span className="text-amber-600">{e.moved} synced, {e.failed.length} failed ({e.failed.join(", ")})</span>
+                                : <span>{e.moved > 0 ? `${e.moved} path${e.moved > 1 ? "s" : ""} synced` : "Up to date"}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground">No {syncHistoryFilter === "failed" ? "failed" : "successful"} syncs yet.</p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
