@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2'
+import { welcomeTaxStatus } from './welcomeTaxStatus.ts'
 
 /** Runtime applicant activation only; never used to mint agent test sessions. */
 export async function prepareTradeActivation(service: SupabaseClient, recipient: string) {
@@ -18,27 +19,34 @@ export async function completeTradeActivation(service: SupabaseClient, userId: s
   const { data: auth, error: authError } = await service.auth.admin.getUserById(userId)
   const email = auth?.user?.email?.toLowerCase()
   if (authError || !email || !auth.user?.email_confirmed_at) throw new Error('Verify your activation email first')
-  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name,country').eq('email', email).maybeSingle()
+  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name,country,tax_vat_id').eq('email', email).maybeSingle()
   if (error || account?.status !== 'approved' || (account.user_id && account.user_id !== userId)) throw new Error('An approved application is required')
   const checked = (result: { error: unknown }) => { if (result.error) throw new Error('Could not activate your trade access. Please retry.') }
   checked(await service.from('profiles').update({ trade_status: 'approved' }).eq('id', userId))
   checked(await service.from('trade_profiles').upsert({ user_id: userId, approval_status: 'approved' }, { onConflict: 'user_id' }))
   checked(await service.from('trade_accounts').update({ user_id: userId }).eq('id', account.id).eq('status', 'approved'))
   checked(await service.from('user_roles').upsert({ user_id: userId, role: 'trade_user' }, { onConflict: 'user_id,role', ignoreDuplicates: true }))
-  if (!account.user_id) await alertActivation(service, account, email).catch((e) => console.error('activation alert failed', e))
+  if (!account.user_id) await alertActivation(service, account, email, userId).catch((e) => console.error('activation alert failed', e))
   return { ok: true }
 }
 
 const ADMIN_EMAILS = ['cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com']
 
 /** First activation only: email each admin (one recipient per send) + in-app notice. Never blocks access. */
-async function alertActivation(service: SupabaseClient, account: { id: string; studio_name?: string | null; contact_name?: string | null; country?: string | null }, email: string) {
+async function alertActivation(service: SupabaseClient, account: { id: string; studio_name?: string | null; contact_name?: string | null; country?: string | null; tax_vat_id?: string | null }, email: string, userId: string) {
   const studio = account.studio_name || email
   const person = account.contact_name || email
+  const [profile, creditProfile] = await Promise.all([
+    service.from('trade_profiles').select('vat_number,vat_valid_status,vat_last_checked_at').eq('user_id', userId).maybeSingle(),
+    service.from('trade_credit_profiles').select('vat_number,vat_valid_status,vat_last_checked_at').eq('user_id', userId).maybeSingle(),
+  ])
+  const taxVatStatus = profile.error || creditProfile.error
+    ? 'Verification status unavailable'
+    : welcomeTaxStatus(profile.data, creditProfile.data, account.tax_vat_id)
   const { error: welcomeError } = await service.functions.invoke('send-transactional-email', { body: {
     templateName: 'trade-welcome-auto', recipientEmail: email,
     idempotencyKey: `trade-welcome-auto-${account.id}`,
-    templateData: { name: account.contact_name || undefined, companyName: account.studio_name || undefined, country: account.country || undefined },
+    templateData: { name: account.contact_name || undefined, companyName: account.studio_name || undefined, country: account.country || undefined, taxVatStatus },
   } })
   await service.from('admin_alert_log').insert({ channel: 'email', event: 'trade_account_welcome', payload: { trade_account_id: account.id, to: email },
     status: welcomeError ? 'failed' : 'sent', error: welcomeError ? String(welcomeError.message ?? welcomeError).slice(0, 500) : null })
