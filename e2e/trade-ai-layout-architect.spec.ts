@@ -72,6 +72,14 @@ function trackErrors(page: Page) {
 async function openStudio(page: Page) {
   await page.goto("/trade/ai-layout", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/trade\/ai-layout/, { timeout: 20_000 });
+  // First visit shows the one-time confidentiality gate; accept it if present.
+  const nda = page.getByRole("dialog", { name: "Secure Studio Access" });
+  const ndaShown = await nda.waitFor({ state: "visible", timeout: 10_000 }).then(() => true).catch(() => false);
+  if (ndaShown) {
+    await nda.getByRole("checkbox").check();
+    await nda.getByRole("button", { name: "Proceed to Secure Studio" }).click();
+    await expect(nda).toBeHidden({ timeout: 15_000 });
+  }
   await expect(page.getByRole("heading", { name: "Curated Room Layout" })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText(/Live RRPs · \d+ of \d+ pieces available/)).toBeVisible({ timeout: 30_000 });
 }
