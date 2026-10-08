@@ -13,7 +13,7 @@ export type ApplicationRecord = {
 
 /** Exact copy of the applicant's letter to each admin mailbox (one recipient per send). Never blocks the applicant notice. */
 async function copyAdmins(a: ApplicationRecord, base: string, templateData: Record<string, unknown>, attempt?: string) {
-  await Promise.all(['concierge', 'cyrille'].map((who) => {
+  await Promise.all(['concierge', 'cyrille', 'gregoire'].map((who) => {
     const templateName = `${base}-copy-${who}`;
     return supabase.functions.invoke('send-transactional-email', {
       body: { templateName, idempotencyKey: `${templateName}-${a.id}${attempt ? `-${attempt}` : ''}`, templateData },
