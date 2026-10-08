@@ -199,7 +199,8 @@ const TradeAILayoutStudio = () => {
           room_dimensions: { width_m: W, length_m: L, height_m: H },
           architectural_anchors: anchorsForPrompt(anchors, W, L),
           client_brief: { room_type: brief.roomType, design_aesthetic: brief.style, budget_eur: brief.totalBudget },
-          available_catalog: rows,
+          // POR / unavailable pieces never reach the model; validation still uses the full rows.
+          available_catalog: rows.filter((r) => typeof r.trade_cost === "number" && r.trade_cost > 0),
         },
       });
       const out = (data as { layout?: ArchitectOutput } | null)?.layout;
