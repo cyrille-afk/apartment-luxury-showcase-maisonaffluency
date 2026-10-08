@@ -99,15 +99,23 @@ function UnitPriceWithSource({
       >
         {isQuote ? "Quote" : "Catalogue"}
       </span>
-      {differsFromCatalogue && catalogueCents != null && (
-        <span
-          className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
-          title={`Saved line price differs from the current catalogue price (€${(catalogueCents / 100).toFixed(0)})`}
-        >
-          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-          Differs
-        </span>
-      )}
+      {differsFromCatalogue && catalogueCents != null && (() => {
+        const { amountCents, pct } = cataloguePriceDifference(cents, catalogueCents);
+        const sign = amountCents > 0 ? "+" : amountCents < 0 ? "−" : "";
+        const absAmount = Math.abs(amountCents) / 100;
+        const absPct = Math.abs(pct);
+        const pctLabel = Number.isInteger(absPct) ? absPct.toFixed(0) : absPct.toFixed(1);
+        const diffLabel = `${sign}€${absAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${pctLabel}%)`;
+        return (
+          <span
+            className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
+            title={`Saved line price differs from the current catalogue price (€${(catalogueCents / 100).toFixed(2)}): ${diffLabel}`}
+          >
+            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+            Differs {diffLabel}
+          </span>
+        );
+      })()}
     </span>
   );
 }
