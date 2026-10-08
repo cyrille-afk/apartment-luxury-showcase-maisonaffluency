@@ -2,7 +2,7 @@
 
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Img, Hr, Section,
+  Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 
@@ -63,6 +63,11 @@ const TradeWelcomeAutoEmail = ({ name, companyName, country, taxVatStatus, desig
           bespoke material alterations for an upcoming project, you can coordinate directly through
           your dashboard trade portal.
         </Text>
+        <Section style={buttonSection}>
+          <Button style={button} href="https://www.maisonaffluency.com/trade/dashboard">
+            Enter your trade portal
+          </Button>
+        </Section>
         <Text style={text}>We look forward to supporting your upcoming spaces.</Text>
         <Text style={footer}>
           Warm regards,<br />
@@ -107,6 +112,17 @@ const logo = { margin: '0 auto' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
+const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
+const button = {
+  display: 'inline-block',
+  padding: '16px 32px',
+  backgroundColor: h1.color,
+  color: main.backgroundColor,
+  textDecoration: 'none',
+  fontSize: '15px',
+  fontWeight: 'bold' as const,
+  borderRadius: '4px',
+}
 const detailsBox = {
   borderLeft: '2px solid #1a1a1a',
   paddingLeft: '16px',
