@@ -1,5 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Film, Pause, Play, Repeat, RotateCcw, Square } from "lucide-react";
+import { Film, Info, Pause, Play, Repeat, RotateCcw, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
