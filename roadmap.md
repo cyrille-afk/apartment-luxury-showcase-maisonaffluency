@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add full-room and per-piece close-up camera presets; verify selection and resize framing.
 - [x] Add an opened/not-opened portal-email filter to the trade applications queue; eight tests pass, live queue filtered studio 1:10 vs Wecraft correctly, temporary tracking rows removed afterwards.
 - [x] Add a plain-text trade portal link beneath the button in the invitation and approval emails; four deployed preview cases render the copyable URL with tracking intact, no emails sent.
 - [x] Add a plain-text trade portal link beneath the welcome email button; live deployed preview renders both the button and the copyable URL under it, no emails sent.

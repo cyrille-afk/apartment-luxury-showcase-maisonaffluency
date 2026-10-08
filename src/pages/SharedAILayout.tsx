@@ -18,6 +18,7 @@ import AICuratedEnvironment from "@/components/trade/visualiser/AICuratedEnviron
 import type { AICuratedSceneSchema } from "@/types/aiCuratedScene";
 import type { LayoutProductSnapshot } from "@/lib/aiLayoutStore";
 import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera";
+import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 
 const micro = "text-[10px] uppercase tracking-[0.15em] text-muted-foreground";
 const eur = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
@@ -47,6 +48,8 @@ const SharedAILayout = () => {
 
   const scene = data?.scene ?? null;
   const [choice, setChoice] = useState<string>("sweep");
+  const [cameraView, setCameraView] = useState("overview");
+  useEffect(() => { setCameraView("overview"); }, [token]);
   const [guideOpen, setGuideOpen] = useState(true);
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [lightbox, setLightbox] = useState<(typeof pathOptions)[number] | null>(null);
@@ -149,11 +152,13 @@ const SharedAILayout = () => {
           <Suspense fallback={null}><Environment preset="apartment" /></Suspense>
           <ContactShadows position={[0, 0.002, 0]} scale={20} opacity={0.3} blur={1.2} far={8} />
           <AICuratedEnvironment schema={scene} selectedId={null} onSelect={() => {}} onAssetTransform={() => {}} onDragStateChange={() => {}} isEditable={false}>
-            <RoomOverviewCamera revision={token} enabled={!active} />
+            <RoomOverviewCamera revision={token} view={cameraView} enabled={!active} />
           </AICuratedEnvironment>
           <CinematicCameraRig path={cinematic} enabled={active} playing={playing} speed={speed} seek={seek} onTimeChange={setTime} onDone={done} />
         </Canvas>
         <div className="absolute left-3 right-3 top-3 z-10 flex flex-wrap justify-end gap-2">
+          <RoomCameraPresets value={cameraView} onChange={setCameraView} disabled={active}
+            pieces={scene.curatedAssets.map((a, i) => ({ id: `ai-${i}-${a.sku}`, name: products.find((p) => p.componentId === a.componentId)?.name ?? a.sku }))} />
           <Dialog open={comparisonOpen} onOpenChange={setComparisonOpen}>
             <Button size="sm" variant="secondary" onClick={() => setComparisonOpen(true)} disabled={pathOptions.length < 2}>
               <Columns2 className="mr-1.5 h-3.5 w-3.5" />Compare routes

@@ -70,6 +70,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
 
       <Suspense fallback={<Html center><span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Loading assets…</span></Html>}>
         {schema.curatedAssets.map((asset, i) => (
+          <group key={instanceIdFor(i, asset.sku)} name={`camera-piece-${instanceIdFor(i, asset.sku)}`}>
           <SceneObject
             key={instanceIdFor(i, asset.sku)}
             object={objects[i]}
@@ -80,6 +81,7 @@ const AICuratedEnvironment = ({ schema, selectedId, onSelect, onAssetTransform, 
             onTransform={(_id, position, rotation) => onAssetTransform(i, position, rotation)}
             onDragStateChange={onDragStateChange}
           />
+          </group>
         ))}
         {children}
       </Suspense>
