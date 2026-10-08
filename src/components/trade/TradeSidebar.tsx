@@ -497,6 +497,18 @@ export function TradeSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink
+                      to="/trade/admin/email-deliverability"
+                      className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                    >
+                      <BarChart3 className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Alert Email Deliverability</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink
                       to="/trade/admin/compliance/sub-processors"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                       activeClassName="text-foreground font-medium"
