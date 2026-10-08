@@ -18,7 +18,7 @@ export async function completeTradeActivation(service: SupabaseClient, userId: s
   const { data: auth, error: authError } = await service.auth.admin.getUserById(userId)
   const email = auth?.user?.email?.toLowerCase()
   if (authError || !email || !auth.user?.email_confirmed_at) throw new Error('Verify your activation email first')
-  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name').eq('email', email).maybeSingle()
+  const { data: account, error } = await service.from('trade_accounts').select('id,status,user_id,studio_name,contact_name,country').eq('email', email).maybeSingle()
   if (error || account?.status !== 'approved' || (account.user_id && account.user_id !== userId)) throw new Error('An approved application is required')
   const checked = (result: { error: unknown }) => { if (result.error) throw new Error('Could not activate your trade access. Please retry.') }
   checked(await service.from('profiles').update({ trade_status: 'approved' }).eq('id', userId))
@@ -32,9 +32,16 @@ export async function completeTradeActivation(service: SupabaseClient, userId: s
 const ADMIN_EMAILS = ['cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com']
 
 /** First activation only: email each admin (one recipient per send) + in-app notice. Never blocks access. */
-async function alertActivation(service: SupabaseClient, account: { id: string; studio_name?: string | null; contact_name?: string | null }, email: string) {
+async function alertActivation(service: SupabaseClient, account: { id: string; studio_name?: string | null; contact_name?: string | null; country?: string | null }, email: string) {
   const studio = account.studio_name || email
   const person = account.contact_name || email
+  const { error: welcomeError } = await service.functions.invoke('send-transactional-email', { body: {
+    templateName: 'trade-welcome-auto', recipientEmail: email,
+    idempotencyKey: `trade-welcome-auto-${account.id}`,
+    templateData: { name: account.contact_name || undefined, companyName: account.studio_name || undefined, country: account.country || undefined },
+  } })
+  await service.from('admin_alert_log').insert({ channel: 'email', event: 'trade_account_welcome', payload: { trade_account_id: account.id, to: email },
+    status: welcomeError ? 'failed' : 'sent', error: welcomeError ? String(welcomeError.message ?? welcomeError).slice(0, 500) : null })
   for (const to of ADMIN_EMAILS) {
     const { error } = await service.functions.invoke('send-transactional-email', { body: {
       templateName: 'studio-activation-alert', recipientEmail: to,
