@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { recordEmailPortalClick } from '@/lib/emailPortalClick';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const TradeActivate = () => {
   const [params] = useSearchParams();
+  useState(() => recordEmailPortalClick());
   const navigate = useNavigate();
   const [stage, setStage] = useState<'welcome' | 'password' | 'complete'>('welcome');
   const [busy, setBusy] = useState(false);

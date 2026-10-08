@@ -395,6 +395,20 @@ Deno.serve(async (req) => {
     delete templateData.activationUrl
   }
 
+  // Portal click tracking: one opaque ref per studio-facing send; the app records the click on arrival.
+  if (templateName === 'trade-approval' || templateName === 'trade-program-invitation') {
+    const { data: link } = await supabase.from('email_portal_links')
+      .insert({ template_name: templateName, recipient_email: effectiveRecipient }).select('token').single()
+    if (link?.token) {
+      templateData = { ...templateData, portalRef: link.token }
+      if (typeof templateData.activationUrl === 'string') {
+        templateData.activationUrl = `${templateData.activationUrl}&ma_ref=${link.token}`
+      }
+    }
+  } else {
+    delete templateData.portalRef
+  }
+
   // 4. Render React Email template to HTML and plain text
   templateData = await welcomeDesignerData(supabase, templateName, templateData)
   const html = await renderAsync(

@@ -3877,6 +3877,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_portal_links: {
+        Row: {
+          click_count: number
+          created_at: string
+          first_clicked_at: string | null
+          last_clicked_at: string | null
+          recipient_email: string
+          template_name: string
+          token: string
+        }
+        Insert: {
+          click_count?: number
+          created_at?: string
+          first_clicked_at?: string | null
+          last_clicked_at?: string | null
+          recipient_email: string
+          template_name: string
+          token?: string
+        }
+        Update: {
+          click_count?: number
+          created_at?: string
+          first_clicked_at?: string | null
+          last_clicked_at?: string | null
+          recipient_email?: string
+          template_name?: string
+          token?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -12197,6 +12227,7 @@ export type Database = {
         Returns: undefined
       }
       recompute_trade_tier_suggestions: { Args: never; Returns: number }
+      record_email_portal_click: { Args: { p_ref: string }; Returns: undefined }
       record_security_event: {
         Args: {
           _details?: Json

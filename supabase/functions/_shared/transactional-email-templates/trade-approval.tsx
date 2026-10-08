@@ -17,9 +17,10 @@ interface TradeApprovalProps {
   bodyText?: string
   subjectText?: string
   activationUrl?: string
+  portalRef?: string
 }
 
-const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUrl }: TradeApprovalProps) => (
+const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUrl, portalRef }: TradeApprovalProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your Trade Program application has been approved</Preview>
@@ -100,7 +101,7 @@ const TradeApprovalEmail = ({ name, companyName, country, bodyText, activationUr
         </table>
 
         <Section style={buttonSection}>
-          <Button style={button} href={activationUrl || "https://www.maisonaffluency.com/trade/login?next=/trade/dashboard"}>
+          <Button style={button} href={activationUrl || `https://www.maisonaffluency.com/trade/login?next=/trade/dashboard${portalRef ? `&ma_ref=${encodeURIComponent(portalRef)}` : ''}`}>
             Access Your Trade Portal
           </Button>
         </Section>
