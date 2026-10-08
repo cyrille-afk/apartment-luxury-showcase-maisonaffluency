@@ -74,7 +74,8 @@ async function openStudio(page: Page) {
   await expect(page).toHaveURL(/\/trade\/ai-layout/, { timeout: 20_000 });
   // First visit shows the one-time confidentiality gate; accept it if present.
   const nda = page.getByRole("dialog", { name: "Secure Studio Access" });
-  if (await nda.isVisible().catch(() => false)) {
+  const ndaShown = await nda.waitFor({ state: "visible", timeout: 10_000 }).then(() => true).catch(() => false);
+  if (ndaShown) {
     await nda.getByRole("checkbox").check();
     await nda.getByRole("button", { name: "Proceed to Secure Studio" }).click();
     await expect(nda).toBeHidden({ timeout: 15_000 });
