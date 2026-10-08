@@ -173,4 +173,5 @@
 
 - [x] Add side-by-side shared camera route comparison; four diagrams and durations, explicit selection, Escape dismissal, screenshot and clean build verified live.
 
-- [ ] Activate approved trade applicants with one-time email links, secure password setup, existing profiles, and live verification.
+- [x] Implement approved-applicant one-time activation links, secure password setup, profile reuse, and retry states; 27 tests and live invalid-link checks pass.
+- [ ] Publish/sync activation page and verify a real applicant email-to-password-to-sign-in journey; blocked on frontend publication and an applicant activation email (none sent during testing).
