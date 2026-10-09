@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -511,7 +511,36 @@ const TradeAILayoutStudio = () => {
       /* storage unavailable */
     }
   };
-  const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
+  // Month filter for the render history; persisted per browser.
+  const [videoHistoryMonth, setVideoHistoryMonth] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem("ma-video-history-month") ?? VIDEO_RENDER_MONTH_ALL;
+    } catch {
+      return VIDEO_RENDER_MONTH_ALL;
+    }
+  });
+  const updateVideoHistoryMonth = (value: string) => {
+    const next = value || VIDEO_RENDER_MONTH_ALL;
+    setVideoHistoryMonth(next);
+    try {
+      window.localStorage.setItem("ma-video-history-month", next);
+    } catch {
+      /* storage unavailable */
+    }
+  };
+  const videoHistoryMonthOptions = useMemo(() => videoRenderMonthOptions(videoHistory), [videoHistory]);
+  // A month stored from an earlier visit may no longer be in the history.
+  const activeVideoHistoryMonth =
+    videoHistoryMonth === VIDEO_RENDER_MONTH_ALL || videoHistoryMonthOptions.some((m) => m.monthKey === videoHistoryMonth)
+      ? videoHistoryMonth
+      : VIDEO_RENDER_MONTH_ALL;
+  const activeVideoHistoryLabel =
+    activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL ? null : videoRenderMonthLabel(activeVideoHistoryMonth);
+  const videoHistoryFiltered = useMemo(
+    () => filterVideoRendersByMonth(videoHistory, activeVideoHistoryMonth),
+    [videoHistory, activeVideoHistoryMonth],
+  );
+  const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistoryFiltered), [videoHistoryFiltered]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
@@ -914,21 +943,42 @@ const TradeAILayoutStudio = () => {
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium">Previous walkthrough videos</p>
-                  <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
-                    Warn when over estimate by
-                    <input
-                      type="number"
-                      min={0}
-                      step={5}
-                      className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
-                      value={overrunThresholdPct}
-                      onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
-                    />
-                    %
-                  </label>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Filter renders by month">
+                      Month
+                      <select
+                        className="border border-border bg-background px-1 py-0.5 text-foreground"
+                        value={activeVideoHistoryMonth}
+                        onChange={(e) => updateVideoHistoryMonth(e.target.value)}
+                      >
+                        <option value={VIDEO_RENDER_MONTH_ALL}>All months</option>
+                        {videoHistoryMonthOptions.map((m) => (
+                          <option key={m.monthKey} value={m.monthKey}>{m.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
+                      Warn when over estimate by
+                      <input
+                        type="number"
+                        min={0}
+                        step={5}
+                        className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
+                        value={overrunThresholdPct}
+                        onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
+                      />
+                      %
+                    </label>
+                  </div>
                 </div>
                 {videoRenderSummary.billedCount > 0 && (
                   <p className="mb-2 text-muted-foreground" aria-label="Walkthrough render cost summary">
+                    {activeVideoHistoryLabel && (
+                      <>
+                        <span className="text-foreground">{activeVideoHistoryLabel}</span>
+                        {" · "}
+                      </>
+                    )}
                     {videoRenderSummary.billedCount} billed render{videoRenderSummary.billedCount === 1 ? "" : "s"}
                     {" · total "}
                     <span className="text-foreground">{formatUsdCents(videoRenderSummary.totalCostCents)}</span>
@@ -940,7 +990,7 @@ const TradeAILayoutStudio = () => {
                       : ""}
                   </p>
                 )}
-                {videoMonthlyBreakdown.length > 0 && (
+                {activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL && videoMonthlyBreakdown.length > 0 && (
                   <ul className="mb-2 space-y-0.5 text-muted-foreground" aria-label="Monthly billed render costs">
                     {videoMonthlyBreakdown.map((m) => (
                       <li key={m.monthKey}>
@@ -952,8 +1002,11 @@ const TradeAILayoutStudio = () => {
                     ))}
                   </ul>
                 )}
+                {videoHistoryFiltered.length === 0 ? (
+                  <p className="text-muted-foreground">No renders in {activeVideoHistoryLabel}.</p>
+                ) : (
                 <ul className="space-y-1.5">
-                  {videoHistory.map((h) => (
+                  {videoHistoryFiltered.map((h) => (
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
@@ -993,6 +1046,7 @@ const TradeAILayoutStudio = () => {
                     </li>
                   ))}
                 </ul>
+                )}
                 {compareItems.length === 2 && (
                   <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
                     <div className="mb-2 flex items-center justify-between">

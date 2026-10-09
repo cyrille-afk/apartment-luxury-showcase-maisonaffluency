@@ -20,7 +20,7 @@ describe("monthlyCostBreakdown", () => {
     expect(months).toEqual([]);
   });
 });
-import { formatUsdCents, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderOverrun } from "../videoRenderSummary";
+import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderMonthKey, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL, videoRenderOverrun } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
@@ -140,5 +140,61 @@ describe("videoRenderOverrun / renderExceedsEstimate", () => {
     expect(renderExceedsEstimate(over, 20)).toBe(true);
     expect(renderExceedsEstimate(over, 70)).toBe(false);
     expect(renderExceedsEstimate({ quality: "720p", render_seconds: null, cost_usd: null }, 0)).toBe(false);
+  });
+});
+
+describe("month filter", () => {
+  it("derives the UTC month key and label", () => {
+    expect(videoRenderMonthKey("2026-10-09T02:00:00Z")).toBe("2026-10");
+    expect(videoRenderMonthKey("2026-09-30T23:59:59Z")).toBe("2026-09");
+    expect(videoRenderMonthKey("not-a-date")).toBeNull();
+    expect(videoRenderMonthLabel("2026-10")).toBe("Oct 2026");
+  });
+
+  it("lists every month in the history, unbilled renders included, newest first", () => {
+    const options = videoRenderMonthOptions([
+      job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.6 }),
+      job({ job_id: "b", created_at: "2026-10-01T23:30:00Z", cost_usd: null }),
+      job({ job_id: "c", created_at: "2026-08-15T12:00:00Z", cost_usd: 1.2 }),
+      job({ job_id: "d", created_at: "not-a-date", cost_usd: 0.35 }),
+    ]);
+    expect(options).toEqual([
+      { monthKey: "2026-10", label: "Oct 2026" },
+      { monthKey: "2026-08", label: "Aug 2026" },
+    ]);
+  });
+
+  it("keeps only the selected month's renders", () => {
+    const jobs = [
+      job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.6 }),
+      job({ job_id: "b", created_at: "2026-10-01T23:30:00Z", cost_usd: null }),
+      job({ job_id: "c", created_at: "2026-09-15T12:00:00Z", cost_usd: 1.2 }),
+    ];
+    expect(filterVideoRendersByMonth(jobs, "2026-10").map((j) => j.job_id)).toEqual(["a", "b"]);
+    expect(filterVideoRendersByMonth(jobs, "2026-07")).toEqual([]);
+  });
+
+  it("returns every render for the all-months sentinel", () => {
+    const jobs = [job({ job_id: "a" }), job({ job_id: "b", created_at: "not-a-date" })];
+    expect(filterVideoRendersByMonth(jobs, VIDEO_RENDER_MONTH_ALL).map((j) => j.job_id)).toEqual(["a", "b"]);
+    expect(filterVideoRendersByMonth(jobs, "").map((j) => j.job_id)).toEqual(["a", "b"]);
+  });
+
+  it("drops renders with unparseable dates when a month is selected", () => {
+    const jobs = [job({ job_id: "a", created_at: "not-a-date" })];
+    expect(filterVideoRendersByMonth(jobs, "2026-10")).toEqual([]);
+  });
+
+  it("summary figures follow the selected month", () => {
+    const jobs = [
+      job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.6 }),
+      job({ job_id: "b", created_at: "2026-10-01T23:30:00Z", cost_usd: 0.35 }),
+      job({ job_id: "c", created_at: "2026-09-15T12:00:00Z", cost_usd: 1.2 }),
+    ];
+    const october = filterVideoRendersByMonth(jobs, "2026-10");
+    expect(summarizeVideoRenders(october)).toMatchObject({ renderCount: 2, billedCount: 2, totalCostCents: 95 });
+    expect(monthlyCostBreakdown(october)).toEqual([
+      { monthKey: "2026-10", label: "Oct 2026", billedCount: 2, totalCostCents: 95 },
+    ]);
   });
 });
