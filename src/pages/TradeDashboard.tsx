@@ -134,17 +134,6 @@ const WalkthroughCardPreview = forwardRef<WalkthroughCardPreviewHandle>(
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100 ${touchPreviewing ? "opacity-100" : "opacity-0"}`}
         onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
         onMouseLeave={(e) => { e.currentTarget.pause(); }}
-        onClickCapture={(e) => {
-          if (!isTouch()) return;
-          if (!touchPreviewing) {
-            // First tap: preview instead of navigating.
-            e.preventDefault();
-            e.stopPropagation();
-            setTouchPreviewing(true);
-            void e.currentTarget.play().catch(() => undefined);
-          }
-          // Second tap falls through and opens the page.
-        }}
       />
       <span
         aria-hidden="true"
