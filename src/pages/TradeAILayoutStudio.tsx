@@ -854,12 +854,12 @@ const TradeAILayoutStudio = () => {
                           </button>
                           <button
                             type="button"
-                            aria-pressed={compareIds.includes(h.job_id)}
+                            aria-pressed={videoCompareIds.includes(h.job_id)}
                             aria-label={`Compare render from ${new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`}
-                            className={`underline underline-offset-2 hover:text-foreground ${compareIds.includes(h.job_id) ? "font-medium text-foreground" : ""}`}
+                            className={`underline underline-offset-2 hover:text-foreground ${videoCompareIds.includes(h.job_id) ? "font-medium text-foreground" : ""}`}
                             onClick={() => toggleVideoCompare(h.job_id)}
                           >
-                            {compareIds.includes(h.job_id) ? "Selected" : "Compare"}
+                            {videoCompareIds.includes(h.job_id) ? "Selected" : "Compare"}
                           </button>
                         </span>
                       )}
@@ -870,7 +870,7 @@ const TradeAILayoutStudio = () => {
                   <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
                     <div className="mb-2 flex items-center justify-between">
                       <p className="font-medium">Side-by-side comparison</p>
-                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setCompareIds([])}>
+                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
                         Close comparison
                       </button>
                     </div>
