@@ -154,7 +154,7 @@ const TradeShowroom = () => {
         </div>
 
         {/* Sub-header workspace navigation */}
-        <div className="sticky top-[7.25rem] md:top-[8rem] z-10 -mx-4 md:-mx-8 lg:-mx-12 mb-10 flex flex-wrap items-center gap-x-8 gap-y-2 border-b border-border bg-background/95 px-4 md:px-8 lg:px-12 pb-3 pt-3 backdrop-blur-sm">
+        <div className="sticky top-14 md:top-16 z-10 -mx-4 md:-mx-8 lg:-mx-12 mb-10 flex flex-wrap items-center gap-x-8 gap-y-2 border-b border-border bg-background/95 px-4 md:px-8 lg:px-12 pb-3 pt-3 backdrop-blur-sm">
           {([
             { id: "gallery", label: "Interactive Gallery", Icon: MapPin },
             { id: "designers", label: "Designers & Ateliers", Icon: Grid3X3 },
