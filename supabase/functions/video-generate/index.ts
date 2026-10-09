@@ -49,6 +49,14 @@ Deno.serve(async (req) => {
     };
     if (mode === "status") return json(summary);
 
+    // The signed-in user's own render history, newest first.
+    if (mode === "history") {
+      const { data: jobs } = await db.from("video_render_jobs")
+        .select("job_id, state, video_url, failure, created_at")
+        .eq("user_id", userId).order("created_at", { ascending: false }).limit(25);
+      return json({ jobs: jobs ?? [] });
+    }
+
     // Admin-only key check. Probes a generation id that cannot exist: a valid key gets 404
     // (authenticated, nothing found), an invalid key gets 401/403. Nothing is created or billed.
     if (mode === "ping") {
