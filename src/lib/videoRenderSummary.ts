@@ -78,6 +78,46 @@ export type VideoRenderMonth = {
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+/** Sentinel month key meaning "no month filter applied". */
+export const VIDEO_RENDER_MONTH_ALL = "all";
+
+/** "2026-10" UTC month key for a render, or null when the date is unparseable. */
+export function videoRenderMonthKey(createdAt: string): string | null {
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** "Oct 2026" style label from a "2026-10" month key. */
+export function videoRenderMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
+/**
+ * Every UTC calendar month present in the history — billed or not — newest first.
+ * Used to populate the month filter.
+ */
+export function videoRenderMonthOptions(jobs: readonly Pick<VideoRenderRecord, "created_at">[]): { monthKey: string; label: string }[] {
+  const keys = new Set<string>();
+  for (const job of jobs) {
+    const key = videoRenderMonthKey(job.created_at);
+    if (key) keys.add(key);
+  }
+  return [...keys]
+    .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
+    .map((monthKey) => ({ monthKey, label: videoRenderMonthLabel(monthKey) }));
+}
+
+/** Renders whose UTC month matches monthKey; VIDEO_RENDER_MONTH_ALL (or blank) returns them all. */
+export function filterVideoRendersByMonth<T extends Pick<VideoRenderRecord, "created_at">>(
+  jobs: readonly T[],
+  monthKey: string,
+): T[] {
+  if (!monthKey || monthKey === VIDEO_RENDER_MONTH_ALL) return [...jobs];
+  return jobs.filter((job) => videoRenderMonthKey(job.created_at) === monthKey);
+}
+
 /**
  * Billed render costs grouped by UTC calendar month, newest month first.
  * Renders without a recorded cost are excluded; unparseable dates are skipped.
@@ -87,9 +127,8 @@ export function monthlyCostBreakdown(jobs: readonly VideoRenderRecord[]): VideoR
   for (const job of jobs) {
     const cents = toCents(job.cost_usd);
     if (cents === null) continue;
-    const date = new Date(job.created_at);
-    if (Number.isNaN(date.getTime())) continue;
-    const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    const key = videoRenderMonthKey(job.created_at);
+    if (!key) continue;
     const entry = byMonth.get(key) ?? { billedCount: 0, totalCostCents: 0 };
     entry.billedCount += 1;
     entry.totalCostCents += cents;
@@ -97,10 +136,7 @@ export function monthlyCostBreakdown(jobs: readonly VideoRenderRecord[]): VideoR
   }
   return [...byMonth.entries()]
     .sort(([a], [b]) => (a < b ? 1 : a > b ? -1 : 0))
-    .map(([monthKey, entry]) => {
-      const [year, month] = monthKey.split("-").map(Number);
-      return { monthKey, label: `${MONTH_NAMES[month - 1]} ${year}`, ...entry };
-    });
+    .map(([monthKey, entry]) => ({ monthKey, label: videoRenderMonthLabel(monthKey), ...entry }));
 }
 
 // Rough Luma estimates for a 5s 16:9 walkthrough, mirroring VIDEO_QUALITY_OPTIONS
