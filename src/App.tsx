@@ -598,6 +598,14 @@ function SameOriginLinkGuard() {
       const target = event.target as Element | null;
       const anchor = target?.closest?.("a[href]") as HTMLAnchorElement | null;
       if (!anchor) return;
+      // Our spec-sheet viewer always opens in this tab so the sign-in carries over.
+      const ownSpecSheet = isOwnSpecSheetUrl(anchor.href);
+      if (ownSpecSheet) {
+        event.preventDefault();
+        event.stopPropagation();
+        navigate(`${ownSpecSheet.pathname}${ownSpecSheet.search}`);
+        return;
+      }
       if (anchor.target && anchor.target !== "_self") return;
       if (anchor.hasAttribute("download")) return;
       // Links that intercept their own first tap (e.g. touch preview on the
@@ -627,8 +635,16 @@ function SameOriginLinkGuard() {
       navigate(next, navState !== undefined ? { state: navState } : undefined);
     };
 
+    const onSpecSheet = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail;
+      if (typeof next === "string") navigate(next);
+    };
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    window.addEventListener(SPEC_SHEET_NAVIGATE_EVENT, onSpecSheet);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener(SPEC_SHEET_NAVIGATE_EVENT, onSpecSheet);
+    };
   }, [navigate]);
 
   return null;

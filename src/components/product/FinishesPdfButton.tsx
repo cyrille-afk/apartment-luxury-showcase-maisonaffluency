@@ -3,7 +3,7 @@ import { Layers, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { FinishSwatch } from "@/lib/finishesSelectionPdf";
-import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { buildSpecSheetUrl, openSpecSheet } from "@/lib/specSheetUrl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // jsPDF stays out of the public product bundle — loaded on click only.
@@ -138,7 +138,7 @@ export default function FinishesPdfButton({
         {finishDocuments.map((entry) => (
           <DropdownMenuItem key={entry.url} onSelect={() => {
             if (onBeforeDocumentOpen && !onBeforeDocumentOpen()) return;
-            window.open(buildSpecSheetUrl(entry.url, brandName || "", productName, entry.label), "_blank", "noopener,noreferrer");
+            openSpecSheet(buildSpecSheetUrl(entry.url, brandName || "", productName, entry.label));
           }}>
             {entry.label}
           </DropdownMenuItem>
