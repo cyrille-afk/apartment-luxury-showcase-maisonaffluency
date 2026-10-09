@@ -901,15 +901,24 @@ const TradeAILayoutStudio = () => {
                 {compareItems.length === 2 && (
                   <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
                     <div className="mb-2 flex items-center justify-between">
-                      <p className="font-medium">Side-by-side comparison</p>
-                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
-                        Close comparison
-                      </button>
+                      <p className="font-medium">Side-by-side comparison <span className="font-normal text-muted-foreground">— playback and seeking stay in sync</span></p>
+                      <span className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="underline underline-offset-2 hover:text-foreground"
+                          onClick={() => compareVideoRefs.current.forEach((v) => { if (v) { v.currentTime = 0; void v.play().catch(() => {}); } })}
+                        >
+                          Restart both
+                        </button>
+                        <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
+                          Close comparison
+                        </button>
+                      </span>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {compareItems.map((h) => (
+                      {compareItems.map((h, i) => (
                         <figure key={h.job_id} className="space-y-1">
-                          <video src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
+                          <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
                           <figcaption className="text-muted-foreground">
                             {h.quality ?? "720p"} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                           </figcaption>
