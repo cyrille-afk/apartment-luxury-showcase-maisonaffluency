@@ -153,7 +153,8 @@ const WalkthroughCardPreview = forwardRef<WalkthroughCardPreviewHandle>(
       )}
     </>
   );
-}
+  }
+);
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
   east: "object-right",
@@ -448,7 +449,7 @@ const TradeDashboard = () => {
                 </div>
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
-              {card.key === "dash-ai-walkthrough" && <WalkthroughCardPreview />}
+              {card.key === "dash-ai-walkthrough" && <WalkthroughCardPreview ref={walkthroughPreviewRef} />}
               {card.key === "dash-showroom" && (
                 <button
                   type="button"
