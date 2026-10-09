@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Fullscreen, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
@@ -439,7 +439,34 @@ const TradeAILayoutStudio = () => {
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
   const [videoWide, setVideoWide] = useState(false);
+  const [videoFullscreen, setVideoFullscreen] = useState(false);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const enterVideoFullscreen = async () => {
+    const container = videoContainerRef.current;
+    const video = videoRef.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
+    try {
+      if (container?.requestFullscreen && document.fullscreenEnabled) {
+        await container.requestFullscreen();
+      } else if (video?.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen();
+      } else {
+        toast.error("Fullscreen is unavailable in this browser. Open the page in a separate tab to try again.");
+      }
+    } catch {
+      toast.error("Fullscreen was blocked. Open the page in a separate tab to try again.");
+    }
+  };
+  const exitVideoFullscreen = async () => {
+    if (document.fullscreenElement !== videoContainerRef.current) return;
+    try { await document.exitFullscreen(); }
+    catch { toast.error("Could not exit fullscreen. Press Escape to return to the page."); }
+  };
+  useEffect(() => {
+    const onFullscreenChange = () => setVideoFullscreen(!!document.fullscreenElement && document.fullscreenElement === videoContainerRef.current);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
   const resumeRef = useRef<{ t: number; playing: boolean } | null>(null);
   const swapVideoSize = () => {
     const v = videoRef.current;
@@ -455,7 +482,9 @@ const TradeAILayoutStudio = () => {
   };
   useEffect(() => {
     if (!videoWide) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setVideoWide(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !document.fullscreenElement) swapVideoSize();
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [videoWide]);
@@ -740,10 +769,14 @@ const TradeAILayoutStudio = () => {
               const inner = (
                 <>
                   {videoJob.url && (
-                    <div className="flex w-full items-center justify-end gap-2">
-                      <Button size="sm" variant="outline" aria-pressed={wide} onClick={swapVideoSize}>
+                    <div className="flex w-full flex-wrap items-center justify-end gap-2">
+                      {!videoFullscreen && <Button size="sm" variant="outline" aria-pressed={wide} onClick={swapVideoSize}>
                         {wide ? <Minimize2 className="mr-1.5 h-3.5 w-3.5" /> : <Maximize2 className="mr-1.5 h-3.5 w-3.5" />}
                         {wide ? "Return to panel size" : "Expand to full width"}
+                      </Button>}
+                      <Button size="sm" variant="outline" aria-pressed={videoFullscreen} onClick={() => void (videoFullscreen ? exitVideoFullscreen() : enterVideoFullscreen())}>
+                        {videoFullscreen ? <X className="mr-1.5 h-3.5 w-3.5" /> : <Fullscreen className="mr-1.5 h-3.5 w-3.5" />}
+                        {videoFullscreen ? "Return to page" : "Enter fullscreen"}
                       </Button>
                     </div>
                   )}
@@ -751,7 +784,7 @@ const TradeAILayoutStudio = () => {
                     <>
                       <video ref={videoRef} src={videoJob.url} controls playsInline
                         onLoadedMetadata={(e) => restoreVideoPosition(e.currentTarget)}
-                        className={wide ? "h-auto max-h-[80vh] w-full bg-black" : "h-auto w-full"} />
+                        className={videoFullscreen ? "min-h-0 w-full flex-1 object-contain" : wide ? "h-auto max-h-[80vh] w-full bg-background" : "h-auto w-full"} />
                       <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
                     </>
                   ) : videoJob.failure ? (
@@ -765,10 +798,10 @@ const TradeAILayoutStudio = () => {
               );
               return wide
                 ? createPortal(
-                  <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4" aria-label="Walkthrough video">
+                  <div ref={videoContainerRef} className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4 [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:bg-background" aria-label="Walkthrough video">
                     {inner}
                   </div>, document.body)
-                : <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">{inner}</div>;
+                : <div ref={videoContainerRef} className="w-full basis-full border border-border p-3 text-xs [&:fullscreen]:flex [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:flex-col [&:fullscreen]:gap-3 [&:fullscreen]:border-0 [&:fullscreen]:bg-background" aria-label="Walkthrough video">{inner}</div>;
             })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
