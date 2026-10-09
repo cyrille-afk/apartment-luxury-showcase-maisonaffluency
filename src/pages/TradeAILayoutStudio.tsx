@@ -912,7 +912,21 @@ const TradeAILayoutStudio = () => {
             })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
-                <p className="mb-2 font-medium">Previous walkthrough videos</p>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium">Previous walkthrough videos</p>
+                  <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
+                    Warn when over estimate by
+                    <input
+                      type="number"
+                      min={0}
+                      step={5}
+                      className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
+                      value={overrunThresholdPct}
+                      onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
+                    />
+                    %
+                  </label>
+                </div>
                 {videoRenderSummary.billedCount > 0 && (
                   <p className="mb-2 text-muted-foreground" aria-label="Walkthrough render cost summary">
                     {videoRenderSummary.billedCount} billed render{videoRenderSummary.billedCount === 1 ? "" : "s"}
@@ -950,6 +964,11 @@ const TradeAILayoutStudio = () => {
                         {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
+                        {renderExceedsEstimate(h, overrunThresholdPct) && (
+                          <span className="ml-1.5 border border-amber-500/40 bg-amber-500/10 px-1 py-0.5 text-amber-600 dark:text-amber-400" aria-label="Overrun warning">
+                            ⚠ over estimate
+                          </span>
+                        )}
                       </span>
                       {h.video_url && (
                         <span className="flex shrink-0 items-center gap-3">
