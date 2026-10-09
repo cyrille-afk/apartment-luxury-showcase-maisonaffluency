@@ -8,7 +8,7 @@ import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft, type BriefBuilderHandle } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
-import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
+import { loadLockedFacts, mergeLockedFacts, persistLockedFacts, loadFactOverrides, persistFactOverrides, clearFactOverrides, applyFactOverrides, type FelixFactOverrides } from "@/lib/felixLockedFacts";
 import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
 import { readPendingBespokeUploadCache, clearPendingBespokeUploadCache, pendingBespokeIntro } from "@/lib/pendingBespokeCache";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
@@ -1023,10 +1023,32 @@ export function AIConcierge({
     });
   }, [onboardingGate.facts]);
   /** Gate facts merged with the locked cache — always the richer of the two. */
+  const [factOverrides, setFactOverrides] = useState<FelixFactOverrides>(() => loadFactOverrides());
+  const [factsEditorOpen, setFactsEditorOpen] = useState(false);
+  const [factDrafts, setFactDrafts] = useState<FelixBriefFacts>({ projectProfile: "", zone: "", budget: "" });
   const verifiedFacts = useMemo(
-    () => mergeLockedFacts(lockedFacts, onboardingGate.facts),
-    [lockedFacts, onboardingGate.facts],
+    () => applyFactOverrides(mergeLockedFacts(lockedFacts, onboardingGate.facts), factOverrides),
+    [lockedFacts, onboardingGate.facts, factOverrides],
   );
+  const openFactsEditor = useCallback(() => {
+    setFactDrafts({ ...verifiedFacts });
+    setFactsEditorOpen(true);
+  }, [verifiedFacts]);
+  const saveFactsEditor = useCallback(() => {
+    const next: FelixFactOverrides = {
+      projectProfile: factDrafts.projectProfile.trim(),
+      zone: factDrafts.zone.trim(),
+      budget: factDrafts.budget.trim(),
+    };
+    persistFactOverrides(next);
+    setFactOverrides(next);
+    setFactsEditorOpen(false);
+  }, [factDrafts]);
+  const resetFactsEditor = useCallback(() => {
+    clearFactOverrides();
+    setFactOverrides({});
+    setFactsEditorOpen(false);
+  }, []);
   useEffect(() => {
     if (onboardingGate.completed) return;
     setTimeline((prev) => {
