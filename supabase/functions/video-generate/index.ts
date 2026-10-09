@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // The signed-in user's own render history, newest first.
     if (mode === "history") {
       const { data: jobs } = await db.from("video_render_jobs")
-        .select("job_id, state, video_url, failure, created_at")
+        .select("job_id, state, video_url, failure, created_at, quality")
         .eq("user_id", userId).order("created_at", { ascending: false }).limit(25);
       return json({ jobs: jobs ?? [] });
     }
@@ -118,8 +118,9 @@ Deno.serve(async (req) => {
     try {
       let response: unknown;
       const lumaKey = Deno.env.get("LUMA_API_KEY");
+      const quality = ["540p", "720p", "1080p"].includes(String(body?.quality)) ? String(body.quality) : "720p";
       if (lumaKey) {
-        response = await executeLumaVideoGeneration(db, lumaKey, userId, body?.snapshot, String((payload as { brief?: string }).brief ?? ""));
+        response = await executeLumaVideoGeneration(db, lumaKey, userId, body?.snapshot, String((payload as { brief?: string }).brief ?? ""), quality);
       } else if (webhook) {
         const res = await fetch(webhook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error(`Render service failed (${res.status})`);
@@ -132,7 +133,7 @@ Deno.serve(async (req) => {
       const jid = (response as { job_id?: string } | null)?.job_id;
       const poll_token = lumaKey && jid ? await pollToken(userId, jid) : undefined;
       if (lumaKey && jid) {
-        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued" });
+        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued", quality });
       }
       return json({ status: "queued", poll_token, charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {
@@ -148,6 +149,7 @@ Deno.serve(async (req) => {
 // passed as a 1-hour signed URL start frame. Any throw here triggers the credit refund above.
 async function executeLumaVideoGeneration(
   db: ReturnType<typeof createClient>, key: string, userId: string, snapshot: unknown, brief: string,
+  resolution: "540p" | "720p" | "1080p" | string = "720p",
 ) {
   let startFrame: Record<string, unknown> | undefined;
   if (typeof snapshot === "string" && snapshot.startsWith("data:image/jpeg;base64,")) {
@@ -170,7 +172,7 @@ async function executeLumaVideoGeneration(
       prompt: `Cinematic interior design walkthrough film, ${brief.slice(0, 1500)}. Ultra-luxury living environment, magazine-ready bounce lighting, soft ray-traced shadows drifting across furniture fabrics, 8k resolution, photorealistic textures, smooth steadicam tracking movement.`,
       aspect_ratio: "16:9",
       video: {
-        resolution: "720p",
+        resolution,
         duration: "5s",
         ...(startFrame ? { start_frame: startFrame } : {}),
       },
