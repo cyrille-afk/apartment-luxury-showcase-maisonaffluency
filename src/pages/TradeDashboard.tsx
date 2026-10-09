@@ -69,13 +69,30 @@ function WalkthroughCardPreview() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      // Members can pin a render from the AI layout history; otherwise use the latest.
+      let chosenId: string | null = null;
+      try { chosenId = localStorage.getItem("ma-dashboard-walkthrough-preview"); } catch { /* ignore */ }
+      let query = supabase
         .from("video_render_jobs")
         .select("video_url")
         .eq("state", "completed")
-        .not("video_url", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(1);
+        .not("video_url", "is", null);
+      if (chosenId) {
+        query = query.eq("job_id", chosenId).limit(1);
+      } else {
+        query = query.order("created_at", { ascending: false }).limit(1);
+      }
+      let { data } = await query;
+      // Pinned render missing or no longer completed — fall back to the latest.
+      if (chosenId && (!data || data.length === 0)) {
+        ({ data } = await supabase
+          .from("video_render_jobs")
+          .select("video_url")
+          .eq("state", "completed")
+          .not("video_url", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1));
+      }
       if (!cancelled && data && data.length > 0 && data[0].video_url) {
         setVideoUrl(data[0].video_url);
       }
