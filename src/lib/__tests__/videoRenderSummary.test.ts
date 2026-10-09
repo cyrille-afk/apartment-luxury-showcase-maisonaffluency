@@ -20,7 +20,7 @@ describe("monthlyCostBreakdown", () => {
     expect(months).toEqual([]);
   });
 });
-import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, previousVideoRenderMonthKey, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthKey, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL, videoRenderOverrun } from "../videoRenderSummary";
+import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, previousVideoRenderMonthKey, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthKey, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL, videoRenderOverrun, videoRenderChartSeries } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
@@ -246,5 +246,25 @@ describe("month-over-month comparison", () => {
     const jobs = [job({ job_id: "a" })];
     expect(videoRenderMonthComparison(jobs, VIDEO_RENDER_MONTH_ALL)).toBeNull();
     expect(videoRenderMonthComparison(jobs, "junk")).toBeNull();
+  });
+});
+
+describe("videoRenderChartSeries", () => {
+  it("plots every render per month, oldest first, with billed costs summed in cents", () => {
+    const jobs = [
+      job({ job_id: "oct-a", created_at: "2026-10-08T10:00:00Z", cost_usd: 0.7 }),
+      job({ job_id: "sep-a", created_at: "2026-09-15T10:00:00Z", cost_usd: 1.2 }),
+      job({ job_id: "oct-b", created_at: "2026-10-05T10:00:00Z", cost_usd: 0.35 }),
+      job({ job_id: "oct-c", created_at: "2026-10-01T10:00:00Z" }), // unbilled still counts
+    ];
+    expect(videoRenderChartSeries(jobs)).toEqual([
+      { monthKey: "2026-09", label: "Sep 2026", renderCount: 1, totalCostCents: 120 },
+      { monthKey: "2026-10", label: "Oct 2026", renderCount: 3, totalCostCents: 105 },
+    ]);
+  });
+
+  it("skips unparseable dates and returns [] for empty history", () => {
+    expect(videoRenderChartSeries([job({ job_id: "a", created_at: "not-a-date", cost_usd: 1 })])).toEqual([]);
+    expect(videoRenderChartSeries([])).toEqual([]);
   });
 });
