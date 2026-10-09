@@ -1005,7 +1005,6 @@ export function AIConcierge({
     briefManuallyCompleted || timeline.some((item) => item.kind === "layout_options"),
   ), [briefDraft, timeline, briefManuallyCompleted]);
   const onboardingGateRef = useRef(onboardingGate);
-  useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
   // --- Locked project facts (no memory drift across timeouts / resumes) ---
   // Once a verified attribute exists ("Prewar Co-op"), it is pinned in local
   // state + localStorage. Nothing coming back from the stream, a retry, or a
