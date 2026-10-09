@@ -33,3 +33,4 @@
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet viewer links open in the same tab via `openSpecSheet`/SameOriginLinkGuard on the current app origin — new tabs can lose the sign-in (partitioned preview storage, www vs apex) and show members the sign-in gate.
+- Presentation Mode marks the trade shell `data-presentation`; all trade editorial overrides (palette, Inter type, square corners, no shadows, reveal animation) are scoped to `.trade-portal-shell:not([data-presentation])` so client-facing pages render with the public site styling and a centred studio masthead.
