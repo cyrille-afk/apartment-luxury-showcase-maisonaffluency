@@ -1043,6 +1043,11 @@ const TradeAILayoutStudio = () => {
                               {h.cost_usd != null ? ` · billed $${Number(h.cost_usd).toFixed(2)}` : ""}
                               {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                               {" · "}{new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                              {renderExceedsEstimate(h, overrunThresholdPct) && (
+                                <span className="ml-1.5 border border-amber-500/40 bg-amber-500/10 px-1 py-0.5 text-amber-600 dark:text-amber-400" aria-label="Overrun warning">
+                                  ⚠ over estimate
+                                </span>
+                              )}
                             </figcaption>
                           </figure>
                         );
