@@ -3,7 +3,7 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, MessageSquare, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
-  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen,
+  TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen, Clapperboard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -34,6 +34,7 @@ const topItems: NavItem[] = [
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },
+  { title: "3D Room Layout & Walkthrough", url: "/trade/ai-layout", icon: Clapperboard },
   { title: "QUOTES & PROFORMAS", url: "/trade/quotes", icon: FileText },
   { title: "Tools", url: "/trade/tools", icon: Wrench },
   { title: "BETA FEEDBOARD", url: "/trade/beta-feedboard", icon: MessageSquare },
@@ -107,7 +108,7 @@ export function TradeSidebar() {
   const visibleTopItems = (
     hasTradeAccess
       ? topItems.filter((i) => i.url !== "/trade/me")
-      : topItems.filter((i) => i.url !== "/trade/concierge")
+      : topItems.filter((i) => i.url !== "/trade/concierge" && i.url !== "/trade/ai-layout")
   ).filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
