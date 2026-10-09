@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -492,6 +492,25 @@ const TradeAILayoutStudio = () => {
   }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  // % over estimate that triggers an overrun warning; persisted per browser.
+  const [overrunThresholdPct, setOverrunThresholdPct] = useState<number>(() => {
+    try {
+      const raw = window.localStorage.getItem("ma-video-overrun-threshold-pct");
+      const parsed = raw === null ? NaN : Number(raw);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 20;
+    } catch {
+      return 20;
+    }
+  });
+  const updateOverrunThreshold = (value: number) => {
+    const next = Number.isFinite(value) && value >= 0 ? Math.round(value) : 20;
+    setOverrunThresholdPct(next);
+    try {
+      window.localStorage.setItem("ma-video-overrun-threshold-pct", String(next));
+    } catch {
+      /* storage unavailable */
+    }
+  };
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
@@ -893,7 +912,21 @@ const TradeAILayoutStudio = () => {
             })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
-                <p className="mb-2 font-medium">Previous walkthrough videos</p>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium">Previous walkthrough videos</p>
+                  <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
+                    Warn when over estimate by
+                    <input
+                      type="number"
+                      min={0}
+                      step={5}
+                      className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
+                      value={overrunThresholdPct}
+                      onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
+                    />
+                    %
+                  </label>
+                </div>
                 {videoRenderSummary.billedCount > 0 && (
                   <p className="mb-2 text-muted-foreground" aria-label="Walkthrough render cost summary">
                     {videoRenderSummary.billedCount} billed render{videoRenderSummary.billedCount === 1 ? "" : "s"}
@@ -931,6 +964,11 @@ const TradeAILayoutStudio = () => {
                         {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
+                        {renderExceedsEstimate(h, overrunThresholdPct) && (
+                          <span className="ml-1.5 border border-amber-500/40 bg-amber-500/10 px-1 py-0.5 text-amber-600 dark:text-amber-400" aria-label="Overrun warning">
+                            ⚠ over estimate
+                          </span>
+                        )}
                       </span>
                       {h.video_url && (
                         <span className="flex shrink-0 items-center gap-3">
@@ -1005,6 +1043,11 @@ const TradeAILayoutStudio = () => {
                               {h.cost_usd != null ? ` · billed $${Number(h.cost_usd).toFixed(2)}` : ""}
                               {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                               {" · "}{new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                              {renderExceedsEstimate(h, overrunThresholdPct) && (
+                                <span className="ml-1.5 border border-amber-500/40 bg-amber-500/10 px-1 py-0.5 text-amber-600 dark:text-amber-400" aria-label="Overrun warning">
+                                  ⚠ over estimate
+                                </span>
+                              )}
                             </figcaption>
                           </figure>
                         );

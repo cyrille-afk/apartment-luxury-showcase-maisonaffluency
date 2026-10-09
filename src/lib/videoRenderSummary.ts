@@ -132,6 +132,35 @@ export function videoRenderDelta(job: Pick<VideoRenderRecord, "quality" | "rende
   };
 }
 
+export type VideoRenderOverrun = {
+  /** % by which actual render time exceeds the estimate; null when no actual recorded. */
+  secondsOverPct: number | null;
+  /** % by which billed cost exceeds the estimate; null when no cost recorded. */
+  costOverPct: number | null;
+};
+
+/**
+ * How far a render's actuals exceed its estimate, as rounded percentages.
+ * Negative values mean the render came in under estimate.
+ */
+export function videoRenderOverrun(job: Pick<VideoRenderRecord, "quality" | "render_seconds" | "cost_usd">): VideoRenderOverrun {
+  const estimate = QUALITY_ESTIMATES[job.quality ?? ""] ?? QUALITY_ESTIMATES["720p"];
+  const cents = toCents(job.cost_usd);
+  return {
+    secondsOverPct:
+      typeof job.render_seconds === "number" && Number.isFinite(job.render_seconds)
+        ? Math.round(((job.render_seconds - estimate.seconds) / estimate.seconds) * 100)
+        : null,
+    costOverPct: cents !== null ? Math.round(((cents - estimate.costCents) / estimate.costCents) * 100) : null,
+  };
+}
+
+/** True when either actual exceeds its estimate by more than thresholdPct (e.g. 20 = 20%). */
+export function renderExceedsEstimate(job: Pick<VideoRenderRecord, "quality" | "render_seconds" | "cost_usd">, thresholdPct: number): boolean {
+  const over = videoRenderOverrun(job);
+  return (over.secondsOverPct ?? -Infinity) > thresholdPct || (over.costOverPct ?? -Infinity) > thresholdPct;
+}
+
 /** "+2s" / "−5s" style signed label. */
 export function formatSecondsDelta(delta: number): string {
   const sign = delta > 0 ? "+" : delta < 0 ? "−" : "±";
