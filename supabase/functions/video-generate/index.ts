@@ -23,7 +23,8 @@ Deno.serve(async (req) => {
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const body = await req.json().catch(() => ({}));
-    const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping" : "status";
+    const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping"
+      : body?.mode === "poll" ? "poll" : "status";
 
     const [{ data: roles }, { data: profile }, { data: credits }] = await Promise.all([
       db.from("user_roles").select("role").eq("user_id", userId),
@@ -48,16 +49,42 @@ Deno.serve(async (req) => {
     };
     if (mode === "status") return json(summary);
 
-    // Admin-only key check: lists 1 generation (no render, no charge).
+    // Admin-only key check. Probes a generation id that cannot exist: a valid key gets 404
+    // (authenticated, nothing found), an invalid key gets 401/403. Nothing is created or billed.
     if (mode === "ping") {
       if (!isAdmin) return json({ error: "Admin only" }, 403);
       const lumaKey = Deno.env.get("LUMA_API_KEY");
       if (!lumaKey) return json({ provider: "luma", configured: false });
-      const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations?limit=1", {
+      const res = await fetch("https://agents.lumalabs.ai/v1/generations/luma-auth-probe", {
         headers: { authorization: `Bearer ${lumaKey}` },
       });
-      return json({ provider: "luma", configured: true, ok: res.ok, status: res.status });
+      const detail = (await res.text()).replace(/\s+/g, " ").trim().slice(0, 300);
+      return json({
+        provider: "luma", configured: true, ok: res.ok || res.status === 404, status: res.status, detail,
+      });
     }
+
+    // Admin-only render lookup (no render, no charge). The id must be a UUID before it is used.
+    if (mode === "poll") {
+      if (!isAdmin) return json({ error: "Admin only" }, 403);
+      const lumaKey = Deno.env.get("LUMA_API_KEY");
+      if (!lumaKey) return json({ provider: "luma", configured: false });
+      const id = String(body?.job_id ?? "");
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
+        return json({ error: "Invalid job id" }, 400);
+      }
+      const res = await fetch(`https://agents.lumalabs.ai/v1/generations/${id}`, {
+        headers: { authorization: `Bearer ${lumaKey}` },
+      });
+      const data = await res.json().catch(() => null);
+      return json({
+        ok: res.ok, status: res.status,
+        state: data?.state ?? null,
+        failure: data?.failure_reason ?? data?.failure_code ?? null,
+        outputs: Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null,
+      });
+    }
+
 
     if (!access.allowed) {
       return json({ error: "purchase_required", message: `A Single Video Pass (€${VIDEO_PASS_PRICE_EUR}) is required to render this walkthrough.`, ...summary }, 403);
@@ -98,12 +125,12 @@ Deno.serve(async (req) => {
   }
 });
 
-// Luma Dream Machine. Snapshot (canvas JPEG data URL) is stored privately and passed as a
-// 1-hour signed URL keyframe. Any throw here triggers the credit refund above.
+// Luma Agents API (Ray 3.2 video). Snapshot (canvas JPEG data URL) is stored privately and
+// passed as a 1-hour signed URL start frame. Any throw here triggers the credit refund above.
 async function executeLumaVideoGeneration(
   db: ReturnType<typeof createClient>, key: string, userId: string, snapshot: unknown, brief: string,
 ) {
-  let keyframes: Record<string, unknown> | undefined;
+  let startFrame: Record<string, unknown> | undefined;
   if (typeof snapshot === "string" && snapshot.startsWith("data:image/jpeg;base64,")) {
     const b64 = snapshot.slice(23);
     if (b64.length > 6_000_000) throw new Error("Snapshot too large");
@@ -113,15 +140,21 @@ async function executeLumaVideoGeneration(
     if (up.error) throw new Error(`Snapshot upload failed: ${up.error.message}`);
     const { data: signed, error } = await db.storage.from("trade-private").createSignedUrl(path, 3600);
     if (error || !signed) throw new Error("Snapshot link failed");
-    keyframes = { frame0: { type: "image", url: signed.signedUrl } };
+    startFrame = { url: signed.signedUrl };
   }
-  const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations", {
+  const res = await fetch("https://agents.lumalabs.ai/v1/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
+      model: "ray-3.2",
+      type: "video",
       prompt: `Cinematic interior design walkthrough film, ${brief.slice(0, 1500)}. Ultra-luxury living environment, magazine-ready bounce lighting, soft ray-traced shadows drifting across furniture fabrics, 8k resolution, photorealistic textures, smooth steadicam tracking movement.`,
       aspect_ratio: "16:9",
-      ...(keyframes ? { keyframes } : {}),
+      video: {
+        resolution: "720p",
+        duration: "5s",
+        ...(startFrame ? { start_frame: startFrame } : {}),
+      },
     }),
   });
   if (!res.ok) throw new Error(`Luma API error (${res.status}): ${(await res.text()).slice(0, 200)}`);
