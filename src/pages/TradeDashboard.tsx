@@ -65,6 +65,10 @@ const DASH_CARDS = [
 function WalkthroughCardPreview() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // On touch devices there is no hover: first tap previews, second tap opens the page.
+  const [touchPreviewing, setTouchPreviewing] = useState(false);
+  const isTouch = () =>
+    typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
 
   useEffect(() => {
     let cancelled = false;
