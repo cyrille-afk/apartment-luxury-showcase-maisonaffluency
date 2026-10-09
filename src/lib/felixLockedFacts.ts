@@ -51,3 +51,45 @@ export function clearLockedFacts(): void {
 /** True when nothing has been locked yet. */
 export const hasLockedFacts = (facts: FelixBriefFacts): boolean =>
   hasRealBriefValue(facts.projectProfile) || hasRealBriefValue(facts.zone) || hasRealBriefValue(facts.budget);
+
+/**
+ * Explicit user corrections. The locked-facts cache is monotonic — real
+ * values are never overwritten by detection — so a deliberate user edit
+ * needs its own channel. A key present here always wins, even when set to
+ * "" (the user cleared a wrongly-detected fact).
+ */
+const OVERRIDES_KEY = "felix:fact-overrides:v1";
+
+export type FelixFactOverrides = Partial<FelixBriefFacts>;
+
+export function loadFactOverrides(): FelixFactOverrides {
+  try {
+    const raw = localStorage.getItem(OVERRIDES_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const out: FelixFactOverrides = {};
+    (Object.keys(EMPTY_LOCKED_FACTS) as Array<keyof FelixBriefFacts>).forEach((key) => {
+      if (typeof parsed[key] === "string") out[key] = parsed[key] as string;
+    });
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export function persistFactOverrides(overrides: FelixFactOverrides): void {
+  try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides)); } catch { /* non-fatal */ }
+}
+
+export function clearFactOverrides(): void {
+  try { localStorage.removeItem(OVERRIDES_KEY); } catch { /* non-fatal */ }
+}
+
+/** Overlay user corrections onto detected/locked facts — overrides win. */
+export function applyFactOverrides(base: FelixBriefFacts, overrides: FelixFactOverrides): FelixBriefFacts {
+  const next = { ...base };
+  (Object.keys(EMPTY_LOCKED_FACTS) as Array<keyof FelixBriefFacts>).forEach((key) => {
+    if (key in overrides) next[key] = String(overrides[key] ?? "").trim();
+  });
+  return next;
+}
