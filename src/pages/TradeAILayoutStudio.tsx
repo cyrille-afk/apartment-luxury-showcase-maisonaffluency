@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
