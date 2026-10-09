@@ -519,7 +519,7 @@ const TradeLayout = () => {
          </AnimatePresence>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header relative h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive><TradeMobileMenu
