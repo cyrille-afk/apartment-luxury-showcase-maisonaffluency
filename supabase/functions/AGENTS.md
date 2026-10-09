@@ -5,3 +5,4 @@
 - Spec-sheet off-domain guard: trigger `flag_offdomain_spec_sheet` (trade_products, designer_curator_picks) logs to content_audit_log; allowed hosts match src/lib/specSheetUrl.ts.
 - Walkthrough renders call Luma's Agents API (`agents.lumalabs.ai/v1/generations`, `model: "ray-3.2"`, `type: "video"`, snapshot as `video.start_frame.url`); the retired `api.lumalabs.ai/dream-machine` host rejects platform keys with 403 "Not authenticated", so it must not be reintroduced. `mode:"ping"` proves key validity without creating a generation, `mode:"poll"` (admin-only, UUID-checked) reports render state.
 
+- Felix brief gate (trade-concierge) only locks card tools and injects a BRIEF STATUS note; it must never short-circuit with a canned reply — that made Felix repeat one line whatever the designer typed.
