@@ -1006,6 +1006,33 @@ const TradeAILayoutStudio = () => {
                     ))}
                   </ul>
                 )}
+                {videoMonthComparison && (
+                  <p className="mb-2 text-muted-foreground" aria-label="Month-over-month render comparison">
+                    vs {videoMonthComparison.previousLabel}
+                    {": "}
+                    {videoMonthComparison.renderCount} render{videoMonthComparison.renderCount === 1 ? "" : "s"}
+                    {" ("}
+                    <span className={videoMonthComparison.renderCountDelta > 0 ? "text-emerald-400" : videoMonthComparison.renderCountDelta < 0 ? "text-amber-400" : "text-foreground"}>
+                      {videoMonthComparison.renderCountDelta > 0 ? "+" : videoMonthComparison.renderCountDelta < 0 ? "−" : "±"}
+                      {Math.abs(videoMonthComparison.renderCountDelta)}
+                    </span>
+                    {") · billed "}
+                    <span className="text-foreground">{formatUsdCents(videoMonthComparison.totalCostCents)}</span>
+                    {videoMonthComparison.costCentsDelta !== null ? (
+                      <>
+                        {" ("}
+                        <span className={videoMonthComparison.costCentsDelta > 0 ? "text-amber-400" : videoMonthComparison.costCentsDelta < 0 ? "text-emerald-400" : "text-foreground"}>
+                          {formatUsdCentsDelta(videoMonthComparison.costCentsDelta)}
+                        </span>
+                        {" vs "}
+                        {formatUsdCents(videoMonthComparison.previousTotalCostCents)}
+                        {")"}
+                      </>
+                    ) : (
+                      " · no renders in the previous month"
+                    )}
+                  </p>
+                )}
                 {videoHistoryFiltered.length === 0 ? (
                   <p className="text-muted-foreground">No renders in {activeVideoHistoryLabel}.</p>
                 ) : (
