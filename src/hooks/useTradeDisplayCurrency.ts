@@ -300,7 +300,7 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     }
 
     return () => { cancelled = true; };
-  }, []);
+  }, [rolesLoaded, isTradeSession]);
 
   const update = useCallback((next: DisplayCurrency) => {
     setValue(next);
