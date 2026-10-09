@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface DirectoryDesigner {
   id: string;
@@ -40,9 +42,10 @@ const ShowroomDesignerDirectory = ({
   const [letter, setLetter] = useState<string | null>(null);
   const liveMakerCount = usePublishedMakerCount();
 
-  const { data: designers = [], isLoading } = useQuery({
+  const { data: designers = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["showroom-designer-directory"],
     staleTime: 1000 * 60 * 30,
+    retry: 3,
     queryFn: async () => {
       // Only makers that actually carry showroom pieces. The inner join also
       // gives us each designer's curated product imagery for the hover reveal.
@@ -119,7 +122,7 @@ const ShowroomDesignerDirectory = ({
           );
         })}
         <span className="ml-auto pl-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-          {liveMakerCount ?? designers.length} Makers
+          {designers.length || liveMakerCount || "…"} Makers
         </span>
       </div>
 
@@ -131,6 +134,11 @@ const ShowroomDesignerDirectory = ({
               <div className="h-3 w-2/3 mt-4 bg-black/5" />
             </div>
           ))}
+        </div>
+      ) : isError && designers.length === 0 ? (
+        <div role="alert" className="flex flex-col items-center gap-4 py-20">
+          <p className="font-body text-sm text-muted-foreground">Designers could not be loaded. Your catalogue has not been removed.</p>
+          <Button variant="outline" onClick={() => void refetch()}><RefreshCw className="h-4 w-4" />Retry</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-6 gap-y-14 pt-10">
@@ -171,7 +179,7 @@ const ShowroomDesignerDirectory = ({
         </div>
       )}
 
-      {!isLoading && visible.length === 0 && (
+      {!isLoading && !isError && visible.length === 0 && (
         <p className="py-20 text-center font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground/60">
           No makers under this letter
         </p>
