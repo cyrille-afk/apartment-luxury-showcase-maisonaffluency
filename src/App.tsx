@@ -1,4 +1,5 @@
 import AdminOnly from "@/components/trade/AdminOnly";
+import { isCollectionLanding, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import { GlobalCanonical } from "@/components/GlobalCanonical";
@@ -366,7 +367,7 @@ function ScrollToTopOnNavigate() {
     prevPathRef.current = location.pathname;
     // Same-route query updates are in-page filters; keep the user at the
     // directory instead of jumping back to the route hero.
-    if (prevPath === location.pathname && location.pathname !== "/trade/the-collection") return;
+    if (!shouldResetRouteScroll(prevPath, location.pathname)) return;
     if (navType === "POP") return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
@@ -377,7 +378,7 @@ function ScrollToTopOnNavigate() {
       (window.matchMedia?.("(max-width: 767px)").matches ||
         window.matchMedia?.("(display-mode: standalone)").matches ||
         (window.navigator as any).standalone === true);
-    const requiresStableTop = location.pathname === "/trade/the-collection";
+    const requiresStableTop = isCollectionLanding(location.pathname);
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const smooth = !isLockedDesignersLanding && !requiresStableTop && state?.smoothScroll !== false && !prefersReduced;
     const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
@@ -464,7 +465,7 @@ function PreviewViewContinuity() {
   const anchorIdRef = useRef<string | undefined>(undefined);
 
   const isLockedDesignersLanding = location.pathname === "/designers" && !location.search;
-  const requiresStableTop = location.pathname === "/trade/the-collection";
+  const requiresStableTop = isCollectionLanding(location.pathname);
 
 
   useEffect(() => {
