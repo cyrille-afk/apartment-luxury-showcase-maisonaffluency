@@ -196,6 +196,11 @@ const isManual = (): boolean => {
 
 export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurrency) => void] {
   const [value, setValue] = useState<DisplayCurrency>(read);
+  const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  // Approved trade sessions (and admins) anchor on the account's declared
+  // currency, falling back to EUR — never to IP/locale geolocation.
+  const isTradeSession =
+    rolesLoaded && (isAdmin || isSuperAdmin || (isTradeUser && tradeStatus === "approved"));
 
   // Sync across tabs and across mounted instances in the same tab.
   useEffect(() => {
