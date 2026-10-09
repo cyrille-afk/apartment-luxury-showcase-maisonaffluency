@@ -6516,7 +6516,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         temperature: 0,
         messages: [
-          { role: "system", content: languageDirective + systemPrompt + cityLockNote + zoneLockNote },
+          { role: "system", content: languageDirective + gateDirective + systemPrompt + cityLockNote + zoneLockNote },
           ...(() => {
             // If the current user turn carries image / file parts (mood
             // board, sketch, floor plan, reference photo, PDF), inject a
