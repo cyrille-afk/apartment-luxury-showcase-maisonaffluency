@@ -56,6 +56,7 @@ const TradeFaqPage = lazy(() => import("./pages/TradeFaqPage"));
 const GuestPayPage = lazy(() => import("./pages/GuestPayPage"));
 import GallerySkeleton from "./components/trade/GallerySkeleton";
 import LegacyTradeSignupRedirect from "./components/trade/LegacyTradeSignupRedirect";
+import { isOwnSpecSheetUrl, SPEC_SHEET_NAVIGATE_EVENT } from "./lib/specSheetUrl";
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
 
 const TradeActivate = lazy(() => import("./pages/TradeActivate"));
