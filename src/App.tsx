@@ -366,7 +366,7 @@ function ScrollToTopOnNavigate() {
     prevPathRef.current = location.pathname;
     // Same-route query updates are in-page filters; keep the user at the
     // directory instead of jumping back to the route hero.
-    if (prevPath === location.pathname) return;
+    if (prevPath === location.pathname && location.pathname !== "/trade/the-collection") return;
     if (navType === "POP") return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
@@ -387,7 +387,7 @@ function ScrollToTopOnNavigate() {
       window.scrollTo({ top: 0, left: 0, behavior });
     });
     return () => window.cancelAnimationFrame(raf);
-  }, [location.pathname, location.hash, location.state, navType]);
+  }, [location.key, location.pathname, location.hash, location.state, navType]);
 
   return null;
 }
@@ -499,7 +499,7 @@ function PreviewViewContinuity() {
       save();
     };
     const restoreAnchorAfterResize = () => {
-      if (isLockedDesignersLanding) return;
+      if (isLockedDesignersLanding || requiresStableTop) return;
       const anchorId = anchorIdRef.current;
       if (!anchorId) return;
       window.setTimeout(() => {
@@ -517,7 +517,7 @@ function PreviewViewContinuity() {
       window.removeEventListener("resize", restoreAnchorAfterResize);
       window.removeEventListener("pagehide", save);
     };
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, isLockedDesignersLanding, requiresStableTop]);
 
   useEffect(() => {
     if (!isPreviewOrDev()) return;
