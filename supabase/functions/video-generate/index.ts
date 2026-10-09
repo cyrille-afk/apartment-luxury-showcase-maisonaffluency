@@ -23,7 +23,8 @@ Deno.serve(async (req) => {
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const body = await req.json().catch(() => ({}));
-    const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping" : "status";
+    const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping"
+      : body?.mode === "poll" ? "poll" : "status";
 
     const [{ data: roles }, { data: profile }, { data: credits }] = await Promise.all([
       db.from("user_roles").select("role").eq("user_id", userId),
@@ -62,6 +63,28 @@ Deno.serve(async (req) => {
         provider: "luma", configured: true, ok: res.ok || res.status === 404, status: res.status, detail,
       });
     }
+
+    // Admin-only render lookup (no render, no charge). The id must be a UUID before it is used.
+    if (mode === "poll") {
+      if (!isAdmin) return json({ error: "Admin only" }, 403);
+      const lumaKey = Deno.env.get("LUMA_API_KEY");
+      if (!lumaKey) return json({ provider: "luma", configured: false });
+      const id = String(body?.job_id ?? "");
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
+        return json({ error: "Invalid job id" }, 400);
+      }
+      const res = await fetch(`https://agents.lumalabs.ai/v1/generations/${id}`, {
+        headers: { authorization: `Bearer ${lumaKey}` },
+      });
+      const data = await res.json().catch(() => null);
+      return json({
+        ok: res.ok, status: res.status,
+        state: data?.state ?? null,
+        failure: data?.failure_reason ?? data?.failure_code ?? null,
+        outputs: Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null,
+      });
+    }
+
 
     if (!access.allowed) {
       return json({ error: "purchase_required", message: `A Single Video Pass (€${VIDEO_PASS_PRICE_EUR}) is required to render this walkthrough.`, ...summary }, 403);
