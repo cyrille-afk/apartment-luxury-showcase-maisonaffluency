@@ -24,6 +24,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
 import { MANUAL_DEST_KEY } from "@/lib/shippingDestination";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const STORAGE_KEY = "trade.displayCurrency";
 const MANUAL_FLAG_KEY = "trade.displayCurrency.manual";
