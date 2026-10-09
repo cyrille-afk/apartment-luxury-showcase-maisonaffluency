@@ -942,7 +942,7 @@ const TradeAILayoutStudio = () => {
                         return (
                           <figure key={h.job_id} className="space-y-1">
                             <div ref={(el) => { compareWrapRefs.current[i] = el; }} className="relative bg-background [&:fullscreen]:flex [&:fullscreen]:items-center [&:fullscreen]:justify-center">
-                              <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} controls playsInline preload="metadata" muted={compareMuted[i]} className="h-auto w-full bg-background [&:fullscreen]:h-full [&:fullscreen]:object-contain" />
+                              <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} crossOrigin="anonymous" controls playsInline preload="metadata" muted={compareMuted[i]} className="h-auto w-full bg-background [&:fullscreen]:h-full [&:fullscreen]:object-contain" />
                               <span className="absolute right-1 top-1 flex gap-1">
                                 <button
                                   type="button"
@@ -969,6 +969,19 @@ const TradeAILayoutStudio = () => {
                         );
                       })}
                     </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <label className="flex items-center gap-1.5">
+                        <input type="checkbox" className="h-3.5 w-3.5 accent-primary" checked={diffOn} onChange={(e) => setDiffOn(e.target.checked)} />
+                        Show difference overlay
+                      </label>
+                      {diffOn && (
+                        <label className="flex items-center gap-1.5 text-muted-foreground">
+                          Sensitivity
+                          <input type="range" min={5} max={80} value={85 - diffThreshold} onChange={(e) => setDiffThreshold(85 - Number(e.target.value))} aria-label="Difference sensitivity" />
+                        </label>
+                      )}
+                    </div>
+                    {diffOn && <div className="mt-2"><VideoDiffOverlay getVideos={getCompareVideos} threshold={diffThreshold} /></div>}
                   </div>
                 )}
                 {compareItems.length === 1 && (
