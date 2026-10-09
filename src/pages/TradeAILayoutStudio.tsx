@@ -943,21 +943,42 @@ const TradeAILayoutStudio = () => {
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium">Previous walkthrough videos</p>
-                  <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
-                    Warn when over estimate by
-                    <input
-                      type="number"
-                      min={0}
-                      step={5}
-                      className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
-                      value={overrunThresholdPct}
-                      onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
-                    />
-                    %
-                  </label>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Filter renders by month">
+                      Month
+                      <select
+                        className="border border-border bg-background px-1 py-0.5 text-foreground"
+                        value={activeVideoHistoryMonth}
+                        onChange={(e) => updateVideoHistoryMonth(e.target.value)}
+                      >
+                        <option value={VIDEO_RENDER_MONTH_ALL}>All months</option>
+                        {videoHistoryMonthOptions.map((m) => (
+                          <option key={m.monthKey} value={m.monthKey}>{m.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-muted-foreground" aria-label="Overrun warning threshold">
+                      Warn when over estimate by
+                      <input
+                        type="number"
+                        min={0}
+                        step={5}
+                        className="w-14 border border-border bg-background px-1 py-0.5 text-foreground"
+                        value={overrunThresholdPct}
+                        onChange={(e) => updateOverrunThreshold(Number(e.target.value))}
+                      />
+                      %
+                    </label>
+                  </div>
                 </div>
                 {videoRenderSummary.billedCount > 0 && (
                   <p className="mb-2 text-muted-foreground" aria-label="Walkthrough render cost summary">
+                    {activeVideoHistoryLabel && (
+                      <>
+                        <span className="text-foreground">{activeVideoHistoryLabel}</span>
+                        {" · "}
+                      </>
+                    )}
                     {videoRenderSummary.billedCount} billed render{videoRenderSummary.billedCount === 1 ? "" : "s"}
                     {" · total "}
                     <span className="text-foreground">{formatUsdCents(videoRenderSummary.totalCostCents)}</span>
@@ -969,7 +990,7 @@ const TradeAILayoutStudio = () => {
                       : ""}
                   </p>
                 )}
-                {videoMonthlyBreakdown.length > 0 && (
+                {activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL && videoMonthlyBreakdown.length > 0 && (
                   <ul className="mb-2 space-y-0.5 text-muted-foreground" aria-label="Monthly billed render costs">
                     {videoMonthlyBreakdown.map((m) => (
                       <li key={m.monthKey}>
@@ -981,8 +1002,11 @@ const TradeAILayoutStudio = () => {
                     ))}
                   </ul>
                 )}
+                {videoHistoryFiltered.length === 0 ? (
+                  <p className="text-muted-foreground">No renders in {activeVideoHistoryLabel}.</p>
+                ) : (
                 <ul className="space-y-1.5">
-                  {videoHistory.map((h) => (
+                  {videoHistoryFiltered.map((h) => (
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
