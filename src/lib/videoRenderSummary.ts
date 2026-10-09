@@ -67,6 +67,42 @@ export function formatUsdCents(cents: number): string {
   return `${sign}$${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
 }
 
+export type VideoRenderMonth = {
+  /** "2026-10" UTC month key, used for sorting. */
+  monthKey: string;
+  /** "Oct 2026" style display label. */
+  label: string;
+  billedCount: number;
+  totalCostCents: number;
+};
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Billed render costs grouped by UTC calendar month, newest month first.
+ * Renders without a recorded cost are excluded; unparseable dates are skipped.
+ */
+export function monthlyCostBreakdown(jobs: readonly VideoRenderRecord[]): VideoRenderMonth[] {
+  const byMonth = new Map<string, { billedCount: number; totalCostCents: number }>();
+  for (const job of jobs) {
+    const cents = toCents(job.cost_usd);
+    if (cents === null) continue;
+    const date = new Date(job.created_at);
+    if (Number.isNaN(date.getTime())) continue;
+    const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    const entry = byMonth.get(key) ?? { billedCount: 0, totalCostCents: 0 };
+    entry.billedCount += 1;
+    entry.totalCostCents += cents;
+    byMonth.set(key, entry);
+  }
+  return [...byMonth.entries()]
+    .sort(([a], [b]) => (a < b ? 1 : a > b ? -1 : 0))
+    .map(([monthKey, entry]) => {
+      const [year, month] = monthKey.split("-").map(Number);
+      return { monthKey, label: `${MONTH_NAMES[month - 1]} ${year}`, ...entry };
+    });
+}
+
 // Rough Luma estimates for a 5s 16:9 walkthrough, mirroring VIDEO_QUALITY_OPTIONS
 // on the AI layout page. Unknown qualities fall back to the 720p estimate, the
 // same fallback the video-generate route applies server-side.
