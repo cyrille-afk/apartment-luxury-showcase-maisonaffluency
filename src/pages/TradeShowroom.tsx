@@ -143,7 +143,7 @@ const TradeShowroom = () => {
                 A MATRICULATED INDEX OF {makerCount ?? "…"} COLLECTIBLE DESIGNERS, ATELIERS, AND CURATED RESIDENTIAL GALLERIES.
               </p>
             </div>
-            <button
+            <button data-trade-sensitive
               onClick={() => setDrawerOpen(true)}
               className="shrink-0 p-2 border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
               title="View active quote"
@@ -194,12 +194,12 @@ const TradeShowroom = () => {
         )}
       </div>
 
-      <QuoteDrawer
+      <div data-trade-sensitive><QuoteDrawer
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
         quoteId={activeQuoteId}
         refreshKey={drawerRefreshKey}
-      />
+      /></div>
     </>
   );
 };

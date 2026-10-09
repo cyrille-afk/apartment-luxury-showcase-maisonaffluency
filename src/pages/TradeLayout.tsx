@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import ProductDisplayToggle from "@/components/trade/ProductDisplayToggle";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
-import ClientViewToggle from "@/components/trade/ClientViewToggle";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
@@ -352,7 +351,8 @@ const TradeLayout = () => {
   const location = useLocation();
   const { clientSafe } = useClientSafeMode();
   const productRoute = /^\/trade\/products\//.test(location.pathname);
-  const presentation = productRoute && clientSafe;
+  const collectionRoute = location.pathname.replace(/\/+$/, "") === "/trade/the-collection";
+  const presentation = (productRoute || collectionRoute) && clientSafe;
 
   // Strip a bare trailing "#" left in the URL by in-page anchor scrolls.
   useEffect(() => {
@@ -538,7 +538,7 @@ const TradeLayout = () => {
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
               <div className="shrink-0" data-felix-target="header-client-view">
-                 {productRoute ? <ProductDisplayToggle /> : <ClientViewToggle />}
+                 <ProductDisplayToggle />
                </div>
                 {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
                <span data-trade-sensitive><MobilePreviewHeaderButton /></span>
