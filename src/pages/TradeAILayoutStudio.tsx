@@ -439,6 +439,20 @@ const TradeAILayoutStudio = () => {
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
   const [videoWide, setVideoWide] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const resumeRef = useRef<{ t: number; playing: boolean } | null>(null);
+  const swapVideoSize = () => {
+    const v = videoRef.current;
+    if (v) resumeRef.current = { t: v.currentTime, playing: !v.paused };
+    setVideoWide((w) => !w);
+  };
+  const restoreVideoPosition = (el: HTMLVideoElement) => {
+    const r = resumeRef.current;
+    if (!r) return;
+    resumeRef.current = null;
+    el.currentTime = r.t;
+    if (r.playing) void el.play().catch(() => { /* autoplay blocked — user can press play */ });
+  };
   useEffect(() => {
     if (!videoWide) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setVideoWide(false); };
