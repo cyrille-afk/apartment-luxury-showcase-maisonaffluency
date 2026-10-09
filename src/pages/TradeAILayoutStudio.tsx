@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Fullscreen, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Fullscreen, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
@@ -496,7 +496,22 @@ const TradeAILayoutStudio = () => {
   const compareItems = videoCompareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
   // Synchronized side-by-side playback: play/pause/seek/rate on either video mirrors to the other.
   const compareVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const compareWrapRefs = useRef<(HTMLDivElement | null)[]>([]);
   const compareSyncing = useRef(false);
+  // Per-video mute state for the side-by-side comparison (independent of sync).
+  const [compareMuted, setCompareMuted] = useState<boolean[]>([true, true]);
+  const toggleCompareMute = (i: number) => {
+    const v = compareVideoRefs.current[i];
+    const next = !compareMuted[i];
+    if (v) v.muted = next;
+    setCompareMuted((m) => m.map((x, j) => (j === i ? next : x)));
+  };
+  const toggleCompareFullscreen = (i: number) => {
+    const el = compareWrapRefs.current[i];
+    if (!el) return;
+    if (document.fullscreenElement === el) void document.exitFullscreen().catch(() => {});
+    else void el.requestFullscreen?.().catch(() => {});
+  };
   useEffect(() => {
     if (compareItems.length !== 2) return;
     const vids = compareVideoRefs.current.filter((v): v is HTMLVideoElement => !!v);
