@@ -513,15 +513,21 @@ const TradeAILayoutStudio = () => {
       const onPause = () => mirror(() => dst.pause());
       const onSeeked = () => mirror(() => { dst.currentTime = src.currentTime; });
       const onRate = () => mirror(() => { dst.playbackRate = src.playbackRate; });
+      // Correct drift while both are playing (one may buffer later than the other).
+      const onTime = () => mirror(() => {
+        if (!src.paused && !dst.paused && Math.abs(dst.currentTime - src.currentTime) > 0.3) dst.currentTime = src.currentTime;
+      });
       src.addEventListener("play", onPlay);
       src.addEventListener("pause", onPause);
       src.addEventListener("seeked", onSeeked);
       src.addEventListener("ratechange", onRate);
+      src.addEventListener("timeupdate", onTime);
       cleanups.push(() => {
         src.removeEventListener("play", onPlay);
         src.removeEventListener("pause", onPause);
         src.removeEventListener("seeked", onSeeked);
         src.removeEventListener("ratechange", onRate);
+        src.removeEventListener("timeupdate", onTime);
       });
     });
     return () => cleanups.forEach((c) => c());
