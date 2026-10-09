@@ -509,6 +509,7 @@ const TradeLayout = () => {
        <div
          className={`trade-portal-shell flex w-full bg-background ${fullBleed ? "h-screen overflow-hidden" : "min-h-screen"}`}
         data-price-view={showTradePrice ? "trade" : "client"}
+        data-presentation={presentation ? "" : undefined}
       >
         {/* Sidebar — desktop only */}
          <AnimatePresence initial={false}>
@@ -529,9 +530,16 @@ const TradeLayout = () => {
               {/* Desktop: sidebar collapse trigger */}
                <span data-trade-sensitive><SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" /></span>
               {/* Desktop: Trade Portal branding */}
+               {presentation ? (
+                 /* Presentation masthead mirrors the public site's centred wordmark. */
+                 <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center justify-center pt-[env(safe-area-inset-top)]">
+                   <StudioBrand studio={currentStudio} className="font-display text-lg md:text-[26px] font-normal tracking-[0.22em]" />
+                 </div>
+               ) : (
                <div className="hidden md:flex items-center gap-2">
                   {showTradePrice ? <span data-trade-sensitive className="inline-flex items-center gap-2"><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></span> : <StudioBrand studio={currentStudio} />}
                </div>
+               )}
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
