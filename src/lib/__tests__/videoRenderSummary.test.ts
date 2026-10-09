@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatUsdCents, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta } from "../videoRenderSummary";
+import { formatUsdCents, monthlyCostBreakdown, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",

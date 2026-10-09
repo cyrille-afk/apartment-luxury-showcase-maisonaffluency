@@ -493,6 +493,7 @@ const TradeAILayoutStudio = () => {
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
+  const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
