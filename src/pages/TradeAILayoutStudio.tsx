@@ -644,6 +644,7 @@ const TradeAILayoutStudio = () => {
       const url = (data.outputs as (string | null)[] | null)?.find(Boolean) ?? undefined;
       const failure = data.state === "failed" ? (data.failure || "Render failed") : data.error;
       setVideoJob((j) => j && j.id === videoJob.id ? { ...j, state: data.state ?? j.state, url, failure } : j);
+      if (data.refunded) toast.error("Luma could not finish this render — your video credit has been refunded.");
       if (url || failure) void refreshVideoHistory();
     };
     const t = setInterval(tick, 5000); void tick();

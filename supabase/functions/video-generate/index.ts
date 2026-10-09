@@ -105,6 +105,17 @@ Deno.serve(async (req) => {
         const billed = { "540p": 0.35, "720p": 0.6, "1080p": 1.2 }[String(existing?.quality ?? "720p")] ?? 0.6;
         if ((state ?? "completed") === "completed" || videoUrl) patch.cost_usd = billed;
         await db.from("video_render_jobs").update(patch).eq("job_id", id).eq("user_id", userId);
+        // Rollback: Luma failed while processing — refund the consumed credit exactly once.
+        if (state === "failed" && !videoUrl) {
+          const { data: claimed } = await db.from("video_render_jobs")
+            .update({ refunded_at: now.toISOString() })
+            .eq("job_id", id).eq("user_id", userId).is("refunded_at", null).not("credit_source", "is", null)
+            .select("credit_source").maybeSingle();
+          if (claimed?.credit_source) {
+            await db.rpc("refund_video_credit", { _user: userId, _source: claimed.credit_source });
+            return json({ ok: res.ok, status: res.status, state, failure, outputs, refunded: true });
+          }
+        }
       }
       return json({ ok: res.ok, status: res.status, state, failure, outputs });
     }
@@ -143,7 +154,7 @@ Deno.serve(async (req) => {
       const jid = (response as { job_id?: string } | null)?.job_id;
       const poll_token = lumaKey && jid ? await pollToken(userId, jid) : undefined;
       if (lumaKey && jid) {
-        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued", quality });
+        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued", quality, credit_source: consumed });
       }
       return json({ status: "queued", poll_token, charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {

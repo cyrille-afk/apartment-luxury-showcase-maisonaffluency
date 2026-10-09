@@ -11323,10 +11323,12 @@ export type Database = {
         Row: {
           cost_usd: number | null
           created_at: string
+          credit_source: string | null
           failure: string | null
           id: string
           job_id: string
           quality: string
+          refunded_at: string | null
           render_seconds: number | null
           state: string
           updated_at: string
@@ -11336,10 +11338,12 @@ export type Database = {
         Insert: {
           cost_usd?: number | null
           created_at?: string
+          credit_source?: string | null
           failure?: string | null
           id?: string
           job_id: string
           quality?: string
+          refunded_at?: string | null
           render_seconds?: number | null
           state?: string
           updated_at?: string
@@ -11349,10 +11353,12 @@ export type Database = {
         Update: {
           cost_usd?: number | null
           created_at?: string
+          credit_source?: string | null
           failure?: string | null
           id?: string
           job_id?: string
           quality?: string
+          refunded_at?: string | null
           render_seconds?: number | null
           state?: string
           updated_at?: string
