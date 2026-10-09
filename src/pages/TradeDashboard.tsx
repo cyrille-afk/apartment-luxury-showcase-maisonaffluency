@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard,
+  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard, Play,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/FelixTour";
 import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
@@ -86,18 +86,27 @@ function WalkthroughCardPreview() {
   if (!videoUrl) return null;
 
   return (
-    <video
-      ref={videoRef}
-      src={videoUrl}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      aria-label="Preview of your latest walkthrough render"
-      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
-      onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
-      onMouseLeave={(e) => { e.currentTarget.pause(); }}
-    />
+    <>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label="Preview of your latest walkthrough render, shown when you hover over or tab to this card"
+        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+        onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
+        onMouseLeave={(e) => { e.currentTarget.pause(); }}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-3 right-3 z-10 hidden items-center gap-1.5 bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground transition-opacity duration-300 [@media(hover:none)]:hidden group-hover:opacity-0 group-focus-visible:opacity-0 sm:inline-flex"
+      >
+        <Play className="h-2.5 w-2.5" />
+        Hover to preview
+      </span>
+    </>
   );
 }
 
