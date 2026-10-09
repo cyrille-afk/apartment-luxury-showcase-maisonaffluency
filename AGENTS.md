@@ -32,3 +32,4 @@
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
+- Spec-sheet viewer links open in the same tab via `openSpecSheet`/SameOriginLinkGuard on the current app origin — new tabs can lose the sign-in (partitioned preview storage, www vs apex) and show members the sign-in gate.
