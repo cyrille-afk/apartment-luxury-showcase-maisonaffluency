@@ -599,6 +599,9 @@ function SameOriginLinkGuard() {
       if (!anchor) return;
       if (anchor.target && anchor.target !== "_self") return;
       if (anchor.hasAttribute("download")) return;
+      // Links that intercept their own first tap (e.g. touch preview on the
+      // dashboard walkthrough card) opt out of this global navigation handler.
+      if (anchor.hasAttribute("data-tap-preview")) return;
 
       const href = anchor.getAttribute("href") || "";
       if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;

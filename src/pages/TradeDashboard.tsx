@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -62,9 +62,28 @@ const DASH_CARDS = [
 // Hover/focus preview of the member's latest completed walkthrough render,
 // layered over the dashboard card image. RLS scopes video_render_jobs to the
 // signed-in user, so this only ever surfaces their own renders.
-function WalkthroughCardPreview() {
+interface WalkthroughCardPreviewHandle {
+  // Returns true when the tap was consumed to start the preview (touch only).
+  startTouchPreview: () => boolean;
+}
+
+const WalkthroughCardPreview = forwardRef<WalkthroughCardPreviewHandle>(
+  function WalkthroughCardPreview(_props, ref) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // On touch devices there is no hover: first tap previews, second tap opens the page.
+  const [touchPreviewing, setTouchPreviewing] = useState(false);
+  const isTouch = () =>
+    typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
+
+  useImperativeHandle(ref, () => ({
+    startTouchPreview: () => {
+      if (!isTouch() || touchPreviewing || !videoUrl) return false;
+      setTouchPreviewing(true);
+      void videoRef.current?.play().catch(() => undefined);
+      return true;
+    },
+  }), [touchPreviewing, videoUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +131,7 @@ function WalkthroughCardPreview() {
         playsInline
         preload="metadata"
         aria-label="Preview of your latest walkthrough render, shown when you hover over or tab to this card"
-        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100 ${touchPreviewing ? "opacity-100" : "opacity-0"}`}
         onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
         onMouseLeave={(e) => { e.currentTarget.pause(); }}
       />
@@ -123,9 +142,19 @@ function WalkthroughCardPreview() {
         <Play className="h-2.5 w-2.5" />
         Hover to preview
       </span>
+      {!touchPreviewing && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 right-3 z-10 hidden items-center gap-1.5 bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground [@media(hover:hover)]:hidden [@media(hover:none)]:inline-flex"
+        >
+          <Play className="h-2.5 w-2.5" />
+          Tap to preview
+        </span>
+      )}
     </>
   );
-}
+  }
+);
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
   east: "object-right",
@@ -190,6 +219,7 @@ const TradeDashboard = () => {
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
+  const walkthroughPreviewRef = useRef<WalkthroughCardPreviewHandle>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
@@ -404,7 +434,16 @@ const TradeDashboard = () => {
             to={card.to}
             data-felix-target={card.key === "dash-showroom" ? "dashboard-showroom" : undefined}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
+            data-tap-preview={card.key === "dash-ai-walkthrough" ? "true" : undefined}
             className={`group ${card.key === "dash-showroom" ? "group/radar" : ""} flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
+            onClickCapture={(e) => {
+              // Touch devices: first tap on the walkthrough card previews the video
+              // instead of navigating; the second tap opens the page.
+              if (card.key === "dash-ai-walkthrough" && walkthroughPreviewRef.current?.startTouchPreview()) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
           >
             <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
               {getCardImage(card) ? (
@@ -420,7 +459,7 @@ const TradeDashboard = () => {
                 </div>
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
-              {card.key === "dash-ai-walkthrough" && <WalkthroughCardPreview />}
+              {card.key === "dash-ai-walkthrough" && <WalkthroughCardPreview ref={walkthroughPreviewRef} />}
               {card.key === "dash-showroom" && (
                 <button
                   type="button"
