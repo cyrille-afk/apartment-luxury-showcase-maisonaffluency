@@ -4992,15 +4992,18 @@ serve(async (req) => {
     }
     const latestUserContent = [...messages].reverse().find((m: any) => m.role === "user")?.content;
     const latestTurnHasFile = Array.isArray(latestUserContent) && latestUserContent.some((part: any) => part?.type === "file" || part?.type === "image_url");
+    // Brief gate: card tools stay locked below until the brief is complete, but Felix
+    // still answers through the model — a canned early return here made him repeat
+    // the same line regardless of what the designer typed.
+    let gateDirective = "";
     if (!onboardingGateComplete && !latestTurnHasFile) {
       const missing: string[] = [];
       if (!isRealGateFact(gateFacts?.projectProfile)) missing.push("project profile");
       if (!isRealGateFact(gateFacts?.zone)) missing.push("zone");
       if (!isRealGateFact(gateFacts?.budget)) missing.push("budget");
-      const factPrompt = missing.length
-        ? `Before I assemble any item schedule, let's lock in ${missing.join(", ")}. What would you like me to record?`
-        : "I have the project profile, zones, and budget. Please confirm these details, or submit them through the Architectural Brief Builder, and I will open the next studio stage.";
-      return sseTextResponse(factPrompt);
+      if (missing.length) {
+        gateDirective = `## BRIEF STATUS\nThe project brief is not yet confirmed (still unrecorded: ${missing.join(", ")}). Answer the designer's actual message helpfully and conversationally — discuss pieces, pairings and ideas freely. Acknowledge any brief details they have just given (e.g. location, property type, zone, budget) by restating them, and ask only for what is still genuinely missing, in one short sentence. Never repeat a previous question verbatim. Do not produce tearsheets or quotes until the brief is confirmed.\n\n`;
+      }
     }
 
     const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
