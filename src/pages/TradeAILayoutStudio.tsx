@@ -999,6 +999,25 @@ const TradeAILayoutStudio = () => {
                       : ""}
                   </p>
                 )}
+                {activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL && videoChartSeries.length > 0 && (
+                  <div className="mb-2 h-44 w-full" aria-label="Monthly render counts and billed costs chart">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={videoChartSeries} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
+                        <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                        <YAxis yAxisId="renders" allowDecimals={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} width={34} />
+                        <YAxis yAxisId="cost" orientation="right" tickFormatter={(v: number) => `$${v}`} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} width={44} />
+                        <Tooltip
+                          cursor={{ fill: "hsl(var(--muted))" }}
+                          contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", fontSize: 11, color: "hsl(var(--popover-foreground))" }}
+                          formatter={(value: number, name: string) => (name === "costUsd" ? [`$${value.toFixed(2)}`, "Billed"] : [value, "Renders"])}
+                        />
+                        <Bar yAxisId="renders" dataKey="renderCount" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} maxBarSize={36} />
+                        <Line yAxisId="cost" type="monotone" dataKey="costUsd" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} dot={{ r: 2.5, fill: "hsl(var(--muted-foreground))" }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
                 {activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL && videoMonthlyBreakdown.length > 0 && (
                   <ul className="mb-2 space-y-0.5 text-muted-foreground" aria-label="Monthly billed render costs">
                     {videoMonthlyBreakdown.map((m) => (
