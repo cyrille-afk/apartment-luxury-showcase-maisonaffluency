@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatUsdCents, summarizeVideoRenders, type VideoRenderRecord } from "../videoRenderSummary";
+import { formatUsdCents, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
@@ -80,5 +80,28 @@ describe("formatUsdCents", () => {
     expect(formatUsdCents(215)).toBe("$2.15");
     expect(formatUsdCents(1200)).toBe("$12.00");
     expect(formatUsdCents(0)).toBe("$0.00");
+  });
+});
+
+describe("videoRenderDelta", () => {
+  it("computes positive and negative deltas against the quality estimate", () => {
+    expect(videoRenderDelta({ quality: "720p", render_seconds: 27, cost_usd: 0.7 })).toEqual({ secondsDelta: 2, costCentsDelta: 10 });
+    expect(videoRenderDelta({ quality: "540p", render_seconds: 10, cost_usd: 0.3 })).toEqual({ secondsDelta: -5, costCentsDelta: -5 });
+  });
+  it("falls back to the 720p estimate for unknown qualities", () => {
+    expect(videoRenderDelta({ quality: "4k", render_seconds: 25, cost_usd: 0.6 })).toEqual({ secondsDelta: 0, costCentsDelta: 0 });
+  });
+  it("returns null deltas when actuals are missing", () => {
+    expect(videoRenderDelta({ quality: "1080p", render_seconds: null, cost_usd: null })).toEqual({ secondsDelta: null, costCentsDelta: null });
+  });
+});
+
+describe("delta formatting", () => {
+  it("formats signed seconds and cents", () => {
+    expect(formatSecondsDelta(2)).toBe("+2s");
+    expect(formatSecondsDelta(-5)).toBe("−5s");
+    expect(formatSecondsDelta(0)).toBe("±0s");
+    expect(formatUsdCentsDelta(10)).toBe("+$0.10");
+    expect(formatUsdCentsDelta(-5)).toBe("−$0.05");
   });
 });

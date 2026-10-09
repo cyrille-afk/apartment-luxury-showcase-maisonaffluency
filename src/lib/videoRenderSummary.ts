@@ -66,3 +66,45 @@ export function formatUsdCents(cents: number): string {
   const abs = Math.abs(Math.round(cents));
   return `${sign}$${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
 }
+
+// Rough Luma estimates for a 5s 16:9 walkthrough, mirroring VIDEO_QUALITY_OPTIONS
+// on the AI layout page. Unknown qualities fall back to the 720p estimate, the
+// same fallback the video-generate route applies server-side.
+const QUALITY_ESTIMATES: Record<string, { seconds: number; costCents: number }> = {
+  "540p": { seconds: 15, costCents: 35 },
+  "720p": { seconds: 25, costCents: 60 },
+  "1080p": { seconds: 45, costCents: 120 },
+};
+
+export type VideoRenderDelta = {
+  /** actual render_seconds minus the estimate; null when no actual recorded. */
+  secondsDelta: number | null;
+  /** actual billed cost minus the estimate, in cents; null when no cost recorded. */
+  costCentsDelta: number | null;
+};
+
+/** How far a render's recorded actuals sit from its quality estimate. */
+export function videoRenderDelta(job: Pick<VideoRenderRecord, "quality" | "render_seconds" | "cost_usd">): VideoRenderDelta {
+  const estimate = QUALITY_ESTIMATES[job.quality ?? ""] ?? QUALITY_ESTIMATES["720p"];
+  const cents = toCents(job.cost_usd);
+  return {
+    secondsDelta:
+      typeof job.render_seconds === "number" && Number.isFinite(job.render_seconds)
+        ? Math.round(job.render_seconds) - estimate.seconds
+        : null,
+    costCentsDelta: cents !== null ? cents - estimate.costCents : null,
+  };
+}
+
+/** "+2s" / "−5s" style signed label. */
+export function formatSecondsDelta(delta: number): string {
+  const sign = delta > 0 ? "+" : delta < 0 ? "−" : "±";
+  return `${sign}${Math.abs(Math.round(delta))}s`;
+}
+
+/** "+$0.10" / "−$0.05" style signed label from integer cents. */
+export function formatUsdCentsDelta(cents: number): string {
+  const sign = cents > 0 ? "+" : cents < 0 ? "−" : "±";
+  const abs = Math.abs(Math.round(cents));
+  return `${sign}$${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
+}

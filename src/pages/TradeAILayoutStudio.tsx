@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatUsdCents, summarizeVideoRenders } from "@/lib/videoRenderSummary";
+import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -913,7 +913,9 @@ const TradeAILayoutStudio = () => {
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                         {h.quality ? ` · ${h.quality}` : ""}
                         {h.render_seconds != null ? ` · ${h.render_seconds}s` : ""}
+                        {videoRenderDelta(h).secondsDelta != null ? ` (${formatSecondsDelta(videoRenderDelta(h).secondsDelta!)} vs est.)` : ""}
                         {h.cost_usd != null ? ` · $${Number(h.cost_usd).toFixed(2)}` : ""}
+                        {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
@@ -986,7 +988,9 @@ const TradeAILayoutStudio = () => {
                             <figcaption className="text-muted-foreground">
                               {q.label} · est. {q.eta} · {q.cost}
                               {h.render_seconds != null ? ` · actual ${h.render_seconds}s` : ""}
+                              {videoRenderDelta(h).secondsDelta != null ? ` (${formatSecondsDelta(videoRenderDelta(h).secondsDelta!)} vs est.)` : ""}
                               {h.cost_usd != null ? ` · billed $${Number(h.cost_usd).toFixed(2)}` : ""}
+                              {videoRenderDelta(h).costCentsDelta != null ? ` (${formatUsdCentsDelta(videoRenderDelta(h).costCentsDelta!)} vs est.)` : ""}
                               {" · "}{new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                             </figcaption>
                           </figure>
