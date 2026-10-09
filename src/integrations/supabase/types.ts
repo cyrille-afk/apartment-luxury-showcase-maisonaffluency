@@ -11319,6 +11319,39 @@ export type Database = {
         }
         Relationships: []
       }
+      video_render_jobs: {
+        Row: {
+          created_at: string
+          failure: string | null
+          id: string
+          job_id: string
+          state: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          failure?: string | null
+          id?: string
+          job_id: string
+          state?: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          failure?: string | null
+          id?: string
+          job_id?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       video_watch_events: {
         Row: {
           created_at: string
