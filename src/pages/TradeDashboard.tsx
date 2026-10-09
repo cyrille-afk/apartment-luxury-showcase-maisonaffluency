@@ -116,9 +116,20 @@ function WalkthroughCardPreview() {
         playsInline
         preload="metadata"
         aria-label="Preview of your latest walkthrough render, shown when you hover over or tab to this card"
-        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100 ${touchPreviewing ? "opacity-100" : "opacity-0"}`}
         onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
         onMouseLeave={(e) => { e.currentTarget.pause(); }}
+        onClickCapture={(e) => {
+          if (!isTouch()) return;
+          if (!touchPreviewing) {
+            // First tap: preview instead of navigating.
+            e.preventDefault();
+            e.stopPropagation();
+            setTouchPreviewing(true);
+            void e.currentTarget.play().catch(() => undefined);
+          }
+          // Second tap falls through and opens the page.
+        }}
       />
       <span
         aria-hidden="true"
@@ -127,6 +138,15 @@ function WalkthroughCardPreview() {
         <Play className="h-2.5 w-2.5" />
         Hover to preview
       </span>
+      {!touchPreviewing && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 right-3 z-10 hidden items-center gap-1.5 bg-background/90 px-2 py-1 font-body text-[9px] uppercase tracking-[0.15em] text-muted-foreground [@media(hover:hover)]:hidden [@media(hover:none)]:inline-flex"
+        >
+          <Play className="h-2.5 w-2.5" />
+          Tap to preview
+        </span>
+      )}
     </>
   );
 }
