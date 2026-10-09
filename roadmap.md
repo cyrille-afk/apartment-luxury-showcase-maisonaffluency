@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Give designer pages distinct Studio catalogue and Presentation editorial layouts; verify both modes, product links and client-safe lightboxes.
 - [x] Restore Collection designers and expose Studio/Presentation switch; 101 designers, navigation, sidebar/quote masking and failed-request recovery verified live.
 - [x] Add product Studio/Presentation modes and verify routes, retail-only localized prices, sidebar and studio EUR.
 - [x] Add comparator A–Z designer browsing with curator picks, catalogue search and favourites; seven tests pass, live Ondas/Dais selection shows Silver −10% prices, and Client View removes the net trade row without page errors.
