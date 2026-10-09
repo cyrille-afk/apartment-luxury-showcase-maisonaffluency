@@ -494,6 +494,44 @@ const TradeAILayoutStudio = () => {
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
   const compareItems = videoCompareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
+  // Synchronized side-by-side playback: play/pause/seek/rate on either video mirrors to the other.
+  const compareVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const compareSyncing = useRef(false);
+  useEffect(() => {
+    if (compareItems.length !== 2) return;
+    const vids = compareVideoRefs.current.filter((v): v is HTMLVideoElement => !!v);
+    if (vids.length !== 2) return;
+    const cleanups: (() => void)[] = [];
+    vids.forEach((src, i) => {
+      const dst = vids[1 - i];
+      const mirror = (fn: () => void) => {
+        if (compareSyncing.current) return;
+        compareSyncing.current = true;
+        try { fn(); } finally { compareSyncing.current = false; }
+      };
+      const onPlay = () => mirror(() => { if (Math.abs(dst.currentTime - src.currentTime) > 0.15) dst.currentTime = src.currentTime; void dst.play().catch(() => {}); });
+      const onPause = () => mirror(() => dst.pause());
+      const onSeeked = () => mirror(() => { dst.currentTime = src.currentTime; });
+      const onRate = () => mirror(() => { dst.playbackRate = src.playbackRate; });
+      // Correct drift while both are playing (one may buffer later than the other).
+      const onTime = () => mirror(() => {
+        if (!src.paused && !dst.paused && Math.abs(dst.currentTime - src.currentTime) > 0.3) dst.currentTime = src.currentTime;
+      });
+      src.addEventListener("play", onPlay);
+      src.addEventListener("pause", onPause);
+      src.addEventListener("seeked", onSeeked);
+      src.addEventListener("ratechange", onRate);
+      src.addEventListener("timeupdate", onTime);
+      cleanups.push(() => {
+        src.removeEventListener("play", onPlay);
+        src.removeEventListener("pause", onPause);
+        src.removeEventListener("seeked", onSeeked);
+        src.removeEventListener("ratechange", onRate);
+        src.removeEventListener("timeupdate", onTime);
+      });
+    });
+    return () => cleanups.forEach((c) => c());
+  }, [compareItems.length === 2 ? compareItems.map((h) => h.job_id).join("|") : ""]);
   const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
     const q = localStorage.getItem("ma_video_quality");
     return q === "540p" || q === "1080p" ? q : "720p";
@@ -869,15 +907,24 @@ const TradeAILayoutStudio = () => {
                 {compareItems.length === 2 && (
                   <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
                     <div className="mb-2 flex items-center justify-between">
-                      <p className="font-medium">Side-by-side comparison</p>
-                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
-                        Close comparison
-                      </button>
+                      <p className="font-medium">Side-by-side comparison <span className="font-normal text-muted-foreground">— playback and seeking stay in sync</span></p>
+                      <span className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="underline underline-offset-2 hover:text-foreground"
+                          onClick={() => compareVideoRefs.current.forEach((v) => { if (v) { v.currentTime = 0; void v.play().catch(() => {}); } })}
+                        >
+                          Restart both
+                        </button>
+                        <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
+                          Close comparison
+                        </button>
+                      </span>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {compareItems.map((h) => (
+                      {compareItems.map((h, i) => (
                         <figure key={h.job_id} className="space-y-1">
-                          <video src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
+                          <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
                           <figcaption className="text-muted-foreground">
                             {h.quality ?? "720p"} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                           </figcaption>
