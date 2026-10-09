@@ -11325,6 +11325,7 @@ export type Database = {
           failure: string | null
           id: string
           job_id: string
+          quality: string
           state: string
           updated_at: string
           user_id: string
@@ -11335,6 +11336,7 @@ export type Database = {
           failure?: string | null
           id?: string
           job_id: string
+          quality?: string
           state?: string
           updated_at?: string
           user_id: string
@@ -11345,6 +11347,7 @@ export type Database = {
           failure?: string | null
           id?: string
           job_id?: string
+          quality?: string
           state?: string
           updated_at?: string
           user_id?: string
