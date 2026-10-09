@@ -4531,6 +4531,20 @@ export function AIConcierge({
                   </div>
                 )}
               </div>}
+              {surface === "trade" && (
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => (factsEditorOpen ? setFactsEditorOpen(false) : openFactsEditor())}
+                className={cn(
+                  "transition-colors p-1 rounded-md hover:bg-muted",
+                  factsEditorOpen ? "text-accent" : "text-muted-foreground hover:text-foreground",
+                )}
+                aria-label="Review project details"
+                title="Review project details Felix has picked up"
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+              </button>
+              )}
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
