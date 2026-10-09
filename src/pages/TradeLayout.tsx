@@ -519,7 +519,7 @@ const TradeLayout = () => {
          </AnimatePresence>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header relative h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive><TradeMobileMenu
@@ -530,9 +530,16 @@ const TradeLayout = () => {
               {/* Desktop: sidebar collapse trigger */}
                <span data-trade-sensitive><SidebarTrigger className="hidden md:inline-flex mr-2 md:mr-3" /></span>
               {/* Desktop: Trade Portal branding */}
+               {presentation ? (
+                 /* Presentation masthead mirrors the public site's centred wordmark. */
+                 <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center justify-center pt-[env(safe-area-inset-top)]">
+                   <StudioBrand studio={currentStudio} className="font-display text-lg md:text-[26px] font-normal tracking-[0.22em]" />
+                 </div>
+               ) : (
                <div className="hidden md:flex items-center gap-2">
                   {showTradePrice ? <span data-trade-sensitive className="inline-flex items-center gap-2"><LayoutDashboard className="h-[18px] w-[18px] text-muted-foreground" /><span className="font-display text-sm text-foreground uppercase tracking-[0.15em]">Trade Portal</span></span> : <StudioBrand studio={currentStudio} />}
                </div>
+               )}
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
