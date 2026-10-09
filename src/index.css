@@ -342,7 +342,7 @@ All colors MUST be HSL.
   letter-spacing: 0;
 }
 
-.trade-portal-shell [class*="shadow"] {
+.trade-portal-shell:not([data-presentation]) [class*="shadow"] {
   box-shadow: none;
 }
 

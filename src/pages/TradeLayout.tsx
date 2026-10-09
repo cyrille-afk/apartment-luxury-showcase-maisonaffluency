@@ -509,6 +509,7 @@ const TradeLayout = () => {
        <div
          className={`trade-portal-shell flex w-full bg-background ${fullBleed ? "h-screen overflow-hidden" : "min-h-screen"}`}
         data-price-view={showTradePrice ? "trade" : "client"}
+        data-presentation={presentation ? "" : undefined}
       >
         {/* Sidebar — desktop only */}
          <AnimatePresence initial={false}>
