@@ -770,11 +770,16 @@ const TradeAILayoutStudio = () => {
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
             <Select value={videoQuality} onValueChange={(v) => { const q = v === "540p" || v === "1080p" ? v : "720p"; setVideoQuality(q); localStorage.setItem("ma_video_quality", q); }}>
-              <SelectTrigger aria-label="Video quality" className="h-9 w-[150px] bg-background text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Video quality" className="h-9 w-[190px] bg-background text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="540p">Draft · 540p</SelectItem>
-                <SelectItem value="720p">HD · 720p</SelectItem>
-                <SelectItem value="1080p">Full HD · 1080p</SelectItem>
+                {VIDEO_QUALITY_OPTIONS.map((q) => (
+                  <SelectItem key={q.value} value={q.value}>
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span>{q.label}</span>
+                      <span className="text-[10px] text-muted-foreground">est. {q.eta} · {q.cost}</span>
+                    </span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
