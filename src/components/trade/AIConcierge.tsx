@@ -4755,6 +4755,51 @@ export function AIConcierge({
               </button>
               </div>
             </div>
+            {factsEditorOpen && surface === "trade" && (
+              <div
+                className={cn(
+                  "border-b px-4 py-3 space-y-2",
+                  modalMode ? "border-cream/15 bg-cream/5" : "border-border bg-muted/30",
+                )}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <p className={cn("font-body text-[10px] uppercase tracking-[0.14em]", modalMode ? "text-cream/70" : "text-muted-foreground")}>
+                  Project details Felix is working from — correct anything and save
+                </p>
+                {([
+                  { key: "projectProfile" as const, label: "Project profile", placeholder: "e.g. Good Class Bungalow, Sentosa" },
+                  { key: "zone" as const, label: "Zone", placeholder: "e.g. Living room" },
+                  { key: "budget" as const, label: "Budget", placeholder: "e.g. SGD 250k or open budget" },
+                ]).map(({ key, label, placeholder }) => (
+                  <label key={key} className="block">
+                    <span className={cn("font-body text-[10px] uppercase tracking-[0.1em]", modalMode ? "text-cream/60" : "text-muted-foreground")}>{label}</span>
+                    <input
+                      value={factDrafts[key]}
+                      onChange={(e) => setFactDrafts((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className={cn(
+                        "mt-0.5 w-full rounded-md border px-2.5 py-1.5 font-body text-xs outline-none focus:border-accent",
+                        modalMode ? "border-cream/20 bg-transparent text-cream placeholder:text-cream/40" : "border-border bg-background text-foreground placeholder:text-muted-foreground/60",
+                      )}
+                    />
+                  </label>
+                ))}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={saveFactsEditor}
+                    className="rounded-md bg-accent px-3 py-1.5 font-body text-[11px] font-medium text-accent-foreground hover:opacity-90 transition-opacity"
+                  >
+                    Save corrections
+                  </button>
+                  <button
+                    onClick={resetFactsEditor}
+                    className={cn("rounded-md border px-3 py-1.5 font-body text-[11px] transition-colors", modalMode ? "border-cream/25 text-cream/80 hover:bg-cream/10" : "border-border text-muted-foreground hover:bg-muted")}
+                  >
+                    Reset to detected
+                  </button>
+                </div>
+              </div>
+            )}
             {handoffTicket && (conciergeStatus === "human_notified" || conciergeStatus === "assigning_curator" || conciergeStatus === "curator_assigned" || conciergeStatus === "appointment_requested") && (
               <div
                 className={cn(
