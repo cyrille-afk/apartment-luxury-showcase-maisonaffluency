@@ -552,6 +552,14 @@ const TradeAILayoutStudio = () => {
     [videoHistory, activeVideoHistoryMonth],
   );
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
+  // Which completed render the dashboard card previews (localStorage-backed).
+  const [dashboardPreviewId, setDashboardPreviewId] = useState<string | null>(() => {
+    try { return localStorage.getItem("ma-dashboard-walkthrough-preview"); } catch { return null; }
+  });
+  const chooseDashboardPreview = (jobId: string) => {
+    setDashboardPreviewId(jobId);
+    try { localStorage.setItem("ma-dashboard-walkthrough-preview", jobId); } catch { /* ignore */ }
+  };
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
   const compareItems = videoCompareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
@@ -1096,6 +1104,18 @@ const TradeAILayoutStudio = () => {
                           >
                             {videoCompareIds.includes(h.job_id) ? "Selected" : "Compare"}
                           </button>
+                          {dashboardPreviewId === h.job_id ? (
+                            <span className="text-muted-foreground" aria-label="This render is shown in your dashboard card preview">Card preview</span>
+                          ) : (
+                            <button
+                              type="button"
+                              aria-label={`Show render from ${new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })} in your dashboard card preview`}
+                              className="underline underline-offset-2 hover:text-foreground"
+                              onClick={() => chooseDashboardPreview(h.job_id)}
+                            >
+                              Set as card preview
+                            </button>
+                          )}
                         </span>
                       )}
                     </li>
