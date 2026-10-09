@@ -56,7 +56,8 @@ Deno.serve(async (req) => {
       const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations?limit=1", {
         headers: { authorization: `Bearer ${lumaKey}` },
       });
-      return json({ provider: "luma", configured: true, ok: res.ok, status: res.status });
+      const detail = (await res.text()).replace(/\s+/g, " ").trim().slice(0, 300);
+      return json({ provider: "luma", configured: true, ok: res.ok, status: res.status, detail });
     }
 
     if (!access.allowed) {
