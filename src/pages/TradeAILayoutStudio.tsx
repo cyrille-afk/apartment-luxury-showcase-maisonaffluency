@@ -897,6 +897,8 @@ const TradeAILayoutStudio = () => {
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                         {h.quality ? ` · ${h.quality}` : ""}
+                        {h.render_seconds != null ? ` · ${h.render_seconds}s` : ""}
+                        {h.cost_usd != null ? ` · $${Number(h.cost_usd).toFixed(2)}` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
