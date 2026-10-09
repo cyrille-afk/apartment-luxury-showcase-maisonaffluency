@@ -205,6 +205,38 @@ export function monthlyCostBreakdown(jobs: readonly VideoRenderRecord[]): VideoR
     .map(([monthKey, entry]) => ({ monthKey, label: videoRenderMonthLabel(monthKey), ...entry }));
 }
 
+export type VideoRenderChartPoint = {
+  /** "2026-10" UTC month key. */
+  monthKey: string;
+  /** "Oct 2026" style display label. */
+  label: string;
+  /** Every render that month, billed or not. */
+  renderCount: number;
+  /** Sum of recorded billed costs that month, in cents. */
+  totalCostCents: number;
+};
+
+/**
+ * Monthly render counts and billed costs, oldest month first — the series the
+ * history chart plots. Unlike monthlyCostBreakdown this counts every render,
+ * not just billed ones, so months with only failed/unbilled renders still show.
+ */
+export function videoRenderChartSeries(jobs: readonly VideoRenderRecord[]): VideoRenderChartPoint[] {
+  const byMonth = new Map<string, { renderCount: number; totalCostCents: number }>();
+  for (const job of jobs) {
+    const key = videoRenderMonthKey(job.created_at);
+    if (!key) continue;
+    const entry = byMonth.get(key) ?? { renderCount: 0, totalCostCents: 0 };
+    entry.renderCount += 1;
+    const cents = toCents(job.cost_usd);
+    if (cents !== null) entry.totalCostCents += cents;
+    byMonth.set(key, entry);
+  }
+  return [...byMonth.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([monthKey, entry]) => ({ monthKey, label: videoRenderMonthLabel(monthKey), ...entry }));
+}
+
 // Rough Luma estimates for a 5s 16:9 walkthrough, mirroring VIDEO_QUALITY_OPTIONS
 // on the AI layout page. Unknown qualities fall back to the 720p estimate, the
 // same fallback the video-generate route applies server-side.
