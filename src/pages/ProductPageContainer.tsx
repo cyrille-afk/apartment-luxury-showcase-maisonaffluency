@@ -13,7 +13,7 @@
  * quantity in either surface calculates against identical data variables.
  */
 import { Suspense, lazy, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "react-router-dom";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
 import { useAuth } from "@/hooks/useAuth";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
@@ -31,7 +31,8 @@ interface ProductPageContainerProps {
 export default function ProductPageContainer({
   isInsideTradePortal,
 }: ProductPageContainerProps) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug?: string }>();
   const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
   const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
@@ -47,7 +48,21 @@ export default function ProductPageContainer({
     }
   }, [tradeSessionLatched, rolesLoaded, isAdmin, isSuperAdmin, isTradeUser, tradeStatus]);
 
-  const insideTradePortal = routeInsideTradePortal || tradeSessionLatched;
+  // The B2B layout only renders correctly inside the trade portal shell
+  // (sidebar, light canvas). On a public URL, send the latched trade session
+  // to the equivalent /trade route instead of rendering it in the public shell.
+  if (!routeInsideTradePortal && tradeSessionLatched && designerSlug && productSlug) {
+    return (
+      <Navigate
+        to={`/trade/products/${designerSlug}/${productSlug}${search}`}
+        replace
+        state={{ from: pathname }}
+      />
+    );
+  }
+
+  const insideTradePortal = routeInsideTradePortal;
+
 
   return (
     <ProductConfigProvider isInsideTradePortal={insideTradePortal}>
