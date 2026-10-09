@@ -1,4 +1,25 @@
 import { describe, expect, it } from "vitest";
+
+describe("monthlyCostBreakdown", () => {
+  it("groups billed costs by UTC month, newest first", () => {
+    const months = monthlyCostBreakdown([
+      job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.6 }),
+      job({ job_id: "b", created_at: "2026-10-01T23:30:00Z", cost_usd: 0.35 }),
+      job({ job_id: "c", created_at: "2026-09-15T12:00:00Z", cost_usd: 1.2 }),
+    ]);
+    expect(months).toEqual([
+      { monthKey: "2026-10", label: "Oct 2026", billedCount: 2, totalCostCents: 95 },
+      { monthKey: "2026-09", label: "Sep 2026", billedCount: 1, totalCostCents: 120 },
+    ]);
+  });
+  it("skips renders with no recorded cost or unparseable dates", () => {
+    const months = monthlyCostBreakdown([
+      job({ job_id: "a", cost_usd: null }),
+      job({ job_id: "b", created_at: "not-a-date", cost_usd: 0.6 }),
+    ]);
+    expect(months).toEqual([]);
+  });
+});
 import { formatUsdCents, monthlyCostBreakdown, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({

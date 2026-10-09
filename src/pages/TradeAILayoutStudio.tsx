@@ -907,6 +907,18 @@ const TradeAILayoutStudio = () => {
                       : ""}
                   </p>
                 )}
+                {videoMonthlyBreakdown.length > 0 && (
+                  <ul className="mb-2 space-y-0.5 text-muted-foreground" aria-label="Monthly billed render costs">
+                    {videoMonthlyBreakdown.map((m) => (
+                      <li key={m.monthKey}>
+                        {m.label}
+                        {" — "}
+                        <span className="text-foreground">{formatUsdCents(m.totalCostCents)}</span>
+                        {` across ${m.billedCount} render${m.billedCount === 1 ? "" : "s"}`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <ul className="space-y-1.5">
                   {videoHistory.map((h) => (
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
