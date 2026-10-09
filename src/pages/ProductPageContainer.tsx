@@ -32,8 +32,22 @@ export default function ProductPageContainer({
   isInsideTradePortal,
 }: ProductPageContainerProps) {
   const { pathname } = useLocation();
-  const insideTradePortal =
+  const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
+
+  // An approved trade session (or admin) always gets the full B2B layout, even
+  // on public product URLs. Latched once confirmed so a later role re-check can
+  // never flip the page back to the public layout mid-visit.
+  const [tradeSessionLatched, setTradeSessionLatched] = useState(false);
+  useEffect(() => {
+    if (tradeSessionLatched || !rolesLoaded) return;
+    if (isAdmin || isSuperAdmin || (isTradeUser && tradeStatus === "approved")) {
+      setTradeSessionLatched(true);
+    }
+  }, [tradeSessionLatched, rolesLoaded, isAdmin, isSuperAdmin, isTradeUser, tradeStatus]);
+
+  const insideTradePortal = routeInsideTradePortal || tradeSessionLatched;
 
   return (
     <ProductConfigProvider isInsideTradePortal={insideTradePortal}>
