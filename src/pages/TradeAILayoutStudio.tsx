@@ -543,6 +543,10 @@ const TradeAILayoutStudio = () => {
   );
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistoryFiltered), [videoHistoryFiltered]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
+  const videoChartSeries = useMemo(
+    () => videoRenderChartSeries(videoHistory).map((p) => ({ ...p, costUsd: p.totalCostCents / 100 })),
+    [videoHistory],
+  );
   const videoMonthComparison = useMemo(
     () => videoRenderMonthComparison(videoHistory, activeVideoHistoryMonth),
     [videoHistory, activeVideoHistoryMonth],
