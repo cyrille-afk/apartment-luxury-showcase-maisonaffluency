@@ -312,8 +312,9 @@ All colors MUST be HSL.
   }
 }
 
-/* Trade Portal — flat editorial workspace */
-.trade-portal-shell {
+/* Trade Portal — flat editorial workspace. Presentation Mode (data-presentation)
+   opts out so client-facing pages keep the public site's palette, type and radii. */
+.trade-portal-shell:not([data-presentation]) {
   --background: 0 0% 100%;
   --foreground: 0 0% 10.2%;
   --card: 0 0% 100%;
@@ -332,11 +333,11 @@ All colors MUST be HSL.
   font-family: 'Inter', sans-serif;
 }
 
-.trade-portal-shell .font-body {
+.trade-portal-shell:not([data-presentation]) .font-body {
   font-family: 'Inter', sans-serif;
 }
 
-.trade-portal-shell .font-display {
+.trade-portal-shell:not([data-presentation]) .font-display {
   font-family: 'Playfair Display', serif;
   letter-spacing: 0;
 }
@@ -345,28 +346,28 @@ All colors MUST be HSL.
   box-shadow: none;
 }
 
-.trade-editorial-main [class*="rounded"],
-.trade-editorial-header [class*="rounded"],
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main [class*="rounded"],
+.trade-portal-shell:not([data-presentation]) .trade-editorial-header [class*="rounded"],
 .trade-editorial-sidebar [class*="rounded"] {
   border-radius: 0;
 }
 
-.trade-editorial-main .material-library-swatch {
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main .material-library-swatch {
   border-radius: 9999px;
 }
 
-.trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
   font-family: 'Playfair Display', serif;
   font-weight: 400;
   letter-spacing: 0;
 }
 
 /* Curator Notes lead header keeps its bold weight inside the trade shell */
-.trade-editorial-main h3.font-bold {
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main h3.font-bold {
   font-weight: 700;
 }
 
-.trade-portal-shell .trade-micro-label {
+.trade-portal-shell:not([data-presentation]) .trade-micro-label {
   font-size: 10px;
   line-height: 1.4;
   font-weight: 400;
@@ -374,11 +375,11 @@ All colors MUST be HSL.
   text-transform: uppercase;
 }
 
-.trade-portal-shell .trade-card-description {
+.trade-portal-shell:not([data-presentation]) .trade-card-description {
   color: hsl(var(--muted-foreground) / 0.72);
 }
 
-.trade-editorial-main > * {
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main > * {
   animation: tradeEditorialReveal 500ms ease-out both;
 }
 
@@ -405,7 +406,7 @@ All colors MUST be HSL.
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .trade-editorial-main > * { animation: none; }
+  .trade-portal-shell:not([data-presentation]) .trade-editorial-main > * { animation: none; }
 }
 
 /* Hide scrollbar for horizontal swipe strips */
