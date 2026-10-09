@@ -1,8 +1,18 @@
-import { describe, expect, it } from "vitest";
-import { buildSpecSheetUrl } from "./specSheetUrl";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildSpecSheetUrl, openSpecSheet, SPEC_SHEET_NAVIGATE_EVENT } from "./specSheetUrl";
+
+const realLocation = window.location;
+const at = (href: string) =>
+  Object.defineProperty(window, "location", { value: new URL(href), configurable: true });
+
+afterEach(() => {
+  Object.defineProperty(window, "location", { value: realLocation, configurable: true });
+  vi.restoreAllMocks();
+});
 
 describe("buildSpecSheetUrl", () => {
-  it("opens the Geo lamp sheet on production with its exact selection", () => {
+  it("opens the Geo lamp sheet with its exact selection", () => {
+    at("https://maisonaffluency.com/trade/products/x");
     const url = new URL(buildSpecSheetUrl(
       "https://assets.example/geo.pdf", "Alexander Lamont", "Geo Table Lamp",
       "Geo Table Lamp Natural Speckle Shagreen  Specsheet", 1,
@@ -16,16 +26,28 @@ describe("buildSpecSheetUrl", () => {
     expect(url.href).not.toContain("assets.example");
   });
 
-  it("uses production for single sheets too and omits invalid indices", () => {
+  it("falls back to production on unknown hosts and omits invalid indices", () => {
+    at("https://evil.example/page");
     expect(buildSpecSheetUrl("ignored", "A & B", "Lamp / One", undefined, NaN))
       .toBe("https://maisonaffluency.com/trade/spec-sheet?brand=A+%26+B&product=Lamp+%2F+One");
   });
-});
-describe("buildSpecSheetUrl origin", () => {
+
   it("keeps the signed-in www origin", () => {
-    const orig = window.location;
-    Object.defineProperty(window, "location", { value: new URL("https://www.maisonaffluency.com/trade/products/x"), configurable: true });
+    at("https://www.maisonaffluency.com/trade/products/x");
     expect(buildSpecSheetUrl("x", "A", "B").startsWith("https://www.maisonaffluency.com/trade/spec-sheet?")).toBe(true);
-    Object.defineProperty(window, "location", { value: orig, configurable: true });
+  });
+});
+
+describe("openSpecSheet", () => {
+  it("opens our own viewer in the same tab, never a new tab", () => {
+    at("https://www.maisonaffluency.com/trade/products/x");
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    const seen: string[] = [];
+    const listener = (e: Event) => seen.push((e as CustomEvent<string>).detail);
+    window.addEventListener(SPEC_SHEET_NAVIGATE_EVENT, listener);
+    openSpecSheet(buildSpecSheetUrl("x", "Entrelacs", "BEAM Wall Lamp"));
+    window.removeEventListener(SPEC_SHEET_NAVIGATE_EVENT, listener);
+    expect(open).not.toHaveBeenCalled();
+    expect(seen).toEqual(["/trade/spec-sheet?brand=Entrelacs&product=BEAM+Wall+Lamp"]);
   });
 });
