@@ -1066,14 +1066,14 @@ export function AIConcierge({
   }, [onboardingGate, verifiedFacts, factOverrides]);
   useEffect(() => { onboardingGateRef.current = effectiveOnboardingGate; }, [effectiveOnboardingGate]);
   useEffect(() => {
-    if (onboardingGate.completed) return;
+    if (effectiveOnboardingGate.completed) return;
     setTimeline((prev) => {
       const next = clearBriefResultState(prev);
       return next.length === prev.length ? prev : next;
     });
-  }, [onboardingGate.completed]);
+  }, [effectiveOnboardingGate.completed]);
   const requestedStage: Stage = stageOverride ?? contextualRouteStage;
-  const stage: Stage = onboardingGate.completed ? requestedStage : "Discover";
+  const stage: Stage = effectiveOnboardingGate.completed ? requestedStage : "Discover";
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
