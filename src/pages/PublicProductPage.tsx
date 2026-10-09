@@ -2811,7 +2811,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                           </p>
                         )}
                       </div>
-                    ) : displayRrpLabel && (
+                    ) : displayRrpLabel ? (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                           {(() => {
@@ -2833,7 +2833,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                           </p>
                         )}
                       </div>
-                    )}
+                    ) : presentation ? <p className="mt-6 font-body text-sm text-muted-foreground">Price upon Request</p> : null}
                   </div>
 
                   <VariantSelectorsProvider

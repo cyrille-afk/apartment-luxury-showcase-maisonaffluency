@@ -17,6 +17,8 @@ import { Navigate, useLocation, useParams } from "react-router-dom";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPublicProductPage } from "@/lib/publicProductPageQuery";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */
@@ -34,7 +36,7 @@ export default function ProductPageContainer({
 }: ProductPageContainerProps) {
   const { pathname, search } = useLocation();
   const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug?: string }>();
-  const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  const { user, isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
   const { clientSafe } = useClientSafeMode();
   const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
@@ -49,6 +51,20 @@ export default function ProductPageContainer({
       setTradeSessionLatched(true);
     }
   }, [tradeSessionLatched, rolesLoaded, isAdmin, isSuperAdmin, isTradeUser, tradeStatus]);
+
+  const shortRouteProduct = useQuery({
+    queryKey: ["trade-short-product-route", productSlug],
+    enabled: tradeSessionLatched && !routeInsideTradePortal && !designerSlug && !!productSlug,
+    queryFn: () => fetchPublicProductPage(undefined, productSlug),
+  });
+
+  if (user && !rolesLoaded && !routeInsideTradePortal) return <PageLoadingSkeleton />;
+  if (!routeInsideTradePortal && tradeSessionLatched && !designerSlug && productSlug) {
+    if (shortRouteProduct.data?.product?.id) {
+      return <Navigate to={`/trade/products/${shortRouteProduct.data.product.id}${search}`} replace />;
+    }
+    if (shortRouteProduct.isLoading) return <PageLoadingSkeleton />;
+  }
 
   // The B2B layout only renders correctly inside the trade portal shell
   // (sidebar, light canvas). On a public URL, send the latched trade session
