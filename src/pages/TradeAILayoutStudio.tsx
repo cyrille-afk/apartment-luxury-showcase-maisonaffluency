@@ -490,6 +490,10 @@ const TradeAILayoutStudio = () => {
   }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const toggleCompare = (jobId: string) =>
+    setCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
+  const compareItems = compareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
   const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
     const q = localStorage.getItem("ma_video_quality");
     return q === "540p" || q === "1080p" ? q : "720p";
