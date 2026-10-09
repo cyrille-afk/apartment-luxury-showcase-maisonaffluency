@@ -1046,6 +1046,7 @@ const TradeAILayoutStudio = () => {
                     </li>
                   ))}
                 </ul>
+                )}
                 {compareItems.length === 2 && (
                   <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
                     <div className="mb-2 flex items-center justify-between">
