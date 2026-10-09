@@ -437,6 +437,13 @@ const TradeAILayoutStudio = () => {
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
+  const [videoWide, setVideoWide] = useState(false);
+  useEffect(() => {
+    if (!videoWide) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setVideoWide(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const refreshVideoHistory = useCallback(async () => {
