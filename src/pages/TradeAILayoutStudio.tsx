@@ -443,11 +443,13 @@ const TradeAILayoutStudio = () => {
   const resumeRef = useRef<{ t: number; playing: boolean } | null>(null);
   const swapVideoSize = () => {
     const v = videoRef.current;
+    console.log("DBG swap", !!v, v && v.currentTime, v && !v.paused);
     if (v) resumeRef.current = { t: v.currentTime, playing: !v.paused };
     setVideoWide((w) => !w);
   };
   const restoreVideoPosition = (el: HTMLVideoElement) => {
     const r = resumeRef.current;
+    console.log("DBG restore", JSON.stringify(r), "readyState", el.readyState, "seekable", el.seekable.length);
     if (!r) return;
     resumeRef.current = null;
     el.currentTime = r.t;
