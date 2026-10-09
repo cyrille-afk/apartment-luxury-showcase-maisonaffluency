@@ -490,6 +490,10 @@ const TradeAILayoutStudio = () => {
   }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
+  const toggleVideoCompare = (jobId: string) =>
+    setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
+  const compareItems = videoCompareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
   const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
     const q = localStorage.getItem("ma_video_quality");
     return q === "540p" || q === "1080p" ? q : "720p";
@@ -840,17 +844,51 @@ const TradeAILayoutStudio = () => {
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
                       {h.video_url && (
-                        <button
-                          type="button"
-                          className="shrink-0 underline underline-offset-2 hover:text-foreground"
-                          onClick={() => setVideoJob({ id: h.job_id, state: "completed", url: h.video_url ?? undefined })}
-                        >
-                          Replay
-                        </button>
+                        <span className="flex shrink-0 items-center gap-3">
+                          <button
+                            type="button"
+                            className="underline underline-offset-2 hover:text-foreground"
+                            onClick={() => setVideoJob({ id: h.job_id, state: "completed", url: h.video_url ?? undefined })}
+                          >
+                            Replay
+                          </button>
+                          <button
+                            type="button"
+                            aria-pressed={videoCompareIds.includes(h.job_id)}
+                            aria-label={`Compare render from ${new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`}
+                            className={`underline underline-offset-2 hover:text-foreground ${videoCompareIds.includes(h.job_id) ? "font-medium text-foreground" : ""}`}
+                            onClick={() => toggleVideoCompare(h.job_id)}
+                          >
+                            {videoCompareIds.includes(h.job_id) ? "Selected" : "Compare"}
+                          </button>
+                        </span>
                       )}
                     </li>
                   ))}
                 </ul>
+                {compareItems.length === 2 && (
+                  <div className="mt-3 border-t border-border pt-3" aria-label="Walkthrough quality comparison">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="font-medium">Side-by-side comparison</p>
+                      <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setVideoCompareIds([])}>
+                        Close comparison
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {compareItems.map((h) => (
+                        <figure key={h.job_id} className="space-y-1">
+                          <video src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
+                          <figcaption className="text-muted-foreground">
+                            {h.quality ?? "720p"} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {compareItems.length === 1 && (
+                  <p className="mt-2 text-muted-foreground">Select one more ready render to compare side by side.</p>
+                )}
               </div>
             )}
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
