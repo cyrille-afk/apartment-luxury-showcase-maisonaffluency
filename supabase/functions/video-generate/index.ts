@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping"
-      : body?.mode === "poll" ? "poll" : "status";
+      : body?.mode === "poll" ? "poll" : body?.mode === "history" ? "history" : "status";
 
     const [{ data: roles }, { data: profile }, { data: credits }] = await Promise.all([
       db.from("user_roles").select("role").eq("user_id", userId),
@@ -87,12 +87,16 @@ Deno.serve(async (req) => {
         headers: { authorization: `Bearer ${lumaKey}` },
       });
       const data = await res.json().catch(() => null);
-      return json({
-        ok: res.ok, status: res.status,
-        state: data?.state ?? null,
-        failure: data?.failure_reason ?? data?.failure_code ?? null,
-        outputs: Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null,
-      });
+      const state = data?.state ?? null;
+      const failure = data?.failure_reason ?? data?.failure_code ?? null;
+      const outputs = Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null;
+      const videoUrl = outputs?.find((u: string | null) => typeof u === "string" && u) ?? null;
+      if (state === "completed" || state === "failed" || videoUrl) {
+        await db.from("video_render_jobs").update({
+          state: state ?? "completed", video_url: videoUrl, failure, updated_at: new Date().toISOString(),
+        }).eq("job_id", id).eq("user_id", userId);
+      }
+      return json({ ok: res.ok, status: res.status, state, failure, outputs });
     }
 
 
