@@ -717,7 +717,7 @@ const TradeAILayoutStudio = () => {
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">
                 {videoJob.url ? (
                   <>
-                    <video src={videoJob.url} controls autoPlay muted loop playsInline className="w-full" />
+                    <video src={videoJob.url} controls playsInline className="w-full" />
                     <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
                   </>
                 ) : videoJob.failure ? (
