@@ -488,8 +488,12 @@ const TradeAILayoutStudio = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [videoWide]);
-  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
+  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
+    const q = localStorage.getItem("ma_video_quality");
+    return q === "540p" || q === "1080p" ? q : "720p";
+  });
   const refreshVideoHistory = useCallback(async () => {
     const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "history" } });
     if (Array.isArray(data?.jobs)) setVideoHistory(data.jobs as VideoHistoryItem[]);
@@ -515,7 +519,7 @@ const TradeAILayoutStudio = () => {
     setExporting(true);
     try {
       const payload = buildSceneVideoPayload(scene, cinematic, briefText);
-      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload, snapshot: captureSnapshot() } });
+      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload, snapshot: captureSnapshot(), quality: videoQuality } });
       if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
       if (error || data?.error) throw new Error(data?.error || error?.message);
       if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
@@ -758,6 +762,14 @@ const TradeAILayoutStudio = () => {
             <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic || !!authorMode}>
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
+            <Select value={videoQuality} onValueChange={(v) => { const q = v === "540p" || v === "1080p" ? v : "720p"; setVideoQuality(q); localStorage.setItem("ma_video_quality", q); }}>
+              <SelectTrigger aria-label="Video quality" className="h-9 w-[150px] bg-background text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="540p">Draft · 540p</SelectItem>
+                <SelectItem value="720p">HD · 720p</SelectItem>
+                <SelectItem value="1080p">Full HD · 1080p</SelectItem>
+              </SelectContent>
+            </Select>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : videoLocked ? <Lock className="mr-1.5 h-3.5 w-3.5" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Generate Walkthrough Video
               {videoStatus?.unlimited && <span className="ml-2 border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.14em]">Cinematic HD Render</span>}
@@ -811,6 +823,7 @@ const TradeAILayoutStudio = () => {
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                        {h.quality ? ` · ${h.quality}` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
