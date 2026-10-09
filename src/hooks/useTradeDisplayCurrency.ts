@@ -224,22 +224,26 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
   // of truth for the trade modules: it is applied on every mount, ahead of any
   // country/IP detection, so every module renders in the declared currency.
   useEffect(() => {
+    if (!rolesLoaded) return;
     let cancelled = false;
     (async () => {
       const fromAccount = await loadAccountCurrency();
-      if (fromAccount && !cancelled) {
+      const next = fromAccount ?? (isTradeSession ? "EUR" : null);
+      if (next && !cancelled) {
         try {
-          window.localStorage.setItem(STORAGE_KEY, fromAccount);
+          window.localStorage.setItem(STORAGE_KEY, next);
         } catch { /* ignore */ }
-        setValue(fromAccount);
-        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: fromAccount }));
+        setValue(next);
+        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [rolesLoaded, isTradeSession]);
 
   // One-shot auto-default from country, only if the user has never manually picked.
+  // Skipped for trade sessions — their baseline is the account currency / EUR.
   useEffect(() => {
+    if (!rolesLoaded || isTradeSession) return;
     if (isManual()) return;
     let cancelled = false;
 
