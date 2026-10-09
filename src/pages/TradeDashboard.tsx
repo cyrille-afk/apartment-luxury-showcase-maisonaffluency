@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -62,13 +62,28 @@ const DASH_CARDS = [
 // Hover/focus preview of the member's latest completed walkthrough render,
 // layered over the dashboard card image. RLS scopes video_render_jobs to the
 // signed-in user, so this only ever surfaces their own renders.
-function WalkthroughCardPreview() {
+interface WalkthroughCardPreviewHandle {
+  // Returns true when the tap was consumed to start the preview (touch only).
+  startTouchPreview: () => boolean;
+}
+
+const WalkthroughCardPreview = forwardRef<WalkthroughCardPreviewHandle>(
+  function WalkthroughCardPreview(_props, ref) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   // On touch devices there is no hover: first tap previews, second tap opens the page.
   const [touchPreviewing, setTouchPreviewing] = useState(false);
   const isTouch = () =>
     typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
+
+  useImperativeHandle(ref, () => ({
+    startTouchPreview: () => {
+      if (!isTouch() || touchPreviewing || !videoUrl) return false;
+      setTouchPreviewing(true);
+      void videoRef.current?.play().catch(() => undefined);
+      return true;
+    },
+  }), [touchPreviewing, videoUrl]);
 
   useEffect(() => {
     let cancelled = false;
