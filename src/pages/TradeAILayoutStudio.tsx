@@ -729,6 +729,31 @@ const TradeAILayoutStudio = () => {
                 )}
               </div>
             )}
+            {videoHistory.length > 0 && (
+              <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
+                <p className="mb-2 font-medium">Previous walkthrough videos</p>
+                <ul className="space-y-1.5">
+                  {videoHistory.map((h) => (
+                    <li key={h.job_id} className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">
+                        {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                        {" — "}
+                        {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
+                      </span>
+                      {h.video_url && (
+                        <button
+                          type="button"
+                          className="shrink-0 underline underline-offset-2 hover:text-foreground"
+                          onClick={() => setVideoJob({ id: h.job_id, state: "completed", url: h.video_url ?? undefined })}
+                        >
+                          Replay
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
               <div className="w-full space-y-1">
                 <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">
