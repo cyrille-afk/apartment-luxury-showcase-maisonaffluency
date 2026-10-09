@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     if (mode === "status") return json(summary);
 
     // Admin-only key check: lists 1 generation (no render, no charge).
-    if (body?.mode === "ping") {
+    if (mode === "ping") {
       if (!isAdmin) return json({ error: "Admin only" }, 403);
       const lumaKey = Deno.env.get("LUMA_API_KEY");
       if (!lumaKey) return json({ provider: "luma", configured: false });
