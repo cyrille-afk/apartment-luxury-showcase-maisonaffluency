@@ -12,9 +12,10 @@
  * Both variants consume the same state, so swapping a finish or changing the
  * quantity in either surface calculates against identical data variables.
  */
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
+import { useAuth } from "@/hooks/useAuth";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */
