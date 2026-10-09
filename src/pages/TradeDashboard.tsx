@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -58,6 +58,48 @@ const DASH_CARDS = [
   { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: dashboard3dStudioImage as string | null, defaultGravity: "auto" },
   { key: "dash-ai-walkthrough", title: "3D Room Layout & Walkthrough", description: "Furnish a room from your brief, then render a cinematic walkthrough", icon: Clapperboard, to: "/trade/ai-layout", fallbackId: null as string | null, fallbackImage: dashboardWalkthroughImage as string | null, defaultGravity: "center" },
 ];
+
+// Hover/focus preview of the member's latest completed walkthrough render,
+// layered over the dashboard card image. RLS scopes video_render_jobs to the
+// signed-in user, so this only ever surfaces their own renders.
+function WalkthroughCardPreview() {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("video_render_jobs")
+        .select("video_url")
+        .eq("state", "completed")
+        .not("video_url", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (!cancelled && data && data.length > 0 && data[0].video_url) {
+        setVideoUrl(data[0].video_url);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!videoUrl) return null;
+
+  return (
+    <video
+      ref={videoRef}
+      src={videoUrl}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      aria-label="Preview of your latest walkthrough render"
+      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-focus-visible:opacity-100"
+      onMouseEnter={(e) => { void e.currentTarget.play().catch(() => undefined); }}
+      onMouseLeave={(e) => { e.currentTarget.pause(); }}
+    />
+  );
+}
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
   east: "object-right",
@@ -352,6 +394,7 @@ const TradeDashboard = () => {
                 </div>
               )}
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+              {card.key === "dash-ai-walkthrough" && <WalkthroughCardPreview />}
               {card.key === "dash-showroom" && (
                 <button
                   type="button"
