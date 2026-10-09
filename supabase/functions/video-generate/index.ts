@@ -131,6 +131,9 @@ Deno.serve(async (req) => {
       }
       const jid = (response as { job_id?: string } | null)?.job_id;
       const poll_token = lumaKey && jid ? await pollToken(userId, jid) : undefined;
+      if (lumaKey && jid) {
+        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued" });
+      }
       return json({ status: "queued", poll_token, charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {
       if (consumed) await db.rpc("refund_video_credit", { _user: userId, _source: consumed });
