@@ -38,6 +38,7 @@ import RoomOverviewCamera from "@/components/trade/visualiser/RoomOverviewCamera
 import RoomCameraPresets from "@/components/trade/visualiser/RoomCameraPresets";
 import SelectedPieceDetails from "@/components/trade/visualiser/SelectedPieceDetails";
 import LayoutPieceCompare from "@/components/trade/visualiser/LayoutPieceCompare";
+import VideoDiffOverlay from "@/components/trade/visualiser/VideoDiffOverlay";
 import { buildFurnishingSchedulePdf, downloadBlob } from "@/lib/furnishingSchedulePdf";
 import ClientSchedulePreview from "@/components/trade/visualiser/ClientSchedulePreview";
 
@@ -500,6 +501,9 @@ const TradeAILayoutStudio = () => {
   const compareSyncing = useRef(false);
   // Per-video mute state for the side-by-side comparison (independent of sync).
   const [compareMuted, setCompareMuted] = useState<boolean[]>([true, true]);
+  const [diffOn, setDiffOn] = useState(false);
+  const [diffThreshold, setDiffThreshold] = useState(30);
+  const getCompareVideos = useCallback(() => compareVideoRefs.current, []);
   const toggleCompareMute = (i: number) => {
     const v = compareVideoRefs.current[i];
     const next = !compareMuted[i];
