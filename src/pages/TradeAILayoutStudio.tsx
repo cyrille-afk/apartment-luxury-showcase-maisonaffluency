@@ -494,6 +494,38 @@ const TradeAILayoutStudio = () => {
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
   const compareItems = videoCompareIds.map((id) => videoHistory.find((h) => h.job_id === id)).filter((h): h is VideoHistoryItem => !!h?.video_url);
+  // Synchronized side-by-side playback: play/pause/seek/rate on either video mirrors to the other.
+  const compareVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const compareSyncing = useRef(false);
+  useEffect(() => {
+    if (compareItems.length !== 2) return;
+    const vids = compareVideoRefs.current.filter((v): v is HTMLVideoElement => !!v);
+    if (vids.length !== 2) return;
+    const cleanups: (() => void)[] = [];
+    vids.forEach((src, i) => {
+      const dst = vids[1 - i];
+      const mirror = (fn: () => void) => {
+        if (compareSyncing.current) return;
+        compareSyncing.current = true;
+        try { fn(); } finally { compareSyncing.current = false; }
+      };
+      const onPlay = () => mirror(() => { if (Math.abs(dst.currentTime - src.currentTime) > 0.15) dst.currentTime = src.currentTime; void dst.play().catch(() => {}); });
+      const onPause = () => mirror(() => dst.pause());
+      const onSeeked = () => mirror(() => { dst.currentTime = src.currentTime; });
+      const onRate = () => mirror(() => { dst.playbackRate = src.playbackRate; });
+      src.addEventListener("play", onPlay);
+      src.addEventListener("pause", onPause);
+      src.addEventListener("seeked", onSeeked);
+      src.addEventListener("ratechange", onRate);
+      cleanups.push(() => {
+        src.removeEventListener("play", onPlay);
+        src.removeEventListener("pause", onPause);
+        src.removeEventListener("seeked", onSeeked);
+        src.removeEventListener("ratechange", onRate);
+      });
+    });
+    return () => cleanups.forEach((c) => c());
+  }, [compareItems.length === 2 ? compareItems.map((h) => h.job_id).join("|") : ""]);
   const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
     const q = localStorage.getItem("ma_video_quality");
     return q === "540p" || q === "1080p" ? q : "720p";
