@@ -17,6 +17,8 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+import ProductDisplayToggle from "@/components/trade/ProductDisplayToggle";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 import ClientViewToggle from "@/components/trade/ClientViewToggle";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher";
@@ -348,6 +350,9 @@ const TradeLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
+  const { clientSafe } = useClientSafeMode();
+  const productRoute = /^\/trade\/products\//.test(location.pathname);
+  const presentation = productRoute && clientSafe;
 
   // Strip a bare trailing "#" left in the URL by in-page anchor scrolls.
   useEffect(() => {
@@ -510,7 +515,7 @@ const TradeLayout = () => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header h-14 md:h-16 ${/^\/trade\/products\//.test(location.pathname) ? "hidden md:flex" : "flex"} items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive><TradeMobileMenu
@@ -531,15 +536,15 @@ const TradeLayout = () => {
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
               <div className="shrink-0" data-felix-target="header-client-view">
-                 <ClientViewToggle />
+                 {productRoute ? <ProductDisplayToggle /> : <ClientViewToggle />}
                </div>
                 {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
                <span data-trade-sensitive><MobilePreviewHeaderButton /></span>
             </div>
           </header>
-          <main className={`trade-editorial-main flex-1 ${fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
+          <main className={`trade-editorial-main flex-1 ${presentation ? "p-0" : fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
             <ToolsBreadcrumbProvider>
-              {!fullBleed && (
+              {!fullBleed && !presentation && (
                  <div data-trade-sensitive className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
                   <ToolsBreadcrumb className="mb-0" />
                   <ProjectWorkspaceBreadcrumb />

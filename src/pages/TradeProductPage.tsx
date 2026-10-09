@@ -51,7 +51,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
 import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
-import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
+import { productDisplayPolicy } from "@/lib/productDisplayMode";
 import { productEditionBadge, isEcartReedition } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
@@ -212,7 +212,7 @@ type TradeProductResult = {
   glbUrl?: string | null;
 };
 
-function useTradeProductBySlug(
+export function useTradeProductBySlug(
   tradeProductIdParam: string | undefined,
   designerSlug: string | undefined,
   productSlug: string | undefined,
@@ -557,7 +557,7 @@ const TradeProductPage: React.FC = () => {
   const { data, isLoading } = useTradeProductBySlug(tradeProductIdParam, designerSlug, productSlug);
 
   // ── Pricing display state ──
-  const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
+  const displayCurrency = productDisplayPolicy(false, "EUR").currency as DisplayCurrency;
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
@@ -635,19 +635,6 @@ const TradeProductPage: React.FC = () => {
 
 
   const fxRates = useFxRates();
-
-  // Honour `?ccy=<CODE>` from the concierge drawer's deep-link so the product
-  // page opens in the same currency the drawer showed (the pick's base
-  // currency), instead of the user's auto-defaulted display currency.
-  useEffect(() => {
-    const qp = new URLSearchParams(location.search);
-    const raw = (qp.get("ccy") || "").trim().toUpperCase();
-    if (!raw) return;
-    const supported = ["original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"] as const;
-    const match = supported.find((c) => c.toUpperCase() === raw);
-    if (match && match !== displayCurrency) setDisplayCurrency(match as any);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search]);
 
   // ── Quote drawer ──
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -2141,7 +2128,7 @@ const TradeProductPage: React.FC = () => {
                 </div>
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
-                <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
+                <span className="font-body text-[11px] text-muted-foreground" title="Contract baseline currency">EUR</span>
               </div>
             </div>
 

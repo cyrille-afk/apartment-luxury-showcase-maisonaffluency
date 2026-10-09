@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add product Studio/Presentation modes and verify routes, retail-only localized prices, sidebar and studio EUR.
 - [x] Add comparator A–Z designer browsing with curator picks, catalogue search and favourites; seven tests pass, live Ondas/Dais selection shows Silver −10% prices, and Client View removes the net trade row without page errors.
 - [x] Add recorded manufacturer names and product-page links to selected room pieces; all three trade sourcing buttons open correct product pages live without page errors; new shared snapshots retain manufacturer and public product links.
 - [x] Show selected generated-piece name, RRP and recorded dual-unit dimensions in studio and shared views; live selection verified for all three pieces, direct lamp-model selection and dismissal pass without page errors; sofa/table dimensions are not recorded.

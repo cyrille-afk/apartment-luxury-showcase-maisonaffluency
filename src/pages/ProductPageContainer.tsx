@@ -16,6 +16,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */
@@ -34,6 +35,7 @@ export default function ProductPageContainer({
   const { pathname, search } = useLocation();
   const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug?: string }>();
   const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  const { clientSafe } = useClientSafeMode();
   const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
 
@@ -63,10 +65,11 @@ export default function ProductPageContainer({
   const insideTradePortal = routeInsideTradePortal;
 
 
+
   return (
     <ProductConfigProvider isInsideTradePortal={insideTradePortal}>
       <Suspense fallback={<PageLoadingSkeleton />}>
-        {insideTradePortal ? <TradePortalDashboardLayout /> : <PublicEditorialLayout />}
+        {insideTradePortal && !clientSafe ? <TradePortalDashboardLayout /> : <PublicEditorialLayout presentation={insideTradePortal && clientSafe} />}
       </Suspense>
     </ProductConfigProvider>
   );
