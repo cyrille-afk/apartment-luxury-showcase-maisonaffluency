@@ -24,6 +24,7 @@ import { useEffect, useState, useCallback } from "react";
 import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
 import { MANUAL_DEST_KEY } from "@/lib/shippingDestination";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const STORAGE_KEY = "trade.displayCurrency";
 const MANUAL_FLAG_KEY = "trade.displayCurrency.manual";
@@ -195,6 +196,11 @@ const isManual = (): boolean => {
 
 export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurrency) => void] {
   const [value, setValue] = useState<DisplayCurrency>(read);
+  const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  // Approved trade sessions (and admins) anchor on the account's declared
+  // currency, falling back to EUR — never to IP/locale geolocation.
+  const isTradeSession =
+    rolesLoaded && (isAdmin || isSuperAdmin || (isTradeUser && tradeStatus === "approved"));
 
   // Sync across tabs and across mounted instances in the same tab.
   useEffect(() => {
@@ -218,22 +224,26 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
   // of truth for the trade modules: it is applied on every mount, ahead of any
   // country/IP detection, so every module renders in the declared currency.
   useEffect(() => {
+    if (!rolesLoaded) return;
     let cancelled = false;
     (async () => {
       const fromAccount = await loadAccountCurrency();
-      if (fromAccount && !cancelled) {
+      const next = fromAccount ?? (isTradeSession ? "EUR" : null);
+      if (next && !cancelled) {
         try {
-          window.localStorage.setItem(STORAGE_KEY, fromAccount);
+          window.localStorage.setItem(STORAGE_KEY, next);
         } catch { /* ignore */ }
-        setValue(fromAccount);
-        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: fromAccount }));
+        setValue(next);
+        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [rolesLoaded, isTradeSession]);
 
   // One-shot auto-default from country, only if the user has never manually picked.
+  // Skipped for trade sessions — their baseline is the account currency / EUR.
   useEffect(() => {
+    if (!rolesLoaded || isTradeSession) return;
     if (isManual()) return;
     let cancelled = false;
 
@@ -290,7 +300,7 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     }
 
     return () => { cancelled = true; };
-  }, []);
+  }, [rolesLoaded, isTradeSession]);
 
   const update = useCallback((next: DisplayCurrency) => {
     setValue(next);

@@ -12,9 +12,10 @@
  * Both variants consume the same state, so swapping a finish or changing the
  * quantity in either surface calculates against identical data variables.
  */
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
+import { useAuth } from "@/hooks/useAuth";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */
@@ -31,8 +32,22 @@ export default function ProductPageContainer({
   isInsideTradePortal,
 }: ProductPageContainerProps) {
   const { pathname } = useLocation();
-  const insideTradePortal =
+  const { isTradeUser, isAdmin, isSuperAdmin, tradeStatus, rolesLoaded } = useAuth();
+  const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
+
+  // An approved trade session (or admin) always gets the full B2B layout, even
+  // on public product URLs. Latched once confirmed so a later role re-check can
+  // never flip the page back to the public layout mid-visit.
+  const [tradeSessionLatched, setTradeSessionLatched] = useState(false);
+  useEffect(() => {
+    if (tradeSessionLatched || !rolesLoaded) return;
+    if (isAdmin || isSuperAdmin || (isTradeUser && tradeStatus === "approved")) {
+      setTradeSessionLatched(true);
+    }
+  }, [tradeSessionLatched, rolesLoaded, isAdmin, isSuperAdmin, isTradeUser, tradeStatus]);
+
+  const insideTradePortal = routeInsideTradePortal || tradeSessionLatched;
 
   return (
     <ProductConfigProvider isInsideTradePortal={insideTradePortal}>
