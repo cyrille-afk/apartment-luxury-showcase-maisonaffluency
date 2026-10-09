@@ -219,6 +219,7 @@ const TradeDashboard = () => {
   const projectBoards = useProjectBoardTree(activeProjects.map((project) => project.id));
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
+  const walkthroughPreviewRef = useRef<WalkthroughCardPreviewHandle>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
@@ -434,6 +435,14 @@ const TradeDashboard = () => {
             data-felix-target={card.key === "dash-showroom" ? "dashboard-showroom" : undefined}
             data-tour-target={card.key === "dash-designers" ? "designers" : card.key === "dash-library" ? "resources" : undefined}
             className={`group ${card.key === "dash-showroom" ? "group/radar" : ""} flex h-full flex-col pb-2 md:pb-4 tour-target ${index === 0 ? "lg:col-span-7" : index === 1 ? "lg:col-span-5" : "lg:col-span-4"}`}
+            onClickCapture={(e) => {
+              // Touch devices: first tap on the walkthrough card previews the video
+              // instead of navigating; the second tap opens the page.
+              if (card.key === "dash-ai-walkthrough" && walkthroughPreviewRef.current?.startTouchPreview()) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
           >
             <div className={`relative overflow-hidden bg-muted ${index === 0 ? "aspect-[16/9]" : index === 1 ? "aspect-[10/9]" : "aspect-[4/3]"}`}>
               {getCardImage(card) ? (
