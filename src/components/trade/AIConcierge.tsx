@@ -8,7 +8,7 @@ import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft, type BriefBuilderHandle } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
-import { loadLockedFacts, mergeLockedFacts, persistLockedFacts } from "@/lib/felixLockedFacts";
+import { loadLockedFacts, mergeLockedFacts, persistLockedFacts, loadFactOverrides, persistFactOverrides, clearFactOverrides, applyFactOverrides, type FelixFactOverrides } from "@/lib/felixLockedFacts";
 import { readPendingBespokeSync, clearBespokeSync, bespokeSyncConfirmation } from "@/lib/bespokeSync";
 import { readPendingBespokeUploadCache, clearPendingBespokeUploadCache, pendingBespokeIntro } from "@/lib/pendingBespokeCache";
 import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
@@ -1005,7 +1005,6 @@ export function AIConcierge({
     briefManuallyCompleted || timeline.some((item) => item.kind === "layout_options"),
   ), [briefDraft, timeline, briefManuallyCompleted]);
   const onboardingGateRef = useRef(onboardingGate);
-  useEffect(() => { onboardingGateRef.current = onboardingGate; }, [onboardingGate]);
   // --- Locked project facts (no memory drift across timeouts / resumes) ---
   // Once a verified attribute exists ("Prewar Co-op"), it is pinned in local
   // state + localStorage. Nothing coming back from the stream, a retry, or a
@@ -1023,19 +1022,58 @@ export function AIConcierge({
     });
   }, [onboardingGate.facts]);
   /** Gate facts merged with the locked cache — always the richer of the two. */
+  const [factOverrides, setFactOverrides] = useState<FelixFactOverrides>(() => loadFactOverrides());
+  const [factsEditorOpen, setFactsEditorOpen] = useState(false);
+  const [factDrafts, setFactDrafts] = useState<FelixBriefFacts>({ projectProfile: "", zone: "", budget: "" });
   const verifiedFacts = useMemo(
-    () => mergeLockedFacts(lockedFacts, onboardingGate.facts),
-    [lockedFacts, onboardingGate.facts],
+    () => applyFactOverrides(mergeLockedFacts(lockedFacts, onboardingGate.facts), factOverrides),
+    [lockedFacts, onboardingGate.facts, factOverrides],
   );
+  const openFactsEditor = useCallback(() => {
+    setFactDrafts({ ...verifiedFacts });
+    setFactsEditorOpen(true);
+  }, [verifiedFacts]);
+  const saveFactsEditor = useCallback(() => {
+    const next: FelixFactOverrides = {
+      projectProfile: factDrafts.projectProfile.trim(),
+      zone: factDrafts.zone.trim(),
+      budget: factDrafts.budget.trim(),
+    };
+    persistFactOverrides(next);
+    setFactOverrides(next);
+    setFactsEditorOpen(false);
+  }, [factDrafts]);
+  const resetFactsEditor = useCallback(() => {
+    clearFactOverrides();
+    setFactOverrides({});
+    setFactsEditorOpen(false);
+  }, []);
+  /** Gate sent to Felix — user corrections replace the detected facts. */
+  const effectiveOnboardingGate = useMemo(() => {
+    const allReal =
+      hasRealBriefValue(verifiedFacts.projectProfile) &&
+      hasRealBriefValue(verifiedFacts.zone) &&
+      hasRealBriefValue(verifiedFacts.budget);
+    const userCompleted =
+      allReal &&
+      (["projectProfile", "zone", "budget"] as const).every((k) => k in factOverrides);
+    return {
+      ...onboardingGate,
+      facts: verifiedFacts,
+      completed: onboardingGate.completed || userCompleted,
+      missing: (["projectProfile", "zone", "budget"] as const).filter((k) => !hasRealBriefValue(verifiedFacts[k])),
+    };
+  }, [onboardingGate, verifiedFacts, factOverrides]);
+  useEffect(() => { onboardingGateRef.current = effectiveOnboardingGate; }, [effectiveOnboardingGate]);
   useEffect(() => {
-    if (onboardingGate.completed) return;
+    if (effectiveOnboardingGate.completed) return;
     setTimeline((prev) => {
       const next = clearBriefResultState(prev);
       return next.length === prev.length ? prev : next;
     });
-  }, [onboardingGate.completed]);
+  }, [effectiveOnboardingGate.completed]);
   const requestedStage: Stage = stageOverride ?? contextualRouteStage;
-  const stage: Stage = onboardingGate.completed ? requestedStage : "Discover";
+  const stage: Stage = effectiveOnboardingGate.completed ? requestedStage : "Discover";
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
       ? (initialGreeting || PUBLIC_GREETING)
@@ -4493,6 +4531,20 @@ export function AIConcierge({
                   </div>
                 )}
               </div>}
+              {surface === "trade" && (
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => (factsEditorOpen ? setFactsEditorOpen(false) : openFactsEditor())}
+                className={cn(
+                  "transition-colors p-1 rounded-md hover:bg-muted",
+                  factsEditorOpen ? "text-accent" : "text-muted-foreground hover:text-foreground",
+                )}
+                aria-label="Review project details"
+                title="Review project details Felix has picked up"
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+              </button>
+              )}
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
@@ -4703,6 +4755,51 @@ export function AIConcierge({
               </button>
               </div>
             </div>
+            {factsEditorOpen && surface === "trade" && (
+              <div
+                className={cn(
+                  "border-b px-4 py-3 space-y-2",
+                  modalMode ? "border-cream/15 bg-cream/5" : "border-border bg-muted/30",
+                )}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <p className={cn("font-body text-[10px] uppercase tracking-[0.14em]", modalMode ? "text-cream/70" : "text-muted-foreground")}>
+                  Project details Felix is working from — correct anything and save
+                </p>
+                {([
+                  { key: "projectProfile" as const, label: "Project profile", placeholder: "e.g. Good Class Bungalow, Sentosa" },
+                  { key: "zone" as const, label: "Zone", placeholder: "e.g. Living room" },
+                  { key: "budget" as const, label: "Budget", placeholder: "e.g. SGD 250k or open budget" },
+                ]).map(({ key, label, placeholder }) => (
+                  <label key={key} className="block">
+                    <span className={cn("font-body text-[10px] uppercase tracking-[0.1em]", modalMode ? "text-cream/60" : "text-muted-foreground")}>{label}</span>
+                    <input
+                      value={factDrafts[key]}
+                      onChange={(e) => setFactDrafts((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className={cn(
+                        "mt-0.5 w-full rounded-md border px-2.5 py-1.5 font-body text-xs outline-none focus:border-accent",
+                        modalMode ? "border-cream/20 bg-transparent text-cream placeholder:text-cream/40" : "border-border bg-background text-foreground placeholder:text-muted-foreground/60",
+                      )}
+                    />
+                  </label>
+                ))}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={saveFactsEditor}
+                    className="rounded-md bg-accent px-3 py-1.5 font-body text-[11px] font-medium text-accent-foreground hover:opacity-90 transition-opacity"
+                  >
+                    Save corrections
+                  </button>
+                  <button
+                    onClick={resetFactsEditor}
+                    className={cn("rounded-md border px-3 py-1.5 font-body text-[11px] transition-colors", modalMode ? "border-cream/25 text-cream/80 hover:bg-cream/10" : "border-border text-muted-foreground hover:bg-muted")}
+                  >
+                    Reset to detected
+                  </button>
+                </div>
+              </div>
+            )}
             {handoffTicket && (conciergeStatus === "human_notified" || conciergeStatus === "assigning_curator" || conciergeStatus === "curator_assigned" || conciergeStatus === "appointment_requested") && (
               <div
                 className={cn(
