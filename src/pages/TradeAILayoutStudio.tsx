@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -492,6 +492,25 @@ const TradeAILayoutStudio = () => {
   }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  // % over estimate that triggers an overrun warning; persisted per browser.
+  const [overrunThresholdPct, setOverrunThresholdPct] = useState<number>(() => {
+    try {
+      const raw = window.localStorage.getItem("ma-video-overrun-threshold-pct");
+      const parsed = raw === null ? NaN : Number(raw);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 20;
+    } catch {
+      return 20;
+    }
+  });
+  const updateOverrunThreshold = (value: number) => {
+    const next = Number.isFinite(value) && value >= 0 ? Math.round(value) : 20;
+    setOverrunThresholdPct(next);
+    try {
+      window.localStorage.setItem("ma-video-overrun-threshold-pct", String(next));
+    } catch {
+      /* storage unavailable */
+    }
+  };
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
