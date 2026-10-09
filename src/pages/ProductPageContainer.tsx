@@ -56,7 +56,6 @@ export default function ProductPageContainer({
       <Navigate
         to={`/trade/products/${designerSlug}/${productSlug}${search}`}
         replace
-        state={{ from: pathname }}
       />
     );
   }
