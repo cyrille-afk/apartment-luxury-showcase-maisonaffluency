@@ -762,6 +762,14 @@ const TradeAILayoutStudio = () => {
             <Button size="sm" variant="secondary" onClick={walkActive ? stopWalk : startWalk} disabled={!cinematic || !!authorMode}>
               <Film className="mr-1.5 h-3.5 w-3.5" />{walkActive ? "Stop walkthrough" : "Preview Walkthrough Animation"}
             </Button>
+            <Select value={videoQuality} onValueChange={(v) => { const q = v === "540p" || v === "1080p" ? v : "720p"; setVideoQuality(q); localStorage.setItem("ma_video_quality", q); }}>
+              <SelectTrigger aria-label="Video quality" className="h-9 w-[150px] bg-background text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="540p">Draft · 540p</SelectItem>
+                <SelectItem value="720p">HD · 720p</SelectItem>
+                <SelectItem value="1080p">Full HD · 1080p</SelectItem>
+              </SelectContent>
+            </Select>
             <Button size="sm" variant="secondary" onClick={exportVideo} disabled={!cinematic || exporting}>
               {exporting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : videoLocked ? <Lock className="mr-1.5 h-3.5 w-3.5" /> : <Clapperboard className="mr-1.5 h-3.5 w-3.5" />}Generate Walkthrough Video
               {videoStatus?.unlimited && <span className="ml-2 border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-[0.14em]">Cinematic HD Render</span>}
@@ -815,6 +823,7 @@ const TradeAILayoutStudio = () => {
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                        {h.quality ? ` · ${h.quality}` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
