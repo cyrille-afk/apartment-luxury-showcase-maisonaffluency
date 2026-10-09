@@ -492,6 +492,7 @@ const TradeAILayoutStudio = () => {
   }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
@@ -892,6 +893,19 @@ const TradeAILayoutStudio = () => {
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
                 <p className="mb-2 font-medium">Previous walkthrough videos</p>
+                {videoRenderSummary.billedCount > 0 && (
+                  <p className="mb-2 text-muted-foreground" aria-label="Walkthrough render cost summary">
+                    {videoRenderSummary.billedCount} billed render{videoRenderSummary.billedCount === 1 ? "" : "s"}
+                    {" · total "}
+                    <span className="text-foreground">{formatUsdCents(videoRenderSummary.totalCostCents)}</span>
+                    {" · average "}
+                    <span className="text-foreground">{formatUsdCents(videoRenderSummary.averageCostCents ?? 0)}</span>
+                    {" per render"}
+                    {videoRenderSummary.unbilledCount > 0
+                      ? ` · ${videoRenderSummary.unbilledCount} render${videoRenderSummary.unbilledCount === 1 ? "" : "s"} with no recorded cost`
+                      : ""}
+                  </p>
+                )}
                 <ul className="space-y-1.5">
                   {videoHistory.map((h) => (
                     <li key={h.job_id} className="flex items-center justify-between gap-2">
