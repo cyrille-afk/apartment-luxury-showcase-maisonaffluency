@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Image, FileText, FolderOpen, FolderClosed,
-  Clock, FileDown, MapPin, Box, Users, Sparkles,
+  Clock, FileDown, MapPin, Box, Users, Sparkles, Clapperboard,
 } from "lucide-react";
 import { startFelixTour } from "@/components/trade/FelixTour";
 import { WhiteLabelTourBanner } from "@/components/trade/WhiteLabelTourBanner";
@@ -29,6 +29,7 @@ import { isSampleProject } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
 import { DashboardPwaBanner } from "@/components/trade/PwaInstall";
 import dashboard3dStudioImage from "@/assets/dashboard-3d-style-neutrals.jpg";
+import dashboardWalkthroughImage from "@/assets/studio-after-render.jpg";
 
 interface BrandFolder {
   brand_name: string;
@@ -55,6 +56,7 @@ const DASH_CARDS = [
   { key: "dash-designers", title: "Designers & Ateliers Library", description: "Discover 32 ateliers and 274 designers", icon: Users, to: "/trade/designers", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/w_600,h_400,c_fill,g_auto,q_auto,f_auto/v1773838925/1_6Jp3vJWe7VFlFHZ9WhSJng_u6ai93.jpg", defaultGravity: "auto" },
   { key: "dash-quotes", title: "Quote Builder", description: "Create branded quotes for your clients", icon: FileText, to: "/trade/quotes", fallbackId: null as string | null, fallbackImage: "https://res.cloudinary.com/dif1oamtj/image/upload/e_contrast:20,e_saturation:15/v1773799140/Screen_Shot_2026-03-18_at_9.57.16_AM_mpvvpg.png", defaultGravity: "auto" },
   { key: "dash-3d-studio", title: "3D Studio", description: "Submit drawings for 3D renders & browse gallery", icon: Box, to: "/trade/axonometric-requests", fallbackId: null as string | null, fallbackImage: dashboard3dStudioImage as string | null, defaultGravity: "auto" },
+  { key: "dash-ai-walkthrough", title: "3D Room Layout & Walkthrough", description: "Furnish a room from your brief, then render a cinematic walkthrough", icon: Clapperboard, to: "/trade/ai-layout", fallbackId: null as string | null, fallbackImage: dashboardWalkthroughImage as string | null, defaultGravity: "center" },
 ];
 
 const GRAVITY_TO_POSITION: Record<string, string> = {
