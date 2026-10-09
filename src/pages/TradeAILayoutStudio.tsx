@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
