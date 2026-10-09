@@ -436,6 +436,20 @@ const TradeAILayoutStudio = () => {
     })();
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
+  const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
+  useEffect(() => {
+    if (!videoJob || videoJob.url || videoJob.failure || videoJob.id.startsWith("mock_")) return;
+    let stop = false;
+    const tick = async () => {
+      const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "poll", job_id: videoJob.id, poll_token: videoJob.token } });
+      if (stop || !data) return;
+      const url = (data.outputs as (string | null)[] | null)?.find(Boolean) ?? undefined;
+      const failure = data.state === "failed" ? (data.failure || "Render failed") : data.error;
+      setVideoJob((j) => j && j.id === videoJob.id ? { ...j, state: data.state ?? j.state, url, failure } : j);
+    };
+    const t = setInterval(tick, 5000); void tick();
+    return () => { stop = true; clearInterval(t); };
+  }, [videoJob?.id, videoJob?.url, videoJob?.failure]);
   const runVideo = async () => {
     if (!scene || !cinematic) return;
     setUnlockOpen(false);
@@ -446,7 +460,9 @@ const TradeAILayoutStudio = () => {
       if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
       if (error || data?.error) throw new Error(data?.error || error?.message);
       if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
-      else toast.success(`Render started${data?.response?.job_id ? ` (job ${data.response.job_id})` : ""}${data?.charged ? " — 1 credit used" : ""}`);
+      const jid = data?.response?.job_id as string | undefined;
+      if (jid) setVideoJob({ id: jid, token: data?.poll_token, state: data?.mock ? "test" : "queued" });
+      if (!data?.mock) toast.success(`Render started${data?.response?.job_id ? ` (job ${data.response.job_id})` : ""}${data?.charged ? " — 1 credit used" : ""}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Render request failed");
     } finally { setExporting(false); void refreshVideoStatus(); }
@@ -689,6 +705,22 @@ const TradeAILayoutStudio = () => {
               {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
             <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
+            {videoJob && (
+              <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">
+                {videoJob.url ? (
+                  <>
+                    <video src={videoJob.url} controls autoPlay muted loop playsInline className="w-full" />
+                    <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
+                  </>
+                ) : videoJob.failure ? (
+                  <p className="text-destructive">Render failed: {videoJob.failure}</p>
+                ) : videoJob.state === "test" ? (
+                  <p className="text-muted-foreground">Test render queued — no real video is produced by the test service.</p>
+                ) : (
+                  <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
+                )}
+              </div>
+            )}
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (
               <div className="w-full space-y-1">
                 <p role="status" aria-label="Camera path sync status" className="flex w-full items-center justify-end gap-2 text-[11px] text-muted-foreground">

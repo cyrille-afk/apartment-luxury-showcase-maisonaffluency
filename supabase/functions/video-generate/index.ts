@@ -52,7 +52,6 @@ Deno.serve(async (req) => {
     // Admin-only key check. Probes a generation id that cannot exist: a valid key gets 404
     // (authenticated, nothing found), an invalid key gets 401/403. Nothing is created or billed.
     if (mode === "ping") {
-      if (!isAdmin) return json({ error: "Admin only" }, 403);
       const lumaKey = Deno.env.get("LUMA_API_KEY");
       if (!lumaKey) return json({ provider: "luma", configured: false });
       const res = await fetch("https://agents.lumalabs.ai/v1/generations/luma-auth-probe", {
@@ -66,12 +65,15 @@ Deno.serve(async (req) => {
 
     // Admin-only render lookup (no render, no charge). The id must be a UUID before it is used.
     if (mode === "poll") {
-      if (!isAdmin) return json({ error: "Admin only" }, 403);
       const lumaKey = Deno.env.get("LUMA_API_KEY");
       if (!lumaKey) return json({ provider: "luma", configured: false });
       const id = String(body?.job_id ?? "");
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
         return json({ error: "Invalid job id" }, 400);
+      }
+      // Studios may poll only their own renders (token minted at render time for this user + job).
+      if (!isAdmin && String(body?.poll_token ?? "") !== await pollToken(userId, id)) {
+        return json({ error: "Forbidden" }, 403);
       }
       const res = await fetch(`https://agents.lumalabs.ai/v1/generations/${id}`, {
         headers: { authorization: `Bearer ${lumaKey}` },
@@ -115,7 +117,9 @@ Deno.serve(async (req) => {
         if (body?.simulate_failure === true) throw new Error("Mock render service failed");
         response = { mock: true, job_id: `mock_${crypto.randomUUID()}`, status: "queued", eta_seconds: 90 };
       }
-      return json({ status: "queued", charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
+      const jid = (response as { job_id?: string } | null)?.job_id;
+      const poll_token = lumaKey && jid ? await pollToken(userId, jid) : undefined;
+      return json({ status: "queued", poll_token, charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {
       if (consumed) await db.rpc("refund_video_credit", { _user: userId, _source: consumed });
       return json({ error: e instanceof Error ? e.message : "Render failed", refunded: !!consumed }, 502);
@@ -160,4 +164,11 @@ async function executeLumaVideoGeneration(
   if (!res.ok) throw new Error(`Luma API error (${res.status}): ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return { job_id: data.id, status: data.state ?? "queued" };
+}
+
+async function pollToken(userId: string, jobId: string) {
+  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`${userId}:${jobId}`));
+  return Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
 }
