@@ -4,6 +4,7 @@
  */
 import { FileDown, FileText } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -37,6 +38,8 @@ export default function SpecSheetButton({
   className,
   icon,
 }: Props) {
+  const { clientSafe } = useClientSafeMode();
+  if (clientSafe) return null;
   // Consolidate into a single list
   const entries: PdfEntry[] = pdfUrls && pdfUrls.length > 0
     ? pdfUrls

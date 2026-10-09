@@ -1,4 +1,6 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
+const EditorialDesignerProfile = lazy(() => import("./PublicDesignerProfile"));
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -49,6 +51,16 @@ interface DraftQuote {
 }
 
 const TradeGallery = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const { clientSafe } = useClientSafeMode();
+  return slug && clientSafe ? (
+    <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
+      <EditorialDesignerProfile presentation />
+    </Suspense>
+  ) : <StudioGallery />;
+};
+
+const StudioGallery = () => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();

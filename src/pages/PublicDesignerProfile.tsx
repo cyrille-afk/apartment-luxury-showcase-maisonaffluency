@@ -455,12 +455,12 @@ const SLUG_ALIASES: Record<string, string> = {
   "alex-proba-cc-tapis": "alex-proba",
 };
 
-const PublicDesignerProfile = () => {
+const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolean }) => {
   const { slug } = useParams<{ slug: string }>();
   const queryClient = useQueryClient();
-  const { isTradeUser, loading: authLoading, user } = useAuth();
+  const { isTradeUser, isAdmin, loading: authLoading, user } = useAuth();
   if (slug && SLUG_ALIASES[slug]) {
-    return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
+    return <Navigate to={`${presentation ? "/trade/gallery" : "/designers"}/${SLUG_ALIASES[slug]}`} replace />;
   }
   // Collectible designer profiles (bio + curator picks) are public.
   // Individual product pages remain gated via PublicProductPage.
@@ -474,7 +474,7 @@ const PublicDesignerProfile = () => {
     () => searchParams.get("from_product") || consumeProductBackRef(slug),
     [searchParams, slug]
   );
-  const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
+  const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser || isAdmin });
   const [pickCols, setPickCols] = useState<"auto" | "two" | "one" | "four">("auto");
   const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "new">("default");
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
@@ -950,7 +950,7 @@ const PublicDesignerProfile = () => {
         );
       })()}
 
-      {(() => {
+      {!presentation && (() => {
         return (
           <>
             <div className="mt-4 md:mt-0 w-full max-w-[600px] md:col-start-1 md:col-span-5 md:row-start-1">
@@ -1342,16 +1342,19 @@ const PublicDesignerProfile = () => {
       })()}
 
       <div className="min-h-dvh bg-background text-foreground">
-        <Navigation />
+        {!presentation && <Navigation />}
 
         <div className={cn(
-          "mx-auto pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] md:pb-20 space-y-1 md:space-y-1.5",
+          "mx-auto pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] md:pb-20 space-y-1 md:space-y-1.5",
+          presentation ? "pt-8 md:pt-12" : "pt-[var(--header-h)]",
           useNewInSpotlightFormat
             ? "w-full max-w-[1380px] px-6 bg-transparent"
             : "w-full max-w-[1380px] px-4 md:px-6"
         )}>
           <div className={cn("flex items-center justify-between")}>
-            {fromProduct ? (
+            {presentation ? (
+              <Link to="/trade/the-collection?tab=designers" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-body text-[11px] uppercase"><ArrowLeft className="h-3.5 w-3.5" />The Collection</Link>
+            ) : fromProduct ? (
               <Link
                 to={fromProduct}
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
@@ -1911,7 +1914,7 @@ const PublicDesignerProfile = () => {
                   const productSlug = isArnoldClamChair
                     ? (isArnoldClamStool ? "clam-stool" : "clam-chair")
                     : ((pick as any).slug || slugifyProduct(pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")));
-                  const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
+                  const productHref = `${presentation ? "/trade/products" : "/designers"}/${targetDesignerSlug}/${productSlug}`;
 
                   const cardBrandLabel = isArnoldClamChair ? "Dagmar" : designerLabel;
                   const cardBrandSlug = isArnoldClamChair ? "dagmar-london" : designerSlug;
@@ -2078,7 +2081,7 @@ const PublicDesignerProfile = () => {
                           {/* Designer / brand label — top, prominent */}
                           {cardBrandSlug || parentBrandSlug ? (
                             <Link
-                              to={`/designers/${cardBrandSlug || parentBrandSlug}`}
+                              to={`${presentation ? "/trade/gallery" : "/designers"}/${cardBrandSlug || parentBrandSlug}`}
                               onClick={(e) => e.stopPropagation()}
                               className="block w-full break-words font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors hover:text-foreground/70 sm:truncate sm:whitespace-nowrap"
                             >
@@ -2137,10 +2140,10 @@ const PublicDesignerProfile = () => {
         </div>
 
 
-        <Footer />
+        {!presentation && <Footer />}
       </div>
 
-      <GalleryDetailsFloatingNav azHref={designerAzBackHref} azLabel="Back to A–Z directory" onAzClick={rememberDesignerAzLetter} />
+      {!presentation && <GalleryDetailsFloatingNav azHref={designerAzBackHref} azLabel="Back to A–Z directory" onAzClick={rememberDesignerAzLetter} />}
 
       <PublicProductLightbox
         product={lightboxItem}
