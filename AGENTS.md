@@ -13,7 +13,7 @@
 - Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view — preserves price visibility.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
-- Never register a blocking beforeunload prompt for admin editor drafts; persist drafts to storage instead — the prompt freezes the embedded preview on code-update reloads.
+- No blocking beforeunload for admin drafts; persist to storage — it freezes the embedded preview on reloads.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed.
 - Curator Notes: product pages = full-width list; lightbox = 3 columns.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
@@ -22,7 +22,7 @@
 - Render edition labels via `editionLabel` and dedupe Ecart badges. Chips are page-scoped: child pages "REEDITION", house page "Ecart REEDITION"; embedded sections pass `pageDesignerName`.
 - Curatorial Guide: 800ms classifier budget, FRONTIER on timeout/failure; tiers vary reasoning effort, not model; turns persist only via `curatorial-guide-stream` after an ownership check.
 - Trade Concierge Felix workspace threads live in concierge_threads (workspace=true, project_id), restored per user+project via localStorage keys; the floating Felix lists only workspace=false.
-- Client View has one synchronous external-store state and a document-root CSS guard for marked trade-only elements (incl. exit animations, portalled drawers) so remounts can't reveal internal figures; not an authorization boundary.
+- Client View: one synchronous store + document-root CSS guard hides `[data-trade-sensitive]` (incl. portals/exit animations); not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — else hidden products resurface.
 - The Extension Integration sandbox embeds the trade sidebar via its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
@@ -32,5 +32,5 @@
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
-- Spec-sheet viewer links open in the same tab via `openSpecSheet`/SameOriginLinkGuard on the current app origin — new tabs can lose the sign-in (partitioned preview storage, www vs apex) and show members the sign-in gate.
-- Presentation Mode marks the trade shell `data-presentation`; all trade editorial overrides (palette, Inter type, square corners, no shadows, reveal animation) are scoped to `.trade-portal-shell:not([data-presentation])` so client-facing pages render with the public site styling and a centred studio masthead.
+- Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
+- Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
