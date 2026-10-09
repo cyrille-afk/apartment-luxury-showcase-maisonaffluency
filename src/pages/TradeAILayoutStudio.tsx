@@ -488,8 +488,12 @@ const TradeAILayoutStudio = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [videoWide]);
-  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
+  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const [videoQuality, setVideoQuality] = useState<"540p" | "720p" | "1080p">(() => {
+    const q = localStorage.getItem("ma_video_quality");
+    return q === "540p" || q === "1080p" ? q : "720p";
+  });
   const refreshVideoHistory = useCallback(async () => {
     const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "history" } });
     if (Array.isArray(data?.jobs)) setVideoHistory(data.jobs as VideoHistoryItem[]);
@@ -515,7 +519,7 @@ const TradeAILayoutStudio = () => {
     setExporting(true);
     try {
       const payload = buildSceneVideoPayload(scene, cinematic, briefText);
-      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload, snapshot: captureSnapshot() } });
+      const { data, error } = await supabase.functions.invoke("video-generate", { body: { mode: "render", payload, snapshot: captureSnapshot(), quality: videoQuality } });
       if (data?.error === "purchase_required") { await refreshVideoStatus(); setUnlockOpen(true); return; }
       if (error || data?.error) throw new Error(data?.error || error?.message);
       if (data?.mock) toast.success(`Render queued (test service, job ${data.response?.job_id ?? ""})${data.charged ? " — 1 credit used" : ""}`);
