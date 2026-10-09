@@ -720,22 +720,36 @@ const TradeAILayoutStudio = () => {
               {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
             <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
-            {videoJob && (
-              <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">
-                {videoJob.url ? (
-                  <>
-                    <video src={videoJob.url} controls playsInline className="w-full" />
-                    <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
-                  </>
-                ) : videoJob.failure ? (
-                  <p className="text-destructive">Render failed: {videoJob.failure}</p>
-                ) : videoJob.state === "test" ? (
-                  <p className="text-muted-foreground">Test render queued — no real video is produced by the test service.</p>
-                ) : (
-                  <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
-                )}
-              </div>
-            )}
+            {videoJob && (() => {
+              const wide = videoWide && !!videoJob.url;
+              return (
+                <div className={wide
+                  ? "fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4"
+                  : "w-full basis-full border border-border p-3 text-xs"}
+                  aria-label="Walkthrough video">
+                  {videoJob.url && (
+                    <div className="flex w-full items-center justify-end gap-2">
+                      <Button size="sm" variant="outline" aria-pressed={wide} onClick={() => setVideoWide((w) => !w)}>
+                        {wide ? <Minimize2 className="mr-1.5 h-3.5 w-3.5" /> : <Maximize2 className="mr-1.5 h-3.5 w-3.5" />}
+                        {wide ? "Return to panel size" : "Expand to full width"}
+                      </Button>
+                    </div>
+                  )}
+                  {videoJob.url ? (
+                    <>
+                      <video src={videoJob.url} controls playsInline className={wide ? "w-full max-h-[80vh] bg-black" : "w-full"} />
+                      <a href={videoJob.url} target="_blank" rel="noreferrer" className="inline-block underline">Download video</a>
+                    </>
+                  ) : videoJob.failure ? (
+                    <p className="text-destructive">Render failed: {videoJob.failure}</p>
+                  ) : videoJob.state === "test" ? (
+                    <p className="text-muted-foreground">Test render queued — no real video is produced by the test service.</p>
+                  ) : (
+                    <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
+                  )}
+                </div>
+              );
+            })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
                 <p className="mb-2 font-medium">Previous walkthrough videos</p>
