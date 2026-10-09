@@ -4,8 +4,9 @@ import SpecSheetButton from "../SpecSheetButton";
 
 const mode = vi.hoisted(() => ({ clientSafe: false }));
 vi.mock("@/lib/clientSafeMode", () => ({ useClientSafeMode: () => mode }));
-vi.mock("@/lib/specSheetUrl", () => ({ buildSpecSheetUrl: () => "/verified-spec-sheet" }));
-afterEach(() => { cleanup(); mode.clientSafe = false; vi.restoreAllMocks(); });
+const openSpecSheet = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/specSheetUrl", () => ({ buildSpecSheetUrl: () => "/verified-spec-sheet", openSpecSheet }));
+afterEach(() => { cleanup(); mode.clientSafe = false; openSpecSheet.mockReset(); });
 
 describe("Specification access in display modes", () => {
   it("does not offer a specification download in Presentation Mode", () => {
@@ -14,9 +15,8 @@ describe("Specification access in display modes", () => {
     expect(screen.queryByRole("button", { name: "Spec Sheet" })).toBeNull();
   });
   it("keeps specification downloads active in Studio Mode", () => {
-    const open = vi.spyOn(window, "open").mockImplementation(() => null);
     render(<SpecSheetButton variant="button" pdfUrl="https://www.maisonaffluency.com/spec.pdf" brandName="Maker" productName="Piece" />);
     fireEvent.click(screen.getByRole("button", { name: "Spec Sheet" }));
-    expect(open).toHaveBeenCalledWith("/verified-spec-sheet", "_blank");
+    expect(openSpecSheet).toHaveBeenCalledWith("/verified-spec-sheet");
   });
 });

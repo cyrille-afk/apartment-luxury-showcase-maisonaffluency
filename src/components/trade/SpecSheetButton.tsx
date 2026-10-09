@@ -3,7 +3,7 @@
  * Accepts either `pdfUrl` (legacy single) or `pdfUrls` (multi).
  */
 import { FileDown, FileText } from "lucide-react";
-import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
+import { buildSpecSheetUrl, openSpecSheet } from "@/lib/specSheetUrl";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import {
   DropdownMenu,
@@ -50,7 +50,7 @@ export default function SpecSheetButton({
   if (entries.length === 0) return null;
 
   const openPdf = (url: string, label?: string, index?: number) => {
-    window.open(buildSpecSheetUrl(url, brandName, productName, label, index), "_blank");
+    openSpecSheet(buildSpecSheetUrl(url, brandName, productName, label, index));
   };
 
   // Single PDF — direct link
