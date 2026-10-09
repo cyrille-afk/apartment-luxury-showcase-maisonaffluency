@@ -1,8 +1,9 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Clapperboard, Copy, Film, Link2, Loader2, Maximize2, Minimize2, Pause, Play, Plus, RefreshCw, Repeat, RotateCcw, Save, Sparkles, Square, Trash2, X } from "lucide-react";
 import { CINEMATIC_PRESETS, useCinematicPath, type CinematicPreset } from "@/hooks/useCinematicPath";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CustomPathBuilderModal, PathStoragePreferencesModal } from "@/components/trade/visualiser/CustomPathModals";
@@ -437,6 +438,27 @@ const TradeAILayoutStudio = () => {
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
+  const [videoWide, setVideoWide] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const resumeRef = useRef<{ t: number; playing: boolean } | null>(null);
+  const swapVideoSize = () => {
+    const v = videoRef.current;
+    if (v) resumeRef.current = { t: v.currentTime, playing: !v.paused };
+    setVideoWide((w) => !w);
+  };
+  const restoreVideoPosition = (el: HTMLVideoElement) => {
+    const r = resumeRef.current;
+    if (!r) return;
+    resumeRef.current = null;
+    el.currentTime = r.t;
+    if (r.playing) void el.play().catch(() => { /* autoplay blocked — user can press play */ });
+  };
+  useEffect(() => {
+    if (!videoWide) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setVideoWide(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [videoWide]);
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const refreshVideoHistory = useCallback(async () => {
@@ -713,22 +735,41 @@ const TradeAILayoutStudio = () => {
               {videoStatus && !videoStatus.unlimited && videoStatus.allowed && <span className="ml-2 text-[10px] text-muted-foreground">{videoStatus.goldIncludedLeft > 0 ? "1 included this month" : `${videoStatus.balance} credit${videoStatus.balance === 1 ? "" : "s"}`}</span>}
             </Button>
             <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
-            {videoJob && (
-              <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">
-                {videoJob.url ? (
-                  <>
-                    <video src={videoJob.url} controls playsInline className="w-full" />
-                    <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
-                  </>
-                ) : videoJob.failure ? (
-                  <p className="text-destructive">Render failed: {videoJob.failure}</p>
-                ) : videoJob.state === "test" ? (
-                  <p className="text-muted-foreground">Test render queued — no real video is produced by the test service.</p>
-                ) : (
-                  <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
-                )}
-              </div>
-            )}
+            {videoJob && (() => {
+              const wide = videoWide && !!videoJob.url;
+              const inner = (
+                <>
+                  {videoJob.url && (
+                    <div className="flex w-full items-center justify-end gap-2">
+                      <Button size="sm" variant="outline" aria-pressed={wide} onClick={swapVideoSize}>
+                        {wide ? <Minimize2 className="mr-1.5 h-3.5 w-3.5" /> : <Maximize2 className="mr-1.5 h-3.5 w-3.5" />}
+                        {wide ? "Return to panel size" : "Expand to full width"}
+                      </Button>
+                    </div>
+                  )}
+                  {videoJob.url ? (
+                    <>
+                      <video ref={videoRef} src={videoJob.url} controls playsInline
+                        onLoadedMetadata={(e) => restoreVideoPosition(e.currentTarget)}
+                        className={wide ? "h-auto max-h-[80vh] w-full bg-black" : "h-auto w-full"} />
+                      <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
+                    </>
+                  ) : videoJob.failure ? (
+                    <p className="text-destructive">Render failed: {videoJob.failure}</p>
+                  ) : videoJob.state === "test" ? (
+                    <p className="text-muted-foreground">Test render queued — no real video is produced by the test service.</p>
+                  ) : (
+                    <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
+                  )}
+                </>
+              );
+              return wide
+                ? createPortal(
+                  <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4" aria-label="Walkthrough video">
+                    {inner}
+                  </div>, document.body)
+                : <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">{inner}</div>;
+            })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
                 <p className="mb-2 font-medium">Previous walkthrough videos</p>
