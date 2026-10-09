@@ -48,6 +48,17 @@ Deno.serve(async (req) => {
     };
     if (mode === "status") return json(summary);
 
+    // Admin-only key check: lists 1 generation (no render, no charge).
+    if (body?.mode === "ping") {
+      if (!isAdmin) return json({ error: "Admin only" }, 403);
+      const lumaKey = Deno.env.get("LUMA_API_KEY");
+      if (!lumaKey) return json({ provider: "luma", configured: false });
+      const res = await fetch("https://api.lumalabs.ai/dream-machine/v1/generations?limit=1", {
+        headers: { authorization: `Bearer ${lumaKey}` },
+      });
+      return json({ provider: "luma", configured: true, ok: res.ok, status: res.status });
+    }
+
     if (!access.allowed) {
       return json({ error: "purchase_required", message: `A Single Video Pass (€${VIDEO_PASS_PRICE_EUR}) is required to render this walkthrough.`, ...summary }, 403);
     }
