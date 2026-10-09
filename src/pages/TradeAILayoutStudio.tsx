@@ -494,6 +494,13 @@ const TradeAILayoutStudio = () => {
     const q = localStorage.getItem("ma_video_quality");
     return q === "540p" || q === "1080p" ? q : "720p";
   });
+  // Rough Luma render estimates for a 5s 16:9 walkthrough — shown as guidance only,
+  // actual time/cost vary with Luma load and billing.
+  const VIDEO_QUALITY_OPTIONS = [
+    { value: "540p", label: "Draft · 540p", eta: "~15s", cost: "~$0.35" },
+    { value: "720p", label: "HD · 720p", eta: "~25s", cost: "~$0.60" },
+    { value: "1080p", label: "Full HD · 1080p", eta: "~45s", cost: "~$1.20" },
+  ] as const;
   const refreshVideoHistory = useCallback(async () => {
     const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "history" } });
     if (Array.isArray(data?.jobs)) setVideoHistory(data.jobs as VideoHistoryItem[]);
