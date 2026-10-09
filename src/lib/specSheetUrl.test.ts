@@ -21,3 +21,11 @@ describe("buildSpecSheetUrl", () => {
       .toBe("https://maisonaffluency.com/trade/spec-sheet?brand=A+%26+B&product=Lamp+%2F+One");
   });
 });
+describe("buildSpecSheetUrl origin", () => {
+  it("keeps the signed-in www origin", () => {
+    const orig = window.location;
+    Object.defineProperty(window, "location", { value: new URL("https://www.maisonaffluency.com/trade/products/x"), configurable: true });
+    expect(buildSpecSheetUrl("x", "A", "B").startsWith("https://www.maisonaffluency.com/trade/spec-sheet?")).toBe(true);
+    Object.defineProperty(window, "location", { value: orig, configurable: true });
+  });
+});

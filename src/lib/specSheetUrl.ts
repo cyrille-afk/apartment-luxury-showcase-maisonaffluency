@@ -16,5 +16,17 @@ export function buildSpecSheetUrl(
   if (typeof sheetIndex === "number" && Number.isFinite(sheetIndex)) {
     params.set("sheetIndex", String(sheetIndex));
   }
-  return `https://maisonaffluency.com/trade/spec-sheet?${params.toString()}`;
+  return `${specSheetOrigin()}/trade/spec-sheet?${params.toString()}`;
+}
+
+/**
+ * Open the viewer on the origin the member is already signed in on (sessions
+ * are per-origin), so trade members are never asked to sign in again.
+ */
+function specSheetOrigin(): string {
+  const canonical = "https://maisonaffluency.com";
+  if (typeof window === "undefined") return canonical;
+  const { hostname, origin } = window.location;
+  if (/^(www\.)?maisonaffluency\.com$/.test(hostname) || hostname.endsWith(".lovable.app")) return origin;
+  return canonical;
 }
