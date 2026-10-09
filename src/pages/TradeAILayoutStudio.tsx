@@ -437,6 +437,13 @@ const TradeAILayoutStudio = () => {
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
+  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
+  const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const refreshVideoHistory = useCallback(async () => {
+    const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "history" } });
+    if (Array.isArray(data?.jobs)) setVideoHistory(data.jobs as VideoHistoryItem[]);
+  }, []);
+  useEffect(() => { void refreshVideoHistory(); }, [refreshVideoHistory]);
   useEffect(() => {
     if (!videoJob || videoJob.url || videoJob.failure || videoJob.id.startsWith("mock_")) return;
     let stop = false;
@@ -446,6 +453,7 @@ const TradeAILayoutStudio = () => {
       const url = (data.outputs as (string | null)[] | null)?.find(Boolean) ?? undefined;
       const failure = data.state === "failed" ? (data.failure || "Render failed") : data.error;
       setVideoJob((j) => j && j.id === videoJob.id ? { ...j, state: data.state ?? j.state, url, failure } : j);
+      if (url || failure) void refreshVideoHistory();
     };
     const t = setInterval(tick, 5000); void tick();
     return () => { stop = true; clearInterval(t); };
@@ -719,6 +727,31 @@ const TradeAILayoutStudio = () => {
                 ) : (
                   <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
                 )}
+              </div>
+            )}
+            {videoHistory.length > 0 && (
+              <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
+                <p className="mb-2 font-medium">Previous walkthrough videos</p>
+                <ul className="space-y-1.5">
+                  {videoHistory.map((h) => (
+                    <li key={h.job_id} className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">
+                        {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                        {" — "}
+                        {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
+                      </span>
+                      {h.video_url && (
+                        <button
+                          type="button"
+                          className="shrink-0 underline underline-offset-2 hover:text-foreground"
+                          onClick={() => setVideoJob({ id: h.job_id, state: "completed", url: h.video_url ?? undefined })}
+                        >
+                          Replay
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             {(pathSyncStatus.lastSyncAt || pathSyncStatus.pendingRetry.length > 0) && (

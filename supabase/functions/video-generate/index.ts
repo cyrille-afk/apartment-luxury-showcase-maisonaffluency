@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const mode = body?.mode === "render" ? "render" : body?.mode === "ping" ? "ping"
-      : body?.mode === "poll" ? "poll" : "status";
+      : body?.mode === "poll" ? "poll" : body?.mode === "history" ? "history" : "status";
 
     const [{ data: roles }, { data: profile }, { data: credits }] = await Promise.all([
       db.from("user_roles").select("role").eq("user_id", userId),
@@ -48,6 +48,14 @@ Deno.serve(async (req) => {
       allowed: access.allowed,
     };
     if (mode === "status") return json(summary);
+
+    // The signed-in user's own render history, newest first.
+    if (mode === "history") {
+      const { data: jobs } = await db.from("video_render_jobs")
+        .select("job_id, state, video_url, failure, created_at")
+        .eq("user_id", userId).order("created_at", { ascending: false }).limit(25);
+      return json({ jobs: jobs ?? [] });
+    }
 
     // Admin-only key check. Probes a generation id that cannot exist: a valid key gets 404
     // (authenticated, nothing found), an invalid key gets 401/403. Nothing is created or billed.
@@ -79,12 +87,16 @@ Deno.serve(async (req) => {
         headers: { authorization: `Bearer ${lumaKey}` },
       });
       const data = await res.json().catch(() => null);
-      return json({
-        ok: res.ok, status: res.status,
-        state: data?.state ?? null,
-        failure: data?.failure_reason ?? data?.failure_code ?? null,
-        outputs: Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null,
-      });
+      const state = data?.state ?? null;
+      const failure = data?.failure_reason ?? data?.failure_code ?? null;
+      const outputs = Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null;
+      const videoUrl = outputs?.find((u: string | null) => typeof u === "string" && u) ?? null;
+      if (state === "completed" || state === "failed" || videoUrl) {
+        await db.from("video_render_jobs").update({
+          state: state ?? "completed", video_url: videoUrl, failure, updated_at: new Date().toISOString(),
+        }).eq("job_id", id).eq("user_id", userId);
+      }
+      return json({ ok: res.ok, status: res.status, state, failure, outputs });
     }
 
 
@@ -119,6 +131,9 @@ Deno.serve(async (req) => {
       }
       const jid = (response as { job_id?: string } | null)?.job_id;
       const poll_token = lumaKey && jid ? await pollToken(userId, jid) : undefined;
+      if (lumaKey && jid) {
+        await db.from("video_render_jobs").insert({ user_id: userId, job_id: jid, state: "queued" });
+      }
       return json({ status: "queued", poll_token, charged: !!consumed, source: consumed, mock: !webhook && !lumaKey, provider: lumaKey ? "luma" : webhook ? "webhook" : "mock", response });
     } catch (e) {
       if (consumed) await db.rpc("refund_video_credit", { _user: userId, _source: consumed });
