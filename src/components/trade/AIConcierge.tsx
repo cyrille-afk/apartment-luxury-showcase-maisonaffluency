@@ -1048,6 +1048,23 @@ export function AIConcierge({
     setFactOverrides({});
     setFactsEditorOpen(false);
   }, []);
+  /** Gate sent to Felix — user corrections replace the detected facts. */
+  const effectiveOnboardingGate = useMemo(() => {
+    const allReal =
+      hasRealBriefValue(verifiedFacts.projectProfile) &&
+      hasRealBriefValue(verifiedFacts.zone) &&
+      hasRealBriefValue(verifiedFacts.budget);
+    const userCompleted =
+      allReal &&
+      (["projectProfile", "zone", "budget"] as const).every((k) => k in factOverrides);
+    return {
+      ...onboardingGate,
+      facts: verifiedFacts,
+      completed: onboardingGate.completed || userCompleted,
+      missing: (["projectProfile", "zone", "budget"] as const).filter((k) => !hasRealBriefValue(verifiedFacts[k])),
+    };
+  }, [onboardingGate, verifiedFacts, factOverrides]);
+  useEffect(() => { onboardingGateRef.current = effectiveOnboardingGate; }, [effectiveOnboardingGate]);
   useEffect(() => {
     if (onboardingGate.completed) return;
     setTimeline((prev) => {
