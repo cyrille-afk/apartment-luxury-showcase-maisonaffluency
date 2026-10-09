@@ -737,14 +737,11 @@ const TradeAILayoutStudio = () => {
             <VideoUnlockModal open={unlockOpen} onOpenChange={setUnlockOpen} balance={videoStatus?.balance ?? 0} onUseCredit={() => void runVideo()} />
             {videoJob && (() => {
               const wide = videoWide && !!videoJob.url;
-              return (
-                <div className={wide
-                  ? "fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4"
-                  : "w-full basis-full border border-border p-3 text-xs"}
-                  aria-label="Walkthrough video">
+              const inner = (
+                <>
                   {videoJob.url && (
                     <div className="flex w-full items-center justify-end gap-2">
-                      <Button size="sm" variant="outline" aria-pressed={wide} onClick={() => setVideoWide((w) => !w)}>
+                      <Button size="sm" variant="outline" aria-pressed={wide} onClick={swapVideoSize}>
                         {wide ? <Minimize2 className="mr-1.5 h-3.5 w-3.5" /> : <Maximize2 className="mr-1.5 h-3.5 w-3.5" />}
                         {wide ? "Return to panel size" : "Expand to full width"}
                       </Button>
@@ -752,8 +749,10 @@ const TradeAILayoutStudio = () => {
                   )}
                   {videoJob.url ? (
                     <>
-                      <video src={videoJob.url} controls playsInline className={wide ? "w-full max-h-[80vh] bg-black" : "w-full"} />
-                      <a href={videoJob.url} target="_blank" rel="noreferrer" className="inline-block underline">Download video</a>
+                      <video ref={videoRef} src={videoJob.url} controls playsInline
+                        onLoadedMetadata={(e) => restoreVideoPosition(e.currentTarget)}
+                        className={wide ? "w-full max-h-[80vh] bg-black" : "w-full"} />
+                      <a href={videoJob.url} target="_blank" rel="noreferrer" className="mt-2 inline-block underline">Download video</a>
                     </>
                   ) : videoJob.failure ? (
                     <p className="text-destructive">Render failed: {videoJob.failure}</p>
@@ -762,8 +761,14 @@ const TradeAILayoutStudio = () => {
                   ) : (
                     <p className="flex items-center text-muted-foreground"><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />Rendering walkthrough ({videoJob.state})… usually under a minute.</p>
                   )}
-                </div>
+                </>
               );
+              return wide
+                ? createPortal(
+                  <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 p-4" aria-label="Walkthrough video">
+                    {inner}
+                  </div>, document.body)
+                : <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video">{inner}</div>;
             })()}
             {videoHistory.length > 0 && (
               <div className="w-full basis-full border border-border p-3 text-xs" aria-label="Walkthrough video history">
