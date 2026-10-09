@@ -118,6 +118,72 @@ export function filterVideoRendersByMonth<T extends Pick<VideoRenderRecord, "cre
   return jobs.filter((job) => videoRenderMonthKey(job.created_at) === monthKey);
 }
 
+/** "2026-09" for "2026-10"; rolls back across years. Null for the all-months sentinel or junk. */
+export function previousVideoRenderMonthKey(monthKey: string): string | null {
+  if (!monthKey || monthKey === VIDEO_RENDER_MONTH_ALL) return null;
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) return null;
+  const prevYear = month === 1 ? year - 1 : year;
+  const prevMonth = month === 1 ? 12 : month - 1;
+  return `${prevYear}-${String(prevMonth).padStart(2, "0")}`;
+}
+
+export type VideoRenderMonthComparison = {
+  monthKey: string;
+  label: string;
+  /** Previous calendar month key, or null when monthKey is invalid/all. */
+  previousMonthKey: string | null;
+  previousLabel: string | null;
+  /** All renders in each month, billed or not. */
+  renderCount: number;
+  previousRenderCount: number;
+  renderCountDelta: number;
+  /** Billed totals per month; deltas are null when the previous month has no history at all. */
+  billedCount: number;
+  previousBilledCount: number;
+  totalCostCents: number;
+  previousTotalCostCents: number;
+  costCentsDelta: number | null;
+};
+
+/**
+ * Month-over-month comparison: the selected month against the previous calendar
+ * month. Render counts include every render; cost figures only count billed
+ * renders. When the previous month has no renders at all, costCentsDelta is
+ * null so the UI can say "no prior month" instead of showing a misleading
+ * −100% drop.
+ */
+export function videoRenderMonthComparison(
+  jobs: readonly VideoRenderRecord[],
+  monthKey: string,
+): VideoRenderMonthComparison | null {
+  const previousMonthKey = previousVideoRenderMonthKey(monthKey);
+  if (!previousMonthKey) return null;
+
+  const current = filterVideoRendersByMonth(jobs, monthKey);
+  const previous = filterVideoRendersByMonth(jobs, previousMonthKey);
+  const currentSummary = summarizeVideoRenders(current);
+  const previousSummary = summarizeVideoRenders(previous);
+
+  return {
+    monthKey,
+    label: videoRenderMonthLabel(monthKey),
+    previousMonthKey,
+    previousLabel: videoRenderMonthLabel(previousMonthKey),
+    renderCount: currentSummary.renderCount,
+    previousRenderCount: previousSummary.renderCount,
+    renderCountDelta: currentSummary.renderCount - previousSummary.renderCount,
+    billedCount: currentSummary.billedCount,
+    previousBilledCount: previousSummary.billedCount,
+    totalCostCents: currentSummary.totalCostCents,
+    previousTotalCostCents: previousSummary.totalCostCents,
+    costCentsDelta:
+      previousSummary.renderCount > 0
+        ? currentSummary.totalCostCents - previousSummary.totalCostCents
+        : null,
+  };
+}
+
 /**
  * Billed render costs grouped by UTC calendar month, newest month first.
  * Renders without a recorded cost are excluded; unparseable dates are skipped.
