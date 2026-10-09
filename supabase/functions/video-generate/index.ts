@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // The signed-in user's own render history, newest first.
     if (mode === "history") {
       const { data: jobs } = await db.from("video_render_jobs")
-        .select("job_id, state, video_url, failure, created_at, quality")
+        .select("job_id, state, video_url, failure, created_at, quality, render_seconds, cost_usd")
         .eq("user_id", userId).order("created_at", { ascending: false }).limit(25);
       return json({ jobs: jobs ?? [] });
     }
@@ -92,9 +92,19 @@ Deno.serve(async (req) => {
       const outputs = Array.isArray(data?.output) ? data.output.map((o: { url?: string }) => o?.url ?? null) : null;
       const videoUrl = outputs?.find((u: string | null) => typeof u === "string" && u) ?? null;
       if (state === "completed" || state === "failed" || videoUrl) {
-        await db.from("video_render_jobs").update({
-          state: state ?? "completed", video_url: videoUrl, failure, updated_at: new Date().toISOString(),
-        }).eq("job_id", id).eq("user_id", userId);
+        const now = new Date();
+        const { data: existing } = await db.from("video_render_jobs")
+          .select("created_at, quality").eq("job_id", id).eq("user_id", userId).maybeSingle();
+        const patch: Record<string, unknown> = {
+          state: state ?? "completed", video_url: videoUrl, failure, updated_at: now.toISOString(),
+        };
+        if (existing?.created_at) {
+          patch.render_seconds = Math.max(0, Math.round((now.getTime() - new Date(existing.created_at).getTime()) / 100) / 10);
+        }
+        // Luma bills per generation by resolution; record the billed figure for the quality used.
+        const billed = { "540p": 0.35, "720p": 0.6, "1080p": 1.2 }[String(existing?.quality ?? "720p")] ?? 0.6;
+        if ((state ?? "completed") === "completed" || videoUrl) patch.cost_usd = billed;
+        await db.from("video_render_jobs").update(patch).eq("job_id", id).eq("user_id", userId);
       }
       return json({ ok: res.ok, status: res.status, state, failure, outputs });
     }

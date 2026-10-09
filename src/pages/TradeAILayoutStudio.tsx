@@ -489,7 +489,7 @@ const TradeAILayoutStudio = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [videoWide]);
-  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null };
+  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
@@ -897,6 +897,8 @@ const TradeAILayoutStudio = () => {
                       <span className="text-muted-foreground">
                         {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                         {h.quality ? ` · ${h.quality}` : ""}
+                        {h.render_seconds != null ? ` · ${h.render_seconds}s` : ""}
+                        {h.cost_usd != null ? ` · $${Number(h.cost_usd).toFixed(2)}` : ""}
                         {" — "}
                         {h.video_url ? "Ready" : h.failure ? `Failed: ${h.failure}` : h.state}
                       </span>
@@ -967,7 +969,10 @@ const TradeAILayoutStudio = () => {
                               </span>
                             </div>
                             <figcaption className="text-muted-foreground">
-                              {q.label} · est. {q.eta} · {q.cost} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                              {q.label} · est. {q.eta} · {q.cost}
+                              {h.render_seconds != null ? ` · actual ${h.render_seconds}s` : ""}
+                              {h.cost_usd != null ? ` · billed $${Number(h.cost_usd).toFixed(2)}` : ""}
+                              {" · "}{new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                             </figcaption>
                           </figure>
                         );

@@ -11321,33 +11321,39 @@ export type Database = {
       }
       video_render_jobs: {
         Row: {
+          cost_usd: number | null
           created_at: string
           failure: string | null
           id: string
           job_id: string
           quality: string
+          render_seconds: number | null
           state: string
           updated_at: string
           user_id: string
           video_url: string | null
         }
         Insert: {
+          cost_usd?: number | null
           created_at?: string
           failure?: string | null
           id?: string
           job_id: string
           quality?: string
+          render_seconds?: number | null
           state?: string
           updated_at?: string
           user_id: string
           video_url?: string | null
         }
         Update: {
+          cost_usd?: number | null
           created_at?: string
           failure?: string | null
           id?: string
           job_id?: string
           quality?: string
+          render_seconds?: number | null
           state?: string
           updated_at?: string
           user_id?: string
