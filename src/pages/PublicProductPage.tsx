@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchPublicProductPage, prefetchPublicProductPage, PUBLIC_PRODUCT_PAGE_STALE_TIME } from "@/lib/publicProductPageQuery";
 import ProductPrefetchOnVisible from "@/components/ProductPrefetchOnVisible";
+import { useTradeProductBySlug } from "@/pages/TradeProductPage";
+import { productDisplayPolicy } from "@/lib/productDisplayMode";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
@@ -1266,8 +1268,8 @@ const VariantSelectors: React.FC<{
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
-const PublicProductPageContent: React.FC = () => {
-  const { slug: designerSlug, productSlug } = useParams<{ slug?: string; productSlug: string }>();
+const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presentation = false }) => {
+  const { id: tradeProductId, slug: designerSlug, productSlug } = useParams<{ id?: string; slug?: string; productSlug: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -1288,12 +1290,12 @@ const PublicProductPageContent: React.FC = () => {
    * Verified trade role OR approved profile trade_status OR an approved
    * trade application OR an admin/super-admin account.
    */
-  const hasTradeAccess =
+  const hasTradeAccess = !presentation && (
     isTradeUser ||
     tradeStatus === "approved" ||
     applicationStatus === "approved" ||
     isAdmin ||
-    isSuperAdmin;
+    isSuperAdmin);
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
@@ -1312,7 +1314,10 @@ const PublicProductPageContent: React.FC = () => {
       try { sessionStorage.removeItem("product_from_path"); } catch {}
     }
   }, [isLegacyArnoldClamChairRoute, navigate, stateFrom, storedFrom]);
-  const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
+  const publicResult = useProductBySlug(designerSlug, presentation ? undefined : productSlug);
+  const tradeResult = useTradeProductBySlug(presentation ? tradeProductId : undefined, presentation ? designerSlug : undefined, presentation ? productSlug : undefined);
+  const data = (presentation ? tradeResult.data : publicResult.data) as { product: ProductRow; designer: { id: string; name: string; slug: string; biography: string; founder?: string | null }; relatedPicks: ProductRow[] } | null | undefined;
+  const isLoading = presentation ? tradeResult.isLoading : publicResult.isLoading;
 
   /**
    * One product = one indexable URL.
@@ -1332,7 +1337,7 @@ const PublicProductPageContent: React.FC = () => {
       : productSlug);
 
   useEffect(() => {
-    if (isLegacyArnoldClamChairRoute) return;
+    if (presentation || isLegacyArnoldClamChairRoute) return;
     if (!definitiveDesignerSlug || !definitiveProductSlug) return;
     const definitivePath = location.pathname.startsWith("/products/")
       ? `/products/${definitiveProductSlug}`
@@ -1342,6 +1347,7 @@ const PublicProductPageContent: React.FC = () => {
       navigate(`${definitivePath}${location.search}`, { replace: true, state: location.state });
     }
   }, [
+    presentation,
     definitiveDesignerSlug,
     definitiveProductSlug,
     isLegacyArnoldClamChairRoute,
@@ -1350,10 +1356,19 @@ const PublicProductPageContent: React.FC = () => {
     location.state,
     navigate,
   ]);
-  const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
+  const { data: visiblePublicRrp } = usePublicRrp(data?.product?.id);
+  const presentationPricing = tradeResult.data?.pricing;
+  const publicRrpRow = presentation ? {
+    rrp_price_cents: presentationPricing?.rrp_price_cents ?? null,
+    currency: presentationPricing?.currency ?? "EUR",
+    price_unit: presentationPricing?.price_unit ?? null,
+    price_prefix: presentationPricing?.price_prefix ?? null,
+    rrp_size_variants: presentationPricing?.size_variants ?? null,
+  } : visiblePublicRrp;
   const { data: relatedRrpMap = {} } = usePublicRrpMap((data?.relatedPicks || []).map((p: any) => p.id));
   // Display currency follows the header flag globally (listing ↔ detail parity).
   const { displayRow: displayRrpRow, toDisplayCents, displayCurrency: rrpDisplayCurrency } = usePublicRrpDisplay(publicRrpRow);
+  const presentationPolicy = productDisplayPolicy(presentation, rrpDisplayCurrency);
   const catalogueRrpLabel = formatPublicRrp(displayRrpRow);
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
@@ -1397,7 +1412,7 @@ const PublicProductPageContent: React.FC = () => {
       : tradeStatus === "pending_review"
         ? "TRADE_UNVERIFIED"
         : "RETAIL_BUYER";
-  const effectiveRole: UserRole = roleOverridden ? devRole : realRole;
+  const effectiveRole: UserRole = presentation ? "RETAIL_BUYER" : roleOverridden ? devRole : realRole;
   const isTradeVerifiedView = effectiveRole === "TRADE_VERIFIED";
   const isTradeUnverifiedView = effectiveRole === "TRADE_UNVERIFIED";
   const { data: protectedPricing } = useTradeProductPricing(data?.product?.id, !!user && hasTradeAccess);
@@ -1474,7 +1489,7 @@ const PublicProductPageContent: React.FC = () => {
   // OR signed in) see the standard RPP / "Price upon Request"; verified trade
   // accounts see their net trade price via showMockTradeCommerce instead.
   const showPublicCommerce =
-    !isTradeVerifiedView && (roleOverridden ? true : !authLoading);
+    !presentation && !isTradeVerifiedView && (roleOverridden ? true : !authLoading);
 
   // On landing we intentionally show the catalogue-wide minimum ("From $X"),
   // not the price of the finish in the first photo — this encourages visitors
@@ -2248,6 +2263,7 @@ const PublicProductPageContent: React.FC = () => {
   // Rendered inside the main commerce action panel on desktop, and as a
   // compact standalone row on mobile.
   const renderUtilityLinks = (extraClass = "") => {
+    if (presentation) return null;
     const tradeApprovedFooter = !!user && hasTradeAccess;
     const otherSheets = product.pdf_urls?.filter((entry) => !/^fabric\s*(?:&|and)\s*finishes\b/i.test(entry.label));
     const hasSheet = !!(product.pdf_url || (otherSheets && otherSheets.length > 0));
@@ -2332,7 +2348,7 @@ const PublicProductPageContent: React.FC = () => {
   };
 
   return (
-    <div className="product-configurator-canvas min-h-[100dvh] overflow-x-hidden md:overflow-x-clip motion-safe:animate-fade-in">
+    <div data-product-mode={presentation ? "presentation" : "public"} data-display-currency={presentationPolicy.currency} className="product-configurator-canvas min-h-[100dvh] overflow-x-hidden md:overflow-x-clip motion-safe:animate-fade-in">
       {(() => {
         const canonical = absoluteUrl(location.pathname);
         const ogImg = toOgImage(product.image_url || images[0] || null);
@@ -2419,13 +2435,13 @@ const PublicProductPageContent: React.FC = () => {
       })()}
 
       <div className="product-page-root flex h-[100dvh] min-h-[-webkit-fill-available] flex-col overflow-hidden bg-background text-foreground md:h-auto md:min-h-[100dvh] md:overflow-visible">
-        <Navigation borderless />
+        {!presentation && <Navigation borderless />}
 
         {/* Desktop slim sticky purchase bar — price + button labels follow the
             effective role so it stays in sync with the sidebar action block.
             Hidden for verified trade: the full-width workspace strip below the
             product grid replaces it and removes the overlapping floating block. */}
-        {!isTradeVerifiedView && (
+        {!presentation && !isTradeVerifiedView && (
           <StickyPurchaseBar
             triggerId="main-product-image-container"
             image={images[0]}
@@ -2441,7 +2457,7 @@ const PublicProductPageContent: React.FC = () => {
         )}
 
         {/* Dev-only role preview switcher (never rendered in production builds) */}
-        {import.meta.env.DEV && typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname) && <DevRoleToggle />}
+        {!presentation && import.meta.env.DEV && typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname) && <DevRoleToggle />}
 
 
 
@@ -2510,7 +2526,7 @@ const PublicProductPageContent: React.FC = () => {
                 firstImageBadge={null}
 
 
-                overlay={
+                overlay={!presentation &&
                   /* Favorite / studio save stays top-right. */
                   <div className="flex items-center gap-3">
                     {user && hasTradeAccess ? (
@@ -2795,7 +2811,7 @@ const PublicProductPageContent: React.FC = () => {
                           </p>
                         )}
                       </div>
-                    ) : displayRrpLabel && (
+                    ) : displayRrpLabel ? (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                           {(() => {
@@ -2817,7 +2833,7 @@ const PublicProductPageContent: React.FC = () => {
                           </p>
                         )}
                       </div>
-                    )}
+                    ) : presentation ? <p className="mt-6 font-body text-sm text-muted-foreground">Price upon Request</p> : null}
                   </div>
 
                   <VariantSelectorsProvider
@@ -2949,7 +2965,7 @@ const PublicProductPageContent: React.FC = () => {
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
-              {user && !roleOverridden && (() => {
+              {!presentation && user && !roleOverridden && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 const q = new URLSearchParams({
                   subject: `Price upon Request — ${product.title} by ${designerDisplay}`,
@@ -3379,9 +3395,9 @@ const PublicProductPageContent: React.FC = () => {
   );
 };
 
-const PublicProductPage: React.FC = () => (
+const PublicProductPage: React.FC<{ presentation?: boolean }> = ({ presentation }) => (
   <UserRoleProvider>
-    <PublicProductPageContent />
+    <PublicProductPageContent presentation={presentation} />
   </UserRoleProvider>
 );
 
