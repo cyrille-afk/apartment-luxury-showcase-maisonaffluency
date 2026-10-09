@@ -437,6 +437,13 @@ const TradeAILayoutStudio = () => {
   }, [refreshVideoStatus]);
   const videoLocked = !!videoStatus && !videoStatus.allowed;
   const [videoJob, setVideoJob] = useState<{ id: string; token?: string; state: string; url?: string; failure?: string } | null>(null);
+  type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string };
+  const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
+  const refreshVideoHistory = useCallback(async () => {
+    const { data } = await supabase.functions.invoke("video-generate", { body: { mode: "history" } });
+    if (Array.isArray(data?.jobs)) setVideoHistory(data.jobs as VideoHistoryItem[]);
+  }, []);
+  useEffect(() => { void refreshVideoHistory(); }, [refreshVideoHistory]);
   useEffect(() => {
     if (!videoJob || videoJob.url || videoJob.failure || videoJob.id.startsWith("mock_")) return;
     let stop = false;
@@ -446,6 +453,7 @@ const TradeAILayoutStudio = () => {
       const url = (data.outputs as (string | null)[] | null)?.find(Boolean) ?? undefined;
       const failure = data.state === "failed" ? (data.failure || "Render failed") : data.error;
       setVideoJob((j) => j && j.id === videoJob.id ? { ...j, state: data.state ?? j.state, url, failure } : j);
+      if (url || failure) void refreshVideoHistory();
     };
     const t = setInterval(tick, 5000); void tick();
     return () => { stop = true; clearInterval(t); };
