@@ -20,7 +20,7 @@ describe("monthlyCostBreakdown", () => {
     expect(months).toEqual([]);
   });
 });
-import { formatUsdCents, monthlyCostBreakdown, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta } from "../videoRenderSummary";
+import { formatUsdCents, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderOverrun } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
@@ -124,5 +124,21 @@ describe("delta formatting", () => {
     expect(formatSecondsDelta(0)).toBe("±0s");
     expect(formatUsdCentsDelta(10)).toBe("+$0.10");
     expect(formatUsdCentsDelta(-5)).toBe("−$0.05");
+  });
+});
+
+describe("videoRenderOverrun / renderExceedsEstimate", () => {
+  it("computes over-estimate percentages", () => {
+    expect(videoRenderOverrun({ quality: "720p", render_seconds: 30, cost_usd: 0.72 })).toEqual({ secondsOverPct: 20, costOverPct: 20 });
+    expect(videoRenderOverrun({ quality: "540p", render_seconds: 10, cost_usd: 0.3 })).toEqual({ secondsOverPct: -33, costOverPct: -14 });
+  });
+  it("returns null when actuals are missing", () => {
+    expect(videoRenderOverrun({ quality: "1080p", render_seconds: null, cost_usd: null })).toEqual({ secondsOverPct: null, costOverPct: null });
+  });
+  it("flags renders over the threshold on either axis", () => {
+    const over = { quality: "720p", render_seconds: 40, cost_usd: 0.6 };
+    expect(renderExceedsEstimate(over, 20)).toBe(true);
+    expect(renderExceedsEstimate(over, 70)).toBe(false);
+    expect(renderExceedsEstimate({ quality: "720p", render_seconds: null, cost_usd: null }, 0)).toBe(false);
   });
 });
