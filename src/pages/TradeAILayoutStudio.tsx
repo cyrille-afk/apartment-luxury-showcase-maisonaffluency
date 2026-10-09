@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
+import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -542,6 +542,10 @@ const TradeAILayoutStudio = () => {
   );
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistoryFiltered), [videoHistoryFiltered]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
+  const videoMonthComparison = useMemo(
+    () => videoRenderMonthComparison(videoHistory, activeVideoHistoryMonth),
+    [videoHistory, activeVideoHistoryMonth],
+  );
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
