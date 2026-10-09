@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
+import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -542,6 +542,10 @@ const TradeAILayoutStudio = () => {
   );
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistoryFiltered), [videoHistoryFiltered]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
+  const videoMonthComparison = useMemo(
+    () => videoRenderMonthComparison(videoHistory, activeVideoHistoryMonth),
+    [videoHistory, activeVideoHistoryMonth],
+  );
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
@@ -1001,6 +1005,33 @@ const TradeAILayoutStudio = () => {
                       </li>
                     ))}
                   </ul>
+                )}
+                {videoMonthComparison && (
+                  <p className="mb-2 text-muted-foreground" aria-label="Month-over-month render comparison">
+                    vs {videoMonthComparison.previousLabel}
+                    {": "}
+                    {videoMonthComparison.renderCount} render{videoMonthComparison.renderCount === 1 ? "" : "s"}
+                    {" ("}
+                    <span className={videoMonthComparison.renderCountDelta > 0 ? "text-emerald-400" : videoMonthComparison.renderCountDelta < 0 ? "text-amber-400" : "text-foreground"}>
+                      {videoMonthComparison.renderCountDelta > 0 ? "+" : videoMonthComparison.renderCountDelta < 0 ? "−" : "±"}
+                      {Math.abs(videoMonthComparison.renderCountDelta)}
+                    </span>
+                    {") · billed "}
+                    <span className="text-foreground">{formatUsdCents(videoMonthComparison.totalCostCents)}</span>
+                    {videoMonthComparison.costCentsDelta !== null ? (
+                      <>
+                        {" ("}
+                        <span className={videoMonthComparison.costCentsDelta > 0 ? "text-amber-400" : videoMonthComparison.costCentsDelta < 0 ? "text-emerald-400" : "text-foreground"}>
+                          {formatUsdCentsDelta(videoMonthComparison.costCentsDelta)}
+                        </span>
+                        {" vs "}
+                        {formatUsdCents(videoMonthComparison.previousTotalCostCents)}
+                        {")"}
+                      </>
+                    ) : (
+                      " · no renders in the previous month"
+                    )}
+                  </p>
                 )}
                 {videoHistoryFiltered.length === 0 ? (
                   <p className="text-muted-foreground">No renders in {activeVideoHistoryLabel}.</p>

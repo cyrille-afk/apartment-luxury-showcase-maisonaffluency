@@ -20,7 +20,7 @@ describe("monthlyCostBreakdown", () => {
     expect(months).toEqual([]);
   });
 });
-import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderMonthKey, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL, videoRenderOverrun } from "../videoRenderSummary";
+import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, previousVideoRenderMonthKey, renderExceedsEstimate, summarizeVideoRenders, type VideoRenderRecord, formatSecondsDelta, formatUsdCentsDelta, videoRenderDelta, videoRenderMonthComparison, videoRenderMonthKey, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL, videoRenderOverrun } from "../videoRenderSummary";
 
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
@@ -196,5 +196,55 @@ describe("month filter", () => {
     expect(monthlyCostBreakdown(october)).toEqual([
       { monthKey: "2026-10", label: "Oct 2026", billedCount: 2, totalCostCents: 95 },
     ]);
+  });
+});
+
+describe("month-over-month comparison", () => {
+  it("rolls the previous month back across years", () => {
+    expect(previousVideoRenderMonthKey("2026-10")).toBe("2026-09");
+    expect(previousVideoRenderMonthKey("2027-01")).toBe("2026-12");
+    expect(previousVideoRenderMonthKey(VIDEO_RENDER_MONTH_ALL)).toBeNull();
+    expect(previousVideoRenderMonthKey("junk")).toBeNull();
+  });
+
+  it("compares render counts and billed costs against the previous month", () => {
+    const jobs = [
+      job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.7 }),
+      job({ job_id: "b", created_at: "2026-10-02T10:00:00Z", cost_usd: 0.35 }),
+      job({ job_id: "c", created_at: "2026-10-05T10:00:00Z", cost_usd: null }),
+      job({ job_id: "d", created_at: "2026-09-15T12:00:00Z", cost_usd: 1.2 }),
+    ];
+    const comparison = videoRenderMonthComparison(jobs, "2026-10");
+    expect(comparison).toMatchObject({
+      monthKey: "2026-10",
+      label: "Oct 2026",
+      previousMonthKey: "2026-09",
+      previousLabel: "Sep 2026",
+      renderCount: 3,
+      previousRenderCount: 1,
+      renderCountDelta: 2,
+      billedCount: 2,
+      previousBilledCount: 1,
+      totalCostCents: 105,
+      previousTotalCostCents: 120,
+      costCentsDelta: -15,
+    });
+  });
+
+  it("reports a null cost delta when the previous month has no renders", () => {
+    const jobs = [job({ job_id: "a", created_at: "2026-10-09T02:00:00Z", cost_usd: 0.6 })];
+    const comparison = videoRenderMonthComparison(jobs, "2026-10");
+    expect(comparison).toMatchObject({
+      renderCount: 1,
+      previousRenderCount: 0,
+      renderCountDelta: 1,
+      costCentsDelta: null,
+    });
+  });
+
+  it("returns null for the all-months sentinel and invalid keys", () => {
+    const jobs = [job({ job_id: "a" })];
+    expect(videoRenderMonthComparison(jobs, VIDEO_RENDER_MONTH_ALL)).toBeNull();
+    expect(videoRenderMonthComparison(jobs, "junk")).toBeNull();
   });
 });
