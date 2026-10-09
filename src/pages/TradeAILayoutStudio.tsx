@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { filterVideoRendersByMonth, formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, renderExceedsEstimate, summarizeVideoRenders, videoRenderDelta, videoRenderMonthLabel, videoRenderMonthOptions, VIDEO_RENDER_MONTH_ALL } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -511,7 +511,36 @@ const TradeAILayoutStudio = () => {
       /* storage unavailable */
     }
   };
-  const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
+  // Month filter for the render history; persisted per browser.
+  const [videoHistoryMonth, setVideoHistoryMonth] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem("ma-video-history-month") ?? VIDEO_RENDER_MONTH_ALL;
+    } catch {
+      return VIDEO_RENDER_MONTH_ALL;
+    }
+  });
+  const updateVideoHistoryMonth = (value: string) => {
+    const next = value || VIDEO_RENDER_MONTH_ALL;
+    setVideoHistoryMonth(next);
+    try {
+      window.localStorage.setItem("ma-video-history-month", next);
+    } catch {
+      /* storage unavailable */
+    }
+  };
+  const videoHistoryMonthOptions = useMemo(() => videoRenderMonthOptions(videoHistory), [videoHistory]);
+  // A month stored from an earlier visit may no longer be in the history.
+  const activeVideoHistoryMonth =
+    videoHistoryMonth === VIDEO_RENDER_MONTH_ALL || videoHistoryMonthOptions.some((m) => m.monthKey === videoHistoryMonth)
+      ? videoHistoryMonth
+      : VIDEO_RENDER_MONTH_ALL;
+  const activeVideoHistoryLabel =
+    activeVideoHistoryMonth === VIDEO_RENDER_MONTH_ALL ? null : videoRenderMonthLabel(activeVideoHistoryMonth);
+  const videoHistoryFiltered = useMemo(
+    () => filterVideoRendersByMonth(videoHistory, activeVideoHistoryMonth),
+    [videoHistory, activeVideoHistoryMonth],
+  );
+  const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistoryFiltered), [videoHistoryFiltered]);
   const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
