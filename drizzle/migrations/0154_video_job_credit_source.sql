@@ -1,0 +1,1 @@
+ALTER TABLE public.video_render_jobs ADD COLUMN IF NOT EXISTS credit_source text, ADD COLUMN IF NOT EXISTS refunded_at timestamptz;
