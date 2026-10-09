@@ -28,7 +28,7 @@ import { fetchLiveCatalogue, repriceScene, summarise, toAsset, type LayoutBrief,
 import type { AICuratedSceneSchema, Vec3 } from "@/types/aiCuratedScene";
 import { Textarea } from "@/components/ui/textarea";
 import { curate, sceneFromCuration, type CurationResult } from "@/lib/curationEngine";
-import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
+import { formatSecondsDelta, formatUsdCents, formatUsdCentsDelta, monthlyCostBreakdown, summarizeVideoRenders, videoRenderDelta } from "@/lib/videoRenderSummary";
 import { cn } from "@/lib/utils";
 import { generateRoomLayoutMatrix } from "@/lib/roomLayoutMatrix";
 import { useAiLayoutForm } from "@/hooks/useAiLayoutForm";
@@ -493,6 +493,7 @@ const TradeAILayoutStudio = () => {
   type VideoHistoryItem = { job_id: string; state: string; video_url: string | null; failure: string | null; created_at: string; quality?: string | null; render_seconds?: number | null; cost_usd?: number | null };
   const [videoHistory, setVideoHistory] = useState<VideoHistoryItem[]>([]);
   const videoRenderSummary = useMemo(() => summarizeVideoRenders(videoHistory), [videoHistory]);
+  const videoMonthlyBreakdown = useMemo(() => monthlyCostBreakdown(videoHistory), [videoHistory]);
   const [videoCompareIds, setVideoCompareIds] = useState<string[]>([]);
   const toggleVideoCompare = (jobId: string) =>
     setVideoCompareIds((ids) => ids.includes(jobId) ? ids.filter((i) => i !== jobId) : ids.length >= 2 ? [ids[1], jobId] : [...ids, jobId]);
@@ -905,6 +906,18 @@ const TradeAILayoutStudio = () => {
                       ? ` · ${videoRenderSummary.unbilledCount} render${videoRenderSummary.unbilledCount === 1 ? "" : "s"} with no recorded cost`
                       : ""}
                   </p>
+                )}
+                {videoMonthlyBreakdown.length > 0 && (
+                  <ul className="mb-2 space-y-0.5 text-muted-foreground" aria-label="Monthly billed render costs">
+                    {videoMonthlyBreakdown.map((m) => (
+                      <li key={m.monthKey}>
+                        {m.label}
+                        {" — "}
+                        <span className="text-foreground">{formatUsdCents(m.totalCostCents)}</span>
+                        {` across ${m.billedCount} render${m.billedCount === 1 ? "" : "s"}`}
+                      </li>
+                    ))}
+                  </ul>
                 )}
                 <ul className="space-y-1.5">
                   {videoHistory.map((h) => (
