@@ -832,7 +832,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     </button>
                   </FavoriteFolderPicker>
 
-                  <button
+                  <button data-trade-sensitive
                     onClick={() => togglePin(compareItem)}
                     title={pinned ? "Pinned" : "Pin to Selection"}
                     className={cn(
@@ -1032,7 +1032,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     </a>
                   )}
                   {!showMemberTradePrice && (
-                    <a
+                    <a data-trade-sensitive
                       href="/trade-program"
                       className="border border-border/60 bg-background px-4 py-3 text-center font-body text-[9px] uppercase leading-relaxed tracking-[0.18em] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                     >
