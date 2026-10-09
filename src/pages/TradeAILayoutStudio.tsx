@@ -937,14 +937,37 @@ const TradeAILayoutStudio = () => {
                       </span>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {compareItems.map((h, i) => (
-                        <figure key={h.job_id} className="space-y-1">
-                          <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} controls playsInline preload="metadata" className="h-auto w-full bg-background" />
-                          <figcaption className="text-muted-foreground">
-                            {h.quality ?? "720p"} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-                          </figcaption>
-                        </figure>
-                      ))}
+                      {compareItems.map((h, i) => {
+                        const q = VIDEO_QUALITY_OPTIONS.find((o) => o.value === (h.quality ?? "720p")) ?? VIDEO_QUALITY_OPTIONS[1];
+                        return (
+                          <figure key={h.job_id} className="space-y-1">
+                            <div ref={(el) => { compareWrapRefs.current[i] = el; }} className="relative bg-background [&:fullscreen]:flex [&:fullscreen]:items-center [&:fullscreen]:justify-center">
+                              <video ref={(el) => { compareVideoRefs.current[i] = el; }} src={h.video_url ?? undefined} controls playsInline preload="metadata" muted={compareMuted[i]} className="h-auto w-full bg-background [&:fullscreen]:h-full [&:fullscreen]:object-contain" />
+                              <span className="absolute right-1 top-1 flex gap-1">
+                                <button
+                                  type="button"
+                                  aria-label={compareMuted[i] ? `Unmute ${q.label} video` : `Mute ${q.label} video`}
+                                  className="border border-border bg-background/90 p-1.5 hover:bg-accent"
+                                  onClick={() => toggleCompareMute(i)}
+                                >
+                                  {compareMuted[i] ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Fullscreen ${q.label} video`}
+                                  className="border border-border bg-background/90 p-1.5 hover:bg-accent"
+                                  onClick={() => toggleCompareFullscreen(i)}
+                                >
+                                  <Fullscreen className="h-3.5 w-3.5" />
+                                </button>
+                              </span>
+                            </div>
+                            <figcaption className="text-muted-foreground">
+                              {q.label} · est. {q.eta} · {q.cost} · {new Date(h.created_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                            </figcaption>
+                          </figure>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
