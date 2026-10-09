@@ -78,7 +78,6 @@ const WalkthroughCardPreview = forwardRef<WalkthroughCardPreviewHandle>(
 
   useImperativeHandle(ref, () => ({
     startTouchPreview: () => {
-      console.log("[tap-preview]", { touch: isTouch(), touchPreviewing, videoUrl: !!videoUrl });
       if (!isTouch() || touchPreviewing || !videoUrl) return false;
       setTouchPreviewing(true);
       void videoRef.current?.play().catch(() => undefined);
