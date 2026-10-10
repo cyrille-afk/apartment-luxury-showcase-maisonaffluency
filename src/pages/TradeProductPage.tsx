@@ -218,8 +218,9 @@ export function useTradeProductBySlug(
   designerSlug: string | undefined,
   productSlug: string | undefined,
 ) {
+  const { isAdmin } = useAuth();
   return useQuery({
-    queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
+    queryKey: [...queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug), isAdmin ? "admin" : "member"],
     queryFn: async () => {
       if (tradeProductIdParam) {
         const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url, source_pick_id";
@@ -248,10 +249,11 @@ export function useTradeProductBySlug(
 
         const brand = (tradeProduct as any).brand_name as string;
         const brandBase = brand.includes(" - ") ? brand.split(" - ")[0].trim() : brand;
-        const { data: designers } = await supabase
+        let designersQuery = supabase
           .from("designers")
-          .select("id, name, slug, display_name, biography, founder")
-          .eq("is_published", true)
+          .select("id, name, slug, display_name, biography, founder");
+        if (!isAdmin) designersQuery = designersQuery.eq("is_published", true);
+        const { data: designers } = await designersQuery;
         const designer = (designers || []).find((d: any) =>
           [d.name, d.display_name].some((name) => {
             if (!name) return false;
@@ -368,12 +370,13 @@ export function useTradeProductBySlug(
 
       if (!designerSlug || !productSlug) return null;
 
-      const { data: designer } = await supabase
+      // Admins can preview products of draft (unpublished) designers.
+      let designerQuery = supabase
         .from("designers")
         .select("id, name, slug, display_name, biography, founder")
-        .eq("slug", designerSlug)
-        .eq("is_published", true)
-        .maybeSingle();
+        .eq("slug", designerSlug);
+      if (!isAdmin) designerQuery = designerQuery.eq("is_published", true);
+      const { data: designer } = await designerQuery.maybeSingle();
       if (!designer) return null;
 
       const { data: picks } = await supabase
