@@ -44,6 +44,26 @@ const TradeAdminGlbModels: React.FC = () => {
   const [managerPage, setManagerPage] = useState(1);
   useEffect(() => { setManagerPage(1); }, [managerSearch, managerBrand, managerSort]);
 
+  // Left panel browse mode: products that already have a model, or the full
+  // active catalogue A–Z so any product can be picked for a first upload.
+  const [browseMode, setBrowseMode] = useState<"with3d" | "all">("with3d");
+  const [allProducts, setAllProducts] = useState<ProductRow[]>([]);
+  const [allLoaded, setAllLoaded] = useState(false);
+
+  useEffect(() => {
+    if (browseMode !== "all" || allLoaded) return;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, glb_url, updated_at")
+        .eq("is_active", true)
+        .order("product_name", { ascending: true })
+        .limit(2000);
+      setAllProducts((data as ProductRow[]) || []);
+      setAllLoaded(true);
+    })();
+  }, [browseMode, allLoaded]);
+
   // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
     (async () => {
@@ -103,7 +123,10 @@ const TradeAdminGlbModels: React.FC = () => {
     setReloadKey((k) => k + 1);
   };
 
-  const list = useMemo(() => (search.trim() ? results : withGlb), [search, results, withGlb]);
+  const list = useMemo(
+    () => (search.trim() ? results : browseMode === "all" ? allProducts : withGlb),
+    [search, results, withGlb, browseMode, allProducts]
+  );
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
@@ -145,9 +168,27 @@ const TradeAdminGlbModels: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
             {/* LEFT: search + list */}
             <div>
-              <label className="block font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
-                {search.trim() ? "Search results" : "Products with a 3D model"}
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                  {search.trim() ? "Search results" : browseMode === "all" ? "All products A–Z" : "Products with a 3D model"}
+                </label>
+                {!search.trim() && (
+                  <div className="flex gap-1 font-body text-[10px] uppercase tracking-[0.12em]">
+                    <button
+                      onClick={() => setBrowseMode("with3d")}
+                      className={`px-2 py-1 rounded ${browseMode === "with3d" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      With 3D
+                    </button>
+                    <button
+                      onClick={() => setBrowseMode("all")}
+                      className={`px-2 py-1 rounded ${browseMode === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      All A–Z
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -166,9 +207,14 @@ const TradeAdminGlbModels: React.FC = () => {
                     <Loader2 size={14} className="animate-spin" /> Searching…
                   </div>
                 )}
-                {!searching && list.length === 0 && (
+                {!searching && browseMode === "all" && !allLoaded && !search.trim() && (
+                  <div className="px-3 py-4 text-muted-foreground text-sm flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" /> Loading catalogue…
+                  </div>
+                )}
+                {!searching && list.length === 0 && (browseMode !== "all" || allLoaded || search.trim()) && (
                   <div className="px-3 py-6 text-muted-foreground text-sm text-center">
-                    {search.trim() ? "No products match." : "No products have a 3D model yet."}
+                    {search.trim() ? "No products match." : browseMode === "all" ? "No active products." : "No products have a 3D model yet."}
                   </div>
                 )}
                 {list.map((row) => (
