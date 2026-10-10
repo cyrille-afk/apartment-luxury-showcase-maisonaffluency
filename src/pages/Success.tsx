@@ -204,6 +204,48 @@ export default function Success() {
                   ) : null}
                 </dl>
               </div>
+            ) : needsEmail ? (
+              <div className="rounded-none border border-foreground/10 bg-background p-6 md:p-8 text-center">
+                <p className="font-body text-sm text-muted-foreground">
+                  For your privacy, please confirm the email address used at checkout to view this order.
+                </p>
+                <form
+                  className="mt-5 flex flex-col sm:flex-row gap-3 justify-center"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const email = emailInput.trim().toLowerCase();
+                    if (!email || !sessionId) return;
+                    setVerifying(true);
+                    try {
+                      const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
+                        body: { session_id: sessionId, email },
+                      });
+                      if (fnError) throw fnError;
+                      if ((data as any)?.error) throw new Error((data as any).error);
+                      if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
+                      setOrder((data as any).order as OrderDetails);
+                      setNeedsEmail(false);
+                    } catch {
+                      setError("That email doesn't match this order. Please try the address used at checkout.");
+                      setNeedsEmail(false);
+                    } finally {
+                      setVerifying(false);
+                    }
+                  }}
+                >
+                  <input
+                    type="email"
+                    required
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="Email used at checkout"
+                    className="h-11 px-4 border border-foreground/15 bg-background font-body text-sm w-full sm:w-72"
+                  />
+                  <Button type="submit" disabled={verifying} className="h-11">
+                    {verifying ? "Checking…" : "View Order"}
+                  </Button>
+                </form>
+              </div>
             ) : error || !order ? (
               <div className="text-center py-10">
                 <p className="font-body text-sm text-muted-foreground">
