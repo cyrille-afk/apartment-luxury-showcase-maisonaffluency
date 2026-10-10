@@ -1851,7 +1851,7 @@ const TradeProductPage: React.FC = () => {
     const netCents = Math.round(rrp * (1 - TRADE_DISCOUNT)) + upcharge;
     // Once the user has made a concrete fabric or wood-frame selection, the
     // price is fully resolved — never show "From".
-    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant;
+    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant || !!picturedVariant;
     const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
     const unit = pricing.price_unit || undefined;
