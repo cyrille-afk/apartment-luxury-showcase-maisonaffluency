@@ -251,7 +251,9 @@ Deno.serve(async (req) => {
     const { data: existingAcct } = await supabase
       .from('trade_accounts')
       .select('id, signup_id, studio_name, contact_name, phone_number, website_or_ig, business_reg_number, credential_document_path, source, intent')
-      .or(`signup_id.eq.${signupId},email.ilike.${email.replace(/[,()]/g, '')}`)
+      // Exact matches only — ILIKE patterns or filter metacharacters in a
+      // crafted email must never match another firm's account.
+      .or(`signup_id.eq.${signupId},email.eq.${email.replace(/[,()"%\\]/g, '')}`)
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle()
