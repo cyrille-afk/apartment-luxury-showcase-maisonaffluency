@@ -151,6 +151,10 @@ Deno.serve(async (req) => {
       return json({ error: 'Could not save your details' }, 500)
     }
   } else {
+    // New application: issue the continuation token the browser must present
+    // for any later submission against this email.
+    continuationToken = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, '')
+    payload.continuation_token_hash = await sha256Hex(continuationToken)
     const { data, error } = await supabase
       .from('trade_program_signups')
       .insert(payload)
