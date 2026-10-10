@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { rugCardPriceCents } from "@/lib/rugPricing";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { picturedVariantPriceCents } from "@/lib/picturedVariantPrice";
 
 /* ── Price helpers ── */
 interface TradePrice { cents: number; currency: string; price_unit?: string; from?: boolean; }
@@ -185,19 +186,32 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return m;
   }, [tradePrices]);
 
+  // Pictured-finish price per product (primary photo), matching the product page.
+  const picturedPriceMap = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of dbPicks) {
+      const c = picturedVariantPriceCents(p.variant_image_map, p.size_variants as any);
+      if (c != null) m.set(normalizeName(p.title), c);
+    }
+    return m;
+  }, [dbPicks]);
+
   const getHotspotPrice = useCallback((productName: string): TradePrice | null => {
     if (!tradePrices.length) return null;
-    return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
-  }, [tradePrices, priceExactMap]);
+    const match = fuzzyPriceMatch(productName, priceExactMap, tradePrices);
+    const pictured = picturedPriceMap.get(normalizeName(productName));
+    if (match && pictured != null) return { ...match, cents: pictured, from: false };
+    return match;
+  }, [tradePrices, priceExactMap, picturedPriceMap]);
 
   // ── Edition & PDF lookup from curator picks (static + DB) ──
-  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null }[]>([]);
+  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
 
   useEffect(() => {
     const fetchDbPicks = async () => {
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("title, edition, pdf_url");
+        .select("title, edition, pdf_url, variant_image_map, size_variants");
       if (data) setDbPicks(data);
     };
     fetchDbPicks();
