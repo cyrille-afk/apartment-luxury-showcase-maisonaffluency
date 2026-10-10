@@ -37,19 +37,20 @@ All colors MUST be HSL.
 */
 
 .spec-sheet-workspace {
-  --background: 168 15% 10%;
-  --foreground: 32 20% 95%;
-  --card: 168 12% 13%;
-  --muted: 168 10% 18%;
-  --muted-foreground: 168 5% 68%;
-  --border: 168 10% 23%;
-  --input: 168 10% 27%;
-  --primary: 168 35% 40%;
-  --primary-foreground: 32 20% 97%;
-  --accent: 38 45% 72%;
-  --accent-foreground: 168 15% 10%;
-  --ring: 38 45% 72%;
-  --shadow-document: 0 18px 60px hsl(168 20% 3% / 0.5), 0 2px 8px hsl(168 20% 3% / 0.3);
+  --background: 60 11.111% 98.235%;
+  --foreground: 0 0% 6.667%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 6.667%;
+  --muted: 60 5% 94%;
+  --muted-foreground: 0 0% 36%;
+  --border: 0 0% 6.667%;
+  --input: 0 0% 6.667%;
+  --primary: 0 0% 6.667%;
+  --primary-foreground: 60 11.111% 98.235%;
+  --accent: 60 5% 94%;
+  --accent-foreground: 0 0% 6.667%;
+  --ring: 0 0% 6.667%;
+  --shadow-document: 0 12px 40px hsl(0 0% 6.667% / 0.08), 0 1px 4px hsl(0 0% 6.667% / 0.08);
 }
 .spec-sheet-document { box-shadow: var(--shadow-document); }
 .spec-sheet-print-frame { position: fixed; width: 1px; height: 1px; left: -10000px; top: 0; border: 0; }
