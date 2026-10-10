@@ -232,14 +232,14 @@ export default function Success() {
                       const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
                         body: { session_id: sessionId, email },
                       });
-                      if (fnError) throw fnError;
+                      if (fnError) throw new Error(await edgeFnMessage(fnError));
                       if ((data as any)?.error) throw new Error((data as any).error);
                       if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
                       setOrder((data as any).order as OrderDetails);
                       setNeedsEmail(false);
                     } catch {
+                      // Keep the form visible so the guest can try again.
                       setError("That email doesn't match this order. Please try the address used at checkout.");
-                      setNeedsEmail(false);
                     } finally {
                       setVerifying(false);
                     }
