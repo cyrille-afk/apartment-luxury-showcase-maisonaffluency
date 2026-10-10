@@ -193,10 +193,8 @@ Deno.serve(async (req) => {
     sha256,
     documentId: logRow?.id ?? null,
     mimeType: verdict.mime,
-    // A recycled binary never blocks the applicant here — it travels with the
-    // application so verification can flag it and route it to a human.
-    duplicate: !!prior,
-    duplicateOf: prior?.id ?? null,
+    // Duplicate status is recorded server-side (duplicate_of) for admin
+    // review only — never disclosed to the uploader.
     signatureNote: verdict.note || null,
     quarantined: scan.severity !== "clean",
     activeContentFlags: scan.flags,

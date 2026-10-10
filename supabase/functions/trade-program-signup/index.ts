@@ -289,8 +289,12 @@ Deno.serve(async (req) => {
           .insert({ ...acctFields, signup_id: signupId }).select('id, status').single()
     if (acctErr) console.error('trade_accounts upsert failed', acctErr)
     if (acct?.id) {
-      await supabase.from('studio_aesthetic_dna')
+      // Paid website analysis runs once per studio: only when this request
+      // created the pending row, so resubmissions can't re-trigger spend.
+      const { data: created } = await supabase.from('studio_aesthetic_dna')
         .upsert({ trade_account_id: acct.id, status: 'pending' }, { onConflict: 'trade_account_id', ignoreDuplicates: true })
+        .select('trade_account_id')
+      if (created && created.length > 0) {
       const task = fetch(`${supabaseUrl}/functions/v1/analyze-studio-aesthetic`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
@@ -299,6 +303,7 @@ Deno.serve(async (req) => {
       // deno-lint-ignore no-explicit-any
       const rt = (globalThis as any).EdgeRuntime
       if (rt?.waitUntil) rt.waitUntil(task)
+      }
     }
     // AI Critical Radar runs in the background after Turnstile validation;
     // the applicant's response never waits on it. The WhatsApp alert is sent
