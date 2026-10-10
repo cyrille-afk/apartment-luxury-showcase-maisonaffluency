@@ -70,14 +70,11 @@ Deno.serve(async (req) => {
   const rrp = Number(price?.trade_price_cents) || 0;
   if (rrp <= 0) return pdfResponse(original, false); // Price upon Request — no margin to chart
 
-  const [{ data: profile }, { data: tierRow }] = await Promise.all([
-    admin.from("profiles").select("company, first_name, last_name, trade_tier").eq("id", userId).maybeSingle(),
-    admin.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
-  ]);
+  const { data: profile } = await admin.from("profiles").select("company, first_name, last_name, trade_tier").eq("id", userId).maybeSingle();
   const net = Math.round(rrp * (1 - discount.pct));
   const currency = String(pick.currency || "EUR");
   const studio = profile?.company || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Trade Studio";
-  const tier = String(tierRow?.trade_tier || "silver");
+  const tier = String(profile?.trade_tier || "silver");
 
   try {
     const out = await PDFDocument.create();
