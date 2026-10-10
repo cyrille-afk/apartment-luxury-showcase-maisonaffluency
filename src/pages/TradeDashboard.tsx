@@ -408,7 +408,7 @@ const TradeDashboard = () => {
             const fmt = (cents: number) => tierVolume.format(tierVolume.amount(cents));
             const nextMilestone = tier === "silver" ? tierVolume.gold : tierVolume.platinum;
             return (
-              <div data-felix-target="tier-volume-tracker" className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
+              <div data-felix-target="tier-volume-tracker" data-trade-sensitive className="hidden lg:block w-[340px] shrink-0 self-center rounded-md border border-border px-5 py-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="trade-micro-label uppercase text-muted-foreground">Tier Volume Tracker</p>
                   <p className="font-body text-[11px] text-muted-foreground tabular-nums">
