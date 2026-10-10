@@ -403,10 +403,10 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
       {/* Desktop-only underlaid split canvas (Emmanuel Babled et al.) */}
       {isUnderlaid && (
         <section className="hidden md:block w-full bg-transparent">
-          <div className="grid grid-cols-2 gap-x-10 items-start w-full">
+          <div className="grid grid-cols-12 gap-x-10 items-start w-full">
             {/* Left Column — constrained editorial hero */}
-            <div className="flex flex-col">
-              <div className="flex h-[280px] w-full items-center justify-center overflow-hidden bg-[hsl(var(--canvas))]">
+            <div className="flex flex-col col-span-12 md:col-span-5">
+              <div className="flex h-[320px] w-full items-center justify-center overflow-hidden bg-[hsl(var(--canvas))]">
                 <CldPicture
                   src={portraitImage}
                   alt={`${displayName} portrait`}
@@ -417,7 +417,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             </div>
 
             {/* Right Column — compact biography stack + From the Studio */}
-            <div className="flex flex-col justify-start pt-0 pb-3">
+            <div className="flex flex-col justify-start pt-0 pb-3 col-span-12 md:col-span-7">
               <div className="flex items-center gap-3 w-full">
                 <h1 className="text-2xl font-serif font-semibold tracking-wide text-black antialiased">
                   {displayName}
@@ -450,7 +450,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
               {igWithImages.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-neutral-100 w-full flex flex-col">
                   <div className="pl-6 md:pl-10 flex flex-col items-center">
-                    <div className="flex gap-3 items-center h-16 md:h-20 overflow-hidden flex-shrink-0 self-start w-full">
+                    <div className="flex gap-3 items-center h-20 md:h-24 overflow-hidden flex-shrink-0 self-start w-full">
                       {igWithImages.slice(0, 6).map((post) => (
                         <a
                           key={post.id}
@@ -465,7 +465,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                             priority
                             widths={[128, 192]}
                             mobileWidths={[128, 192]}
-                            sizes="(min-width: 768px) 106px, 80px"
+                            sizes="(min-width: 768px) 96px, 80px"
                             className="h-full w-full object-cover object-center transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
                           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                             <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
