@@ -1279,7 +1279,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         <DialogContent
           ref={lightboxContentRef}
           hideClose
-          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-black/95 overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
+          overlayClassName="bg-black/35 backdrop-blur-md"
+          className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !max-w-none !max-h-[100dvh] !w-[100dvw] !h-[100dvh] p-0 border-none bg-transparent shadow-none overflow-hidden flex items-start justify-start md:items-center md:justify-center [&>button]:hidden"
           aria-describedby={undefined}
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") goToPrevious();
