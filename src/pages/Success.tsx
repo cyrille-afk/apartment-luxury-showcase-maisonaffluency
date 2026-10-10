@@ -53,6 +53,10 @@ export default function Success() {
   const [adhoc, setAdhoc] = useState<AdhocPayment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Guests must prove the order email before details are shown.
+  const [needsEmail, setNeedsEmail] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
