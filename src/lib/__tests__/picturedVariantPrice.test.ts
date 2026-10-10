@@ -14,6 +14,10 @@ describe("picturedVariantPriceCents", () => {
   it("Orsay card prices the pictured Travertine + Ocean Onyx (€38,600), not the cheapest", () => {
     expect(picturedVariantPriceCents(orsayMap, orsayVariants)).toBe(3860000);
   });
+  it("reads prices from trade rows when the pick list has prices stripped", () => {
+    const stripped = orsayVariants.map(({ price_cents, ...v }) => v);
+    expect(picturedVariantPriceCents(orsayMap, stripped, 0, orsayVariants)).toBe(3860000);
+  });
   it("returns null when the photo has no mapped finish", () => {
     expect(picturedVariantPriceCents({}, orsayVariants)).toBeNull();
   });

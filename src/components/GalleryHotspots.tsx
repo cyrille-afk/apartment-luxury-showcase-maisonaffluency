@@ -171,7 +171,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
             const all = base > 0 ? [base, ...variantCents] : variantCents;
             const cents = all.length ? Math.min(...all) : 0;
             const from = /from/i.test(p.price_prefix || "") || new Set(all).size > 1;
-            return { name: p.product_name, cents, currency: p.currency, price_unit: p.price_unit, from };
+            return { name: p.product_name, cents, currency: p.currency, price_unit: p.price_unit, from, variants: Array.isArray(p.size_variants) ? p.size_variants : [] };
           })
           .filter(e => e.cents > 0);
         setTradePrices(entries);
@@ -200,12 +200,13 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     fetchDbPicks();
   }, []);
 
-  // Pictured-finish price per product (primary photo), matching the product page.
-  const picturedPriceMap = useMemo(() => {
-    const m = new Map<string, number>();
+  // Pictured-finish pricing (primary photo), matching the product page. The
+  // public pick view supplies the photo→finish map; prices come from the
+  // member's trade rows because that view strips them.
+  const pickFinishLookup = useMemo(() => {
+    const m = new Map<string, { map: unknown; variants: any[] }>();
     for (const p of dbPicks) {
-      const c = picturedVariantPriceCents(p.variant_image_map, p.size_variants as any);
-      if (c != null) m.set(normalizeName(p.title), c);
+      if (p.variant_image_map && Array.isArray(p.size_variants)) m.set(normalizeName(p.title), { map: p.variant_image_map, variants: p.size_variants as any[] });
     }
     return m;
   }, [dbPicks]);
@@ -213,10 +214,14 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const getHotspotPrice = useCallback((productName: string): TradePrice | null => {
     if (!tradePrices.length) return null;
     const match = fuzzyPriceMatch(productName, priceExactMap, tradePrices);
-    const pictured = picturedPriceMap.get(normalizeName(productName));
-    if (match && pictured != null) return { ...match, cents: pictured, from: false };
+    const pick = pickFinishLookup.get(normalizeName(productName));
+    const row = tradePrices.find((e) => normalizeName(e.name) === normalizeName(productName)) as any;
+    if (match && pick && row?.variants?.length) {
+      const pictured = picturedVariantPriceCents(pick.map, pick.variants, 0, row.variants);
+      if (pictured != null) return { ...match, cents: pictured, from: false };
+    }
     return match;
-  }, [tradePrices, priceExactMap, picturedPriceMap]);
+  }, [tradePrices, priceExactMap, pickFinishLookup]);
 
   const { editionLookup, pdfLookup } = useMemo(() => {
     const editions = new Map<string, string>();

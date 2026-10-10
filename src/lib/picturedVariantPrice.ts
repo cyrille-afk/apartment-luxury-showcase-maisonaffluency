@@ -12,12 +12,22 @@ export function picturedVariantPriceCents(
   rawMap: unknown,
   variants: Variant[] | null | undefined,
   imageIndex = 0,
+  /** Priced variant rows (trade pricing). The public pick view strips prices,
+   *  so match the photo against `variants` and read prices from here. */
+  pricedVariants?: Variant[] | null,
 ): number | null {
   const map = buildProductFinishMap(rawMap);
   const list = Array.isArray(variants) ? variants : [];
   if (!map || !list.length) return null;
-  const priced = (v: Variant | undefined) =>
-    v && typeof v.price_cents === "number" && v.price_cents > 0 ? v.price_cents : null;
+  const pricedList = Array.isArray(pricedVariants) ? pricedVariants : list;
+  const same = (a: Variant, b: Variant) =>
+    (a.base || "").trim() === (b.base || "").trim() &&
+    (a.top || "").trim() === (b.top || "").trim() &&
+    (a.label || "").trim() === (b.label || "").trim();
+  const priced = (v: Variant | undefined) => {
+    const row = v ? pricedList.find((p) => same(p, v)) : undefined;
+    return row && typeof row.price_cents === "number" && row.price_cents > 0 ? row.price_cents : null;
+  };
 
   // 1) Canonical keys (base|top|size, base|top, single axis).
   const hit = findVariantForImageIndex(map, list, imageIndex);
