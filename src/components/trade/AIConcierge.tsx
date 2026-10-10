@@ -3992,7 +3992,12 @@ export function AIConcierge({
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         await supabase.functions.invoke("concierge-cn-brief", {
-          body: { session_id: sessionId, invited_name: invitedName, messages },
+          body: {
+            session_id: sessionId,
+            brief_capability: sessionStorage.getItem("cn_portal:brief_cap"),
+            invited_name: invitedName,
+            messages,
+          },
         });
         return;
       }

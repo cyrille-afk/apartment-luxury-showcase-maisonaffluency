@@ -78,6 +78,10 @@ export default function PortalCN() {
       invitedCompany: payload.invited_company ?? null,
     };
     writePortalSession(s);
+    // Short-lived, session-scoped capability for concierge brief attachments.
+    if (payload.session_id) sessionStorage.setItem("cn_portal:session_id", payload.session_id);
+    if (payload.brief_capability) sessionStorage.setItem("cn_portal:brief_cap", payload.brief_capability);
+    if (payload.invited_name) sessionStorage.setItem("cn_portal:invited_name", payload.invited_name);
     setSession(s);
     setStage("welcome");
   }

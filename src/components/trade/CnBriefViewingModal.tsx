@@ -41,6 +41,7 @@ export function CnBriefViewingModal({ open, onOpenChange, sessionId, invitedName
       const { data, error } = await supabase.functions.invoke("concierge-cn-brief", {
         body: {
           session_id: sessionId || null,
+          brief_capability: sessionStorage.getItem("cn_portal:brief_cap"),
           invited_name: name.trim(),
           contact_email: email.trim() || null,
           contact_phone: phone.trim() || null,
