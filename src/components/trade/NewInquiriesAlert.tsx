@@ -77,6 +77,7 @@ export function NewInquiriesAlert() {
   return (
     <Link
       to="/trade/admin/inquiries"
+      data-trade-sensitive
       className="group mb-8 block animate-[pulse_2.5s_ease-in-out_infinite] border border-accent/60 bg-accent/10 px-5 py-4 transition-colors hover:bg-accent/20 md:px-7 md:py-5"
       aria-live="polite"
     >
