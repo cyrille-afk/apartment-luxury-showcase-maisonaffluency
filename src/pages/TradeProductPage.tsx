@@ -570,6 +570,9 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+  // Finishes the selector currently highlights (pictured in the gallery
+  // photo). Used to price the pictured pairing when the user hasn't picked.
+  const [displayedFinishes, setDisplayedFinishes] = useState<{ base: string | null; top: string | null }>({ base: null, top: null });
 
   // Mirror the dashboard's finish selection into the shared container engine.
   useEffect(() => {
@@ -1231,14 +1234,17 @@ const TradeProductPage: React.FC = () => {
   // now showing. No-op when the active image isn't tied to any variant
   // (e.g. an editorial photo) or when the dropdowns already match.
   useEffect(() => {
-    if (galleryActiveIndex === undefined) return;
+    // On load (no gallery navigation yet) sync from the photo actually shown
+    // (index 0) so the price matches the pictured finishes — but never
+    // override a finish the user has already picked.
+    if (galleryActiveIndex === undefined && (selectedBase || selectedTop || selectedDualSize)) return;
     const rawMap = (data?.product as any)?.variant_image_map;
     const finishMap = buildProductFinishMap(rawMap);
     if (!finishMap) return;
     const variants = (data?.pricing?.size_variants
       || (data?.product as any)?.size_variants
       || []) as { label?: string; base?: string; top?: string }[];
-    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
+    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex ?? 0);
     if (!match) return;
     const nextBase = match.base;
     const nextTop = match.top;
@@ -1600,6 +1606,18 @@ const TradeProductPage: React.FC = () => {
     (b == null || (v.base || "").trim() === b) &&
     (t == null || (v.top || "").trim() === t) &&
     (s == null || (v.label || "").trim() === s);
+  // Pictured finishes: when the user hasn't picked anything, the finish
+  // selector highlights the finishes shown in the current gallery photo.
+  // Price the page for THAT pairing instead of the cheapest "From" rate.
+  const matchAxisOption = (name: string | null, options: string[]): string | null => {
+    if (!name) return null;
+    const norm = (s: string) => s.trim().toLowerCase();
+    const nw = norm(name);
+    return options.find((o) => norm(o) === nw)
+      || options.find((o) => nw.includes(norm(o)))
+      || options.find((o) => norm(o).includes(nw))
+      || null;
+  };
   // Only disable an axis option when NO variant exists for it given the size
   // selection. We intentionally do NOT cross-disable base ↔ top: picking the
   // other base should be allowed and will auto-swap the top to a compatible
@@ -1691,6 +1709,20 @@ const TradeProductPage: React.FC = () => {
     { sizeVariants: variantsList, isDualAxis },
   );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
+  // Pictured finishes: when the user hasn't picked anything, the finish
+  // selector highlights the finishes shown in the current gallery photo.
+  // Price the page for THAT pairing instead of the cheapest "From" rate.
+  const picturedVariant = (!activeVariant && !dualSelectionMade && isDualAxis)
+    ? (() => {
+        const b = matchAxisOption(displayedFinishes.base, baseOptions);
+        const t = matchAxisOption(displayedFinishes.top, topOptions);
+        if (!b && !t) return null;
+        return variantsList.find((v: any) => matchesDual(v, b, t, null)) ?? null;
+      })()
+    : null;
+  const picturedVariantCents = picturedVariant && typeof picturedVariant.price_cents === "number" && picturedVariant.price_cents > 0
+    ? picturedVariant.price_cents
+    : null;
   // Catalogue rate on the product itself. Many pieces carry finish options that
   // do not change the price (every variant is price_cents = 0) — those must
   // still show the catalogue rate rather than "Price upon Request".
@@ -1713,9 +1745,9 @@ const TradeProductPage: React.FC = () => {
       ? catalogueRrpCents
       : (activeVariant
         ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : catalogueRrpCents)
-        : (dualSelectionUnpriced ? catalogueRrpCents : (partialDualMinCents ?? minVariantCents))))
+        : (dualSelectionUnpriced ? catalogueRrpCents : (picturedVariantCents ?? partialDualMinCents ?? minVariantCents))))
     : catalogueRrpCents;
-  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
+  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && picturedVariantCents == null && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
@@ -1819,7 +1851,7 @@ const TradeProductPage: React.FC = () => {
     const netCents = Math.round(rrp * (1 - TRADE_DISCOUNT)) + upcharge;
     // Once the user has made a concrete fabric or wood-frame selection, the
     // price is fully resolved — never show "From".
-    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant;
+    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant || !!picturedVariant;
     const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
     const unit = pricing.price_unit || undefined;
@@ -2166,6 +2198,7 @@ const TradeProductPage: React.FC = () => {
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
+                  onDisplayedFinishesChange={(n) => setDisplayedFinishes({ base: n.base, top: n.top })}
                   preselectFabricName={requestedFabricName}
                   upholsteryLabel={
                     resolveFinishSectionLabels({
