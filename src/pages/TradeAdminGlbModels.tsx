@@ -161,12 +161,24 @@ const TradeAdminGlbModels: React.FC = () => {
             <h1 className="font-display text-3xl flex items-center gap-3">
               <Box size={22} /> 3D Models
             </h1>
-            <button
-              onClick={startUpload}
-              className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
-            >
-              <Upload size={15} /> Upload a 3D model
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={startUpload}
+                className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
+              >
+                <Upload size={15} /> Upload a 3D model
+              </button>
+              <button
+                onClick={startBulkUpload}
+                className={`inline-flex items-center gap-2 font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md transition-colors ${
+                  bulkMode
+                    ? "bg-foreground text-background"
+                    : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
+                }`}
+              >
+                <Layers size={15} /> Bulk upload
+              </button>
+            </div>
           </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
             Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
@@ -253,9 +265,11 @@ const TradeAdminGlbModels: React.FC = () => {
 
             {/* RIGHT: upload + preview */}
             <div>
-              {!selected ? (
+              {bulkMode ? (
+                <GlbBulkUpload onChange={() => setReloadKey((k) => k + 1)} />
+              ) : !selected ? (
                 <div className="border border-dashed border-border rounded-md p-10 text-center text-muted-foreground font-body text-sm">
-                  Select a product on the left to upload or replace its 3D model.
+                  Select a product on the left to upload or replace its 3D model — or use Bulk upload to add several products for one designer at once.
                 </div>
               ) : (
                 <GlbVariantManager
