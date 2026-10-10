@@ -1231,14 +1231,17 @@ const TradeProductPage: React.FC = () => {
   // now showing. No-op when the active image isn't tied to any variant
   // (e.g. an editorial photo) or when the dropdowns already match.
   useEffect(() => {
-    if (galleryActiveIndex === undefined) return;
+    // On load (no gallery navigation yet) sync from the photo actually shown
+    // (index 0) so the price matches the pictured finishes — but never
+    // override a finish the user has already picked.
+    if (galleryActiveIndex === undefined && (selectedBase || selectedTop || selectedDualSize)) return;
     const rawMap = (data?.product as any)?.variant_image_map;
     const finishMap = buildProductFinishMap(rawMap);
     if (!finishMap) return;
     const variants = (data?.pricing?.size_variants
       || (data?.product as any)?.size_variants
       || []) as { label?: string; base?: string; top?: string }[];
-    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex);
+    const match = findVariantForImageIndex(finishMap, variants, galleryActiveIndex ?? 0);
     if (!match) return;
     const nextBase = match.base;
     const nextTop = match.top;
