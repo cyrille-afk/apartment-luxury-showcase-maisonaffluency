@@ -186,6 +186,20 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return m;
   }, [tradePrices]);
 
+
+  // ── Edition & PDF lookup from curator picks (static + DB) ──
+  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
+
+  useEffect(() => {
+    const fetchDbPicks = async () => {
+      const { data } = await supabase
+        .from("designer_curator_picks_public")
+        .select("title, edition, pdf_url, variant_image_map, size_variants");
+      if (data) setDbPicks(data);
+    };
+    fetchDbPicks();
+  }, []);
+
   // Pictured-finish price per product (primary photo), matching the product page.
   const picturedPriceMap = useMemo(() => {
     const m = new Map<string, number>();
@@ -203,19 +217,6 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     if (match && pictured != null) return { ...match, cents: pictured, from: false };
     return match;
   }, [tradePrices, priceExactMap, picturedPriceMap]);
-
-  // ── Edition & PDF lookup from curator picks (static + DB) ──
-  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
-
-  useEffect(() => {
-    const fetchDbPicks = async () => {
-      const { data } = await supabase
-        .from("designer_curator_picks_public")
-        .select("title, edition, pdf_url, variant_image_map, size_variants");
-      if (data) setDbPicks(data);
-    };
-    fetchDbPicks();
-  }, []);
 
   const { editionLookup, pdfLookup } = useMemo(() => {
     const editions = new Map<string, string>();
