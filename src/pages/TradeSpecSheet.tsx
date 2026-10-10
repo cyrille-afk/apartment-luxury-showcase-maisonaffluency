@@ -64,7 +64,7 @@ export default function TradeSpecSheet() {
         if (!cancelled) setComposing(false);
       }
     })();
-    return () => { cancelled = true; if (objectUrl) window.setTimeout(() => URL.revokeObjectURL(objectUrl!), 60000); };
+    return () => { cancelled = true; if (objectUrl) { const retiredUrl = objectUrl; window.setTimeout(() => URL.revokeObjectURL(retiredUrl), 60000); } };
   }, [pdfUrl, user, product, brand, clientView]);
   const documentUrl = composed?.url ?? pdfUrl;
 
