@@ -35,6 +35,38 @@ export default function TradeSpecSheet() {
   const isMobile = useIsMobile();
   const { user, loading: authLoading } = useAuth();
   const [gateOpen, setGateOpen] = useState(false);
+  const clientView = params.get("view") === "client";
+  const [composed, setComposed] = useState<{ url: string; cover: boolean } | null>(null);
+  const [composing, setComposing] = useState(false);
+
+  // Compile the document server-side: trade mode prepends the confidential
+  // cover sheet for approved members; client mode always returns the clean sheet.
+  useEffect(() => {
+    if (!pdfUrl || !user) { setComposed(null); return; }
+    let cancelled = false; let objectUrl: string | null = null;
+    setComposing(true);
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/spec-sheet-compose`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          body: JSON.stringify({ pdfUrl, product, brand, mode: clientView ? "client" : "trade" }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const blob = await res.blob();
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+        setComposed({ url: objectUrl, cover: res.headers.get("X-Cover-Sheet") === "included" });
+      } catch {
+        if (!cancelled) setComposed(null); // fall back to the plain sheet
+      } finally {
+        if (!cancelled) setComposing(false);
+      }
+    })();
+    return () => { cancelled = true; if (objectUrl) window.setTimeout(() => URL.revokeObjectURL(objectUrl!), 60000); };
+  }, [pdfUrl, user, product, brand, clientView]);
+  const documentUrl = composed?.url ?? pdfUrl;
 
   const pageTitle = useMemo(
     () => (product ? `${brand} — ${product} Spec Sheet` : "Trade Product Spec Sheet Viewer"),
@@ -126,16 +158,16 @@ export default function TradeSpecSheet() {
   }, [product, user, sheetLabel, sheetIndex]);
 
   const handleDownload = useCallback(async () => {
-    if (!pdfUrl) return;
+    if (!documentUrl) return;
     trackDownload(undefined, `${brand} — ${product} Spec Sheet`);
     try {
-      const res = await fetch(pdfUrl);
+      const res = await fetch(documentUrl);
       if (!res.ok) throw new Error("Document unavailable");
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `${brand} — ${product} Spec Sheet.pdf`;
+      a.download = `${brand} — ${product} ${composed?.cover ? "Trade Spec Sheet" : "Spec Sheet"}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -143,7 +175,7 @@ export default function TradeSpecSheet() {
     } catch {
       throw new Error("Document download unavailable");
     }
-  }, [pdfUrl, brand, product]);
+  }, [documentUrl, composed, brand, product]);
 
   return (
     <>
@@ -158,8 +190,11 @@ export default function TradeSpecSheet() {
         product={product}
         sheetLabel={sheetLabel}
         sheetIndex={sheetIndex}
-        pdfUrl={pdfUrl}
-        loading={loading || (!user && authLoading)}
+        pdfUrl={documentUrl}
+        remoteUrl={pdfUrl}
+        coverIncluded={!!composed?.cover}
+        clientView={clientView}
+        loading={loading || composing || (!user && authLoading)}
         signedIn={!!user}
         isMobile={isMobile}
         onSignIn={() => setGateOpen(true)}

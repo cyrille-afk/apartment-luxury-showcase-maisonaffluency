@@ -24,6 +24,11 @@ interface Props {
   sheetLabel: string;
   sheetIndex: number | null;
   pdfUrl: string | null;
+  /** Remote (non-blob) URL for viewers that can't read blob: URLs (mobile gview). */
+  remoteUrl?: string | null;
+  /** True when the confidential trade cover sheet is page 1 of this document. */
+  coverIncluded?: boolean;
+  clientView?: boolean;
   loading: boolean;
   signedIn: boolean;
   isMobile: boolean;
@@ -31,7 +36,7 @@ interface Props {
   onDownload: () => Promise<void>;
 }
 
-export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIndex, pdfUrl, loading, signedIn, isMobile, onSignIn, onDownload }: Props) {
+export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIndex, pdfUrl, remoteUrl, coverIncluded, clientView, loading, signedIn, isMobile, onSignIn, onDownload }: Props) {
   const [busy, setBusy] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -54,9 +59,11 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
     if (!pdfUrl) return;
     const url = new URL(buildSpecSheetUrl(pdfUrl, brand, product, sheetLabel || undefined, sheetIndex ?? undefined));
     url.hostname = "www.maisonaffluency.com"; url.protocol = "https:"; url.port = "";
+    // Client links request the clean retail sheet; the server never adds the trade cover in client mode.
+    url.searchParams.set("view", "client");
     const success = await copyTextToClipboard(url.toString());
     setCopied(success);
-    setNotice(success ? "Spec sheet link copied. Recipients sign in to view the document." : "The link could not be copied. Please try again.");
+    setNotice(success ? "Client link copied — it opens the clean spec sheet without your trade cover page. Recipients sign in to view." : "The link could not be copied. Please try again.");
   };
   const print = async () => {
     if (!pdfUrl) return;
@@ -105,7 +112,7 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
         <Button asChild variant="ghost" size="sm" className="shrink-0 text-muted-foreground"><Link to="/trade/the-collection"><ArrowLeft /><span className="hidden md:inline">Collection</span></Link></Button>
       </div>
       {notice && <p role="status" className="mb-4 font-body text-xs text-accent">{notice}</p>}
-      {ready && inlineSupported ? <div className="spec-sheet-document relative h-[calc(100dvh-18rem)] min-h-[560px] overflow-hidden border border-border"><PdfFrame src={isMobile ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl || "")}` : pdfUrl || ""} title={`${title} — Spec Sheet`} /></div> :
+      {ready && inlineSupported ? <div className="spec-sheet-document relative h-[calc(100dvh-18rem)] min-h-[560px] overflow-hidden border border-border"><PdfFrame src={isMobile ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(remoteUrl || pdfUrl || "")}` : pdfUrl || ""} title={`${title} — Spec Sheet`} /></div> :
         <div className="flex min-h-[560px] flex-1 items-center justify-center">
           <div className="spec-sheet-document w-full max-w-lg border border-border bg-card px-8 py-14 text-center md:px-12">
             {loading ? <Loader2 className="mx-auto mb-7 h-9 w-9 animate-spin text-accent" /> : signedIn ? <FileText className="mx-auto mb-7 h-10 w-10 text-accent" strokeWidth={1} /> : <Lock className="mx-auto mb-7 h-10 w-10 text-accent" strokeWidth={1} />}
@@ -114,7 +121,7 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
             {!loading && (!signedIn ? <Button onClick={onSignIn} className="mt-8 gap-2"><Lock />Sign in to view</Button> : pdfUrl ? <Button onClick={download} disabled={busy} className="mt-8 gap-2"><Download />Download Document</Button> : null)}
           </div>
         </div>}
-      {ready && inlineSupported && <div className="mt-4 flex flex-wrap items-center justify-between gap-2 font-body text-[10px] text-muted-foreground"><span>SPECIFICATION SHEET · PDF</span><Button onClick={download} disabled={busy} variant="link" size="sm" className="h-auto p-0 text-xs text-muted-foreground">Preview not displaying? Download Document</Button></div>}
+      {ready && inlineSupported && <div className="mt-4 flex flex-wrap items-center justify-between gap-2 font-body text-[10px] text-muted-foreground"><span>{coverIncluded ? "PAGE 1 · CONFIDENTIAL TRADE COVER SHEET — NOT INCLUDED IN CLIENT LINKS" : clientView ? "CLIENT SPECIFICATION SHEET · PDF" : "SPECIFICATION SHEET · PDF"}</span><Button onClick={download} disabled={busy} variant="link" size="sm" className="h-auto p-0 text-xs text-muted-foreground">Preview not displaying? Download Document</Button></div>}
     </main>
     <footer className="border-t border-border px-5 py-4 text-center font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Maison Affluency · Technical Documents</footer>
   </div>;
