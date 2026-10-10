@@ -5853,6 +5853,8 @@ export type Database = {
       }
       portal_sessions: {
         Row: {
+          brief_capability_expires_at: string | null
+          brief_capability_hash: string | null
           corporate_id: string
           created_at: string
           expires_at: string
@@ -5865,6 +5867,8 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          brief_capability_expires_at?: string | null
+          brief_capability_hash?: string | null
           corporate_id: string
           created_at?: string
           expires_at: string
@@ -5877,6 +5881,8 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          brief_capability_expires_at?: string | null
+          brief_capability_hash?: string | null
           corporate_id?: string
           created_at?: string
           expires_at?: string

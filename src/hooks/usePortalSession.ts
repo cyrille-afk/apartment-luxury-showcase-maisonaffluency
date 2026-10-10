@@ -54,7 +54,15 @@ export function usePortalSession() {
       const ok = !error && (data as any)?.valid === true;
       setValid(ok);
       setChecking(false);
-      if (!ok) clearPortalSession();
+      if (!ok) {
+        clearPortalSession();
+      } else {
+        // Keep the short-lived brief capability fresh (server renews it when
+        // it is missing or expiring soon) and record the session id.
+        const d = data as any;
+        if (d.session_id) sessionStorage.setItem("cn_portal:session_id", d.session_id);
+        if (d.brief_capability) sessionStorage.setItem("cn_portal:brief_cap", d.brief_capability);
+      }
     })();
     return () => {
       cancelled = true;

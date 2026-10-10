@@ -27,6 +27,7 @@ interface ClientMsg {
 
 interface Body {
   session_id?: string | null;
+  brief_capability?: string | null;
   invited_name?: string | null;
   contact_email?: string | null;
   contact_phone?: string | null;
@@ -80,8 +81,20 @@ serve(async (req) => {
   let sessionUuid: string | null = null;
   if (body.session_id && UUID_RE.test(body.session_id)) {
     const { data: ps } = await admin.from("portal_sessions")
-      .select("id, expires_at, revoked_at").eq("id", body.session_id).maybeSingle();
-    if (ps && !ps.revoked_at && Date.parse(ps.expires_at) > Date.now()) sessionUuid = ps.id;
+      .select("id, expires_at, revoked_at, brief_capability_hash, brief_capability_expires_at")
+      .eq("id", body.session_id).maybeSingle();
+    if (ps && !ps.revoked_at && Date.parse(ps.expires_at) > Date.now()) {
+      // Attaching a brief to a portal session requires the short-lived,
+      // session-scoped capability minted at redemption/validation. Without a
+      // valid capability, brief under the signed-in caller only (no session).
+      const cap = (body.brief_capability || "").trim();
+      if (cap && ps.brief_capability_hash && ps.brief_capability_expires_at
+          && Date.parse(ps.brief_capability_expires_at) > Date.now()) {
+        const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(cap));
+        const hex = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        if (hex === ps.brief_capability_hash) sessionUuid = ps.id;
+      }
+    }
   }
   const sessionKey = sessionUuid || "no-session";
   void UUID_RE;
