@@ -11,6 +11,7 @@ import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { rugCardPriceCents } from "@/lib/rugPricing";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
 
 /* ── Price helpers ── */
 interface TradePrice { cents: number; currency: string; price_unit?: string; from?: boolean; }
@@ -145,6 +146,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   // ── Trade price lookup ──
   const [tradePrices, setTradePrices] = useState<(TradePrice & { name: string })[]>([]);
   const tierDiscount = useTradeDiscount();
+  const { clientSafe } = useClientSafeMode();
 
   useEffect(() => {
     if (!onAddToQuote) return; // only fetch for trade mode
@@ -570,13 +572,16 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         })()}
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
+                          if (clientSafe) {
+                            return <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-3 italic">Price Upon Request</p>;
+                          }
                           return price ? (
                             <div className="mt-3">
                               <p data-trade-sensitive className="font-display text-sm text-accent font-semibold">
                                 {price.from ? "From " : ""}{formatPrice(tierDiscount.apply(price.cents), price.currency, price.price_unit)}
                                 <span className="ml-1.5 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground font-normal">Net trade price</span>
                               </p>
-                              <p className="font-body text-[10px] text-muted-foreground line-through">
+                              <p data-trade-sensitive className="font-body text-[10px] text-muted-foreground line-through">
                                 Retail: {price.from ? "From " : ""}{formatPrice(price.cents, price.currency, price.price_unit)}
                               </p>
                             </div>
