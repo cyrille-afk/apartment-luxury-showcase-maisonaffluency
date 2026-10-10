@@ -18,6 +18,8 @@ interface BulkFile {
   /** Companion files attached to an .obj entry (.mtl + textures). */
   companions: File[];
   productId: string | null;
+  /** Variant label — distinct labels save as separate selectable 3D models. */
+  label: string;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -54,6 +56,14 @@ const norm = (s: string) =>
 const stem = (name: string) => norm(name);
 
 /** Score how well a filename matches a product name (0 = no match). */
+/** Guess a size label from a filename like "bob_95x77.obj" → "W 95 × D 77". */
+export function guessVariantLabel(fileName: string): string {
+  const stem = fileName.replace(/\.[^.]+$/, "");
+  const m = stem.match(/(\d{2,4})\s*[x×*]\s*(\d{2,4})(?:\s*[x×*]\s*(\d{2,4}))?/i);
+  if (m) return m[3] ? `W ${m[1]} × D ${m[2]} × H ${m[3]}` : `W ${m[1]} × D ${m[2]}`;
+  return "Default";
+}
+
 function matchScore(fileStem: string, productName: string): number {
   const f = norm(fileStem);
   const p = norm(productName);
@@ -72,7 +82,7 @@ function matchScore(fileStem: string, productName: string): number {
  * of its products, drop many model files at once — including OBJ bundles
  * (.obj + .mtl + textures, grouped by filename). Files are auto-matched to
  * products by filename (editable per file), then uploaded sequentially with
- * per-file progress. Everything lands as the product's "Default" variant.
+ * per-file progress. Each file lands under its own variant label.
  */
 export function GlbBulkUpload({ onChange }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
@@ -173,6 +183,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       file: f,
       companions: [],
       productId: bestProductMatch(f.name),
+      label: guessVariantLabel(f.name),
       status: "pending" as FileStatus,
       progress: 0,
     }));
@@ -253,6 +264,15 @@ export function GlbBulkUpload({ onChange }: Props) {
       toast.error("Assign a product to at least one file first.");
       return;
     }
+    const seen = new Set<string>();
+    for (const f of queue) {
+      const k = `${f.productId}::${(f.label.trim() || "Default").toLowerCase()}`;
+      if (seen.has(k)) {
+        toast.error(`Two files share the label "${f.label.trim() || "Default"}" for the same product — give each dimension its own label.`);
+        return;
+      }
+      seen.add(k);
+    }
     setRunning(true);
     let done = 0;
     let failed = 0;
@@ -271,7 +291,7 @@ export function GlbBulkUpload({ onChange }: Props) {
           .eq("product_id", item.productId!);
         await uploadGlbForProduct({
           productId: item.productId!,
-          label: "Default",
+          label: item.label.trim() || "Default",
           prepared,
           existingVariants: (vrows as any[]) || [],
           onProgress: (pct) => setFile(item.key, { progress: pct }),
@@ -296,7 +316,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       <div>
         <div className="font-display text-xl">Bulk upload — one designer</div>
         <div className="font-body text-[11px] text-muted-foreground">
-          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Each model becomes the product's Default 3D model.
+          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label (sizes like 95x77 in the filename are detected) — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
         </div>
       </div>
 
@@ -416,6 +436,14 @@ export function GlbBulkUpload({ onChange }: Props) {
                         <option key={p.id} value={p.id}>{p.product_name}</option>
                       ))}
                     </select>
+                    <input
+                      value={f.label}
+                      onChange={(e) => setFile(f.key, { label: e.target.value })}
+                      disabled={running || f.status === "done"}
+                      placeholder="Variant label"
+                      className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-none focus:border-foreground/40"
+                      aria-label="Variant label"
+                    />
                     {f.status === "done" ? (
                       <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
                     ) : f.status === "error" ? (
