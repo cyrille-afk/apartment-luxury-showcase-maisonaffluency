@@ -197,4 +197,4 @@
 - [ ] Verify a real applicant email-to-password-to-sign-in journey; activation page publication verified, but still needs a controlled recipient and activation email (none sent during testing).
 - [x] Room piece side-by-side comparison (LayoutPieceCompare): compare checkboxes on curated pieces, Compare selected button, manufacturer/dimensions/RRP/tier trade price; verified live (Silver -10%: €7,443.00 / €7,649.10), no page errors.
 
-- [ ] Create five Emma Donnersberg PDF product pages with cropped photos/finishes and attached spec sheets; verify Public and Trade.
+- [x] Create five Emma Donnersberg PDF product pages: live Public and signed-in Trade verified; 6 ceramic and 16 Wave fabric crops plus 12 reused Stratus finishes checked, all five spec sheets opened. No invented swatches for US or two-module Wave; PDF dimension conflicts noted.
