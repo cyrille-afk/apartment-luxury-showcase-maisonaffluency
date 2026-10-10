@@ -207,9 +207,14 @@ const TradeAdminGlbModels: React.FC = () => {
                     <Loader2 size={14} className="animate-spin" /> Searching…
                   </div>
                 )}
-                {!searching && list.length === 0 && (
+                {!searching && browseMode === "all" && !allLoaded && !search.trim() && (
+                  <div className="px-3 py-4 text-muted-foreground text-sm flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" /> Loading catalogue…
+                  </div>
+                )}
+                {!searching && list.length === 0 && (browseMode !== "all" || allLoaded || search.trim()) && (
                   <div className="px-3 py-6 text-muted-foreground text-sm text-center">
-                    {search.trim() ? "No products match." : "No products have a 3D model yet."}
+                    {search.trim() ? "No products match." : browseMode === "all" ? "No active products." : "No products have a 3D model yet."}
                   </div>
                 )}
                 {list.map((row) => (
