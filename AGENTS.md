@@ -11,7 +11,7 @@
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
-- Resolve finish-specific trade RRPs via approved-member pricing, never the price-stripped public pick view — preserves price visibility.
+- Finish-specific trade RRPs (product pages and room-photo cards via `picturedVariantPriceCents`, priced at the pictured finish, never cheapest "From") use approved-member pricing, never the price-stripped public pick view.
 - OOL 77 Mini bar finish rules live in src/components/AGENTS.md.
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
 - No blocking beforeunload for admin drafts; persist to storage — it freezes the embedded preview on reloads.

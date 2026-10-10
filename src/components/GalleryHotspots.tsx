@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { rugCardPriceCents } from "@/lib/rugPricing";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { picturedVariantPriceCents } from "@/lib/picturedVariantPrice";
 
 /* ── Price helpers ── */
 interface TradePrice { cents: number; currency: string; price_unit?: string; from?: boolean; }
@@ -170,7 +171,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
             const all = base > 0 ? [base, ...variantCents] : variantCents;
             const cents = all.length ? Math.min(...all) : 0;
             const from = /from/i.test(p.price_prefix || "") || new Set(all).size > 1;
-            return { name: p.product_name, cents, currency: p.currency, price_unit: p.price_unit, from };
+            return { name: p.product_name, cents, currency: p.currency, price_unit: p.price_unit, from, variants: Array.isArray(p.size_variants) ? p.size_variants : [] };
           })
           .filter(e => e.cents > 0);
         setTradePrices(entries);
@@ -185,23 +186,42 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return m;
   }, [tradePrices]);
 
-  const getHotspotPrice = useCallback((productName: string): TradePrice | null => {
-    if (!tradePrices.length) return null;
-    return fuzzyPriceMatch(productName, priceExactMap, tradePrices);
-  }, [tradePrices, priceExactMap]);
 
   // ── Edition & PDF lookup from curator picks (static + DB) ──
-  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null }[]>([]);
+  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
 
   useEffect(() => {
     const fetchDbPicks = async () => {
       const { data } = await supabase
         .from("designer_curator_picks_public")
-        .select("title, edition, pdf_url");
+        .select("title, edition, pdf_url, variant_image_map, size_variants");
       if (data) setDbPicks(data);
     };
     fetchDbPicks();
   }, []);
+
+  // Pictured-finish pricing (primary photo), matching the product page. The
+  // public pick view supplies the photo→finish map; prices come from the
+  // member's trade rows because that view strips them.
+  const pickFinishLookup = useMemo(() => {
+    const m = new Map<string, { map: unknown; variants: any[] }>();
+    for (const p of dbPicks) {
+      if (p.variant_image_map && Array.isArray(p.size_variants)) m.set(normalizeName(p.title), { map: p.variant_image_map, variants: p.size_variants as any[] });
+    }
+    return m;
+  }, [dbPicks]);
+
+  const getHotspotPrice = useCallback((productName: string): TradePrice | null => {
+    if (!tradePrices.length) return null;
+    const match = fuzzyPriceMatch(productName, priceExactMap, tradePrices);
+    const pick = pickFinishLookup.get(normalizeName(productName));
+    const row = tradePrices.find((e) => normalizeName(e.name) === normalizeName(productName)) as any;
+    if (match && pick && row?.variants?.length) {
+      const pictured = picturedVariantPriceCents(pick.map, pick.variants, 0, row.variants);
+      if (pictured != null) return { ...match, cents: pictured, from: false };
+    }
+    return match;
+  }, [tradePrices, priceExactMap, pickFinishLookup]);
 
   const { editionLookup, pdfLookup } = useMemo(() => {
     const editions = new Map<string, string>();
