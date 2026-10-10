@@ -125,9 +125,17 @@ const TradeAdminGlbModels: React.FC = () => {
             <ChevronLeft size={14} /> Back to Trade Admin
           </Link>
 
-          <h1 className="font-display text-3xl mb-2 flex items-center gap-3">
-            <Box size={22} /> 3D Models
-          </h1>
+          <div className="flex items-start justify-between gap-6 flex-wrap mb-2">
+            <h1 className="font-display text-3xl flex items-center gap-3">
+              <Box size={22} /> 3D Models
+            </h1>
+            <button
+              onClick={startUpload}
+              className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
+            >
+              <Upload size={15} /> Upload a 3D model
+            </button>
+          </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
             Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
             Upload .glb, .gltf, or an .obj bundle — the trade product page and concierge tearsheet
@@ -143,6 +151,7 @@ const TradeAdminGlbModels: React.FC = () => {
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
