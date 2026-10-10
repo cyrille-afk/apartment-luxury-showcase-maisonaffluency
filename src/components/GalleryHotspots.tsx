@@ -487,11 +487,11 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 className={`absolute z-40 ${
                   isMobile
                     ? `min-w-[180px] max-w-[220px] ${hotspot.y_percent > 45 ? "bottom-full mb-2" : "top-full mt-2"} ${hotspot.x_percent > 55 ? "right-0" : hotspot.x_percent < 35 ? "left-0" : "left-1/2 -translate-x-1/2"}`
-                    : `min-w-[200px] max-w-[260px] ${hotspot.x_percent > 65 ? "right-full mr-2" : "left-full ml-2"} ${hotspot.y_percent > 65 ? "bottom-0" : hotspot.y_percent < 35 ? "top-0" : "top-1/2 -translate-y-1/2"}`
+                    : `min-w-[240px] max-w-[300px] ${hotspot.x_percent > 65 ? "right-full mr-3" : "left-full ml-3"} ${hotspot.y_percent > 65 ? "bottom-0" : hotspot.y_percent < 35 ? "top-0" : "top-1/2 -translate-y-1/2"}`
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-2xl border border-primary/10 overflow-hidden">
+                <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-primary/10 overflow-hidden">
                   {editMode && editingId === hotspot.id ? (
                     /* Inline edit form */
                     <div className="p-3 w-[260px]">
@@ -526,19 +526,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                     /* Normal display */
                     <>
                       {hotspot.product_image_url && (
-                        <div className="w-full h-32 overflow-hidden bg-muted/10">
+                        <div className="w-full h-40 overflow-hidden bg-muted/10">
                           <img src={hotspot.product_image_url} alt={hotspot.product_name} className="w-full h-full object-contain" />
                         </div>
                       )}
-                      <div className="p-3">
-                        <h5 className="font-serif text-sm text-foreground leading-tight">{hotspot.product_name}</h5>
+                      <div className="p-5">
+                        <h5 className="font-serif text-base text-foreground leading-snug">{hotspot.product_name}</h5>
                         {hotspot.designer_name && (hotspot.product_name === "Bronze MicMac Chandelier" && hotspot.designer_name === "Hervé van der Straeten" && !onAddToQuote ? (
                           <span className="block font-body text-xs text-muted-foreground mt-0.5">{hotspot.designer_name}</span>
                         ) : (
                           <a
                             href={`/designers/${hotspot.designer_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`}
                             onClick={(e) => { e.stopPropagation(); navigate(`/designers/${hotspot.designer_name!.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}?expanded=true`); }}
-                            className="text-xs text-muted-foreground font-body mt-0.5 hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer block"
+                            className="text-xs text-muted-foreground font-body mt-1.5 tracking-wide hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer block"
                           >
                             {hotspot.designer_name}
                           </a>
@@ -547,7 +547,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {(() => {
                           const edition = getHotspotEdition(hotspot.product_name);
                           return edition ? (
-                            <p className="font-body text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--gold))] mt-1">
+                            <p className="font-body text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--gold))] mt-2">
                               {edition}
                             </p>
                           ) : null;
@@ -560,7 +560,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               href={buildSpecSheetUrl(pdfUrl, hotspot.designer_name || "", hotspot.product_name)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 mt-1.5 text-[10px] font-body text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.1em]"
+                              className="flex items-center gap-1 mt-2.5 text-[10px] font-body text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.1em]"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <FileText className="w-3 h-3" />
@@ -571,7 +571,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
                           return price ? (
-                            <div className="mt-1.5">
+                            <div className="mt-3">
                               <p data-trade-sensitive className="font-display text-sm text-accent font-semibold">
                                 {price.from ? "From " : ""}{formatPrice(tierDiscount.apply(price.cents), price.currency, price.price_unit)}
                                 <span className="ml-1.5 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground font-normal">Net trade price</span>
@@ -581,11 +581,11 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               </p>
                             </div>
                           ) : (
-                            <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
+                            <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-3 italic">Price Upon Request</p>
                           );
                         })()}
                         {!onAddToQuote && (
-                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
+                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-3 italic">Price Upon Request</p>
                         )}
                         {hotspot.link_url && !onAddToQuote && !onRequestQuote && (
                           <button
@@ -620,7 +620,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {/* Trade: View Full Product (replaces Add to Quote) */}
                         {onAddToQuote && (
                           <button
-                            className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
+                            className="flex items-center gap-1.5 mt-4 w-full text-xs font-body tracking-wide bg-foreground text-background rounded px-4 py-2.5 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (onViewFullProduct) {
@@ -645,7 +645,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {/* Public: View Product (opens PublicProductLightbox) */}
                         {onViewProduct && (
                           <button
-                            className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
+                            className="flex items-center gap-1.5 mt-4 w-full text-xs font-body tracking-wide bg-foreground text-background rounded px-4 py-2.5 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
                               onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
