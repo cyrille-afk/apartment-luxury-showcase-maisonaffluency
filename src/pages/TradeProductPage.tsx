@@ -1709,6 +1709,20 @@ const TradeProductPage: React.FC = () => {
     { sizeVariants: variantsList, isDualAxis },
   );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
+  // Pictured finishes: when the user hasn't picked anything, the finish
+  // selector highlights the finishes shown in the current gallery photo.
+  // Price the page for THAT pairing instead of the cheapest "From" rate.
+  const picturedVariant = (!activeVariant && !dualSelectionMade && isDualAxis)
+    ? (() => {
+        const b = matchAxisOption(displayedFinishes.base, baseOptions);
+        const t = matchAxisOption(displayedFinishes.top, topOptions);
+        if (!b && !t) return null;
+        return variantsList.find((v: any) => matchesDual(v, b, t, null)) ?? null;
+      })()
+    : null;
+  const picturedVariantCents = picturedVariant && typeof picturedVariant.price_cents === "number" && picturedVariant.price_cents > 0
+    ? picturedVariant.price_cents
+    : null;
   // Catalogue rate on the product itself. Many pieces carry finish options that
   // do not change the price (every variant is price_cents = 0) — those must
   // still show the catalogue rate rather than "Price upon Request".
