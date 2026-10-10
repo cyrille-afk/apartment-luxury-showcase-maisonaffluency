@@ -196,6 +196,11 @@ serve(async (req) => {
         if (floorCents > 0 && estimatedFreightCents < Math.floor(floorCents * 0.9)) {
           return json({ error: "Your delivery estimate is out of date. Please refresh checkout and try again." }, 409);
         }
+      } else if (estimatedFreightCents > 0) {
+        // No recognized zone → no server-side floor exists, so a
+        // caller-supplied estimate cannot be trusted at all. Unconfirmed
+        // freight to such destinations must go through a manual quote.
+        return json({ error: "Delivery to this destination requires a confirmed shipping quote. Please contact us before checking out." }, 400);
       }
     }
     const freightForTaxCents = shippingCents > 0 ? shippingCents : estimatedFreightCents;

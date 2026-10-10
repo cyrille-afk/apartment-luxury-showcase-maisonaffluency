@@ -196,7 +196,9 @@ Deno.serve(async (req) => {
       .eq("email", email)
       .in("status", ["pending_verification", "verified", "in_progress"]);
     if ((openCount ?? 0) >= 3) {
-      return json({ error: "You already have requests in progress. We will respond shortly." }, 429);
+      // Return the same shape as a fresh submission: a distinct error here
+      // would let anyone probe whether an address has open requests.
+      return json({ status: "received" });
     }
 
     const ipHash = await sha256Hex(
