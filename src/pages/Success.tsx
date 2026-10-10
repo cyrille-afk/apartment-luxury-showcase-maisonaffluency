@@ -55,6 +55,18 @@ export default function Success() {
   const [error, setError] = useState<string | null>(null);
   // Guests must prove the order email before details are shown.
   const [needsEmail, setNeedsEmail] = useState(false);
+
+  // supabase-js gives a generic message for non-2xx edge function responses;
+  // the real error text lives in the response body on error.context.
+  async function edgeFnMessage(fnError: any): Promise<string> {
+    try {
+      const body = await fnError?.context?.json();
+      if (body?.error) return String(body.error);
+    } catch {
+      // fall through
+    }
+    return fnError?.message || "Unable to load order details.";
+  }
   const [emailInput, setEmailInput] = useState("");
   const [verifying, setVerifying] = useState(false);
 
