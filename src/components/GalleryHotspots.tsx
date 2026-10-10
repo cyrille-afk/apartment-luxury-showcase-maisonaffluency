@@ -9,9 +9,10 @@ import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 
 /* ── Price helpers ── */
-interface TradePrice { cents: number; currency: string; price_unit?: string; }
+interface TradePrice { cents: number; currency: string; price_unit?: string; from?: boolean; }
 
 const normalizeName = (s: string) =>
   s.toLowerCase()
@@ -26,7 +27,7 @@ const tokenize = (s: string) => normalizeName(s).split(" ").filter(t => t.length
 function fuzzyPriceMatch(
   name: string,
   exactMap: Map<string, TradePrice>,
-  entries: { name: string; cents: number; currency: string; price_unit?: string }[],
+  entries: (TradePrice & { name: string })[],
 ): TradePrice | null {
   const key = normalizeName(name);
   const exact = exactMap.get(key);
@@ -42,7 +43,7 @@ function fuzzyPriceMatch(
     const score = shorter > 0 ? overlap / shorter : 0;
     if (score > bestScore && score > 0.5) {
       bestScore = score;
-      best = { cents: e.cents, currency: e.currency, price_unit: e.price_unit };
+      best = { cents: e.cents, currency: e.currency, price_unit: e.price_unit, from: e.from };
     }
   }
   return best;
@@ -141,18 +142,28 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   }, [editMode, pickOptions.length]);
 
   // ── Trade price lookup ──
-  const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
+  const [tradePrices, setTradePrices] = useState<(TradePrice & { name: string })[]>([]);
+  const tierDiscount = useTradeDiscount();
 
   useEffect(() => {
     if (!onAddToQuote) return; // only fetch for trade mode
     const fetchPrices = async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit")
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, size_variants")
         .eq("is_hidden", false);
       if (data) {
         const entries = data
-          .map(p => ({ name: p.product_name, cents: p.trade_price_cents ?? p.rrp_price_cents ?? 0, currency: p.currency, price_unit: p.price_unit }))
+          .map(p => {
+            // trade_price_cents stores RRP; variants may price higher, so lowest price shows as "From".
+            const variantCents = (Array.isArray(p.size_variants) ? p.size_variants : [])
+              .map((v: any) => Number(v?.price_cents) || 0).filter((c: number) => c > 0);
+            const base = p.trade_price_cents ?? p.rrp_price_cents ?? 0;
+            const all = base > 0 ? [base, ...variantCents] : variantCents;
+            const cents = all.length ? Math.min(...all) : 0;
+            const from = /from/i.test(p.price_prefix || "") || new Set(all).size > 1;
+            return { name: p.product_name, cents, currency: p.currency, price_unit: p.price_unit, from };
+          })
           .filter(e => e.cents > 0);
         setTradePrices(entries);
       }
@@ -162,7 +173,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
 
   const priceExactMap = useMemo(() => {
     const m = new Map<string, TradePrice>();
-    for (const e of tradePrices) m.set(normalizeName(e.name), { cents: e.cents, currency: e.currency, price_unit: e.price_unit });
+    for (const e of tradePrices) m.set(normalizeName(e.name), { cents: e.cents, currency: e.currency, price_unit: e.price_unit, from: e.from });
     return m;
   }, [tradePrices]);
 
@@ -554,9 +565,15 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         {onAddToQuote && (() => {
                           const price = getHotspotPrice(hotspot.product_name);
                           return price ? (
-                            <p className="font-display text-sm text-accent font-semibold mt-1.5">
-                              {formatPrice(price.cents, price.currency, price.price_unit)}
-                            </p>
+                            <div className="mt-1.5">
+                              <p data-trade-sensitive className="font-display text-sm text-accent font-semibold">
+                                {price.from ? "From " : ""}{formatPrice(tierDiscount.apply(price.cents), price.currency, price.price_unit)}
+                                <span className="ml-1.5 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground font-normal">Net trade price</span>
+                              </p>
+                              <p className="font-body text-[10px] text-muted-foreground line-through">
+                                Retail: {price.from ? "From " : ""}{formatPrice(price.cents, price.currency, price.price_unit)}
+                              </p>
+                            </div>
                           ) : (
                             <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
                           );
