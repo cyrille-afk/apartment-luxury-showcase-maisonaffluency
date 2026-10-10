@@ -56,6 +56,14 @@ const norm = (s: string) =>
 const stem = (name: string) => norm(name);
 
 /** Score how well a filename matches a product name (0 = no match). */
+/** Guess a size label from a filename like "bob_95x77.obj" → "W 95 × D 77". */
+export function guessVariantLabel(fileName: string): string {
+  const stem = fileName.replace(/\.[^.]+$/, "");
+  const m = stem.match(/(\d{2,4})\s*[x×*]\s*(\d{2,4})(?:\s*[x×*]\s*(\d{2,4}))?/i);
+  if (m) return m[3] ? `W ${m[1]} × D ${m[2]} × H ${m[3]}` : `W ${m[1]} × D ${m[2]}`;
+  return "Default";
+}
+
 function matchScore(fileStem: string, productName: string): number {
   const f = norm(fileStem);
   const p = norm(productName);
@@ -74,7 +82,7 @@ function matchScore(fileStem: string, productName: string): number {
  * of its products, drop many model files at once — including OBJ bundles
  * (.obj + .mtl + textures, grouped by filename). Files are auto-matched to
  * products by filename (editable per file), then uploaded sequentially with
- * per-file progress. Everything lands as the product's "Default" variant.
+ * per-file progress. Each file lands under its own variant label.
  */
 export function GlbBulkUpload({ onChange }: Props) {
   const [brands, setBrands] = useState<string[]>([]);
@@ -308,7 +316,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       <div>
         <div className="font-display text-xl">Bulk upload — one designer</div>
         <div className="font-body text-[11px] text-muted-foreground">
-          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Each model becomes the product's Default 3D model.
+          Pick a brand, select the products, then drop all the model files at once — including each product's .obj with its .mtl and texture files. Files are matched to products by filename — adjust any match before starting. Give each dimension its own variant label (sizes like 95x77 in the filename are detected) — distinct labels save as separate selectable 3D models; a repeated label replaces that model.
         </div>
       </div>
 
