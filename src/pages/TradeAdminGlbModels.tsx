@@ -241,7 +241,7 @@ const TradeAdminGlbModels: React.FC = () => {
                 {list.map((row) => (
                   <button
                     key={row.id}
-                    onClick={() => setSelected(row)}
+                    onClick={() => { setSelected(row); setBulkMode(false); }}
                     className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors ${
                       selected?.id === row.id ? "bg-muted/60" : ""
                     }`}
@@ -399,6 +399,7 @@ const TradeAdminGlbModels: React.FC = () => {
                         <button
                           onClick={() => {
                             setSelected(row);
+                            setBulkMode(false);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                           className="block w-full text-left"
