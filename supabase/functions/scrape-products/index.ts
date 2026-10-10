@@ -6,7 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DEFAULT_PROMPT =
+// Extraction instructions are fixed server-side; callers cannot customize them.
+const SCRAPE_PROMPT =
   "Extract: product_name, retail_price_usd (number only, null if unavailable), currency, all_dimensions (all size options in cm as a string), materials, short_description";
 
 async function runScrape(
@@ -15,10 +16,9 @@ async function runScrape(
   urls: string[],
   brandName: string,
   category: string,
-  extractPrompt?: string,
   location?: string
 ) {
-  const prompt = extractPrompt || DEFAULT_PROMPT;
+  const prompt = SCRAPE_PROMPT;
 
   // 1. Submit batch scrape
   const batchRes = await fetch("https://api.firecrawl.dev/v1/batch/scrape", {
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
           try {
             const result = await runScrape(
               serviceClient, firecrawlKey,
-              config.urls, config.brand_name, config.category, config.extract_prompt
+              config.urls, config.brand_name, config.category
             );
             allResults.push(result);
             await serviceClient.from("scrape_configs").update({
@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
 
       const result = await runScrape(
         serviceClient, firecrawlKey,
-        config.urls, config.brand_name, config.category, config.extract_prompt, config.location || undefined
+        config.urls, config.brand_name, config.category, config.location || undefined
       );
 
       await serviceClient.from("scrape_configs").update({
@@ -312,7 +312,7 @@ Deno.serve(async (req) => {
           brand_name: b.brand_name,
           category: b.category || "Uncategorized",
           urls: b.urls,
-          extract_prompt: b.extract_prompt || null,
+          extract_prompt: null,
           schedule_cron: b.schedule_cron || null,
           chunk_size: body.chunk_size || 10,
           chunk_delay: body.chunk_delay || 0,
@@ -328,7 +328,7 @@ Deno.serve(async (req) => {
     for (const b of brands) {
       const result = await runScrape(
         serviceClient, firecrawlKey,
-        b.urls, b.brand_name, b.category || "Uncategorized", b.extract_prompt, b.location
+        b.urls, b.brand_name, b.category || "Uncategorized", b.location
       );
       allResults.push(result);
     }
