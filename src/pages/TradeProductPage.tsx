@@ -2198,6 +2198,7 @@ const TradeProductPage: React.FC = () => {
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
+                  onDisplayedFinishesChange={(n) => setDisplayedFinishes({ base: n.base, top: n.top })}
                   preselectFabricName={requestedFabricName}
                   upholsteryLabel={
                     resolveFinishSectionLabels({
