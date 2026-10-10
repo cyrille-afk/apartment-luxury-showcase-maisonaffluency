@@ -35,6 +35,7 @@ import FinishesPdfButton from "@/components/product/FinishesPdfButton";
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
+import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -519,7 +520,7 @@ const TradeProductPage: React.FC = () => {
   const { id: tradeProductIdParam, slug: designerSlug, productSlug } = useParams<{ id: string; slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile: authProfile } = useAuth();
   const { toast } = useToast();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
@@ -2610,6 +2611,37 @@ const TradeProductPage: React.FC = () => {
                         icon={<FileText size={12} strokeWidth={1.25} className="shrink-0" />}
                       />
                     ) : null}
+                    {priceLabels && showTradePrice && (
+                      <button
+                        type="button"
+                        data-trade-sensitive
+                        onClick={() => {
+                          const blob = buildTradeCoverSheetPdf({
+                            productName: product.title,
+                            brand: designerDisplay,
+                            dimensions: product.dimensions,
+                            materials: product.materials,
+                            leadTime: product.lead_time,
+                            retailCents: priceLabels.retailCents,
+                            netCents: priceLabels.netCents,
+                            currency: priceLabels.currency,
+                            studioName: authProfile?.company || [authProfile?.first_name, authProfile?.last_name].filter(Boolean).join(" ") || "Trade Studio",
+                            tierLabel: tierLabel || "Trade",
+                            discountPct: TRADE_DISCOUNT,
+                          });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `${product.title.replace(/[^\w]+/g, "_")}_Trade_Cover_Sheet.pdf`;
+                          a.click();
+                          setTimeout(() => URL.revokeObjectURL(url), 60000);
+                        }}
+                        className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors hover:text-foreground cursor-pointer"
+                      >
+                        <FileText size={12} strokeWidth={1.25} className="shrink-0" />
+                        Trade Cover Sheet
+                      </button>
+                    )}
                     <FinishesPdfButton
                       pickId={product.id}
                       productName={product.title}
