@@ -686,6 +686,9 @@ function installPreviewNavTrace() {
   window.addEventListener("popstate", () => log("popstate", stamp(), window.location.pathname));
   window.addEventListener("pagehide", () => log("pagehide", stamp(), window.location.pathname));
   window.addEventListener("message", (e) => {
+    // Ignore cross-origin messages: without this check any framed or framing
+    // page could inject crafted entries into the navigation trace log.
+    if (e.origin !== window.location.origin) return;
     const type = (e.data && typeof e.data === "object" && (e.data as { type?: unknown }).type) || "";
     if (typeof type === "string" && /navigat|route|url|path|reload/i.test(type)) {
       log("message", stamp(), e.origin, type, JSON.stringify(e.data).slice(0, 200));
