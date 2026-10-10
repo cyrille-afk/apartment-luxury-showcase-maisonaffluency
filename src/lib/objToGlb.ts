@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { OBJLoader } from "three-stdlib";
 import { MTLLoader } from "three-stdlib";
 import { GLTFExporter } from "three-stdlib";
+import { TDSLoader } from "three-stdlib";
 
 const TEXTURE_EXTS = ["png", "jpg", "jpeg", "webp", "bmp", "gif", "tga", "tif", "tiff"];
 
@@ -109,6 +110,36 @@ export async function convertObjBundleToGlb(
       URL.revokeObjectURL(url);
     }
   }
+
+  return new File([glbArrayBuffer], outputName, { type: "model/gltf-binary" });
+}
+
+/**
+ * Convert a 3D Studio (.3ds) mesh into a single .glb File.
+ * Mesh + basic materials only — .3ds texture references are external files
+ * and are not resolved here.
+ */
+export async function convert3dsToGlb(
+  tdsFile: File,
+  outputName = "model.glb"
+): Promise<File> {
+  const buffer = await tdsFile.arrayBuffer();
+  const loader = new TDSLoader();
+  const group = loader.parse(buffer, "");
+  group.name = tdsFile.name.replace(/\.3ds$/i, "");
+
+  const glbArrayBuffer: ArrayBuffer = await new Promise((resolve, reject) => {
+    const exporter = new GLTFExporter();
+    exporter.parse(
+      group,
+      (result) => {
+        if (result instanceof ArrayBuffer) resolve(result);
+        else reject(new Error("GLTFExporter did not return binary GLB"));
+      },
+      (err) => reject(err),
+      { binary: true, embedImages: true, onlyVisible: false } as any
+    );
+  });
 
   return new File([glbArrayBuffer], outputName, { type: "model/gltf-binary" });
 }
