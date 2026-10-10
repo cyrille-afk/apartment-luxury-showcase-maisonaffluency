@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter } from "lucide-react";
+import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,14 @@ const TradeAdminGlbModels: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const startUpload = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSearch("");
+    setSelected(null);
+    setTimeout(() => searchInputRef.current?.focus(), 350);
+  };
 
   // Manager section state
   const [managerSearch, setManagerSearch] = useState("");
