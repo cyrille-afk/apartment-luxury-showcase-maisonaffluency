@@ -44,6 +44,26 @@ const TradeAdminGlbModels: React.FC = () => {
   const [managerPage, setManagerPage] = useState(1);
   useEffect(() => { setManagerPage(1); }, [managerSearch, managerBrand, managerSort]);
 
+  // Left panel browse mode: products that already have a model, or the full
+  // active catalogue A–Z so any product can be picked for a first upload.
+  const [browseMode, setBrowseMode] = useState<"with3d" | "all">("with3d");
+  const [allProducts, setAllProducts] = useState<ProductRow[]>([]);
+  const [allLoaded, setAllLoaded] = useState(false);
+
+  useEffect(() => {
+    if (browseMode !== "all" || allLoaded) return;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_products")
+        .select("id, product_name, brand_name, image_url, glb_url, updated_at")
+        .eq("is_active", true)
+        .order("product_name", { ascending: true })
+        .limit(2000);
+      setAllProducts((data as ProductRow[]) || []);
+      setAllLoaded(true);
+    })();
+  }, [browseMode, allLoaded]);
+
   // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
     (async () => {
