@@ -123,7 +123,10 @@ const TradeAdminGlbModels: React.FC = () => {
     setReloadKey((k) => k + 1);
   };
 
-  const list = useMemo(() => (search.trim() ? results : withGlb), [search, results, withGlb]);
+  const list = useMemo(
+    () => (search.trim() ? results : browseMode === "all" ? allProducts : withGlb),
+    [search, results, withGlb, browseMode, allProducts]
+  );
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
