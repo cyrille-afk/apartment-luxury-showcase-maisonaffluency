@@ -105,7 +105,7 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
         <Button asChild variant="ghost" size="sm" className="shrink-0 text-muted-foreground"><Link to="/trade/the-collection"><ArrowLeft /><span className="hidden md:inline">Collection</span></Link></Button>
       </div>
       {notice && <p role="status" className="mb-4 font-body text-xs text-accent">{notice}</p>}
-      {ready && inlineSupported ? <div className="spec-sheet-document min-h-[560px] flex-1 overflow-hidden border border-border"><PdfFrame src={isMobile ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl || "")}` : pdfUrl || ""} title={`${title} — Spec Sheet`} /></div> :
+      {ready && inlineSupported ? <div className="spec-sheet-document h-[calc(100dvh-18rem)] min-h-[560px] overflow-hidden border border-border"><PdfFrame src={isMobile ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl || "")}` : pdfUrl || ""} title={`${title} — Spec Sheet`} /></div> :
         <div className="flex min-h-[560px] flex-1 items-center justify-center">
           <div className="spec-sheet-document w-full max-w-lg border border-border bg-card px-8 py-14 text-center md:px-12">
             {loading ? <Loader2 className="mx-auto mb-7 h-9 w-9 animate-spin text-accent" /> : signedIn ? <FileText className="mx-auto mb-7 h-10 w-10 text-accent" strokeWidth={1} /> : <Lock className="mx-auto mb-7 h-10 w-10 text-accent" strokeWidth={1} />}
