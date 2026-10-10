@@ -161,7 +161,7 @@ const TradeAdminGlbModels: React.FC = () => {
           </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
             Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
-            Upload .glb, .gltf, or an .obj bundle — the trade product page and concierge tearsheet
+            Upload .glb, .gltf, .3ds, or an .obj bundle — the trade product page and concierge tearsheet
             drawer will pick the right model automatically based on the size the user selects.
           </p>
 
