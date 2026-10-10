@@ -94,7 +94,7 @@ export default function Success() {
 
         if (cancelled) return;
 
-        if (fnError) throw fnError;
+        if (fnError) throw new Error(await edgeFnMessage(fnError));
         if ((data as any)?.error) throw new Error((data as any).error);
         if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
 
