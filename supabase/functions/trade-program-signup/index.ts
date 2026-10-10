@@ -92,9 +92,23 @@ Deno.serve(async (req) => {
   // wildcard characters (% / _) in a crafted address match other firms.
   const { data: existing } = await supabase
     .from('trade_program_signups')
-    .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path')
+    .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path, continuation_token_hash')
     .eq('email', email)
     .maybeSingle()
+
+  // An existing application can only be continued by the browser that started
+  // it: the caller must present the continuation token issued at insert time.
+  // Without it we pretend the application was simply received — no updates,
+  // no document attachment, no notifications — so knowing someone's email is
+  // not enough to alter their application.
+  if (existing) {
+    const presented = typeof body.continuationToken === 'string' ? body.continuationToken : ''
+    const presentedHash = presented.length >= 32 ? await sha256Hex(presented) : null
+    const storedHash = (existing as Record<string, unknown>).continuation_token_hash as string | null
+    if (!storedHash || !presentedHash || presentedHash !== storedHash) {
+      return json({ ok: true, alreadyReceived: true })
+    }
+  }
 
   const payload: Record<string, unknown> = { email, step }
   if (step === 2 || step === 3) {
