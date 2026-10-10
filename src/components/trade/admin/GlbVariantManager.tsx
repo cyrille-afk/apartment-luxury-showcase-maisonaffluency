@@ -161,126 +161,53 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     setPendingLabel(null);
     if (!label || files.length === 0) return;
 
-    let fileToUpload: File | null = null;
-    let ext: "glb" | "gltf" = "glb";
-
-    if (files.length === 1) {
-      const f = files[0];
-      const n = f.name.toLowerCase();
-      if (n.endsWith(".glb") || n.endsWith(".gltf")) {
-        fileToUpload = f;
-        ext = n.endsWith(".gltf") ? "gltf" : "glb";
-      }
-    }
-
-    if (!fileToUpload && files.length === 1 && files[0].name.toLowerCase().endsWith(".3ds")) {
-      setUploading(label);
-      setUploadProgress(0);
-      try {
-        toast.message(`Converting 3DS to GLB for "${label}"…`);
-        const outName = files[0].name.replace(/\.3ds$/i, "") + ".glb";
-        fileToUpload = await convert3dsToGlb(files[0], outName);
-        ext = "glb";
-      } catch (e: any) {
-        setUploading(null);
-        toast.error(`3DS→GLB conversion failed: ${e?.message || e}`);
-        return;
-      }
-    }
-
-    if (!fileToUpload) {
-      const bundle = classifyObjBundle(files);
-      if (bundle) {
-        setUploading(label);
-        setUploadProgress(0);
-        try {
-          toast.message(`Converting OBJ to GLB for "${label}"…`);
-          const outName = bundle.objFile.name.replace(/\.obj$/i, "") + ".glb";
-          fileToUpload = await convertObjBundleToGlb(bundle, outName);
-          ext = "glb";
-        } catch (e: any) {
-          setUploading(null);
-          toast.error(`OBJ→GLB conversion failed: ${e?.message || e}`);
-          return;
-        }
-      }
-    }
-
-    if (!fileToUpload) {
-      toast.error("Please upload a .glb/.gltf, a .3ds, or an .obj (+ .mtl + textures).");
-      return;
-    }
-    if (fileToUpload.size > MAX_MB * 1024 * 1024) {
-      setUploading(null);
-      toast.error(`${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
-      return;
-    }
-
-    // Fabric-convention validator: warn (but don't block) if no material/mesh
-    // name matches the upholstery keyword list expected by Product3DViewer.
-    try {
-      const report = await inspectGlbFile(fileToUpload);
-      if (report.parseError) {
-        toast.warning(
-          `Couldn't inspect GLB material names (${report.parseError}). Upload will continue.`,
-        );
-      } else if (!report.hasUpholsteryConvention) {
-        const preview = [...report.materialNames, ...report.meshNames]
-          .slice(0, 4)
-          .join(", ") || "(no named materials/meshes)";
-        toast.warning(
-          `No upholstery material detected in this GLB. Fabric swaps will fall back to every material. Rename your seat/cushion material to include one of: ${UPHOLSTERY_KEYWORDS.join(", ")}. Found: ${preview}`,
-          { duration: 10000 },
-        );
-      } else {
-        toast.success(
-          `Fabric convention detected on: ${report.matchedNames.slice(0, 3).join(", ")}${report.matchedNames.length > 3 ? "…" : ""}`,
-        );
-      }
-    } catch {
-      /* non-fatal */
-    }
-
     setUploading(label);
     setUploadProgress(0);
     try {
-      const safeLabel = label.replace(/[^a-z0-9-]+/gi, "-").toLowerCase();
-      const path = `glb-models/${productId}/${safeLabel}-${Date.now()}.${ext}`;
-      const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
-      const { error: upErr } = await supabase.storage.from("assets").upload(path, fileToUpload, {
-        contentType,
-        cacheControl: "31536000",
-        upsert: false,
-        onUploadProgress: (evt: { loaded?: number; total?: number }) => {
-          const pct = Math.round(((evt.loaded || 0) / (evt.total || fileToUpload!.size)) * 100);
-          setUploadProgress(pct);
-        },
-      } as any);
-      if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      const publicUrl = urlData.publicUrl;
-
-      const existing = variants.find(
-        (v) => v.variant_label.toLowerCase() === label.toLowerCase(),
-      );
-      const shouldBeDefault = variants.length === 0 || (existing?.is_default ?? false);
-
-      if (existing) {
-        const { error } = await supabase
-          .from("trade_product_glb_variants")
-          .update({ glb_url: publicUrl, file_size_bytes: fileToUpload.size })
-          .eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("trade_product_glb_variants").insert({
-          product_id: productId,
-          variant_label: label,
-          glb_url: publicUrl,
-          file_size_bytes: fileToUpload.size,
-          is_default: shouldBeDefault,
-        });
-        if (error) throw error;
+      // Shared conversion pipeline (glb/gltf passthrough, 3ds/obj → GLB).
+      let prepared;
+      try {
+        prepared = await prepareGlbFile(files);
+      } catch (e: any) {
+        toast.error(e?.message || "Unsupported file.");
+        return;
       }
+      if (prepared.convertedFrom) {
+        toast.message(`Converted ${prepared.convertedFrom} to GLB for "${label}".`);
+      }
+
+      // Fabric-convention validator: warn (but don't block) if no material/mesh
+      // name matches the upholstery keyword list expected by Product3DViewer.
+      try {
+        const report = await inspectGlbFile(prepared.file);
+        if (report.parseError) {
+          toast.warning(
+            `Couldn't inspect GLB material names (${report.parseError}). Upload will continue.`,
+          );
+        } else if (!report.hasUpholsteryConvention) {
+          const preview = [...report.materialNames, ...report.meshNames]
+            .slice(0, 4)
+            .join(", ") || "(no named materials/meshes)";
+          toast.warning(
+            `No upholstery material detected in this GLB. Fabric swaps will fall back to every material. Rename your seat/cushion material to include one of: ${UPHOLSTERY_KEYWORDS.join(", ")}. Found: ${preview}`,
+            { duration: 10000 },
+          );
+        } else {
+          toast.success(
+            `Fabric convention detected on: ${report.matchedNames.slice(0, 3).join(", ")}${report.matchedNames.length > 3 ? "…" : ""}`,
+          );
+        }
+      } catch {
+        /* non-fatal */
+      }
+
+      await uploadGlbForProduct({
+        productId,
+        label,
+        prepared,
+        existingVariants: variants,
+        onProgress: setUploadProgress,
+      });
       toast.success(`Saved 3D model for "${label}"`);
       await reload();
       onChange?.();
