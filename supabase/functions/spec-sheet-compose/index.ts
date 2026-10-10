@@ -74,7 +74,9 @@ Deno.serve(async (req) => {
   const net = Math.round(rrp * (1 - discount.pct));
   const currency = String(pick.currency || "EUR");
   const studio = profile?.company || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Trade Studio";
-  const tier = String(profile?.trade_tier || "silver");
+  const rawTier = String(profile?.trade_tier || "silver");
+  // Same normalisation as resolveAccountDiscount, so the tier label matches the discount applied.
+  const tier = ["silver", "gold", "platinum"].includes(rawTier) ? rawTier : "silver";
 
   try {
     const out = await PDFDocument.create();
