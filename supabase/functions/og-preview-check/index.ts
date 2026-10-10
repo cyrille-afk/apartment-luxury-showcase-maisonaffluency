@@ -119,6 +119,22 @@ function analyze(parsed: ReturnType<typeof parseHead>) {
 
 import { requireAdmin } from "../_shared/auth.ts";
 
+// Only our own properties and media hosts may be fetched.
+const ALLOWED_HOST_SUFFIXES = [
+  "maisonaffluency.com",
+  "lovable.app",
+  "supabase.co",
+  "cloudinary.com",
+];
+function isAllowedHost(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+    const h = u.hostname.toLowerCase();
+    return ALLOWED_HOST_SUFFIXES.some((d) => h === d || h.endsWith("." + d));
+  } catch { return false; }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
@@ -148,6 +164,12 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (!isAllowedHost(target)) {
+    return new Response(JSON.stringify({ error: "Only Maison Affluency, backend storage and Cloudinary URLs can be checked" }), {
+      status: 400, headers: { ...cors, "content-type": "application/json" },
+    });
+  }
+
   const started = Date.now();
   const [fb, wa] = await Promise.all([fetchAs(target, UA_FB), fetchAs(target, UA_WA)]);
 
@@ -156,7 +178,9 @@ Deno.serve(async (req) => {
   const { issues, warnings } = analyze(parsed);
 
   let imageCheck: Awaited<ReturnType<typeof checkImage>> | null = null;
-  if (parsed.og["og:image"]) {
+  if (parsed.og["og:image"] && !isAllowedHost(parsed.og["og:image"])) {
+    imageCheck = { status: 0, contentType: "", ok: false, error: "og:image host not on allowlist (not fetched)" };
+  } else if (parsed.og["og:image"]) {
     imageCheck = await checkImage(parsed.og["og:image"]);
     if (!imageCheck.ok) issues.push(`og:image fetch failed (HTTP ${imageCheck.status || "ERR"} ${imageCheck.contentType || ""})`);
     if (imageCheck.sizeKb && imageCheck.sizeKb > 8000) issues.push(`og:image too large (${imageCheck.sizeKb} KB — Facebook caps ~8 MB, WhatsApp ~300 KB)`);
