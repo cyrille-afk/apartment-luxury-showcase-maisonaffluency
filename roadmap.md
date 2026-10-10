@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Create eight unique Emma Donnersberg product pages from the supplied PDFs, crop supplied finishes, attach source sheets, and verify Public and Trade pages.
 - [x] Refine spec-sheet workspace: official logo, linen-white/charcoal styling, all four BEAM cover/specification pages and zoom verified signed-in; no runtime errors.
 - [x] Redesign spec-sheet workspace with dark canvas, download/print/share and fallback; six tests pass, signed-in downloads/shares/fallback and full-height frame verified; native PDF rendering and OS print dialog unavailable in headless browser.
 - [x] Restore standalone production lead time in product Presentation Mode; Geo and Beam show 12 weeks with no net trade prices or tearsheet actions, verified live.
