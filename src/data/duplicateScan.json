@@ -1,0 +1,4745 @@
+[
+ {
+  "key": "1f6b941c-cec5-4f70-b1cf-6ee8e9b510d3|a5b19c6a-f4de-47e9-b8e1-d2a76fb8caa9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "1f6b941c-cec5-4f70-b1cf-6ee8e9b510d3",
+   "brand": "Andr\u00e9e Putman",
+   "name": "Cartesian Reflect Mirror",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "a5b19c6a-f4de-47e9-b8e1-d2a76fb8caa9",
+   "brand": "Andr\u00e9e Putman",
+   "name": "Cartesian Reflect Mirror ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9|e307fb94-1478-439f-a354-e0781f85f6bd",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs",
+   "created": "2026-05-05 04:41:50.055443+00"
+  },
+  "b": {
+   "id": "e307fb94-1478-439f-a354-e0781f85f6bd",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "a0323e9e-2f8f-4b89-b920-a284f3e3408f|c590e611-2376-47b4-b9dc-39c996995cfb",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a0323e9e-2f8f-4b89-b920-a284f3e3408f",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-04 05:08:04.682407+00"
+  },
+  "b": {
+   "id": "c590e611-2376-47b4-b9dc-39c996995cfb",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "f2e747a8-6b8c-4acc-ad95-f3f199d40710|90bebbbd-250f-4c8b-8b68-25d45476ee34",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "f2e747a8-6b8c-4acc-ad95-f3f199d40710",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "90bebbbd-250f-4c8b-8b68-25d45476ee34",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-04 04:06:58.954929+00"
+  }
+ },
+ {
+  "key": "be2bacdd-b0d1-4716-a09a-f066031ca968|fc93d06f-57fb-4391-9e5d-930027c3d2b3",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "be2bacdd-b0d1-4716-a09a-f066031ca968",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk x Pierre Frey",
+   "created": "2026-06-04 05:27:11.833275+00"
+  },
+  "b": {
+   "id": "fc93d06f-57fb-4391-9e5d-930027c3d2b3",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk x Pierre Frey",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "36828e89-fcc2-424d-b305-9938e7206e29|59213db8-5c63-47ed-99f8-8e4f4a144044",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "36828e89-fcc2-424d-b305-9938e7206e29",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ceramic",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "59213db8-5c63-47ed-99f8-8e4f4a144044",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ceramic",
+   "created": "2026-05-31 03:32:56.828134+00"
+  }
+ },
+ {
+  "key": "a621793c-85cd-40a5-8c08-d536b1f842f6|973cccfe-472f-4931-94ca-45d9f2f49238",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a621793c-85cd-40a5-8c08-d536b1f842f6",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "973cccfe-472f-4931-94ca-45d9f2f49238",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus",
+   "created": "2026-05-31 03:33:01.539159+00"
+  }
+ },
+ {
+  "key": "489860c4-4699-40dd-a87c-b40c203101e2|40a456e3-2bbb-4de7-9af5-146a9902faa7",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "489860c4-4699-40dd-a87c-b40c203101e2",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky",
+   "created": "2026-05-26 09:31:45.713853+00"
+  },
+  "b": {
+   "id": "40a456e3-2bbb-4de7-9af5-146a9902faa7",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "010e01ae-338a-4d4b-ae28-6ad0ea974397|46e4fee9-eff1-4358-bab6-33c7a3c460f1",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "010e01ae-338a-4d4b-ae28-6ad0ea974397",
+   "brand": "Atelier Pendhapa",
+   "name": "Akar Desk / Console",
+   "created": "2026-05-02 10:12:36.651357+00"
+  },
+  "b": {
+   "id": "46e4fee9-eff1-4358-bab6-33c7a3c460f1",
+   "brand": "Atelier Pendhapa",
+   "name": "Akar Desk/Console",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60|0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:39.187527+00"
+  },
+  "b": {
+   "id": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass)Sconce",
+   "created": "2026-06-07 10:49:38.01008+00"
+  }
+ },
+ {
+  "key": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60|ce0f1385-60df-458f-b7e7-3363a81978e6",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:39.187527+00"
+  },
+  "b": {
+   "id": "ce0f1385-60df-458f-b7e7-3363a81978e6",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce",
+   "created": "2026-06-07 10:49:43.749409+00"
+  }
+ },
+ {
+  "key": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60|38b69570-45a5-478d-aeff-ffcc562948e9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:39.187527+00"
+  },
+  "b": {
+   "id": "38b69570-45a5-478d-aeff-ffcc562948e9",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60|5a6060c3-9a81-40b3-956f-9308048ec562",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:39.187527+00"
+  },
+  "b": {
+   "id": "5a6060c3-9a81-40b3-956f-9308048ec562",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:41.250007+00"
+  }
+ },
+ {
+  "key": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715|ce0f1385-60df-458f-b7e7-3363a81978e6",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass)Sconce",
+   "created": "2026-06-07 10:49:38.01008+00"
+  },
+  "b": {
+   "id": "ce0f1385-60df-458f-b7e7-3363a81978e6",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce",
+   "created": "2026-06-07 10:49:43.749409+00"
+  }
+ },
+ {
+  "key": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715|38b69570-45a5-478d-aeff-ffcc562948e9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass)Sconce",
+   "created": "2026-06-07 10:49:38.01008+00"
+  },
+  "b": {
+   "id": "38b69570-45a5-478d-aeff-ffcc562948e9",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715|5a6060c3-9a81-40b3-956f-9308048ec562",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass)Sconce",
+   "created": "2026-06-07 10:49:38.01008+00"
+  },
+  "b": {
+   "id": "5a6060c3-9a81-40b3-956f-9308048ec562",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:41.250007+00"
+  }
+ },
+ {
+  "key": "ce0f1385-60df-458f-b7e7-3363a81978e6|38b69570-45a5-478d-aeff-ffcc562948e9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "ce0f1385-60df-458f-b7e7-3363a81978e6",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce",
+   "created": "2026-06-07 10:49:43.749409+00"
+  },
+  "b": {
+   "id": "38b69570-45a5-478d-aeff-ffcc562948e9",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "ce0f1385-60df-458f-b7e7-3363a81978e6|5a6060c3-9a81-40b3-956f-9308048ec562",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "ce0f1385-60df-458f-b7e7-3363a81978e6",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce",
+   "created": "2026-06-07 10:49:43.749409+00"
+  },
+  "b": {
+   "id": "5a6060c3-9a81-40b3-956f-9308048ec562",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:41.250007+00"
+  }
+ },
+ {
+  "key": "38b69570-45a5-478d-aeff-ffcc562948e9|5a6060c3-9a81-40b3-956f-9308048ec562",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "38b69570-45a5-478d-aeff-ffcc562948e9",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "5a6060c3-9a81-40b3-956f-9308048ec562",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:41.250007+00"
+  }
+ },
+ {
+  "key": "071e541e-6f0b-42e4-ba87-708f8b37e1a8|86e6882c-7701-4e26-b3a3-1819d6211391",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "071e541e-6f0b-42e4-ba87-708f8b37e1a8",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi  Side Table",
+   "created": "2026-06-11 11:09:41.821212+00"
+  },
+  "b": {
+   "id": "86e6882c-7701-4e26-b3a3-1819d6211391",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi \u2014 Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "6fe1afa2-c986-40b5-90aa-201560dab7a8|cfc0dacd-06e9-4c7a-a44a-a09a704de911",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "6fe1afa2-c986-40b5-90aa-201560dab7a8",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi \u2014 Console",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "cfc0dacd-06e9-4c7a-a44a-a09a704de911",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi \u2014Console",
+   "created": "2026-06-11 04:30:34.732518+00"
+  }
+ },
+ {
+  "key": "6fe1afa2-c986-40b5-90aa-201560dab7a8|6f0cdb7c-aecf-45ea-a5fa-53f57c312e13",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "6fe1afa2-c986-40b5-90aa-201560dab7a8",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi \u2014 Console",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "6f0cdb7c-aecf-45ea-a5fa-53f57c312e13",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Console",
+   "created": "2026-06-11 04:30:34.397007+00"
+  }
+ },
+ {
+  "key": "cfc0dacd-06e9-4c7a-a44a-a09a704de911|6f0cdb7c-aecf-45ea-a5fa-53f57c312e13",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "cfc0dacd-06e9-4c7a-a44a-a09a704de911",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi \u2014Console",
+   "created": "2026-06-11 04:30:34.732518+00"
+  },
+  "b": {
+   "id": "6f0cdb7c-aecf-45ea-a5fa-53f57c312e13",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Console",
+   "created": "2026-06-11 04:30:34.397007+00"
+  }
+ },
+ {
+  "key": "2dce6f43-ddd7-4342-8f24-1d404a8f2507|e73056bb-bfd2-4d02-9f50-fc8d320484f9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "2dce6f43-ddd7-4342-8f24-1d404a8f2507",
+   "brand": "Emmanuel Babled",
+   "name": "Pyros Marini \u2014 Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "e73056bb-bfd2-4d02-9f50-fc8d320484f9",
+   "brand": "Emmanuel Babled",
+   "name": "Pyros Marini Vase",
+   "created": "2026-06-11 08:36:17.922351+00"
+  }
+ },
+ {
+  "key": "5dca8562-4e77-4e3f-93da-1658b92f6a98|ab7ed5a5-b082-4c8c-a6f1-80d873efb475",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "5dca8562-4e77-4e3f-93da-1658b92f6a98",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table One Foot",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "ab7ed5a5-b082-4c8c-a6f1-80d873efb475",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table One Foot",
+   "created": "2026-03-19 08:52:05.378129+00"
+  }
+ },
+ {
+  "key": "4450e451-b467-42d4-9154-83da6600dc0d|73b96e42-6058-4116-8082-01ed3927a4ad",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "4450e451-b467-42d4-9154-83da6600dc0d",
+   "brand": "Felix Agostini",
+   "name": "Archeoptryx Double Skin",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "73b96e42-6058-4116-8082-01ed3927a4ad",
+   "brand": "Felix Agostini",
+   "name": "Archeoptryx Double Skin",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "b6ab418a-50d4-47e6-95c2-290ec3a77124|4ad4bcc7-aa63-4007-a220-7d27298a5c15",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b6ab418a-50d4-47e6-95c2-290ec3a77124",
+   "brand": "Felix Agostini",
+   "name": "Benedicte Wall Light",
+   "created": "2026-06-06 16:26:15.895076+00"
+  },
+  "b": {
+   "id": "4ad4bcc7-aa63-4007-a220-7d27298a5c15",
+   "brand": "Felix Agostini",
+   "name": "Benedicte Wall Light",
+   "created": "2026-06-16 05:17:03.104141+00"
+  }
+ },
+ {
+  "key": "63d960a8-4457-4284-870e-28c904051de2|9aa65409-03ca-4fa3-9629-52c6a9d86a83",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "63d960a8-4457-4284-870e-28c904051de2",
+   "brand": "Felix Agostini",
+   "name": "Console Cheval",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "9aa65409-03ca-4fa3-9629-52c6a9d86a83",
+   "brand": "Felix Agostini",
+   "name": "Console Cheval",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "63851d7f-3f8f-4d53-8b99-7a215db7e2ae|c3570c6f-3d94-46be-86fa-b3417a1b1a2d",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "63851d7f-3f8f-4d53-8b99-7a215db7e2ae",
+   "brand": "Felix Agostini",
+   "name": "Etrier",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "c3570c6f-3d94-46be-86fa-b3417a1b1a2d",
+   "brand": "Felix Agostini",
+   "name": "Etrier",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "db6fde9e-dc11-4ae5-b59e-41fa7f546f19|7b977754-1d41-4902-8420-8edb1bab39f5",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "db6fde9e-dc11-4ae5-b59e-41fa7f546f19",
+   "brand": "Felix Agostini",
+   "name": "Gingko Floor Lamp",
+   "created": "2026-07-05 12:34:33.625969+00"
+  },
+  "b": {
+   "id": "7b977754-1d41-4902-8420-8edb1bab39f5",
+   "brand": "Felix Agostini",
+   "name": "Gingko Floor Lamp",
+   "created": "2026-06-06 16:16:12.847843+00"
+  }
+ },
+ {
+  "key": "2df1ce2d-7c02-41cd-9537-a8392f6f83de|b1b87a4b-4b51-4d81-9f05-d7fef0a3fd42",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "2df1ce2d-7c02-41cd-9537-a8392f6f83de",
+   "brand": "Felix Agostini",
+   "name": "Socle Table Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "b1b87a4b-4b51-4d81-9f05-d7fef0a3fd42",
+   "brand": "Felix Agostini",
+   "name": "Socle Table Lamp",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "4ca03627-a2e7-472a-a651-1758d8f46145|51e0431a-83ab-4c42-9752-83c8afed8ac2",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "4ca03627-a2e7-472a-a651-1758d8f46145",
+   "brand": "Felix Agostini",
+   "name": "Taureau Floor Lamp",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "51e0431a-83ab-4c42-9752-83c8afed8ac2",
+   "brand": "Felix Agostini",
+   "name": "Taureau Floor Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "a3ed5994-0e6e-4e6f-889d-5aa2f13c4256|188b7045-51cd-4633-a23a-03bf428d5f00",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a3ed5994-0e6e-4e6f-889d-5aa2f13c4256",
+   "brand": "Felix Agostini",
+   "name": "Venus Floor Lamp",
+   "created": "2026-06-07 09:39:05.579775+00"
+  },
+  "b": {
+   "id": "188b7045-51cd-4633-a23a-03bf428d5f00",
+   "brand": "Felix Agostini",
+   "name": "Venus Floor Lamp",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "daee6ac7-31d5-4096-a107-bb758a082d32|46d34a67-43f8-478e-b700-d3ec6ba831a9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "daee6ac7-31d5-4096-a107-bb758a082d32",
+   "brand": "Leo Sentou",
+   "name": "Montgolfiere Dining Chair",
+   "created": "2026-05-04 09:46:27.223678+00"
+  },
+  "b": {
+   "id": "46d34a67-43f8-478e-b700-d3ec6ba831a9",
+   "brand": "Leo Sentou",
+   "name": "Montgolfiere Dining Chair ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "d85ba09e-ed41-4552-895a-0f79e01c9c09|75c3d81d-4cd5-4692-9691-6f6230ef25bb",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "d85ba09e-ed41-4552-895a-0f79e01c9c09",
+   "brand": "Leo Sentou",
+   "name": "Rognon Ottoman",
+   "created": "2026-05-04 10:59:56.659008+00"
+  },
+  "b": {
+   "id": "75c3d81d-4cd5-4692-9691-6f6230ef25bb",
+   "brand": "Leo Sentou",
+   "name": "Rognon Ottoman ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "553e0cbb-0d7a-4b48-95c9-ce51251a0122|b0f23793-f432-4854-a627-54cc5b32b1c9",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "553e0cbb-0d7a-4b48-95c9-ce51251a0122",
+   "brand": "Mern\u00f8e",
+   "name": "No. 1 Pendant",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "b0f23793-f432-4854-a627-54cc5b32b1c9",
+   "brand": "Mern\u00f8e",
+   "name": "No. 1 Pendant",
+   "created": "2026-06-26 04:36:33.212067+00"
+  }
+ },
+ {
+  "key": "a51b2c69-23b4-470f-9318-127f08ed4247|057daae5-84ad-4a91-9327-513d65fbd83d",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a51b2c69-23b4-470f-9318-127f08ed4247",
+   "brand": "Noom",
+   "name": "Flock Chair CS2",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "057daae5-84ad-4a91-9327-513d65fbd83d",
+   "brand": "Noom",
+   "name": "Flock Chair CS2",
+   "created": "2026-05-12 15:29:48.158189+00"
+  }
+ },
+ {
+  "key": "a364bcb4-82e6-4bf8-8322-3303760e362e|65253d07-ca91-49db-80da-f587b69463a5",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a364bcb4-82e6-4bf8-8322-3303760e362e",
+   "brand": "Noom",
+   "name": "Flock Lounge Chair",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "65253d07-ca91-49db-80da-f587b69463a5",
+   "brand": "Noom",
+   "name": "Flock Lounge Chair &",
+   "created": "2026-05-12 14:45:12.502096+00"
+  }
+ },
+ {
+  "key": "b9ce3c1f-dcd3-4765-8b40-74c3d21b7190|4472972f-e6d7-40ed-b68b-fa487815fdd0",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b9ce3c1f-dcd3-4765-8b40-74c3d21b7190",
+   "brand": "Noom",
+   "name": "Gropius Chair CS1",
+   "created": "2026-05-15 05:19:47.485817+00"
+  },
+  "b": {
+   "id": "4472972f-e6d7-40ed-b68b-fa487815fdd0",
+   "brand": "Noom",
+   "name": "Gropius Chair CS1",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "cebf0f3d-847b-4a13-a29c-24567529273b|612bcf63-638b-4804-9dba-ac3529ee7a07",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "cebf0f3d-847b-4a13-a29c-24567529273b",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "612bcf63-638b-4804-9dba-ac3529ee7a07",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-03-20 02:56:03.050434+00"
+  }
+ },
+ {
+  "key": "e1377a6b-d1fd-4619-b3b7-ddfd66ed1235|5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "e1377a6b-d1fd-4619-b3b7-ddfd66ed1235",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "3cd1fce7-df11-4d19-a359-4516fe8d569a|3bf84ba1-0219-42de-a77b-e9e928145b30",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "3cd1fce7-df11-4d19-a359-4516fe8d569a",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Nazar\u00e9 Suspension II Pendant Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3bf84ba1-0219-42de-a77b-e9e928145b30",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Nazar\u00e9 Suspension II Pendant Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "ffefa0a6-1817-4b1a-8939-e5141984b908|927a7b59-3a7c-42b8-b378-9e52d3c41566",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "ffefa0a6-1817-4b1a-8939-e5141984b908",
+   "brand": "Pierre Augustin Rose",
+   "name": "Helios Mirror",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "927a7b59-3a7c-42b8-b378-9e52d3c41566",
+   "brand": "Pierre Augustin Rose",
+   "name": "Helios Mirror ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "b7a5f742-33ca-40fb-b52f-4227c8914ec1|52b23bd3-3319-4442-a173-8060c32f87eb",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b7a5f742-33ca-40fb-b52f-4227c8914ec1",
+   "brand": "Pierre Augustin Rose",
+   "name": "Minotaure 280 Sofa",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "52b23bd3-3319-4442-a173-8060c32f87eb",
+   "brand": "Pierre Augustin Rose",
+   "name": "Minotaure 280 Sofa ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "a408bc2c-c2ef-4af5-85f3-f977b2b44be9|92666fe3-9743-4df1-b2df-d49bb488ee88",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "a408bc2c-c2ef-4af5-85f3-f977b2b44be9",
+   "brand": "Reda Amalou",
+   "name": "Dot Side Table",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "92666fe3-9743-4df1-b2df-d49bb488ee88",
+   "brand": "Reda Amalou",
+   "name": "DOT Side Table",
+   "created": "2026-05-22 09:21:27.086697+00"
+  }
+ },
+ {
+  "key": "53f0d3db-7a7d-42b7-91b8-70282287d155|1b427c94-786e-4e1f-9f2a-b4964826fdfa",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "53f0d3db-7a7d-42b7-91b8-70282287d155",
+   "brand": "Saint-Louis",
+   "name": "Les Endiabl\u00e9s by Jos\u00e9 Levy",
+   "created": "2026-05-24 11:31:06.868025+00"
+  },
+  "b": {
+   "id": "1b427c94-786e-4e1f-9f2a-b4964826fdfa",
+   "brand": "Saint-Louis",
+   "name": "Les Endiabl\u00e9s by Jos\u00e9 L\u00e9vy",
+   "created": "2026-05-24 11:33:16.561996+00"
+  }
+ },
+ {
+  "key": "d2ca9ae5-683c-4335-9b77-bfb2702cae30|93942a7a-e3dc-4a5b-b377-98d6489f6ca0",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "d2ca9ae5-683c-4335-9b77-bfb2702cae30",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey by Kiki van Eijk",
+   "created": "2026-05-23 16:13:14.617316+00"
+  },
+  "b": {
+   "id": "93942a7a-e3dc-4a5b-b377-98d6489f6ca0",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey by Kiki van Eijk ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "d9da6e50-c3d1-4da5-8fbc-356ea8ab2d35|b817f761-3a66-49b3-9c91-8d7d30896914",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "d9da6e50-c3d1-4da5-8fbc-356ea8ab2d35",
+   "brand": "Sollen",
+   "name": "Artemis Armchair",
+   "created": "2026-05-27 10:55:38.0202+00"
+  },
+  "b": {
+   "id": "b817f761-3a66-49b3-9c91-8d7d30896914",
+   "brand": "Sollen",
+   "name": "Artemis Armchair",
+   "created": "2026-05-05 10:58:15.30329+00"
+  }
+ },
+ {
+  "key": "e66c95c2-5191-434d-82fd-100e1a2e96e6|d8182aa4-1296-4f7f-9dbb-62519bb1c8a4",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "e66c95c2-5191-434d-82fd-100e1a2e96e6",
+   "brand": "Sollen",
+   "name": "Cloud Bench",
+   "created": "2026-05-27 10:55:50.239155+00"
+  },
+  "b": {
+   "id": "d8182aa4-1296-4f7f-9dbb-62519bb1c8a4",
+   "brand": "Sollen",
+   "name": "Cloud Bench",
+   "created": "2026-05-06 06:05:57.675349+00"
+  }
+ },
+ {
+  "key": "0ba78014-1595-4f26-a6fd-49d9e25efbdc|978eccb1-0db0-4e94-a5ff-0d8cfc2627a0",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "0ba78014-1595-4f26-a6fd-49d9e25efbdc",
+   "brand": "Sollen",
+   "name": "Driades Bar Stool",
+   "created": "2026-05-27 10:56:01.768638+00"
+  },
+  "b": {
+   "id": "978eccb1-0db0-4e94-a5ff-0d8cfc2627a0",
+   "brand": "Sollen",
+   "name": "Driades Bar Stool",
+   "created": "2026-05-05 11:12:04.273041+00"
+  }
+ },
+ {
+  "key": "7c3bef6a-d2ec-410b-91fb-7e289b49fa84|fcdce75c-beba-44e3-8749-1959a6441b8f",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "7c3bef6a-d2ec-410b-91fb-7e289b49fa84",
+   "brand": "Sollen",
+   "name": "Zephir Armchair",
+   "created": "2026-05-27 09:54:42.866782+00"
+  },
+  "b": {
+   "id": "fcdce75c-beba-44e3-8749-1959a6441b8f",
+   "brand": "Sollen",
+   "name": "Zephir Armchair",
+   "created": "2026-05-05 11:25:47.134023+00"
+  }
+ },
+ {
+  "key": "e6ea5af8-12c6-4db4-afce-5330805e6bd8|e251bf9c-6aca-4345-ad65-7b4b0f2dd4e6",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "e6ea5af8-12c6-4db4-afce-5330805e6bd8",
+   "brand": "Toulemonde Bochart",
+   "name": "Esterel by Dorothee Delaye",
+   "created": "2026-05-22 14:12:39.725594+00"
+  },
+  "b": {
+   "id": "e251bf9c-6aca-4345-ad65-7b4b0f2dd4e6",
+   "brand": "Toulemonde Bochart",
+   "name": "Esterel by Doroth\u00e9e Delaye",
+   "created": "2026-05-22 14:12:44.712767+00"
+  }
+ },
+ {
+  "key": "c23b77dd-e24d-4a27-abf2-7afb8e6949aa|91f45515-582a-4069-b2b6-891b452fe189",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "c23b77dd-e24d-4a27-abf2-7afb8e6949aa",
+   "brand": "Toulemonde Bochart",
+   "name": "Nazar\u00e9 by Dorothee Delaye",
+   "created": "2026-05-23 05:07:35.084766+00"
+  },
+  "b": {
+   "id": "91f45515-582a-4069-b2b6-891b452fe189",
+   "brand": "Toulemonde Bochart",
+   "name": "Nazar\u00e9 by Doroth\u00e9e Delaye",
+   "created": "2026-05-23 05:07:38.388863+00"
+  }
+ },
+ {
+  "key": "b21f34b7-a53d-4365-a2d1-bcd59c488168|9f29504c-97b4-4311-a01d-6725fe0661c5",
+  "confidence": "exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b21f34b7-a53d-4365-a2d1-bcd59c488168",
+   "brand": "Toulemonde Bochart",
+   "name": "Trasimene by Andr\u00e9e Putman",
+   "created": "2026-05-23 07:51:43.502651+00"
+  },
+  "b": {
+   "id": "9f29504c-97b4-4311-a01d-6725fe0661c5",
+   "brand": "Toulemonde Bochart",
+   "name": "Trasim\u00e8ne by Andr\u00e9e Putman",
+   "created": "2026-05-23 07:48:20.985603+00"
+  }
+ },
+ {
+  "key": "b6ec9230-7e04-4da2-acc2-fcefcc27a6a9|85ea99cc-de91-4b7a-976d-f0032522d4ea",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "b6ec9230-7e04-4da2-acc2-fcefcc27a6a9",
+   "brand": "Atelier Demichelis",
+   "name": "Babel Table Lamp",
+   "created": "2026-03-16 02:58:30.610706+00"
+  },
+  "b": {
+   "id": "85ea99cc-de91-4b7a-976d-f0032522d4ea",
+   "brand": "Nicolas Aubagnac",
+   "name": "Babel Table Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "22ed31c0-7ed5-4da6-a5f9-8b9f1bc2b72d|c61efd47-b0a9-4c5e-9431-f13c4ae55e82",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "22ed31c0-7ed5-4da6-a5f9-8b9f1bc2b72d",
+   "brand": "Entrelacs",
+   "name": "BEAM 800",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "c61efd47-b0a9-4c5e-9431-f13c4ae55e82",
+   "brand": "Entrelacs Creation - Yves Macheret",
+   "name": "BEAM 800",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "cd72291b-2ac9-4626-846f-71f73ba0fb9c|06f91ab2-59f5-41fe-82be-f8cc63fa51bf",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "cd72291b-2ac9-4626-846f-71f73ba0fb9c",
+   "brand": "Entrelacs Creation - Yves Macheret",
+   "name": "BRAUN 650",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "06f91ab2-59f5-41fe-82be-f8cc63fa51bf",
+   "brand": "Entrelacs",
+   "name": "BRAUN 650",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "e07d4e29-b15b-41a4-af7e-7dbefd3b4c1d|20cd249c-c62d-4d96-97db-8da16f7ede64",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "e07d4e29-b15b-41a4-af7e-7dbefd3b4c1d",
+   "brand": "Entrelacs Creation - Yves Macheret",
+   "name": "Nomad 295",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "20cd249c-c62d-4d96-97db-8da16f7ede64",
+   "brand": "Entrelacs",
+   "name": "Nomad 295",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "228d9ff8-6588-4ca8-b0ed-a63536c0db75|40bc9efd-afc3-4ca0-b318-41565722ac80",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "228d9ff8-6588-4ca8-b0ed-a63536c0db75",
+   "brand": "Marta Sala \u00c9ditions",
+   "name": "Inge D3 Sofa",
+   "created": "2026-06-01 04:38:45.356365+00"
+  },
+  "b": {
+   "id": "40bc9efd-afc3-4ca0-b318-41565722ac80",
+   "brand": "Lazzarini & Pickering",
+   "name": "Inge D3 Sofa",
+   "created": "2026-07-08 09:28:10.927343+00"
+  }
+ },
+ {
+  "key": "3fcd3c53-655a-44d2-8723-59a7995a8dfa|c22e0c34-a4d1-47c5-81ee-8c960e2ee597",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "3fcd3c53-655a-44d2-8723-59a7995a8dfa",
+   "brand": "Ozone",
+   "name": "G\u00e9lule Alabaster Wall Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "c22e0c34-a4d1-47c5-81ee-8c960e2ee597",
+   "brand": "Joseph Dirand",
+   "name": "G\u00e9lule Alabaster Wall Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "718d0178-1c87-473a-9bce-42a4eef8aa8b|654af637-0296-4e69-9c02-4393e998727e",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "718d0178-1c87-473a-9bce-42a4eef8aa8b",
+   "brand": "Ozone",
+   "name": "TENNESSEE S4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "654af637-0296-4e69-9c02-4393e998727e",
+   "brand": "Glenn Sestig",
+   "name": "TENNESSEE S4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "c3042f64-b5a4-4e0b-87f7-327572dfaaef|d1b7ec05-a256-4ba5-9f45-74e902c43594",
+  "confidence": "cross-brand-exact",
+  "similarity": 1.0,
+  "a": {
+   "id": "c3042f64-b5a4-4e0b-87f7-327572dfaaef",
+   "brand": "Veronese",
+   "name": "YSA Wall Light",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "d1b7ec05-a256-4ba5-9f45-74e902c43594",
+   "brand": "Tristan Auer",
+   "name": "YSA Wall Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "4f7b9f8a-1a37-478b-8749-d067bf626b69|d2ca9ae5-683c-4335-9b77-bfb2702cae30",
+  "confidence": "high",
+  "similarity": 0.988,
+  "a": {
+   "id": "4f7b9f8a-1a37-478b-8749-d067bf626b69",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey b Kiki van Eijk",
+   "created": "2026-05-23 16:13:14.367324+00"
+  },
+  "b": {
+   "id": "d2ca9ae5-683c-4335-9b77-bfb2702cae30",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey by Kiki van Eijk",
+   "created": "2026-05-23 16:13:14.617316+00"
+  }
+ },
+ {
+  "key": "4f7b9f8a-1a37-478b-8749-d067bf626b69|93942a7a-e3dc-4a5b-b377-98d6489f6ca0",
+  "confidence": "high",
+  "similarity": 0.988,
+  "a": {
+   "id": "4f7b9f8a-1a37-478b-8749-d067bf626b69",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey b Kiki van Eijk",
+   "created": "2026-05-23 16:13:14.367324+00"
+  },
+  "b": {
+   "id": "93942a7a-e3dc-4a5b-b377-98d6489f6ca0",
+   "brand": "Saint-Louis",
+   "name": "Matrice Vase Flannel Grey by Kiki van Eijk ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "56334cdd-324f-4c7b-9c6b-297ddb6de401|4431fb58-dc32-4323-926a-2275c0be9768",
+  "confidence": "high",
+  "similarity": 0.986,
+  "a": {
+   "id": "56334cdd-324f-4c7b-9c6b-297ddb6de401",
+   "brand": "De La Espada",
+   "name": "Orion Dining Table by Anthony Guerr\u00e9e",
+   "created": "2026-06-09 03:21:11.972787+00"
+  },
+  "b": {
+   "id": "4431fb58-dc32-4323-926a-2275c0be9768",
+   "brand": "De La Espada",
+   "name": "Orion Dining Tableby Anthony Guerr\u00e9e",
+   "created": "2026-06-09 03:21:10.329169+00"
+  }
+ },
+ {
+  "key": "5f08ef10-a793-4bf6-a51f-491ef27c0ea1|916c6d0f-ffef-4c32-aeb1-53cdca8c75d0",
+  "confidence": "high",
+  "similarity": 0.986,
+  "a": {
+   "id": "5f08ef10-a793-4bf6-a51f-491ef27c0ea1",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back 3-Seater Sofa c. 1930",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "916c6d0f-ffef-4c32-aeb1-53cdca8c75d0",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back 3-SeaterSofa c. 1930",
+   "created": "2026-06-15 02:42:51.871873+00"
+  }
+ },
+ {
+  "key": "315b49ff-4f1d-4f87-a12a-be14df7ffe88|aebbb861-e64c-471f-8d18-010c1ba7b7a5",
+  "confidence": "high",
+  "similarity": 0.986,
+  "a": {
+   "id": "315b49ff-4f1d-4f87-a12a-be14df7ffe88",
+   "brand": "Saint-Louis",
+   "name": "Folia Dark Wood Amber Portable Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "aebbb861-e64c-471f-8d18-010c1ba7b7a5",
+   "brand": "Saint-Louis",
+   "name": "Folia Dark Wood AmberPortable Lamp",
+   "created": "2026-05-23 16:18:32.658225+00"
+  }
+ },
+ {
+  "key": "dc22a169-6fa1-434b-beac-6c6354facc31|29b753cc-25f4-42a5-8933-36899235f202",
+  "confidence": "high",
+  "similarity": 0.985,
+  "a": {
+   "id": "dc22a169-6fa1-434b-beac-6c6354facc31",
+   "brand": "Entrelacs",
+   "name": "Martel Wall Lamp by Felix Millory",
+   "created": "2026-05-07 17:02:43.824342+00"
+  },
+  "b": {
+   "id": "29b753cc-25f4-42a5-8933-36899235f202",
+   "brand": "Entrelacs",
+   "name": "Martel Wall Lamp y Felix Millory",
+   "created": "2026-05-07 17:02:43.741956+00"
+  }
+ },
+ {
+  "key": "de14206c-1075-4a59-8a12-a96759e2fba5|08e7f8bf-8061-4927-8d42-20dcb55487da",
+  "confidence": "high",
+  "similarity": 0.985,
+  "a": {
+   "id": "de14206c-1075-4a59-8a12-a96759e2fba5",
+   "brand": "Entrelacs",
+   "name": "Nomad Table Lamp by Yves Macheret",
+   "created": "2026-05-07 16:24:05.347886+00"
+  },
+  "b": {
+   "id": "08e7f8bf-8061-4927-8d42-20dcb55487da",
+   "brand": "Entrelacs",
+   "name": "Nomad Table Lampby Yves Macheret",
+   "created": "2026-05-07 16:24:04.201584+00"
+  }
+ },
+ {
+  "key": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9|0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+  "confidence": "high",
+  "similarity": 0.982,
+  "a": {
+   "id": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs",
+   "created": "2026-05-05 04:41:50.055443+00"
+  },
+  "b": {
+   "id": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10Concept Rugs",
+   "created": "2026-05-05 04:41:49.784582+00"
+  }
+ },
+ {
+  "key": "e307fb94-1478-439f-a354-e0781f85f6bd|0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+  "confidence": "high",
+  "similarity": 0.982,
+  "a": {
+   "id": "e307fb94-1478-439f-a354-e0781f85f6bd",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10Concept Rugs",
+   "created": "2026-05-05 04:41:49.784582+00"
+  }
+ },
+ {
+  "key": "278962e2-8796-412e-a24e-0c6560546cbc|389ba441-00b6-4318-b0d0-c06df9aa6d0c",
+  "confidence": "high",
+  "similarity": 0.979,
+  "a": {
+   "id": "278962e2-8796-412e-a24e-0c6560546cbc",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Lin Dining table",
+   "created": "2026-05-03 10:35:15.507362+00"
+  },
+  "b": {
+   "id": "389ba441-00b6-4318-b0d0-c06df9aa6d0c",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Line Dining table",
+   "created": "2026-05-03 10:35:15.640051+00"
+  }
+ },
+ {
+  "key": "7b323aac-a485-4086-a89d-6b7a1b9fbe51|dbbef8ca-92d4-40f1-8d4c-43031f5184fb",
+  "confidence": "high",
+  "similarity": 0.979,
+  "a": {
+   "id": "7b323aac-a485-4086-a89d-6b7a1b9fbe51",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Line Coffee table",
+   "created": "2026-05-02 11:52:07.646535+00"
+  },
+  "b": {
+   "id": "dbbef8ca-92d4-40f1-8d4c-43031f5184fb",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of LineCoffee table",
+   "created": "2026-05-02 11:52:07.209601+00"
+  }
+ },
+ {
+  "key": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc|62dfa000-e42c-4538-a066-4461b45e1e31",
+  "confidence": "high",
+  "similarity": 0.978,
+  "a": {
+   "id": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04 Rug",
+   "created": "2026-05-05 04:06:56.637075+00"
+  },
+  "b": {
+   "id": "62dfa000-e42c-4538-a066-4461b45e1e31",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04Rug",
+   "created": "2026-05-05 04:41:40.403479+00"
+  }
+ },
+ {
+  "key": "7f324c46-5cbd-4e91-9f57-c92314945cd9|3ec9c42c-580f-4178-8580-b5aa4f56e8bd",
+  "confidence": "high",
+  "similarity": 0.978,
+  "a": {
+   "id": "7f324c46-5cbd-4e91-9f57-c92314945cd9",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli  Duo of Table Lamps",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3ec9c42c-580f-4178-8580-b5aa4f56e8bd",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli  Duo ofTable Lamps",
+   "created": "2026-06-06 08:39:58.012128+00"
+  }
+ },
+ {
+  "key": "1ce2c78b-8675-4b86-acd9-44a2f0520c12|292c8cef-1181-49d5-9c12-10bcd507cb88",
+  "confidence": "high",
+  "similarity": 0.978,
+  "a": {
+   "id": "1ce2c78b-8675-4b86-acd9-44a2f0520c12",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshel Side Table",
+   "created": "2026-05-22 09:21:32.313284+00"
+  },
+  "b": {
+   "id": "292c8cef-1181-49d5-9c12-10bcd507cb88",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshell Side Table",
+   "created": "2026-05-22 09:21:32.487563+00"
+  }
+ },
+ {
+  "key": "546e16f7-f302-4894-a09c-828a8f8fba70|2fa25d80-62bf-4098-a621-b7d994d24e20",
+  "confidence": "high",
+  "similarity": 0.976,
+  "a": {
+   "id": "546e16f7-f302-4894-a09c-828a8f8fba70",
+   "brand": "Atelier Demichelis",
+   "name": "Table d'appoint RHINO",
+   "created": "2026-03-16 02:58:30.610706+00"
+  },
+  "b": {
+   "id": "2fa25d80-62bf-4098-a621-b7d994d24e20",
+   "brand": "Atelier Demichelis",
+   "name": "Table d'appointRHINO",
+   "created": "2026-06-04 11:56:22.905114+00"
+  }
+ },
+ {
+  "key": "092991ec-6c7b-44ee-b04d-e817be112787|01491006-17a2-4770-8a76-5da033d80a6c",
+  "confidence": "high",
+  "similarity": 0.976,
+  "a": {
+   "id": "092991ec-6c7b-44ee-b04d-e817be112787",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte Convex Mirror",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "01491006-17a2-4770-8a76-5da033d80a6c",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte ConvexMirror",
+   "created": "2026-06-17 14:45:22.187071+00"
+  }
+ },
+ {
+  "key": "033e3999-db92-4411-ba3c-68372812d8d6|b4ab2410-a5e5-4046-90dc-2682394d444a",
+  "confidence": "high",
+  "similarity": 0.976,
+  "a": {
+   "id": "033e3999-db92-4411-ba3c-68372812d8d6",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 280 Sofa",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "b4ab2410-a5e5-4046-90dc-2682394d444a",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 280Sofa",
+   "created": "2026-05-19 10:34:50.040468+00"
+  }
+ },
+ {
+  "key": "4744d41f-0a3f-493a-8023-9db39a8c889c|7664f192-3e4d-4562-978a-17b7eec7637e",
+  "confidence": "high",
+  "similarity": 0.975,
+  "a": {
+   "id": "4744d41f-0a3f-493a-8023-9db39a8c889c",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 110",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "7664f192-3e4d-4562-978a-17b7eec7637e",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 130",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "7d633dec-12e0-41d5-9a22-5470ac060ba5|2a60e724-2d53-4447-81fe-29269ed99703",
+  "confidence": "high",
+  "similarity": 0.974,
+  "a": {
+   "id": "7d633dec-12e0-41d5-9a22-5470ac060ba5",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 189 Coffee table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "2a60e724-2d53-4447-81fe-29269ed99703",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 189Coffee table",
+   "created": "2026-05-02 11:51:54.595266+00"
+  }
+ },
+ {
+  "key": "15e8d43a-8da8-4219-909f-a3ac1efa4208|59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+  "confidence": "high",
+  "similarity": 0.974,
+  "a": {
+   "id": "15e8d43a-8da8-4219-909f-a3ac1efa4208",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 250",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 280",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "0f3a49e4-9e4c-4690-b591-0d51eb81f067|2f5a52e0-10f2-4001-9b27-acef25b2253f",
+  "confidence": "high",
+  "similarity": 0.973,
+  "a": {
+   "id": "0f3a49e4-9e4c-4690-b591-0d51eb81f067",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Pedesta Table",
+   "created": "2026-05-04 09:45:31.637565+00"
+  },
+  "b": {
+   "id": "2f5a52e0-10f2-4001-9b27-acef25b2253f",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Pedestal Table",
+   "created": "2026-05-04 09:45:32.497042+00"
+  }
+ },
+ {
+  "key": "f5cafbcb-c16d-4821-809c-57666d5a6aa4|0c27ee5d-594d-419c-8390-2c716af6c9ef",
+  "confidence": "high",
+  "similarity": 0.968,
+  "a": {
+   "id": "f5cafbcb-c16d-4821-809c-57666d5a6aa4",
+   "brand": "Hamrei",
+   "name": "Anjos Side Board",
+   "created": "2026-05-03 03:41:38.840476+00"
+  },
+  "b": {
+   "id": "0c27ee5d-594d-419c-8390-2c716af6c9ef",
+   "brand": "Hamrei",
+   "name": "Anjos Sideboard",
+   "created": "2026-05-03 04:02:25.057914+00"
+  }
+ },
+ {
+  "key": "07d827e6-6761-45ff-a970-f337ab972b93|f05312c1-bc20-417d-a174-a8ffc9aa120e",
+  "confidence": "high",
+  "similarity": 0.966,
+  "a": {
+   "id": "07d827e6-6761-45ff-a970-f337ab972b93",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL  Night table",
+   "created": "2026-05-03 11:11:43.217892+00"
+  },
+  "b": {
+   "id": "f05312c1-bc20-417d-a174-a8ffc9aa120e",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL  Nighttable",
+   "created": "2026-05-03 11:11:42.833335+00"
+  }
+ },
+ {
+  "key": "e32526f7-e7e1-4fce-9f20-08a990d9bcba|3a841a7c-bb45-4dd1-a608-0e2931e86da3",
+  "confidence": "high",
+  "similarity": 0.966,
+  "a": {
+   "id": "e32526f7-e7e1-4fce-9f20-08a990d9bcba",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus 002 Chair",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3a841a7c-bb45-4dd1-a608-0e2931e86da3",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus 002Chair",
+   "created": "2026-05-19 12:24:00.208181+00"
+  }
+ },
+ {
+  "key": "4096661c-cbdc-4642-8405-de247aeb1077|c43178c3-8221-4937-acdd-775dcfb911db",
+  "confidence": "high",
+  "similarity": 0.963,
+  "a": {
+   "id": "4096661c-cbdc-4642-8405-de247aeb1077",
+   "brand": "Leo Sentou",
+   "name": "Oval Armchair",
+   "created": "2026-05-04 10:38:11.301298+00"
+  },
+  "b": {
+   "id": "c43178c3-8221-4937-acdd-775dcfb911db",
+   "brand": "Leo Sentou",
+   "name": "Oval Armchjair",
+   "created": "2026-05-04 10:38:09.170697+00"
+  }
+ },
+ {
+  "key": "2023fce8-689b-4df2-acdf-b82f1c634bca|96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+  "confidence": "high",
+  "similarity": 0.957,
+  "a": {
+   "id": "2023fce8-689b-4df2-acdf-b82f1c634bca",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 03 Rug",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04 Rug",
+   "created": "2026-05-05 04:06:56.637075+00"
+  }
+ },
+ {
+  "key": "278962e2-8796-412e-a24e-0c6560546cbc|e32ab2dc-f5d9-4c54-ba6f-cad8d42d05c1",
+  "confidence": "high",
+  "similarity": 0.957,
+  "a": {
+   "id": "278962e2-8796-412e-a24e-0c6560546cbc",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Lin Dining table",
+   "created": "2026-05-03 10:35:15.507362+00"
+  },
+  "b": {
+   "id": "e32ab2dc-f5d9-4c54-ba6f-cad8d42d05c1",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Lon Dining table",
+   "created": "2026-05-03 10:35:14.561851+00"
+  }
+ },
+ {
+  "key": "b237d49a-bfc4-4944-91d6-2cfa510f1dfa|f91132b5-8ffb-4c29-a4e7-bef2d0918d12",
+  "confidence": "high",
+  "similarity": 0.952,
+  "a": {
+   "id": "b237d49a-bfc4-4944-91d6-2cfa510f1dfa",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Peigne 1 Rug Burgundy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "f91132b5-8ffb-4c29-a4e7-bef2d0918d12",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Peigne 2 Rug Burgundy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "7b5f281f-7453-47a2-885f-26d438d64133|53c885e6-8b77-4731-88f2-30a64f94082b",
+  "confidence": "high",
+  "similarity": 0.948,
+  "a": {
+   "id": "7b5f281f-7453-47a2-885f-26d438d64133",
+   "brand": "Saint-Louis",
+   "name": "Folia Mini Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 09:31:34.794135+00"
+  },
+  "b": {
+   "id": "53c885e6-8b77-4731-88f2-30a64f94082b",
+   "brand": "Saint-Louis",
+   "name": "Folia Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-23 16:18:51.67355+00"
+  }
+ },
+ {
+  "key": "b3bae6ca-8429-47ab-97c5-68266d19d0c5|844a08b2-5468-4e06-a14f-56321124965c",
+  "confidence": "high",
+  "similarity": 0.947,
+  "a": {
+   "id": "b3bae6ca-8429-47ab-97c5-68266d19d0c5",
+   "brand": "Christopher Boots",
+   "name": "Ouranos I",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "844a08b2-5468-4e06-a14f-56321124965c",
+   "brand": "Christopher Boots",
+   "name": "Ouranos II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "1ed103ac-a4b1-4713-a232-5e97bced9de6|857401c0-3939-4e87-bf4d-7106777ecdf3",
+  "confidence": "high",
+  "similarity": 0.947,
+  "a": {
+   "id": "1ed103ac-a4b1-4713-a232-5e97bced9de6",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement 1",
+   "created": "2026-06-11 11:12:51.339486+00"
+  },
+  "b": {
+   "id": "857401c0-3939-4e87-bf4d-7106777ecdf3",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement 5 ",
+   "created": "2026-06-11 04:33:47.33608+00"
+  }
+ },
+ {
+  "key": "7339a2d9-6ad8-4ce7-a3a2-e2230f9e9949|3450ac45-089d-4736-bd2d-c31258243016",
+  "confidence": "high",
+  "similarity": 0.947,
+  "a": {
+   "id": "7339a2d9-6ad8-4ce7-a3a2-e2230f9e9949",
+   "brand": "Serge Mouille",
+   "name": "Ceiling Lamp 2 Arms",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3450ac45-089d-4736-bd2d-c31258243016",
+   "brand": "Serge Mouille",
+   "name": "Ceiling Lamp 3 Arms",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "8c7b4db5-9c7f-4c2e-b5da-240bd33fa671|cf98fcc7-6a9b-408e-9ab2-08758aaadfc9",
+  "confidence": "high",
+  "similarity": 0.944,
+  "a": {
+   "id": "8c7b4db5-9c7f-4c2e-b5da-240bd33fa671",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino 2 Side Table",
+   "created": "2026-06-04 12:00:51.452737+00"
+  },
+  "b": {
+   "id": "cf98fcc7-6a9b-408e-9ab2-08758aaadfc9",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino 3 Side Table",
+   "created": "2026-06-04 12:10:43.027517+00"
+  }
+ },
+ {
+  "key": "04b165c8-b0b6-48ad-b6b1-c303c0690c96|43e29025-7ded-4413-8594-fbd0b4c56868",
+  "confidence": "high",
+  "similarity": 0.944,
+  "a": {
+   "id": "04b165c8-b0b6-48ad-b6b1-c303c0690c96",
+   "brand": "Emmanuel Babled",
+   "name": "OSMOSIS Series \u2014 Sculptural Book Cover",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "43e29025-7ded-4413-8594-fbd0b4c56868",
+   "brand": "Emmanuel Babled",
+   "name": "OSMOSIS Series \u2014 Sculptured Book Cover",
+   "created": "2026-06-11 11:40:07.143257+00"
+  }
+ },
+ {
+  "key": "8c7b4db5-9c7f-4c2e-b5da-240bd33fa671|938fd31c-29ec-4a91-8f57-5ee9fd56fb62",
+  "confidence": "high",
+  "similarity": 0.941,
+  "a": {
+   "id": "8c7b4db5-9c7f-4c2e-b5da-240bd33fa671",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino 2 Side Table",
+   "created": "2026-06-04 12:00:51.452737+00"
+  },
+  "b": {
+   "id": "938fd31c-29ec-4a91-8f57-5ee9fd56fb62",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino Side Table",
+   "created": "2026-06-04 11:56:30.055996+00"
+  }
+ },
+ {
+  "key": "cf98fcc7-6a9b-408e-9ab2-08758aaadfc9|938fd31c-29ec-4a91-8f57-5ee9fd56fb62",
+  "confidence": "high",
+  "similarity": 0.941,
+  "a": {
+   "id": "cf98fcc7-6a9b-408e-9ab2-08758aaadfc9",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino 3 Side Table",
+   "created": "2026-06-04 12:10:43.027517+00"
+  },
+  "b": {
+   "id": "938fd31c-29ec-4a91-8f57-5ee9fd56fb62",
+   "brand": "Atelier Demichelis",
+   "name": "Rhino Side Table",
+   "created": "2026-06-04 11:56:30.055996+00"
+  }
+ },
+ {
+  "key": "8999f590-1246-478a-a4eb-5b7c811ecd19|cf2f9629-fd8a-42ef-a11b-b62df270687b",
+  "confidence": "high",
+  "similarity": 0.938,
+  "a": {
+   "id": "8999f590-1246-478a-a4eb-5b7c811ecd19",
+   "brand": "Apparatus",
+   "name": "Median 1 Surface",
+   "created": "2026-03-14 04:10:24.526334+00"
+  },
+  "b": {
+   "id": "cf2f9629-fd8a-42ef-a11b-b62df270687b",
+   "brand": "Apparatus",
+   "name": "Median 2 Surface",
+   "created": "2026-03-16 02:58:30.610706+00"
+  }
+ },
+ {
+  "key": "954011be-819d-4fd3-94ac-21b30ac240d1|d99180cd-6327-447e-98f4-ae98dfe86dd1",
+  "confidence": "high",
+  "similarity": 0.938,
+  "a": {
+   "id": "954011be-819d-4fd3-94ac-21b30ac240d1",
+   "brand": "Bina Baitel",
+   "name": "Tremblay Consoel",
+   "created": "2026-05-21 05:02:30.660341+00"
+  },
+  "b": {
+   "id": "d99180cd-6327-447e-98f4-ae98dfe86dd1",
+   "brand": "Bina Baitel",
+   "name": "Tremblay Console",
+   "created": "2026-05-21 05:02:31.98706+00"
+  }
+ },
+ {
+  "key": "389ba441-00b6-4318-b0d0-c06df9aa6d0c|e32ab2dc-f5d9-4c54-ba6f-cad8d42d05c1",
+  "confidence": "high",
+  "similarity": 0.936,
+  "a": {
+   "id": "389ba441-00b6-4318-b0d0-c06df9aa6d0c",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Line Dining table",
+   "created": "2026-05-03 10:35:15.640051+00"
+  },
+  "b": {
+   "id": "e32ab2dc-f5d9-4c54-ba6f-cad8d42d05c1",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Lon Dining table",
+   "created": "2026-05-03 10:35:14.561851+00"
+  }
+ },
+ {
+  "key": "2023fce8-689b-4df2-acdf-b82f1c634bca|62dfa000-e42c-4538-a066-4461b45e1e31",
+  "confidence": "high",
+  "similarity": 0.933,
+  "a": {
+   "id": "2023fce8-689b-4df2-acdf-b82f1c634bca",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 03 Rug",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "62dfa000-e42c-4538-a066-4461b45e1e31",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04Rug",
+   "created": "2026-05-05 04:41:40.403479+00"
+  }
+ },
+ {
+  "key": "651ce810-7616-4cfa-a375-f27538a459a4|d5b288d6-d711-4820-b132-7ef1cec80a55",
+  "confidence": "high",
+  "similarity": 0.926,
+  "a": {
+   "id": "651ce810-7616-4cfa-a375-f27538a459a4",
+   "brand": "OKHA",
+   "name": "Repose F Sofa by Adam Court",
+   "created": "2026-06-10 23:15:02.79995+00"
+  },
+  "b": {
+   "id": "d5b288d6-d711-4820-b132-7ef1cec80a55",
+   "brand": "OKHA",
+   "name": "Repose Sofa A by Adam Court",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "c9ecbf4a-a860-4584-ae07-7443d1f7d511|87abe414-87ce-4369-9a48-00f630a379c4",
+  "confidence": "high",
+  "similarity": 0.923,
+  "a": {
+   "id": "c9ecbf4a-a860-4584-ae07-7443d1f7d511",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Madonna Del Monte Coffee & Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "87abe414-87ce-4369-9a48-00f630a379c4",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Madonna Del Monte Coffee Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "3b85fff7-f1b4-4576-b22c-79b0a893ae42|7db629ed-2fce-4552-a43e-deb1df6f3494",
+  "confidence": "high",
+  "similarity": 0.92,
+  "a": {
+   "id": "3b85fff7-f1b4-4576-b22c-79b0a893ae42",
+   "brand": "Alex Proba",
+   "name": "The One Rug for CC-Tapis",
+   "created": "2026-05-18 10:36:12.816542+00"
+  },
+  "b": {
+   "id": "7db629ed-2fce-4552-a43e-deb1df6f3494",
+   "brand": "Alex Proba",
+   "name": "The Other Rug for CC-Tapis",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "b4ab2410-a5e5-4046-90dc-2682394d444a|80cd2456-03cf-4b90-a144-ad32152356a6",
+  "confidence": "high",
+  "similarity": 0.919,
+  "a": {
+   "id": "b4ab2410-a5e5-4046-90dc-2682394d444a",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 280Sofa",
+   "created": "2026-05-19 10:34:50.040468+00"
+  },
+  "b": {
+   "id": "80cd2456-03cf-4b90-a144-ad32152356a6",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 Sofa",
+   "created": "2026-05-19 10:34:50.521779+00"
+  }
+ },
+ {
+  "key": "97e2c55f-ac68-4db8-8da4-43a5b36bd60b|275250df-04c2-4218-a667-dc4d3c039d16",
+  "confidence": "high",
+  "similarity": 0.917,
+  "a": {
+   "id": "97e2c55f-ac68-4db8-8da4-43a5b36bd60b",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Le Jeu Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "275250df-04c2-4218-a667-dc4d3c039d16",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Le Jeu Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "4eda8ff9-5ea3-4fb0-83b3-41e10d3c256b|1c6ce709-6b4a-4796-85dd-32f465a78700",
+  "confidence": "high",
+  "similarity": 0.917,
+  "a": {
+   "id": "4eda8ff9-5ea3-4fb0-83b3-41e10d3c256b",
+   "brand": "Pierre Bonnefille",
+   "name": "Bronze Painting 204, 2023",
+   "created": "2026-09-28 16:09:15.450155+00"
+  },
+  "b": {
+   "id": "1c6ce709-6b4a-4796-85dd-32f465a78700",
+   "brand": "Pierre Bonnefille",
+   "name": "Bronze Painting 208, 2024",
+   "created": "2026-09-28 16:09:15.450155+00"
+  }
+ },
+ {
+  "key": "e97edc5e-ae68-4f33-b516-21d994731787|3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+  "confidence": "high",
+  "similarity": 0.914,
+  "a": {
+   "id": "e97edc5e-ae68-4f33-b516-21d994731787",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline XL Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0738cc53-64ce-4406-841e-dd0be6e6aee6|c6b7c96b-8464-4130-b462-76df8175bd11",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "0738cc53-64ce-4406-841e-dd0be6e6aee6",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "c6b7c96b-8464-4130-b462-76df8175bd11",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "0738cc53-64ce-4406-841e-dd0be6e6aee6|cd59ef89-023a-4874-831e-5955be8fea41",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "0738cc53-64ce-4406-841e-dd0be6e6aee6",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "cd59ef89-023a-4874-831e-5955be8fea41",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 6",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "0738cc53-64ce-4406-841e-dd0be6e6aee6|1f3900e0-5239-45cb-8716-e77ed93505b8",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "0738cc53-64ce-4406-841e-dd0be6e6aee6",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "1f3900e0-5239-45cb-8716-e77ed93505b8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 7",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "0738cc53-64ce-4406-841e-dd0be6e6aee6|55955ef7-1711-457a-a857-8773b438dec4",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "0738cc53-64ce-4406-841e-dd0be6e6aee6",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "55955ef7-1711-457a-a857-8773b438dec4",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 8",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "c6b7c96b-8464-4130-b462-76df8175bd11|cd59ef89-023a-4874-831e-5955be8fea41",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "c6b7c96b-8464-4130-b462-76df8175bd11",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "cd59ef89-023a-4874-831e-5955be8fea41",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 6",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "c6b7c96b-8464-4130-b462-76df8175bd11|1f3900e0-5239-45cb-8716-e77ed93505b8",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "c6b7c96b-8464-4130-b462-76df8175bd11",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "1f3900e0-5239-45cb-8716-e77ed93505b8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 7",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "c6b7c96b-8464-4130-b462-76df8175bd11|55955ef7-1711-457a-a857-8773b438dec4",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "c6b7c96b-8464-4130-b462-76df8175bd11",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "55955ef7-1711-457a-a857-8773b438dec4",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 8",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "cd59ef89-023a-4874-831e-5955be8fea41|1f3900e0-5239-45cb-8716-e77ed93505b8",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "cd59ef89-023a-4874-831e-5955be8fea41",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 6",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "1f3900e0-5239-45cb-8716-e77ed93505b8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 7",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "cd59ef89-023a-4874-831e-5955be8fea41|55955ef7-1711-457a-a857-8773b438dec4",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "cd59ef89-023a-4874-831e-5955be8fea41",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 6",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "55955ef7-1711-457a-a857-8773b438dec4",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 8",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "1f3900e0-5239-45cb-8716-e77ed93505b8|55955ef7-1711-457a-a857-8773b438dec4",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "1f3900e0-5239-45cb-8716-e77ed93505b8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 7",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "55955ef7-1711-457a-a857-8773b438dec4",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ricky Rug 8",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "48df18b8-447b-43d9-a4c7-2f805d450179|0fef6cba-1d14-4afd-a0cf-1425b4487bc8",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "48df18b8-447b-43d9-a4c7-2f805d450179",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "0fef6cba-1d14-4afd-a0cf-1425b4487bc8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "48df18b8-447b-43d9-a4c7-2f805d450179|7e2b7fd1-a529-4a9c-abc1-69f8cc0ab1e7",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "48df18b8-447b-43d9-a4c7-2f805d450179",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 1",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "7e2b7fd1-a529-4a9c-abc1-69f8cc0ab1e7",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 5",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "0fef6cba-1d14-4afd-a0cf-1425b4487bc8|7e2b7fd1-a529-4a9c-abc1-69f8cc0ab1e7",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "0fef6cba-1d14-4afd-a0cf-1425b4487bc8",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 2",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "7e2b7fd1-a529-4a9c-abc1-69f8cc0ab1e7",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Surya Rug 5",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "ba491f1d-1e94-49e0-9a95-d9c9aca26dbc|92206a0f-54ae-418e-9cbd-42307076154a",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "ba491f1d-1e94-49e0-9a95-d9c9aca26dbc",
+   "brand": "Forest & Giaconia",
+   "name": "Console.01 by Archimobilier",
+   "created": "2026-06-16 05:46:47.48054+00"
+  },
+  "b": {
+   "id": "92206a0f-54ae-418e-9cbd-42307076154a",
+   "brand": "Forest & Giaconia",
+   "name": "Console.01 for Archimobilier",
+   "created": "2026-06-16 05:48:17.80693+00"
+  }
+ },
+ {
+  "key": "bc88818f-1b2c-40ec-90f6-e17679419e80|955e46d2-fafd-4341-94bf-d7b1a7a34d7e",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "bc88818f-1b2c-40ec-90f6-e17679419e80",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 1",
+   "created": "2026-06-25 09:04:23.918224+00"
+  },
+  "b": {
+   "id": "955e46d2-fafd-4341-94bf-d7b1a7a34d7e",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 2",
+   "created": "2026-06-25 09:08:49.191127+00"
+  }
+ },
+ {
+  "key": "bc88818f-1b2c-40ec-90f6-e17679419e80|1a583e5e-8a85-457f-9f9e-196b8f84d219",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "bc88818f-1b2c-40ec-90f6-e17679419e80",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 1",
+   "created": "2026-06-25 09:04:23.918224+00"
+  },
+  "b": {
+   "id": "1a583e5e-8a85-457f-9f9e-196b8f84d219",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "bc88818f-1b2c-40ec-90f6-e17679419e80|255ffffb-2f81-4217-bde8-ecd27da9866b",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "bc88818f-1b2c-40ec-90f6-e17679419e80",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 1",
+   "created": "2026-06-25 09:04:23.918224+00"
+  },
+  "b": {
+   "id": "255ffffb-2f81-4217-bde8-ecd27da9866b",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 5",
+   "created": "2026-06-25 08:57:42.631341+00"
+  }
+ },
+ {
+  "key": "955e46d2-fafd-4341-94bf-d7b1a7a34d7e|1a583e5e-8a85-457f-9f9e-196b8f84d219",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "955e46d2-fafd-4341-94bf-d7b1a7a34d7e",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 2",
+   "created": "2026-06-25 09:08:49.191127+00"
+  },
+  "b": {
+   "id": "1a583e5e-8a85-457f-9f9e-196b8f84d219",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "955e46d2-fafd-4341-94bf-d7b1a7a34d7e|255ffffb-2f81-4217-bde8-ecd27da9866b",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "955e46d2-fafd-4341-94bf-d7b1a7a34d7e",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 2",
+   "created": "2026-06-25 09:08:49.191127+00"
+  },
+  "b": {
+   "id": "255ffffb-2f81-4217-bde8-ecd27da9866b",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 5",
+   "created": "2026-06-25 08:57:42.631341+00"
+  }
+ },
+ {
+  "key": "1a583e5e-8a85-457f-9f9e-196b8f84d219|255ffffb-2f81-4217-bde8-ecd27da9866b",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "1a583e5e-8a85-457f-9f9e-196b8f84d219",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "255ffffb-2f81-4217-bde8-ecd27da9866b",
+   "brand": "Matthieu Gicquel",
+   "name": "G\u00e9ode Nbr 5",
+   "created": "2026-06-25 08:57:42.631341+00"
+  }
+ },
+ {
+  "key": "eb254f07-4dfe-4bba-9c97-6697f959a768|bcbe18ac-aa38-4cfd-aeba-9e86c29888c1",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "eb254f07-4dfe-4bba-9c97-6697f959a768",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 1",
+   "created": "2026-06-25 10:13:05.755864+00"
+  },
+  "b": {
+   "id": "bcbe18ac-aa38-4cfd-aeba-9e86c29888c1",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 2",
+   "created": "2026-06-25 10:18:38.491542+00"
+  }
+ },
+ {
+  "key": "eb254f07-4dfe-4bba-9c97-6697f959a768|5445f51b-438c-4a01-bed8-729858f75fad",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "eb254f07-4dfe-4bba-9c97-6697f959a768",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 1",
+   "created": "2026-06-25 10:13:05.755864+00"
+  },
+  "b": {
+   "id": "5445f51b-438c-4a01-bed8-729858f75fad",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 9",
+   "created": "2026-06-25 10:34:31.63751+00"
+  }
+ },
+ {
+  "key": "bcbe18ac-aa38-4cfd-aeba-9e86c29888c1|5445f51b-438c-4a01-bed8-729858f75fad",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "bcbe18ac-aa38-4cfd-aeba-9e86c29888c1",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 2",
+   "created": "2026-06-25 10:18:38.491542+00"
+  },
+  "b": {
+   "id": "5445f51b-438c-4a01-bed8-729858f75fad",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Nbr 9",
+   "created": "2026-06-25 10:34:31.63751+00"
+  }
+ },
+ {
+  "key": "433d9d89-d216-48e3-a5c6-52813041ebce|e4331e94-0517-4f90-9d38-52571f81367f",
+  "confidence": "high",
+  "similarity": 0.909,
+  "a": {
+   "id": "433d9d89-d216-48e3-a5c6-52813041ebce",
+   "brand": "Ozone",
+   "name": "BRASILIA LP",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "e4331e94-0517-4f90-9d38-52571f81367f",
+   "brand": "Ozone",
+   "name": "Brasilia PL",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "3de62bf6-a107-41b0-afff-4f3ba97b2e98|56419a0e-c009-4f14-96be-37db7f8ea5fe",
+  "confidence": "high",
+  "similarity": 0.906,
+  "a": {
+   "id": "3de62bf6-a107-41b0-afff-4f3ba97b2e98",
+   "brand": "Dagmar",
+   "name": "Entre Bedside Table, 1956",
+   "created": "2026-08-04 09:17:22.838111+00"
+  },
+  "b": {
+   "id": "56419a0e-c009-4f14-96be-37db7f8ea5fe",
+   "brand": "Dagmar",
+   "name": "Entre Tall Bedside Table, 1956",
+   "created": "2026-08-04 09:17:22.838111+00"
+  }
+ },
+ {
+  "key": "107b78ee-a40d-4c77-95a1-0d8e52123753|df27d200-539b-49fa-839f-6a7bc621a9a8",
+  "confidence": "high",
+  "similarity": 0.903,
+  "a": {
+   "id": "107b78ee-a40d-4c77-95a1-0d8e52123753",
+   "brand": "Pierre Bonnefille",
+   "name": "Bloc SideBoard ",
+   "created": "2026-06-17 04:08:41.382892+00"
+  },
+  "b": {
+   "id": "df27d200-539b-49fa-839f-6a7bc621a9a8",
+   "brand": "Pierre Bonnefille",
+   "name": "Bloc Sideboard II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "b4e39b47-0677-4698-9242-328df8f618ca|24ec643a-fdba-427d-9088-0e5be5748df1",
+  "confidence": "high",
+  "similarity": 0.901,
+  "a": {
+   "id": "b4e39b47-0677-4698-9242-328df8f618ca",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ribbon by Atelier F\u00e9vrier x De Gournay",
+   "created": "2026-06-04 18:20:04.5597+00"
+  },
+  "b": {
+   "id": "24ec643a-fdba-427d-9088-0e5be5748df1",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Ribbon by Atelier F\u00e9vrier x De Gp",
+   "created": "2026-06-04 18:20:02.254169+00"
+  }
+ },
+ {
+  "key": "8dec0995-80f0-4456-87f4-57ba905be460|53c885e6-8b77-4731-88f2-30a64f94082b",
+  "confidence": "medium",
+  "similarity": 0.899,
+  "a": {
+   "id": "8dec0995-80f0-4456-87f4-57ba905be460",
+   "brand": "Saint-Louis",
+   "name": "Folia Floor Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:08:16.884366+00"
+  },
+  "b": {
+   "id": "53c885e6-8b77-4731-88f2-30a64f94082b",
+   "brand": "Saint-Louis",
+   "name": "Folia Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-23 16:18:51.67355+00"
+  }
+ },
+ {
+  "key": "033e3999-db92-4411-ba3c-68372812d8d6|80cd2456-03cf-4b90-a144-ad32152356a6",
+  "confidence": "medium",
+  "similarity": 0.895,
+  "a": {
+   "id": "033e3999-db92-4411-ba3c-68372812d8d6",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 280 Sofa",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "80cd2456-03cf-4b90-a144-ad32152356a6",
+   "brand": "Pierre Augustin Rose",
+   "name": "Saint Honor\u00e9 Sofa",
+   "created": "2026-05-19 10:34:50.521779+00"
+  }
+ },
+ {
+  "key": "2a8726d5-dc49-4085-83f9-75c7ac39aecf|fc2121d1-aff6-4421-b399-16e25dd98c07",
+  "confidence": "medium",
+  "similarity": 0.889,
+  "a": {
+   "id": "2a8726d5-dc49-4085-83f9-75c7ac39aecf",
+   "brand": "Garnier & Linker",
+   "name": "Callisto Pendant",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "fc2121d1-aff6-4421-b399-16e25dd98c07",
+   "brand": "Garnier & Linker",
+   "name": "Callisto Pendant x 4",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "e0c5c594-5e1b-49f3-83f7-f49611eb1852|0d58811b-db04-44d3-bd7f-e0d139feb3a0",
+  "confidence": "medium",
+  "similarity": 0.889,
+  "a": {
+   "id": "e0c5c594-5e1b-49f3-83f7-f49611eb1852",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Console Empil\u00e9e 526",
+   "created": "2026-06-17 14:14:02.714179+00"
+  },
+  "b": {
+   "id": "0d58811b-db04-44d3-bd7f-e0d139feb3a0",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Console Empil\u00e9e C",
+   "created": "2026-06-17 14:13:59.836548+00"
+  }
+ },
+ {
+  "key": "292852a6-89e1-4ffb-a5e9-2d27048a1a29|a2065546-22cd-43a2-8dfc-d0a77cd4d2e8",
+  "confidence": "medium",
+  "similarity": 0.889,
+  "a": {
+   "id": "292852a6-89e1-4ffb-a5e9-2d27048a1a29",
+   "brand": "Pouenat",
+   "name": "Sorbet Table Lamp by Humberrt",
+   "created": "2026-05-26 03:03:32.483121+00"
+  },
+  "b": {
+   "id": "a2065546-22cd-43a2-8dfc-d0a77cd4d2e8",
+   "brand": "Pouenat",
+   "name": "Sorbet Table Lamp by Humbert & Poyet",
+   "created": "2026-05-26 03:03:39.12279+00"
+  }
+ },
+ {
+  "key": "d776ff6c-9d03-41f8-a43d-1bde559b061b|857401c0-3939-4e87-bf4d-7106777ecdf3",
+  "confidence": "medium",
+  "similarity": 0.884,
+  "a": {
+   "id": "d776ff6c-9d03-41f8-a43d-1bde559b061b",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement #5 - Long",
+   "created": "2026-06-11 04:30:45.085506+00"
+  },
+  "b": {
+   "id": "857401c0-3939-4e87-bf4d-7106777ecdf3",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement 5 ",
+   "created": "2026-06-11 04:33:47.33608+00"
+  }
+ },
+ {
+  "key": "31cf6827-7c1f-4c6e-a268-eec2d4c99709|c3c1fcb4-5f61-4f4b-b911-f74693a4bc0c",
+  "confidence": "medium",
+  "similarity": 0.882,
+  "a": {
+   "id": "31cf6827-7c1f-4c6e-a268-eec2d4c99709",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Cream",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "c3c1fcb4-5f61-4f4b-b911-f74693a4bc0c",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Red",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "c75f8a0b-3e55-4f00-8574-eef3e1d96d4e|8f1ec8c1-befa-404b-b20d-81f57d05da20",
+  "confidence": "medium",
+  "similarity": 0.882,
+  "a": {
+   "id": "c75f8a0b-3e55-4f00-8574-eef3e1d96d4e",
+   "brand": "Bina Baitel",
+   "name": "Sublime M Ottoman",
+   "created": "2026-03-14 04:10:24.526334+00"
+  },
+  "b": {
+   "id": "8f1ec8c1-befa-404b-b20d-81f57d05da20",
+   "brand": "Bina Baitel",
+   "name": "Sublime Ottoman M",
+   "created": "2026-03-16 07:28:30.556587+00"
+  }
+ },
+ {
+  "key": "f129ac95-5e2a-4c63-8dd0-02cb178fe2a6|29c0dd07-6d3b-423c-b8e1-e70d385904a0",
+  "confidence": "medium",
+  "similarity": 0.881,
+  "a": {
+   "id": "f129ac95-5e2a-4c63-8dd0-02cb178fe2a6",
+   "brand": "Collection Particuli\u00e8re",
+   "name": "Lady R low table by Luca Erba",
+   "created": "2026-04-22 10:25:40.025045+00"
+  },
+  "b": {
+   "id": "29c0dd07-6d3b-423c-b8e1-e70d385904a0",
+   "brand": "Collection Particuli\u00e8re",
+   "name": "Lady R side table by Luca Erba",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "3a841a7c-bb45-4dd1-a608-0e2931e86da3|694b2292-03a2-4132-899a-fbf856c3c89b",
+  "confidence": "medium",
+  "similarity": 0.88,
+  "a": {
+   "id": "3a841a7c-bb45-4dd1-a608-0e2931e86da3",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus 002Chair",
+   "created": "2026-05-19 12:24:00.208181+00"
+  },
+  "b": {
+   "id": "694b2292-03a2-4132-899a-fbf856c3c89b",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus Chair",
+   "created": "2026-05-19 12:24:00.452866+00"
+  }
+ },
+ {
+  "key": "ede25e29-906b-4f2c-b373-d88181d38d6b|fd8c2682-d8a1-48fe-b110-d22209cbcce7",
+  "confidence": "medium",
+  "similarity": 0.879,
+  "a": {
+   "id": "ede25e29-906b-4f2c-b373-d88181d38d6b",
+   "brand": "Delcourt Collection",
+   "name": "IBO Bed by Christophe Delcourt",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "fd8c2682-d8a1-48fe-b110-d22209cbcce7",
+   "brand": "Delcourt Collection",
+   "name": "IBO low table by Christophe Delcourt",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "594f0730-7b51-4697-ba9d-b793d0f45fb9|3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+  "confidence": "medium",
+  "similarity": 0.878,
+  "a": {
+   "id": "594f0730-7b51-4697-ba9d-b793d0f45fb9",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Small Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline XL Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "8999f590-1246-478a-a4eb-5b7c811ecd19|47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+  "confidence": "medium",
+  "similarity": 0.875,
+  "a": {
+   "id": "8999f590-1246-478a-a4eb-5b7c811ecd19",
+   "brand": "Apparatus",
+   "name": "Median 1 Surface",
+   "created": "2026-03-14 04:10:24.526334+00"
+  },
+  "b": {
+   "id": "47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+   "brand": "Apparatus",
+   "name": "Median Surface 2",
+   "created": "2026-03-16 07:28:21.958106+00"
+  }
+ },
+ {
+  "key": "cf2f9629-fd8a-42ef-a11b-b62df270687b|47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+  "confidence": "medium",
+  "similarity": 0.875,
+  "a": {
+   "id": "cf2f9629-fd8a-42ef-a11b-b62df270687b",
+   "brand": "Apparatus",
+   "name": "Median 2 Surface",
+   "created": "2026-03-16 02:58:30.610706+00"
+  },
+  "b": {
+   "id": "47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+   "brand": "Apparatus",
+   "name": "Median Surface 2",
+   "created": "2026-03-16 07:28:21.958106+00"
+  }
+ },
+ {
+  "key": "916c6d0f-ffef-4c32-aeb1-53cdca8c75d0|3e8ea650-c7fb-44de-a160-88c297cbd42a",
+  "confidence": "medium",
+  "similarity": 0.875,
+  "a": {
+   "id": "916c6d0f-ffef-4c32-aeb1-53cdca8c75d0",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back 3-SeaterSofa c. 1930",
+   "created": "2026-06-15 02:42:51.871873+00"
+  },
+  "b": {
+   "id": "3e8ea650-c7fb-44de-a160-88c297cbd42a",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back Sofa c. 1930",
+   "created": "2026-06-15 02:42:53.185452+00"
+  }
+ },
+ {
+  "key": "e57ee0c7-524f-4189-960a-f15e238def2e|1fe7381c-4fb6-4331-8af9-1156f8d234de",
+  "confidence": "medium",
+  "similarity": 0.868,
+  "a": {
+   "id": "e57ee0c7-524f-4189-960a-f15e238def2e",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp in  Green",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "1fe7381c-4fb6-4331-8af9-1156f8d234de",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp in Blue",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "33c8ac37-072b-4bef-b07a-a1d31e48c09b|fb5e38be-e5e3-4162-9707-6d0ecac76cf0",
+  "confidence": "medium",
+  "similarity": 0.868,
+  "a": {
+   "id": "33c8ac37-072b-4bef-b07a-a1d31e48c09b",
+   "brand": "Sebastian Herkner",
+   "name": "Granville Bridge Arm Chair",
+   "created": "2026-07-15 06:29:50.498234+00"
+  },
+  "b": {
+   "id": "fb5e38be-e5e3-4162-9707-6d0ecac76cf0",
+   "brand": "Sebastian Herkner",
+   "name": "Granville Bridge Side Chair",
+   "created": "2026-07-15 06:29:50.498234+00"
+  }
+ },
+ {
+  "key": "f05312c1-bc20-417d-a174-a8ffc9aa120e|39b3ab47-1e88-4206-b371-d255d1b3e374",
+  "confidence": "medium",
+  "similarity": 0.867,
+  "a": {
+   "id": "f05312c1-bc20-417d-a174-a8ffc9aa120e",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL  Nighttable",
+   "created": "2026-05-03 11:11:42.833335+00"
+  },
+  "b": {
+   "id": "39b3ab47-1e88-4206-b371-d255d1b3e374",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 55 Nightable",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "4f5b1c73-a676-418c-b45e-cb72b793a536|69466992-6368-4956-b9a9-93ba74ae6726",
+  "confidence": "medium",
+  "similarity": 0.865,
+  "a": {
+   "id": "4f5b1c73-a676-418c-b45e-cb72b793a536",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 135 Bookcase",
+   "created": "2026-05-03 16:32:45.639043+00"
+  },
+  "b": {
+   "id": "69466992-6368-4956-b9a9-93ba74ae6726",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 135 Bookcase High",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "81bd2f25-fabe-40c6-ac50-9176c0ce0235|1fe2137d-87e0-471e-977f-b967a413de72",
+  "confidence": "medium",
+  "similarity": 0.864,
+  "a": {
+   "id": "81bd2f25-fabe-40c6-ac50-9176c0ce0235",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Lignes Dor\u00e9es Rug Gold",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "1fe2137d-87e0-471e-977f-b967a413de72",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Lignes Dor\u00e9es Rug Nude",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "5f08ef10-a793-4bf6-a51f-491ef27c0ea1|3e8ea650-c7fb-44de-a160-88c297cbd42a",
+  "confidence": "medium",
+  "similarity": 0.862,
+  "a": {
+   "id": "5f08ef10-a793-4bf6-a51f-491ef27c0ea1",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back 3-Seater Sofa c. 1930",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3e8ea650-c7fb-44de-a160-88c297cbd42a",
+   "brand": "Jean-Michel Frank",
+   "name": "Upholstered Back Sofa c. 1930",
+   "created": "2026-06-15 02:42:53.185452+00"
+  }
+ },
+ {
+  "key": "3888fc41-fe77-479c-800d-e2843d261d44|a831eb8f-ef54-4c1c-9e5b-eaf8da67a9ec",
+  "confidence": "medium",
+  "similarity": 0.857,
+  "a": {
+   "id": "3888fc41-fe77-479c-800d-e2843d261d44",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Shadow Blue",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "a831eb8f-ef54-4c1c-9e5b-eaf8da67a9ec",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Shadow Pink",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "b67b7e76-f89d-489d-aff5-2770ec43e733|2f9c6f46-4bcc-4a17-bc01-0b0830d15d19",
+  "confidence": "medium",
+  "similarity": 0.857,
+  "a": {
+   "id": "b67b7e76-f89d-489d-aff5-2770ec43e733",
+   "brand": "Le Berre Vevaud",
+   "name": "Barth Enama Lava",
+   "created": "2026-05-05 03:17:51.67884+00"
+  },
+  "b": {
+   "id": "2f9c6f46-4bcc-4a17-bc01-0b0830d15d19",
+   "brand": "Le Berre Vevaud",
+   "name": "Barth Enameled Lava",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0a24bb6b-5703-4a18-8efc-8923375eb915|48c6328b-64ca-4a0e-99f3-aba0d4da9517",
+  "confidence": "medium",
+  "similarity": 0.857,
+  "a": {
+   "id": "0a24bb6b-5703-4a18-8efc-8923375eb915",
+   "brand": "Leo Sentou",
+   "name": "Ondine Armchair",
+   "created": "2026-05-04 09:06:33.608924+00"
+  },
+  "b": {
+   "id": "48c6328b-64ca-4a0e-99f3-aba0d4da9517",
+   "brand": "Leo Sentou",
+   "name": "Ondine Armcxh",
+   "created": "2026-05-04 09:06:31.082542+00"
+  }
+ },
+ {
+  "key": "53c885e6-8b77-4731-88f2-30a64f94082b|26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+  "confidence": "medium",
+  "similarity": 0.854,
+  "a": {
+   "id": "53c885e6-8b77-4731-88f2-30a64f94082b",
+   "brand": "Saint-Louis",
+   "name": "Folia Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-23 16:18:51.67355+00"
+  },
+  "b": {
+   "id": "26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+   "brand": "Saint-Louis",
+   "name": "Folia Side Table by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:18:27.83575+00"
+  }
+ },
+ {
+  "key": "8dec0995-80f0-4456-87f4-57ba905be460|7b5f281f-7453-47a2-885f-26d438d64133",
+  "confidence": "medium",
+  "similarity": 0.851,
+  "a": {
+   "id": "8dec0995-80f0-4456-87f4-57ba905be460",
+   "brand": "Saint-Louis",
+   "name": "Folia Floor Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:08:16.884366+00"
+  },
+  "b": {
+   "id": "7b5f281f-7453-47a2-885f-26d438d64133",
+   "brand": "Saint-Louis",
+   "name": "Folia Mini Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 09:31:34.794135+00"
+  }
+ },
+ {
+  "key": "7b5f281f-7453-47a2-885f-26d438d64133|26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+  "confidence": "medium",
+  "similarity": 0.851,
+  "a": {
+   "id": "7b5f281f-7453-47a2-885f-26d438d64133",
+   "brand": "Saint-Louis",
+   "name": "Folia Mini Portable Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 09:31:34.794135+00"
+  },
+  "b": {
+   "id": "26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+   "brand": "Saint-Louis",
+   "name": "Folia Side Table by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:18:27.83575+00"
+  }
+ },
+ {
+  "key": "a8ea9f35-f2b5-4a1e-b625-aab6a9d8885a|b94f16ea-cd2b-458f-bd0a-057c4f259512",
+  "confidence": "medium",
+  "similarity": 0.85,
+  "a": {
+   "id": "a8ea9f35-f2b5-4a1e-b625-aab6a9d8885a",
+   "brand": "Christopher Boots",
+   "name": "Nepenthes Complex",
+   "created": "2026-06-07 15:54:02.577344+00"
+  },
+  "b": {
+   "id": "b94f16ea-cd2b-458f-bd0a-057c4f259512",
+   "brand": "Christopher Boots",
+   "name": "Nepenthes Complex Small",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "a9a91250-b2e8-439b-9788-c3e9fa85ad25|49acb717-16cf-4542-9576-61646e9d090c",
+  "confidence": "medium",
+  "similarity": 0.85,
+  "a": {
+   "id": "a9a91250-b2e8-439b-9788-c3e9fa85ad25",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Alabaster Pendant",
+   "created": "2026-03-14 04:10:24.526334+00"
+  },
+  "b": {
+   "id": "49acb717-16cf-4542-9576-61646e9d090c",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Alabaster Pendant Light",
+   "created": "2026-03-25 10:45:55.342169+00"
+  }
+ },
+ {
+  "key": "16c309b9-2f15-4794-b56b-af3e48dbda7f|466098b6-c8de-4adc-bf5c-46ae827fddf5",
+  "confidence": "medium",
+  "similarity": 0.85,
+  "a": {
+   "id": "16c309b9-2f15-4794-b56b-af3e48dbda7f",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Bench c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "466098b6-c8de-4adc-bf5c-46ae827fddf5",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Chair c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "289baed1-69b2-4b99-a921-3ca66e78dc31|25846c31-7bcb-4979-8004-1c6604ef9d67",
+  "confidence": "medium",
+  "similarity": 0.85,
+  "a": {
+   "id": "289baed1-69b2-4b99-a921-3ca66e78dc31",
+   "brand": "Sam Accoceberry",
+   "name": "Conica Large Table Lamp",
+   "created": "2026-06-26 09:13:05.011211+00"
+  },
+  "b": {
+   "id": "25846c31-7bcb-4979-8004-1c6604ef9d67",
+   "brand": "Sam Accoceberry",
+   "name": "Conica Table Lamp",
+   "created": "2026-06-26 09:13:10.446064+00"
+  }
+ },
+ {
+  "key": "39768dcd-83e2-429c-b036-0d22ba37cf74|05f184e7-ca8c-4275-8829-72ffddc70f93",
+  "confidence": "medium",
+  "similarity": 0.848,
+  "a": {
+   "id": "39768dcd-83e2-429c-b036-0d22ba37cf74",
+   "brand": "Collection Particuli\u00e8re",
+   "name": "Pia armchair by Christophe Delcourt",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "05f184e7-ca8c-4275-8829-72ffddc70f93",
+   "brand": "Collection Particuli\u00e8re",
+   "name": "Pia sofa by Christophe Delcourt",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "55ef3ee6-2eaf-4c84-be55-0c835354f824|1709bd46-2072-4a33-bb58-4e6be2afafba",
+  "confidence": "medium",
+  "similarity": 0.846,
+  "a": {
+   "id": "55ef3ee6-2eaf-4c84-be55-0c835354f824",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil A.B",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "1709bd46-2072-4a33-bb58-4e6be2afafba",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil J.B.L",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "e32526f7-e7e1-4fce-9f20-08a990d9bcba|694b2292-03a2-4132-899a-fbf856c3c89b",
+  "confidence": "medium",
+  "similarity": 0.846,
+  "a": {
+   "id": "e32526f7-e7e1-4fce-9f20-08a990d9bcba",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus 002 Chair",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "694b2292-03a2-4132-899a-fbf856c3c89b",
+   "brand": "Pierre Augustin Rose",
+   "name": "Polus Chair",
+   "created": "2026-05-19 12:24:00.452866+00"
+  }
+ },
+ {
+  "key": "d5bc2b8f-e22a-4cbc-959d-283a4560a5ba|390bf8d3-a96e-4819-b1c1-cdba10e1d598",
+  "confidence": "medium",
+  "similarity": 0.844,
+  "a": {
+   "id": "d5bc2b8f-e22a-4cbc-959d-283a4560a5ba",
+   "brand": "Garnier & Linker",
+   "name": "Calliope Chandelier",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "390bf8d3-a96e-4819-b1c1-cdba10e1d598",
+   "brand": "Garnier & Linker",
+   "name": "Calliope Medium Chandelier",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "a2858bd5-5449-478b-8726-9885841a053d|50b7b3df-4626-48b9-b71f-b0f1d76a683a",
+  "confidence": "medium",
+  "similarity": 0.842,
+  "a": {
+   "id": "a2858bd5-5449-478b-8726-9885841a053d",
+   "brand": "Leo Sentou",
+   "name": "Ligne Sif",
+   "created": "2026-05-04 10:22:23.873757+00"
+  },
+  "b": {
+   "id": "50b7b3df-4626-48b9-b71f-b0f1d76a683a",
+   "brand": "Leo Sentou",
+   "name": "Ligne Sofa",
+   "created": "2026-05-04 10:22:26.036829+00"
+  }
+ },
+ {
+  "key": "594f0730-7b51-4697-ba9d-b793d0f45fb9|e97edc5e-ae68-4f33-b516-21d994731787",
+  "confidence": "medium",
+  "similarity": 0.842,
+  "a": {
+   "id": "594f0730-7b51-4697-ba9d-b793d0f45fb9",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Small Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "e97edc5e-ae68-4f33-b516-21d994731787",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "90501f67-4151-487c-b349-8a670ff5ccdd|c5f9fce2-80ab-4a3e-b575-a22a9a248e6f",
+  "confidence": "medium",
+  "similarity": 0.84,
+  "a": {
+   "id": "90501f67-4151-487c-b349-8a670ff5ccdd",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Volume 2 Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "c5f9fce2-80ab-4a3e-b575-a22a9a248e6f",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Volume Series",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "07d827e6-6761-45ff-a970-f337ab972b93|39b3ab47-1e88-4206-b371-d255d1b3e374",
+  "confidence": "medium",
+  "similarity": 0.839,
+  "a": {
+   "id": "07d827e6-6761-45ff-a970-f337ab972b93",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL  Night table",
+   "created": "2026-05-03 11:11:43.217892+00"
+  },
+  "b": {
+   "id": "39b3ab47-1e88-4206-b371-d255d1b3e374",
+   "brand": "Bieke Casteleyn",
+   "name": "OOL 55 Nightable",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "1be54e9c-fd94-4ab2-b7e3-77f12f882834|0d8ce210-d430-45a8-ba89-7a3c1298f896",
+  "confidence": "medium",
+  "similarity": 0.839,
+  "a": {
+   "id": "1be54e9c-fd94-4ab2-b7e3-77f12f882834",
+   "brand": "Overgaard & Dyrman",
+   "name": "Circle Bar Chair with Armrests",
+   "created": "2026-06-28 16:05:55.219148+00"
+  },
+  "b": {
+   "id": "0d8ce210-d430-45a8-ba89-7a3c1298f896",
+   "brand": "Overgaard & Dyrman",
+   "name": "Circle Dining Chair with Armrest",
+   "created": "2026-06-28 15:58:05.624639+00"
+  }
+ },
+ {
+  "key": "d776ff6c-9d03-41f8-a43d-1bde559b061b|1ed103ac-a4b1-4713-a232-5e97bced9de6",
+  "confidence": "medium",
+  "similarity": 0.837,
+  "a": {
+   "id": "d776ff6c-9d03-41f8-a43d-1bde559b061b",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement #5 - Long",
+   "created": "2026-06-11 04:30:45.085506+00"
+  },
+  "b": {
+   "id": "1ed103ac-a4b1-4713-a232-5e97bced9de6",
+   "brand": "Emmanuel Babled",
+   "name": "Osmosi Complement 1",
+   "created": "2026-06-11 11:12:51.339486+00"
+  }
+ },
+ {
+  "key": "c2494faa-542d-49f3-bbfa-0142cd1c0ed0|758d5b17-a772-4ffc-89e6-80fd51bd4279",
+  "confidence": "medium",
+  "similarity": 0.836,
+  "a": {
+   "id": "c2494faa-542d-49f3-bbfa-0142cd1c0ed0",
+   "brand": "Jean-Michel Frank",
+   "name": "Croisillon Lamp (Brass) c. 1924",
+   "created": "2026-06-16 10:35:51.488735+00"
+  },
+  "b": {
+   "id": "758d5b17-a772-4ffc-89e6-80fd51bd4279",
+   "brand": "Jean-Michel Frank",
+   "name": "Croisillon Lamp (Wood) c. 1924",
+   "created": "2026-06-16 10:35:51.488735+00"
+  }
+ },
+ {
+  "key": "55ef3ee6-2eaf-4c84-be55-0c835354f824|64807917-6694-475c-97d1-0cf5e22c5a71",
+  "confidence": "medium",
+  "similarity": 0.833,
+  "a": {
+   "id": "55ef3ee6-2eaf-4c84-be55-0c835354f824",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil A.B",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "64807917-6694-475c-97d1-0cf5e22c5a71",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil L.D",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "d54b7d66-f51a-493f-b594-db371e714d73|9fc0960f-361f-43d3-8880-dab4b152e369",
+  "confidence": "medium",
+  "similarity": 0.824,
+  "a": {
+   "id": "d54b7d66-f51a-493f-b594-db371e714d73",
+   "brand": "Bina Baitel",
+   "name": "ZigZag Bench & Ottoman",
+   "created": "2026-05-21 05:28:02.940884+00"
+  },
+  "b": {
+   "id": "9fc0960f-361f-43d3-8880-dab4b152e369",
+   "brand": "Bina Baitel",
+   "name": "ZigZag Ottoman",
+   "created": "2026-05-21 05:35:23.13109+00"
+  }
+ },
+ {
+  "key": "01491006-17a2-4770-8a76-5da033d80a6c|5dcaf5c1-7b7a-4ae8-96f0-29fc310b7cc7",
+  "confidence": "medium",
+  "similarity": 0.824,
+  "a": {
+   "id": "01491006-17a2-4770-8a76-5da033d80a6c",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte ConvexMirror",
+   "created": "2026-06-17 14:45:22.187071+00"
+  },
+  "b": {
+   "id": "5dcaf5c1-7b7a-4ae8-96f0-29fc310b7cc7",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte Mirror",
+   "created": "2026-06-17 14:45:23.363042+00"
+  }
+ },
+ {
+  "key": "bb0bfc5e-56cb-4bb2-b788-08bafd47a2e5|58d4a2b9-d82a-4c8d-a2d3-d7e95d3cf3fa",
+  "confidence": "medium",
+  "similarity": 0.824,
+  "a": {
+   "id": "bb0bfc5e-56cb-4bb2-b788-08bafd47a2e5",
+   "brand": "Michel Boyer",
+   "name": "Brasilia PL Pendant",
+   "created": "2026-06-15 01:32:38.272224+00"
+  },
+  "b": {
+   "id": "58d4a2b9-d82a-4c8d-a2d3-d7e95d3cf3fa",
+   "brand": "Michel Boyer",
+   "name": "Brasilia PL Pne",
+   "created": "2026-06-15 01:32:35.658449+00"
+  }
+ },
+ {
+  "key": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254|e74e9edd-0c0f-4995-93f9-b0315fdc140d",
+  "confidence": "medium",
+  "similarity": 0.818,
+  "a": {
+   "id": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254",
+   "brand": "Alinea",
+   "name": "Angelo M/H High Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "e74e9edd-0c0f-4995-93f9-b0315fdc140d",
+   "brand": "Alinea",
+   "name": "Angelo M/R Dining Table ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "a99767c2-08d4-4437-87cf-a0cfdceabebd|1fe7381c-4fb6-4331-8af9-1156f8d234de",
+  "confidence": "medium",
+  "similarity": 0.818,
+  "a": {
+   "id": "a99767c2-08d4-4437-87cf-a0cfdceabebd",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "1fe7381c-4fb6-4331-8af9-1156f8d234de",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp in Blue",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "4d65b76b-54ce-4482-949b-d820bcfebf48|55e3d050-0231-4c19-a429-534f96864d0f",
+  "confidence": "medium",
+  "similarity": 0.818,
+  "a": {
+   "id": "4d65b76b-54ce-4482-949b-d820bcfebf48",
+   "brand": "Michel Boyer",
+   "name": "Brasilia LP Floor Lamp",
+   "created": "2026-06-15 01:33:19.590431+00"
+  },
+  "b": {
+   "id": "55e3d050-0231-4c19-a429-534f96864d0f",
+   "brand": "Michel Boyer",
+   "name": "Brasilia LP Table Lamp",
+   "created": "2026-06-15 01:34:08.853096+00"
+  }
+ },
+ {
+  "key": "90501f67-4151-487c-b349-8a670ff5ccdd|3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+  "confidence": "medium",
+  "similarity": 0.818,
+  "a": {
+   "id": "90501f67-4151-487c-b349-8a670ff5ccdd",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Volume 2 Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3721033c-3cca-4c2f-89cc-95a1a98e9bf8",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline XL Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "662cc394-6658-4d43-86a4-9e881b275659|4884cc6e-820f-48b8-acb2-beb705d2966e",
+  "confidence": "medium",
+  "similarity": 0.816,
+  "a": {
+   "id": "662cc394-6658-4d43-86a4-9e881b275659",
+   "brand": "Saint-Louis",
+   "name": "Twist 1586 Spirits Tasting",
+   "created": "2026-05-24 16:16:22.718866+00"
+  },
+  "b": {
+   "id": "4884cc6e-820f-48b8-acb2-beb705d2966e",
+   "brand": "Saint-Louis",
+   "name": "Twist 1586 Wine Tasting",
+   "created": "2026-05-24 16:00:26.788956+00"
+  }
+ },
+ {
+  "key": "fe73e3d1-4796-4a2a-b1de-cb07b27d67e7|7ef5f9cc-d53d-4c16-8879-db8f323382c1",
+  "confidence": "medium",
+  "similarity": 0.815,
+  "a": {
+   "id": "fe73e3d1-4796-4a2a-b1de-cb07b27d67e7",
+   "brand": "Entrelacs",
+   "name": "Toast by Yves Macheret",
+   "created": "2026-05-07 15:57:03.166078+00"
+  },
+  "b": {
+   "id": "7ef5f9cc-d53d-4c16-8879-db8f323382c1",
+   "brand": "Entrelacs",
+   "name": "Toast Wall Lamp by Yves Macheret",
+   "created": "2026-05-07 15:57:22.123023+00"
+  }
+ },
+ {
+  "key": "353547c3-ea0c-4d59-b79a-21b761bfb291|2816322a-94f6-49e7-a70f-4a8c15292d5a",
+  "confidence": "medium",
+  "similarity": 0.815,
+  "a": {
+   "id": "353547c3-ea0c-4d59-b79a-21b761bfb291",
+   "brand": "Man of Parts",
+   "name": "Frenchmen Street Armchair ",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "2816322a-94f6-49e7-a70f-4a8c15292d5a",
+   "brand": "Man of Parts",
+   "name": "Frenchmen Street Lounge Chair ",
+   "created": "2026-03-31 23:44:57.00073+00"
+  }
+ },
+ {
+  "key": "06ab7444-5cf9-4fda-8267-7933b9546418|f188ac81-4332-4d7d-a5f3-82b1aeebb1db",
+  "confidence": "medium",
+  "similarity": 0.815,
+  "a": {
+   "id": "06ab7444-5cf9-4fda-8267-7933b9546418",
+   "brand": "Sebastian Herkner",
+   "name": "Granville Bridge Stool",
+   "created": "2026-07-15 06:29:50.498234+00"
+  },
+  "b": {
+   "id": "f188ac81-4332-4d7d-a5f3-82b1aeebb1db",
+   "brand": "Sebastian Herkner",
+   "name": "Granville Bridge Stool With Arms",
+   "created": "2026-07-15 06:29:50.498234+00"
+  }
+ },
+ {
+  "key": "7157b734-c3cf-4662-af17-97e88cb39306|25a35eb9-f384-4dab-bf4f-3cd7eee01aa0",
+  "confidence": "medium",
+  "similarity": 0.814,
+  "a": {
+   "id": "7157b734-c3cf-4662-af17-97e88cb39306",
+   "brand": "Christopher Boots",
+   "name": "Prometheus IV Table Lamp",
+   "created": "2026-06-07 11:46:59.268725+00"
+  },
+  "b": {
+   "id": "25a35eb9-f384-4dab-bf4f-3cd7eee01aa0",
+   "brand": "Christopher Boots",
+   "name": "Prometheus IV Table Lamp (Quartz 450)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "f9c81b0e-4ef0-4be8-900f-8e80bccb46c6|60b83bdb-b781-4be5-9264-ea9ded6a7b6c",
+  "confidence": "medium",
+  "similarity": 0.812,
+  "a": {
+   "id": "f9c81b0e-4ef0-4be8-900f-8e80bccb46c6",
+   "brand": "Garnier & Linker",
+   "name": "Erato Pendant",
+   "created": "2026-06-17 07:55:17.417845+00"
+  },
+  "b": {
+   "id": "60b83bdb-b781-4be5-9264-ea9ded6a7b6c",
+   "brand": "Garnier & Linker",
+   "name": "Erato Pendant Large",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "27b4ae94-0881-476a-b657-f800bf767877|9a6238b5-8306-4ba8-aabf-8a1b45a97aff",
+  "confidence": "medium",
+  "similarity": 0.812,
+  "a": {
+   "id": "27b4ae94-0881-476a-b657-f800bf767877",
+   "brand": "Jeremy Maxwell Wintrebert",
+   "name": "Cloud Bull\u00e9 Pendant",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "9a6238b5-8306-4ba8-aabf-8a1b45a97aff",
+   "brand": "Jeremy Maxwell Wintrebert",
+   "name": "Cloud Pendant",
+   "created": "2026-03-16 02:58:30.610706+00"
+  }
+ },
+ {
+  "key": "91716fbb-140a-4a50-abcd-d51bb656eb01|d5222c8e-645b-4875-8942-03b460630e67",
+  "confidence": "medium",
+  "similarity": 0.811,
+  "a": {
+   "id": "91716fbb-140a-4a50-abcd-d51bb656eb01",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Black",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "d5222c8e-645b-4875-8942-03b460630e67",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Navy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "b1f295cb-b1e8-4732-9398-c605b3848a69|d5222c8e-645b-4875-8942-03b460630e67",
+  "confidence": "medium",
+  "similarity": 0.811,
+  "a": {
+   "id": "b1f295cb-b1e8-4732-9398-c605b3848a69",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Cream",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "d5222c8e-645b-4875-8942-03b460630e67",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Navy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "3ec9c42c-580f-4178-8580-b5aa4f56e8bd|69f521b9-cfe8-4690-9f6f-bc24e0be1b5d",
+  "confidence": "medium",
+  "similarity": 0.811,
+  "a": {
+   "id": "3ec9c42c-580f-4178-8580-b5aa4f56e8bd",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli  Duo ofTable Lamps",
+   "created": "2026-06-06 08:39:58.012128+00"
+  },
+  "b": {
+   "id": "69f521b9-cfe8-4690-9f6f-bc24e0be1b5d",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli Table Lamp",
+   "created": "2026-06-06 08:40:04.946048+00"
+  }
+ },
+ {
+  "key": "f78996d4-7dd5-40f6-9af9-d7061e831781|d6cca6f7-2f0b-454f-b082-2d09f6d9676f",
+  "confidence": "medium",
+  "similarity": 0.81,
+  "a": {
+   "id": "f78996d4-7dd5-40f6-9af9-d7061e831781",
+   "brand": "Emmanuel Babled",
+   "name": "Etnastone Cabinet",
+   "created": "2026-06-11 09:52:17.494326+00"
+  },
+  "b": {
+   "id": "d6cca6f7-2f0b-454f-b082-2d09f6d9676f",
+   "brand": "Emmanuel Babled",
+   "name": "Etnastone Cabinet \u2014 Stripes",
+   "created": "2026-06-11 09:52:13.243155+00"
+  }
+ },
+ {
+  "key": "d5b288d6-d711-4820-b132-7ef1cec80a55|dde0d90d-ea90-4dbf-8194-a3118c5ff8fa",
+  "confidence": "medium",
+  "similarity": 0.806,
+  "a": {
+   "id": "d5b288d6-d711-4820-b132-7ef1cec80a55",
+   "brand": "OKHA",
+   "name": "Repose Sofa A by Adam Court",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "dde0d90d-ea90-4dbf-8194-a3118c5ff8fa",
+   "brand": "OKHA",
+   "name": "Repose Sofa A with Ottoman by Adam Court",
+   "created": "2026-06-10 22:37:11.004614+00"
+  }
+ },
+ {
+  "key": "e74e9edd-0c0f-4995-93f9-b0315fdc140d|34e85552-8a3e-416d-9f0c-a676a1a52bce",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "e74e9edd-0c0f-4995-93f9-b0315fdc140d",
+   "brand": "Alinea",
+   "name": "Angelo M/R Dining Table ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "34e85552-8a3e-416d-9f0c-a676a1a52bce",
+   "brand": "Alinea",
+   "name": "Angelo M/SR Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2|62dfa000-e42c-4538-a066-4461b45e1e31",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10Concept Rugs",
+   "created": "2026-05-05 04:41:49.784582+00"
+  },
+  "b": {
+   "id": "62dfa000-e42c-4538-a066-4461b45e1e31",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04Rug",
+   "created": "2026-05-05 04:41:40.403479+00"
+  }
+ },
+ {
+  "key": "f014beb7-6a7d-4067-8c95-ec61c459b8bb|3888fc41-fe77-479c-800d-e2843d261d44",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "f014beb7-6a7d-4067-8c95-ec61c459b8bb",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Olive",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "3888fc41-fe77-479c-800d-e2843d261d44",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Shadow Blue",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "092991ec-6c7b-44ee-b04d-e817be112787|5dcaf5c1-7b7a-4ae8-96f0-29fc310b7cc7",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "092991ec-6c7b-44ee-b04d-e817be112787",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte Convex Mirror",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "5dcaf5c1-7b7a-4ae8-96f0-29fc310b7cc7",
+   "brand": "Herv\u00e9 van der Straeten",
+   "name": "Tumulte Mirror",
+   "created": "2026-06-17 14:45:23.363042+00"
+  }
+ },
+ {
+  "key": "5cc6958a-a3f2-4132-a267-af2544b3f786|dfbec699-dd8c-4b31-b483-bfa338f85967",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "5cc6958a-a3f2-4132-a267-af2544b3f786",
+   "brand": "MMairo",
+   "name": "Nissa Coffee Table by Ivan Colominas",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "dfbec699-dd8c-4b31-b483-bfa338f85967",
+   "brand": "MMairo",
+   "name": "Nissa Stool by Ivan Colominas",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "a99767c2-08d4-4437-87cf-a0cfdceabebd|e57ee0c7-524f-4189-960a-f15e238def2e",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "a99767c2-08d4-4437-87cf-a0cfdceabebd",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp",
+   "created": "2026-03-14 04:10:42.214584+00"
+  },
+  "b": {
+   "id": "e57ee0c7-524f-4189-960a-f15e238def2e",
+   "brand": "Made in Kira",
+   "name": "Toshiro Table Lamp in  Green",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "2180d8a3-d232-4202-824e-44e035d40b1c|acb1958d-2462-4e59-ba92-6ed6a27c56b7",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "2180d8a3-d232-4202-824e-44e035d40b1c",
+   "brand": "Made in Kira",
+   "name": "Yoshiko Table Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "acb1958d-2462-4e59-ba92-6ed6a27c56b7",
+   "brand": "Made in Kira",
+   "name": "Yoshiko Table Lamp in Black",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "280d26e5-accd-43b5-bbc2-71c06fcc0f1b|9229cc76-6657-48dd-8ea7-6c61595078fd",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "280d26e5-accd-43b5-bbc2-71c06fcc0f1b",
+   "brand": "Nicolas Aubagnac",
+   "name": "Iguazu Coffee Table for Pouenat",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "9229cc76-6657-48dd-8ea7-6c61595078fd",
+   "brand": "Nicolas Aubagnac",
+   "name": "Iguazu Table Lamp for Pouenat",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "cebf0f3d-847b-4a13-a29c-24567529273b|e1377a6b-d1fd-4619-b3b7-ddfd66ed1235",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "cebf0f3d-847b-4a13-a29c-24567529273b",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "e1377a6b-d1fd-4619-b3b7-ddfd66ed1235",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "cebf0f3d-847b-4a13-a29c-24567529273b|5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "cebf0f3d-847b-4a13-a29c-24567529273b",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "612bcf63-638b-4804-9dba-ac3529ee7a07|e1377a6b-d1fd-4619-b3b7-ddfd66ed1235",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "612bcf63-638b-4804-9dba-ac3529ee7a07",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-03-20 02:56:03.050434+00"
+  },
+  "b": {
+   "id": "e1377a6b-d1fd-4619-b3b7-ddfd66ed1235",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "612bcf63-638b-4804-9dba-ac3529ee7a07|5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "612bcf63-638b-4804-9dba-ac3529ee7a07",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Coffee Table",
+   "created": "2026-03-20 02:56:03.050434+00"
+  },
+  "b": {
+   "id": "5ed3ab68-118e-4ea5-a763-f39d8d6251bd",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Mineral Flower Side Table II",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "de1a8323-d036-4311-b351-fde975bb3d79|fdff7148-706c-4a86-b00b-aa63b9b47e04",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "de1a8323-d036-4311-b351-fde975bb3d79",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Whisper Large Sofa",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "fdff7148-706c-4a86-b00b-aa63b9b47e04",
+   "brand": "No\u00e9 Duchaufour-Lawrance",
+   "name": "Whisper Sofa",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "bfa41a99-9193-472f-9b48-2fe54cfdaf46|629f0a0e-eb8c-46e5-9ab2-c48e060183b9",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "bfa41a99-9193-472f-9b48-2fe54cfdaf46",
+   "brand": "Sam Accoceberry",
+   "name": "Conica Wall Down",
+   "created": "2026-06-26 09:13:18.264795+00"
+  },
+  "b": {
+   "id": "629f0a0e-eb8c-46e5-9ab2-c48e060183b9",
+   "brand": "Sam Accoceberry",
+   "name": "Conica Wall Up",
+   "created": "2026-06-26 09:13:26.668862+00"
+  }
+ },
+ {
+  "key": "3eb8ae6d-ec1d-4830-b0db-38085b406571|9782fbf0-1b18-4db0-bd13-cdc8b98f1ed7",
+  "confidence": "medium",
+  "similarity": 0.8,
+  "a": {
+   "id": "3eb8ae6d-ec1d-4830-b0db-38085b406571",
+   "brand": "Sam Accoceberry",
+   "name": "Volca Column",
+   "created": "2026-06-26 09:13:49.090659+00"
+  },
+  "b": {
+   "id": "9782fbf0-1b18-4db0-bd13-cdc8b98f1ed7",
+   "brand": "Sam Accoceberry",
+   "name": "Volca Column Large",
+   "created": "2026-06-26 09:13:54.35645+00"
+  }
+ },
+ {
+  "key": "4744d41f-0a3f-493a-8023-9db39a8c889c|15e8d43a-8da8-4219-909f-a3ac1efa4208",
+  "confidence": "medium",
+  "similarity": 0.795,
+  "a": {
+   "id": "4744d41f-0a3f-493a-8023-9db39a8c889c",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 110",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "15e8d43a-8da8-4219-909f-a3ac1efa4208",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 250",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "4744d41f-0a3f-493a-8023-9db39a8c889c|59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+  "confidence": "medium",
+  "similarity": 0.795,
+  "a": {
+   "id": "4744d41f-0a3f-493a-8023-9db39a8c889c",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 110",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 280",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "7664f192-3e4d-4562-978a-17b7eec7637e|15e8d43a-8da8-4219-909f-a3ac1efa4208",
+  "confidence": "medium",
+  "similarity": 0.795,
+  "a": {
+   "id": "7664f192-3e4d-4562-978a-17b7eec7637e",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 130",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "15e8d43a-8da8-4219-909f-a3ac1efa4208",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 250",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "7664f192-3e4d-4562-978a-17b7eec7637e|59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+  "confidence": "medium",
+  "similarity": 0.795,
+  "a": {
+   "id": "7664f192-3e4d-4562-978a-17b7eec7637e",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Circular Dining Table 130",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "59b8bc72-9683-4ead-b6ad-ad6cb158b05a",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Oblong Dining Table 280",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "b92e3ddd-2f75-4b81-ab8f-de4e446cdde8|fcc6f65a-c000-41e0-af6b-b2cae3ba32ba",
+  "confidence": "medium",
+  "similarity": 0.794,
+  "a": {
+   "id": "b92e3ddd-2f75-4b81-ab8f-de4e446cdde8",
+   "brand": "Entrelacs",
+   "name": "Hublot Mirror by Yves Macheret",
+   "created": "2026-05-07 16:33:15.612795+00"
+  },
+  "b": {
+   "id": "fcc6f65a-c000-41e0-af6b-b2cae3ba32ba",
+   "brand": "Entrelacs",
+   "name": "Hublot Wall Lamp by Yves Macheret",
+   "created": "2026-05-08 02:20:45.036129+00"
+  }
+ },
+ {
+  "key": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254|34e85552-8a3e-416d-9f0c-a676a1a52bce",
+  "confidence": "medium",
+  "similarity": 0.791,
+  "a": {
+   "id": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254",
+   "brand": "Alinea",
+   "name": "Angelo M/H High Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "34e85552-8a3e-416d-9f0c-a676a1a52bce",
+   "brand": "Alinea",
+   "name": "Angelo M/SR Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "8dec0995-80f0-4456-87f4-57ba905be460|26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+  "confidence": "medium",
+  "similarity": 0.791,
+  "a": {
+   "id": "8dec0995-80f0-4456-87f4-57ba905be460",
+   "brand": "Saint-Louis",
+   "name": "Folia Floor Lamp by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:08:16.884366+00"
+  },
+  "b": {
+   "id": "26b644bc-cf7e-4f64-90b8-f2f3fdf8bd78",
+   "brand": "Saint-Louis",
+   "name": "Folia Side Table by No\u00e9 Duchaufour-Lawrence",
+   "created": "2026-05-24 10:18:27.83575+00"
+  }
+ },
+ {
+  "key": "8999f590-1246-478a-a4eb-5b7c811ecd19|0167c14e-aa72-498a-a346-46e9a5308dae",
+  "confidence": "medium",
+  "similarity": 0.789,
+  "a": {
+   "id": "8999f590-1246-478a-a4eb-5b7c811ecd19",
+   "brand": "Apparatus",
+   "name": "Median 1 Surface",
+   "created": "2026-03-14 04:10:24.526334+00"
+  },
+  "b": {
+   "id": "0167c14e-aa72-498a-a346-46e9a5308dae",
+   "brand": "Apparatus",
+   "name": "Median 3 Surface Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "cf2f9629-fd8a-42ef-a11b-b62df270687b|0167c14e-aa72-498a-a346-46e9a5308dae",
+  "confidence": "medium",
+  "similarity": 0.789,
+  "a": {
+   "id": "cf2f9629-fd8a-42ef-a11b-b62df270687b",
+   "brand": "Apparatus",
+   "name": "Median 2 Surface",
+   "created": "2026-03-16 02:58:30.610706+00"
+  },
+  "b": {
+   "id": "0167c14e-aa72-498a-a346-46e9a5308dae",
+   "brand": "Apparatus",
+   "name": "Median 3 Surface Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0167c14e-aa72-498a-a346-46e9a5308dae|47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+  "confidence": "medium",
+  "similarity": 0.789,
+  "a": {
+   "id": "0167c14e-aa72-498a-a346-46e9a5308dae",
+   "brand": "Apparatus",
+   "name": "Median 3 Surface Light",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "47a87bf5-ca0b-4ad8-89c0-bc84238b751a",
+   "brand": "Apparatus",
+   "name": "Median Surface 2",
+   "created": "2026-03-16 07:28:21.958106+00"
+  }
+ },
+ {
+  "key": "91716fbb-140a-4a50-abcd-d51bb656eb01|b1f295cb-b1e8-4732-9398-c605b3848a69",
+  "confidence": "medium",
+  "similarity": 0.789,
+  "a": {
+   "id": "91716fbb-140a-4a50-abcd-d51bb656eb01",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Black",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "b1f295cb-b1e8-4732-9398-c605b3848a69",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Egg Shell Rug Cream",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "7f324c46-5cbd-4e91-9f57-c92314945cd9|69f521b9-cfe8-4690-9f6f-bc24e0be1b5d",
+  "confidence": "medium",
+  "similarity": 0.789,
+  "a": {
+   "id": "7f324c46-5cbd-4e91-9f57-c92314945cd9",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli  Duo of Table Lamps",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "69f521b9-cfe8-4690-9f6f-bc24e0be1b5d",
+   "brand": "Bruno Moinard Editions",
+   "name": "Noli Table Lamp",
+   "created": "2026-06-06 08:40:04.946048+00"
+  }
+ },
+ {
+  "key": "b8835dce-d7e1-481b-a7bb-4effa88aa30e|fd27e90f-5ed4-489c-ab36-e8856b65c46e",
+  "confidence": "medium",
+  "similarity": 0.788,
+  "a": {
+   "id": "b8835dce-d7e1-481b-a7bb-4effa88aa30e",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Danti Rug Brown",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "fd27e90f-5ed4-489c-ab36-e8856b65c46e",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Danti Rug Burgundy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "0f3a49e4-9e4c-4690-b591-0d51eb81f067|49ddfd70-f110-4307-a077-4881ad4927fa",
+  "confidence": "medium",
+  "similarity": 0.788,
+  "a": {
+   "id": "0f3a49e4-9e4c-4690-b591-0d51eb81f067",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Pedesta Table",
+   "created": "2026-05-04 09:45:31.637565+00"
+  },
+  "b": {
+   "id": "49ddfd70-f110-4307-a077-4881ad4927fa",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "a355c20f-b0df-4a2b-84e6-392d1a8293d3|a5ada54b-711c-478b-a840-2702ddca34b3",
+  "confidence": "medium",
+  "similarity": 0.788,
+  "a": {
+   "id": "a355c20f-b0df-4a2b-84e6-392d1a8293d3",
+   "brand": "Sebastian Herkner",
+   "name": "Via Bernina Oval",
+   "created": "2026-07-15 06:29:50.498234+00"
+  },
+  "b": {
+   "id": "a5ada54b-711c-478b-a840-2702ddca34b3",
+   "brand": "Sebastian Herkner",
+   "name": "Via Bernina Round",
+   "created": "2026-07-15 06:29:50.498234+00"
+  }
+ },
+ {
+  "key": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9|62dfa000-e42c-4538-a066-4461b45e1e31",
+  "confidence": "medium",
+  "similarity": 0.784,
+  "a": {
+   "id": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs",
+   "created": "2026-05-05 04:41:50.055443+00"
+  },
+  "b": {
+   "id": "62dfa000-e42c-4538-a066-4461b45e1e31",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04Rug",
+   "created": "2026-05-05 04:41:40.403479+00"
+  }
+ },
+ {
+  "key": "e307fb94-1478-439f-a354-e0781f85f6bd|62dfa000-e42c-4538-a066-4461b45e1e31",
+  "confidence": "medium",
+  "similarity": 0.784,
+  "a": {
+   "id": "e307fb94-1478-439f-a354-e0781f85f6bd",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "62dfa000-e42c-4538-a066-4461b45e1e31",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04Rug",
+   "created": "2026-05-05 04:41:40.403479+00"
+  }
+ },
+ {
+  "key": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2|2023fce8-689b-4df2-acdf-b82f1c634bca",
+  "confidence": "medium",
+  "similarity": 0.784,
+  "a": {
+   "id": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10Concept Rugs",
+   "created": "2026-05-05 04:41:49.784582+00"
+  },
+  "b": {
+   "id": "2023fce8-689b-4df2-acdf-b82f1c634bca",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 03 Rug",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2|96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+  "confidence": "medium",
+  "similarity": 0.784,
+  "a": {
+   "id": "0410c6e6-86be-40e9-ba7b-08e2258fd3d2",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10Concept Rugs",
+   "created": "2026-05-05 04:41:49.784582+00"
+  },
+  "b": {
+   "id": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04 Rug",
+   "created": "2026-05-05 04:06:56.637075+00"
+  }
+ },
+ {
+  "key": "e97edc5e-ae68-4f33-b516-21d994731787|90501f67-4151-487c-b349-8a670ff5ccdd",
+  "confidence": "medium",
+  "similarity": 0.78,
+  "a": {
+   "id": "e97edc5e-ae68-4f33-b516-21d994731787",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "90501f67-4151-487c-b349-8a670ff5ccdd",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Volume 2 Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "5b991f0d-f2d1-4d3f-af0e-6cd2be399eed|31cf6827-7c1f-4c6e-a268-eec2d4c99709",
+  "confidence": "medium",
+  "similarity": 0.778,
+  "a": {
+   "id": "5b991f0d-f2d1-4d3f-af0e-6cd2be399eed",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Black",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "31cf6827-7c1f-4c6e-a268-eec2d4c99709",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Cream",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "2f9c6f46-4bcc-4a17-bc01-0b0830d15d19|39bf0557-6303-4a32-b28a-f88d50151508",
+  "confidence": "medium",
+  "similarity": 0.778,
+  "a": {
+   "id": "2f9c6f46-4bcc-4a17-bc01-0b0830d15d19",
+   "brand": "Le Berre Vevaud",
+   "name": "Barth Enameled Lava",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "39bf0557-6303-4a32-b28a-f88d50151508",
+   "brand": "Le Berre Vevaud",
+   "name": "Barth Glazed Lava",
+   "created": "2026-05-05 03:16:37.903812+00"
+  }
+ },
+ {
+  "key": "ec16d41a-ae6d-4e78-91a2-de156a120b86|52235412-498b-4891-8acc-240ed573555d",
+  "confidence": "medium",
+  "similarity": 0.778,
+  "a": {
+   "id": "ec16d41a-ae6d-4e78-91a2-de156a120b86",
+   "brand": "Pierre Bonnefille",
+   "name": "Stone E Floor Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "52235412-498b-4891-8acc-240ed573555d",
+   "brand": "Pierre Bonnefille",
+   "name": "Stone E Table Lamp",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "1ce2c78b-8675-4b86-acd9-44a2f0520c12|a408bc2c-c2ef-4af5-85f3-f977b2b44be9",
+  "confidence": "medium",
+  "similarity": 0.778,
+  "a": {
+   "id": "1ce2c78b-8675-4b86-acd9-44a2f0520c12",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshel Side Table",
+   "created": "2026-05-22 09:21:32.313284+00"
+  },
+  "b": {
+   "id": "a408bc2c-c2ef-4af5-85f3-f977b2b44be9",
+   "brand": "Reda Amalou",
+   "name": "Dot Side Table",
+   "created": "2026-03-14 04:10:42.214584+00"
+  }
+ },
+ {
+  "key": "1ce2c78b-8675-4b86-acd9-44a2f0520c12|92666fe3-9743-4df1-b2df-d49bb488ee88",
+  "confidence": "medium",
+  "similarity": 0.778,
+  "a": {
+   "id": "1ce2c78b-8675-4b86-acd9-44a2f0520c12",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshel Side Table",
+   "created": "2026-05-22 09:21:32.313284+00"
+  },
+  "b": {
+   "id": "92666fe3-9743-4df1-b2df-d49bb488ee88",
+   "brand": "Reda Amalou",
+   "name": "DOT Side Table",
+   "created": "2026-05-22 09:21:27.086697+00"
+  }
+ },
+ {
+  "key": "a0323e9e-2f8f-4b89-b920-a284f3e3408f|f2e747a8-6b8c-4acc-ad95-f3f199d40710",
+  "confidence": "medium",
+  "similarity": 0.774,
+  "a": {
+   "id": "a0323e9e-2f8f-4b89-b920-a284f3e3408f",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-04 05:08:04.682407+00"
+  },
+  "b": {
+   "id": "f2e747a8-6b8c-4acc-ad95-f3f199d40710",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "a0323e9e-2f8f-4b89-b920-a284f3e3408f|90bebbbd-250f-4c8b-8b68-25d45476ee34",
+  "confidence": "medium",
+  "similarity": 0.774,
+  "a": {
+   "id": "a0323e9e-2f8f-4b89-b920-a284f3e3408f",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-04 05:08:04.682407+00"
+  },
+  "b": {
+   "id": "90bebbbd-250f-4c8b-8b68-25d45476ee34",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-04 04:06:58.954929+00"
+  }
+ },
+ {
+  "key": "c590e611-2376-47b4-b9dc-39c996995cfb|f2e747a8-6b8c-4acc-ad95-f3f199d40710",
+  "confidence": "medium",
+  "similarity": 0.774,
+  "a": {
+   "id": "c590e611-2376-47b4-b9dc-39c996995cfb",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "f2e747a8-6b8c-4acc-ad95-f3f199d40710",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "c590e611-2376-47b4-b9dc-39c996995cfb|90bebbbd-250f-4c8b-8b68-25d45476ee34",
+  "confidence": "medium",
+  "similarity": 0.774,
+  "a": {
+   "id": "c590e611-2376-47b4-b9dc-39c996995cfb",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Oak",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "90bebbbd-250f-4c8b-8b68-25d45476ee34",
+   "brand": "Atelier BdM",
+   "name": "Lyric Desk Walnut",
+   "created": "2026-06-04 04:06:58.954929+00"
+  }
+ },
+ {
+  "key": "7ad88978-c156-449a-a82c-61ff20b4efff|8021f634-c801-45cf-ae15-6fa2ed6c97ae",
+  "confidence": "medium",
+  "similarity": 0.774,
+  "a": {
+   "id": "7ad88978-c156-449a-a82c-61ff20b4efff",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Rayons Rug Blue",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "8021f634-c801-45cf-ae15-6fa2ed6c97ae",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Rayons Rug Cream",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9|2023fce8-689b-4df2-acdf-b82f1c634bca",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs",
+   "created": "2026-05-05 04:41:50.055443+00"
+  },
+  "b": {
+   "id": "2023fce8-689b-4df2-acdf-b82f1c634bca",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 03 Rug",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9|96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "81c7e2c9-5eab-49b6-afb3-803ffaeb71a9",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs",
+   "created": "2026-05-05 04:41:50.055443+00"
+  },
+  "b": {
+   "id": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04 Rug",
+   "created": "2026-05-05 04:06:56.637075+00"
+  }
+ },
+ {
+  "key": "e307fb94-1478-439f-a354-e0781f85f6bd|2023fce8-689b-4df2-acdf-b82f1c634bca",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "e307fb94-1478-439f-a354-e0781f85f6bd",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "2023fce8-689b-4df2-acdf-b82f1c634bca",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 03 Rug",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "e307fb94-1478-439f-a354-e0781f85f6bd|96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "e307fb94-1478-439f-a354-e0781f85f6bd",
+   "brand": "Apparatus",
+   "name": "Sequence - 1 to 10 Concept Rugs ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  },
+  "b": {
+   "id": "96c0b8dc-5ac7-40b6-be91-d3789a3d47dc",
+   "brand": "Apparatus",
+   "name": "Sequence - Concept 04 Rug",
+   "created": "2026-05-05 04:06:56.637075+00"
+  }
+ },
+ {
+  "key": "bf1eed28-2b2f-4281-8b47-98829bbb24da|e445f0bd-2d61-483f-83e1-a9948d0b5d24",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "bf1eed28-2b2f-4281-8b47-98829bbb24da",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Gold",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "e445f0bd-2d61-483f-83e1-a9948d0b5d24",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Nude",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "1c44e628-1294-4e3e-9ddc-b3a56af4fc63|9dee6c8c-6261-45e6-af9c-9c7c021c1ae8",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "1c44e628-1294-4e3e-9ddc-b3a56af4fc63",
+   "brand": "Atelier Pendhapa",
+   "name": "Anemos Bedside Table",
+   "created": "2026-05-03 07:58:22.992629+00"
+  },
+  "b": {
+   "id": "9dee6c8c-6261-45e6-af9c-9c7c021c1ae8",
+   "brand": "Atelier Pendhapa",
+   "name": "Anemos Coffee Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "1709bd46-2072-4a33-bb58-4e6be2afafba|64807917-6694-475c-97d1-0cf5e22c5a71",
+  "confidence": "medium",
+  "similarity": 0.769,
+  "a": {
+   "id": "1709bd46-2072-4a33-bb58-4e6be2afafba",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil J.B.L",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "64807917-6694-475c-97d1-0cf5e22c5a71",
+   "brand": "Leo Sentou",
+   "name": "Fauteuil L.D",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "7af125d9-59c2-4dcd-aeb4-fe90166371c1|ee21de3f-0918-4941-991b-2adae7b44955",
+  "confidence": "medium",
+  "similarity": 0.766,
+  "a": {
+   "id": "7af125d9-59c2-4dcd-aeb4-fe90166371c1",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Console",
+   "created": "2026-09-29 01:25:05.722293+00"
+  },
+  "b": {
+   "id": "ee21de3f-0918-4941-991b-2adae7b44955",
+   "brand": "Emmanuel Levet Stenne",
+   "name": "Dress Up Stone Side Table",
+   "created": "2026-09-29 01:25:05.722293+00"
+  }
+ },
+ {
+  "key": "594f0730-7b51-4697-ba9d-b793d0f45fb9|90501f67-4151-487c-b349-8a670ff5ccdd",
+  "confidence": "medium",
+  "similarity": 0.766,
+  "a": {
+   "id": "594f0730-7b51-4697-ba9d-b793d0f45fb9",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Small Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "90501f67-4151-487c-b349-8a670ff5ccdd",
+   "brand": "Milan Peka\u0159",
+   "name": "Crystalline Volume 2 Vase",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "5b991f0d-f2d1-4d3f-af0e-6cd2be399eed|c3c1fcb4-5f61-4f4b-b911-f74693a4bc0c",
+  "confidence": "medium",
+  "similarity": 0.765,
+  "a": {
+   "id": "5b991f0d-f2d1-4d3f-af0e-6cd2be399eed",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Black",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "c3c1fcb4-5f61-4f4b-b911-f74693a4bc0c",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Nautilus Rug Red",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "4368c898-6841-468e-8230-2649a5374ad5|ac8cf5f4-b7fb-4343-a88b-3e36d57d622b",
+  "confidence": "medium",
+  "similarity": 0.765,
+  "a": {
+   "id": "4368c898-6841-468e-8230-2649a5374ad5",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Vitesse Rug Oval",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "ac8cf5f4-b7fb-4343-a88b-3e36d57d622b",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Vitesse Rug Square",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "2f5a52e0-10f2-4001-9b27-acef25b2253f|49ddfd70-f110-4307-a077-4881ad4927fa",
+  "confidence": "medium",
+  "similarity": 0.765,
+  "a": {
+   "id": "2f5a52e0-10f2-4001-9b27-acef25b2253f",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Pedestal Table",
+   "created": "2026-05-04 09:45:32.497042+00"
+  },
+  "b": {
+   "id": "49ddfd70-f110-4307-a077-4881ad4927fa",
+   "brand": "Le Berre Vevaud",
+   "name": "Mala Side Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "8b8c0d35-cfb9-4c93-a484-a0bda97164a1|fa759f08-76c4-4d91-9e1a-0dca0bf7c474",
+  "confidence": "medium",
+  "similarity": 0.765,
+  "a": {
+   "id": "8b8c0d35-cfb9-4c93-a484-a0bda97164a1",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Coffee Table",
+   "created": "2026-06-25 12:28:24.885614+00"
+  },
+  "b": {
+   "id": "fa759f08-76c4-4d91-9e1a-0dca0bf7c474",
+   "brand": "Matthieu Gicquel",
+   "name": "Yugen Side Table",
+   "created": "2026-06-25 12:46:13.37186+00"
+  }
+ },
+ {
+  "key": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254|3486dffb-f64e-4422-8dae-b54676b430da",
+  "confidence": "medium",
+  "similarity": 0.762,
+  "a": {
+   "id": "f0dc6a25-fb8a-455b-b7a7-ea000ba36254",
+   "brand": "Alinea",
+   "name": "Angelo M/H High Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "3486dffb-f64e-4422-8dae-b54676b430da",
+   "brand": "Alinea",
+   "name": "Angelo M/O Oval Table",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "e685d983-81da-4d1e-94a6-77168866fb57|7cae3a24-acfb-49af-adc2-5fe704b161a8",
+  "confidence": "medium",
+  "similarity": 0.762,
+  "a": {
+   "id": "e685d983-81da-4d1e-94a6-77168866fb57",
+   "brand": "Alinea",
+   "name": "Twin / Uphostered armchair ",
+   "created": "2026-06-17 02:40:38.845942+00"
+  },
+  "b": {
+   "id": "7cae3a24-acfb-49af-adc2-5fe704b161a8",
+   "brand": "Alinea",
+   "name": "Twin Wood Armchair ",
+   "created": "2026-06-17 02:39:43.562112+00"
+  }
+ },
+ {
+  "key": "16c309b9-2f15-4794-b56b-af3e48dbda7f|4048a363-bc07-448c-b3d6-9f507d8a921a",
+  "confidence": "medium",
+  "similarity": 0.762,
+  "a": {
+   "id": "16c309b9-2f15-4794-b56b-af3e48dbda7f",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Bench c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "4048a363-bc07-448c-b3d6-9f507d8a921a",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Ottoman c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "466098b6-c8de-4adc-bf5c-46ae827fddf5|4048a363-bc07-448c-b3d6-9f507d8a921a",
+  "confidence": "medium",
+  "similarity": 0.762,
+  "a": {
+   "id": "466098b6-c8de-4adc-bf5c-46ae827fddf5",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Chair c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "4048a363-bc07-448c-b3d6-9f507d8a921a",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Arcadia Ottoman c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "f014beb7-6a7d-4067-8c95-ec61c459b8bb|a831eb8f-ef54-4c1c-9e5b-eaf8da67a9ec",
+  "confidence": "medium",
+  "similarity": 0.76,
+  "a": {
+   "id": "f014beb7-6a7d-4067-8c95-ec61c459b8bb",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Olive",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "a831eb8f-ef54-4c1c-9e5b-eaf8da67a9ec",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Olga Rug Cropped Shadow Pink",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60|4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+  "confidence": "medium",
+  "similarity": 0.759,
+  "a": {
+   "id": "b2d173fe-cfb1-4ae1-ad33-6a1d4424ef60",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:39.187527+00"
+  },
+  "b": {
+   "id": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Sconce (Stone & Brass)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715|4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+  "confidence": "medium",
+  "similarity": 0.759,
+  "a": {
+   "id": "0e50ca16-3f34-4457-8e4f-f4ed9c6c6715",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb (Stone & Brass)Sconce",
+   "created": "2026-06-07 10:49:38.01008+00"
+  },
+  "b": {
+   "id": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Sconce (Stone & Brass)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3|ce0f1385-60df-458f-b7e7-3363a81978e6",
+  "confidence": "medium",
+  "similarity": 0.759,
+  "a": {
+   "id": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Sconce (Stone & Brass)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "ce0f1385-60df-458f-b7e7-3363a81978e6",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce",
+   "created": "2026-06-07 10:49:43.749409+00"
+  }
+ },
+ {
+  "key": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3|38b69570-45a5-478d-aeff-ffcc562948e9",
+  "confidence": "medium",
+  "similarity": 0.759,
+  "a": {
+   "id": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Sconce (Stone & Brass)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "38b69570-45a5-478d-aeff-ffcc562948e9",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass Sconce ",
+   "created": "2026-06-18 03:25:12.928359+00"
+  }
+ },
+ {
+  "key": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3|5a6060c3-9a81-40b3-956f-9308048ec562",
+  "confidence": "medium",
+  "similarity": 0.759,
+  "a": {
+   "id": "4f3541af-2b06-4e4e-a99f-55ed2cc994a3",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Sconce (Stone & Brass)",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "5a6060c3-9a81-40b3-956f-9308048ec562",
+   "brand": "Christopher Boots",
+   "name": "Sugar Bomb Stone & Brass) Sconce",
+   "created": "2026-06-07 10:49:41.250007+00"
+  }
+ },
+ {
+  "key": "2f6d6b80-2eca-411e-a994-79acda27b937|5dca8562-4e77-4e3f-93da-1658b92f6a98",
+  "confidence": "medium",
+  "similarity": 0.757,
+  "a": {
+   "id": "2f6d6b80-2eca-411e-a994-79acda27b937",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table",
+   "created": "2026-06-15 16:52:53.505678+00"
+  },
+  "b": {
+   "id": "5dca8562-4e77-4e3f-93da-1658b92f6a98",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table One Foot",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "2f6d6b80-2eca-411e-a994-79acda27b937|ab7ed5a5-b082-4c8c-a6f1-80d873efb475",
+  "confidence": "medium",
+  "similarity": 0.757,
+  "a": {
+   "id": "2f6d6b80-2eca-411e-a994-79acda27b937",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table",
+   "created": "2026-06-15 16:52:53.505678+00"
+  },
+  "b": {
+   "id": "ab7ed5a5-b082-4c8c-a6f1-80d873efb475",
+   "brand": "Eric Schmitt Studio",
+   "name": "Floating Table One Foot",
+   "created": "2026-03-19 08:52:05.378129+00"
+  }
+ },
+ {
+  "key": "292c8cef-1181-49d5-9c12-10bcd507cb88|a408bc2c-c2ef-4af5-85f3-f977b2b44be9",
+  "confidence": "medium",
+  "similarity": 0.757,
+  "a": {
+   "id": "292c8cef-1181-49d5-9c12-10bcd507cb88",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshell Side Table",
+   "created": "2026-05-22 09:21:32.487563+00"
+  },
+  "b": {
+   "id": "a408bc2c-c2ef-4af5-85f3-f977b2b44be9",
+   "brand": "Reda Amalou",
+   "name": "Dot Side Table",
+   "created": "2026-03-14 04:10:42.214584+00"
+  }
+ },
+ {
+  "key": "292c8cef-1181-49d5-9c12-10bcd507cb88|92666fe3-9743-4df1-b2df-d49bb488ee88",
+  "confidence": "medium",
+  "similarity": 0.757,
+  "a": {
+   "id": "292c8cef-1181-49d5-9c12-10bcd507cb88",
+   "brand": "Reda Amalou",
+   "name": "DOT Eggshell Side Table",
+   "created": "2026-05-22 09:21:32.487563+00"
+  },
+  "b": {
+   "id": "92666fe3-9743-4df1-b2df-d49bb488ee88",
+   "brand": "Reda Amalou",
+   "name": "DOT Side Table",
+   "created": "2026-05-22 09:21:27.086697+00"
+  }
+ },
+ {
+  "key": "fc55792b-0ad6-4744-ad09-f7426c867821|ea4920be-490c-4dff-b610-a305720284ce",
+  "confidence": "medium",
+  "similarity": 0.757,
+  "a": {
+   "id": "fc55792b-0ad6-4744-ad09-f7426c867821",
+   "brand": "Sebastian Herkner",
+   "name": "Savignyplatz Console",
+   "created": "2026-07-15 06:29:50.498234+00"
+  },
+  "b": {
+   "id": "ea4920be-490c-4dff-b610-a305720284ce",
+   "brand": "Sebastian Herkner",
+   "name": "Savignyplatz Desk",
+   "created": "2026-07-15 06:29:50.498234+00"
+  }
+ },
+ {
+  "key": "66562dee-d95a-4cf2-8aed-632a6b5ae095|96b93cab-812e-4ad5-88f5-67c706fe65a7",
+  "confidence": "medium",
+  "similarity": 0.756,
+  "a": {
+   "id": "66562dee-d95a-4cf2-8aed-632a6b5ae095",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Avondale Lamp c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  },
+  "b": {
+   "id": "96b93cab-812e-4ad5-88f5-67c706fe65a7",
+   "brand": "Paul L\u00e1szl\u00f3",
+   "name": "Avondale Sideboard c. 1950",
+   "created": "2026-04-30 13:40:55.345292+00"
+  }
+ },
+ {
+  "key": "692c133a-e446-455d-a5ca-ac1b5d1656b0|5ca5358f-a2e1-4a2d-80ab-c9edd83a07d7",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "692c133a-e446-455d-a5ca-ac1b5d1656b0",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Elisse Rug Blue",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "5ca5358f-a2e1-4a2d-80ab-c9edd83a07d7",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Elisse Rug Yellow",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "f91132b5-8ffb-4c29-a4e7-bef2d0918d12|ee7016b3-0ca0-4e50-ab1d-2b4b250559af",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "f91132b5-8ffb-4c29-a4e7-bef2d0918d12",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Peigne 2 Rug Burgundy",
+   "created": "2026-03-28 12:04:46.507626+00"
+  },
+  "b": {
+   "id": "ee7016b3-0ca0-4e50-ab1d-2b4b250559af",
+   "brand": "Atelier F\u00e9vrier",
+   "name": "Peigne 2 Rug Orange",
+   "created": "2026-03-28 12:04:46.507626+00"
+  }
+ },
+ {
+  "key": "7b323aac-a485-4086-a89d-6b7a1b9fbe51|389ba441-00b6-4318-b0d0-c06df9aa6d0c",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "7b323aac-a485-4086-a89d-6b7a1b9fbe51",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Line Coffee table",
+   "created": "2026-05-02 11:52:07.646535+00"
+  },
+  "b": {
+   "id": "389ba441-00b6-4318-b0d0-c06df9aa6d0c",
+   "brand": "Bieke Casteleyn",
+   "name": "Out Of Line Dining table",
+   "created": "2026-05-03 10:35:15.640051+00"
+  }
+ },
+ {
+  "key": "bc4443a3-a3d6-416c-86b7-3297272e61ce|4e49a503-9da3-4607-9952-8d0fce2ebcae",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "bc4443a3-a3d6-416c-86b7-3297272e61ce",
+   "brand": "Bina Baitel",
+   "name": "Naia Sofa",
+   "created": "2026-05-21 05:57:24.521968+00"
+  },
+  "b": {
+   "id": "4e49a503-9da3-4607-9952-8d0fce2ebcae",
+   "brand": "Bina Baitel",
+   "name": "Naia Sp",
+   "created": "2026-05-21 05:57:23.09123+00"
+  }
+ },
+ {
+  "key": "00c298f8-ef62-44cb-97b1-f3a1c47fc8a3|d54b7d66-f51a-493f-b594-db371e714d73",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "00c298f8-ef62-44cb-97b1-f3a1c47fc8a3",
+   "brand": "Bina Baitel",
+   "name": "ZigZag Bench",
+   "created": "2026-05-21 05:27:59.593114+00"
+  },
+  "b": {
+   "id": "d54b7d66-f51a-493f-b594-db371e714d73",
+   "brand": "Bina Baitel",
+   "name": "ZigZag Bench & Ottoman",
+   "created": "2026-05-21 05:28:02.940884+00"
+  }
+ },
+ {
+  "key": "bee81139-fbfb-4a0e-b24a-962dc9902d87|d6094740-c916-4c7f-9f76-08883bc0c066",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "bee81139-fbfb-4a0e-b24a-962dc9902d87",
+   "brand": "Kerstens",
+   "name": "Yoma CLW Cabinet",
+   "created": "2026-05-31 11:13:41.064876+00"
+  },
+  "b": {
+   "id": "d6094740-c916-4c7f-9f76-08883bc0c066",
+   "brand": "Kerstens",
+   "name": "Yoma CLW Console",
+   "created": "2026-05-31 11:16:55.398379+00"
+  }
+ },
+ {
+  "key": "2f11ec83-77ce-4724-82c1-d068ab697c10|3aa2cb53-864b-45e6-a898-8c9ae73b2f8f",
+  "confidence": "medium",
+  "similarity": 0.75,
+  "a": {
+   "id": "2f11ec83-77ce-4724-82c1-d068ab697c10",
+   "brand": "Sebastian Herkner",
+   "name": "Mainkai 3 Table Lamp",
+   "created": "2026-07-15 06:29:50.498234+00"
+  },
+  "b": {
+   "id": "3aa2cb53-864b-45e6-a898-8c9ae73b2f8f",
+   "brand": "Sebastian Herkner",
+   "name": "Mainkai 5 Floor Lamp",
+   "created": "2026-07-15 06:29:50.498234+00"
+  }
+ }
+]
