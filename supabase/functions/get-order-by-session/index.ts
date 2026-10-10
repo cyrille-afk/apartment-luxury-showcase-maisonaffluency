@@ -20,17 +20,37 @@ serve(async (req) => {
 
   try {
     let sessionId = "";
+    let emailProof = "";
 
     if (req.method === "GET") {
       const url = new URL(req.url);
       sessionId = url.searchParams.get("session_id")?.trim() ?? "";
+      emailProof = url.searchParams.get("email")?.trim().toLowerCase() ?? "";
     } else {
       const body = await req.json().catch(() => ({}));
       sessionId = typeof body?.session_id === "string" ? body.session_id.trim() : "";
+      emailProof = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
     }
 
     if (!SESSION_ID_PATTERN.test(sessionId)) {
       return json({ error: "Invalid session identifier." }, 400);
+    }
+
+    // The session id alone is no longer enough: require a signed-in caller
+    // whose email matches the order, or a guest who also supplies the order
+    // email address as proof of ownership.
+    let callerEmail: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const supabaseAnon = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      );
+      const { data: claimsData } = await supabaseAnon.auth.getClaims(
+        authHeader.replace("Bearer ", ""),
+      );
+      const claims = claimsData?.claims as Record<string, unknown> | undefined;
+      if (typeof claims?.email === "string") callerEmail = claims.email.toLowerCase();
     }
 
     const supabaseAdmin = createClient(
