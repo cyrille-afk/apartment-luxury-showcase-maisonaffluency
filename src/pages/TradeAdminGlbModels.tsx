@@ -168,9 +168,27 @@ const TradeAdminGlbModels: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
             {/* LEFT: search + list */}
             <div>
-              <label className="block font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
-                {search.trim() ? "Search results" : "Products with a 3D model"}
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                  {search.trim() ? "Search results" : browseMode === "all" ? "All products A–Z" : "Products with a 3D model"}
+                </label>
+                {!search.trim() && (
+                  <div className="flex gap-1 font-body text-[10px] uppercase tracking-[0.12em]">
+                    <button
+                      onClick={() => setBrowseMode("with3d")}
+                      className={`px-2 py-1 rounded ${browseMode === "with3d" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      With 3D
+                    </button>
+                    <button
+                      onClick={() => setBrowseMode("all")}
+                      className={`px-2 py-1 rounded ${browseMode === "all" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      All A–Z
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="relative mb-3">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
