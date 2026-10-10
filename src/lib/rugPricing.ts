@@ -96,3 +96,17 @@ export function looksLikeDimension(text: string | null | undefined): boolean {
       return false;
     });
 }
+
+/**
+ * Price a per-sqm rug for a single listing card (e.g. a room-photo hotspot):
+ * rate × the record's own dimensions. Returns null when the item isn't a
+ * per-sqm rug or the size can't be parsed, so callers keep their flat price.
+ */
+export function rugCardPriceCents(p: {
+  category?: string | null;
+  price_per_sqm_cents?: number | null;
+  dimensions?: string | null;
+}): number | null {
+  if (!isRugCategory(p.category) || !p.price_per_sqm_cents || p.price_per_sqm_cents <= 0) return null;
+  return priceRugVariantFromLabel(p.dimensions, p.price_per_sqm_cents);
+}

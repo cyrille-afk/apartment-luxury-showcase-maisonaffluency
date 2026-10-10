@@ -10,6 +10,7 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { rugCardPriceCents } from "@/lib/rugPricing";
 
 /* ── Price helpers ── */
 interface TradePrice { cents: number; currency: string; price_unit?: string; from?: boolean; }
@@ -150,11 +151,16 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     const fetchPrices = async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, size_variants")
+        .select("product_name, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, size_variants, category, price_per_sqm_cents, dimensions")
         .eq("is_hidden", false);
       if (data) {
         const entries = data
           .map(p => {
+            // Per-m² rugs: price = rate × this piece's own size, never a stale flat figure.
+            const rugCents = rugCardPriceCents(p as any);
+            if (rugCents) {
+              return { name: p.product_name, cents: rugCents, currency: p.currency, price_unit: "per_piece", from: false };
+            }
             // trade_price_cents stores RRP; variants may price higher, so lowest price shows as "From".
             const variantCents = (Array.isArray(p.size_variants) ? p.size_variants : [])
               .map((v: any) => Number(v?.price_cents) || 0).filter((c: number) => c > 0);
