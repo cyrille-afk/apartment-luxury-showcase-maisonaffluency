@@ -95,9 +95,9 @@ serve(async (req: Request) => {
             <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:14px;color:#2d3748;">${escapeHtml(item.title)}</td>
             <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;">${escapeHtml(CATEGORY_LABELS[item.category] || item.category)}</td>
             <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:13px;">
-              <span style="background:#edf2f7;color:#4a5568;padding:2px 8px;border-radius:12px;font-size:12px;">${STATUS_LABELS[item.status] || item.status}</span>
+              <span style="background:#edf2f7;color:#4a5568;padding:2px 8px;border-radius:12px;font-size:12px;">${escapeHtml(STATUS_LABELS[item.status] || item.status)}</span>
             </td>
-            <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;">${item.target_date}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;">${escapeHtml(item.target_date)}</td>
             <td style="padding:10px 12px;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:600;color:${urgency};">${daysOverdue}d</td>
           </tr>`;
       })
