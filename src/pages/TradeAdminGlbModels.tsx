@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload } from "lucide-react";
+import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { GlbVariantManager } from "@/components/trade/admin/GlbVariantManager";
+import { GlbBulkUpload } from "@/components/trade/admin/GlbBulkUpload";
 
 interface ProductRow {
   id: string;
@@ -27,6 +28,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [results, setResults] = useState<ProductRow[]>([]);
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
+  const [bulkMode, setBulkMode] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,7 +36,14 @@ const TradeAdminGlbModels: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setSearch("");
     setSelected(null);
+    setBulkMode(false);
     setTimeout(() => searchInputRef.current?.focus(), 350);
+  };
+
+  const startBulkUpload = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSelected(null);
+    setBulkMode(true);
   };
 
   // Manager section state
@@ -152,12 +161,24 @@ const TradeAdminGlbModels: React.FC = () => {
             <h1 className="font-display text-3xl flex items-center gap-3">
               <Box size={22} /> 3D Models
             </h1>
-            <button
-              onClick={startUpload}
-              className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
-            >
-              <Upload size={15} /> Upload a 3D model
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={startUpload}
+                className="inline-flex items-center gap-2 bg-foreground text-background font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md hover:opacity-90 transition-opacity"
+              >
+                <Upload size={15} /> Upload a 3D model
+              </button>
+              <button
+                onClick={startBulkUpload}
+                className={`inline-flex items-center gap-2 font-body text-[12px] uppercase tracking-[0.14em] px-5 py-3 rounded-md transition-colors ${
+                  bulkMode
+                    ? "bg-foreground text-background"
+                    : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
+                }`}
+              >
+                <Layers size={15} /> Bulk upload
+              </button>
+            </div>
           </div>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
             Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
@@ -220,7 +241,7 @@ const TradeAdminGlbModels: React.FC = () => {
                 {list.map((row) => (
                   <button
                     key={row.id}
-                    onClick={() => setSelected(row)}
+                    onClick={() => { setSelected(row); setBulkMode(false); }}
                     className={`w-full text-left flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors ${
                       selected?.id === row.id ? "bg-muted/60" : ""
                     }`}
@@ -244,9 +265,11 @@ const TradeAdminGlbModels: React.FC = () => {
 
             {/* RIGHT: upload + preview */}
             <div>
-              {!selected ? (
+              {bulkMode ? (
+                <GlbBulkUpload onChange={() => setReloadKey((k) => k + 1)} />
+              ) : !selected ? (
                 <div className="border border-dashed border-border rounded-md p-10 text-center text-muted-foreground font-body text-sm">
-                  Select a product on the left to upload or replace its 3D model.
+                  Select a product on the left to upload or replace its 3D model — or use Bulk upload to add several products for one designer at once.
                 </div>
               ) : (
                 <GlbVariantManager
@@ -376,6 +399,7 @@ const TradeAdminGlbModels: React.FC = () => {
                         <button
                           onClick={() => {
                             setSelected(row);
+                            setBulkMode(false);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                           className="block w-full text-left"
