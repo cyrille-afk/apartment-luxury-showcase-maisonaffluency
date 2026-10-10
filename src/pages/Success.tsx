@@ -67,7 +67,7 @@ export default function Success() {
 
     let cancelled = false;
 
-    async function fetchOrder() {
+    async function fetchOrder(emailProof?: string) {
       // 1) Reconcile ad-hoc Sales Funnel payments directly with Stripe so the
       //    pipeline card flips immediately — no waiting on webhook delivery.
       try {
