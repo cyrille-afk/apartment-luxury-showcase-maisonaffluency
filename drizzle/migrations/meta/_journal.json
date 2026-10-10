@@ -1086,6 +1086,13 @@
       "when": 1791518578048,
       "tag": "0154_video_job_credit_source",
       "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1791602088797,
+      "tag": "0155_trade_signup_continuation_token",
+      "breakpoints": true
     }
   ]
 }

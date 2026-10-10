@@ -10262,6 +10262,7 @@ export type Database = {
         Row: {
           business_reg_number: string | null
           company_name: string | null
+          continuation_token_hash: string | null
           created_at: string
           credential_document_path: string | null
           email: string
@@ -10279,6 +10280,7 @@ export type Database = {
         Insert: {
           business_reg_number?: string | null
           company_name?: string | null
+          continuation_token_hash?: string | null
           created_at?: string
           credential_document_path?: string | null
           email: string
@@ -10296,6 +10298,7 @@ export type Database = {
         Update: {
           business_reg_number?: string | null
           company_name?: string | null
+          continuation_token_hash?: string | null
           created_at?: string
           credential_document_path?: string | null
           email?: string

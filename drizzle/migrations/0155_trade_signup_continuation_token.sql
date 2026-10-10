@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_program_signups ADD COLUMN IF NOT EXISTS continuation_token_hash text;
