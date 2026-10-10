@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload } from "lucide-react";
+import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { GlbVariantManager } from "@/components/trade/admin/GlbVariantManager";
+import { GlbBulkUpload } from "@/components/trade/admin/GlbBulkUpload";
 
 interface ProductRow {
   id: string;
@@ -27,6 +28,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [results, setResults] = useState<ProductRow[]>([]);
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
+  const [bulkMode, setBulkMode] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,7 +36,14 @@ const TradeAdminGlbModels: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setSearch("");
     setSelected(null);
+    setBulkMode(false);
     setTimeout(() => searchInputRef.current?.focus(), 350);
+  };
+
+  const startBulkUpload = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSelected(null);
+    setBulkMode(true);
   };
 
   // Manager section state
