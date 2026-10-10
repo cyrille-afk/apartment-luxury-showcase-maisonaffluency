@@ -3,12 +3,12 @@ import { Upload, Loader2, Trash2, ExternalLink, Star, Plus, X } from "lucide-rea
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { classifyObjBundle, convertObjBundleToGlb, convert3dsToGlb } from "@/lib/objToGlb";
+import { prepareGlbFile, uploadGlbForProduct, GLB_MAX_MB } from "@/lib/glbUpload";
 import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
 import GlbMaterialRolesEditor from "@/components/trade/admin/GlbMaterialRolesEditor";
 
 
-const MAX_MB = 50;
+const MAX_MB = GLB_MAX_MB;
 
 type MaterialRole = "fabric" | "base" | "top" | "ignore";
 
