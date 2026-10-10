@@ -126,6 +126,7 @@ Deno.serve(async (req) => {
   }
 
   let signupId = existing?.id as string | undefined
+  let continuationToken: string | null = null
   // Unauthenticated callers can't prove they own this email, so an existing
   // application is never overwritten: only empty fields are filled in and the
   // step can only move forward.
@@ -387,5 +388,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, id: signupId, emailSent })
+  return json({ ok: true, id: signupId, emailSent, ...(continuationToken ? { continuationToken } : {}) })
 })
