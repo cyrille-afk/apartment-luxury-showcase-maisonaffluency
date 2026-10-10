@@ -231,6 +231,7 @@ export default function Success() {
                     const email = emailInput.trim().toLowerCase();
                     if (!email || !sessionId) return;
                     setVerifying(true);
+                    setError(null);
                     try {
                       const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
                         body: { session_id: sessionId, email },
