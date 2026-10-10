@@ -74,6 +74,14 @@ serve(async (req) => {
       return json({ error: "Order not found." }, 404);
     }
 
+    const orderEmail = String(data.customer_email ?? "").toLowerCase();
+    const authorized =
+      (callerEmail && callerEmail === orderEmail) ||
+      (emailProof && emailProof === orderEmail);
+    if (!authorized) {
+      return json({ error: "Please sign in with the email used for this order, or provide it to view the order." }, 403);
+    }
+
     // Mask the email: the session id alone shouldn't reveal full contact details.
     const masked = data.customer_email
       ? String(data.customer_email).replace(/^(.)(.*)(@.*)$/, (_m, a, b, c) => a + "*".repeat(Math.min(6, Math.max(1, b.length))) + c)
