@@ -1618,17 +1618,6 @@ const TradeProductPage: React.FC = () => {
       || options.find((o) => norm(o).includes(nw))
       || null;
   };
-  const picturedVariant = (!activeVariant && !dualSelectionMade && isDualAxis)
-    ? (() => {
-        const b = matchAxisOption(displayedFinishes.base, baseOptions);
-        const t = matchAxisOption(displayedFinishes.top, topOptions);
-        if (!b && !t) return null;
-        return variantsList.find((v: any) => matchesDual(v, b, t, null)) ?? null;
-      })()
-    : null;
-  const picturedVariantCents = picturedVariant && typeof picturedVariant.price_cents === "number" && picturedVariant.price_cents > 0
-    ? picturedVariant.price_cents
-    : null;
   // Only disable an axis option when NO variant exists for it given the size
   // selection. We intentionally do NOT cross-disable base ↔ top: picking the
   // other base should be allowed and will auto-swap the top to a compatible
