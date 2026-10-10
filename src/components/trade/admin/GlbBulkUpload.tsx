@@ -18,6 +18,8 @@ interface BulkFile {
   /** Companion files attached to an .obj entry (.mtl + textures). */
   companions: File[];
   productId: string | null;
+  /** Variant label — distinct labels save as separate selectable 3D models. */
+  label: string;
   status: FileStatus;
   progress: number;
   message?: string;
@@ -173,6 +175,7 @@ export function GlbBulkUpload({ onChange }: Props) {
       file: f,
       companions: [],
       productId: bestProductMatch(f.name),
+      label: guessVariantLabel(f.name),
       status: "pending" as FileStatus,
       progress: 0,
     }));
@@ -253,6 +256,15 @@ export function GlbBulkUpload({ onChange }: Props) {
       toast.error("Assign a product to at least one file first.");
       return;
     }
+    const seen = new Set<string>();
+    for (const f of queue) {
+      const k = `${f.productId}::${(f.label.trim() || "Default").toLowerCase()}`;
+      if (seen.has(k)) {
+        toast.error(`Two files share the label "${f.label.trim() || "Default"}" for the same product — give each dimension its own label.`);
+        return;
+      }
+      seen.add(k);
+    }
     setRunning(true);
     let done = 0;
     let failed = 0;
@@ -271,7 +283,7 @@ export function GlbBulkUpload({ onChange }: Props) {
           .eq("product_id", item.productId!);
         await uploadGlbForProduct({
           productId: item.productId!,
-          label: "Default",
+          label: item.label.trim() || "Default",
           prepared,
           existingVariants: (vrows as any[]) || [],
           onProgress: (pct) => setFile(item.key, { progress: pct }),
@@ -416,6 +428,14 @@ export function GlbBulkUpload({ onChange }: Props) {
                         <option key={p.id} value={p.id}>{p.product_name}</option>
                       ))}
                     </select>
+                    <input
+                      value={f.label}
+                      onChange={(e) => setFile(f.key, { label: e.target.value })}
+                      disabled={running || f.status === "done"}
+                      placeholder="Variant label"
+                      className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-none focus:border-foreground/40"
+                      aria-label="Variant label"
+                    />
                     {f.status === "done" ? (
                       <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
                     ) : f.status === "error" ? (
