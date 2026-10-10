@@ -555,18 +555,18 @@ const handler = async (req: Request): Promise<Response> => {
       if (notifyErr) console.error(`Notification enqueue failed for ${adminEmail}:`, notifyErr);
     }
 
-    // 2. Confirmation → visitor. Trade applications receive the dedicated
-    // Trade Program receipt; product and contact inquiries keep the standard reply.
-    const { error: confirmErr } = await supabase.functions.invoke(
+    // 2. Visitor emails: product/contact inquiries get NO confirmation email —
+    // a public form must not be usable to deliver caller-written content to an
+    // arbitrary address. Trade applications still receive the dedicated
+    // fixed-content Trade Program receipt (no caller-controlled message body).
+    const { error: confirmErr } = !isTradeApplication ? { error: null } : await supabase.functions.invoke(
       "send-transactional-email",
       {
         body: {
-          templateName: isTradeApplication ? "trade-program-invitation" : "inquiry-confirmation",
+          templateName: "trade-program-invitation",
           recipientEmail: email,
-          idempotencyKey: `${isTradeApplication ? "trade-program-application" : "inquiry-confirm"}-${idStem}`,
-          templateData: isTradeApplication
-            ? { firstName: name.trim().split(/\s+/)[0], name, email, companyName }
-            : { name, message: resolvedMessage },
+          idempotencyKey: `trade-program-application-${idStem}`,
+          templateData: { firstName: name.trim().split(/\s+/)[0], name, email, companyName },
         },
       }
     );

@@ -17,6 +17,11 @@ const json = (body: unknown, status = 200) =>
   })
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+const sha256Hex = async (value: string) => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 const PHONE_RE = /^\+?[0-9 ()-]+$/
 
 Deno.serve(async (req) => {
@@ -87,9 +92,23 @@ Deno.serve(async (req) => {
   // wildcard characters (% / _) in a crafted address match other firms.
   const { data: existing } = await supabase
     .from('trade_program_signups')
-    .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path')
+    .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path, continuation_token_hash')
     .eq('email', email)
     .maybeSingle()
+
+  // An existing application can only be continued by the browser that started
+  // it: the caller must present the continuation token issued at insert time.
+  // Without it we pretend the application was simply received — no updates,
+  // no document attachment, no notifications — so knowing someone's email is
+  // not enough to alter their application.
+  if (existing) {
+    const presented = typeof body.continuationToken === 'string' ? body.continuationToken : ''
+    const presentedHash = presented.length >= 32 ? await sha256Hex(presented) : null
+    const storedHash = (existing as Record<string, unknown>).continuation_token_hash as string | null
+    if (!storedHash || !presentedHash || presentedHash !== storedHash) {
+      return json({ ok: true, alreadyReceived: true })
+    }
+  }
 
   const payload: Record<string, unknown> = { email, step }
   if (step === 2 || step === 3) {
@@ -107,6 +126,7 @@ Deno.serve(async (req) => {
   }
 
   let signupId = existing?.id as string | undefined
+  let continuationToken: string | null = null
   // Unauthenticated callers can't prove they own this email, so an existing
   // application is never overwritten: only empty fields are filled in and the
   // step can only move forward.
@@ -132,6 +152,10 @@ Deno.serve(async (req) => {
       return json({ error: 'Could not save your details' }, 500)
     }
   } else {
+    // New application: issue the continuation token the browser must present
+    // for any later submission against this email.
+    continuationToken = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, '')
+    payload.continuation_token_hash = await sha256Hex(continuationToken)
     const { data, error } = await supabase
       .from('trade_program_signups')
       .insert(payload)
@@ -364,5 +388,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, id: signupId, emailSent })
+  return json({ ok: true, id: signupId, emailSent, ...(continuationToken ? { continuationToken } : {}) })
 })

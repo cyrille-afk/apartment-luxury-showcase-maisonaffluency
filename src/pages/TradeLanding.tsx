@@ -470,8 +470,12 @@ const TradeLanding = () => {
         data: dataUrl.split(",")[1] || "",
       };
     }
-    const { error } = await supabase.functions.invoke("trade-program-signup", {
-      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName: (searchParams.get("name") || "").slice(0, 120) || undefined, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken },
+    // A previously started application can only be continued with the token
+    // issued to this browser at first submission.
+    const tokenKey = `ma_trade_signup_token_${email.trim().toLowerCase()}`;
+    const continuationToken = (() => { try { return localStorage.getItem(tokenKey) || undefined; } catch { return undefined; } })();
+    const { data: signupData, error } = await supabase.functions.invoke("trade-program-signup", {
+      body: { email, completeApplication: true, source: (searchParams.get("source") || "").slice(0, 80) || undefined, intent: (searchParams.get("intent") || "").slice(0, 80) || undefined, contactName: (searchParams.get("name") || "").slice(0, 120) || undefined, companyName, phoneNumber, websiteUrl, businessRegNumber, document, "cf-turnstile-response": turnstileToken, ...(continuationToken ? { continuationToken } : {}) },
     });
     setJoinLoading(false);
     setTurnstileToken("");
@@ -479,6 +483,8 @@ const TradeLanding = () => {
       setJoinError("We couldn't submit your application. Please try again.");
       return;
     }
+    const issued = (signupData as { continuationToken?: string } | null)?.continuationToken;
+    if (issued) { try { localStorage.setItem(tokenKey, issued); } catch { /* noop */ } }
     setApplicationSubmitted(true);
   };
 
