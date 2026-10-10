@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Refine spec-sheet workspace: official logo, linen-white/charcoal styling, and high-resolution inline cover/specification pages; verify signed-in display.
 - [x] Redesign spec-sheet workspace with dark canvas, download/print/share and fallback; six tests pass, signed-in downloads/shares/fallback and full-height frame verified; native PDF rendering and OS print dialog unavailable in headless browser.
 - [x] Restore standalone production lead time in product Presentation Mode; Geo and Beam show 12 weeks with no net trade prices or tearsheet actions, verified live.
 - [x] Give designer pages distinct Studio catalogue and Presentation editorial layouts; verify both modes, product links and client-safe lightboxes.
