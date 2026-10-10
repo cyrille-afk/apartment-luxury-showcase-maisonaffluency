@@ -221,6 +221,9 @@ export default function Success() {
                 <p className="font-body text-sm text-muted-foreground">
                   For your privacy, please confirm the email address used at checkout to view this order.
                 </p>
+                {error ? (
+                  <p className="mt-3 font-body text-sm text-destructive">{error}</p>
+                ) : null}
                 <form
                   className="mt-5 flex flex-col sm:flex-row gap-3 justify-center"
                   onSubmit={async (e) => {
