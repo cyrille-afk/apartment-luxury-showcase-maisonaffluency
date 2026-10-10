@@ -1745,9 +1745,9 @@ const TradeProductPage: React.FC = () => {
       ? catalogueRrpCents
       : (activeVariant
         ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : catalogueRrpCents)
-        : (dualSelectionUnpriced ? catalogueRrpCents : (partialDualMinCents ?? minVariantCents))))
+        : (dualSelectionUnpriced ? catalogueRrpCents : (picturedVariantCents ?? partialDualMinCents ?? minVariantCents))))
     : catalogueRrpCents;
-  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
+  const isFromPrice = hasVariants && !variantsCarryNoPrice && !activeVariant && !dualSelectionUnpriced && picturedVariantCents == null && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
