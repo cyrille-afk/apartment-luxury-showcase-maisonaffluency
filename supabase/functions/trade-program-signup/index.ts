@@ -17,6 +17,11 @@ const json = (body: unknown, status = 200) =>
   })
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+const sha256Hex = async (value: string) => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 const PHONE_RE = /^\+?[0-9 ()-]+$/
 
 Deno.serve(async (req) => {
