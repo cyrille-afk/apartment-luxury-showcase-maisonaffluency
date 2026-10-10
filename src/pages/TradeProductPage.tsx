@@ -1606,6 +1606,29 @@ const TradeProductPage: React.FC = () => {
     (b == null || (v.base || "").trim() === b) &&
     (t == null || (v.top || "").trim() === t) &&
     (s == null || (v.label || "").trim() === s);
+  // Pictured finishes: when the user hasn't picked anything, the finish
+  // selector highlights the finishes shown in the current gallery photo.
+  // Price the page for THAT pairing instead of the cheapest "From" rate.
+  const matchAxisOption = (name: string | null, options: string[]): string | null => {
+    if (!name) return null;
+    const norm = (s: string) => s.trim().toLowerCase();
+    const nw = norm(name);
+    return options.find((o) => norm(o) === nw)
+      || options.find((o) => nw.includes(norm(o)))
+      || options.find((o) => norm(o).includes(nw))
+      || null;
+  };
+  const picturedVariant = (!activeVariant && !dualSelectionMade && isDualAxis)
+    ? (() => {
+        const b = matchAxisOption(displayedFinishes.base, baseOptions);
+        const t = matchAxisOption(displayedFinishes.top, topOptions);
+        if (!b && !t) return null;
+        return variantsList.find((v: any) => matchesDual(v, b, t, null)) ?? null;
+      })()
+    : null;
+  const picturedVariantCents = picturedVariant && typeof picturedVariant.price_cents === "number" && picturedVariant.price_cents > 0
+    ? picturedVariant.price_cents
+    : null;
   // Only disable an axis option when NO variant exists for it given the size
   // selection. We intentionally do NOT cross-disable base ↔ top: picking the
   // other base should be allowed and will auto-swap the top to a compatible
