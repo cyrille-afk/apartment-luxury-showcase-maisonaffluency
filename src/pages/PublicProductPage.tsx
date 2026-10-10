@@ -2922,9 +2922,15 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
                   </VariantSelectorsProvider>
 
+                  {presentation && product.lead_time?.trim() && (
+                    <p className="font-body text-sm leading-relaxed text-muted-foreground">
+                      Production lead time: {formatHandcrafted(null, product.lead_time)}
+                    </p>
+                  )}
+
                   {!isTradeVerifiedView && (() => {
-                    // Lead time intentionally excluded here — it lives at the
-                    // top of the action block so it binds to the purchase flow.
+                    // Commerce displays lead time in its action block; Presentation
+                    // keeps it as a standalone detail above, without trade actions.
                     const handcrafted = formatHandcrafted(product.origin, null);
                     if (!handcrafted) return null;
                     return (
