@@ -83,10 +83,12 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, serviceKey)
 
+  // Exact match only: emails are stored lowercased, and ILIKE would let
+  // wildcard characters (% / _) in a crafted address match other firms.
   const { data: existing } = await supabase
     .from('trade_program_signups')
     .select('id, invite_email_sent_at, step, company_name, phone_number, website_url, portfolio_reference, business_reg_number, credential_document_path')
-    .ilike('email', email)
+    .eq('email', email)
     .maybeSingle()
 
   const payload: Record<string, unknown> = { email, step }
