@@ -55,6 +55,18 @@ export default function Success() {
   const [error, setError] = useState<string | null>(null);
   // Guests must prove the order email before details are shown.
   const [needsEmail, setNeedsEmail] = useState(false);
+
+  // supabase-js gives a generic message for non-2xx edge function responses;
+  // the real error text lives in the response body on error.context.
+  async function edgeFnMessage(fnError: any): Promise<string> {
+    try {
+      const body = await fnError?.context?.json();
+      if (body?.error) return String(body.error);
+    } catch {
+      // fall through
+    }
+    return fnError?.message || "Unable to load order details.";
+  }
   const [emailInput, setEmailInput] = useState("");
   const [verifying, setVerifying] = useState(false);
 
@@ -94,7 +106,7 @@ export default function Success() {
 
         if (cancelled) return;
 
-        if (fnError) throw fnError;
+        if (fnError) throw new Error(await edgeFnMessage(fnError));
         if ((data as any)?.error) throw new Error((data as any).error);
         if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
 
@@ -209,6 +221,9 @@ export default function Success() {
                 <p className="font-body text-sm text-muted-foreground">
                   For your privacy, please confirm the email address used at checkout to view this order.
                 </p>
+                {error ? (
+                  <p className="mt-3 font-body text-sm text-destructive">{error}</p>
+                ) : null}
                 <form
                   className="mt-5 flex flex-col sm:flex-row gap-3 justify-center"
                   onSubmit={async (e) => {
@@ -216,18 +231,19 @@ export default function Success() {
                     const email = emailInput.trim().toLowerCase();
                     if (!email || !sessionId) return;
                     setVerifying(true);
+                    setError(null);
                     try {
                       const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
                         body: { session_id: sessionId, email },
                       });
-                      if (fnError) throw fnError;
+                      if (fnError) throw new Error(await edgeFnMessage(fnError));
                       if ((data as any)?.error) throw new Error((data as any).error);
                       if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
                       setOrder((data as any).order as OrderDetails);
                       setNeedsEmail(false);
                     } catch {
+                      // Keep the form visible so the guest can try again.
                       setError("That email doesn't match this order. Please try the address used at checkout.");
-                      setNeedsEmail(false);
                     } finally {
                       setVerifying(false);
                     }
