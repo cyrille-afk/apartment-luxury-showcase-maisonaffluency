@@ -85,8 +85,8 @@ export default function SpecSheetWorkspace({ brand, product, sheetLabel, sheetIn
   return <div className="spec-sheet-workspace flex min-h-[100dvh] flex-col bg-background text-foreground">
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border/20 bg-background px-5 py-4 md:px-10">
       <Link to="/trade/the-collection" className="flex items-center gap-3" aria-label="Maison Affluency — The Collection">
-        <span className="font-display text-2xl text-foreground" aria-hidden="true">MA</span>
-        <span className="font-display text-[13px] uppercase tracking-[0.18em]">Maison Affluency<span className="mt-1 block font-body text-[9px] text-muted-foreground tracking-[0.16em]">DOCUMENT ATELIER</span></span>
+        <img src="https://res.cloudinary.com/dif1oamtj/image/upload/affluency-logo-icon_mpchum" alt="Maison Affluency" className="h-14 w-14 object-contain" />
+        <span className="font-brand text-[13px] uppercase tracking-[0.18em]">Maison Affluency<span className="mt-1 block font-body text-[9px] text-muted-foreground tracking-[0.16em]">DOCUMENT ATELIER</span></span>
       </Link>
       <div className="flex flex-wrap items-center gap-1.5" aria-label="Document actions">
         <Button variant="outline" size="sm" title="Download Document" disabled={!ready || busy} onClick={download} className="gap-2 text-xs">{busy ? <Loader2 className="animate-spin" /> : <Download />}<span className="hidden sm:inline">Download Document</span></Button>
