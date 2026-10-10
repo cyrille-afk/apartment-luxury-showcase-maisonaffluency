@@ -570,6 +570,9 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+  // Finishes the selector currently highlights (pictured in the gallery
+  // photo). Used to price the pictured pairing when the user hasn't picked.
+  const [displayedFinishes, setDisplayedFinishes] = useState<{ base: string | null; top: string | null }>({ base: null, top: null });
 
   // Mirror the dashboard's finish selection into the shared container engine.
   useEffect(() => {
