@@ -21,9 +21,11 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url)
   const destination = url.searchParams.get('u')
-  const template = url.searchParams.get('t') ?? 'unknown'
-  const linkId = url.searchParams.get('l') ?? 'unknown'
-  const recipient = url.searchParams.get('r') ?? null
+  // Public endpoint: clamp caller-supplied labels so they can't flood logs.
+  const label = (v: string | null) => (v ?? 'unknown').replace(/[^a-z0-9_\-.]/gi, '').slice(0, 80) || 'unknown'
+  const template = label(url.searchParams.get('t'))
+  const linkId = label(url.searchParams.get('l'))
+  const rawRecipient = (url.searchParams.get('r') ?? '').trim().toLowerCase().slice(0, 254)
 
   // Validate destination — must be a maisonaffluency.com URL to prevent open redirect abuse
   let safeDestination: string | null = null
@@ -44,6 +46,14 @@ Deno.serve(async (req) => {
   // Fire-and-forget log; never block redirect on logging failure
   try {
     const supabase = createClient(supabaseUrl, serviceKey)
+    // Only attribute the click to a recipient we actually sent this template
+    // to — a forged ?r= can't fabricate engagement for an arbitrary address.
+    let recipient: string | null = null
+    if (rawRecipient && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawRecipient)) {
+      const { data: sent } = await supabase.from('email_send_log')
+        .select('id').eq('template_name', template).eq('recipient_email', rawRecipient).limit(1).maybeSingle()
+      if (sent) recipient = rawRecipient
+    }
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? ''
     const ipHash = ip ? await hashIp(ip) : null
     await supabase.from('email_click_log').insert({

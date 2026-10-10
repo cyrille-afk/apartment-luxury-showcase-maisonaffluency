@@ -514,14 +514,8 @@ const handler = async (req: Request): Promise<Response> => {
             { trade_account_id: acctId, status: "pending" },
             { onConflict: "trade_account_id", ignoreDuplicates: true },
           );
-          const task = fetch(`${SUPABASE_URL}/functions/v1/analyze-studio-aesthetic`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ trade_account_id: acctId }),
-          }).then((r) => r.text()).catch((e) => console.error("aesthetic trigger failed", e));
-          // deno-lint-ignore no-explicit-any
-          const rt = (globalThis as any).EdgeRuntime;
-          if (rt?.waitUntil) rt.waitUntil(task);
+          // Paid website analysis is admin-triggered from the applications
+          // queue — never started by a public form submission.
         }
       } catch (e) {
         console.error("Inbound Applications sync failed", e);
