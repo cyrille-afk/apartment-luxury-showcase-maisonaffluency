@@ -89,7 +89,7 @@ export default function Success() {
       // 2) Standard shop order lookup.
       try {
         const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
-          body: { session_id: sessionId },
+          body: { session_id: sessionId, ...(emailProof ? { email: emailProof } : {}) },
         });
 
         if (cancelled) return;
@@ -99,8 +99,18 @@ export default function Success() {
         if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
 
         setOrder((data as any).order as OrderDetails);
+        setNeedsEmail(false);
       } catch (err: any) {
-        if (!cancelled) setError(err?.message || "Unable to load order details.");
+        if (cancelled) return;
+        const msg = err?.message || "Unable to load order details.";
+        // The function asks guests to prove the order email — show the
+        // email prompt instead of a dead-end error.
+        if (/sign in|provide it/i.test(msg)) {
+          setNeedsEmail(true);
+          setError(null);
+        } else {
+          setError(msg);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
