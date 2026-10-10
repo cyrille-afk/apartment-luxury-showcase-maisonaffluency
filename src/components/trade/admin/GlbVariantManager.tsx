@@ -3,7 +3,7 @@ import { Upload, Loader2, Trash2, ExternalLink, Star, Plus, X } from "lucide-rea
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
+import { classifyObjBundle, convertObjBundleToGlb, convert3dsToGlb } from "@/lib/objToGlb";
 import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
 import GlbMaterialRolesEditor from "@/components/trade/admin/GlbMaterialRolesEditor";
 
@@ -173,6 +173,21 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
       }
     }
 
+    if (!fileToUpload && files.length === 1 && files[0].name.toLowerCase().endsWith(".3ds")) {
+      setUploading(label);
+      setUploadProgress(0);
+      try {
+        toast.message(`Converting 3DS to GLB for "${label}"…`);
+        const outName = files[0].name.replace(/\.3ds$/i, "") + ".glb";
+        fileToUpload = await convert3dsToGlb(files[0], outName);
+        ext = "glb";
+      } catch (e: any) {
+        setUploading(null);
+        toast.error(`3DS→GLB conversion failed: ${e?.message || e}`);
+        return;
+      }
+    }
+
     if (!fileToUpload) {
       const bundle = classifyObjBundle(files);
       if (bundle) {
@@ -192,7 +207,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     }
 
     if (!fileToUpload) {
-      toast.error("Please upload a .glb/.gltf or an .obj (+ .mtl + textures).");
+      toast.error("Please upload a .glb/.gltf, a .3ds, or an .obj (+ .mtl + textures).");
       return;
     }
     if (fileToUpload.size > MAX_MB * 1024 * 1024) {
@@ -504,7 +519,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
 
 
       <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-[520px]">
-        Accepted files per variant: <b>.glb</b>, <b>.gltf</b>, or an <b>.obj</b> with its <b>.mtl</b> and texture images (⌘/Ctrl to multi-select — converted to GLB in your browser). Max {MAX_MB} MB per file. The default variant is what shows on public product pages and inside the concierge tearsheet drawer when no size is selected.
+        Accepted files per variant: <b>.glb</b>, <b>.gltf</b>, <b>.3ds</b> (converted to GLB in your browser), or an <b>.obj</b> with its <b>.mtl</b> and texture images (⌘/Ctrl to multi-select). Max {MAX_MB} MB per file. The default variant is what shows on public product pages and inside the concierge tearsheet drawer when no size is selected.
       </p>
 
       {/* Hidden shared file picker */}
@@ -512,7 +527,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
         ref={inputRef}
         type="file"
         multiple
-        accept=".glb,.gltf,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
+        accept=".glb,.gltf,.3ds,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
         className="hidden"
         onChange={(e) => {
           const fs = e.target.files ? Array.from(e.target.files) : [];
