@@ -465,7 +465,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                             priority
                             widths={[128, 192]}
                             mobileWidths={[128, 192]}
-                            sizes="(min-width: 768px) 106px, 80px"
+                            sizes="(min-width: 768px) 96px, 80px"
                             className="h-full w-full object-cover object-center transition-transform duration-700 ease-out scale-[1.10] group-hover:scale-[1.15]" />
                           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
                             <Instagram className="h-4 w-4 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
