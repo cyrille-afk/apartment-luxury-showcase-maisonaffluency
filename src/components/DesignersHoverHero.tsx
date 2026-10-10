@@ -333,6 +333,8 @@ const FEATURED_GROUPS = [
       "christopher-boots",
       "delcourt-collection",
       "emmanuel-levet-stenne",
+      "emma-donnersberg",
+
       "garnier-linker",
       "hamrei",
       "collection-particuliere",
