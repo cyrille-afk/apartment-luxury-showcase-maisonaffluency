@@ -521,6 +521,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const openHotspot = useCallback((hotspot: Hotspot) => {
     setActivePin(hotspot.id);
     setDockDismissed(false);
+    setDockRotation((n) => n + 1);
     if (expandedScene || !discoveryRoom) {
       setLightboxProduct(resolveHotspotProduct(hotspot));
     }
