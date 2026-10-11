@@ -2593,7 +2593,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
                       { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
                       { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                    ].map(({ label, text, Icon }) => {
+                    ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
                       const isLead = label === "Design Significance";
                       return (
                         <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>

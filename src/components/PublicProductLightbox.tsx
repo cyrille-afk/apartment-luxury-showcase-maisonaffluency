@@ -1056,7 +1056,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
               Curator Notes
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+            <div className={cn("grid grid-cols-1 gap-4 md:gap-8", curatorNotes.provenance ? "md:grid-cols-3" : "md:grid-cols-2")}>
               <div className="flex gap-4">
                 <Award className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
@@ -1081,6 +1081,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
+              {curatorNotes.provenance && (
               <div className="flex gap-4">
                 <FileText className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
                 <div>
@@ -1092,6 +1093,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                 </div>
               </div>
+              )}
             </div>
           </motion.div>
 

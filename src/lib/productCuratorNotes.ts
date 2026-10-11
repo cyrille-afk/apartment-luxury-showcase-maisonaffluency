@@ -10,8 +10,13 @@ export interface CuratorNotesSource {
 export interface ProductCuratorNotes {
   significance: string;
   spatial: string;
-  provenance: string;
+  /** Null when the description carries no real provenance signal — renderers must hide the section. */
+  provenance: string | null;
 }
+
+/** Words that indicate genuine historical/provenance content rather than generic craft copy. */
+const PROVENANCE_SIGNAL =
+  /\b((?:18|19|20)\d{2}|edition|re[- ]?edition|originally|first (?:produced|designed|introduced|shown)|archive[sd]?|vintage|heritage|revival|reissue[sd]?|restored|prototype|exhibited|retrospective)\b/i;
 
 /**
  * Split prose into sentences without breaking on abbreviations such as
@@ -44,9 +49,6 @@ function splitSentences(text: string): string[] {
 }
 
 export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCuratorNotes {
-  const designer = source.brandName.includes(" - ")
-    ? source.brandName.split(" - ")[0].trim()
-    : source.brandName;
   const year = source.title.match(/\b(18|19|20)\d{2}\b/)?.[0] || null;
   const plainDescription = (source.description || "")
     .replace(/<[^>]+>/g, " ")
@@ -55,6 +57,13 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
   const sentences = splitSentences(plainDescription);
   const category = (source.subcategory || source.category || "piece").toLowerCase();
   const dimensions = (source.dimensions || "").split("\n")[0]?.trim();
+
+  // Provenance: only surface a sentence that carries a genuine historical
+  // signal (a year, an edition, an archive origin...). Never recycle the
+  // sentences already used for significance/spatial, and never invent copy.
+  const provenanceSentence = sentences.find(
+    (s, i) => i >= 2 && PROVENANCE_SIGNAL.test(s),
+  ) ?? (year ? sentences.find((s, i) => i >= 2 && s.includes(year)) : undefined);
 
   return {
     significance:
@@ -67,8 +76,6 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
       (dimensions
         ? `Proportioned at ${dimensions}, with precise geometric balance to serve as a quiet, functional focal point for considered interiors.`
         : "A stripped-back silhouette with precise geometric proportions, calculated to serve as a quiet, functional focal point for considered interiors."),
-    provenance:
-      sentences[2] ||
-      `Reflects ${designer}’s design philosophy, balancing refined craftsmanship with enduring architectural clarity.`,
+    provenance: provenanceSentence ?? null,
   };
 }
