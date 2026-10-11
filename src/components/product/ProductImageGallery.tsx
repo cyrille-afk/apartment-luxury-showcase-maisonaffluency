@@ -518,9 +518,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             )}
             {isMobileOrPwa && mobileMenuItems ? (
               <DropdownMenu>
-                <CornerTooltip label="Presentation" side="top" align="end">
+                <CornerTooltip label="Editorial Gallery" side="top" align="end">
                   <DropdownMenuTrigger
-                    aria-label="Presentation and more actions"
+                    aria-label="Editorial Gallery and more actions"
                     className="relative isolate flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -535,10 +535,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <CornerTooltip label="Presentation" side="top" align="end">
+              <CornerTooltip label="Editorial Gallery" side="top" align="end">
                 <button
                   type="button"
-                  aria-label="Presentation"
+                  aria-label="Editorial Gallery"
                   className="relative isolate flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]"
                   onClick={(e) => {
                     e.stopPropagation();
