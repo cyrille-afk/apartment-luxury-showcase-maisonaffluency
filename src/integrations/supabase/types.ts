@@ -3116,6 +3116,7 @@ export type Database = {
           created_at: string
           currency: string
           default_ship_mode: string | null
+          default_variant_label: string | null
           depth_mm: number | null
           description: string | null
           designer_id: string
@@ -3192,6 +3193,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           depth_mm?: number | null
           description?: string | null
           designer_id: string
@@ -3268,6 +3270,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           depth_mm?: number | null
           description?: string | null
           designer_id?: string
@@ -3348,6 +3351,7 @@ export type Database = {
           created_at: string | null
           currency: string | null
           default_ship_mode: string | null
+          default_variant_label: string | null
           description: string | null
           designer_id: string | null
           dimensions: string | null
@@ -3389,6 +3393,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           description?: string | null
           designer_id?: string | null
           dimensions?: string | null
@@ -3430,6 +3435,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           description?: string | null
           designer_id?: string | null
           dimensions?: string | null
@@ -9997,6 +10003,7 @@ export type Database = {
           created_at: string
           currency: string
           default_ship_mode: string | null
+          default_variant_label: string | null
           depth_mm: number | null
           description: string | null
           design_style_tokens: string[]
@@ -10073,6 +10080,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           depth_mm?: number | null
           description?: string | null
           design_style_tokens?: string[]
@@ -10149,6 +10157,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          default_variant_label?: string | null
           depth_mm?: number | null
           description?: string | null
           design_style_tokens?: string[]
