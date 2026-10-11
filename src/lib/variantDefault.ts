@@ -54,6 +54,23 @@ function startsWithWord(candidate: string, wanted: string): boolean {
   return next === undefined || !/[a-z0-9]/i.test(next);
 }
 
+/** True when `wanted` appears anywhere in `candidate`, at a word boundary. */
+function containsWord(candidate: string, wanted: string): boolean {
+  const hay = candidate.toLowerCase();
+  const needle = wanted.toLowerCase();
+  let from = 0;
+  for (;;) {
+    const at = hay.indexOf(needle, from);
+    if (at < 0) return false;
+    const before = at === 0 ? undefined : hay[at - 1];
+    const after = hay[at + needle.length];
+    const beforeOk = before === undefined || !/[a-z0-9]/i.test(before);
+    const afterOk = after === undefined || !/[a-z0-9]/i.test(after);
+    if (beforeOk && afterOk) return true;
+    from = at + 1;
+  }
+}
+
 /**
  * Returns the variant to pre-select, or null when the product has no default
  * or the default names nothing in its own variant list.
@@ -76,8 +93,7 @@ export function resolveDefaultVariant(
   const prefix = labels.findIndex((l) => startsWithWord(l, wanted));
   if (prefix >= 0) return { index: prefix, label: labels[prefix] };
 
-  // 3. Last resort: the default names part of a label, e.g. "W 350".
-  const wantedLower = wanted.toLowerCase();
-  const contains = labels.findIndex((l) => l.toLowerCase().includes(wantedLower));
+  // 3. Last resort: the default names a whole word inside a label, e.g. "W 350".
+  const contains = labels.findIndex((l) => containsWord(l, wanted));
   return contains >= 0 ? { index: contains, label: labels[contains] } : null;
 }
