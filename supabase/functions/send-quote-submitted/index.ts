@@ -152,28 +152,14 @@ const handler = async (req: Request): Promise<Response> => {
       </p>
     </div>`;
 
-    // Fetch all admin emails
-    const { data: adminRoles } = await adminClient
-      .from("user_roles")
-      .select("user_id")
-      .in("role", ["admin", "super_admin"]);
+    // Fixed ops inbox. Admin profile emails include retired domains
+    // (affluency.com / myaffluency.com) and test accounts that bounce, and
+    // keying by local-part made all "gregoire@…" copies share one idempotency key.
+    const adminEmails = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
 
-    const adminUserIds = [...new Set((adminRoles || []).map((r: any) => r.user_id))];
-    let adminEmails: string[] = [];
-    if (adminUserIds.length > 0) {
-      const { data: adminProfiles } = await adminClient
-        .from("profiles")
-        .select("email")
-        .in("id", adminUserIds);
-      adminEmails = [...new Set((adminProfiles || []).map((p: any) => p.email).filter(Boolean))];
-    }
-    if (adminEmails.length === 0) {
-      adminEmails = ["gregoire@maisonaffluency.com"];
-    }
-
-    // Enqueue one email per admin
+    // Enqueue one email per recipient
     for (const recipientEmail of adminEmails) {
-      const messageId = `quote-submitted-${quoteId}-${recipientEmail.split("@")[0]}`;
+      const messageId = `quote-submitted-${quoteId}-${recipientEmail.toLowerCase()}`;
       const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
         queue_name: "transactional_emails",
         payload: {
