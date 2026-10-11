@@ -402,6 +402,19 @@ const VariantSelectorsProvider: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
 
+  // A product-level default (e.g. Galet Dining Table → Large) opens the size
+  // picker on that option instead of the empty "Select Your Size" placeholder.
+  // A selection restored from the visitor's own session, or anything they click
+  // afterwards, always wins over this.
+  useEffect(() => {
+    if (isDualAxis || isBaseOnly || hasSingleAxisSplit) return;
+    if (selSize != null) return;
+    const match = resolveDefaultVariant(product.size_variants, product.default_variant_label);
+    if (!match) return;
+    setSelSize(match.label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id, product?.default_variant_label, isDualAxis, isBaseOnly, hasSingleAxisSplit]);
+
   const handleResetDefault = () => {
     if (!defaultPair) return;
     setSelBase(defaultPair.base);
