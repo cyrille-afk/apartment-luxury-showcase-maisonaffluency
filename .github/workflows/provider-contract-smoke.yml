@@ -19,6 +19,11 @@ concurrency:
   group: provider-contract-smoke
   cancel-in-progress: false
 
+# The drift-alert step opens/comments on an issue; the default token is read-only.
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   smoke:
     timeout-minutes: 15
