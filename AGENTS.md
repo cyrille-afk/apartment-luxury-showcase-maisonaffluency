@@ -36,3 +36,5 @@
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
 - Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
+
+- Concierge email failure alerts are event-driven (trigger on email_send_log inserts → monitor-concierge-email), not cron polling; matching rules live in its rules.ts and the SQL trigger and must stay in sync.
