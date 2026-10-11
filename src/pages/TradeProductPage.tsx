@@ -318,6 +318,7 @@ export function useTradeProductBySlug(
           base_axis_label: curatorPick?.base_axis_label || null,
           top_axis_label: curatorPick?.top_axis_label || null,
           wood_label_override: (curatorPick as any)?.wood_label_override || null,
+          default_variant_label: (curatorPick as any)?.default_variant_label ?? null,
           size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
