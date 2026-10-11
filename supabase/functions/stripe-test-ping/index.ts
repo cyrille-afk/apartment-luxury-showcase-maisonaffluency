@@ -21,6 +21,14 @@ Deno.serve(async (req) => {
   const key = envOk ? envKey : ((pc?.test_secret_key as string) ?? "").trim();
   if (!/^(sk|rk)_test_/.test(key)) return json({ error: "no test key", envKeyLooksTest: envOk }, 400);
   const stripe = new Stripe(key, { apiVersion: "2025-08-27.basil" });
+  if (new URL(req.url).searchParams.get("inspect")) {
+    const eps = await stripe.webhookEndpoints.list({ limit: 20 });
+    const evs = await stripe.events.list({ limit: 5 });
+    return json({
+      endpoints: eps.data.map((e) => ({ url: e.url, status: e.status, events: e.enabled_events })),
+      events: evs.data.map((e) => ({ id: e.id, type: e.type, pending: e.pending_webhooks, created: e.created })),
+    });
+  }
   const pi = await stripe.paymentIntents.create({
     amount: 100, currency: "eur", payment_method: "pm_card_visa", confirm: true,
     automatic_payment_methods: { enabled: true, allow_redirects: "never" },
