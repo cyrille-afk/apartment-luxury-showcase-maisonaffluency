@@ -958,6 +958,7 @@ const VariantDimensionsPanel: React.FC = () => {
   } = ctx;
 
   const dualLabelsAreDimensions = dualSizeOptions.length > 0 && dualSizeOptions.every(looksLikeDimension);
+  const isRugProduct = isRugCategory(product.category);
   const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
     && isUpholsteryAxisLabel(topAxisLabelRaw) && !dualLabelsAreDimensions;
   const frameSwatchesCoverLabels = product.id === OOL_MINIBAR_PICK_ID || (frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes));
