@@ -1,5 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 interface ScreenshotItem {
   src: string;
@@ -10,26 +12,20 @@ interface ScreenshotItem {
 
 const SCREENSHOTS: ScreenshotItem[] = [
   {
-    src: "/designers-hero-lock/mobile-iphone15pro-real-device.png",
-    filename: "mobile-iphone15pro-real-device.png",
-    deviceLabel: "Mobile — iPhone 15 Pro",
-    description: "Real-device Safari capture with iOS browser navigation visible",
+    src: "/designers-hero-lock/mobile-current.png",
+    filename: "mobile-current.png",
+    deviceLabel: "Mobile — 393px",
+    description: "Current build, captured 2026-10-11 (Directory search bottom-right)",
   },
   {
-    src: "/designers-hero-lock/pwa-iphone15pro-real-device.png",
-    filename: "pwa-iphone15pro-real-device.png",
-    deviceLabel: "PWA — iPhone 15 Pro",
-    description: "Real-device PWA capture without Safari browser navigation",
-  },
-  {
-    src: "/designers-hero-lock/desktop-1440.png",
-    filename: "desktop-1440.png",
+    src: "/designers-hero-lock/desktop-current.png",
+    filename: "desktop-current.png",
     deviceLabel: "Desktop — 1440px",
-    description: "1440×900 viewport, browser chrome",
+    description: "Current build, captured 2026-10-11",
   },
 ];
 
-const LOCK_VERSION = "2026-06-25-real-device-v3";
+const LOCK_VERSION = "2026-10-11-current";
 
 export default function ScreenshotGallery() {
   const total = SCREENSHOTS.length;
@@ -44,6 +40,13 @@ export default function ScreenshotGallery() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-foreground px-6 py-12 md:px-12 lg:px-20">
         <div className="max-w-7xl mx-auto">
+          <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-2 text-xs font-body text-white/50">
+            <Link to="/trade" className="inline-flex items-center gap-1.5 hover:text-white transition-colors">
+              <ArrowLeft className="h-3.5 w-3.5" /> Trade Portal
+            </Link>
+            <span>/</span>
+            <span className="text-white/80">Locked Layout Gallery</span>
+          </nav>
           <header className="mb-12 md:mb-16 border-b border-white/10 pb-8">
             <p className="text-[10px] uppercase tracking-[0.3em] text-white/50 mb-3 font-body">
               Design QA — Locked {today}
@@ -52,9 +55,7 @@ export default function ScreenshotGallery() {
               Designers Hero — Locked Layout Reference
             </h1>
             <p className="font-body text-sm md:text-base text-white/60 max-w-2xl">
-              These screenshots capture verified locked references only. The
-              iPhone SE capture was removed because it was emulated and not a
-              valid real-device reference.
+              Latest captures of the current designers page.
             </p>
           </header>
 
