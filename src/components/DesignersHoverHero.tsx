@@ -1908,8 +1908,14 @@ const DesignersHoverHero = () => {
                 ),
             align === "left" && "text-left justify-start",
             align === "center" && "text-center justify-center",
-            align === "right" && "text-right flex-row-reverse justify-start"
+            // Mobile/PWA keeps the magnifier on the leading edge of the label;
+            // the desktop right-column variant reverses the row instead.
+            align === "right" &&
+              (isMobileOrPwa
+                ? "text-right justify-end"
+                : "text-right flex-row-reverse justify-start")
           )}
+
         >
           <Search className={cn("h-3.5 w-3.5 not-italic", isMobileOrPwa ? "text-white/70" : "text-white/45")} aria-hidden="true" />
           Search {makerCountLabel} Designers
@@ -2234,15 +2240,17 @@ const DesignersHoverHero = () => {
           </div>
         </div>
 
-        {/* Directory label — pinned to the svh frame bottom on mobile only.
-            Lowered slightly so it sits closer to the bottom edge. */}
+        {/* Directory label — pinned to the svh frame bottom on mobile only,
+            flush to the right edge. The PWA sits higher because the standalone
+            frame has no browser toolbar eating into the bottom inset. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "center")}
+          "absolute flex items-end text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(1rem+env(safe-area-inset-bottom))]"
+        ), directoryRef, "right")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(0.75rem+env(safe-area-inset-bottom))]"
-        ), directoryRef, "center")}
+          "absolute flex items-end text-white left-6 right-6 pointer-events-auto md:hidden z-30 bottom-[calc(2rem+env(safe-area-inset-bottom))]"
+        ), directoryRef, "right")}
+
 
 
       </div>
