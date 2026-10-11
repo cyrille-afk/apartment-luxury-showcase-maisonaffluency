@@ -56,6 +56,7 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { Button } from "@/components/ui/button";
 import { lastNameInitial } from "@/lib/nameFormat";
 import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
+import { compareCataloguePrices } from "@/lib/compareCataloguePrices";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
@@ -1632,9 +1633,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                 ).sort((a, b) => a.localeCompare(b));
 
                 const priceOf = (p: typeof picks[number]) => {
-                  const raw: any = (publicRrpMap as any)[p.id];
-                  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(/[^0-9.]/g, ""));
-                  return Number.isFinite(n) && n > 0 ? n : Number.POSITIVE_INFINITY;
+                  return publicRrpMap[p.id]?.rrp_price_cents;
                 };
 
                 const filtered = activeCategories.length
@@ -1652,8 +1651,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                           };
                           return t(b) - t(a);
                         }
-                        const d = priceOf(a) - priceOf(b);
-                        return sortMode === "price-asc" ? d : -d;
+                        return compareCataloguePrices(priceOf(a), priceOf(b), sortMode);
                       });
 
                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
