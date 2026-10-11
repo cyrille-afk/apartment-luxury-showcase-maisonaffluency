@@ -61,6 +61,13 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
   const category = (source.subcategory || source.category || "piece").toLowerCase();
   const dimensions = (source.dimensions || "").split("\n")[0]?.trim();
 
+  // Provenance: only surface a sentence that carries a genuine historical
+  // signal (a year, an edition, an archive origin...). Never recycle the
+  // sentences already used for significance/spatial, and never invent copy.
+  const provenanceSentence = sentences.find(
+    (s, i) => i >= 2 && PROVENANCE_SIGNAL.test(s),
+  ) ?? (year ? sentences.find((s, i) => i >= 2 && s.includes(year)) : undefined);
+
   return {
     significance:
       sentences[0] ||
