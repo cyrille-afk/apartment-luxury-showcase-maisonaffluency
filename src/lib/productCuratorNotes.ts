@@ -79,8 +79,6 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
       (dimensions
         ? `Proportioned at ${dimensions}, with precise geometric balance to serve as a quiet, functional focal point for considered interiors.`
         : "A stripped-back silhouette with precise geometric proportions, calculated to serve as a quiet, functional focal point for considered interiors."),
-    provenance:
-      sentences[2] ||
-      `Reflects ${designer}’s design philosophy, balancing refined craftsmanship with enduring architectural clarity.`,
+    provenance: provenanceSentence ?? null,
   };
 }
