@@ -56,6 +56,7 @@ import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex, variantImageKey } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
+import { resolveDefaultVariant } from "@/lib/variantDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
@@ -401,6 +402,19 @@ const VariantSelectorsProvider: React.FC<{
     onMaterialChange?.(pair.base, { base: pair.base, top: pair.top, size: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDualAxis, product.id]);
+
+  // A product-level default (e.g. Galet Dining Table → Large) opens the size
+  // picker on that option instead of the empty "Select Your Size" placeholder.
+  // A selection restored from the visitor's own session, or anything they click
+  // afterwards, always wins over this.
+  useEffect(() => {
+    if (isDualAxis || isBaseOnly || hasSingleAxisSplit) return;
+    if (selSize != null) return;
+    const match = resolveDefaultVariant(product.size_variants, product.default_variant_label);
+    if (!match) return;
+    setSelSize(match.label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id, product?.default_variant_label, isDualAxis, isBaseOnly, hasSingleAxisSplit]);
 
   const handleResetDefault = () => {
     if (!defaultPair) return;

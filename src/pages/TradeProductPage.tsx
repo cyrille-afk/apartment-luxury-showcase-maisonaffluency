@@ -68,6 +68,7 @@ import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVaria
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
+import { resolveDefaultVariant } from "@/lib/variantDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
@@ -179,6 +180,8 @@ interface ProductRow {
   top_axis_label: string | null;
   wood_label_override: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number; meters?: number }[] | null;
+  /** Variant the size picker opens with pre-selected (see src/lib/variantDefault.ts). */
+  default_variant_label?: string | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
   edition: string | null;
@@ -267,7 +270,7 @@ export function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -284,7 +287,7 @@ export function useTradeProductBySlug(
         if (!curatorPick && (tradeProduct as any).source_pick_id) {
           const { data: pickById } = await supabase
             .from("designer_curator_picks")
-            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
             .eq("id", (tradeProduct as any).source_pick_id)
             .maybeSingle();
           curatorPick = pickById || null;
@@ -316,6 +319,7 @@ export function useTradeProductBySlug(
           base_axis_label: curatorPick?.base_axis_label || null,
           top_axis_label: curatorPick?.top_axis_label || null,
           wood_label_override: (curatorPick as any)?.wood_label_override || null,
+          default_variant_label: (curatorPick as any)?.default_variant_label ?? null,
           size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
@@ -381,7 +385,7 @@ export function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -1273,6 +1277,35 @@ const TradeProductPage: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryActiveIndex, data?.product?.id]);
+
+  // Product-level default variant (e.g. Galet Dining Table → Large): the size
+  // picker opens on that option instead of the empty "Select Your Size"
+  // placeholder. Applied once per product so a visitor who clears the choice is
+  // never pushed back onto it. Declared above the loading guards so the hook
+  // order can never change between renders.
+  const defaultVariantAppliedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const row = (data?.product ?? null) as any;
+    const pid = row?.id ?? null;
+    if (!pid || defaultVariantAppliedFor.current === pid) return;
+    const wanted = row?.default_variant_label;
+    const pickVariants = Array.isArray(row?.size_variants) ? row.size_variants : null;
+    const axes = computeVariantAxes(pickVariants);
+    if (!wanted || axes.isDualAxis || axes.isBaseOnly || axes.hasSingleAxisSplit) {
+      defaultVariantAppliedFor.current = pid;
+      return;
+    }
+    // Index the picker's own list: priced variants when the pricing service
+    // supplies them, otherwise the curator pick's rows.
+    const priced = Array.isArray((data?.pricing as any)?.size_variants)
+      ? ((data?.pricing as any).size_variants as any[])
+      : [];
+    const match = resolveDefaultVariant(priced.length ? priced : pickVariants, wanted);
+    // Variants can still be loading — retry on the next data tick.
+    if (!match) return;
+    defaultVariantAppliedFor.current = pid;
+    setSelectedVariantIdx(match.index);
+  }, [data]);
 
   // Proactive tearsheet nudge — fires after the architect has stopped
   // changing finishes for 3s. Sends a lightweight "lock this in" spec card
