@@ -6,6 +6,7 @@ import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { biographyPictureGroups } from "@/lib/biographyPictureGroups";
+import { placeCtaAfterParagraph, type CtaPlacement } from "@/lib/biographyCtaPlacement";
 import {
   renderParagraph,
   parseMediaLine,
@@ -221,6 +222,28 @@ function FadeInRow({ children, delay = 0 }: { children: React.ReactNode; delay?:
   );
 }
 
+type TextEntry = { block: Extract<Block, { kind: "text" }>; index: number };
+type MediaEntry = { block: Extract<Block, { kind: "image" } | { kind: "video" }>; index: number };
+
+type NarrativeRow =
+  | { kind: "intro"; entry: TextEntry }
+  | { kind: "blockquote"; entry: TextEntry }
+  | { kind: "video"; entry: MediaEntry }
+  | { kind: "picture"; pictureIndex: number; image: MediaEntry | null; texts: TextEntry[] }
+  | { kind: "texts"; texts: TextEntry[] };
+
+/** Break a row in two so the collection CTA can sit between its paragraphs. */
+function splitNarrativeRow(rows: NarrativeRow[], { rowIndex, splitAt }: CtaPlacement): NarrativeRow[] {
+  const row = rows[rowIndex];
+  if (splitAt <= 0 || !row || (row.kind !== "picture" && row.kind !== "texts")) return rows;
+  return [
+    ...rows.slice(0, rowIndex),
+    { ...row, texts: row.texts.slice(0, splitAt) },
+    { kind: "texts", texts: row.texts.slice(splitAt) },
+    ...rows.slice(rowIndex + 1),
+  ];
+}
+
 export default function EditorialBiographyColumns({
   biography,
   biographyImages = [],
@@ -275,6 +298,33 @@ export default function EditorialBiographyColumns({
   const additionalVideos = videoBlocks.slice(1);
 
   const showCollectionCta = Boolean(collectionCtaHref);
+
+  // Narrative rows in reading order. The collection CTA sits at the midpoint of
+  // the paragraphs — after paragraph three when there are five — not after the
+  // opening, so it breaks the biography rather than cutting it short.
+  const narrativeRows: NarrativeRow[] = [];
+  if (introText) narrativeRows.push({ kind: "intro", entry: introText });
+  if (firstVideo) narrativeRows.push({ kind: "video", entry: firstVideo });
+  if (blockquoteText) narrativeRows.push({ kind: "blockquote", entry: blockquoteText });
+  pictureTextGroups.forEach((texts, pictureIndex) => {
+    const image = imageBlocks[pictureIndex];
+    if (image || texts.length > 0) {
+      narrativeRows.push({ kind: "picture", pictureIndex, image: image ?? null, texts });
+    }
+  });
+  additionalVideos.forEach((entry) => narrativeRows.push({ kind: "video", entry }));
+
+  const ctaPlacement = placeCtaAfterParagraph(
+    narrativeRows.map((row) =>
+      row.kind === "intro" || row.kind === "blockquote"
+        ? 1
+        : row.kind === "picture" || row.kind === "texts"
+          ? row.texts.length
+          : 0,
+    ),
+  );
+  const narrativeDisplay = splitNarrativeRow(narrativeRows, ctaPlacement);
+
   const mobileMedia = [...videoBlocks, ...imageBlocks];
   const mobileGaps = Math.max(1, textBlocks.length - 1);
   const mobileSequence: Block[] = [];
@@ -320,87 +370,81 @@ export default function EditorialBiographyColumns({
             </div>
           ) : (
             <>
-          {/* Row 1: intro paragraph + centered video */}
-          {introText && (
-            <FadeInRow delay={60}>
-              <div className="w-full max-w-3xl mx-auto">
-                <TextCell content={introText.block.content} eyebrow={eyebrow} />
-              </div>
-            </FadeInRow>
-          )}
+          {narrativeDisplay.map((row, rowIndex) => (
+            <React.Fragment key={`narrative-${rowIndex}`}>
+              {row.kind === "intro" && (
+                <FadeInRow delay={60}>
+                  <div className="w-full max-w-3xl mx-auto">
+                    <TextCell content={row.entry.block.content} eyebrow={eyebrow} />
+                  </div>
+                </FadeInRow>
+              )}
 
-          {firstVideo && (
-            <FadeInRow delay={120}>
-              <MediaCell
-                block={firstVideo.block}
-                designerName={designerName}
-                index={firstVideo.index}
-                className="w-full max-w-4xl mx-auto my-12 block"
-              />
-            </FadeInRow>
-          )}
+              {row.kind === "video" && (
+                <FadeInRow delay={120}>
+                  <MediaCell
+                    block={row.entry.block}
+                    designerName={designerName}
+                    index={row.entry.index}
+                    className="w-full max-w-4xl mx-auto my-12 block"
+                  />
+                </FadeInRow>
+              )}
 
-          {/* Single collection CTA — beneath the video caption */}
-          {showCollectionCta && collectionCtaHref && (
-            <FadeInRow delay={140}>
-              <div className="flex justify-center my-2">
-                <Link
-                  to={collectionCtaHref}
-                  className="group inline-flex items-center gap-3 border border-foreground/20 px-7 py-3 md:px-9 md:py-3.5 hover:border-foreground/60 transition-colors duration-300"
-                >
-                  <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.34em] text-foreground/70 group-hover:text-foreground transition-colors">
-                    {collectionCtaLabel}
-                  </span>
-                  <ArrowRight className="h-3 w-3 text-foreground/50 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
-                </Link>
-              </div>
-            </FadeInRow>
-          )}
+              {row.kind === "blockquote" && (
+                <FadeInRow delay={180}>
+                  <div className="w-full max-w-3xl mx-auto my-8">
+                    <TextCell content={row.entry.block.content} />
+                  </div>
+                </FadeInRow>
+              )}
 
-          {/* Row 2: large blockquote */}
-          {blockquoteText && (
-            <FadeInRow delay={180}>
-              <div className="w-full max-w-3xl mx-auto my-8">
-                <TextCell content={blockquoteText.block.content} />
-              </div>
-            </FadeInRow>
-          )}
+              {row.kind === "picture" && (
+                <FadeInRow delay={240}>
+                  <div data-biography-picture-row={row.pictureIndex + 1}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
+                    {row.image && (
+                      <MediaCell block={row.image.block} designerName={designerName} index={row.image.index}
+                        className={cn("md:row-start-1", row.pictureIndex % 2 === 0 ? "md:col-start-1" : "md:col-start-2")} />
+                    )}
+                    {row.texts.length > 0 && (
+                      <div className={cn("w-full text-left space-y-8 md:row-start-1",
+                        row.image ? (row.pictureIndex % 2 === 0 ? "md:col-start-2" : "md:col-start-1") : "md:col-span-2 max-w-3xl mx-auto")}>
+                        {row.texts.map(({ block, index }) => (
+                          <TextCell key={`picture-text-${index}`} content={block.content} className="w-full text-left" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </FadeInRow>
+              )}
 
-
-
-          {pictureTextGroups.map((texts, pictureIndex) => {
-            const image = imageBlocks[pictureIndex];
-            const imageOnLeft = pictureIndex % 2 === 0;
-            return (
-            <FadeInRow key={`picture-row-${pictureIndex}`} delay={240}>
-              <div data-biography-picture-row={pictureIndex + 1}
-                className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
-                {image && (
-                  <MediaCell block={image.block} designerName={designerName} index={image.index}
-                    className={cn("md:row-start-1", imageOnLeft ? "md:col-start-1" : "md:col-start-2")} />
-                )}
-                {texts.length > 0 && (
-                  <div className={cn("w-full text-left space-y-8 md:row-start-1",
-                    image ? (imageOnLeft ? "md:col-start-2" : "md:col-start-1") : "md:col-span-2 max-w-3xl mx-auto")}>
-                    {texts.map(({ block, index }) => (
-                      <TextCell key={`picture-text-${index}`} content={block.content} className="w-full text-left" />
+              {row.kind === "texts" && (
+                <FadeInRow delay={240}>
+                  <div className="w-full max-w-3xl mx-auto space-y-8">
+                    {row.texts.map(({ block, index }) => (
+                      <TextCell key={`narrative-text-${index}`} content={block.content} className="w-full text-left" />
                     ))}
                   </div>
-                )}
-              </div>
-            </FadeInRow>
-            );
-          })}
+                </FadeInRow>
+              )}
 
-          {additionalVideos.map(({ block, index }) => (
-            <FadeInRow key={`extra-video-${index}`} delay={300}>
-              <MediaCell
-                block={block}
-                designerName={designerName}
-                index={index}
-                className="w-full max-w-4xl mx-auto my-12 block"
-              />
-            </FadeInRow>
+              {showCollectionCta && collectionCtaHref && rowIndex === ctaPlacement.rowIndex && (
+                <FadeInRow delay={140}>
+                  <div className="flex justify-center my-2">
+                    <Link
+                      to={collectionCtaHref}
+                      className="group inline-flex items-center gap-3 border border-foreground/20 px-7 py-3 md:px-9 md:py-3.5 hover:border-foreground/60 transition-colors duration-300"
+                    >
+                      <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.34em] text-foreground/70 group-hover:text-foreground transition-colors">
+                        {collectionCtaLabel}
+                      </span>
+                      <ArrowRight className="h-3 w-3 text-foreground/50 group-hover:text-foreground group-hover:translate-x-1 transition-all duration-300" strokeWidth={1.25} />
+                    </Link>
+                  </div>
+                </FadeInRow>
+              )}
+            </React.Fragment>
           ))}
 
             </>
