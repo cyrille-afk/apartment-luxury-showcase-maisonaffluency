@@ -2854,6 +2854,13 @@ const TradeDesignersAdmin = () => {
 
                             const updateEntry = (newUrl: string, newCaption: string) => writeEntry(newUrl, newCaption, posterUrl);
                             const updatePoster = (newPoster: string) => writeEntry(rawUrl, caption, newPoster);
+                            const moveMedia = (direction: -1 | 1) => {
+                              const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                              const target = idx + direction;
+                              if (target < 0 || target >= imgs.length) return;
+                              [imgs[idx], imgs[target]] = [imgs[target], imgs[idx]];
+                              setField(d.id, "biography_images", imgs);
+                            };
 
                             return (
                               <div key={idx} className="flex items-start gap-2 border border-border/50 rounded-md p-2">
@@ -2916,16 +2923,29 @@ const TradeDesignersAdmin = () => {
                                     ↳ Insert in biography
                                   </button>
                                 </div>
-                                <button
-                                  onClick={() => {
-                                    const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
-                                    imgs.splice(idx, 1);
-                                    setField(d.id, "biography_images", imgs);
-                                  }}
-                                  className="text-muted-foreground hover:text-destructive transition-colors p-1 mt-1"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                                <div className="flex shrink-0 flex-col gap-1">
+                                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8"
+                                    title="Move media up" aria-label={`Move editorial media ${idx + 1} up`}
+                                    disabled={idx === 0} onClick={() => moveMedia(-1)}>
+                                    <ArrowUp className="h-4 w-4" />
+                                  </Button>
+                                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8"
+                                    title="Move media down" aria-label={`Move editorial media ${idx + 1} down`}
+                                    disabled={idx === ((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).length - 1}
+                                    onClick={() => moveMedia(1)}>
+                                    <ArrowDown className="h-4 w-4" />
+                                  </Button>
+                                  <Button type="button" variant="ghost" size="icon"
+                                    title="Remove media" aria-label={`Remove editorial media ${idx + 1}`}
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    onClick={() => {
+                                      const imgs = [...((editBuffer[d.id]?.biography_images ?? d.biography_images) || [])];
+                                      imgs.splice(idx, 1);
+                                      setField(d.id, "biography_images", imgs);
+                                    }}>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
                               </div>
                             );
                           })}
