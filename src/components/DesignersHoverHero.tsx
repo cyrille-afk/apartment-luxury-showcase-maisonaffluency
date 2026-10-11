@@ -1872,11 +1872,18 @@ const DesignersHoverHero = () => {
     align: "left" | "center" | "right" = "left"
   ) => (
     <div ref={ref} className={className}>
-      <div className={cn(
-        "flex flex-col w-full",
-        align === "center" && "items-center text-center",
-        align === "right" && "items-end"
-      )}>
+      <div
+        className={cn(
+          "flex flex-col w-full",
+          align === "center" && "items-center text-center",
+          align === "right" && "items-end",
+          // Mobile/PWA: the entire label block ("Directory" + "Search N Designers")
+          // is one tap target, so a tap anywhere on the label opens the directory
+          // — no need to hit the small magnifier exactly.
+          isMobileOrPwa && "cursor-pointer select-none"
+        )}
+        onClick={isMobileOrPwa ? () => openDesignerSearch("search") : undefined}
+      >
         <span
           className={cn(
             isMobileOrPwa
@@ -1901,7 +1908,7 @@ const DesignersHoverHero = () => {
           className={cn(
             "inline-flex items-center gap-2 text-xs font-body font-light italic transition-colors",
             isMobileOrPwa
-              ? cn("text-white/85 hover:text-white underline-offset-4 hover:underline", align === "left" && "w-full justify-start")
+              ? cn("text-white/85 hover:text-white underline-offset-4 hover:underline py-1.5 -my-1.5", align === "left" && "w-full justify-start")
               : cn(
                   "w-full rounded-lg border border-gold/10 bg-white/[0.04] px-3 py-2.5 text-[13px] text-white/75 hover:text-white hover:bg-white/[0.07] hover:border-gold/20",
                   searchOpen && "lg:opacity-0"
