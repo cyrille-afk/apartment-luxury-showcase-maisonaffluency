@@ -1093,6 +1093,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   </p>
                 </div>
               </div>
+              )}
             </div>
           </motion.div>
 
