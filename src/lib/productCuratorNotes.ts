@@ -10,8 +10,13 @@ export interface CuratorNotesSource {
 export interface ProductCuratorNotes {
   significance: string;
   spatial: string;
-  provenance: string;
+  /** Null when the description carries no real provenance signal — renderers must hide the section. */
+  provenance: string | null;
 }
+
+/** Words that indicate genuine historical/provenance content rather than generic craft copy. */
+const PROVENANCE_SIGNAL =
+  /\b((?:18|19|20)\d{2}|edition|re[- ]?edition|originally|first (?:produced|designed|introduced|shown)|archive[sd]?|vintage|heritage|revival|reissue[sd]?|restored|prototype|exhibited|retrospective)\b/i;
 
 /**
  * Split prose into sentences without breaking on abbreviations such as
