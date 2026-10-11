@@ -22,11 +22,18 @@ Deno.serve(async (req) => {
   if (!/^(sk|rk)_test_/.test(key)) return json({ error: "no test key", envKeyLooksTest: envOk }, 400);
   const stripe = new Stripe(key, { apiVersion: "2025-08-27.basil" });
   if (new URL(req.url).searchParams.get("inspect")) {
+    const ourUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/stripe-webhook`;
     const eps = await stripe.webhookEndpoints.list({ limit: 20 });
-    const evs = await stripe.events.list({ limit: 5 });
+    const evs = await stripe.events.list({ limit: 8 });
+    const ids = evs.data.map((e) => e.id);
+    const { data: got } = await admin.from("webhook_events").select("event_id").eq("provider", "stripe").in("event_id", ids);
+    const received = new Set((got ?? []).map((r: any) => r.event_id));
+    const { data: last } = await admin.from("webhook_events").select("event_id,event_type,created_at")
+      .eq("provider", "stripe").order("created_at", { ascending: false }).limit(1).maybeSingle();
     return json({
-      endpoints: eps.data.map((e) => ({ url: e.url, status: e.status, events: e.enabled_events })),
-      events: evs.data.map((e) => ({ id: e.id, type: e.type, pending: e.pending_webhooks, created: e.created })),
+      endpoints: eps.data.map((e) => ({ url: e.url, status: e.status, events: e.enabled_events, matchesApp: e.url === ourUrl })),
+      events: evs.data.map((e) => ({ id: e.id, type: e.type, pending: e.pending_webhooks, created: e.created, received: received.has(e.id) })),
+      lastReceived: last ?? null,
     });
   }
   const pi = await stripe.paymentIntents.create({
