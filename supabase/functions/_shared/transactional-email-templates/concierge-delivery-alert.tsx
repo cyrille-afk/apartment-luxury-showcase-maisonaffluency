@@ -58,7 +58,6 @@ export const template = {
   component: ConciergeDeliveryAlertEmail,
   subject: (data) => `⚠️ ${data.count ?? 0} concierge email(s) failed to deliver`,
   displayName: 'Concierge Delivery Failure (ops alert)',
-  to: 'cyrille@maisonaffluency.com',
   previewData: {
     count: 1,
     failures: [{ template: 'inquiry-notification', recipient: 'concierge@maisonaffluency.com', status: 'suppressed', error: 'Recipient on suppression list (bounce)', at: new Date().toISOString() }],
