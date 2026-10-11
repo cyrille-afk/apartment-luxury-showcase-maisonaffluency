@@ -272,6 +272,8 @@ export default function EditorialBiographyColumns({
   const firstVideo = videoBlocks[0];
   const firstImage = imageBlocks[0];
   const secondImage = imageBlocks[1];
+  const additionalImages = imageBlocks.slice(2);
+  const additionalVideos = videoBlocks.slice(1);
 
   const showCollectionCta = Boolean(collectionCtaHref);
 
@@ -300,11 +302,11 @@ export default function EditorialBiographyColumns({
           )}
 
           {/* Single collection CTA — beneath the video caption */}
-          {showCollectionCta && (
+          {showCollectionCta && collectionCtaHref && (
             <FadeInRow delay={140}>
               <div className="flex justify-center my-2">
                 <Link
-                  to={collectionCtaHref!}
+                  to={collectionCtaHref}
                   className="group inline-flex items-center gap-3 border border-foreground/20 px-7 py-3 md:px-9 md:py-3.5 hover:border-foreground/60 transition-colors duration-300"
                 >
                   <span className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.34em] text-foreground/70 group-hover:text-foreground transition-colors">
@@ -373,6 +375,30 @@ export default function EditorialBiographyColumns({
             </FadeInRow>
           )}
 
+
+          {additionalImages.map(({ block, index }, imageIndex) => (
+            <FadeInRow key={`extra-image-${index}`} delay={300}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
+                <MediaCell
+                  block={block}
+                  designerName={designerName}
+                  index={index}
+                  className={imageIndex % 2 === 0 ? "md:col-start-1" : "md:col-start-2"}
+                />
+              </div>
+            </FadeInRow>
+          ))}
+
+          {additionalVideos.map(({ block, index }) => (
+            <FadeInRow key={`extra-video-${index}`} delay={300}>
+              <MediaCell
+                block={block}
+                designerName={designerName}
+                index={index}
+                className="w-full max-w-4xl mx-auto my-12 block"
+              />
+            </FadeInRow>
+          ))}
 
           {/* Closing navigation link at the end of the narrative track */}
           {onClosePortrait && (
