@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { biographyPictureGroups } from "@/lib/biographyPictureGroups";
 import {
   renderParagraph,
   parseMediaLine,
@@ -20,8 +21,8 @@ import {
  *  - Outer wrapper: max-w-6xl px-6
  *  - Row 1: intro paragraph + centered horizontal video
  *  - Row 2: large blockquote, centered
- *  - Row 3: first vertical photo left, next narrative paragraphs right
- *  - Row 4: remaining text left, second vertical photo right
+ *  - Following rows: ordered photos alternate sides beside successive paragraphs
+ *  - Final photo row: all remaining narrative text
  */
 
 type Block =
@@ -268,13 +269,9 @@ export default function EditorialBiographyColumns({
     ? textBlocks.slice(blockquoteIndex + 1)
     : textBlocks.slice(1);
 
-  const row3Texts = remainingTexts.slice(0, Math.ceil(remainingTexts.length / 2));
-  const row4Texts = remainingTexts.slice(Math.ceil(remainingTexts.length / 2));
+  const pictureTextGroups = biographyPictureGroups(remainingTexts, imageBlocks.length);
 
   const firstVideo = videoBlocks[0];
-  const firstImage = imageBlocks[0];
-  const secondImage = imageBlocks[1];
-  const additionalImages = imageBlocks.slice(2);
   const additionalVideos = videoBlocks.slice(1);
 
   const showCollectionCta = Boolean(collectionCtaHref);
@@ -371,65 +368,29 @@ export default function EditorialBiographyColumns({
 
 
 
-          {/* Row 3: first photo left, continuous text right */}
-          {(firstImage || row3Texts.length > 0) && (
-            <FadeInRow delay={240}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
-                {firstImage && (
-                  <MediaCell
-                    block={firstImage.block}
-                    designerName={designerName}
-                    index={firstImage.index}
-                    className="md:sticky md:top-28"
-                  />
+          {pictureTextGroups.map((texts, pictureIndex) => {
+            const image = imageBlocks[pictureIndex];
+            const imageOnLeft = pictureIndex % 2 === 0;
+            return (
+            <FadeInRow key={`picture-row-${pictureIndex}`} delay={240}>
+              <div data-biography-picture-row={pictureIndex + 1}
+                className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
+                {image && (
+                  <MediaCell block={image.block} designerName={designerName} index={image.index}
+                    className={cn("md:row-start-1", imageOnLeft ? "md:col-start-1" : "md:col-start-2")} />
                 )}
-                {row3Texts.length > 0 && (
-                  <div className="w-full text-left space-y-8">
-                    {row3Texts.map(({ block, index }) => (
-                      <TextCell key={`row3-text-${index}`} content={block.content} className="w-full text-left" />
+                {texts.length > 0 && (
+                  <div className={cn("w-full text-left space-y-8 md:row-start-1",
+                    image ? (imageOnLeft ? "md:col-start-2" : "md:col-start-1") : "md:col-span-2 max-w-3xl mx-auto")}>
+                    {texts.map(({ block, index }) => (
+                      <TextCell key={`picture-text-${index}`} content={block.content} className="w-full text-left" />
                     ))}
                   </div>
                 )}
               </div>
             </FadeInRow>
-          )}
-
-          {/* Row 4: continuous text left, second photo right */}
-          {(row4Texts.length > 0 || secondImage) && (
-            <FadeInRow delay={300}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
-                {row4Texts.length > 0 && (
-                  <div className="w-full text-left space-y-8">
-                    {row4Texts.map(({ block, index }) => (
-                      <TextCell key={`row4-text-${index}`} content={block.content} className="w-full text-left" />
-                    ))}
-                  </div>
-                )}
-                {secondImage && (
-                  <MediaCell
-                    block={secondImage.block}
-                    designerName={designerName}
-                    index={secondImage.index}
-                    className="md:sticky md:top-28"
-                  />
-                )}
-              </div>
-            </FadeInRow>
-          )}
-
-
-          {additionalImages.map(({ block, index }, imageIndex) => (
-            <FadeInRow key={`extra-image-${index}`} delay={300}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 items-start my-12">
-                <MediaCell
-                  block={block}
-                  designerName={designerName}
-                  index={index}
-                  className={imageIndex % 2 === 0 ? "md:col-start-1" : "md:col-start-2"}
-                />
-              </div>
-            </FadeInRow>
-          ))}
+            );
+          })}
 
           {additionalVideos.map(({ block, index }) => (
             <FadeInRow key={`extra-video-${index}`} delay={300}>
