@@ -4,6 +4,7 @@ import { ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   renderParagraph,
   parseMediaLine,
@@ -243,6 +244,7 @@ export default function EditorialBiographyColumns({
   onClosePortrait?: () => void;
 }) {
   const blocks = toBlocks(biography, biographyImages);
+  const isMobile = useIsMobile();
 
   const textBlocks = blocks
     .map((block, index) => ({ block, index }))
@@ -276,11 +278,51 @@ export default function EditorialBiographyColumns({
   const additionalVideos = videoBlocks.slice(1);
 
   const showCollectionCta = Boolean(collectionCtaHref);
+  const mobileMedia = [...videoBlocks, ...imageBlocks];
+  const mobileGaps = Math.max(1, textBlocks.length - 1);
+  const mobileSequence: Block[] = [];
+  textBlocks.forEach(({ block }, textIndex) => {
+    const gapIndex = textBlocks.length === 1 ? 0 : textIndex - 1;
+    if (gapIndex >= 0) {
+      const gapMedia = mobileMedia.filter((_, mediaIndex) =>
+        Math.floor(mediaIndex * mobileGaps / Math.max(1, mobileMedia.length)) === gapIndex,
+      );
+      // Photos precede videos if there is insufficient text for separate gaps.
+      gapMedia.sort((a, b) => Number(a.block.kind === "video") - Number(b.block.kind === "video"));
+      mobileSequence.push(...gapMedia.map(({ block: media }) => media));
+    }
+    mobileSequence.push(block);
+  });
+  if (textBlocks.length === 0) mobileSequence.push(...blocks);
 
   return (
     <div className="bg-cream">
       <div className={containerClassName ?? "mx-auto w-full max-w-6xl px-6 pt-4 md:pt-6 pb-4 md:pb-6"}>
         <div className="flex w-full flex-col gap-y-8 md:gap-y-10">
+          {isMobile ? (
+            <div className="flex flex-col gap-8" data-biography-mobile>
+              {mobileSequence.map((block, index) => (
+                <div key={`mobile-${index}`} data-biography-block={block.kind}>
+                  <FadeInRow>
+                    {block.kind === "text" ? (
+                      <TextCell content={block.content} eyebrow={index === 0 ? eyebrow : undefined} />
+                    ) : (
+                      <MediaCell block={block} designerName={designerName} index={index} />
+                    )}
+                  </FadeInRow>
+                </div>
+              ))}
+              {showCollectionCta && collectionCtaHref && (
+                <div className="flex justify-center">
+                  <Link to={collectionCtaHref} className="inline-flex items-center gap-3 border border-foreground/20 px-7 py-3 text-foreground/70 hover:text-foreground transition-colors">
+                    <span className="font-body text-[10px] uppercase tracking-[0.34em]">{collectionCtaLabel}</span>
+                    <ArrowRight className="h-3 w-3" strokeWidth={1.25} />
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
           {/* Row 1: intro paragraph + centered video */}
           {introText && (
             <FadeInRow delay={60}>
@@ -399,6 +441,9 @@ export default function EditorialBiographyColumns({
               />
             </FadeInRow>
           ))}
+
+            </>
+          )}
 
           {/* Closing navigation link at the end of the narrative track */}
           {onClosePortrait && (
