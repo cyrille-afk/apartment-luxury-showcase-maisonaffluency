@@ -1659,6 +1659,26 @@ const TradeProductPage: React.FC = () => {
     : [];
   const baseOnlyRequiresSize = isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
 
+  // Product-level default variant (e.g. Galet Dining Table → Large): the size
+  // picker opens on that option instead of the empty "Select Your Size"
+  // placeholder. Applied once per product, so a visitor who clears the choice
+  // is never pushed back onto the default.
+  const defaultVariantAppliedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const pid = product?.id ?? null;
+    if (!pid || defaultVariantAppliedFor.current === pid) return;
+    const wanted = (product as any).default_variant_label;
+    if (!wanted || isDualAxis || isBaseOnly || hasSingleAxisSplit) {
+      defaultVariantAppliedFor.current = pid;
+      return;
+    }
+    const match = resolveDefaultVariant(sizeVariants, wanted);
+    // Variants can still be loading — retry on the next data tick.
+    if (!match) return;
+    defaultVariantAppliedFor.current = pid;
+    setSelectedVariantIdx(match.index);
+  }, [product, sizeVariants, isDualAxis, isBaseOnly, hasSingleAxisSplit]);
+
   // `activeVariant` is hoisted above `handleAddToQuote` (top of component) so
   // both the caption and the quote flow read from the same resolver.
 
