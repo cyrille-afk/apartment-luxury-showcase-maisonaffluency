@@ -546,9 +546,14 @@ const TradeLayout = () => {
             <div className="ml-auto flex min-w-0 items-center gap-2 md:gap-4" data-felix-target="account-panel">
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
-              <div className="shrink-0" data-felix-target="header-client-view">
-                 <ProductDisplayToggle />
-               </div>
+              {/* The display-mode toggle only affects product, collection and
+                  designer-gallery routes — hide it elsewhere so it can't be a
+                  no-op that silently hides the sidebar. */}
+              {(productRoute || collectionRoute || designerRoute) && (
+                <div className="shrink-0" data-felix-target="header-client-view">
+                  <ProductDisplayToggle />
+                </div>
+              )}
                 {showTradePrice && <span data-trade-sensitive><NotificationBell /></span>}
                <span data-trade-sensitive><MobilePreviewHeaderButton /></span>
             </div>
