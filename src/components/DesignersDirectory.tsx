@@ -696,6 +696,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
             </span>
           </div>
         )}
+        {!isLetterA && (
           <>
             {/* Subtle bottom vignette for cinematic continuity with hero */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
