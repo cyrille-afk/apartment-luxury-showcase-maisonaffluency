@@ -47,6 +47,7 @@ import { template as funnelPaymentReceivedInternal } from './funnel-payment-rece
 import { template as depositClearedInternal } from './deposit-cleared-internal.tsx'
 import { template as queueJobParked } from './queue-job-parked.tsx'
 import { template as webhookWorkerUnhealthy } from './webhook-worker-unhealthy.tsx'
+import { template as conciergeDeliveryAlert } from './concierge-delivery-alert.tsx'
 import { template as studioActivationAlert } from './studio-activation-alert.tsx'
 import { approvalCopyConcierge, approvalCopyCyrille, approvalCopyGregoire, rejectionCopyConcierge, rejectionCopyCyrille, rejectionCopyGregoire } from './application-decision-copy.tsx'
 
@@ -87,6 +88,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'deposit-cleared-internal': depositClearedInternal,
   'queue-job-parked': queueJobParked,
   'webhook-worker-unhealthy': webhookWorkerUnhealthy,
+  'concierge-delivery-alert': conciergeDeliveryAlert,
   'studio-activation-alert': studioActivationAlert,
   'trade-approval-copy-concierge': approvalCopyConcierge,
   'trade-approval-copy-cyrille': approvalCopyCyrille,
