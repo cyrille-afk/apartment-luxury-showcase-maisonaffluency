@@ -49,9 +49,6 @@ function splitSentences(text: string): string[] {
 }
 
 export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCuratorNotes {
-  const designer = source.brandName.includes(" - ")
-    ? source.brandName.split(" - ")[0].trim()
-    : source.brandName;
   const year = source.title.match(/\b(18|19|20)\d{2}\b/)?.[0] || null;
   const plainDescription = (source.description || "")
     .replace(/<[^>]+>/g, " ")
