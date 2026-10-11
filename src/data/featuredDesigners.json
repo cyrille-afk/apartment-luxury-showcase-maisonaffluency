@@ -1,5 +1,14 @@
 [
   {
+    "id": "eb7741a8-2b2c-4619-9746-37d2cfda0ec8",
+    "slug": "emma-donnersberg",
+    "name": "Emma Donnersberg",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791637199/Screen_Shot_2026-10-10_at_8.59.28_PM_rywdna.png",
+    "image_url": "",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791633700/Screen_Shot_2026-10-10_at_7.58.22_PM_ptnpdf.png"
+  },
+  {
     "id": "f519e68e-c87f-41e7-baf1-7d5f51aadac6",
     "slug": "delcourt-collection",
     "name": "Delcourt Collection",
