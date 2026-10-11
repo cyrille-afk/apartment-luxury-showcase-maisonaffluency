@@ -1002,7 +1002,7 @@ const VariantDimensionsPanel: React.FC = () => {
           secondaryText={null}
           emphasized
           forceDropdown={!dualLabelsAreDimensions}
-          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || product.variant_placeholder || "Select the Wood Finish")}
+          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || product.variant_placeholder || (isRugProduct ? "Select Your Size" : "Select the Wood Finish"))}
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
