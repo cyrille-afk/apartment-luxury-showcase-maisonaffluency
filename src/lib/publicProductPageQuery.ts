@@ -15,7 +15,7 @@ function slugify(s: string) {
 export const PUBLIC_PRODUCT_PAGE_STALE_TIME = 5 * 60_000;
 
 const publicPickFields =
-  "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
+  "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, default_variant_label";
 
 /**
  * Canonical fetcher for the public product page. Shared by the page itself and

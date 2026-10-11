@@ -179,6 +179,8 @@ interface ProductRow {
   top_axis_label: string | null;
   wood_label_override: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number; meters?: number }[] | null;
+  /** Variant the size picker opens with pre-selected (see src/lib/variantDefault.ts). */
+  default_variant_label?: string | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
   edition: string | null;
