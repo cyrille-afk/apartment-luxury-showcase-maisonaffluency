@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToastAction } from "@/components/ui/toast";
+import { WebhookDeliveryStatus } from "@/components/trade/WebhookDeliveryStatus";
 
 type FieldKey = "publishableKey" | "secretKey" | "webhookSecret";
 
@@ -776,6 +777,8 @@ export default function TradeAdminPaymentSettings() {
           </Button>
         </div>
       </section>
+
+      <WebhookDeliveryStatus />
     </div>
   );
 }
