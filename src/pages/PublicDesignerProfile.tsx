@@ -1827,7 +1827,8 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
 
 
                     <div className={cn(
-                      "w-full columns-2 gap-6 sm:grid sm:columns-auto",
+                      "w-full gap-6 sm:grid sm:columns-auto",
+                      sortMode === "default" ? "columns-2" : "grid",
                       gridClass,
                       "md:gap-8"
                     )}>
