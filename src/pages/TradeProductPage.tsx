@@ -269,7 +269,7 @@ export function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -286,7 +286,7 @@ export function useTradeProductBySlug(
         if (!curatorPick && (tradeProduct as any).source_pick_id) {
           const { data: pickById } = await supabase
             .from("designer_curator_picks")
-            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
             .eq("id", (tradeProduct as any).source_pick_id)
             .maybeSingle();
           curatorPick = pickById || null;
@@ -383,7 +383,7 @@ export function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
