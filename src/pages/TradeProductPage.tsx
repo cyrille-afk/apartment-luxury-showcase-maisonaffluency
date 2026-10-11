@@ -1278,6 +1278,35 @@ const TradeProductPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryActiveIndex, data?.product?.id]);
 
+  // Product-level default variant (e.g. Galet Dining Table → Large): the size
+  // picker opens on that option instead of the empty "Select Your Size"
+  // placeholder. Applied once per product so a visitor who clears the choice is
+  // never pushed back onto it. Declared above the loading guards so the hook
+  // order can never change between renders.
+  const defaultVariantAppliedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const row = (data?.product ?? null) as any;
+    const pid = row?.id ?? null;
+    if (!pid || defaultVariantAppliedFor.current === pid) return;
+    const wanted = row?.default_variant_label;
+    const pickVariants = Array.isArray(row?.size_variants) ? row.size_variants : null;
+    const axes = computeVariantAxes(pickVariants);
+    if (!wanted || axes.isDualAxis || axes.isBaseOnly || axes.hasSingleAxisSplit) {
+      defaultVariantAppliedFor.current = pid;
+      return;
+    }
+    // Index the picker's own list: priced variants when the pricing service
+    // supplies them, otherwise the curator pick's rows.
+    const priced = Array.isArray((data?.pricing as any)?.size_variants)
+      ? ((data?.pricing as any).size_variants as any[])
+      : [];
+    const match = resolveDefaultVariant(priced.length ? priced : pickVariants, wanted);
+    // Variants can still be loading — retry on the next data tick.
+    if (!match) return;
+    defaultVariantAppliedFor.current = pid;
+    setSelectedVariantIdx(match.index);
+  }, [data]);
+
   // Proactive tearsheet nudge — fires after the architect has stopped
   // changing finishes for 3s. Sends a lightweight "lock this in" spec card
   // into the concierge chat stream. Skips firing until at least one finish
