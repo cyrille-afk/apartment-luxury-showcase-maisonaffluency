@@ -688,7 +688,14 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
             className={`pointer-events-none absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out md:opacity-0 md:group-hover:opacity-100 ${mobileRevealed ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
-        {!isLetterA && (
+        {/* Desktop hover-only "View Curators Picks" pill — signals the pick reveal; non-interactive */}
+        {hasHoverPick && (
+          <div className="hidden md:flex pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">
+              View Curators Picks
+            </span>
+          </div>
+        )}
           <>
             {/* Subtle bottom vignette for cinematic continuity with hero */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
