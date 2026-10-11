@@ -6,6 +6,7 @@ import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { biographyPictureGroups } from "@/lib/biographyPictureGroups";
+import { placeCtaAfterParagraph, type CtaPlacement } from "@/lib/biographyCtaPlacement";
 import {
   renderParagraph,
   parseMediaLine,
@@ -221,6 +222,28 @@ function FadeInRow({ children, delay = 0 }: { children: React.ReactNode; delay?:
   );
 }
 
+type TextEntry = { block: Extract<Block, { kind: "text" }>; index: number };
+type MediaEntry = { block: Extract<Block, { kind: "image" } | { kind: "video" }>; index: number };
+
+type NarrativeRow =
+  | { kind: "intro"; entry: TextEntry }
+  | { kind: "blockquote"; entry: TextEntry }
+  | { kind: "video"; entry: MediaEntry }
+  | { kind: "picture"; pictureIndex: number; image: MediaEntry | null; texts: TextEntry[] }
+  | { kind: "texts"; texts: TextEntry[] };
+
+/** Break a row in two so the collection CTA can sit between its paragraphs. */
+function splitNarrativeRow(rows: NarrativeRow[], { rowIndex, splitAt }: CtaPlacement): NarrativeRow[] {
+  const row = rows[rowIndex];
+  if (splitAt <= 0 || !row || (row.kind !== "picture" && row.kind !== "texts")) return rows;
+  return [
+    ...rows.slice(0, rowIndex),
+    { ...row, texts: row.texts.slice(0, splitAt) },
+    { kind: "texts", texts: row.texts.slice(splitAt) },
+    ...rows.slice(rowIndex + 1),
+  ];
+}
+
 export default function EditorialBiographyColumns({
   biography,
   biographyImages = [],
@@ -275,6 +298,33 @@ export default function EditorialBiographyColumns({
   const additionalVideos = videoBlocks.slice(1);
 
   const showCollectionCta = Boolean(collectionCtaHref);
+
+  // Narrative rows in reading order. The collection CTA sits at the midpoint of
+  // the paragraphs — after paragraph three when there are five — not after the
+  // opening, so it breaks the biography rather than cutting it short.
+  const narrativeRows: NarrativeRow[] = [];
+  if (introText) narrativeRows.push({ kind: "intro", entry: introText });
+  if (firstVideo) narrativeRows.push({ kind: "video", entry: firstVideo });
+  if (blockquoteText) narrativeRows.push({ kind: "blockquote", entry: blockquoteText });
+  pictureTextGroups.forEach((texts, pictureIndex) => {
+    const image = imageBlocks[pictureIndex];
+    if (image || texts.length > 0) {
+      narrativeRows.push({ kind: "picture", pictureIndex, image: image ?? null, texts });
+    }
+  });
+  additionalVideos.forEach((entry) => narrativeRows.push({ kind: "video", entry }));
+
+  const ctaPlacement = placeCtaAfterParagraph(
+    narrativeRows.map((row) =>
+      row.kind === "intro" || row.kind === "blockquote"
+        ? 1
+        : row.kind === "picture" || row.kind === "texts"
+          ? row.texts.length
+          : 0,
+    ),
+  );
+  const narrativeDisplay = splitNarrativeRow(narrativeRows, ctaPlacement);
+
   const mobileMedia = [...videoBlocks, ...imageBlocks];
   const mobileGaps = Math.max(1, textBlocks.length - 1);
   const mobileSequence: Block[] = [];
