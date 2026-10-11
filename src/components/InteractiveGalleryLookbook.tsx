@@ -373,6 +373,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [loadedScenes, setLoadedScenes] = useState<Set<string>>(() => new Set());
   const [activePin, setActivePin] = useState<string | null>(null);
   const [dockDismissed, setDockDismissed] = useState(false);
+  // Bumped on every hotspot hover/open so the dock draws a fresh trio from the pool.
+  const [dockRotation, setDockRotation] = useState(0);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
@@ -631,7 +633,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     const product = resolveHotspotProduct(hotspot);
     const ownProduct = product && !product.restricted_gallery_pin ? product : null;
     const pool = allPicks.filter((pick) => publicPickIds.has(pick.id) && pick.id !== product?.id && pick.image_url);
-    return galleryAlternatives(hotspot.product_name, ownProduct, pool);
+    return galleryAlternatives(hotspot.product_name, ownProduct, pool, 12);
   };
   // Landing: default to the first pin that actually has alternatives, so the dock populates immediately.
   const sceneHotspots = portraitDock && activeScene ? hotspotsForScene(activeScene) : [];
@@ -640,7 +642,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       ?? sceneHotspots.find((hotspot) => alternativesFor(hotspot).length > 0)
       ?? sceneHotspots[0]
     : undefined;
-  const dockAlternatives = selectedHotspot ? alternativesFor(selectedHotspot) : [];
+  const dockAlternatives = useMemo(() => {
+    if (!selectedHotspot) return [];
+    const pool = [...alternativesFor(selectedHotspot)];
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, 3);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
@@ -746,7 +757,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
@@ -786,7 +797,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                          <div className="min-w-0 truncate font-body text-[10px] font-semibold uppercase tracking-widest text-foreground">Curated alternatives · {selectedHotspot.product_name}</div>
                           <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setDockDismissed(true)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                        </div>
-                       <div className="grid grid-cols-3 gap-2 md:gap-3">
+                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:gap-3">
                          {dockAlternatives.map((pick) => (
                            <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:gap-3 md:p-2">
                              <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-16" loading="lazy" />
