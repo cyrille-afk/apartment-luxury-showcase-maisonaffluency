@@ -958,6 +958,7 @@ const VariantDimensionsPanel: React.FC = () => {
   } = ctx;
 
   const dualLabelsAreDimensions = dualSizeOptions.length > 0 && dualSizeOptions.every(looksLikeDimension);
+  const isRugProduct = isRugCategory(product.category);
   const frameOnLabel = isDualAxis && isUpholsteryAxisLabel(baseAxisLabelRaw)
     && isUpholsteryAxisLabel(topAxisLabelRaw) && !dualLabelsAreDimensions;
   const frameSwatchesCoverLabels = product.id === OOL_MINIBAR_PICK_ID || (frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes));
@@ -1002,7 +1003,7 @@ const VariantDimensionsPanel: React.FC = () => {
           secondaryText={null}
           emphasized
           forceDropdown={!dualLabelsAreDimensions}
-          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || product.variant_placeholder || "Select the Wood Finish")}
+          placeholder={dualLabelsAreDimensions ? "Select Your Size" : (product.wood_label_override || product.variant_placeholder || (isRugProduct ? "Select Your Size" : "Select the Wood Finish"))}
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
