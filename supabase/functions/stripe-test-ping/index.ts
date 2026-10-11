@@ -15,7 +15,9 @@ Deno.serve(async (req) => {
   if (!uid) return json({ error: "unauthorized" }, 401);
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", uid).in("role", ["admin", "super_admin"]);
   if (!roles?.length) return json({ error: "forbidden" }, 403);
-  const envKey = (Deno.env.get("STRIPE_TEST_SECRET_KEY") ?? "").trim();
+  const candidates = [Deno.env.get("STRIPE_TEST_API_KEY"), Deno.env.get("STRIPE_TEST_SECRET_KEY")]
+    .map((v) => (v ?? "").trim());
+  const envKey = candidates.find((v) => /^(sk|rk)_test_/.test(v)) ?? candidates[0];
   const envOk = /^(sk|rk)_test_/.test(envKey);
   const { data: pc } = await admin.from("payment_credentials").select("test_secret_key").limit(1).maybeSingle();
   const key = envOk ? envKey : ((pc?.test_secret_key as string) ?? "").trim();
