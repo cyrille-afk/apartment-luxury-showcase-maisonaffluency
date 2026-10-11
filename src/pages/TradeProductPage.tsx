@@ -68,6 +68,7 @@ import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVaria
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
+import { resolveDefaultVariant } from "@/lib/variantDefault";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
