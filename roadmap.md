@@ -214,3 +214,5 @@
 - [x] Create five Emma Donnersberg PDF product pages: live Public and signed-in Trade verified; 6 ceramic and 16 Wave fabric crops plus 12 reused Stratus finishes checked, all five spec sheets opened. No invented swatches for US or two-module Wave; PDF dimension conflicts noted.
 
 - [x] Attribute Mushroom rug to Emma Donnersberg with CC-Tapis Edition; public and signed-in catalogue cards verified, two live attribution tests pass; public catalogue refreshed.
+
+- [ ] Sync Visualiser saved finish configurations to the account (blocked: database unreachable)
