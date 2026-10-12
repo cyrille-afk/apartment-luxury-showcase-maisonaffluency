@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Persist consented IP currency on signed-in profiles and linked clients; verify detection, ownership, readback and unchanged pricing.
 - [x] Add precise model rotation degree inputs and six common up-axis presets; 19 unit tests pass, signed-in GUM decimal inputs/all presets/reload/reset verified, placement and scale retained, full decimal values visible, no page errors, build OK.
 - [x] Display country and available IP-detected currency on Client Management profiles; six tests pass, real signed-in Singapore/SGD account sheet and directory verified without page errors, build OK. No linked IP detections currently recorded; shown as unavailable, never inferred from the admin browser. Pricing preferences unchanged.
 - [x] Add selected-model X/Y/Z ±90° rotation and orientation reset controls; 10 tests pass, signed-in GUM rotation/reload/reset verified with upright reset screenshot and no page errors. Position, scale and finishes retained; build OK.

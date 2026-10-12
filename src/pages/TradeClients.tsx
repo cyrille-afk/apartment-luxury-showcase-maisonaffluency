@@ -39,6 +39,9 @@ type Client = {
   website: string | null;
   tax_id: string | null;
   default_currency: string | null;
+  ip_detected_country?: string | null;
+  ip_detected_currency?: string | null;
+  ip_detected_at?: string | null;
   billing_address_line1: string | null;
   billing_address_line2: string | null;
   billing_city: string | null;

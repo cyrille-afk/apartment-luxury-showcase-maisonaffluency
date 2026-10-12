@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { clientLocationDetails } from "./clientLocation";
 
 describe("Client Management location display", () => {
+  it("shows persisted IP currency without changing preferred currency", () => {
+    expect(clientLocationDetails({ billing_country: 'France', default_currency: 'EUR', ip_detected_country: 'SG', ip_detected_currency: 'SGD' }, 'US')).toMatchObject({ currency: 'EUR', ipCountry: 'SG', ipCurrency: 'SGD' });
+  });
   it("shows country-based currency when no default was saved", () => {
     expect(clientLocationDetails({ billing_country: "Singapore" })).toMatchObject({
       country: "Singapore", countryCurrency: "SGD", currency: "SGD", ipCurrency: null,
