@@ -866,7 +866,7 @@ export default function TradeClients() {
                     <dl className="grid gap-3 md:grid-cols-2 text-sm font-body">
                       {Object.entries(editing.onboarding_details).map(([key, value]) => value === null ? null : (
                         <div key={key} className="min-w-0">
-                          <dt className="text-muted-foreground capitalize">{key.replaceAll("_", " ")}</dt>
+                          <dt className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</dt>
                           <dd className="whitespace-pre-wrap break-words">{typeof value === "boolean" ? (value ? "Yes" : "No") : value}</dd>
                         </div>
                       ))}
