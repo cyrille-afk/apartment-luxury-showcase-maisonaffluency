@@ -82,14 +82,17 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   const { data: founderIsBrand = false } = useFounderIsBrand(
     isParentBrand ? undefined : designer.founder
   );
-  const { data: simplePicks = [] } = useDesignerPicks(profileOnly || hasOverride ? undefined : designer.id, { publicOnly: true });
+  // Trade-only designer rows only load for approved trade/admin sessions, so
+  // their full catalogue is safe here; public designers stay on the public view.
+  const publicOnly = !designer.trade_only;
+  const { data: simplePicks = [] } = useDesignerPicks(profileOnly || hasOverride ? undefined : designer.id, { publicOnly });
   const { data: attributedPicks = [] } = useAttributedDesignerPicks(
     !profileOnly && !hasOverride && !isParentBrand ? designer : undefined,
-    { publicOnly: true },
+    { publicOnly },
   );
   const { data: groupedPicks = [] } = useGroupedDesignerPicks(
     !profileOnly && isParentBrand ? designer : undefined,
-    { publicOnly: true }
+    { publicOnly }
   );
   const picks: DesignerCuratorPick[] = hasOverride
     ? (picksOverride as DesignerCuratorPick[])
