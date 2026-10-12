@@ -10,6 +10,7 @@ const base: TradeProduct = {
   tags: ["fuga collection"],
   edition: "CC-Tapis Edition",
   materials: "100% Himalayan wool",
+  image_url: null,
 };
 
 const make = (over: Partial<TradeProduct>): TradeProduct => ({ ...base, ...over });
