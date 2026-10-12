@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { FINISH_TARGET_LABELS, finishTargetsFromParts, materialFitsTarget, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -585,6 +586,12 @@ const TradeVisualiser = () => {
               ))}
             </div>
             <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" ? selected.material?.name : null) ?? "No finish applied"}</p>
+            <FinishPresets
+              object={selected}
+              onRestore={(preset) => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId
+                ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial }
+                : object))}
+            />
           </div>
           )}
         </>)}
