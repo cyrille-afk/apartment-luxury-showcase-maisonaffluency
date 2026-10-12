@@ -6,8 +6,9 @@ import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
-import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
+import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
 // three.js / @react-three/* live behind this boundary so they are never part
@@ -431,6 +432,7 @@ const TradeVisualiser = () => {
   );
 
   return (
+    <VisualiserSelectionProvider objects={objects} selectedId={selectedId} setSelectedId={setSelectedId}>
     <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#F9F8F6]">
       <Helmet>
         <title>Visualiser Sandbox | Maison Affluency Trade</title>
@@ -474,33 +476,9 @@ const TradeVisualiser = () => {
         <p className={cn(microLabel, "text-muted-foreground")}>Drag to orbit // Scroll to zoom</p>
       </div>
 
-      {/* Selected object panel */}
-      {selected && (
-        <div className="absolute right-4 sm:right-8 top-24 z-[60] max-h-[calc(100%-14rem)] w-64 max-w-[calc(100%-2rem)] overflow-y-auto border-t border-foreground/15 bg-background/90 px-5 py-4 backdrop-blur-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className={cn(microLabel, "text-muted-foreground")}>{selected.brand_name}</p>
-              <p className="mt-1 font-serif text-base leading-tight text-foreground">{selected.product_name}</p>
-            </div>
-            <button aria-label="Remove object" onClick={() => removeObject(selected.instanceId)} className="text-muted-foreground hover:text-foreground">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <p className={cn(microLabel, "mt-3 text-muted-foreground")}>
-            {formatDimensions(resolveDimensions({ dimensions: selected.dimensions })) ?? DIMENSIONS_PLACEHOLDER}
-          </p>
-
-          <label className={cn(microLabel, "mt-5 block text-muted-foreground")}>Scale · {Math.round(selected.scale * 100)}%</label>
-          <input
-            type="range"
-            aria-label="Scale object"
-            min={MIN_SCALE * 100}
-            max={MAX_SCALE * 100}
-            value={Math.round(selected.scale * 100)}
-            onChange={(event) => scaleObject(selected.instanceId, Number(event.target.value) / 100)}
-            className="mt-2 w-full accent-foreground"
-          />
-
+      {/* Inspector sidebar — reads the shared selection context */}
+      <VisualiserInspector onRemove={removeObject} onScale={scaleObject}>
+        {selected && (<>
           {selected.glb_url && <Suspense fallback={null}>
             <ModelOrientationControls
               orientation={selected.modelOrientation}
@@ -588,8 +566,8 @@ const TradeVisualiser = () => {
             <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{(finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.name ?? activeMaterial?.name ?? "No active finish"}</p>
           </div>
           )}
-        </div>
-      )}
+        </>)}
+      </VisualiserInspector>
 
       {/* Sourcing tray */}
       {trayOpen && (
@@ -674,6 +652,7 @@ const TradeVisualiser = () => {
         onChange={(event) => uploadBackdrop(event.target.files?.[0] ?? null)}
       />
     </div>
+    </VisualiserSelectionProvider>
   );
 };
 
