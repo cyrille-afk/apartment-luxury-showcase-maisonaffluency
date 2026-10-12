@@ -2186,17 +2186,13 @@ const TradeProductPage: React.FC = () => {
                 >
                    {showTradePrice ? designerDisplay : "Curated Collection"}
                 </Link>
-                <div className="flex items-baseline justify-between gap-4 mt-1">
-                  <h1 className="font-display text-[1.5rem] md:text-[1.85rem] leading-tight">
-                    {product.title}
-                    {showTradePrice && formatProductSubtitleLine(product.title, product.subtitle) && (
-                      <span className="block mt-1 text-[0.8em] text-muted-foreground">
-                        {formatProductSubtitleLine(product.title, product.subtitle)}
-                      </span>
-                    )}
-                  </h1>
-                </div>
-                {showTradePrice && (() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mt-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
+                <ProductTitleBlock
+                  title={product.title}
+                  subtitleLine={formatProductSubtitleLine(product.title, product.subtitle)}
+                  product={product}
+                  isEcartProduct={isEcartProduct}
+                  showBadge={showTradePrice}
+                />
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
                 <span className="font-body text-[11px] text-muted-foreground" title="Contract baseline currency">EUR</span>
