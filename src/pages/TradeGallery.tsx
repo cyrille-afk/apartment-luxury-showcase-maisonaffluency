@@ -33,6 +33,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { sortNameKey } from "@/lib/nameFormat";
 import { sortTradeProducts } from "@/lib/tradeSort";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
@@ -83,6 +84,7 @@ const StudioGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
+  const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
@@ -421,6 +423,24 @@ const StudioGallery = () => {
     }
   };
 
+  const editions = useMemo(() => {
+    const byKey = new Map<string, string>();
+    for (const p of allProducts) {
+      const ed = (p.edition || "").trim();
+      if (!ed) continue;
+      const key = ed.toLowerCase();
+      if (!byKey.has(key)) byKey.set(key, ed);
+    }
+    // Named collections (e.g. "CC-Tapis Edition", "Erased Heritage Collection")
+    // come first; pure size labels ("Edition of 12") follow, both alphabetical.
+    const isSizeLabel = (ed: string) =>
+      /^(edition of|limited edition|numbered|unique piece|copies\b|\d+\s+copies)/i.test(ed);
+    return [...byKey.values()].sort((a, b) => {
+      const aSize = isSizeLabel(a) ? 1 : 0;
+      const bSize = isSizeLabel(b) ? 1 : 0;
+      return aSize - bSize || sortNameKey(a).localeCompare(sortNameKey(b));
+    });
+  }, [allProducts]);
   const matchedProducts = useMemo(() => {
     return allProducts.filter((p) => {
       if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
@@ -429,9 +449,10 @@ const StudioGallery = () => {
       const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
-      return matchesBrand && matchesCategory && matchesSub;
+      const matchesEdition = selectedEdition === "all" || (p.edition || "").trim() === selectedEdition;
+      return matchesBrand && matchesCategory && matchesSub && matchesEdition;
     });
-  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
+  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory, selectedEdition]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
   const canonicalProducts = useMemo(() => {
     if (!routeBrandSlug || !galleryDesigner || galleryDesigner.trade_only) return null;
@@ -446,9 +467,10 @@ const StudioGallery = () => {
       if (!searchMatches(product, search)) return [];
       if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
       if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
+      if (selectedEdition !== "all" && (product.edition || "").trim() !== selectedEdition) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
-  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
+  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
   const filtered = useMemo(
     () => {
       if (canonicalProducts) return canonicalProducts;
@@ -638,6 +660,19 @@ const StudioGallery = () => {
               </select>
             </div>
           )}
+          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
+            <select
+              value={selectedEdition}
+              onChange={(e) => setSelectedEdition(e.target.value)}
+              aria-label="Filter by collection or edition"
+              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+            >
+              <option value="all">All Collections</option>
+              {editions.map((ed) => (
+                <option key={ed} value={ed}>{ed}</option>
+              ))}
+            </select>
+          </div>
           <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
             <select
               value={sortBy}
