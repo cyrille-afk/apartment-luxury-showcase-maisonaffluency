@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Audit studio portfolio evidence at its original resolution and replace poor sources with verified sharper official photographs where available.
 - [x] Label Puzzle Console, Puzzle Dining Table and Canyon Console jointly; all three verified in Emma's Public and signed-in Trade picks, six tests pass, Puzzle Console photo opens its correct labelled sheet. Other Michel Amar pieces remain restricted.
 - [x] Add visible zoom-in/out controls to mobile and PWA editorial gallery photos; plus/minus, zoom limits, two-finger pinch, reset and next-photo navigation verified in both with no page errors; build OK.
 - [x] Save Fuga's supplied description on all three curator/Trade scenes; explicit Description legends always stay open. Five tests pass; Scene 2 verified visible without a Description button in Public, Studio and Presentation, no page errors.
