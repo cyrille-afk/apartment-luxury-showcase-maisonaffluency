@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Reorganize Trade Gallery toolbar into search/currency, pill filters and results/view controls; preserve secondary tools and verify signed-in desktop/mobile interactions.
+- [x] Reorganize Trade Gallery toolbar into search/currency, pill filters and results/view controls; secondary tools preserved, signed-in search/currency/category/creator/sort/grid/list verified, desktop/mobile screenshots show no overflow, 21 regressions pass and build OK.
 - [x] Audit all 65 saved studio portfolio sources; replace eight thumbnails with sharper originals and seven flag/logo/icon slots with authentic portfolio photos across five studios. All 15 replacement files decode, saved values read back correctly, and signed-in review screenshots verify the visible images. Pola Sentosa originals are 476–705px wide; no enlargement or AI substitutes. Analysis notes and scraper unchanged.
 - [x] Label Puzzle Console, Puzzle Dining Table and Canyon Console jointly; all three verified in Emma's Public and signed-in Trade picks, six tests pass, Puzzle Console photo opens its correct labelled sheet. Other Michel Amar pieces remain restricted.
 - [x] Add visible zoom-in/out controls to mobile and PWA editorial gallery photos; plus/minus, zoom limits, two-finger pinch, reset and next-photo navigation verified in both with no page errors; build OK.
