@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Label Puzzle Console, Puzzle Dining Table and Canyon Console jointly and include all three in Emma's Curators' Picks; verify Public and Trade.
+- [x] Label Puzzle Console, Puzzle Dining Table and Canyon Console jointly; all three verified in Emma's Public and signed-in Trade picks, six tests pass, Puzzle Console photo opens its correct labelled sheet. Other Michel Amar pieces remain restricted.
 - [x] Add visible zoom-in/out controls to mobile and PWA editorial gallery photos; plus/minus, zoom limits, two-finger pinch, reset and next-photo navigation verified in both with no page errors; build OK.
 - [x] Save Fuga's supplied description on all three curator/Trade scenes; explicit Description legends always stay open. Five tests pass; Scene 2 verified visible without a Description button in Public, Studio and Presentation, no page errors.
 - [x] Recognize linked finishes and variant materials in the missing-materials audit; 13 tests pass, all 744 records checked live, 412 false flags removed (439 → 27), all eight Amélie products clear including Solare, no page errors. Dimension rules unchanged; no catalogue records edited.
