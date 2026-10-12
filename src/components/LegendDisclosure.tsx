@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { parseTechnicalSpecs } from "@/lib/technicalSpecs";
 
 interface LegendDisclosureProps {
   icon: ReactNode;
@@ -23,26 +25,8 @@ export default function LegendDisclosure({
   fallbackLabel = "Technical Specs",
   defaultOpen = false,
 }: LegendDisclosureProps) {
-  const lines = text.split("\n").map((l) => l.trim());
-  // Find header line: first non-empty line that ends with ":"
-  let headerIdx = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (!lines[i]) continue;
-    if (/:\s*$/.test(lines[i])) { headerIdx = i; break; }
-    break; // first non-empty isn't a header → no header
-  }
-  const label =
-    headerIdx >= 0 ? lines[headerIdx].replace(/:\s*$/, "").trim() : fallbackLabel;
-  const bodyLines = (headerIdx >= 0 ? lines.slice(headerIdx + 1) : lines)
-    .map((l) => l)
-    .reduce<string[]>((acc, l) => {
-      // collapse leading empty lines
-      if (acc.length === 0 && !l) return acc;
-      acc.push(l);
-      return acc;
-    }, []);
-  // Trim trailing empty lines
-  while (bodyLines.length && !bodyLines[bodyLines.length - 1]) bodyLines.pop();
+  const { label, bodyLines, collapsible } = parseTechnicalSpecs(text, fallbackLabel);
+  void icon;
 
   const [open, setOpen] = useState(defaultOpen);
 
@@ -50,12 +34,13 @@ export default function LegendDisclosure({
 
   return (
     <div className="border-b border-border/60">
-      <button
+      {collapsible ? <Button
+        variant="ghost"
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex items-center w-full py-2.5 md:py-4 text-left",
+          "flex items-center justify-start w-full h-auto px-0 rounded-none py-2.5 md:py-4 text-left hover:bg-transparent",
           "font-body text-sm text-foreground font-medium",
           "focus:outline-none focus-visible:ring-0",
           "hover:text-foreground transition-colors"
@@ -70,8 +55,10 @@ export default function LegendDisclosure({
             open && "rotate-90"
           )}
         />
-      </button>
-      {open && bodyLines.length > 0 && (
+      </Button> : (
+        <p className="py-2.5 md:py-4 font-body text-sm text-foreground font-medium">{label}</p>
+      )}
+      {(!collapsible || open) && bodyLines.length > 0 && (
         <div className="pb-3 md:pb-4 pr-2 flex flex-col gap-1">
           {bodyLines.map((line, i) => (
             <p

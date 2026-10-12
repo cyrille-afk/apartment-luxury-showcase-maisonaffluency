@@ -1110,6 +1110,7 @@ const VariantDimensionsPanel: React.FC = () => {
       )}
 
       {hasVariants && isBaseOnly && !baseAxisIsDim
+        && baseOnlySizeOptions.length <= 1
         && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
         && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
@@ -2686,10 +2687,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-3 md:gap-5 order-4">
-                      <MaterialsDescriptionBlock />
-                    </div>
-
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
                       {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                       <div className="group inline-flex max-w-full flex-col items-start">
@@ -2722,6 +2719,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
                       <MotionAndDimensionsPanel />
+                      <MaterialsDescriptionBlock />
                       <ShippingDetailsAccordion variant="row" />
                     </div>
                   </VariantSelectorsProvider>
@@ -2873,7 +2871,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div id="finish-selectors" className="flex flex-col gap-5 scroll-mt-28">
-                      <VariantFinishSelectors />
+                      <VariantFinishSelectors renderMaterialsDescription={false} />
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                           No reference image on file for{" "}
@@ -2885,6 +2883,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
                     <MotionAndDimensionsPanel />
 
+                    <MaterialsDescriptionBlock />
                     {!isTradeVerifiedView && <ShippingDetailsAccordion variant="row" />}
 
                     {/* Actions follow the complete finish, motion, and dimensions stack. */}

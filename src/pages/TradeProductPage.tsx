@@ -1958,7 +1958,6 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-        <ShippingDetailsAccordion />
       </div>
     );
 
@@ -2541,12 +2540,6 @@ const TradeProductPage: React.FC = () => {
                 </>
               )}
 
-              {!isRugSqmActive && product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
-                <LegendDisclosure
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                />
-              )}
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
@@ -3108,6 +3101,15 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
             </div>
+
+              {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
+                <LegendDisclosure
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                />
+              )}
+
+            <ShippingDetailsAccordion variant="row" />
 
             {/* Origin only — lead time lives exclusively in the pricing block. */}
             <div className="flex flex-col gap-2">
