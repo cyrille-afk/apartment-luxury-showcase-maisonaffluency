@@ -377,16 +377,17 @@ const StudioGallery = () => {
   }, [slugBrandMap]);
 
   // Sync route slug -> dropdown selection (so the <select> visibly reflects the URL).
+  const prevSlugRef = useRef<string | undefined>(routeBrandSlug);
   useEffect(() => {
+    const cameFromSlug = prevSlugRef.current !== undefined && routeBrandSlug === undefined;
+    prevSlugRef.current = routeBrandSlug;
     if (routeBrandName && selectedBrand !== routeBrandName) {
       setSelectedBrand(routeBrandName);
-    } else if (!routeBrandSlug && selectedBrand !== "all" && !brands.includes(selectedBrand)) {
-      // Brand list loaded later — no-op; handled by user interaction.
-    }
-    // When user navigates from /trade/gallery/:slug back to /trade/gallery, reset selection.
-    if (!routeBrandSlug && routeBrandName === undefined && selectedBrand !== "all") {
-      // Only auto-reset if previous value matched a known brand from a slug route.
-      // Skip to avoid clobbering manual dropdown choices.
+    } else if (cameFromSlug && selectedBrand !== "all") {
+      // Navigated from /trade/gallery/:slug back to /trade/gallery (e.g. the
+      // Gallery breadcrumb): the component stays mounted, so reset the
+      // persisted brand selection to show the full gallery again.
+      setSelectedBrand("all");
     }
   }, [routeBrandName, routeBrandSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
