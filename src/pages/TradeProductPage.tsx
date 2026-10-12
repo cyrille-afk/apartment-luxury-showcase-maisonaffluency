@@ -2177,7 +2177,6 @@ const TradeProductPage: React.FC = () => {
           <div className="relative flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
-                {showTradePrice && (() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                 <Link
                   to={designer.slug ? `/trade/gallery/${designer.slug}` : fallbackPath}
                   onClick={() => {
@@ -2197,6 +2196,7 @@ const TradeProductPage: React.FC = () => {
                     )}
                   </h1>
                 </div>
+                {showTradePrice && (() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="inline-block mt-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
                 <span className="font-body text-[11px] text-muted-foreground" title="Contract baseline currency">EUR</span>
