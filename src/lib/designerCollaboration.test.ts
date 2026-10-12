@@ -4,6 +4,14 @@ import { attributedDesignerPicksQueryOptions, designerQueryOptions } from "@/hoo
 import { creditsDesigner } from "./designerCollaboration";
 
 describe("Collaborative designer portfolio", () => {
+  it("keeps Emma's profile inaccessible to public visitors while Trade-only", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    try {
+      expect(await client.fetchQuery(designerQueryOptions("emma-donnersberg"))).toBeNull();
+    } finally {
+      client.clear();
+    }
+  });
   it("matches exact collaborators without adding similarly named designers", () => {
     const pick = { edition: "Michel Amar x Emma Donnersberg" };
     expect(creditsDesigner(pick, "Emma Donnersberg")).toBe(true);
@@ -18,8 +26,13 @@ describe("Collaborative designer portfolio", () => {
       it(`includes ${title} in Emma's ${publicOnly ? "Public" : "Trade"} picks without changing ownership`, async () => {
         const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
         try {
-          const designer = await client.fetchQuery(designerQueryOptions("emma-donnersberg"));
-          expect(designer).not.toBeNull();
+          const designer = {
+            id: "eb7741a8-2b2c-4619-9746-37d2cfda0ec8", name: "Emma Donnersberg", slug: "emma-donnersberg",
+            founder: null, display_name: null, specialty: "", biography: "", notable_works: "", philosophy: "",
+            image_url: "", hero_image_url: null, hero_photo_credit: null, logo_url: null, source: "",
+            links: [], biography_images: [], is_published: true, trade_only: true, sort_order: 0,
+            new_in_order: null, collab_brands: null,
+          };
           const picks = await client.fetchQuery(attributedDesignerPicksQueryOptions(designer, publicOnly));
           const matches = picks.filter((pick) => pick.title === title);
           expect(matches).toHaveLength(1);
