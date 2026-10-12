@@ -26,6 +26,7 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useClientTierUpgrades, tierUpgradeLabel } from "@/hooks/useClientTierUpgrades";
 import { Link } from "react-router-dom";
 import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
+import { clientLocationDetails, currencyForClientCountry as currencyForCountry } from "@/lib/clientLocation";
 
 type ClientType = "company" | "studio" | "individual";
 
@@ -49,6 +50,7 @@ type Client = {
   updated_at: string;
   onboarding_details?: Record<string, string | boolean | null> | null;
   onboarding_synced_at?: string | null;
+  onboarding_account_id?: string | null;
 };
 
 type Contact = {
@@ -101,14 +103,6 @@ function clearDraft(id: string | undefined) {
   try { sessionStorage.removeItem(draftKey(id)); } catch { /* noop */ }
 }
 
-const currencyForCountry = (country: string | null | undefined): string | null => {
-  const normalized = country?.trim().toLowerCase();
-  if (!normalized) return null;
-  return SHIPPING_COUNTRIES.find(
-    (entry) => entry.iso.toLowerCase() === normalized || entry.name.toLowerCase() === normalized,
-  )?.currency ?? null;
-};
-
 export default function TradeClients() {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
@@ -121,6 +115,7 @@ export default function TradeClients() {
 
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
+  const [ipCountryByClient, setIpCountryByClient] = useState<Record<string, string>>({});
   const [contactsByClient, setContactsByClient] = useState<Record<string, Contact[]>>({});
   const [docCountsByClient, setDocCountsByClient] = useState<Record<string, number>>({});
   const [search, setSearch] = useState("");
@@ -183,6 +178,33 @@ export default function TradeClients() {
     }
     const list = (cls || []) as unknown as Client[];
     setClients(list);
+    setIpCountryByClient({});
+    // Only geo-header events contain actual IP detection. Download countries
+    // and browser caches may be submitted/manual countries, not IP evidence.
+    const accountIds = list.flatMap((client) => client.onboarding_account_id ? [client.onboarding_account_id] : []);
+    if (accountIds.length) {
+      const accounts = await supabase.from("trade_accounts").select("id, user_id").in("id", accountIds);
+      const userIds = (accounts.data || []).flatMap((account) => account.user_id ? [account.user_id] : []);
+      if (userIds.length) {
+        const events = await supabase.from("magazine_badge_events")
+          .select("user_id, country, created_at")
+          .in("user_id", userIds).not("country", "is", null).neq("country", "")
+          .order("created_at", { ascending: false }).limit(1000);
+        const latestCountry = new Map<string, string>();
+        for (const event of events.data || []) {
+          if (event.user_id && event.country?.trim() && !latestCountry.has(event.user_id)) {
+            latestCountry.set(event.user_id, event.country.trim());
+          }
+        }
+        const locations: Record<string, string> = {};
+        for (const client of list) {
+          const account = accounts.data?.find((item) => item.id === client.onboarding_account_id);
+          const country = account?.user_id ? latestCountry.get(account.user_id) : undefined;
+          if (country) locations[client.id] = country;
+        }
+        setIpCountryByClient(locations);
+      }
+    }
     if (list.length) {
       const ids = list.map((c) => c.id);
       const { data: cts } = await supabase
@@ -536,7 +558,7 @@ export default function TradeClients() {
       ) : (
         <div className="border-t border-border/40">
           {/* Column headers */}
-          <div className="hidden md:grid md:grid-cols-[1.4fr_1.2fr_1fr_0.5fr_auto] gap-6 py-3 border-b border-border/40">
+          <div className="hidden md:grid md:grid-cols-[1.4fr_1.2fr_1fr_1fr_auto] gap-6 py-3 border-b border-border/40">
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Client</span>
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Active Project</span>
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Markup Rule</span>
@@ -545,10 +567,12 @@ export default function TradeClients() {
           </div>
           {filtered.map((c) => {
             const project = projectsByClient[c.id];
+            const location = clientLocationDetails(c, ipCountryByClient[c.id]);
             return (
               <div
                 key={c.id}
-                className="grid gap-2 md:gap-6 md:grid-cols-[1.4fr_1.2fr_1fr_0.5fr_auto] md:items-baseline py-6 border-b border-border/30"
+                className="grid gap-2 md:gap-6 md:grid-cols-[1.4fr_1.2fr_1fr_1fr_auto] md:items-baseline py-6 border-b border-border/30"
+                data-testid="client-profile-row"
               >
                 {/* Client name */}
                 <div className="min-w-0">
@@ -558,6 +582,7 @@ export default function TradeClients() {
                       {c.type}
                     </span>
                   )}
+                  {location.country && <p className="mt-1 font-body text-xs text-muted-foreground">{location.country}</p>}
                   {!isClientMode && upgradeFlags[c.id] && (
                     <span className="ml-2 inline-flex items-center whitespace-nowrap rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-accent align-middle">
                       {tierUpgradeLabel(upgradeFlags[c.id])}
@@ -587,10 +612,12 @@ export default function TradeClients() {
                 </div>
 
                 {/* Base operating currency */}
-                <div>
+                <div className="min-w-0 space-y-1">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground">
-                    {c.default_currency || "—"}
+                    {location.currency || "—"}
                   </span>
+                  {!c.default_currency && location.countryCurrency && <p className="font-body text-xs text-muted-foreground">Country-based</p>}
+                  {location.ipCurrency && <p className="font-body text-xs text-muted-foreground">IP-detected: {location.ipCurrency}</p>}
                 </div>
 
                 {/* Operational triggers */}
@@ -635,6 +662,16 @@ export default function TradeClients() {
 
           {editing && (
             <div className="space-y-6">
+              {editing.id && (() => {
+                const location = clientLocationDetails(editing, ipCountryByClient[editing.id]);
+                return (
+                  <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-b border-border pb-4 text-sm font-body" data-testid="client-location-details">
+                    <div><dt className="text-muted-foreground">Country</dt><dd>{location.country || "Not available"}</dd></div>
+                    <div><dt className="text-muted-foreground">Country-based currency</dt><dd>{location.countryCurrency || "Not available"}</dd></div>
+                    <div><dt className="text-muted-foreground">IP-detected currency</dt><dd>{location.ipCurrency || "Not available"}</dd>{location.ipCountry && <dd className="text-xs text-muted-foreground">{location.ipCountry}</dd>}</div>
+                  </dl>
+                );
+              })()}
               <section className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
