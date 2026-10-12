@@ -136,6 +136,16 @@ export function resolveVariantImageIndex(
 
   // 1) Full triple — most specific
   const rowLabel = resolveVariantRowLabel(variants, base, top, size || label);
+  // A size-only choice can imply a single material (common for wool rugs).
+  // Never infer an image if that size has multiple finish combinations.
+  if (!base && !top && rowLabel && variants?.length) {
+    const matchingRows = variants.filter((v) => normFinish(v.label || "") === normFinish(rowLabel));
+    const keys = new Set(matchingRows.map((v) => variantImageKey(v.base, v.top, v.label)));
+    if (keys.size === 1) {
+      const hit = tryKey(Array.from(keys)[0]);
+      if (hit !== undefined) return hit;
+    }
+  }
   if (base && top && rowLabel) {
     const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(rowLabel)}`;
     const hit = tryKey(triple);

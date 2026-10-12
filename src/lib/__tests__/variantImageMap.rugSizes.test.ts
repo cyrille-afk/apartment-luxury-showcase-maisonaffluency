@@ -34,4 +34,10 @@ describe("Independent rug-size images", () => {
     expect(key).toBe("wool|large");
     expect(resolveVariantImageIndex(buildProductFinishMap({ [key]: 2 }), { top: "Wool", size: "Large", requireCompletePair: false, imageCount: 3 })).toBe(2);
   });
+  it("resolves a size chosen before its sole material", () => {
+    expect(resolveVariantImageIndex(map, { size: "Scene 2", variants, imageCount: 3 })).toBe(1);
+  });
+  it("does not guess between different materials for a size-only choice", () => {
+    expect(resolveVariantImageIndex(map, { size: "Scene 2", variants: [...variants, { label: "Scene 2", base: "Silk", dimensions: "170×330 cm" }], imageCount: 3 })).toBeUndefined();
+  });
 });
