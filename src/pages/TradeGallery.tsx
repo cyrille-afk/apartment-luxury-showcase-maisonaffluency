@@ -33,6 +33,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { sortNameKey } from "@/lib/nameFormat";
 import { sortTradeProducts } from "@/lib/tradeSort";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
@@ -458,7 +459,7 @@ const StudioGallery = () => {
       if (selectedEdition !== "all" && (product.edition || "").trim() !== selectedEdition) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
-  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
+  }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
   const filtered = useMemo(
     () => {
       if (canonicalProducts) return canonicalProducts;
