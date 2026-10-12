@@ -11,6 +11,7 @@ import type { TradeProduct } from "@/lib/tradeProducts";
 export function searchMatches(product: TradeProduct, rawQuery: string): boolean {
   const q = rawQuery.toLowerCase().trim();
   if (!q) return true;
+  const fold = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const tokens = q.split(/\s+/).filter(Boolean);
   if (!tokens.length) return true;
 
@@ -26,7 +27,7 @@ export function searchMatches(product: TradeProduct, rawQuery: string): boolean 
     ...(product.tags || []),
   ]
     .filter((v): v is string => typeof v === "string" && v.length > 0)
-    .map((v) => v.toLowerCase());
+    .map(fold);
 
-  return tokens.every((token) => haystacks.some((h) => h.includes(token)));
+  return tokens.map(fold).every((token) => haystacks.some((h) => h.includes(token)));
 }
