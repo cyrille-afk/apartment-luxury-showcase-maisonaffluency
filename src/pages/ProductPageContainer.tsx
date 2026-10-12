@@ -64,6 +64,15 @@ export default function ProductPageContainer({
     queryFn: () => fetchPublicProductPage(undefined, productSlug),
   });
 
+  if (legacyCanonical) {
+    return (
+      <Navigate
+        to={`${pathname.replace(/\/[^/]*$/, "")}/${legacyCanonical}${search}`}
+        replace
+      />
+    );
+  }
+
   if (user && !rolesLoaded && !routeInsideTradePortal) return <PageLoadingSkeleton />;
   if (!routeInsideTradePortal && tradeSessionLatched && !designerSlug && productSlug) {
     if (shortRouteProduct.data?.product?.id) {
