@@ -11,7 +11,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
-import { searchMatches } from "@/lib/tradeSearch";
+import { filterTradeProducts } from "@/lib/tradeFilter";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -444,15 +444,13 @@ const StudioGallery = () => {
     });
   }, [allProducts]);
   const matchedProducts = useMemo(() => {
-    return allProducts.filter((p) => {
-      if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
-      if (!searchMatches(p, search)) return false;
-      const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
-      const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
-      const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
-      const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
-      const matchesEdition = selectedEdition === "all" || (p.edition || "").trim() === selectedEdition;
-      return matchesBrand && matchesCategory && matchesSub && matchesEdition;
+    const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
+    return filterTradeProducts(visible, {
+      search,
+      brand: routeBrandName || (selectedBrand === "all" ? null : selectedBrand),
+      category: selectedCategory,
+      subcategory: selectedSubcategory,
+      edition: selectedEdition,
     });
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory, selectedEdition]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
@@ -466,10 +464,13 @@ const StudioGallery = () => {
       if (!product || isTradeProductMarkedHidden(product, hiddenTradeProductIds)) return [];
       // Filter the shared public sequence, not the trade brand name: a credited
       // designer may feature a piece owned by a different atelier.
-      if (!searchMatches(product, search)) return [];
-      if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
-      if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
-      if (selectedEdition !== "all" && (product.edition || "").trim() !== selectedEdition) return [];
+      const [kept] = filterTradeProducts([product], {
+        search,
+        category: selectedCategory,
+        subcategory: selectedSubcategory,
+        edition: selectedEdition,
+      });
+      if (!kept) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
