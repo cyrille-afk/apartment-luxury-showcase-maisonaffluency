@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
+import { FINISH_TARGET_LABELS, finishTargetsFromParts, materialFitsTarget, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +98,11 @@ const TradeVisualiser = () => {
   const intakeRef = useRef<string | null>(null);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
   const [materialSearch, setMaterialSearch] = useState("");
-  const [finishTarget, setFinishTarget] = useState<"all" | "top" | "base">("all");
+  const [finishTarget, setFinishTarget] = useState<FinishTarget>("all");
+  const [textureParts, setTextureParts] = useState<Record<string, FinishPart[]>>({});
+  const handleTextureParts = useCallback((instanceId: string, parts: FinishPart[]) => {
+    setTextureParts((current) => (current[instanceId]?.join() === parts.join() ? current : { ...current, [instanceId]: parts }));
+  }, []);
   const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
   const { session: conciergeSession } = useConciergeSession();
 
@@ -292,6 +297,18 @@ const TradeVisualiser = () => {
 
   const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
+  // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
+  const availableTargets = useMemo<FinishTarget[]>(
+    () => finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
+    [selected, textureParts],
+  );
+  const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
+  const targetMaterial = selected
+    ? effectiveTarget === "top" ? selected.topMaterial
+      : effectiveTarget === "base" ? selected.baseMaterial
+        : effectiveTarget === "upholstery" ? selected.upholsteryMaterial
+          : selected.material
+    : null;
 
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
@@ -371,8 +388,9 @@ const TradeVisualiser = () => {
     }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
-      if (finishTarget === "top") return { ...object, topMaterial: material };
-      if (finishTarget === "base") return { ...object, baseMaterial: material };
+      if (effectiveTarget === "top") return { ...object, topMaterial: material };
+      if (effectiveTarget === "base") return { ...object, baseMaterial: material };
+      if (effectiveTarget === "upholstery") return { ...object, upholsteryMaterial: material };
       return { ...object, material, topMaterial: null, baseMaterial: null };
     }));
   };
@@ -381,7 +399,7 @@ const TradeVisualiser = () => {
     if (!selectedId) return;
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId
-        ? { ...object, material: null, topMaterial: null, baseMaterial: null }
+        ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null }
         : object
     )));
   };
@@ -397,11 +415,11 @@ const TradeVisualiser = () => {
 
   const filteredMaterials = useMemo(() => {
     const query = materialSearch.trim().toLowerCase();
-    if (!query) return materials;
     return materials.filter((material) => (
-      `${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`.toLowerCase().includes(query)
+      materialFitsTarget(material, effectiveTarget)
+      && (!query || `${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`.toLowerCase().includes(query))
     ));
-  }, [materialSearch, materials]);
+  }, [materialSearch, materials, effectiveTarget]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
@@ -459,6 +477,7 @@ const TradeVisualiser = () => {
             onSelect={setSelectedId}
             onTransform={transformObject}
             onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
+            onTextureParts={handleTextureParts}
           />
         </Suspense>
       </div>
@@ -533,18 +552,20 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {(selected.material || selected.topMaterial || selected.baseMaterial) && (
+              {(selected.material || selected.topMaterial || selected.baseMaterial || selected.upholsteryMaterial) && (
                 <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
               )}
             </div>
             <div className="mt-3 flex items-center gap-4">
-              {([["all", "Whole Piece"], ["top", "Top"], ["base", "Base"]] as const).map(([value, label]) => (
+              {availableTargets.map((value) => (
                 <button
                   key={value}
+                  role="tab"
+                  aria-selected={effectiveTarget === value}
                   onClick={() => setFinishTarget(value)}
-                  className={cn(microLabel, finishTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                  className={cn(microLabel, effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
                 >
-                  {label}
+                  {FINISH_TARGET_LABELS[value]}
                 </button>
               ))}
             </div>
@@ -558,12 +579,12 @@ const TradeVisualiser = () => {
             <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
                 <button key={material.id} onClick={() => applyMaterial(material)} className="w-14 shrink-0 text-left" title={`${material.brand_name} — ${material.name}`}>
-                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", (finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
+                  <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
                   <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
                 </button>
               ))}
             </div>
-            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{(finishTarget === "top" ? selected.topMaterial : finishTarget === "base" ? selected.baseMaterial : selected.material)?.name ?? activeMaterial?.name ?? "No active finish"}</p>
+            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? activeMaterial?.name ?? "No active finish"}</p>
           </div>
           )}
         </>)}

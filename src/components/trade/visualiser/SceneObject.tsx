@@ -5,6 +5,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
+import { classifyTextureNode, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 
 export type PlacedObject = {
@@ -37,6 +38,8 @@ type Props = {
   scaleVector?: [number, number, number];
   /** Name-only annotation for generated room pieces; never includes pricing. */
   label?: string;
+  /** Reports which texturable parts (top/base/upholstery) the GLB contains. */
+  onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
 };
 
 type LoadedMaps = {
@@ -172,14 +175,7 @@ function useFittedModel(
         // so a finish lands on the surface the designer actually picked.
         const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`.toLowerCase();
         const isBondStreet = isBondStreetStool(productId);
-        const role: "upholstery" | "base" | "top" | null =
-          /upholstery|fabric|cushion|seat|cover|textile/.test(nodeName)
-            ? "upholstery"
-            : /base|frame|leg|stem|pedestal|foot|column|bracket/.test(nodeName)
-              ? "base"
-              : /top|surface|plate|tabletop|marble|stone|counter|shelf/.test(nodeName)
-                ? "top"
-                : null;
+        const role = classifyTextureNode(nodeName);
         const finish = role === "upholstery"
           ? upholsteryMaterial
           : role === "base"
@@ -205,7 +201,7 @@ function useFittedModel(
   }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url, orientation]);
 }
 
-const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: string; onSelect: (id: string) => void }) => {
+const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: PlacedObject; label?: string; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
   const model = useFittedModel(
     object.id,
     object.glb_url ?? "",
@@ -216,6 +212,17 @@ const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: 
     object.upholsteryMaterial ?? null,
     object.modelOrientation,
   );
+  useEffect(() => {
+    if (!onTextureParts) return;
+    const parts = new Set<FinishPart>();
+    model.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const part = classifyTextureNode(`${mesh.name} ${mesh.parent?.name ?? ""}`);
+      if (part) parts.add(part);
+    });
+    onTextureParts(object.instanceId, [...parts]);
+  }, [model, object.instanceId, onTextureParts]);
   const labelPosition = useMemo<[number, number, number]>(() => {
     const bounds = new THREE.Box3().setFromObject(model);
     const centre = bounds.getCenter(new THREE.Vector3());
@@ -258,7 +265,7 @@ const ImageBody = ({ url, name }: { url: string; name: string }) => {
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts }: Props) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl } = useThree();
@@ -274,7 +281,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   }, [object.position]);
 
   const body = object.glb_url
-    ? <ModelBody object={object} label={label} onSelect={onSelect} />
+    ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
       ? <ImageBody url={object.image_url} name={object.product_name} />
       : null;
