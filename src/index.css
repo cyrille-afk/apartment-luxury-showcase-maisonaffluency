@@ -375,6 +375,10 @@ All colors MUST be HSL.
   border-radius: 9999px;
 }
 
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main .gallery-filter-pill {
+  border-radius: 9999px;
+}
+
 .trade-portal-shell:not([data-presentation]) .trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
   font-family: 'Playfair Display', serif;
   font-weight: 400;
