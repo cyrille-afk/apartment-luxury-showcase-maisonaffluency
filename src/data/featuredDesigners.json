@@ -177,7 +177,7 @@
     "founder": "Pouenat",
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782832726/Screen_Shot_2026-06-30_at_11.16.56_PM_a7cjar.png",
     "image_url": "https://www.veronese.fr/wp-content/uploads/2016/04/tristan-auer-portrait-veronese.jpg",
-    "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg"
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791734893/Wall_Light_H_-_06_result_r7xzmk.jpg"
   },
   {
     "id": "86483e10-0001-4000-8000-000000000001",
@@ -277,14 +277,5 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781089566/design-focus-jean-michel-frank-and-his-creative-journey-3303-6_jmni5m.webp",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1000,h_1200,q_auto,c_fit,f_auto/jean-michel-frank-new_toifde",
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1789524142/image_27_yws3wj.png"
-  },
-  {
-    "id": "eb7741a8-2b2c-4619-9746-37d2cfda0ec8",
-    "slug": "emma-donnersberg",
-    "name": "Emma Donnersberg",
-    "founder": null,
-    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791637199/Screen_Shot_2026-10-10_at_8.59.28_PM_rywdna.png",
-    "image_url": "",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1791633700/Screen_Shot_2026-10-10_at_7.58.22_PM_ptnpdf.png"
   }
 ]
