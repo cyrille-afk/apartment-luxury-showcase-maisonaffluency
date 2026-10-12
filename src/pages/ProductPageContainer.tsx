@@ -44,15 +44,8 @@ export default function ProductPageContainer({
 
   // Legacy one-letter slugs (pre-2026-10-12 slug bug) redirect to the
   // canonical full-slug URL, preserving the trade/public prefix and query.
+  // Computed here; the redirect itself happens after all hooks below.
   const legacyCanonical = resolveLegacyProductSlug(designerSlug, productSlug);
-  if (legacyCanonical) {
-    return (
-      <Navigate
-        to={`${pathname.replace(/\/[^/]*$/, "")}/${legacyCanonical}${search}`}
-        replace
-      />
-    );
-  }
 
   // An approved trade session (or admin) always gets the full B2B layout, even
   // on public product URLs. Latched once confirmed so a later role re-check can
