@@ -80,7 +80,7 @@ const VisualiserCanvas = ({
       signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${objects
         .map(
           (o) =>
-            `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}` +
+            `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
             `:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}`,
         )
         .join("|")}`}

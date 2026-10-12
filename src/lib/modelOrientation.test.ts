@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from "three";
-import { fitUprightModel } from "./modelOrientation";
+import { applyModelOrientation, fitUprightModel, rotateModelOrientation } from "./modelOrientation";
 
 function piece(w: number, h: number, d: number) {
   const mesh = new Mesh(new BoxGeometry(w, h, d), new MeshBasicMaterial());
@@ -14,6 +14,24 @@ function bounds(model: Group) {
   return new Box3().setFromObject(model);
 }
 describe("model import frame", () => {
+  it.each(["X", "Y", "Z"] as const)("rotates %s by 90 degrees and returns after four turns", axis => {
+    const first = rotateModelOrientation(undefined, axis, 1);
+    expect(new Quaternion(...first).angleTo(new Quaternion())).toBeCloseTo(Math.PI / 2);
+    let current = first;
+    for (let i = 0; i < 3; i++) current = rotateModelOrientation(current, axis, 1);
+    expect(new Quaternion(...current).angleTo(new Quaternion())).toBeCloseTo(0);
+    expect(new Quaternion(...rotateModelOrientation(first, axis, -1)).angleTo(new Quaternion())).toBeCloseTo(0);
+  });
+  it("keeps corrected models on the floor and reset restores fitted dimensions", () => {
+    const fitted = fitUprightModel(piece(3, 1, 2));
+    const original = bounds(fitted).getSize(new Vector3());
+    const rotated = bounds(applyModelOrientation(fitted, rotateModelOrientation(undefined, "X", 1)));
+    expect(rotated.min.y).toBeCloseTo(0);
+    expect(rotated.getSize(new Vector3()).y).toBeCloseTo(original.z);
+    const reset = bounds(applyModelOrientation(fitUprightModel(piece(3, 1, 2))));
+    expect(reset.min.y).toBeCloseTo(0);
+    expect(reset.getSize(new Vector3()).distanceTo(original)).toBeCloseTo(0);
+  });
   it("corrects a negative-Z vertical axis to Y with its feet down", () => {
     const source = piece(900, 750, 770);
     source.rotation.x = -Math.PI / 2;

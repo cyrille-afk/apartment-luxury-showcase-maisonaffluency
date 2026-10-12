@@ -15,6 +15,9 @@ import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 const VisualiserCanvas = lazy(
   lazyImportWithRetry(() => import("@/components/trade/visualiser/VisualiserCanvas")),
 );
+const ModelOrientationControls = lazy(
+  lazyImportWithRetry(() => import("@/components/trade/visualiser/ModelOrientationControls")),
+);
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -473,7 +476,7 @@ const TradeVisualiser = () => {
 
       {/* Selected object panel */}
       {selected && (
-        <div className="absolute right-8 top-24 z-[60] w-64 border-t border-foreground/15 bg-white/90 px-5 py-4 backdrop-blur-sm">
+        <div className="absolute right-4 sm:right-8 top-24 z-[60] max-h-[calc(100%-14rem)] w-64 max-w-[calc(100%-2rem)] overflow-y-auto border-t border-foreground/15 bg-background/90 px-5 py-4 backdrop-blur-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className={cn(microLabel, "text-muted-foreground")}>{selected.brand_name}</p>
@@ -498,7 +501,13 @@ const TradeVisualiser = () => {
             className="mt-2 w-full accent-foreground"
           />
 
-          <p className={cn(microLabel, "mt-4 text-muted-foreground/70")}>Drag the coloured arrows to slide along the floor plane, or the outer ring to spin the piece 360° into the backdrop perspective.</p>
+          {selected.glb_url && <Suspense fallback={null}>
+            <ModelOrientationControls
+              orientation={selected.modelOrientation}
+              onChange={(modelOrientation) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation } : object))}
+              onReset={() => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation: undefined, rotation: [0, 0, 0] } : object))}
+            />
+          </Suspense>}
 
           {isBondStreetStool(selected.id) ? (
             <div className="mt-5 border-t border-foreground/10 pt-4">
