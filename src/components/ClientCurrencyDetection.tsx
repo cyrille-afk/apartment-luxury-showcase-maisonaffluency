@@ -16,7 +16,8 @@ export default function ClientCurrencyDetection() {
         const { data, error } = await supabase.functions.invoke('detect-client-currency', { body: { functionalConsent: true } });
         completed = !error && data?.saved === true;
         if (completed) window.dispatchEvent(new Event('client-ip-currency-saved'));
-      } finally { running = false; }
+      } catch { /* Retry on focus; never block the client workspace. */ }
+      finally { running = false; }
     };
     void detect();
     window.addEventListener(CONSENT_EVENT, detect);
