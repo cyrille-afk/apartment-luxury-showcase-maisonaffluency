@@ -5,6 +5,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
+import { fitUprightModel } from "@/lib/modelOrientation";
 
 export type PlacedObject = {
   instanceId: string;
@@ -143,6 +144,7 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
 function useFittedModel(
   productId: string,
   url: string,
+  dimensions: string | null,
   material: VisualiserMaterial | null,
   topMaterial: VisualiserMaterial | null,
   baseMaterial: VisualiserMaterial | null,
@@ -197,26 +199,15 @@ function useFittedModel(
         mesh.material = Array.isArray(mesh.material) ? next : next[0];
       }
     });
-    const box = new THREE.Box3().setFromObject(clone);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const largest = Math.max(size.x, size.y, size.z) || 1;
-    const fit = 1.4 / largest;
-    clone.scale.setScalar(fit);
-    const fitted = new THREE.Box3().setFromObject(clone);
-    const center = new THREE.Vector3();
-    fitted.getCenter(center);
-    clone.position.set(-center.x, -fitted.min.y, -center.z);
-    const wrapper = new THREE.Group();
-    wrapper.add(clone);
-    return wrapper;
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial]);
+    return fitUprightModel(clone, dimensions, url);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url]);
 }
 
 const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: string; onSelect: (id: string) => void }) => {
   const model = useFittedModel(
     object.id,
     object.glb_url ?? "",
+    object.dimensions,
     object.material ?? null,
     object.topMaterial ?? null,
     object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
