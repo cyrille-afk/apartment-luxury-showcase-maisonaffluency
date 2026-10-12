@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import PinchZoomImage from "@/components/PinchZoomImage";
 import { createPortal } from "react-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -104,6 +105,14 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     emblaApi.scrollTo(index);
   }, [emblaApi, index, open]);
 
+  // Zoomed photo owns the gesture: stop carousel drag while zoomed, reset on slide change/close.
+  const [zoomed, setZoomed] = useState(false);
+  useEffect(() => { setZoomed(false); }, [index, open]);
+  useEffect(() => {
+    if (!emblaApi || !open) return;
+    emblaApi.reInit({ watchDrag: !zoomed, startIndex: emblaApi.selectedScrollSnap() });
+  }, [emblaApi, open, zoomed]);
+
   if (!open || typeof document === "undefined" || images.length === 0) return null;
 
   const go = (i: number) => {
@@ -128,17 +137,32 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
           paddingBottom: "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))",
         }}
       >
-        <div ref={emblaRef} className="absolute inset-0 overflow-hidden" style={{ touchAction: "pan-y pinch-zoom" }}>
-          <div className="flex h-full touch-pan-y">
+        <div ref={emblaRef} className="absolute inset-0 overflow-hidden" style={{ touchAction: isMobileOrPwa ? "none" : "pan-y pinch-zoom" }}>
+          <div className={cn("flex h-full", !isMobileOrPwa && "touch-pan-y")}>
             {images.map((src, i) => (
-              <div key={`${src}-${i}`} className="flex h-full min-w-0 flex-[0_0_100%] items-center justify-center">
-                <img
-                  src={src}
-                  alt={i === index ? alt : ""}
-                  draggable={false}
-                  onDragStart={(e) => e.preventDefault()}
-                  className="max-h-full max-w-full select-none object-contain [-webkit-touch-callout:none]"
-                />
+              <div key={`${src}-${i}`} className="relative flex h-full min-w-0 flex-[0_0_100%] items-center justify-center">
+                {isMobileOrPwa && i === index ? (
+                  <PinchZoomImage
+                    key={`pinch-${i}`}
+                    showZoomControls
+                    src={src}
+                    alt={alt}
+                    draggable={false}
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                    className="max-h-full max-w-full select-none object-contain"
+                    onZoomChange={setZoomed}
+                  />
+                ) : (
+                  <img
+                    src={src}
+                    alt={i === index ? alt : ""}
+                    draggable={false}
+                    onDragStart={(e) => e.preventDefault()}
+                    className="max-h-full max-w-full select-none object-contain [-webkit-touch-callout:none]"
+                  />
+                )}
               </div>
             ))}
           </div>
