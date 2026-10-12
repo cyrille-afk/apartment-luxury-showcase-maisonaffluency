@@ -3112,13 +3112,6 @@ const TradeProductPage: React.FC = () => {
               )}
             </div>
 
-              {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
-                <LegendDisclosure
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                />
-              )}
-
             <ShippingDetailsAccordion variant="row" />
 
             {/* Origin only — lead time lives exclusively in the pricing block. */}
