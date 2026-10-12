@@ -1170,6 +1170,13 @@
       "when": 1791839891593,
       "tag": "0166_grant_read_profile_ip_detection",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1791839961443,
+      "tag": "0167_allow_own_ip_detection_readback",
+      "breakpoints": true
     }
   ]
 }
