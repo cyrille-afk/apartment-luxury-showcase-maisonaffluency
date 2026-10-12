@@ -46,10 +46,16 @@ const PinchZoomImage = ({
   const translateRef = useRef(translate);
   translateRef.current = translate;
 
+  // Ref for the latest callback so updateZoom/resetZoom keep a stable identity —
+  // an unstable resetZoom re-triggers the [src, resetZoom] effect below and
+  // wipes zoom back to scale(1) on every parent re-render.
+  const onZoomChangeRef = useRef(onZoomChange);
+  onZoomChangeRef.current = onZoomChange;
+
   const updateZoom = useCallback((zoomed: boolean) => {
     setIsZoomed(zoomed);
-    onZoomChange?.(zoomed);
-  }, [onZoomChange]);
+    onZoomChangeRef.current?.(zoomed);
+  }, []);
 
   const resetZoom = useCallback(() => {
     setScale(1);
