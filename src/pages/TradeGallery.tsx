@@ -33,6 +33,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
+import { sortTradeProducts } from "@/lib/tradeSort";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
@@ -82,6 +83,7 @@ const StudioGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
+  const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
@@ -462,6 +464,12 @@ const StudioGallery = () => {
     [matchedProducts, canonicalProducts, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
   );
 
+  // Explicit sort options layered on top of the curated sequence.
+  const sorted = useMemo(
+    () => sortTradeProducts(filtered, sortBy),
+    [filtered, sortBy],
+  );
+
   const toCompareItem = (product: TradeProduct): CompareItem => ({
     pick: {
       title: product.product_name,
@@ -630,6 +638,19 @@ const StudioGallery = () => {
               </select>
             </div>
           )}
+          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              aria-label="Sort pieces"
+              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+            >
+              <option value="curated">Sort: Curated order</option>
+              <option value="designer">Sort: Designer A–Z</option>
+              <option value="title">Sort: Title A–Z</option>
+              <option value="recent">Sort: Most recently added</option>
+            </select>
+          </div>
         </div>
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-3 px-3 py-2 sm:px-0 xl:py-0">
           <GridDensityToggle
@@ -660,7 +681,7 @@ const StudioGallery = () => {
           "grid grid-cols-2 gap-x-4 gap-y-6 transition-[grid-template-columns] duration-300 sm:gap-x-6 lg:gap-x-8 lg:gap-y-8",
           density === "compact" ? "md:grid-cols-4 gap-y-5 lg:gap-y-6" : "md:grid-cols-3",
         )}>
-          {filtered.map((product) => {
+          {sorted.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
@@ -812,7 +833,7 @@ const StudioGallery = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((product) => {
+          {sorted.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);

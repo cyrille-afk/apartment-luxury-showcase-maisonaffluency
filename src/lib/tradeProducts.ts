@@ -79,6 +79,7 @@ export function getAllTradeProducts(): TradeProduct[] {
       const resolvedCategory = normalizeCategory(rawCategory, resolvedSubcategory) || rawCategory || "Uncategorized";
       products.push({
         id: `tp-${idx++}`,
+        created_at: (pick as any).created_at ?? null,
         brand_name: displayBrand,
         product_name: pick.title,
         subtitle: pick.subtitle,
