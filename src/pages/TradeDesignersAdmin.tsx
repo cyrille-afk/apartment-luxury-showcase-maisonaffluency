@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { lazy, Suspense } from "react";
 import CloudUpload from "@/components/trade/CloudUpload";
+import LegendPreview from "@/components/admin/LegendPreview";
 import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
@@ -740,6 +741,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     className="text-xs min-h-[60px]"
                     placeholder={"Description:\nProduct description"}
                   />
+                  <LegendPreview text={(pick as any).materials_description || ""} />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
