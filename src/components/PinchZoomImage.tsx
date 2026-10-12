@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -229,7 +229,8 @@ const PinchZoomImage = ({
           {[
             { label: "Zoom out", icon: Minus, factor: 1 / 1.5, disabled: scale <= 1 },
             { label: "Zoom in", icon: Plus, factor: 1.5, disabled: scale >= 5 },
-          ].map(({ label, icon: Icon, factor, disabled }) => (
+            { label: "Reset zoom", icon: RotateCcw, action: resetZoom, disabled: scale <= 1 },
+          ].map(({ label, icon: Icon, factor, action, disabled }) => (
             <Tooltip key={label}>
               <TooltipTrigger asChild>
                 <Button
@@ -239,7 +240,7 @@ const PinchZoomImage = ({
                   className="h-11 w-11 border border-border shadow-sm"
                   aria-label={label}
                   disabled={disabled}
-                  onClick={(event) => { event.stopPropagation(); zoomBy(factor); }}
+                  onClick={(event) => { event.stopPropagation(); if (action) action(); else zoomBy(factor!); }}
                 >
                   <Icon />
                 </Button>
