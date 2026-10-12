@@ -421,18 +421,12 @@ const StudioGallery = () => {
   const matchedProducts = useMemo(() => {
     return allProducts.filter((p) => {
       if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
-      const q = search.toLowerCase();
-      const matchesSearch =
-        !q ||
-        p.product_name.toLowerCase().includes(q) ||
-        p.brand_name.toLowerCase().includes(q) ||
-        p.subtitle?.toLowerCase().includes(q) ||
-        p.materials?.toLowerCase().includes(q);
+      if (!searchMatches(p, search)) return false;
       const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
       const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
-      return matchesSearch && matchesBrand && matchesCategory && matchesSub;
+      return matchesBrand && matchesCategory && matchesSub;
     });
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
