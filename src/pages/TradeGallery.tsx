@@ -464,10 +464,13 @@ const StudioGallery = () => {
       if (!product || isTradeProductMarkedHidden(product, hiddenTradeProductIds)) return [];
       // Filter the shared public sequence, not the trade brand name: a credited
       // designer may feature a piece owned by a different atelier.
-      if (!searchMatches(product, search)) return [];
-      if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
-      if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
-      if (selectedEdition !== "all" && (product.edition || "").trim() !== selectedEdition) return [];
+      const [kept] = filterTradeProducts([product], {
+        search,
+        category: selectedCategory,
+        subcategory: selectedSubcategory,
+        edition: selectedEdition,
+      });
+      if (!kept) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
