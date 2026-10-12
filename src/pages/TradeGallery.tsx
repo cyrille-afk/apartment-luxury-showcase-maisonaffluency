@@ -612,7 +612,7 @@ const StudioGallery = () => {
 
       {/* Filters */}
       <div className="flex flex-col gap-3 mb-4 border-b border-border pb-3 xl:flex-row xl:items-center">
-        <div className="flex-1 min-w-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-border">
+        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:flex-wrap gap-y-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
           <div className="relative flex-1 min-w-0 py-2 sm:py-0 px-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
