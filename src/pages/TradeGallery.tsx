@@ -440,9 +440,7 @@ const StudioGallery = () => {
       if (!product || isTradeProductMarkedHidden(product, hiddenTradeProductIds)) return [];
       // Filter the shared public sequence, not the trade brand name: a credited
       // designer may feature a piece owned by a different atelier.
-      const q = search.toLowerCase();
-      if (q && ![product.product_name, product.brand_name, product.subtitle, product.materials]
-        .some((value) => value?.toLowerCase().includes(q))) return [];
+      if (!searchMatches(product, search)) return [];
       if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
       if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
@@ -579,7 +577,7 @@ const StudioGallery = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
             <input
               type="text"
-              placeholder="Search products, brands, materials…"
+              placeholder="Search designer, title, collection…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className={`${filterInputClass} pl-9 text-[16px] sm:text-sm`}
