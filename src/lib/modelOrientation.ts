@@ -2,6 +2,30 @@ import { Box3, Group, Mesh, Object3D, Quaternion, Vector3 } from "three";
 import { parseDimensionString } from "./productDimensions";
 
 const Y_UP = new Vector3(0, 1, 0);
+export type ModelOrientation = [number, number, number, number];
+export const DEFAULT_MODEL_ORIENTATION: ModelOrientation = [0, 0, 0, 1];
+
+/** Quarter turns in the sandbox frame, independently of placement yaw. */
+export function rotateModelOrientation(current: ModelOrientation | undefined, axis: "X" | "Y" | "Z", direction: 1 | -1): ModelOrientation {
+  const vector = new Vector3(axis === "X" ? 1 : 0, axis === "Y" ? 1 : 0, axis === "Z" ? 1 : 0);
+  return new Quaternion().setFromAxisAngle(vector, direction * Math.PI / 2)
+    .multiply(new Quaternion(...(current ?? DEFAULT_MODEL_ORIENTATION))).normalize().toArray() as ModelOrientation;
+}
+
+/** Re-seat a corrected model without changing fitted scale. */
+export function applyModelOrientation(model: Group, orientation?: ModelOrientation): Group {
+  const frame = new Group();
+  frame.add(model);
+  frame.quaternion.fromArray(orientation ?? DEFAULT_MODEL_ORIENTATION).normalize();
+  frame.updateWorldMatrix(true, true);
+  const box = new Box3().setFromObject(frame);
+  if (!box.isEmpty()) {
+    const center = box.getCenter(new Vector3());
+    frame.position.set(-center.x, -box.min.y, -center.z);
+  }
+  frame.updateWorldMatrix(true, true);
+  return frame;
+}
 // Verified against the authored GUM geometry: local +Y points toward its feet.
 // Its exporter maps that to -Z, so the actual furniture up direction is +Z.
 const VERIFIED_UP: Record<string, [number, number, number]> = {

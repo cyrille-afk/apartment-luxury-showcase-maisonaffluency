@@ -5,7 +5,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
-import { fitUprightModel } from "@/lib/modelOrientation";
+import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 
 export type PlacedObject = {
   instanceId: string;
@@ -18,6 +18,7 @@ export type PlacedObject = {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: number;
+  modelOrientation?: ModelOrientation;
   material?: VisualiserMaterial | null;
   topMaterial?: VisualiserMaterial | null;
   baseMaterial?: VisualiserMaterial | null;
@@ -149,6 +150,7 @@ function useFittedModel(
   topMaterial: VisualiserMaterial | null,
   baseMaterial: VisualiserMaterial | null,
   upholsteryMaterial: VisualiserMaterial | null,
+  orientation?: ModelOrientation,
 ) {
   // Self-hosted Draco decoder: compressed GLBs stream in a fraction of the
   // bytes, uncompressed ones are unaffected (decoder is fetched on demand).
@@ -199,8 +201,8 @@ function useFittedModel(
         mesh.material = Array.isArray(mesh.material) ? next : next[0];
       }
     });
-    return fitUprightModel(clone, dimensions, url);
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url]);
+    return applyModelOrientation(fitUprightModel(clone, dimensions, url), orientation);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url, orientation]);
 }
 
 const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: string; onSelect: (id: string) => void }) => {
@@ -212,6 +214,7 @@ const ModelBody = ({ object, label, onSelect }: { object: PlacedObject; label?: 
     object.topMaterial ?? null,
     object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
     object.upholsteryMaterial ?? null,
+    object.modelOrientation,
   );
   const labelPosition = useMemo<[number, number, number]>(() => {
     const bounds = new THREE.Box3().setFromObject(model);
