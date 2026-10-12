@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
+import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
@@ -53,6 +54,7 @@ interface VisualiserCanvasProps {
   onSelect: (id: string | null) => void;
   onTransform: (instanceId: string, position: [number, number, number], rotation: [number, number, number]) => void;
   onDragStateChange: (dragging: boolean) => void;
+  onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
 }
 
 /**
@@ -68,6 +70,7 @@ const VisualiserCanvas = ({
   onSelect,
   onTransform,
   onDragStateChange,
+  onTextureParts,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows
@@ -147,6 +150,7 @@ const VisualiserCanvas = ({
           onSelect={onSelect}
           onTransform={onTransform}
           onDragStateChange={onDragStateChange}
+          onTextureParts={onTextureParts}
         />
       ))}
     </Suspense>
