@@ -444,15 +444,13 @@ const StudioGallery = () => {
     });
   }, [allProducts]);
   const matchedProducts = useMemo(() => {
-    return allProducts.filter((p) => {
-      if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
-      if (!searchMatches(p, search)) return false;
-      const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
-      const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
-      const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
-      const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
-      const matchesEdition = selectedEdition === "all" || (p.edition || "").trim() === selectedEdition;
-      return matchesBrand && matchesCategory && matchesSub && matchesEdition;
+    const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
+    return filterTradeProducts(visible, {
+      search,
+      brand: routeBrandName || (selectedBrand === "all" ? null : selectedBrand),
+      category: selectedCategory,
+      subcategory: selectedSubcategory,
+      edition: selectedEdition,
     });
   }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory, selectedEdition]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
