@@ -1877,6 +1877,9 @@ export type Database = {
           eligible_for_upgrade: boolean
           eligible_tier: string | null
           id: string
+          ip_detected_at: string | null
+          ip_detected_country: string | null
+          ip_detected_currency: string | null
           name: string
           notes: string | null
           onboarding_account_id: string | null
@@ -1904,6 +1907,9 @@ export type Database = {
           eligible_for_upgrade?: boolean
           eligible_tier?: string | null
           id?: string
+          ip_detected_at?: string | null
+          ip_detected_country?: string | null
+          ip_detected_currency?: string | null
           name: string
           notes?: string | null
           onboarding_account_id?: string | null
@@ -1931,6 +1937,9 @@ export type Database = {
           eligible_for_upgrade?: boolean
           eligible_tier?: string | null
           id?: string
+          ip_detected_at?: string | null
+          ip_detected_country?: string | null
+          ip_detected_currency?: string | null
           name?: string
           notes?: string | null
           onboarding_account_id?: string | null
@@ -6462,6 +6471,9 @@ export type Database = {
           has_accepted_trade_nda: boolean
           has_seen_trade_intro: boolean
           id: string
+          ip_detected_at: string | null
+          ip_detected_country: string | null
+          ip_detected_currency: string | null
           last_name: string
           phone: string
           preferred_currency: string | null
@@ -6488,6 +6500,9 @@ export type Database = {
           has_accepted_trade_nda?: boolean
           has_seen_trade_intro?: boolean
           id: string
+          ip_detected_at?: string | null
+          ip_detected_country?: string | null
+          ip_detected_currency?: string | null
           last_name?: string
           phone?: string
           preferred_currency?: string | null
@@ -6516,6 +6531,9 @@ export type Database = {
           has_accepted_trade_nda?: boolean
           has_seen_trade_intro?: boolean
           id?: string
+          ip_detected_at?: string | null
+          ip_detected_country?: string | null
+          ip_detected_currency?: string | null
           last_name?: string
           phone?: string
           preferred_currency?: string | null
