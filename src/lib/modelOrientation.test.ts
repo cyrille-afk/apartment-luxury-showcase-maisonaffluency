@@ -14,7 +14,7 @@ function bounds(model: Group) {
   return new Box3().setFromObject(model);
 }
 describe("model import frame", () => {
-  it("corrects the GUM chair's negative-Z vertical axis to Y with its feet down", () => {
+  it("corrects a negative-Z vertical axis to Y with its feet down", () => {
     const source = piece(900, 750, 770);
     source.rotation.x = -Math.PI / 2;
     const fitted = bounds(fitUprightModel(source, "W 90 x D 77 x H 75 cm"));
@@ -23,6 +23,14 @@ describe("model import frame", () => {
     expect(size.z).toBeCloseTo(1.4 * 770 / 900);
     expect(fitted.min.y).toBeCloseTo(0);
     expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
+  });
+  it("uses the verified GUM positive-Z up direction rather than its inverted local Y", () => {
+    const source = piece(900, 750, 770);
+    source.rotation.x = Math.PI / 2;
+    const fitted = bounds(fitUprightModel(source, "W 90 x D 77 x H 75 cm", "/glb-models/f72b4185-9eeb-4ec0-b862-0972abc93a9f/default.glb"));
+    expect(source.getWorldQuaternion(new Quaternion()).angleTo(new Quaternion())).toBeCloseTo(0);
+    expect(fitted.min.y).toBeCloseTo(0);
+    expect(fitted.getSize(new Vector3()).y).toBeCloseTo(1.4 * 750 / 900);
   });
   it("leaves a correctly exported wide low table upright", () => {
     const fitted = bounds(fitUprightModel(piece(1280, 340, 830), "W 128 x D 83 x H 34 cm"));
