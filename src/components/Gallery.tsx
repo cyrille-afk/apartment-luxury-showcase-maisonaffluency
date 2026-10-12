@@ -978,6 +978,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     onSwipeRight: goToPrevious,
     minDistance: minSwipeDistance,
   });
+
+  // Mobile lightbox: a zoomed image must own the gesture, so suspend Embla
+  // dragging while zoomed and reset zoom state when the slide changes.
+  useEffect(() => {
+    imageZoomedRef.current = false;
+    setImageZoomed(false);
+  }, [currentItemIndex, currentSectionIndex]);
+  useEffect(() => {
+    if (!emblaApi || !isMobile || !lightboxOpen) return;
+    emblaApi.reInit({ loop: true, startIndex: emblaApi.selectedScrollSnap(), watchDrag: !imageZoomed });
+  }, [emblaApi, isMobile, lightboxOpen, imageZoomed]);
   return <>
        <section id="gallery" ref={ref} className="pt-0 pb-4 md:pt-0 md:pb-24 bg-white scroll-header-offset">
         <div className="mx-auto w-full max-w-[1500px] px-6">
