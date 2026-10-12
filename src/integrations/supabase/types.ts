@@ -1677,6 +1677,7 @@ export type Database = {
           is_primary: boolean
           last_name: string
           notes: string | null
+          onboarding_account_id: string | null
           phone: string | null
           role_title: string | null
           updated_at: string
@@ -1690,6 +1691,7 @@ export type Database = {
           is_primary?: boolean
           last_name?: string
           notes?: string | null
+          onboarding_account_id?: string | null
           phone?: string | null
           role_title?: string | null
           updated_at?: string
@@ -1703,6 +1705,7 @@ export type Database = {
           is_primary?: boolean
           last_name?: string
           notes?: string | null
+          onboarding_account_id?: string | null
           phone?: string | null
           role_title?: string | null
           updated_at?: string
@@ -1713,6 +1716,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_contacts_onboarding_account_id_fkey"
+            columns: ["onboarding_account_id"]
+            isOneToOne: false
+            referencedRelation: "trade_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1869,6 +1879,9 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          onboarding_account_id: string | null
+          onboarding_details: Json | null
+          onboarding_synced_at: string | null
           rolling_12m_spend_cents: number
           studio_id: string
           tax_id: string | null
@@ -1893,6 +1906,9 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          onboarding_account_id?: string | null
+          onboarding_details?: Json | null
+          onboarding_synced_at?: string | null
           rolling_12m_spend_cents?: number
           studio_id: string
           tax_id?: string | null
@@ -1917,6 +1933,9 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          onboarding_account_id?: string | null
+          onboarding_details?: Json | null
+          onboarding_synced_at?: string | null
           rolling_12m_spend_cents?: number
           studio_id?: string
           tax_id?: string | null
@@ -1926,6 +1945,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_onboarding_account_id_fkey"
+            columns: ["onboarding_account_id"]
+            isOneToOne: false
+            referencedRelation: "trade_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_studio_id_fkey"
             columns: ["studio_id"]
@@ -9652,6 +9678,29 @@ export type Database = {
           },
         ]
       }
+      trade_directory_targets: {
+        Row: {
+          created_at: string
+          studio_id: string
+        }
+        Insert: {
+          created_at?: string
+          studio_id: string
+        }
+        Update: {
+          created_at?: string
+          studio_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_directory_targets_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: true
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_documents: {
         Row: {
           brand_name: string
@@ -12479,6 +12528,10 @@ export type Database = {
           _reaction: string
           _token: string
         }
+        Returns: undefined
+      }
+      sync_approved_trade_directory: {
+        Args: { p_account_id: string }
         Returns: undefined
       }
       tier_discount_pct: {
