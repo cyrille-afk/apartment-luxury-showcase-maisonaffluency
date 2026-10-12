@@ -68,6 +68,8 @@ export function variantImageKey(
   const s = normFinish((size || label || "").trim());
   if (b && t && s) return `${b}|${t}|${s}`;
   if (b && t) return `${b}|${t}`;
+  if (b && s) return `${b}|${s}`;
+  if (t && s) return `${t}|${s}`;
   return normFinish(top || base || label || size || "");
 }
 
@@ -78,10 +80,10 @@ function resolveVariantRowLabel(
   explicitSize?: string | null
 ): string | null {
   if (explicitSize && explicitSize.trim()) return explicitSize.trim();
-  if (!variants || !variants.length || !base || !top) return null;
+  if (!variants || !variants.length || (!base && !top)) return null;
   const matches = variants.filter((v) =>
-    (v.base || "").trim() === base.trim() &&
-    (v.top || "").trim() === top.trim()
+    (v.base || "").trim() === (base || "").trim() &&
+    (v.top || "").trim() === (top || "").trim()
   );
   if (matches.length !== 1) return null;
   return (matches[0].label || "").trim() || null;
@@ -127,10 +129,13 @@ export function resolveVariantImageIndex(
   // dropdown can land on the wrong finish image (e.g. clearing Top while
   // Base remains used to resolve to whatever the standalone Base key
   // happened to point at).
-  const isDualAxisMap = requireCompletePair && Object.keys(finishMap).some((k) => k.includes("|"));
+  const hasDualAxes = variants?.length
+    ? variants.some((v) => v.base?.trim()) && variants.some((v) => v.top?.trim())
+    : Object.keys(finishMap).some((k) => k.includes("|"));
+  const isDualAxisMap = requireCompletePair && hasDualAxes;
 
   // 1) Full triple — most specific
-  const rowLabel = resolveVariantRowLabel(variants, base, top, size);
+  const rowLabel = resolveVariantRowLabel(variants, base, top, size || label);
   if (base && top && rowLabel) {
     const triple = `${normFinish(base)}|${normFinish(top)}|${normFinish(rowLabel)}`;
     const hit = tryKey(triple);
@@ -151,6 +156,11 @@ export function resolveVariantImageIndex(
   // can snap the gallery back to the primary image instead of a stray finish.
   if (isDualAxisMap && (base || top) && !(base && top)) {
     return undefined;
+  }
+  // One finish axis × size takes precedence over the shared finish image.
+  if ((base || top) && rowLabel) {
+    const hit = tryKey(variantImageKey(base, top, rowLabel));
+    if (hit !== undefined) return hit;
   }
   // 3) Single-axis fallbacks, in priority order
   for (const candidate of [top, base, label, size]) {
@@ -195,7 +205,7 @@ export function findVariantForImageIndex(
     const label = (v.label || "").trim() || null;
 
     const candidates: string[] = [];
-    if (base && top) candidates.push(variantImageKey(base, top, label, label));
+    candidates.push(variantImageKey(base, top, label, label));
     if (base && top) candidates.push(`${normFinish(base)}|${normFinish(top)}`);
     if (top) candidates.push(normFinish(top));
     if (base) candidates.push(normFinish(base));
