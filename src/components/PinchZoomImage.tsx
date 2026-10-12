@@ -46,10 +46,16 @@ const PinchZoomImage = ({
   const translateRef = useRef(translate);
   translateRef.current = translate;
 
+  // Ref for the latest callback so updateZoom/resetZoom keep a stable identity —
+  // an unstable resetZoom re-triggers the [src, resetZoom] effect below and
+  // wipes zoom back to scale(1) on every parent re-render.
+  const onZoomChangeRef = useRef(onZoomChange);
+  onZoomChangeRef.current = onZoomChange;
+
   const updateZoom = useCallback((zoomed: boolean) => {
     setIsZoomed(zoomed);
-    onZoomChange?.(zoomed);
-  }, [onZoomChange]);
+    onZoomChangeRef.current?.(zoomed);
+  }, []);
 
   const resetZoom = useCallback(() => {
     setScale(1);
@@ -85,6 +91,14 @@ const PinchZoomImage = ({
       } else if (e.touches.length === 1 && scaleRef.current > 1) {
         e.preventDefault();
         e.stopPropagation();
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+          // Double-tap while zoomed resets the zoom before pan takes over.
+          resetZoom();
+          lastTap.current = now;
+          return;
+        }
+        lastTap.current = now;
         isPanning.current = true;
         panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         translateStart.current = { ...translateRef.current };

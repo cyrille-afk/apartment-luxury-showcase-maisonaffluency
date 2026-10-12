@@ -978,6 +978,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     onSwipeRight: goToPrevious,
     minDistance: minSwipeDistance,
   });
+
+  // Mobile lightbox: a zoomed image must own the gesture, so suspend Embla
+  // dragging while zoomed and reset zoom state when the slide changes.
+  useEffect(() => {
+    imageZoomedRef.current = false;
+    setImageZoomed(false);
+  }, [currentItemIndex, currentSectionIndex]);
+  useEffect(() => {
+    if (!emblaApi || !isMobile || !lightboxOpen) return;
+    emblaApi.reInit({ loop: true, startIndex: emblaApi.selectedScrollSnap(), watchDrag: !imageZoomed });
+  }, [emblaApi, isMobile, lightboxOpen, imageZoomed]);
   return <>
        <section id="gallery" ref={ref} className="pt-0 pb-4 md:pt-0 md:pb-24 bg-white scroll-header-offset">
         <div className="mx-auto w-full max-w-[1500px] px-6">
@@ -1306,18 +1317,31 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       {currentSectionItems.map((item, i) => (
                         <div key={i} className="flex-[0_0_100%] min-w-0 flex items-center justify-center">
                           <div className="relative w-full">
-                           <img
-                             {...galleryImg(item.image, "100vw", [480, 640, 800, 1080, 1440, 1920])}
-                             alt={item.title}
-                             className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
-                             loading={Math.abs(i - currentItemIndex) <= 1 ? "eager" : "lazy"}
-                             decoding="async"
-                             draggable={false}
-                           />
+                           {i === currentItemIndex ? (
+                             <PinchZoomImage
+                               key={`pinch-${i}`}
+                               src={item.image}
+                               alt={item.title}
+                               className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
+                               loading="eager"
+                               decoding="sync"
+                               fetchPriority="high"
+                               onZoomChange={(z) => { imageZoomedRef.current = z; setImageZoomed(z); }}
+                             />
+                           ) : (
+                             <img
+                               {...galleryImg(item.image, "100vw", [480, 640, 800, 1080, 1440, 1920])}
+                               alt={item.title}
+                               className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
+                               loading="lazy"
+                               decoding="async"
+                               draggable={false}
+                             />
+                           )}
                            {i === currentItemIndex && (
                              <GalleryHotspots
                                 imageIdentifier={item.title}
-                                visible={true}
+                                visible={!imageZoomed}
                                 onCloseLightbox={closeLightbox}
                                  filterDesigner={filterDesigner}
                                  {...(onHotspotAddToQuote ? { onAddToQuote: onHotspotAddToQuote, onViewFullProduct: handleHotspotViewFullProduct } : { onRequestQuote: handleHotspotQuoteRequest, onViewProduct: handleHotspotViewProduct })}
