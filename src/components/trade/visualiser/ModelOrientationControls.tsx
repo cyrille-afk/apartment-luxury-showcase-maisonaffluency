@@ -41,19 +41,19 @@ export default function ModelOrientationControls({ orientation, onChange, onRese
           <TooltipContent className="z-[80]">Reset to imported orientation</TooltipContent>
         </Tooltip>
       </div>
-      <div className="mt-2 grid grid-cols-3 gap-2">
-        {(["X", "Y", "Z"] as const).map((axis, index) => <div key={axis} className="min-w-0 text-center">
+      <div className="mt-2 space-y-2">
+        {(["X", "Y", "Z"] as const).map((axis, index) => <div key={axis} className="grid min-w-0 grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2">
           <span className="text-xs text-muted-foreground">{axis}</span>
-          <div className="relative mt-1">
+          <div className="relative">
             <Input type="number" step="0.1" aria-label={`Model ${axis} rotation degrees`} value={degrees[index]}
-              className="h-8 min-w-0 pr-5 text-xs" onChange={event => setDegrees(values => values.map((value, i) => i === index ? event.target.value : value))}
+              className="h-8 min-w-0 pl-2 pr-5 text-xs [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" onChange={event => setDegrees(values => values.map((value, i) => i === index ? event.target.value : value))}
               onBlur={commit} onKeyDown={event => {
                 if (event.key === "Enter") { event.preventDefault(); event.stopPropagation(); event.currentTarget.blur(); }
                 if (event.key === "Escape") { event.stopPropagation(); setDegrees(modelOrientationToDegrees(orientation).map(String)); }
               }} />
             <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">°</span>
           </div>
-          <div className="mt-1 flex justify-center gap-1">
+          <div className="flex justify-center gap-1">
             {([-1, 1] as const).map(direction => <Tooltip key={direction}>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon-sm" aria-label={`Rotate model ${axis} ${direction === 1 ? "+90" : "−90"} degrees`}
