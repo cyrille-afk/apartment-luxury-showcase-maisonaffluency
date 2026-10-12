@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPublicProductPage } from "@/lib/publicProductPageQuery";
+import { resolveLegacyProductSlug } from "@/lib/legacyProductSlugs";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */
@@ -41,6 +42,11 @@ export default function ProductPageContainer({
   const routeInsideTradePortal =
     isInsideTradePortal ?? /^\/trade(\/|$)/.test(pathname);
 
+  // Legacy one-letter slugs (pre-2026-10-12 slug bug) redirect to the
+  // canonical full-slug URL, preserving the trade/public prefix and query.
+  // Computed here; the redirect itself happens after all hooks below.
+  const legacyCanonical = resolveLegacyProductSlug(designerSlug, productSlug);
+
   // An approved trade session (or admin) always gets the full B2B layout, even
   // on public product URLs. Latched once confirmed so a later role re-check can
   // never flip the page back to the public layout mid-visit.
@@ -57,6 +63,15 @@ export default function ProductPageContainer({
     enabled: tradeSessionLatched && !routeInsideTradePortal && !designerSlug && !!productSlug,
     queryFn: () => fetchPublicProductPage(undefined, productSlug),
   });
+
+  if (legacyCanonical) {
+    return (
+      <Navigate
+        to={`${pathname.replace(/\/[^/]*$/, "")}/${legacyCanonical}${search}`}
+        replace
+      />
+    );
+  }
 
   if (user && !rolesLoaded && !routeInsideTradePortal) return <PageLoadingSkeleton />;
   if (!routeInsideTradePortal && tradeSessionLatched && !designerSlug && productSlug) {
