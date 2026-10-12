@@ -6,14 +6,15 @@ import { createClient } from "@supabase/supabase-js";
 const token = process.env.LOVABLE_BROWSER_SUPABASE_ACCESS_TOKEN;
 const url = process.env.VITE_SUPABASE_URL;
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const live = Boolean(token && url && key);
+const fixtureId = process.env.E2E_DIRECTORY_ACCOUNT_ID;
+const live = Boolean(token && url && key && fixtureId);
 const client = createClient(url || "http://localhost", key || "unused", {
   global: { headers: { Authorization: `Bearer ${token || "unused"}` } },
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const stamp = crypto.randomUUID();
-const accountId = crypto.randomUUID();
-const email = `directory-${stamp}@example.invalid`;
+const stamp = "cf289daf";
+const accountId = fixtureId || "unused";
+const email = "directory-sync-verification@example.invalid";
 const studio = "8f16a389-f13c-487a-83a2-01b81639e7dd";
 let profileId: string | undefined;
 
@@ -25,8 +26,9 @@ async function synced() {
 
 describe.skipIf(!live)("approved Trade User directory sync (live)", () => {
   beforeAll(async () => {
-    const { error } = await client.from("trade_accounts").insert({ id: accountId, email, studio_name: `Directory verification ${stamp}`, contact_name: "Directory Tester", status: "pending_review", website_or_ig: "example.invalid", phone_number: "+6599990000", job_title: "Principal", country: "Singapore", city: "Singapore", tax_vat_id: "TEST-VAT" });
+    const { data, error } = await client.from("trade_accounts").select("id,status").eq("id", accountId).single();
     if (error) throw error;
+    expect(data.status).toBe("pending_review");
   });
   afterAll(async () => {
     const { error: ce } = await client.from("clients").delete().eq("onboarding_account_id", accountId);
