@@ -465,31 +465,10 @@ const StudioGallery = () => {
   );
 
   // Explicit sort options layered on top of the curated sequence.
-  const sorted = useMemo(() => {
-    if (sortBy === "curated") return filtered;
-    const fold = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    const out = filtered.slice();
-    if (sortBy === "designer") {
-      out.sort((a, b) =>
-        sortNameKey(a.brand_name).localeCompare(sortNameKey(b.brand_name)) ||
-        fold(a.product_name).localeCompare(fold(b.product_name)));
-    } else if (sortBy === "title") {
-      out.sort((a, b) =>
-        fold(a.product_name).localeCompare(fold(b.product_name)) ||
-        sortNameKey(a.brand_name).localeCompare(sortNameKey(b.brand_name)));
-    } else {
-      // Most recently added: newest first; picks without a timestamp last.
-      out.sort((a, b) => {
-        const at = a.created_at || "";
-        const bt = b.created_at || "";
-        if (!at && !bt) return 0;
-        if (!at) return 1;
-        if (!bt) return -1;
-        return bt < at ? -1 : bt > at ? 1 : 0;
-      });
-    }
-    return out;
-  }, [filtered, sortBy]);
+  const sorted = useMemo(
+    () => sortTradeProducts(filtered, sortBy),
+    [filtered, sortBy],
+  );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
     pick: {
