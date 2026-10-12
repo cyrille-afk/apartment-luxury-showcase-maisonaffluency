@@ -305,11 +305,16 @@ const VariantSelectorsProvider: React.FC<{
   // Persist the shopper's configuration so switching audience tabs, signing in
   // to a trade account, or returning to the page keeps the exact variant.
   const persistKey = `ma_variant_sel_${product?.id ?? "unknown"}`;
+  const singleAxisRestore = { sizes: singleSizeOptions, materials: singleMaterialOptions, split: hasSingleAxisSplit };
   const stored = (() => {
     if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem(persistKey);
-      return raw ? (JSON.parse(raw) as Record<string, string | null>) : null;
+      // Only restore values the current variants still offer — a stale
+      // remembered finish would otherwise cross out every size.
+      return raw
+        ? sanitizeStoredSelection(JSON.parse(raw) as StoredVariantSelection, product.size_variants, singleAxisRestore)
+        : null;
     } catch {
       return null;
     }
