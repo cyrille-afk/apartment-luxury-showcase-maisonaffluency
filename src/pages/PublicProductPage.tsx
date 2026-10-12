@@ -2717,9 +2717,13 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       )}
                     </div>
 
+                    {/* Collection description — directly below the price/title block */}
+                    <div className="order-2">
+                      <MaterialsDescriptionBlock />
+                    </div>
+
                     <div className="flex flex-col gap-3 md:gap-5 order-5 md:order-5">
                       <MotionAndDimensionsPanel />
-                      <MaterialsDescriptionBlock />
                       <ShippingDetailsAccordion variant="row" />
                     </div>
                   </VariantSelectorsProvider>
@@ -2870,6 +2874,8 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     onDisplayedFinishesChange={setDisplayedFinishes}
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
+                    <MaterialsDescriptionBlock />
+
                     <div id="finish-selectors" className="flex flex-col gap-5 scroll-mt-28">
                       <VariantFinishSelectors renderMaterialsDescription={false} />
                       {finishesMissingImages.length > 0 && (
