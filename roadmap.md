@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Save Fuga's supplied collection description and display Description legends permanently open; verify Public, Studio and Presentation.
 - [x] Recognize linked finishes and variant materials in the missing-materials audit; 13 tests pass, all 744 records checked live, 412 false flags removed (439 → 27), all eight Amélie products clear including Solare, no page errors. Dimension rules unchanged; no catalogue records edited.
 - [x] Remove repeated product dimensions; short specs open and long specs collapsible. Seven tests pass; Public, Studio and Presentation ordering plus rug-size selection verified live without page errors.
 - [x] Make rug-size image assignments independent; signed-in Fuga editor verified 1/2/3 assignments and isolated second-size change with autosave requests intercepted; shared Public/Trade resolver regressions pass, saved catalogue unchanged.
