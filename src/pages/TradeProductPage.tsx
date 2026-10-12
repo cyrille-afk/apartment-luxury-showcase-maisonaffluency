@@ -2214,6 +2214,16 @@ const TradeProductPage: React.FC = () => {
               </p>
             )}
 
+            {/* Collection description — directly below the price */}
+            <div className="order-[-2] md:order-none">
+              {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
+                <LegendDisclosure
+                  icon={specIcon("⬗")}
+                  text={product.materials_description.trim()}
+                />
+              )}
+            </div>
+
             {/* Finish selection — mobile: directly under the photography */}
 
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
@@ -3101,13 +3111,6 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
             </div>
-
-              {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
-                <LegendDisclosure
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                />
-              )}
 
             <ShippingDetailsAccordion variant="row" />
 
