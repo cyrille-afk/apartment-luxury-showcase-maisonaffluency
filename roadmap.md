@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Display country and available IP-detected currency on Client Management profiles; verify live profiles without changing pricing preferences.
 - [x] Add selected-model X/Y/Z ±90° rotation and orientation reset controls; 10 tests pass, signed-in GUM rotation/reload/reset verified with upright reset screenshot and no page errors. Position, scale and finishes retained; build OK.
 - [x] Automatically sync approved Trade onboarding into the private admin Client Management directory; all 11 approvals backfilled, six live create/update/deduplication/scope/permission/notes tests passed, temporary account removed, signed-in Pola account sheet verified and build OK.
 - [x] Reorganize Trade Gallery toolbar into search/currency, pill filters and results/view controls; secondary tools preserved, signed-in search/currency/category/creator/sort/grid/list verified, desktop/mobile screenshots show no overflow, 21 regressions pass and build OK.
