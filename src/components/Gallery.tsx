@@ -1320,6 +1320,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                            {i === currentItemIndex ? (
                              <PinchZoomImage
                                key={`pinch-${i}`}
+                               showZoomControls
                                src={item.image}
                                alt={item.title}
                                className="object-contain brightness-[1.05] contrast-[1.08] saturate-[1.05] w-full max-h-[70dvh]"
