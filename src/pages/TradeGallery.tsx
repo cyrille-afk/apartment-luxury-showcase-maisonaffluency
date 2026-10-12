@@ -854,7 +854,7 @@ const StudioGallery = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((product) => {
+          {sorted.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
