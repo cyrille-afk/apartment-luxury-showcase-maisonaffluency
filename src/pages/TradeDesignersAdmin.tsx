@@ -1258,19 +1258,17 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     // same finishes but have different dimensions/concepts do not collide.
                     const isTriple = Boolean(baseTrim && topTrim && labelTrim);
                     const isComposite = Boolean(baseTrim && topTrim);
-                    const keySource: "Base × Top × Label" | "Base × Top" | "Top" | "Base" | "Label" | null =
+                    const keySource: "Base × Top × Label" | "Base × Top" | "Top × Label" | "Base × Label" | "Top" | "Base" | "Label" | null =
                       isTriple ? "Base × Top × Label"
                       : isComposite ? "Base × Top"
+                      : topTrim && labelTrim ? "Top × Label"
+                      : baseTrim && labelTrim ? "Base × Label"
                       : topTrim ? "Top"
                       : baseTrim ? "Base"
                       : labelTrim ? "Label"
                       : null;
                     const mapKey = variantImageKey(baseTrim, topTrim, labelTrim, labelTrim);
-                    const keyDisplay = isTriple
-                      ? mapKey.replace(/\|/g, " | ")
-                      : isComposite
-                        ? mapKey.replace(/\|/g, " | ")
-                      : mapKey;
+                    const keyDisplay = mapKey.replace(/\|/g, " | ");
                     const currentImageIdx = mapKey && pick.variant_image_map
                       ? pick.variant_image_map[mapKey]
                       : undefined;
@@ -1381,6 +1379,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                         min={1}
                         max={galleryCount || undefined}
                         value={currentImageNum}
+                        aria-label={`Image for ${labelTrim || topTrim || baseTrim || `variant ${idx + 1}`}`}
                         onChange={(e) => {
                           if (!mapKey) return;
                           const next = { ...(pick.variant_image_map || {}) };
