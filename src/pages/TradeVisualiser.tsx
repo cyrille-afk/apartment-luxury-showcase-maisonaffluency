@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
+import { FINISH_TARGET_LABELS, finishTargetsFromParts, materialFitsTarget, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -296,6 +297,18 @@ const TradeVisualiser = () => {
 
   const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
+  // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
+  const availableTargets = useMemo<FinishTarget[]>(
+    () => finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
+    [selected, textureParts],
+  );
+  const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
+  const targetMaterial = selected
+    ? effectiveTarget === "top" ? selected.topMaterial
+      : effectiveTarget === "base" ? selected.baseMaterial
+        : effectiveTarget === "upholstery" ? selected.upholsteryMaterial
+          : selected.material
+    : null;
 
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
@@ -375,9 +388,9 @@ const TradeVisualiser = () => {
     }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
-      if (finishTarget === "top") return { ...object, topMaterial: material };
-      if (finishTarget === "base") return { ...object, baseMaterial: material };
-      if (finishTarget === "upholstery") return { ...object, upholsteryMaterial: material };
+      if (effectiveTarget === "top") return { ...object, topMaterial: material };
+      if (effectiveTarget === "base") return { ...object, baseMaterial: material };
+      if (effectiveTarget === "upholstery") return { ...object, upholsteryMaterial: material };
       return { ...object, material, topMaterial: null, baseMaterial: null };
     }));
   };
