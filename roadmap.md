@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add selected-model X/Y/Z rotation and orientation reset controls; verify floor contact, persistence and live canvas interaction.
 - [x] Automatically sync approved Trade onboarding into the private admin Client Management directory; all 11 approvals backfilled, six live create/update/deduplication/scope/permission/notes tests passed, temporary account removed, signed-in Pola account sheet verified and build OK.
 - [x] Reorganize Trade Gallery toolbar into search/currency, pill filters and results/view controls; secondary tools preserved, signed-in search/currency/category/creator/sort/grid/list verified, desktop/mobile screenshots show no overflow, 21 regressions pass and build OK.
 - [x] Audit all 65 saved studio portfolio sources; replace eight thumbnails with sharper originals and seven flag/logo/icon slots with authentic portfolio photos across five studios. All 15 replacement files decode, saved values read back correctly, and signed-in review screenshots verify the visible images. Pola Sentosa originals are 476–705px wide; no enlargement or AI substitutes. Analysis notes and scraper unchanged.
