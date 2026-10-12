@@ -2,6 +2,11 @@ import { Box3, Group, Mesh, Object3D, Quaternion, Vector3 } from "three";
 import { parseDimensionString } from "./productDimensions";
 
 const Y_UP = new Vector3(0, 1, 0);
+// Verified against the authored GUM geometry: local +Y points toward its feet.
+// Its exporter maps that to -Z, so the actual furniture up direction is +Z.
+const VERIFIED_UP: Record<string, [number, number, number]> = {
+  "f72b4185-9eeb-4ec0-b862-0972abc93a9f": [0, 0, 1],
+};
 
 /** Correct the import frame, never the cached GLTF scene or individual meshes. */
 export function fitUprightModel(model: Object3D, dimensions?: string | null, url = ""): Group {
@@ -18,9 +23,12 @@ export function fitUprightModel(model: Object3D, dimensions?: string | null, url
     authoredUp.addScaledVector(Y_UP.clone().applyQuaternion(mesh.getWorldQuaternion(new Quaternion())), weight);
   });
   authoredUp.normalize();
+  const verified = Object.entries(VERIFIED_UP).find(([id]) => url.includes(id))?.[1];
   // glTF is Y-up by contract. Only correct when declared dimensions contradict
   // the world frame; longest-axis guesses would tip wide sofas and low tables.
-  if (expected && Math.min(size.x, size.y, size.z) > 0) {
+  if (verified) {
+    frame.quaternion.setFromUnitVectors(new Vector3(...verified), Y_UP);
+  } else if (expected && Math.min(size.x, size.y, size.z) > 0) {
     const score = (w: number, h: number, d: number) => Math.min(
       Math.abs(Math.log((w / h) / (expected.w / expected.h))) + Math.abs(Math.log((d / h) / (expected.d / expected.h))),
       Math.abs(Math.log((d / h) / (expected.w / expected.h))) + Math.abs(Math.log((w / h) / (expected.d / expected.h))),
