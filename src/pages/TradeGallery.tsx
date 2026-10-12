@@ -83,6 +83,7 @@ const StudioGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
+  const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
@@ -421,6 +422,13 @@ const StudioGallery = () => {
     }
   };
 
+  const editions = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of allProducts) {
+      if (p.edition && p.edition.trim()) set.add(p.edition.trim());
+    }
+    return [...set].sort((a, b) => sortNameKey(a).localeCompare(sortNameKey(b)));
+  }, [allProducts]);
   const matchedProducts = useMemo(() => {
     return allProducts.filter((p) => {
       if (isTradeProductMarkedHidden(p, hiddenTradeProductIds)) return false;
@@ -429,9 +437,10 @@ const StudioGallery = () => {
       const matchesBrand = !activeBrand || p.brand_name === activeBrand || p.reedition_by === activeBrand;
       const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
       const matchesSub = selectedSubcategory === "all" || p.subcategory === selectedSubcategory;
-      return matchesBrand && matchesCategory && matchesSub;
+      const matchesEdition = selectedEdition === "all" || (p.edition || "").trim() === selectedEdition;
+      return matchesBrand && matchesCategory && matchesSub && matchesEdition;
     });
-  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
+  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory, selectedEdition]);
   const imageTones = useImageTones(matchedProducts.map((p) => p.image_url || ""));
   const canonicalProducts = useMemo(() => {
     if (!routeBrandSlug || !galleryDesigner || galleryDesigner.trade_only) return null;
@@ -446,6 +455,7 @@ const StudioGallery = () => {
       if (!searchMatches(product, search)) return [];
       if (selectedCategory !== "all" && product.category !== selectedCategory) return [];
       if (selectedSubcategory !== "all" && product.subcategory !== selectedSubcategory) return [];
+      if (selectedEdition !== "all" && (product.edition || "").trim() !== selectedEdition) return [];
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory]);
