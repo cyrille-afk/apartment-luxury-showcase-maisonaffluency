@@ -651,6 +651,19 @@ const StudioGallery = () => {
           )}
           <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
             <select
+              value={selectedEdition}
+              onChange={(e) => setSelectedEdition(e.target.value)}
+              aria-label="Filter by collection or edition"
+              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+            >
+              <option value="all">All Collections</option>
+              {editions.map((ed) => (
+                <option key={ed} value={ed}>{ed}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
+            <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               aria-label="Sort pieces"
