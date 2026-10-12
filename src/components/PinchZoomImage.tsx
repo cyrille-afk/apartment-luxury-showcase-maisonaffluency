@@ -91,6 +91,14 @@ const PinchZoomImage = ({
       } else if (e.touches.length === 1 && scaleRef.current > 1) {
         e.preventDefault();
         e.stopPropagation();
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+          // Double-tap while zoomed resets the zoom before pan takes over.
+          resetZoom();
+          lastTap.current = now;
+          return;
+        }
+        lastTap.current = now;
         isPanning.current = true;
         panStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         translateStart.current = { ...translateRef.current };
