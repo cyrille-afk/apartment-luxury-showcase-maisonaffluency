@@ -1958,7 +1958,6 @@ const TradeProductPage: React.FC = () => {
             })()}
           </span>
         )}
-        <ShippingDetailsAccordion />
       </div>
     );
 
@@ -3109,6 +3108,8 @@ const TradeProductPage: React.FC = () => {
                   text={product.materials_description.trim()}
                 />
               )}
+
+            <ShippingDetailsAccordion variant="row" />
 
             {/* Origin only — lead time lives exclusively in the pricing block. */}
             <div className="flex flex-col gap-2">
