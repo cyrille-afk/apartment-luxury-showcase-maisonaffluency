@@ -702,7 +702,7 @@ const StudioGallery = () => {
           "grid grid-cols-2 gap-x-4 gap-y-6 transition-[grid-template-columns] duration-300 sm:gap-x-6 lg:gap-x-8 lg:gap-y-8",
           density === "compact" ? "md:grid-cols-4 gap-y-5 lg:gap-y-6" : "md:grid-cols-3",
         )}>
-          {filtered.map((product) => {
+          {sorted.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
