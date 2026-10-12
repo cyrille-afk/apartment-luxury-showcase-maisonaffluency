@@ -8,6 +8,8 @@ import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
 import { useToast } from "@/hooks/use-toast";
 import { recordEmailPortalClick } from "@/lib/emailPortalClick";
+import { Button } from "@/components/ui/button";
+import { clearGoogleAttempt, readGoogleAttempt, startGoogleAttempt } from "@/lib/googleSignInRecovery";
 
 // Monochrome Google "G" — single-path glyph rendered in currentColor so it
 // stays charcoal/grayscale and reads as part of the brand, not a vendor badge.
@@ -25,6 +27,11 @@ const TradeLogin = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
+  const [googleRecovery, setGoogleRecovery] = useState(false);
+  const [returnedGoogleAttempt] = useState(() => {
+    try { return !!readGoogleAttempt(sessionStorage) || new URLSearchParams(window.location.search).get("google_recovery") === "1"; }
+    catch { return false; }
+  });
   const [showForgot, setShowForgot] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -47,9 +54,20 @@ const TradeLogin = () => {
   // member on the sign-in form.
   useEffect(() => {
     if (authLoading || !user) return;
+    clearGoogleAttempt();
     try { sessionStorage.removeItem("maison:oauth-return-path"); } catch { /* noop */ }
     navigate(getReturnPath(), { replace: true });
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!returnedGoogleAttempt || authLoading || user) return;
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!cancelled && !error && !data.session) setGoogleRecovery(true);
+    }, 1500);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [returnedGoogleAttempt, authLoading, user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +117,8 @@ const TradeLogin = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setGoogleError(null);
+    setGoogleRecovery(false);
+    startGoogleAttempt(getReturnPath());
     try {
       ensureStorageHeadroom();
       // Mark the intended destination so the full-page redirect flow returns
@@ -110,12 +130,23 @@ const TradeLogin = () => {
       });
       if (result.redirected) return; // browser is navigating to Google
       if (result.error) {
+        clearGoogleAttempt();
+        setGoogleRecovery(true);
         setGoogleError(result.error.message || "Google sign-in could not be completed.");
         return;
       }
-      // Popup flow: session is set — go straight to the requested destination.
+      // A bridge return alone does not prove a session was established.
+      const { data, error } = await supabase.auth.getSession();
+      if (error || !data.session) {
+        clearGoogleAttempt();
+        setGoogleRecovery(true);
+        return;
+      }
+      clearGoogleAttempt();
       navigate(getReturnPath());
     } catch (err) {
+      clearGoogleAttempt();
+      setGoogleRecovery(true);
       setGoogleError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
       setGoogleLoading(false);
@@ -208,22 +239,40 @@ const TradeLogin = () => {
 
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
-          {googleError && (
+          {(googleError || googleRecovery) && (
             <div role="alert" className="mt-4 border border-destructive/40 bg-destructive/5 px-4 py-3.5">
               <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-destructive">
                 Google sign-in didn't complete
               </p>
               <p className="mt-1.5 font-body text-sm text-foreground/80">
-                {googleError}
+                The Google sign-in return did not establish an active session. Your Lovable session may have expired.
               </p>
-              <button
+              <ol className="mt-3 list-decimal pl-4 space-y-2 font-body text-sm text-foreground/80">
+                <li>Open Lovable in this browser and sign in to your Lovable account.</li>
+                <li>Return here and retry Google sign-in.</li>
+              </ol>
+              <p className="mt-3 font-body text-sm text-foreground/80">Or sign in with your email address and password above.</p>
+              <Button asChild variant="link" className="mt-2 h-auto px-0 text-foreground">
+                <a href="https://lovable.dev/login" target="_blank" rel="noopener noreferrer">Sign in to Lovable</a>
+              </Button>
+              <Button
+                variant="outline"
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={googleLoading}
-                className="mt-3 w-full py-3 border border-foreground/40 font-body text-xs uppercase tracking-[0.3em] text-foreground hover:bg-foreground/[0.03] transition-colors disabled:opacity-50"
+                className="mt-3 w-full rounded-none font-body text-xs uppercase tracking-[0.2em]"
               >
-                {googleLoading ? "Retrying" : "Try Again"}
-              </button>
+                {googleLoading ? "Retrying" : "Retry Google sign-in"}
+              </Button>
+              <Button variant="link" type="button" className="mt-2 h-auto px-0 text-foreground"
+                onClick={() => {
+                  clearGoogleAttempt();
+                  setGoogleRecovery(false);
+                  setGoogleError(null);
+                  document.querySelector<HTMLInputElement>('input[name="identifier"]')?.focus();
+                }}>
+                Use email and password
+              </Button>
             </div>
           )}
 
