@@ -2889,7 +2889,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
                     <MotionAndDimensionsPanel />
 
-                    <MaterialsDescriptionBlock />
                     {!isTradeVerifiedView && <ShippingDetailsAccordion variant="row" />}
 
                     {/* Actions follow the complete finish, motion, and dimensions stack. */}
