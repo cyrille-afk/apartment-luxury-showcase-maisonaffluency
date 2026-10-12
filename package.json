@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-designers-index.mjs && node scripts/build-featured-designers.mjs && node scripts/build-catalog-manifest.mjs && vite build && node scripts/build-sitemap.mjs",
-    "build:dev": "node scripts/build-designers-index.mjs && node scripts/build-featured-designers.mjs && node scripts/build-catalog-manifest.mjs && vite build --mode development && node scripts/build-sitemap.mjs",
+    "build": "node scripts/run-prebuild.mjs scripts/build-designers-index.mjs 90 && node scripts/run-prebuild.mjs scripts/build-featured-designers.mjs 90 && node scripts/run-prebuild.mjs scripts/build-catalog-manifest.mjs 90 && vite build && node scripts/run-prebuild.mjs scripts/build-sitemap.mjs 90",
+    "build:dev": "node scripts/run-prebuild.mjs scripts/build-designers-index.mjs 90 && node scripts/run-prebuild.mjs scripts/build-featured-designers.mjs 90 && node scripts/run-prebuild.mjs scripts/build-catalog-manifest.mjs 90 && vite build --mode development && node scripts/run-prebuild.mjs scripts/build-sitemap.mjs 90",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
