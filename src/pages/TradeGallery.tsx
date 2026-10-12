@@ -11,7 +11,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info, X } from "lucide-react";
+import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info, X, List } from "lucide-react";
 import { filterTradeProducts } from "@/lib/tradeFilter";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -44,6 +44,9 @@ import { usePublishedMakerNames } from "@/hooks/usePublishedMakerNames";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
 import { createActiveDraftQuote, fetchScopedDraftQuotes } from "@/lib/activeProjectId";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import GalleryFilterSelect from "@/components/trade/GalleryFilterSelect";
 import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
 
@@ -94,7 +97,7 @@ const StudioGallery = () => {
     syncSavedViews().then((v) => { if (alive && v) setSavedViews(v); }).catch((err) => console.warn("Saved views sync failed", err));
     return () => { alive = false; };
   }, []);
-  const viewMode: "grid" | "list" = "grid";
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
     // Default to 4-column (compact); new storage key resets the legacy 3-column default
@@ -561,7 +564,7 @@ const StudioGallery = () => {
   };
 
   const filterInputClass =
-    "w-full bg-transparent border-0 font-body text-sm text-foreground focus:outline-none focus:ring-0 transition-colors placeholder:text-muted-foreground/60 placeholder:font-light";
+    "h-11 w-full min-w-0 border border-border bg-background px-4 font-body text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
 
   return (
     <>
@@ -610,95 +613,46 @@ const StudioGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-      {/* Filters */}
-      <div className="flex flex-col gap-3 mb-4 border-b border-border pb-3 xl:flex-row xl:items-center">
-        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:flex-wrap gap-y-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-          <div className="relative flex-1 min-w-0 py-2 sm:py-0 px-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-            <input
-              type="text"
-              placeholder="Search designer, title, collection…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={`${filterInputClass} pl-9 text-[16px] sm:text-sm`}
-            />
-          </div>
-          <div className="flex-1 sm:flex-none sm:min-w-[16rem] py-2 sm:py-0 px-3">
-            {productsLoading ? (
-              <div
-                className={`${filterInputClass} py-2 flex items-center text-muted-foreground/60 italic text-[16px] sm:text-sm`}
-                aria-busy="true"
-              >
-                Loading designers…
-              </div>
-            ) : (
-              <AlphabetDesignerPicker
-                brands={dropdownBrands}
-                value={selectedBrand}
-                onChange={handleBrandChange}
-                selectClassName={`${filterInputClass} text-[16px] sm:text-sm`}
-              />
-            )}
-          </div>
-          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setSelectedSubcategory("all");
-              }}
-              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
-            >
-              <option value="all">All Categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          {subcategories.length > 0 && (
-            <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
-              <select
-                value={selectedSubcategory}
-                onChange={(e) => setSelectedSubcategory(e.target.value)}
-                className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
-              >
-                <option value="all">All Subcategories</option>
-                {subcategories.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+      {/* Primary toolbar: search/currency, filters, then results/view controls. */}
+      <div className="mb-4 border-y border-border py-4" data-testid="gallery-filter-toolbar">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex min-w-0 items-center gap-3 xl:w-[21rem] xl:shrink-0" data-testid="gallery-search-currency">
+            <div className="relative min-w-0 flex-1">
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input type="search" aria-label="Search pieces" placeholder="Search pieces…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
             </div>
+            <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
+          </div>
+          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 xl:flex-1" data-testid="gallery-primary-filters">
+            <div className="min-w-0 [&>div]:w-full">
+              {productsLoading ? (
+                <div className={`${filterInputClass} gallery-filter-pill flex items-center rounded-full text-muted-foreground`} aria-busy="true">Loading designers…</div>
+              ) : (
+                <AlphabetDesignerPicker brands={dropdownBrands} value={selectedBrand} onChange={handleBrandChange} allLabel="Studio / Creator" hideCount selectClassName={`${filterInputClass} gallery-filter-pill !w-full !min-w-0 rounded-full text-base sm:text-sm`} />
+              )}
+            </div>
+            <GalleryFilterSelect value={selectedCategory} onChange={(value) => { setSelectedCategory(value); setSelectedSubcategory("all"); }} label="Filter by category" allLabel="All Categories" options={categories} />
+            <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} />
+          </div>
+          <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
+            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : filtered.length} {filtered.length === 1 ? "Item" : "Items"} Found</span>
+            <div className="flex items-center gap-1">
+              <GridDensityToggle value={density === "compact" ? 4 : 3} onChange={(columns) => { setViewMode("grid"); setDensity(columns === 4 ? "compact" : "comfortable"); }} className="!flex shrink-0" />
+              <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="icon" aria-label="Display list" aria-pressed={viewMode === "list"} title="Display list" onClick={() => setViewMode("list")} className={cn("h-10 w-10", viewMode === "list" && "bg-foreground text-background hover:bg-foreground/90")}><List /></Button>
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center" data-testid="gallery-secondary-tools">
+          {subcategories.length > 0 && (
+            <div className="w-full sm:w-52"><GalleryFilterSelect value={selectedSubcategory} onChange={setSelectedSubcategory} label="Filter by subcategory" allLabel="All Subcategories" options={subcategories} /></div>
           )}
-          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
-            <select
-              value={selectedEdition}
-              onChange={(e) => setSelectedEdition(e.target.value)}
-              aria-label="Filter by collection or edition"
-              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
-            >
-              <option value="all">All Collections</option>
-              {editions.map((ed) => (
-                <option key={ed} value={ed}>{ed}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              aria-label="Sort pieces"
-              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
-            >
-              <option value="curated">Sort: Curated order</option>
-              <option value="designer">Sort: Designer A–Z</option>
-              <option value="title">Sort: Title A–Z</option>
-              <option value="recent">Sort: Most recently added</option>
-            </select>
-          </div>
-          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3 flex items-center gap-2">
-            <select
-              value=""
-              aria-label="Saved views"
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
+            <option value="curated">Sort: Curated order</option>
+            <option value="designer">Sort: Designer A–Z</option>
+            <option value="title">Sort: Title A–Z</option>
+            <option value="recent">Sort: Most recently added</option>
+          </select>
+          <select value="" aria-label="Saved views"
               onChange={(e) => {
                 const val = e.target.value;
                 if (val === "__save") {
@@ -728,36 +682,12 @@ const StudioGallery = () => {
                 setSortBy(v.sortBy);
                 if (v.brand !== selectedBrand) handleBrandChange(v.brand);
               }}
-              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
-            >
-              <option value="" disabled>Saved views{savedViews.length ? ` (${savedViews.length})` : ""}</option>
-              {savedViews.map((v) => (
-                <option key={v.id} value={v.id}>{v.name}</option>
-              ))}
-              <option value="__save">+ Save current view…</option>
-              {savedViews.length > 0 && (
-                <optgroup label="Delete">
-                  {savedViews.map((v) => (
-                    <option key={`d-${v.id}`} value={`__del:${v.id}`}>Delete “{v.name}”</option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-          </div>
-        </div>
-        <div className="flex min-w-0 shrink-0 items-center justify-end gap-3 px-3 py-2 sm:px-0 xl:py-0">
-          <GridDensityToggle
-            value={density === "compact" ? 4 : 3}
-            onChange={(columns) => setDensity(columns === 4 ? "compact" : "comfortable")}
-            disabled={viewMode !== "grid"}
-            className="shrink-0"
-          />
-          <CurrencyToggle
-            value={displayCurrency}
-            onChange={setDisplayCurrency}
-            variant="dropdown"
-            className="shrink-0"
-          />
+            className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
+            <option value="" disabled>Saved views{savedViews.length ? ` (${savedViews.length})` : ""}</option>
+            {savedViews.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+            <option value="__save">+ Save current view…</option>
+            {savedViews.length > 0 && <optgroup label="Delete">{savedViews.map((v) => <option key={`d-${v.id}`} value={`__del:${v.id}`}>Delete “{v.name}”</option>)}</optgroup>}
+          </select>
         </div>
       </div>
       {/* Active filter chips */}
@@ -968,14 +898,14 @@ const StudioGallery = () => {
           })}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2" data-testid="gallery-product-list">
           {sorted.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
             const price = getProductPrice(product);
             const pinned = isPinned(product.product_name, product.id);
             return (
-              <div key={product.id} className="flex items-center gap-4 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors">
+              <div key={product.id} className="flex flex-wrap items-center gap-3 border border-border rounded-lg p-3 hover:border-foreground/20 transition-colors sm:flex-nowrap">
                 <div className="w-16 h-16 rounded bg-muted/30 overflow-hidden shrink-0">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.product_name} width={160} height={200} decoding="async" className="w-full h-full object-cover" loading="lazy" />
