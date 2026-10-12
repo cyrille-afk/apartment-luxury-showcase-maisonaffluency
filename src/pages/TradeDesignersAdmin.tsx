@@ -733,12 +733,12 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] text-muted-foreground">Product Legend (free-form description — when set, replaces the Materials dropdown and renders as a plain paragraph with the Layers icon)</label>
+                  <label className="text-[10px] text-muted-foreground">Product Legend (start with “Description:” for always-visible text, or “Technical Specs:” for specifications)</label>
                   <Textarea
                     value={(pick as any).materials_description || ""}
                     onChange={(e) => updateField(pick.id, "materials_description" as any, e.target.value || null)}
                     className="text-xs min-h-[60px]"
-                    placeholder="e.g. Frame in solid and multilayer wood with elastic belts and upholstery in different densities polyurethane foam · Slide feet or lacquered solid wood base"
+                    placeholder={"Description:\nProduct description"}
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2">

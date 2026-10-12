@@ -8,6 +8,7 @@ export function parseTechnicalSpecs(text: string, fallbackLabel = "Technical Spe
   while (bodyLines.length && !bodyLines[0]) bodyLines.shift();
   while (bodyLines.length && !bodyLines[bodyLines.length - 1]) bodyLines.pop();
   const content = bodyLines.filter(Boolean);
-  const collapsible = content.length > 3 || content.join(" ").length > 300 || content.some((line) => line.length > 160);
+  const isDescription = /^description$/i.test(label);
+  const collapsible = !isDescription && (content.length > 3 || content.join(" ").length > 300 || content.some((line) => line.length > 160));
   return { label, bodyLines, collapsible };
 }
