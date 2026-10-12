@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
+import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 const EditorialDesignerProfile = lazy(() => import("./PublicDesignerProfile"));
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -88,6 +89,11 @@ const StudioGallery = () => {
   const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const [savedViews, setSavedViews] = useState<TradeSavedView[]>(() => readSavedViews());
+  useEffect(() => {
+    let alive = true;
+    syncSavedViews().then((v) => { if (alive && v) setSavedViews(v); }).catch((err) => console.warn("Saved views sync failed", err));
+    return () => { alive = false; };
+  }, []);
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
@@ -698,13 +704,19 @@ const StudioGallery = () => {
                 if (val === "__save") {
                   const name = window.prompt("Name this view");
                   if (name && name.trim()) {
-                    setSavedViews(saveView({ name, search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy }));
+                    const next = saveView({ name, search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy });
+                    setSavedViews(next);
+                    const saved = next[next.length - 1];
+                    pushSavedView(saved).catch((err) => console.warn("Saved view sync failed", err));
                   }
                   return;
                 }
                 if (val.startsWith("__del:")) {
                   const v = savedViews.find((x) => x.id === val.slice(6));
-                  if (v && window.confirm(`Delete saved view "${v.name}"?`)) setSavedViews(deleteView(v.id));
+                  if (v && window.confirm(`Delete saved view "${v.name}"?`)) {
+                    setSavedViews(deleteView(v.id));
+                    removeSavedView(v.id).catch((err) => console.warn("Saved view delete sync failed", err));
+                  }
                   return;
                 }
                 const v = savedViews.find((x) => x.id === val);
