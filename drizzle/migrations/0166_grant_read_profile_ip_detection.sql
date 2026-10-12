@@ -1,0 +1,2 @@
+GRANT SELECT (ip_detected_country, ip_detected_currency, ip_detected_at) ON public.profiles TO authenticated;
+GRANT SELECT, UPDATE (ip_detected_country, ip_detected_currency, ip_detected_at) ON public.profiles TO service_role;

@@ -1163,6 +1163,13 @@
       "when": 1791839727709,
       "tag": "0165_persist_client_ip_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 166,
+      "version": "7",
+      "when": 1791839891593,
+      "tag": "0166_grant_read_profile_ip_detection",
+      "breakpoints": true
     }
   ]
 }
