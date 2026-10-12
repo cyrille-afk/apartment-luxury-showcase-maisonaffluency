@@ -57,5 +57,12 @@ describe("catalogue slug integrity", () => {
       dupes.map(([slug, titles]) => `${slug}: ${titles.join(" | ")}`),
       "duplicate slugs"
     ).toEqual([]);
+
+    // Every legacy one-letter redirect must point at a slug that exists.
+    const allSlugs = new Set(rows.map((r) => r.slug));
+    const deadTargets = Object.values(LEGACY_PRODUCT_SLUGS)
+      .flatMap((byProduct) => Object.values(byProduct))
+      .filter((target) => !allSlugs.has(target));
+    expect(deadTargets, "legacy redirects pointing at missing slugs").toEqual([]);
   }, 60_000);
 });
