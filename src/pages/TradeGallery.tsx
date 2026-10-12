@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 const EditorialDesignerProfile = lazy(() => import("./PublicDesignerProfile"));
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
