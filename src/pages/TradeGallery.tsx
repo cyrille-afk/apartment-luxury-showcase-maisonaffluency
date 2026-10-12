@@ -19,6 +19,7 @@ import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useDesigner } from "@/hooks/useDesigner";
 import { useDesignerGalleryPicks } from "@/hooks/useDesignerGalleryPicks";
+import { creditsDesigner } from "@/lib/designerCollaboration";
 import { isTradeProductMarkedHidden, useHiddenTradeProductIds } from "@/hooks/useHiddenTradeProductIds";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -793,6 +794,9 @@ const StudioGallery = () => {
                    <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
                    </h3>
+                   {creditsDesigner(product, "Emma Donnersberg") && (
+                     <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
+                   )}
                    {isAdmin && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
                        <InlinePriceEditor
@@ -832,6 +836,9 @@ const StudioGallery = () => {
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                    <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
+                   {creditsDesigner(product, "Emma Donnersberg") && (
+                     <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
+                   )}
                 </div>
                 {isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">

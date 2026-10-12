@@ -12334,6 +12334,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_collaboration_owner_metadata: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
       public_micmac_gallery_pins: {
         Args: never
         Returns: {
