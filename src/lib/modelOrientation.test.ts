@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Quaternion, Vector3 } from "three";
-import { applyModelOrientation, fitUprightModel, rotateModelOrientation } from "./modelOrientation";
+import { applyModelOrientation, fitUprightModel, rotateModelOrientation, modelOrientationFromDegrees, modelOrientationToDegrees, MODEL_UP_AXIS_PRESETS } from "./modelOrientation";
 
 function piece(w: number, h: number, d: number) {
   const mesh = new Mesh(new BoxGeometry(w, h, d), new MeshBasicMaterial());
@@ -14,6 +14,29 @@ function bounds(model: Group) {
   return new Box3().setFromObject(model);
 }
 describe("model import frame", () => {
+  it("round trips precise decimal degree corrections", () => {
+    const degrees: [number, number, number] = [12.5, -23.75, 46.125];
+    modelOrientationToDegrees(modelOrientationFromDegrees(degrees)).forEach((value, index) => expect(value).toBeCloseTo(degrees[index], 4));
+  });
+  it.each([
+    ["y-up", [0, 1, 0]], ["z-up", [0, 0, 1]], ["x-up", [1, 0, 0]],
+    ["negative-z-up", [0, 0, -1]], ["negative-x-up", [-1, 0, 0]], ["upside-down", [0, -1, 0]],
+  ] as const)("maps %s to positive Y", (id, axis) => {
+    const preset = MODEL_UP_AXIS_PRESETS.find(item => item.id === id);
+    if (!preset) throw new Error(`Missing preset ${id}`);
+    const result = new Vector3(...axis).applyQuaternion(new Quaternion(...modelOrientationFromDegrees(preset.degrees)));
+    expect(result.distanceTo(new Vector3(0, 1, 0))).toBeCloseTo(0);
+  });
+  it("keeps arbitrary degree corrections on the floor without changing fitted scale", () => {
+    const fitted = fitUprightModel(piece(3, 1, 2));
+    const scale = fitted.children[0].scale.clone();
+    const corrected = applyModelOrientation(fitted, modelOrientationFromDegrees([12.5, -23.75, 46.125]));
+    expect(bounds(corrected).min.y).toBeCloseTo(0);
+    expect(fitted.children[0].scale.equals(scale)).toBe(true);
+  });
+  it("does not emit non-finite orientation values", () => {
+    expect(modelOrientationFromDegrees([NaN, 0, 0])).toEqual([0, 0, 0, 1]);
+  });
   it.each(["X", "Y", "Z"] as const)("rotates %s by 90 degrees and returns after four turns", axis => {
     const first = rotateModelOrientation(undefined, axis, 1);
     expect(new Quaternion(...first).angleTo(new Quaternion())).toBeCloseTo(Math.PI / 2);

@@ -1,9 +1,30 @@
-import { Box3, Group, Mesh, Object3D, Quaternion, Vector3 } from "three";
+import { Box3, Euler, Group, MathUtils, Mesh, Object3D, Quaternion, Vector3 } from "three";
 import { parseDimensionString } from "./productDimensions";
 
 const Y_UP = new Vector3(0, 1, 0);
 export type ModelOrientation = [number, number, number, number];
 export const DEFAULT_MODEL_ORIENTATION: ModelOrientation = [0, 0, 0, 1];
+export type ModelRotationDegrees = [number, number, number];
+
+export function modelOrientationFromDegrees(degrees: ModelRotationDegrees): ModelOrientation {
+  if (!degrees.every(Number.isFinite)) return [...DEFAULT_MODEL_ORIENTATION];
+  return new Quaternion().setFromEuler(new Euler(...degrees.map(MathUtils.degToRad) as ModelRotationDegrees, "XYZ"))
+    .normalize().toArray() as ModelOrientation;
+}
+
+export function modelOrientationToDegrees(orientation?: ModelOrientation): ModelRotationDegrees {
+  const euler = new Euler().setFromQuaternion(new Quaternion(...(orientation ?? DEFAULT_MODEL_ORIENTATION)).normalize(), "XYZ");
+  return [euler.x, euler.y, euler.z].map(value => Math.round(MathUtils.radToDeg(value) * 10000) / 10000) as ModelRotationDegrees;
+}
+
+export const MODEL_UP_AXIS_PRESETS = [
+  { id: "y-up", label: "Y-up", degrees: [0, 0, 0] },
+  { id: "z-up", label: "Z-up → Y-up", degrees: [-90, 0, 0] },
+  { id: "x-up", label: "X-up → Y-up", degrees: [0, 0, 90] },
+  { id: "negative-z-up", label: "−Z-up → Y-up", degrees: [90, 0, 0] },
+  { id: "negative-x-up", label: "−X-up → Y-up", degrees: [0, 0, -90] },
+  { id: "upside-down", label: "Upside down → Y-up", degrees: [180, 0, 0] },
+] satisfies { id: string; label: string; degrees: ModelRotationDegrees }[];
 
 /** Quarter turns in the sandbox frame, independently of placement yaw. */
 export function rotateModelOrientation(current: ModelOrientation | undefined, axis: "X" | "Y" | "Z", direction: 1 | -1): ModelOrientation {
