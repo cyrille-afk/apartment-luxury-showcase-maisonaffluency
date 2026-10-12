@@ -10,6 +10,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
+import { searchMatches } from "@/lib/tradeSearch";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
