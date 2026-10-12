@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 const EditorialDesignerProfile = lazy(() => import("./PublicDesignerProfile"));
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -86,6 +87,7 @@ const StudioGallery = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
+  const [savedViews, setSavedViews] = useState<TradeSavedView[]>(() => readSavedViews());
   const viewMode: "grid" | "list" = "grid";
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
@@ -684,6 +686,49 @@ const StudioGallery = () => {
               <option value="designer">Sort: Designer A–Z</option>
               <option value="title">Sort: Title A–Z</option>
               <option value="recent">Sort: Most recently added</option>
+            </select>
+          </div>
+          <div className="flex-1 sm:flex-none sm:min-w-[12rem] py-2 sm:py-0 px-3 flex items-center gap-2">
+            <select
+              value=""
+              aria-label="Saved views"
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "__save") {
+                  const name = window.prompt("Name this view");
+                  if (name && name.trim()) {
+                    setSavedViews(saveView({ name, search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy }));
+                  }
+                  return;
+                }
+                if (val.startsWith("__del:")) {
+                  const v = savedViews.find((x) => x.id === val.slice(6));
+                  if (v && window.confirm(`Delete saved view "${v.name}"?`)) setSavedViews(deleteView(v.id));
+                  return;
+                }
+                const v = savedViews.find((x) => x.id === val);
+                if (!v) return;
+                setSearch(v.search);
+                setSelectedCategory(v.category);
+                setSelectedSubcategory(v.subcategory);
+                setSelectedEdition(v.edition);
+                setSortBy(v.sortBy);
+                if (v.brand !== selectedBrand) handleBrandChange(v.brand);
+              }}
+              className={`${filterInputClass} pr-6 text-[16px] sm:text-sm`}
+            >
+              <option value="" disabled>Saved views{savedViews.length ? ` (${savedViews.length})` : ""}</option>
+              {savedViews.map((v) => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
+              <option value="__save">+ Save current view…</option>
+              {savedViews.length > 0 && (
+                <optgroup label="Delete">
+                  {savedViews.map((v) => (
+                    <option key={`d-${v.id}`} value={`__del:${v.id}`}>Delete “{v.name}”</option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </div>
         </div>
