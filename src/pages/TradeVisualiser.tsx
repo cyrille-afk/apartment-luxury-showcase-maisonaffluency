@@ -584,7 +584,7 @@ const TradeVisualiser = () => {
                 </button>
               ))}
             </div>
-            <p className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? activeMaterial?.name ?? "No active finish"}</p>
+            <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" ? selected.material?.name : null) ?? "No finish applied"}</p>
           </div>
           )}
         </>)}
