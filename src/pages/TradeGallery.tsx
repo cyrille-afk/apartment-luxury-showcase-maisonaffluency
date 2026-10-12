@@ -33,7 +33,7 @@ import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CsvPriceImport from "@/components/trade/CsvPriceImport";
 import InlinePriceEditor from "@/components/trade/InlinePriceEditor";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
-import { sortNameKey } from "@/lib/nameFormat";
+import { sortTradeProducts } from "@/lib/tradeSort";
 import { curateGrid, useImageTones } from "@/lib/curateGrid";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
