@@ -300,6 +300,12 @@ export function attributedDesignerPicksQueryOptions(
         .in("id", ownerIds);
       if (ownersError) throw ownersError;
       const ownerMap = Object.fromEntries((owners || []).map((owner) => [owner.id, owner]));
+      const missingOwnerIds = ownerIds.filter((id) => !ownerMap[id]);
+      if (publicOnly && missingOwnerIds.length) {
+        const { data: publicOwners, error: creditError } = await supabase.rpc("public_collaboration_owner_metadata", { _ids: missingOwnerIds });
+        if (creditError) throw creditError;
+        for (const owner of publicOwners || []) ownerMap[owner.id] = owner;
+      }
 
       return sortCuratorPicks(dedupePicks(rows.map((row) => ({
         ...row,
