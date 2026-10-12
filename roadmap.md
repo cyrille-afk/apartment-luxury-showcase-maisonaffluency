@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Recognize linked finishes and variant materials in the missing-materials audit; verify Solare, Amélie and the full flagged catalogue.
 - [x] Remove repeated product dimensions; short specs open and long specs collapsible. Seven tests pass; Public, Studio and Presentation ordering plus rug-size selection verified live without page errors.
 - [x] Make rug-size image assignments independent; signed-in Fuga editor verified 1/2/3 assignments and isolated second-size change with autosave requests intercepted; shared Public/Trade resolver regressions pass, saved catalogue unchanged.
 - [x] Create seven new Emma Donnersberg products and update existing Iris from eight unique PDFs; all eight Public/Trade pages and spec-sheet viewers verified without page errors, supplied chair/wood finishes reused, three pictured textures cropped. Corrected travertine crop and lamp drawing bounds; chair dimension conflicts noted, no invented finishes or prices.

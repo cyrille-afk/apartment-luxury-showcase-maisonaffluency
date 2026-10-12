@@ -5,6 +5,7 @@ export interface SpecAuditInput {
   title: string | null;
   dimensions: string | null;
   materials: string | null;
+  materials_description?: string | null;
   size_variants?: unknown;
   linkedFinishCount?: number;
 }
@@ -25,11 +26,22 @@ function variantDims(sv: unknown): string[] {
     .filter(Boolean);
 }
 
+export function hasCatalogueMaterials(p: SpecAuditInput): boolean {
+  const hasText = (value: unknown) => typeof value === "string" && value.trim().length > 0;
+  if (hasText(p.materials) || hasText(p.materials_description) || (p.linkedFinishCount ?? 0) > 0) return true;
+  if (!Array.isArray(p.size_variants)) return false;
+  return p.size_variants.some((variant: unknown) => {
+    if (!variant || typeof variant !== "object") return false;
+    const fields = variant as Record<string, unknown>;
+    return ["base", "top", "materials", "material"].some((key) => hasText(fields[key]));
+  });
+}
+
 export function auditCatalogueSpec(p: SpecAuditInput): SpecIssue[] {
   const issues: SpecIssue[] = [];
   const dims = (p.dimensions ?? "").trim();
   if (!dims) issues.push("missing_dimensions");
-  if (!(p.materials ?? "").trim()) issues.push("missing_materials");
+  if (!hasCatalogueMaterials(p)) issues.push("missing_materials");
 
   const segments = dims ? dims.split(/\s+\/\s+/).filter((s) => /\d/.test(s)) : [];
   const keys = segments.map(dimensionKey);

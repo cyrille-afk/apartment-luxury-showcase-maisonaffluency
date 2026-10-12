@@ -9,16 +9,22 @@ import { auditCatalogueSpec, SPEC_ISSUE_LABEL, type SpecIssue } from "@/lib/cata
 export default function CatalogueSpecAudit() {
   const [filter, setFilter] = useState<SpecIssue | "all">("all");
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["catalogue-spec-audit"],
+    queryKey: ["catalogue-spec-audit", "material-evidence-v2"],
     queryFn: async () => {
       const all: any[] = [];
       for (let from = 0; ; from += 1000) {
         const { data, error } = await supabase
           .from("designer_curator_picks")
-          .select("id, title, dimensions, materials, size_variants, designer_id, designers(name)")
+          .select("id, title, dimensions, materials, materials_description, size_variants, designer_id, designers(name), product_fabrics(fabric:fabrics(name, is_active))")
+          .order("id")
           .range(from, from + 999);
         if (error) throw error;
-        all.push(...(data ?? []));
+        all.push(...(data ?? []).map((row) => ({
+          ...row,
+          linkedFinishCount: (row.product_fabrics ?? []).filter(
+            (link) => link.fabric?.is_active !== false && Boolean(link.fabric?.name?.trim()),
+          ).length,
+        })));
         if (!data || data.length < 1000) break;
       }
       return all;
