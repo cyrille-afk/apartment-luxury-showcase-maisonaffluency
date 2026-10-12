@@ -11,7 +11,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info } from "lucide-react";
+import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info, X } from "lucide-react";
 import { filterTradeProducts } from "@/lib/tradeFilter";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -760,6 +760,49 @@ const StudioGallery = () => {
           />
         </div>
       </div>
+      {/* Active filter chips */}
+      {(() => {
+        const activeFilters: { key: string; label: string; clear: () => void }[] = [];
+        if (search.trim()) activeFilters.push({ key: "search", label: `“${search.trim()}”`, clear: () => setSearch("") });
+        const activeBrand = routeBrandName || (selectedBrand !== "all" ? selectedBrand : null);
+        if (activeBrand) activeFilters.push({ key: "brand", label: activeBrand, clear: () => handleBrandChange("all") });
+        if (selectedCategory !== "all") activeFilters.push({ key: "category", label: selectedCategory, clear: () => { setSelectedCategory("all"); setSelectedSubcategory("all"); } });
+        if (selectedSubcategory !== "all") activeFilters.push({ key: "subcategory", label: selectedSubcategory, clear: () => setSelectedSubcategory("all") });
+        if (selectedEdition !== "all") activeFilters.push({ key: "edition", label: selectedEdition, clear: () => setSelectedEdition("all") });
+        if (activeFilters.length === 0) return null;
+        return (
+          <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="active-filter-chips">
+            {activeFilters.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={f.clear}
+                aria-label={`Clear filter: ${f.label}`}
+                title="Clear this filter"
+                className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 px-3 py-1 font-body text-[11px] uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+              >
+                <span className="max-w-[14rem] truncate">{f.label}</span>
+                <X className="h-3 w-3 text-muted-foreground/60 group-hover:text-foreground" aria-hidden="true" />
+              </button>
+            ))}
+            {activeFilters.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setSelectedCategory("all");
+                  setSelectedSubcategory("all");
+                  setSelectedEdition("all");
+                  if (routeBrandName || selectedBrand !== "all") handleBrandChange("all");
+                }}
+                className="ml-1 font-body text-[11px] uppercase tracking-[0.1em] text-muted-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        );
+      })()}
       {/* Content */}
       {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
         <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
