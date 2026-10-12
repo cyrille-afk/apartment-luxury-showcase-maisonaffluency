@@ -1142,6 +1142,20 @@
       "when": 1791833947562,
       "tag": "0162_trade_saved_views",
       "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1791837640421,
+      "tag": "0163_approved_trade_client_directory_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1791837691254,
+      "tag": "0164_directory_sync_variable_disambiguation",
+      "breakpoints": true
     }
   ]
 }

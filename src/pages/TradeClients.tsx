@@ -47,6 +47,8 @@ type Client = {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  onboarding_details?: Record<string, string | boolean | null> | null;
+  onboarding_synced_at?: string | null;
 };
 
 type Contact = {
@@ -857,12 +859,28 @@ export default function TradeClients() {
               </section>
 
               {editing.id && user && (
+                <>
+                {editing.onboarding_details && (
+                  <section className="space-y-3">
+                    <h4 className="font-body text-sm uppercase tracking-wider text-muted-foreground">Trade onboarding</h4>
+                    <dl className="grid gap-3 md:grid-cols-2 text-sm font-body">
+                      {Object.entries(editing.onboarding_details).map(([key, value]) => value === null ? null : (
+                        <div key={key} className="min-w-0">
+                          <dt className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</dt>
+                          <dd className="whitespace-pre-wrap break-words">{typeof value === "boolean" ? (value ? "Yes" : "No") : value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    {editing.onboarding_synced_at && <p className="text-xs text-muted-foreground">Last synced: {new Date(editing.onboarding_synced_at).toLocaleString()}</p>}
+                  </section>
+                )}
                 <ClientDocumentsSection
                   clientId={editing.id}
                   studioId={editing.studio_id || currentStudio.id}
                   userId={user.id}
                   canEdit={canEdit}
                 />
+                </>
               )}
               {!editing.id && (
                 <section className="border border-dashed border-border rounded-lg p-3 text-xs text-muted-foreground font-body">
