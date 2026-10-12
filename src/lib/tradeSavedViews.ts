@@ -28,6 +28,7 @@ export function readSavedViews(): TradeSavedView[] {
 function write(views: TradeSavedView[]) {
   localStorage.setItem(KEY, JSON.stringify(views));
 }
+export const writeSavedViews = write;
 
 /** Saves a view; a view with the same name (case-insensitive) is replaced. */
 export function saveView(view: Omit<TradeSavedView, "id" | "createdAt">): TradeSavedView[] {
