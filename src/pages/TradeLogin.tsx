@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
-import { X } from "lucide-react";
+import { X, Loader2, CircleCheck, CircleAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { ensureStorageHeadroom } from "@/lib/storageReclaim";
@@ -28,6 +28,7 @@ const TradeLogin = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
   const [googleRecovery, setGoogleRecovery] = useState(false);
+  const [googleSucceeded, setGoogleSucceeded] = useState(false);
   const [returnedGoogleAttempt] = useState(() => {
     try { return !!readGoogleAttempt(sessionStorage) || new URLSearchParams(window.location.search).get("google_recovery") === "1"; }
     catch { return false; }
@@ -117,7 +118,8 @@ const TradeLogin = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setGoogleError(null);
-    setGoogleRecovery(false);
+    setGoogleSucceeded(false);
+    setGoogleRecovery(true);
     startGoogleAttempt(getReturnPath());
     try {
       ensureStorageHeadroom();
@@ -143,6 +145,8 @@ const TradeLogin = () => {
         return;
       }
       clearGoogleAttempt();
+      setGoogleSucceeded(true);
+      toast({ title: "Google sign-in succeeded", description: "Opening your requested page." });
       navigate(getReturnPath());
     } catch (err) {
       clearGoogleAttempt();
@@ -240,13 +244,20 @@ const TradeLogin = () => {
           {/* Persistent Google sign-in error with retry — a toast alone
               disappears and leaves the member with no way forward. */}
           {(googleError || googleRecovery) && (
-            <div role="alert" className="mt-4 border border-destructive/40 bg-destructive/5 px-4 py-3.5">
-              <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-destructive">
-                Google sign-in didn't complete
-              </p>
+            <div className={`mt-4 border px-4 py-3.5 ${googleLoading || googleSucceeded ? "border-border bg-muted/30" : "border-destructive/40 bg-destructive/5"}`}>
+              <div role="status" aria-live="polite" aria-atomic="true" data-testid="google-sign-in-status"
+                className={`flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.2em] ${googleLoading || googleSucceeded ? "text-foreground" : "text-destructive"}`}>
+                {googleLoading ? <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin" aria-hidden="true" />
+                  : googleSucceeded ? <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    : <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                <span>{googleLoading ? "Google sign-in in progress" : googleSucceeded ? "Google sign-in succeeded" : "Google sign-in failed"}</span>
+              </div>
               <p className="mt-1.5 font-body text-sm text-foreground/80">
-                The Google sign-in return did not establish an active session. Your Lovable session may have expired.
+                {googleLoading ? "Waiting for Google sign-in to complete. Finish signing in in the Google window."
+                  : googleSucceeded ? "Opening your requested page."
+                    : "Google sign-in did not complete. Your Lovable session may have expired; you can retry or use email and password."}
               </p>
+              {!googleLoading && !googleSucceeded && <>
               <ol className="mt-3 list-decimal pl-4 space-y-2 font-body text-sm text-foreground/80">
                 <li>Open Lovable in this browser and sign in to your Lovable account.</li>
                 <li>Return here and retry Google sign-in.</li>
@@ -268,11 +279,13 @@ const TradeLogin = () => {
                 onClick={() => {
                   clearGoogleAttempt();
                   setGoogleRecovery(false);
+                  setGoogleSucceeded(false);
                   setGoogleError(null);
                   document.querySelector<HTMLInputElement>('input[name="identifier"]')?.focus();
                 }}>
                 Use email and password
               </Button>
+              </>}
             </div>
           )}
 
