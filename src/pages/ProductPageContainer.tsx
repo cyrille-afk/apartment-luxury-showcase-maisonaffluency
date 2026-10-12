@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPublicProductPage } from "@/lib/publicProductPageQuery";
+import { resolveLegacyProductSlug } from "@/lib/legacyProductSlugs";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 
 /** Variant A: spacious editorial gallery layout for the public site. */

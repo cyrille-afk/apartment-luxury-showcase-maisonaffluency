@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { supabase } from "@/integrations/supabase/client";
+import { LEGACY_PRODUCT_SLUGS } from "./legacyProductSlugs";
 
 const PAGE = 1000;
 
