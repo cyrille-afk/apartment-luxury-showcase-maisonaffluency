@@ -1156,6 +1156,27 @@
       "when": 1791837691254,
       "tag": "0164_directory_sync_variable_disambiguation",
       "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1791839727709,
+      "tag": "0165_persist_client_ip_currency",
+      "breakpoints": true
+    },
+    {
+      "idx": 166,
+      "version": "7",
+      "when": 1791839891593,
+      "tag": "0166_grant_read_profile_ip_detection",
+      "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1791839961443,
+      "tag": "0167_allow_own_ip_detection_readback",
+      "breakpoints": true
     }
   ]
 }

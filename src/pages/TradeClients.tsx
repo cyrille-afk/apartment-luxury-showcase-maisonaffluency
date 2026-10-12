@@ -39,6 +39,9 @@ type Client = {
   website: string | null;
   tax_id: string | null;
   default_currency: string | null;
+  ip_detected_country?: string | null;
+  ip_detected_currency?: string | null;
+  ip_detected_at?: string | null;
   billing_address_line1: string | null;
   billing_address_line2: string | null;
   billing_city: string | null;
@@ -267,6 +270,11 @@ export default function TradeClients() {
   }, [currentStudio, toast]);
 
   useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    const onDetected = () => { void refresh(); };
+    window.addEventListener('client-ip-currency-saved', onDetected);
+    return () => window.removeEventListener('client-ip-currency-saved', onDetected);
+  }, [refresh]);
 
   // Auto-open edit dialog when navigated with ?edit=<clientId>
   const [autoEditedFor, setAutoEditedFor] = useState<string | null>(null);

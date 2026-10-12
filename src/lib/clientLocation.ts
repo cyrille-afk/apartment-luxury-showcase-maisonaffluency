@@ -11,6 +11,8 @@ export function currencyForClientCountry(country?: string | null): string | null
 export function clientLocationDetails(client: {
   billing_country?: string | null;
   default_currency?: string | null;
+  ip_detected_country?: string | null;
+  ip_detected_currency?: string | null;
 }, ipCountry?: string | null) {
   const rawCountry = client.billing_country?.trim() || null;
   const country = SHIPPING_COUNTRIES.find(
@@ -21,7 +23,7 @@ export function clientLocationDetails(client: {
     country,
     countryCurrency,
     currency: client.default_currency?.trim() || countryCurrency,
-    ipCountry: ipCountry?.trim() || null,
-    ipCurrency: currencyForClientCountry(ipCountry),
+    ipCountry: client.ip_detected_country?.trim() || ipCountry?.trim() || null,
+    ipCurrency: client.ip_detected_currency?.trim() || currencyForClientCountry(client.ip_detected_country || ipCountry),
   };
 }
