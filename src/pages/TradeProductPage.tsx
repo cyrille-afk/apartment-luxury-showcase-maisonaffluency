@@ -381,18 +381,61 @@ export function useTradeProductBySlug(
         .select("id, name, slug, display_name, biography, founder")
         .eq("slug", designerSlug);
       if (!isAdmin) designerQuery = designerQuery.eq("is_published", true);
-      const { data: designer } = await designerQuery.maybeSingle();
-      if (!designer) return null;
+      const { data: routeDesigner } = await designerQuery.maybeSingle();
+      if (!routeDesigner) return null;
+      let designer: any = routeDesigner;
 
-      const { data: picks } = await supabase
+      const pickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label";
+      let { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters, default_variant_label")
+        .select(pickFields)
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
+      // Exact matches only (stored slug, title+subtitle, title, title without "by …").
+      const exactMatch = (list: any[] | null | undefined) =>
+        list?.find((p: any) => p.slug === productSlug) ||
+        list?.find((p: any) => slugify(p.title + (p.subtitle ? `-${p.subtitle}` : "")) === productSlug) ||
+        list?.find((p: any) => slugify(p.title) === productSlug) ||
+        list?.find((p: any) => slugify(String(p.title).replace(/\s+by\s+.+$/i, "")) === productSlug) ||
+        null;
+
+      let product: any = exactMatch(picks);
+
+      // A credited piece (e.g. Atelier Février's "Mushroom by Emma Donnersberg"
+      // rug) can be linked under the credited designer's slug. Resolve an exact
+      // stored slug anywhere in the catalogue BEFORE any fuzzy matching, so
+      // "mushroom" never falls through to "Mushrooms – Gold Bronze".
+      if (!product) {
+        const { data: globalHits } = await supabase
+          .from("designer_curator_picks")
+          .select(pickFields)
+          .eq("slug", productSlug)
+          .limit(2);
+        if (globalHits && globalHits.length === 1) {
+          const hit: any = globalHits[0];
+          const { data: owner } = await supabase
+            .from("designers")
+            .select("id, name, slug, display_name, biography, founder")
+            .eq("id", hit.designer_id)
+            .maybeSingle();
+          if (owner) {
+            designer = owner;
+            product = hit;
+            const { data: ownerPicks } = await supabase
+              .from("designer_curator_picks")
+              .select(pickFields)
+              .eq("designer_id", owner.id)
+              .order("sort_order", { ascending: true });
+            picks = ownerPicks || [hit];
+          }
+        }
+      }
+
       if (!picks || picks.length === 0) return null;
 
-      // Match priority: exact (title+subtitle) → exact (title) → startsWith (title) → contains (title) → token overlap.
+      // Fuzzy fallbacks: whole-word prefix/contains, then token overlap. Word
+      // boundaries stop "mushroom" matching "mushrooms-gold-bronze".
       // Token overlap covers cases where the gallery card uses a trade_products name (e.g. "Angelo M Side Table Collection")
       // that doesn't slug-match the underlying curator pick title (e.g. "Angelo M/SR 45/55/80 Side Table Collection").
       const slugTokens = (s: string) =>
@@ -402,13 +445,12 @@ export function useTradeProductBySlug(
         const ts = new Set(slugTokens(slugify(pickTitle)));
         return targetTokens.reduce((n, t) => n + (ts.has(t) ? 1 : 0), 0);
       };
-      let product: any =
-        picks.find((p: any) => p.slug === productSlug) ||
-        picks.find((p: any) => slugify(p.title + (p.subtitle ? `-${p.subtitle}` : "")) === productSlug) ||
-        picks.find((p: any) => slugify(p.title) === productSlug) ||
-        picks.find((p: any) => slugify(String(p.title).replace(/\s+by\s+.+$/i, "")) === productSlug) ||
-        picks.find((p: any) => slugify(p.title).startsWith(productSlug!)) ||
-        picks.find((p: any) => slugify(p.title).includes(productSlug!));
+      if (!product) {
+        product =
+          picks.find((p: any) => slugify(p.title).startsWith(`${productSlug}-`)) ||
+          picks.find((p: any) => `-${slugify(p.title)}-`.includes(`-${productSlug}-`)) ||
+          null;
+      }
 
       if (!product && targetTokens.length >= 2) {
         const ranked = picks
