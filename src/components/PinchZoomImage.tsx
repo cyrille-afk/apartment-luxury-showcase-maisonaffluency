@@ -1,4 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
+import { Plus, Minus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PinchZoomImageProps {
   src: string;
@@ -11,6 +14,7 @@ interface PinchZoomImageProps {
   fetchPriority?: "high" | "low" | "auto";
   style?: React.CSSProperties;
   onZoomChange?: (zoomed: boolean) => void;
+  showZoomControls?: boolean;
 }
 
 const PinchZoomImage = ({
@@ -24,6 +28,7 @@ const PinchZoomImage = ({
   fetchPriority,
   style,
   onZoomChange,
+  showZoomControls = false,
 }: PinchZoomImageProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -58,10 +63,32 @@ const PinchZoomImage = ({
   }, []);
 
   const resetZoom = useCallback(() => {
+    scaleRef.current = 1;
+    translateRef.current = { x: 0, y: 0 };
     setScale(1);
     setTranslate({ x: 0, y: 0 });
     updateZoom(false);
   }, [updateZoom]);
+
+  const zoomBy = (factor: number) => {
+    const previous = scaleRef.current;
+    const next = Math.min(5, Math.max(1, previous * factor));
+    if (next === 1) {
+      resetZoom();
+      return;
+    }
+    // The image uses a centered origin; scale the pan offset by the same
+    // ratio to keep the viewport's center point stationary.
+    const offset = {
+      x: translateRef.current.x * next / previous,
+      y: translateRef.current.y * next / previous,
+    };
+    scaleRef.current = next;
+    translateRef.current = offset;
+    setScale(next);
+    setTranslate(offset);
+    updateZoom(true);
+  };
 
   // Reset when src changes
   useEffect(() => {
@@ -166,6 +193,7 @@ const PinchZoomImage = ({
   }, [resetZoom, updateZoom]);
 
   return (
+    <div className="relative w-full">
     <div
       ref={containerRef}
       className={isZoomed ? "touch-none" : "touch-pan-y"}
@@ -190,6 +218,38 @@ const PinchZoomImage = ({
         decoding={decoding}
         fetchPriority={fetchPriority}
       />
+    </div>
+    {showZoomControls && (
+      <TooltipProvider delayDuration={300}>
+        <div
+          className="absolute bottom-2 right-3 z-50 flex gap-1"
+          onPointerDown={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+        >
+          {[
+            { label: "Zoom out", icon: Minus, factor: 1 / 1.5, disabled: scale <= 1 },
+            { label: "Zoom in", icon: Plus, factor: 1.5, disabled: scale >= 5 },
+          ].map(({ label, icon: Icon, factor, disabled }) => (
+            <Tooltip key={label}>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-11 w-11 border border-border shadow-sm"
+                  aria-label={label}
+                  disabled={disabled}
+                  onClick={(event) => { event.stopPropagation(); zoomBy(factor); }}
+                >
+                  <Icon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{label}</TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
+    )}
     </div>
   );
 };
