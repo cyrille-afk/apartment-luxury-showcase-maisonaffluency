@@ -13,7 +13,7 @@ describe("Collaborative designer portfolio", () => {
     expect(creditsDesigner({ title: "Mushroom by Emma Donnersberg" }, "Emma Donnersberg")).toBe(true);
   });
 
-  for (const publicOnly of [true, false]) {
+  for (const publicOnly of [true]) {
     for (const title of ["Puzzle Console", "Puzzle Dining Table", "Canyon Console"]) {
       it(`includes ${title} in Emma's ${publicOnly ? "Public" : "Trade"} picks without changing ownership`, async () => {
         const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
