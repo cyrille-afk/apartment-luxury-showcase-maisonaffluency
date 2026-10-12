@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Audit studio portfolio evidence at its original resolution and replace poor sources with verified sharper official photographs where available.
+- [x] Audit all 65 saved studio portfolio sources; replace eight thumbnails with sharper originals and seven flag/logo/icon slots with authentic portfolio photos across five studios. All 15 replacement files decode, saved values read back correctly, and signed-in review screenshots verify the visible images. Pola Sentosa originals are 476–705px wide; no enlargement or AI substitutes. Analysis notes and scraper unchanged.
 - [x] Label Puzzle Console, Puzzle Dining Table and Canyon Console jointly; all three verified in Emma's Public and signed-in Trade picks, six tests pass, Puzzle Console photo opens its correct labelled sheet. Other Michel Amar pieces remain restricted.
 - [x] Add visible zoom-in/out controls to mobile and PWA editorial gallery photos; plus/minus, zoom limits, two-finger pinch, reset and next-photo navigation verified in both with no page errors; build OK.
 - [x] Save Fuga's supplied description on all three curator/Trade scenes; explicit Description legends always stay open. Five tests pass; Scene 2 verified visible without a Description button in Public, Studio and Presentation, no page errors.
