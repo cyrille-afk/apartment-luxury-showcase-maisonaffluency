@@ -13,7 +13,17 @@ export default function ClientCurrencyDetection() {
       if (running || completed || !hasConsent('functional')) return;
       running = true;
       try {
-        const { data, error } = await supabase.functions.invoke('detect-client-currency', { body: { functionalConsent: true } });
+        // Only call with a live session token; an expired/missing one yields 401.
+        const { data: sess } = await supabase.auth.getSession();
+        const token = sess.session?.access_token;
+        if (!token || (sess.session?.expires_at ?? 0) * 1000 < Date.now()) return;
+        const { data, error } = await supabase.functions.invoke('detect-client-currency', {
+          body: { functionalConsent: true },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const status = (error as { context?: { status?: number } } | null)?.context?.status;
+        // Stop retrying on auth failure or backend timeout for this page load.
+        if (status === 401 || status === 504) { completed = true; return; }
         completed = !error && data?.saved === true;
         if (completed) window.dispatchEvent(new Event('client-ip-currency-saved'));
       } catch { /* Retry on focus; never block the client workspace. */ }
