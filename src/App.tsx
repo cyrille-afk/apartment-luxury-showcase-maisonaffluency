@@ -17,6 +17,7 @@ import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ClientCurrencyDetection from "@/components/ClientCurrencyDetection";
+import GoogleOAuthReturnRecovery from "@/components/GoogleOAuthReturnRecovery";
 import { StudioProvider } from "@/hooks/useStudio";
 import { RealtimeMultiplexerProvider } from "@/contexts/RealtimeMultiplexerContext";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
@@ -813,6 +814,7 @@ const App = () => {
         <CheckoutFormProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
+              <GoogleOAuthReturnRecovery />
               <GlobalCanonical />
               <HomeRouteSync />
               <SameOriginLinkGuard />
