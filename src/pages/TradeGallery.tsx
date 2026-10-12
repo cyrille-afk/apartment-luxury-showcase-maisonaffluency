@@ -424,11 +424,22 @@ const StudioGallery = () => {
   };
 
   const editions = useMemo(() => {
-    const set = new Set<string>();
+    const byKey = new Map<string, string>();
     for (const p of allProducts) {
-      if (p.edition && p.edition.trim()) set.add(p.edition.trim());
+      const ed = (p.edition || "").trim();
+      if (!ed) continue;
+      const key = ed.toLowerCase();
+      if (!byKey.has(key)) byKey.set(key, ed);
     }
-    return [...set].sort((a, b) => sortNameKey(a).localeCompare(sortNameKey(b)));
+    // Named collections (e.g. "CC-Tapis Edition", "Erased Heritage Collection")
+    // come first; pure size labels ("Edition of 12") follow, both alphabetical.
+    const isSizeLabel = (ed: string) =>
+      /^(edition of|limited edition|numbered|unique piece|copies\b|\d+\s+copies)/i.test(ed);
+    return [...byKey.values()].sort((a, b) => {
+      const aSize = isSizeLabel(a) ? 1 : 0;
+      const bSize = isSizeLabel(b) ? 1 : 0;
+      return aSize - bSize || sortNameKey(a).localeCompare(sortNameKey(b));
+    });
   }, [allProducts]);
   const matchedProducts = useMemo(() => {
     return allProducts.filter((p) => {
