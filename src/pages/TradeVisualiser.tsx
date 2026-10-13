@@ -652,6 +652,7 @@ const TradeVisualiser = () => {
             snapToGrid={snapToGrid}
             showGrid={showGrid}
             depthOfField={depthOfField}
+            dofStrength={dofStrength}
           />
         </Suspense>
       </div>
@@ -850,6 +851,22 @@ const TradeVisualiser = () => {
             >
               [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
             </button>
+            {depthOfField && (
+              <label className="flex items-center gap-2" title="How softly the background is blurred">
+                <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={dofStrength}
+                  onChange={(event) => setDofStrength(Number(event.target.value))}
+                  className="h-1 w-24 cursor-pointer accent-primary"
+                  aria-label="Background blur strength"
+                />
+                <span className={cn(microLabel, "w-4 text-muted-foreground")}>{dofStrength}</span>
+              </label>
+            )}
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
