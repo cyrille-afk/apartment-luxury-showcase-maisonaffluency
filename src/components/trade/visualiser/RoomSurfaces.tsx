@@ -207,6 +207,53 @@ export function organicRugShape(width: number, depth: number): THREE.Shape {
   return s;
 }
 
+const RUG_CORD_RADIUS_M = 0.01;
+
+/** Procedural braided/whip-stitched cord normal map (u runs along the cord). */
+function makeBraidNormalMap(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const W = 256, H = 64;
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d"); if (!ctx) return null;
+  const img = ctx.createImageData(W, H);
+  // Height field: two interleaved diagonal strands → braided twist.
+  const h = (x: number, y: number) => {
+    const a = Math.sin(((x / W) * 4 + (y / H)) * Math.PI * 2);
+    const b = Math.sin(((x / W) * 4 - (y / H)) * Math.PI * 2 + Math.PI);
+    return Math.max(a, b) * 0.5 + 0.5 + Math.sin((x / W) * Math.PI * 64) * 0.04;
+  };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const dx = h((x + 1) % W, y) - h((x - 1 + W) % W, y);
+    const dy = h(x, (y + 1) % H) - h(x, (y - 1 + H) % H);
+    const n = new THREE.Vector3(-dx * 3, -dy * 3, 1).normalize();
+    const i = (y * W + x) * 4;
+    img.data[i] = (n.x * 0.5 + 0.5) * 255; img.data[i + 1] = (n.y * 0.5 + 0.5) * 255; img.data[i + 2] = (n.z * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.NoColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
+  return t;
+}
+
+/** Braided piping trim following the rug's top outer lip. */
+function RugBorder({ width, depth, color }: { width: number; depth: number; color: string }) {
+  const normal = useMemo(() => makeBraidNormalMap(), []);
+  const geometry = useMemo(() => {
+    const topZ = RUG_THICKNESS_M + RUG_BEVEL_M * 2;
+    const pts = organicRugShape(width, depth).getSpacedPoints(480).slice(0, -1).map((v) => new THREE.Vector3(v.x, v.y, topZ));
+    const curve = new THREE.CatmullRomCurve3(pts, true, "centripetal");
+    return { g: new THREE.TubeGeometry(curve, 960, RUG_CORD_RADIUS_M, 12, true), len: curve.getLength() };
+  }, [width, depth]);
+  useEffect(() => { if (normal) normal.repeat.set(geometry.len / 0.025, 1); }, [normal, geometry.len]);
+  useEffect(() => () => geometry.g.dispose(), [geometry]);
+  useEffect(() => () => normal?.dispose(), [normal]);
+  return (
+    <mesh name="room-area-rug-border" geometry={geometry.g} castShadow receiveShadow>
+      <meshStandardMaterial color={color} normalMap={normal ?? undefined} normalScale={new THREE.Vector2(1.6, 1.6)} roughness={0.75} metalness={0} envMapIntensity={0.08} />
+    </mesh>
+  );
+}
+
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
 function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
@@ -241,9 +288,12 @@ function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[];
   useEffect(() => () => geometry.dispose(), [geometry]);
   if (!maps.color || !maps.normal) return null;
   return (
-    <mesh name="room-area-rug" geometry={geometry} position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
+    <group position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh name="room-area-rug" geometry={geometry} castShadow receiveShadow>
       <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8 + (p / 100) * 1.6, 0.8 + (p / 100) * 1.6)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
+    <RugBorder width={width} depth={depth} color={rugColorHex(color)} />
+    </group>
   );
 }
 
