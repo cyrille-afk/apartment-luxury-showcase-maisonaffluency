@@ -641,7 +641,7 @@ const TradeVisualiser = () => {
 
   const toolbarButton = cn(
     "font-mono text-[10px] uppercase tracking-[0.15em]",
-    "flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
+    "flex items-center gap-2 whitespace-nowrap px-3 py-2 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
 
   return (
@@ -825,8 +825,9 @@ const TradeVisualiser = () => {
       )}
 
       {/* Floating executive console */}
-      <div className="absolute bottom-10 left-1/2 z-[60] -translate-x-1/2">
-        <div className="flex items-center gap-1 rounded-full border border-[#E5E5E5] bg-[#FFFFFF] px-4 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]">
+      <div data-testid="visualiser-toolbar" className="absolute bottom-6 left-1/2 z-[60] w-max max-w-[calc(100%-2rem)] -translate-x-1/2">
+        <div className="flex flex-col items-stretch gap-1 rounded-3xl border border-[#E5E5E5] bg-[#FFFFFF] px-3 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]">
+        <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1" aria-label="Scene actions">
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</button>
@@ -854,6 +855,43 @@ const TradeVisualiser = () => {
             <button className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
               [ &#8596; Respace ]
             </button>
+          </div>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
+            [ &#8593; {backdropSrc ? "Change Backdrop" : "Upload Backdrop"} ]
+          </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button
+            className={toolbarButton}
+            onClick={downloadPresentationMockup}
+            disabled={exporting}
+            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
+          >
+            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
+          </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <ScenePresets
+            className={toolbarButton}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
+            onLoad={(data) => {
+              setSelectedId(null);
+              setObjects(data.objects);
+              setBackdrop(null);
+              setBackdropDataUrl(data.backdropDataUrl ?? null);
+              if (typeof data.spacing === "number") setSpacing(data.spacing);
+              setSnapToGrid(data.snapToGrid === true);
+              setShowGrid(data.showGrid !== false);
+              setShowLabels(data.showLabels !== false);
+              setDepthOfField(data.depthOfField === true);
+              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
+              setDofFocusSelected(data.dofFocusSelected !== false);
+            }}
+          />
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
+        </div>
+        <div className="h-px w-full bg-[#E5E5E5]" />
+          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1" aria-label="View settings">
             <button
               className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
               onClick={() => setSnapToGrid((value) => !value)}
@@ -913,39 +951,6 @@ const TradeVisualiser = () => {
               </label>
             )}
           </div>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
-            [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button
-            className={toolbarButton}
-            onClick={downloadPresentationMockup}
-            disabled={exporting}
-            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
-          >
-            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <ScenePresets
-            className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
-            onLoad={(data) => {
-              setSelectedId(null);
-              setObjects(data.objects);
-              setBackdrop(null);
-              setBackdropDataUrl(data.backdropDataUrl ?? null);
-              if (typeof data.spacing === "number") setSpacing(data.spacing);
-              setSnapToGrid(data.snapToGrid === true);
-              setShowGrid(data.showGrid !== false);
-              setShowLabels(data.showLabels !== false);
-              setDepthOfField(data.depthOfField === true);
-              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
-              setDofFocusSelected(data.dofFocusSelected !== false);
-            }}
-          />
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
         </div>
       </div>
 
