@@ -825,7 +825,7 @@ const TradeVisualiser = () => {
       )}
 
       {/* Floating executive console */}
-      <div data-testid="visualiser-toolbar" className="absolute bottom-6 left-1/2 z-[60] w-max max-w-[calc(100vw-2rem)] -translate-x-1/2">
+      <div data-testid="visualiser-toolbar" className="absolute bottom-6 left-1/2 z-[60] w-max max-w-[calc(100%-2rem)] -translate-x-1/2">
         <div className="flex flex-col items-stretch gap-1 rounded-3xl border border-[#E5E5E5] bg-[#FFFFFF] px-3 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]">
         <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1" aria-label="Scene actions">
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
