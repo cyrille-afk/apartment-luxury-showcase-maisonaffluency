@@ -187,7 +187,6 @@ const RUG_THICKNESS_M = 0.018;
 const RUG_BEVEL_M = 0.005;
 /** Height of the rug's top surface — contact shadows sit just above it. */
 export const RUG_TOP_Y = 0.001 + RUG_THICKNESS_M + RUG_BEVEL_M * 2;
-/** Top of the braided border cord (contact shadows stay below it on the rug body). */
 const RUG_TILE: [number, number] = [1.35, 1.35];
 
 /**
