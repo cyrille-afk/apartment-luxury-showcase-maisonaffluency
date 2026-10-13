@@ -1,7 +1,8 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import type { CeilingSettings } from "./visualiserCeilingSettings";
 import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
-export type ScenePresetData = {
+export type ScenePresetData = CeilingSettings & {
   objects: PlacedObject[];
   spacing?: number;
   snapToGrid?: boolean;

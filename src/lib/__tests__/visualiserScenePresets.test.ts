@@ -4,6 +4,18 @@ import { clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomWallC
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
+  it("saves independent ceiling frame height", () => {
+    saveScenePreset("Ceiling height", { objects: [obj], ceilingHeight: 3.5 });
+    expect(readScenePresets()[0].data.ceilingHeight).toBe(3.5);
+  });
+  it("saves ceiling frame thickness", () => {
+    saveScenePreset("Ceiling thickness", { objects: [obj], ceilingThickness: 0.3 });
+    expect(readScenePresets()[0].data.ceilingThickness).toBe(0.3);
+  });
+  it("saves ceiling opening size", () => {
+    saveScenePreset("Ceiling opening", { objects: [obj], ceilingOpening: 70 });
+    expect(readScenePresets()[0].data.ceilingOpening).toBe(70);
+  });
   it("saving an existing name overwrites instead of duplicating", () => {
     saveScenePreset("Lounge", { objects: [obj] });
     saveScenePreset("lounge ", { objects: [obj, obj] });
