@@ -5,6 +5,7 @@ import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarg
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
+import { pickFreeSlot } from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
