@@ -922,6 +922,7 @@ const TradeVisualiser = () => {
               setEnvironmentSource(data.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr");
               setFloorFinish(roomFloorFinish(data.floorFinish));
               setShowRearWall(data.showRearWall !== false);
+              setWallHeight(clampWallHeight(data.wallHeight));
               setFloorGlare(clampFloorGlare(data.floorGlare));
             }}
           />
@@ -945,6 +946,23 @@ const TradeVisualiser = () => {
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem checked={showRearWall} onCheckedChange={setShowRearWall}>Plaster Rear Wall</DropdownMenuCheckboxItem>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Wall Height</span>
+                    <span>{Math.round((WALL_FULL_HEIGHT_M * wallHeight) / 100 * 10) / 10} m</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={20}
+                    max={100}
+                    step={5}
+                    value={wallHeight}
+                    onChange={(e) => setWallHeight(clampWallHeight(Number(e.target.value)))}
+                    aria-label="Wall height"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; hide the ceiling band entirely at 100%.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
