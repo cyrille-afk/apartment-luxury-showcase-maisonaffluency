@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { getFxRates } from "@/lib/fxRates";
 
-export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD" | "GBP" | "CHF" | "AED" | "HKD" | "AUD";
+export type DisplayCurrency = "original" | "SGD" | "EUR" | "USD" | "GBP" | "CHF" | "AED" | "HKD" | "AUD" | "THB";
 
-const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"];
+const SUPPORTED_CURRENCIES: DisplayCurrency[] = ["SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD", "THB"];
 
 /** Cache rates so multiple components don't re-query */
 let _rateCache: { rates: Record<string, number>; ts: number } | null = null;
@@ -36,23 +36,25 @@ async function fetchLiveRates(): Promise<Record<string, number>> {
 /** Hardcoded fallback if API is unreachable (approximate, last reviewed 2026-09-03) */
 const FALLBACK_RATES: Record<string, number> = {
   // self
-  SGD_SGD: 1, EUR_EUR: 1, USD_USD: 1, GBP_GBP: 1, CHF_CHF: 1, AED_AED: 1, HKD_HKD: 1, AUD_AUD: 1,
+  SGD_SGD: 1, EUR_EUR: 1, USD_USD: 1, GBP_GBP: 1, CHF_CHF: 1, AED_AED: 1, HKD_HKD: 1, AUD_AUD: 1, THB_THB: 1,
   // EUR base
-  EUR_SGD: 1.473, EUR_USD: 1.1583, EUR_GBP: 0.8589, EUR_CHF: 0.9421, EUR_AED: 4.2538, EUR_HKD: 9.083, EUR_AUD: 1.6178,
+  EUR_SGD: 1.473, EUR_USD: 1.1583, EUR_GBP: 0.8589, EUR_CHF: 0.9421, EUR_AED: 4.2538, EUR_HKD: 9.083, EUR_AUD: 1.6178, EUR_THB: 37.8,
   // USD base
-  USD_EUR: 0.8633, USD_SGD: 1.2717, USD_GBP: 0.7416, USD_CHF: 0.8134, USD_AED: 3.6725, USD_HKD: 7.8418, USD_AUD: 1.3967,
+  USD_EUR: 0.8633, USD_SGD: 1.2717, USD_GBP: 0.7416, USD_CHF: 0.8134, USD_AED: 3.6725, USD_HKD: 7.8418, USD_AUD: 1.3967, USD_THB: 32.6,
   // SGD base
-  SGD_EUR: 0.6789, SGD_USD: 0.7863, SGD_GBP: 0.5831, SGD_CHF: 0.6396, SGD_AED: 2.8878, SGD_HKD: 6.1663, SGD_AUD: 1.0983,
+  SGD_EUR: 0.6789, SGD_USD: 0.7863, SGD_GBP: 0.5831, SGD_CHF: 0.6396, SGD_AED: 2.8878, SGD_HKD: 6.1663, SGD_AUD: 1.0983, SGD_THB: 25.6,
   // GBP base
-  GBP_EUR: 1.1642, GBP_USD: 1.3485, GBP_SGD: 1.7149, GBP_CHF: 1.0968, GBP_AED: 4.9523, GBP_HKD: 10.5746, GBP_AUD: 1.8834,
+  GBP_EUR: 1.1642, GBP_USD: 1.3485, GBP_SGD: 1.7149, GBP_CHF: 1.0968, GBP_AED: 4.9523, GBP_HKD: 10.5746, GBP_AUD: 1.8834, GBP_THB: 44.0,
   // CHF base
-  CHF_EUR: 1.0614, CHF_USD: 1.2294, CHF_SGD: 1.5635, CHF_GBP: 0.9117, CHF_AED: 4.5151, CHF_HKD: 9.641, CHF_AUD: 1.7171,
+  CHF_EUR: 1.0614, CHF_USD: 1.2294, CHF_SGD: 1.5635, CHF_GBP: 0.9117, CHF_AED: 4.5151, CHF_HKD: 9.641, CHF_AUD: 1.7171, CHF_THB: 40.1,
   // AED base
-  AED_EUR: 0.2351, AED_USD: 0.2723, AED_SGD: 0.3463, AED_GBP: 0.2019, AED_CHF: 0.2215, AED_HKD: 2.1353, AED_AUD: 0.3803,
+  AED_EUR: 0.2351, AED_USD: 0.2723, AED_SGD: 0.3463, AED_GBP: 0.2019, AED_CHF: 0.2215, AED_HKD: 2.1353, AED_AUD: 0.3803, AED_THB: 8.88,
   // HKD base
-  HKD_EUR: 0.1101, HKD_USD: 0.1275, HKD_SGD: 0.1622, HKD_GBP: 0.0946, HKD_CHF: 0.1037, HKD_AED: 0.4683, HKD_AUD: 0.1781,
+  HKD_EUR: 0.1101, HKD_USD: 0.1275, HKD_SGD: 0.1622, HKD_GBP: 0.0946, HKD_CHF: 0.1037, HKD_AED: 0.4683, HKD_AUD: 0.1781, HKD_THB: 4.16,
   // AUD base
-  AUD_EUR: 0.6181, AUD_USD: 0.716, AUD_SGD: 0.9105, AUD_GBP: 0.5309, AUD_CHF: 0.5824, AUD_AED: 2.6294, AUD_HKD: 5.6146,
+  AUD_EUR: 0.6181, AUD_USD: 0.716, AUD_SGD: 0.9105, AUD_GBP: 0.5309, AUD_CHF: 0.5824, AUD_AED: 2.6294, AUD_HKD: 5.6146, AUD_THB: 21.3,
+  // THB base
+  THB_EUR: 0.0265, THB_USD: 0.0307, THB_SGD: 0.0391, THB_GBP: 0.0227, THB_CHF: 0.0249, THB_AED: 0.1126, THB_HKD: 0.2404, THB_AUD: 0.0469,
 };
 
 /** Hook to access live FX rates */

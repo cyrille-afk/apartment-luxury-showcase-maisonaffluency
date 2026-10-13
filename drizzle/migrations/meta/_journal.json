@@ -1205,6 +1205,13 @@
       "when": 1791853769004,
       "tag": "0171_thailand_thb_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1791853924408,
+      "tag": "0172_thb_currency_for_thailand",
+      "breakpoints": true
     }
   ]
 }
