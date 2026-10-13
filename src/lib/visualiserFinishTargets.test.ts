@@ -91,6 +91,12 @@ describe("component tab labels", () => {
     expect(targetLabel("part:WoodFinish", { "part:WoodFinish": "Table Top" })).toBe("Table Top");
   });
 
+  it("a declared component name beats the generic role label", () => {
+    expect(targetLabel("top", { top: "Table Top", base: "Base Structure" })).toBe("Table Top");
+    expect(targetLabel("base", { top: "Table Top", base: "Base Structure" })).toBe("Base Structure");
+    expect(targetLabel("all", { top: "Table Top" })).toBe("Whole Piece");
+  });
+
   it("known roles keep their own labels", () => {
     expect(targetLabel("all")).toBe("Whole Piece");
     expect(targetLabel("top")).toBe("Top");

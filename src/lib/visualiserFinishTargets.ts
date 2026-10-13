@@ -78,8 +78,12 @@ export function humanizePartName(raw: string): string {
 }
 
 export function targetLabel(target: FinishTarget, customLabels: Record<string, string> = {}): string {
-  if (target === "all" || isKnownPart(target)) return FINISH_TARGET_LABELS[target as "all" | KnownPart];
-  return customLabels[target] || humanizePartName(target) || "Part";
+  // A declared component name ("Table Top") always beats the generic role label ("Top").
+  return customLabels[target]
+    || (target === "all" || isKnownPart(target)
+      ? FINISH_TARGET_LABELS[target as "all" | KnownPart]
+      : humanizePartName(target))
+    || "Part";
 }
 
 type PartHolder = {
