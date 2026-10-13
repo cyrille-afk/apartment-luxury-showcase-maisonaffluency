@@ -155,6 +155,13 @@ const VisualiserCanvas = ({
           onDragStateChange={onDragStateChange}
           onTextureParts={onTextureParts}
           snapToGrid={snapToGrid}
+          selfRadius={footprintRadius(parseDimensionString(object.dimensions), object.scale)}
+          obstacles={objects
+            .filter((other) => other.instanceId !== object.instanceId)
+            .map((other) => ({
+              position: other.position,
+              radius: footprintRadius(parseDimensionString(other.dimensions), other.scale),
+            }))}
         />
       ))}
     </Suspense>
