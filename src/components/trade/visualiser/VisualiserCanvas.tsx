@@ -11,7 +11,7 @@ import * as THREE from "three";
 import { EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
-import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
+import { createExrEnvironmentTexture } from "@/lib/visualiserExrTexture";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
@@ -39,12 +39,6 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
-  const scene = useThree((s) => s.scene);
-  // Align the HDRI daylight direction with the front-left key light so shadows fall to the right.
-  useEffect(() => {
-    scene.environmentRotation = new THREE.Euler(0, Math.PI / 4, 0);
-    scene.backgroundRotation = new THREE.Euler(0, Math.PI / 4, 0);
-  }, [scene]);
   useEffect(() => {
     const bump = () => setLocalVersion((v) => v + 1);
     window.addEventListener("ma-local-exr-changed", bump);
@@ -64,29 +58,32 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
       invalidate();
     };
     const fallbackToStudioHdr = (exr?: "missing" | "unreadable") => {
+      if (cancelled) return;
       new RGBELoader().load(studioAsset.url, accept("studio-hdr", exr), undefined, () => {
         /* Keep local studio reflections if both HDRI sources are unavailable. */
+        if (cancelled) return;
         reportEnvironmentStatus({ source: "local", exr });
       });
     };
     const loadEmptyRoom = () => {
       // The studio's own empty-room EXR — validated (present + readable) before parsing.
       validateEmptyRoomExr().then((result) => {
+        if (cancelled) return;
         if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
         try {
-          accept("empty-room-exr")(new EXRLoader().parse(result.buffer) as THREE.DataTexture);
+          accept("empty-room-exr")(createExrEnvironmentTexture(result.buffer));
         } catch {
           fallbackToStudioHdr("unreadable");
         }
-      });
+      }).catch(() => fallbackToStudioHdr("unreadable"));
     };
     if (preferred === "empty-room-exr") loadEmptyRoom();
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
-  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} />;
+  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} environmentRotation={[0, Math.PI / 4, 0]} backgroundRotation={[0, Math.PI / 4, 0]} />;
   return (
-    <Environment resolution={256}>
+    <Environment resolution={256} environmentRotation={[0, Math.PI / 4, 0]}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />

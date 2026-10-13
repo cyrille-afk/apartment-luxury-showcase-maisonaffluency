@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { CEILING, recessedCeilingGeometry, recessedCeilingShape } from "./recessedCeiling";
+import { CEILING, recessedCeilingGeometry, recessedCeilingShape, safeCeilingDimensions } from "./recessedCeiling";
 import { clampCeilingHeight, clampCeilingOpening, clampCeilingThickness } from "./visualiserCeilingSettings";
 
 describe("recessed ceiling enclosure", () => {
+  it("rejects non-finite coordinates before constructing a shape", () => {
+    expect(safeCeilingDimensions(Number.NaN, 0.15, 90)).toBeNull();
+    expect(safeCeilingDimensions(Number.POSITIVE_INFINITY, 0.15, 90)).toBeNull();
+    expect(safeCeilingDimensions(null, 0.15, 90)).toBeNull();
+  });
   it("accepts manual frame height and retains automatic height for older scenes", () => {
     expect(clampCeilingHeight(3.5)).toBe(3.5);
     expect(clampCeilingHeight(undefined)).toBeNull();
