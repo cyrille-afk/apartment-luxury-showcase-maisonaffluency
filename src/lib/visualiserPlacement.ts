@@ -4,7 +4,13 @@ export const DEFAULT_SLOT_SPACING = 1.4;
 export const MIN_SLOT_SPACING = 0.6;
 export const MAX_SLOT_SPACING = 3;
 export const SLOT_SPACING_STEP = 0.2;
+/** Grid step used by the optional snap-to-grid drag mode. */
+export const SNAP_GRID_STEP = 0.25;
 const GRID_RANGE = 6;
+
+/** Round a coordinate to the nearest grid line. */
+export const snapCoordinate = (value: number, step: number = SNAP_GRID_STEP): number =>
+  Math.round(value / step) * step;
 
 const clampSpacing = (spacing: number) =>
   Math.min(MAX_SLOT_SPACING, Math.max(MIN_SLOT_SPACING, spacing));
