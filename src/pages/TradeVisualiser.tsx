@@ -26,6 +26,7 @@ import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } f
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { roomFloorFinish, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import { clampFloorGlare } from "@/components/trade/visualiser/RoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -940,6 +941,24 @@ const TradeVisualiser = () => {
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem checked={showRearWall} onCheckedChange={setShowRearWall}>Plaster Rear Wall</DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Floor Glare</span>
+                    <span>{floorGlare}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={floorGlare}
+                    onChange={(e) => setFloorGlare(clampFloorGlare(Number(e.target.value)))}
+                    aria-label="Floor glare intensity"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">Lower = matte floor, reflections fade; texture stays visible.</p>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="ghost"
