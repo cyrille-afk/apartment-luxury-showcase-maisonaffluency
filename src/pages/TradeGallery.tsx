@@ -422,6 +422,7 @@ const StudioGallery = () => {
   // Dropdown -> URL: keep route in sync with dropdown so paginate/search/share stays consistent.
   const handleBrandChange = (value: string) => {
     setSelectedBrand(value);
+    setSelectedEdition("all");
     if (value === "all") {
       if (routeBrandSlug) navigate("/trade/gallery", { replace: false });
       return;
