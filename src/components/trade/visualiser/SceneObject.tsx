@@ -170,7 +170,9 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
   meshes.forEach((mesh, index) => {
     const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
     const key = meshKey(index, mesh.name || mesh.parent?.name || "");
-    const named = classifyTextureNode(nodeName);
+    // Unnamed meshes are still classifiable by their material name
+    // (e.g. Man of Parts "WoodFinish" → frame, "Glides" → base).
+    const named = classifyTextureNode(nodeName) ?? classifyTextureNode(matName(mesh));
     // Unnamed parts that carry their own GLB material are independently finishable.
     let auto: FinishPart | null = named;
     if (!auto && distinct > 1) {
