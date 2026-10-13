@@ -34,7 +34,7 @@ const COUNTRY_CACHE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const EVENT_NAME = "trade-display-currency-change";
 
 const SUPPORTED: DisplayCurrency[] = [
-  "original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD",
+  "original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD", "THB",
 ];
 
 const isValid = (v: unknown): v is DisplayCurrency =>
@@ -61,6 +61,8 @@ const COUNTRY_TO_CURRENCY: Record<string, DisplayCurrency> = {
   AU: "AUD",
   // Singapore
   SG: "SGD",
+  // Thailand
+  TH: "THB",
 };
 
 /** Country full names (as stored on profiles.country / trade_applications) → ISO. */
@@ -73,7 +75,7 @@ const COUNTRY_NAME_TO_ISO: Record<string, string> = {
   "france": "FR", "germany": "DE", "italy": "IT", "spain": "ES", "netherlands": "NL",
   "belgium": "BE", "ireland": "IE", "portugal": "PT", "austria": "AT", "greece": "GR",
   "finland": "FI", "luxembourg": "LU", "monaco": "MC",
-  "switzerland": "CH", "australia": "AU", "singapore": "SG",
+  "switzerland": "CH", "australia": "AU", "singapore": "SG", "thailand": "TH",
 };
 
 const currencyForCountry = (input?: string | null): DisplayCurrency | null => {

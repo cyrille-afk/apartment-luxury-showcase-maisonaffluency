@@ -24,7 +24,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireCronOrAdmin } from "../_shared/auth.ts";
 
 export const CURRENCIES = [
-  "EUR", "USD", "SGD", "GBP", "CHF", "AED", "HKD", "AUD", "JPY", "CAD",
+  "EUR", "USD", "SGD", "GBP", "CHF", "AED", "HKD", "AUD", "JPY", "CAD", "THB",
 ] as const;
 
 /** Reject a sync if any pair moves more than this fraction vs. stored value. */
