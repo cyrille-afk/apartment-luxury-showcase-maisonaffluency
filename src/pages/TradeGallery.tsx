@@ -434,9 +434,13 @@ const StudioGallery = () => {
     }
   };
 
+  const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
   const editions = useMemo(() => {
     const byKey = new Map<string, string>();
     for (const p of allProducts) {
+      // Scope collections to the chosen designer: offering every studio's
+      // collections once a designer is picked makes no sense.
+      if (activeBrand && (p.brand || "").trim().toLowerCase() !== activeBrand.toLowerCase()) continue;
       const ed = (p.edition || "").trim();
       if (!ed) continue;
       const key = ed.toLowerCase();
