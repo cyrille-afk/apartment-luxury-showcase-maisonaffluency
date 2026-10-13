@@ -954,6 +954,7 @@ const TradeVisualiser = () => {
                 <span className={cn(microLabel, "w-4 text-muted-foreground")}>{dofStrength}</span>
               </label>
             )}
+            <EnvironmentStatusChip />
           </div>
         </div>
       </div>
@@ -971,3 +972,46 @@ const TradeVisualiser = () => {
 };
 
 export default TradeVisualiser;
+
+// Shares the literal with VisualiserCanvas on purpose — importing that module
+// here would pull the whole three.js canvas into the main bundle.
+const ENV_STATUS_EVENT = "ma-visualiser-env";
+
+type EnvStatus = { source: "empty-room-exr" | "studio-hdr" | "local"; exr?: "missing" | "unreadable" };
+
+/** Confirms which HDRI source the Visualiser is using — the empty-room EXR when valid. */
+function EnvironmentStatusChip() {
+  const [status, setStatus] = useState<EnvStatus | null>(null);
+  useEffect(() => {
+    const onStatus = (event: Event) => setStatus((event as CustomEvent<EnvStatus>).detail);
+    window.addEventListener(ENV_STATUS_EVENT, onStatus);
+    return () => window.removeEventListener(ENV_STATUS_EVENT, onStatus);
+  }, []);
+  if (!status) return null;
+  const label = status.source === "empty-room-exr"
+    ? "HDR: Empty Room"
+    : status.source === "studio-hdr"
+      ? status.exr ? `HDR: Studio · EXR ${status.exr}` : "HDR: Studio"
+      : "HDR: Local";
+  const title = status.source === "empty-room-exr"
+    ? "Environment reflections load from /images/_empty_room_3.exr — present and readable"
+    : status.source === "studio-hdr"
+      ? status.exr === "missing"
+        ? "The empty-room EXR (/images/_empty_room_3.exr) is not present — the built-in studio HDRI is in use"
+        : status.exr === "unreadable"
+          ? "The empty-room EXR is present but not a readable EXR file — the built-in studio HDRI is in use"
+          : "Built-in studio HDRI in use"
+      : "No HDRI could be loaded — local studio reflections are in use";
+  return (
+    <span
+      className={cn(
+        microLabel,
+        "hidden lg:inline-flex items-center rounded-full border border-border px-2.5 py-1",
+        status.source === "empty-room-exr" ? "border-primary text-primary" : "text-muted-foreground",
+      )}
+      title={title}
+    >
+      {label}
+    </span>
+  );
+}
