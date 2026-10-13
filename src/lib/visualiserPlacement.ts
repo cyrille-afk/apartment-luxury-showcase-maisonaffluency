@@ -56,14 +56,29 @@ export function pickFootprintSlot(
   occupied: { position: [number, number, number]; radius: number }[],
   radius: number,
   spacing: number = DEFAULT_SLOT_SPACING,
+  origin: [number, number] = [0, 0],
 ): PlacementSlot {
   const step = Math.max(0.2, clampSpacing(spacing) / 2);
-  const slots: PlacementSlot[] = [];
-  for (let x = -24; x <= 24; x++) for (let z = -24; z <= 24; z++) slots.push([x * step, 0, z * step]);
-  slots.sort((a, b) => (a[0] * a[0] + a[2] * a[2]) - (b[0] * b[0] + b[2] * b[2]));
+  const [ox, oz] = origin;
+  const slots: PlacementSlot[] = [[ox, 0, oz]];
+  for (let x = -24; x <= 24; x++) for (let z = -24; z <= 24; z++) slots.push([ox + x * step, 0, oz + z * step]);
+  slots.sort((a, b) => ((a[0] - ox) ** 2 + (a[2] - oz) ** 2) - ((b[0] - ox) ** 2 + (b[2] - oz) ** 2));
   const free = (s: PlacementSlot) =>
     occupied.every((o) => Math.hypot(o.position[0] - s[0], o.position[2] - s[2]) >= o.radius + radius + FOOTPRINT_MARGIN);
-  return slots.find(free) ?? [0, 0, 0];
+  return slots.find(free) ?? [ox, 0, oz];
+}
+
+/** Back-to-back adds cascade +200 mm on X from the camera focus point. */
+export const SPAWN_STAGGER_X = 0.2;
+
+/** Where a ray from the camera along its view direction hits the Y = 0 floor; null if it never does. */
+export function floorFocusPoint(
+  camPos: [number, number, number],
+  dir: [number, number, number],
+): [number, number] | null {
+  if (dir[1] >= -1e-4) return null;
+  const t = -camPos[1] / dir[1];
+  return [camPos[0] + dir[0] * t, camPos[2] + dir[2] * t];
 }
 
 export type FootprintObstacle = { position: [number, number, number]; radius: number };

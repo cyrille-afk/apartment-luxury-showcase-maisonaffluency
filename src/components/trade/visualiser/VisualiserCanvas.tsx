@@ -3,7 +3,25 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
-import { footprintRadius } from "@/lib/visualiserPlacement";
+import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
+import * as THREE from "three";
+
+/** Exposes a getter for the floor point at the centre of the camera view (raycast onto Y = 0). */
+const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number, number] | null) | null } }) => {
+  const camera = useThree((s) => s.camera);
+  const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
+  useEffect(() => {
+    focusRef.current = () => {
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      const hit = floorFocusPoint([camera.position.x, camera.position.y, camera.position.z], [dir.x, dir.y, dir.z]);
+      if (hit) return hit;
+      return controls?.target ? [controls.target.x, controls.target.z] : null;
+    };
+    return () => { focusRef.current = null; };
+  }, [camera, controls, focusRef]);
+  return null;
+};
 import { parseDimensionString } from "@/lib/productDimensions";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
@@ -61,6 +79,8 @@ interface VisualiserCanvasProps {
   snapToGrid?: boolean;
   /** When true, the faint design-canvas floor grid renders at Y = 0. */
   showGrid?: boolean;
+  /** Filled with a getter returning the floor point the camera is looking at. */
+  focusRef?: { current: (() => [number, number] | null) | null };
 }
 
 /**
@@ -79,6 +99,7 @@ const VisualiserCanvas = ({
   onTextureParts,
   snapToGrid = false,
   showGrid = true,
+  focusRef,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows
@@ -96,6 +117,7 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
+    {focusRef && <FloorFocusReporter focusRef={focusRef} />}
     <PerspectiveCamera makeDefault fov={45} position={[0, 3.4, 9.5]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
