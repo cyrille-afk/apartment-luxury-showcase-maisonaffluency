@@ -457,6 +457,13 @@ const StudioGallery = () => {
       return aSize - bSize || sortNameKey(a).localeCompare(sortNameKey(b));
     });
   }, [allProducts, activeBrand]);
+  // Direct navigation (or a saved view) can leave a collection selected that
+  // doesn't belong to the active designer — clear it.
+  useEffect(() => {
+    if (selectedEdition !== "all" && !editions.some((ed) => ed.toLowerCase() === selectedEdition.toLowerCase())) {
+      setSelectedEdition("all");
+    }
+  }, [editions, selectedEdition]);
   const matchedProducts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return filterTradeProducts(visible, {
