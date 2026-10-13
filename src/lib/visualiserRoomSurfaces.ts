@@ -17,6 +17,11 @@ export function clampWallHeight(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(20, Math.round(value))) : 100;
 }
 
+/** Clamp a persisted wall finish intensity (0–100; 100 = the finish as designed). */
+export function clampWallFinishIntensity(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 100;
+}
+
 /** Plaster wall colour palette — soft architectural neutrals plus two accents. */
 export const WALL_COLORS = [
   { key: "warm-white", label: "Warm White", hex: "#f4efe7" },

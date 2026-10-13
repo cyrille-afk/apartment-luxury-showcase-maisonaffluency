@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -95,6 +95,7 @@ type PersistedSandbox = {
   wallColor?: RoomWallColor;
   wallFinish?: RoomWallFinish;
   wallCustomHex?: string | null;
+  wallFinishIntensity?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -130,6 +131,7 @@ const readSandbox = (): PersistedSandbox => {
       wallColor: roomWallColor(parsed.wallColor),
       wallFinish: roomWallFinish(parsed.wallFinish),
       wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
+      wallFinishIntensity: clampWallFinishIntensity(parsed.wallFinishIntensity),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -180,6 +182,7 @@ const TradeVisualiser = () => {
   const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
   const [wallCustomHex, setWallCustomHex] = useState<string | null>(normalizeHexColor(initial.wallCustomHex) ?? null);
+  const [wallFinishIntensity, setWallFinishIntensity] = useState<number>(clampWallFinishIntensity(initial.wallFinishIntensity));
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
     setCustomHexDraft(raw);
@@ -313,11 +316,12 @@ const TradeVisualiser = () => {
         wallColor,
         wallFinish,
         wallCustomHex,
+        wallFinishIntensity,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -737,6 +741,7 @@ const TradeVisualiser = () => {
             wallColor={wallColor}
             wallFinish={wallFinish}
             wallCustomHex={wallCustomHex}
+            wallFinishIntensity={wallFinishIntensity}
           />
         </Suspense>
       </div>
@@ -931,7 +936,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -954,6 +959,7 @@ const TradeVisualiser = () => {
               const restoredHex = normalizeHexColor(data.wallCustomHex);
               setWallCustomHex(restoredHex ?? null);
               if (restoredHex) setCustomHexDraft(restoredHex);
+              setWallFinishIntensity(clampWallFinishIntensity(data.wallFinishIntensity));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1034,6 +1040,23 @@ const TradeVisualiser = () => {
                     <DropdownMenuRadioItem key={f.key} value={f.key}>{f.label}</DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Finish Intensity</span>
+                    <span>{wallFinishIntensity}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={wallFinishIntensity}
+                    onChange={(e) => setWallFinishIntensity(clampWallFinishIntensity(Number(e.target.value)))}
+                    aria-label="Wall finish intensity"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">How strongly the plaster catches light — 100% is the finish as designed, lower goes matte.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
