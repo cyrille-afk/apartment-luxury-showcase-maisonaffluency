@@ -47,6 +47,16 @@ export function setPartOverride(productId: string, key: string, value: PartAssig
   emit();
 }
 
+/** Clears every manual mapping for a product so schema/auto roles take over. */
+export function clearPartOverrides(productId: string) {
+  if (!overrides[productId]) return;
+  const next = { ...overrides };
+  delete next[productId];
+  overrides = next;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides)); } catch { /* storage full/blocked */ }
+  emit();
+}
+
 export function registerModelMeshes(productId: string, list: ModelMesh[], labels: Record<string, string> = {}) {
   if (JSON.stringify(meshes[productId]) === JSON.stringify(list) && JSON.stringify(groupLabels[productId]) === JSON.stringify(labels)) return;
   meshes = { ...meshes, [productId]: list };
