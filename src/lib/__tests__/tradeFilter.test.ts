@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterTradeProducts } from "@/lib/tradeFilter";
+import { countTradeCollectionPieces, filterTradeProducts } from "@/lib/tradeFilter";
 import type { TradeProduct } from "@/lib/tradeProducts";
 
 const base: TradeProduct = {

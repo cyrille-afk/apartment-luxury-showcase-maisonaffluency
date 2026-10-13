@@ -660,7 +660,7 @@ const StudioGallery = () => {
               )}
             </div>
             <GalleryFilterSelect value={selectedCategory} onChange={(value) => { setSelectedCategory(value); setSelectedSubcategory("all"); }} label="Filter by category" allLabel="All Categories" options={categories} />
-            <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} />
+            <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} counts={editionCounts} allCount={collectionCounts.total} />
           </div>
           <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
             <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : filtered.length} {filtered.length === 1 ? "Item" : "Items"} Found</span>
