@@ -1,8 +1,22 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { SHOWROOM, textileNormalPixels, toPbrMaterial } from "./showroomRendering";
+import { SHOWROOM, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates } from "./showroomRendering";
 
 describe("showroom rendering", () => {
+  it("repairs missing UVs without modifying the cached geometry", () => {
+    const source = new THREE.BoxGeometry(1, 2, 1);
+    source.deleteAttribute("uv");
+    const repaired = withFallbackTextureCoordinates(source);
+    expect(source.getAttribute("uv")).toBeUndefined();
+    const uv = repaired.getAttribute("uv");
+    expect(uv.count).toBe(repaired.getAttribute("position").count);
+    expect(new Set(uv.array).size).toBeGreaterThan(1);
+    expect([...uv.array].every(Number.isFinite)).toBe(true);
+  });
+  it("preserves authored texture coordinates", () => {
+    const source = new THREE.BoxGeometry();
+    expect(withFallbackTextureCoordinates(source)).toBe(source);
+  });
   it("keeps exposure within 1.0–1.2 and ambient at 0.15", () => {
     expect(SHOWROOM.exposure).toBeGreaterThanOrEqual(1);
     expect(SHOWROOM.exposure).toBeLessThanOrEqual(1.2);

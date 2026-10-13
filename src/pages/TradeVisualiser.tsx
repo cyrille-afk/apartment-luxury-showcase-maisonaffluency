@@ -807,7 +807,7 @@ const TradeVisualiser = () => {
                 </Button>
               ))}
             </div>
-            <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" ? selected.material?.name : null) ?? "No finish applied"}</p>
+            <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" && effectiveTarget !== "backrest" ? selected.material?.name : null) ?? "No finish applied"}</p>
             <FinishPresets
               object={selected}
               onRestore={(preset) => {

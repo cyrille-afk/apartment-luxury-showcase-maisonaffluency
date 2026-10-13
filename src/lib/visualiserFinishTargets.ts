@@ -1,7 +1,7 @@
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 
 /** Named texturable roles a GLB can expose. */
-export type KnownPart = "top" | "frame" | "base" | "upholstery" | "drawer" | "door" | "shelf" | "handle";
+export type KnownPart = "top" | "frame" | "base" | "upholstery" | "backrest" | "drawer" | "door" | "shelf" | "handle";
 /** A known role, or `part:<group>` for an unnamed but separately-materialled part. */
 export type FinishPart = KnownPart | `part:${string}`;
 export type FinishTarget = "all" | FinishPart;
@@ -11,6 +11,7 @@ export const KNOWN_PART_LABELS: Record<KnownPart, string> = {
   frame: "Frame",
   base: "Base",
   upholstery: "Upholstery",
+  backrest: "Backrest Upholstery",
   drawer: "Drawer",
   door: "Door",
   shelf: "Shelf",
@@ -19,7 +20,7 @@ export const KNOWN_PART_LABELS: Record<KnownPart, string> = {
 export const FINISH_TARGET_LABELS: Record<"all" | KnownPart, string> = { all: "Whole Piece", ...KNOWN_PART_LABELS };
 export const KNOWN_PARTS = Object.keys(KNOWN_PART_LABELS) as KnownPart[];
 
-const PART_ORDER: KnownPart[] = ["top", "frame", "base", "upholstery", "drawer", "door", "shelf", "handle"];
+const PART_ORDER: KnownPart[] = ["top", "frame", "base", "upholstery", "backrest", "drawer", "door", "shelf", "handle"];
 const LEGACY_FIELD = { top: "topMaterial", base: "baseMaterial", upholstery: "upholsteryMaterial" } as const;
 
 export const isKnownPart = (p: string): p is KnownPart => p in KNOWN_PART_LABELS;
@@ -98,18 +99,20 @@ type PartHolder = {
 /** The canvas and inspector share exactly the same part inheritance policy. */
 export function meshPartMaterial(o: PartHolder, part: FinishPart | null): VisualiserMaterial | null {
   const own = part ? getPartMaterial(o, part) : null;
-  return part === "upholstery" ? own : own ?? o.material ?? null;
+  return part === "upholstery" || part === "backrest" ? own : own ?? o.material ?? null;
 }
 
 /** Finish on one part; top/base/upholstery keep their legacy fields for saved compositions. */
 export function getPartMaterial(o: PartHolder, part: FinishTarget): VisualiserMaterial | null {
   if (part === "all") return o.material ?? null;
+  if (part === "backrest" && !Object.prototype.hasOwnProperty.call(o.partMaterials ?? {}, "backrest")) return o.upholsteryMaterial ?? null;
   if (part in LEGACY_FIELD) return o[LEGACY_FIELD[part as keyof typeof LEGACY_FIELD]] ?? null;
   return o.partMaterials?.[part] ?? null;
 }
 
 export function withPartMaterial<T extends PartHolder>(o: T, part: FinishTarget, m: VisualiserMaterial | null): T {
   if (part === "all") return { ...o, material: m, topMaterial: null, baseMaterial: null, partMaterials: {} , upholsteryMaterial: o.upholsteryMaterial };
+  if (part === "upholstery") return { ...o, upholsteryMaterial: m, partMaterials: { ...(o.partMaterials ?? {}), backrest: getPartMaterial(o, "backrest") } };
   if (part in LEGACY_FIELD) return { ...o, [LEGACY_FIELD[part as keyof typeof LEGACY_FIELD]]: m };
   return { ...o, partMaterials: { ...(o.partMaterials ?? {}), [part]: m } };
 }
@@ -122,6 +125,7 @@ const PART_KEYWORDS: Record<KnownPart, RegExp> = {
   frame: /wood|oak|walnut|ash|veneer|lacquer|metal|bronze|brass|steel|iron|alumin|chrome|nickel|stuc|cement|rattan|cane/,
   base: /metal|bronze|brass|steel|iron|alumin|chrome|nickel|copper|wood|oak|walnut|ash|lacquer|powder/,
   upholstery: /fabric|textile|velvet|linen|wool|boucl|leather|suede|mohair|cotton|silk|chenille/,
+  backrest: /fabric|textile|velvet|linen|wool|boucl|leather|suede|mohair|cotton|silk|chenille/,
   drawer: /wood|oak|walnut|ash|veneer|lacquer|leather|suede|stone|marble|metal/,
   door: /wood|oak|walnut|ash|veneer|lacquer|glass|metal|cane|rattan|stone/,
   shelf: /wood|oak|walnut|ash|veneer|lacquer|glass|stone|marble|metal/,

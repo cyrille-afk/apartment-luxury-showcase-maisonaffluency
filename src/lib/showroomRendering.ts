@@ -28,6 +28,39 @@ export function toPbrMaterial(source: THREE.Material): THREE.MeshStandardMateria
   });
 }
 
+/** Box-projected fallback for exports missing UVs; never replaces authored UVs. */
+export function withFallbackTextureCoordinates(source: THREE.BufferGeometry): THREE.BufferGeometry {
+  if (source.getAttribute("uv")) return source;
+  const geometry = source.index ? source.toNonIndexed() : source.clone();
+  const positions = geometry.getAttribute("position");
+  if (!positions) return geometry;
+  geometry.computeBoundingBox();
+  const bounds = geometry.boundingBox;
+  if (!bounds) return geometry;
+  const size = bounds.getSize(new THREE.Vector3());
+  const unit = Math.max(size.x, size.y, size.z, 0.000001);
+  const uv = new Float32Array(positions.count * 2);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+  for (let i = 0; i + 2 < positions.count; i += 3) {
+    a.fromBufferAttribute(positions, i);
+    b.fromBufferAttribute(positions, i + 1).sub(a);
+    c.fromBufferAttribute(positions, i + 2).sub(a);
+    normal.crossVectors(b, c);
+    const x = Math.abs(normal.x), y = Math.abs(normal.y), z = Math.abs(normal.z);
+    for (let v = i; v < i + 3; v++) {
+      const px = (positions.getX(v) - bounds.min.x) / unit;
+      const py = (positions.getY(v) - bounds.min.y) / unit;
+      const pz = (positions.getZ(v) - bounds.min.z) / unit;
+      uv[v * 2] = x >= y && x >= z ? pz : px;
+      uv[v * 2 + 1] = y >= x && y >= z ? pz : py;
+    }
+  }
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+  geometry.userData.visualiserUvFallback = true;
+  return geometry;
+}
+
 /** A photo-derived micro-normal approximation, not a measured textile scan. */
 export function textileNormalPixels(pixels: Uint8ClampedArray, width: number, height: number): Uint8ClampedArray {
   const result = new Uint8ClampedArray(width * height * 4);

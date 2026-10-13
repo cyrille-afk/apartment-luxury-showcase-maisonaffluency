@@ -49,11 +49,12 @@ export const PRODUCT_FINISH_SCHEMAS: ProductFinishSchema[] = [
     name: "GUM armchair",
     brand: "Christophe Delcourt",
     components: [
-      { componentId: "upholstery_shell", displayName: "Upholstery", part: "upholstery", allowedGroups: ["fabrics", "leathers"] },
+      { componentId: "seat", displayName: "Seat Upholstery", part: "upholstery", allowedGroups: ["fabrics", "leathers"] },
+      { componentId: "backrest", displayName: "Backrest Upholstery", part: "backrest", allowedGroups: ["fabrics", "leathers"] },
       { componentId: "frame_legs", displayName: "Frame", part: "frame", allowedGroups: ["woods"] },
     ],
     // GLB nodes are coded "VIFS01…14"; materials: terracotta = frame, white/grey = upholstery.
-    materialRoles: { "09 - Default": "frame", "02 - Default": "upholstery", "01 - Default": "upholstery" },
+    materialRoles: { "09 - Default": "frame", "02 - Default": "upholstery", "01 - Default": "backrest" },
   },
   {
     name: "Madison Avenue Side Table",

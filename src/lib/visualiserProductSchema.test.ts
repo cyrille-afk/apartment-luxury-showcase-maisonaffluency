@@ -4,6 +4,14 @@ import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "./vi
 const m = (name: string, category: string) => ({ id: name, name, brand_name: "", category, material_type: category, color_family: null, image_url: null }) as never;
 
 describe("product finish schema", () => {
+  it("GUM separates seat, backrest and wood frame using authored material IDs", () => {
+    const schema = findProductSchema("GUM armchair");
+    expect(schema?.materialRoles).toEqual({ "09 - Default": "frame", "02 - Default": "upholstery", "01 - Default": "backrest" });
+    if (!schema) throw new Error("Missing GUM schema");
+    expect(schemaTargets(schema)).toEqual(["all", "upholstery", "backrest", "frame"]);
+    expect(schemaFits(schema, m("Edson", "Fabric"), "backrest")).toBe(true);
+    expect(schemaFits(schema, m("Oak", "Wood"), "backrest")).toBe(false);
+  });
   it("Madison Avenue table exposes Table Top and Base Structure", () => {
     const s = findProductSchema("Madison Avenue Side Table")!;
     expect(schemaTargets(s)).toEqual(["all", "top", "base"]);

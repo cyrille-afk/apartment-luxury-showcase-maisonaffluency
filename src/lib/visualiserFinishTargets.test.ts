@@ -6,6 +6,23 @@ const m = (category: string, material_type: string | null = null) => ({
 });
 
 describe("visualiser finish targets", () => {
+  it("changing GUM seat preserves the existing backrest finish", () => {
+    const old = m("Old Fabric"), seat = m("Seat Fabric");
+    const updated = withPartMaterial({ upholsteryMaterial: old }, "upholstery", seat);
+    expect(meshPartMaterial(updated, "upholstery")).toBe(seat);
+    expect(meshPartMaterial(updated, "backrest")).toBe(old);
+  });
+  it("changing GUM backrest never changes seat or frame", () => {
+    const seat = m("Seat Fabric"), back = m("Back Fabric"), frame = m("Wood");
+    const updated = withPartMaterial({ upholsteryMaterial: seat, partMaterials: { frame } }, "backrest", back);
+    expect(meshPartMaterial(updated, "backrest")).toBe(back);
+    expect(meshPartMaterial(updated, "upholstery")).toBe(seat);
+    expect(meshPartMaterial(updated, "frame")).toBe(frame);
+  });
+  it("a new seat does not paint an untouched backrest", () => {
+    const updated = withPartMaterial({ upholsteryMaterial: null }, "upholstery", m("Fabric"));
+    expect(meshPartMaterial(updated, "backrest")).toBeNull();
+  });
   it("Tobacco Oak on Base changes only base, even when position is locked", () => {
     const frame = m("Walnut Wood");
     const upholstery = m("Fabric");
