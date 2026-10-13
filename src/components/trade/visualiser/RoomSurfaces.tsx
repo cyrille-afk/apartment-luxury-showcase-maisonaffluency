@@ -10,8 +10,12 @@ import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
 
+/** Clamp a persisted glare value (0–100) to a safe slider range. */
+export const clampFloorGlare = (value: unknown): number =>
+  typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 50;
+
 /** Isolate UV repeats and linear data maps from the shared image cache. */
-function useSurfaceMaps(url: string, repeat: number, polished: boolean) {
+function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
   const source = useTexture(url);
   const anisotropy = useThree((s) => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
   const maps = useMemo(() => {
@@ -29,7 +33,9 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean) {
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
-        const value = Math.round((polished ? 0.78 + (1 - light) * 0.14 : 0.88 + (1 - light) * 0.1) * 255);
+        // Glare 0 = near-matte floor (0.9), 100 = polished (0.55); brighter texels stay rougher.
+        const polishedBase = 0.9 - (clampFloorGlare(glare) / 100) * 0.35;
+        const value = Math.round((polished ? polishedBase + (1 - light) * 0.14 : 0.88 + (1 - light) * 0.1) * 255);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }
       ctx.putImageData(pixels, 0, 0);
