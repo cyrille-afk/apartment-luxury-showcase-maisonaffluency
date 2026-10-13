@@ -31,6 +31,7 @@ export type ScenePresetData = {
   wallFinishIntensity?: number;
   /** Area rug colour / weave / pile depth (0–100). */
   rugColor?: string;
+  rugBorderColor?: string;
   rugWeave?: string;
   rugPile?: number;
   /** Rug size in metres (null = auto-fit) and offset from the layout centre. */
