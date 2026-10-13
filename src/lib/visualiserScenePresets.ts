@@ -8,6 +8,8 @@ export type ScenePresetData = {
   depthOfField?: boolean;
   /** Background blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
+  /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
+  backdropDataUrl?: string | null;
 };
 export type ScenePreset = { id: string; name: string; savedAt: string; data: ScenePresetData };
 
@@ -21,13 +23,12 @@ export const readScenePresets = (): ScenePreset[] => {
   } catch { return []; }
 };
 
-const write = (list: ScenePreset[]) => {
-  try { localStorage.setItem(KEY, JSON.stringify(list)); } catch { /* quota */ }
-  return list;
+const write = (list: ScenePreset[]): ScenePreset[] | null => {
+  try { localStorage.setItem(KEY, JSON.stringify(list)); return list; } catch { return null; }
 };
 
-/** Saving under an existing name (case-insensitive) overwrites that preset. */
-export const saveScenePreset = (name: string, data: ScenePresetData): ScenePreset[] => {
+/** Saving under an existing name (case-insensitive) overwrites that preset. Returns null if storage is full. */
+export const saveScenePreset = (name: string, data: ScenePresetData): ScenePreset[] | null => {
   const clean = name.trim();
   const list = readScenePresets();
   const existing = list.find((p) => p.name.toLowerCase() === clean.toLowerCase());
@@ -40,4 +41,4 @@ export const saveScenePreset = (name: string, data: ScenePresetData): ScenePrese
   return write([preset, ...list.filter((p) => p.id !== preset.id)]);
 };
 
-export const deleteScenePreset = (id: string) => write(readScenePresets().filter((p) => p.id !== id));
+export const deleteScenePreset = (id: string) => write(readScenePresets().filter((p) => p.id !== id)) ?? readScenePresets();

@@ -20,7 +20,9 @@ const ScenePresets = ({ className, current, onLoad }: Props) => {
   const save = () => {
     const data = current();
     if (!data.objects.length) { toast.error("Add at least one piece before saving a preset"); return; }
-    setPresets(saveScenePreset(name, data));
+    const saved = saveScenePreset(name, data);
+    if (!saved) { toast.error("Couldn't save — the room photo is too large for browser storage. Try a smaller image."); return; }
+    setPresets(saved);
     toast.success(`Saved "${name.trim()}"`);
     setName("");
   };
