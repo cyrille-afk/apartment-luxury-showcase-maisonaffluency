@@ -33,7 +33,8 @@ export function classifyTextureNode(nodeName: string): KnownPart | null {
   if (/handle|knob|pull/.test(name)) return "handle";
   if (/shelf|shelves/.test(name)) return "shelf";
   // Exporters often name the frame by its material (e.g. Man of Parts "WoodFinish").
-  if (/frame|carcass|body|structure|wood|timber|finish|arm/.test(name)) return "frame";
+  // \barms?\b is word-boundaried so "Armchair" in a parent name doesn't force frame.
+  if (/frame|carcass|body|structure|wood|timber|finish|\barms?\b/.test(name)) return "frame";
   if (/base|leg|stem|pedestal|foot|feet|glide|column|bracket|plinth|metal/.test(name)) return "base";
   if (/top|surface|plate|tabletop|marble|stone|counter/.test(name)) return "top";
   return null;

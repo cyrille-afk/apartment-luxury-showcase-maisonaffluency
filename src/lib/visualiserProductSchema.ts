@@ -20,6 +20,12 @@ export interface ProductFinishSchema {
   name: string;
   brand: string;
   components: ProductComponentSpec[];
+  /**
+   * Default finish part per GLB material name, for models whose node/material
+   * names are coded (e.g. "VIFS01" / "09 - Default") so name classification fails.
+   * Manual per-mesh mapping still wins over these defaults.
+   */
+  materialRoles?: Record<string, KnownPart>;
 }
 
 export const FINISH_GROUPS: Record<FinishGroupId, { label: string; match: RegExp }> = {
@@ -38,6 +44,16 @@ export const PRODUCT_FINISH_SCHEMAS: ProductFinishSchema[] = [
       { componentId: "main_body", displayName: "Main Body / Seat", part: "upholstery", allowedGroups: ["fabrics", "leathers"] },
       { componentId: "base_trim", displayName: "Base Trim / Accent", part: "base", allowedGroups: ["woods", "metals"] },
     ],
+  },
+  {
+    name: "GUM armchair",
+    brand: "Christophe Delcourt",
+    components: [
+      { componentId: "upholstery_shell", displayName: "Upholstery", part: "upholstery", allowedGroups: ["fabrics", "leathers"] },
+      { componentId: "frame_legs", displayName: "Frame", part: "frame", allowedGroups: ["woods"] },
+    ],
+    // GLB nodes are coded "VIFS01…14"; materials: terracotta = frame, white/grey = upholstery.
+    materialRoles: { "09 - Default": "frame", "02 - Default": "upholstery", "01 - Default": "upholstery" },
   },
   {
     name: "Madison Avenue Side Table",

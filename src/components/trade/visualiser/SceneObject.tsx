@@ -5,6 +5,7 @@ import { Lock } from "lucide-react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
+import { findProductSchema } from "@/lib/visualiserProductSchema";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
 import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
@@ -210,8 +211,8 @@ function useMaterialMapsMany(materials: (VisualiserMaterial | null | undefined)[
   return maps;
 }
 
-/** Resolves every mesh to a finishable part: manual mapping → node name → own material group. */
-function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
+/** Resolves every mesh to a finishable part: manual mapping → declared material role → node name → own material group. */
+function assignParts(root: THREE.Object3D, overrides: PartOverrides, materialRoles: Record<string, FinishPart> = {}) {
   const meshes: THREE.Mesh[] = [];
   root.traverse((c) => { if ((c as THREE.Mesh).isMesh) meshes.push(c as THREE.Mesh); });
   const matName = (m: THREE.Mesh) => {
@@ -231,7 +232,8 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
     const key = meshKey(index, mesh.name || mesh.parent?.name || "");
     // Unnamed meshes are still classifiable by their material name
     // (e.g. Man of Parts "WoodFinish" → frame, "Glides" → base).
-    const named = classifyMeshPart(nodeName, matName(mesh));
+    // Declared material roles beat name guessing for coded models (e.g. "VIFS01").
+    const named = materialRoles[matName(mesh)] ?? classifyMeshPart(nodeName, matName(mesh));
     // Unnamed parts that carry their own GLB material are independently finishable.
     let auto: FinishPart | null = named;
     if (!auto && distinct > 1) {
@@ -272,7 +274,7 @@ function useFittedModel(object: PlacedObject) {
   const partOverrides = usePartOverrides(productId);
   return useMemo(() => {
     const clone = scene.clone(true);
-    const groupLabels = assignParts(clone, partOverrides);
+    const groupLabels = assignParts(clone, partOverrides, findProductSchema(object.product_name)?.materialRoles ?? {});
     clone.userData.groupLabels = Object.fromEntries(groupLabels);
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
