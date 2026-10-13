@@ -1,5 +1,5 @@
 import { defineTool } from "@lovable.dev/mcp-js";
-import { createClient } from "@supabase/supabase-js";
+import { PostgrestClient } from "@supabase/postgrest-js";
 import { z } from "zod";
 
 // Public, unauthenticated. Reads the anon-safe view `designer_curator_picks_public`
@@ -22,7 +22,7 @@ function getClient() {
   const url = process.env.SUPABASE_URL!;
   // Publishable/anon key — safe to use with the public view; RLS enforces visibility.
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!;
-  return createClient(url, anon, { auth: { persistSession: false, autoRefreshToken: false } });
+  return new PostgrestClient(`${url}/rest/v1`, { headers: { apikey: anon, Authorization: `Bearer ${anon}` } });
 }
 
 export default defineTool({
