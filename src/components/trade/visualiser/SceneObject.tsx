@@ -276,16 +276,34 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
   </>;
 };
 
-const ImageBody = ({ url, name }: { url: string; name: string }) => {
+/** Small non-interactive pill shown above a piece whose finishes are locked. */
+const LockBadge = ({ instanceId }: { instanceId: string }) => (
+  <span
+    data-lock-badge={instanceId}
+    className="pointer-events-none flex select-none items-center gap-1 rounded-full border border-border bg-background/95 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] text-foreground shadow-sm"
+  >
+    <Lock className="h-3 w-3 text-primary" aria-hidden />
+    Locked
+  </span>
+);
+
+const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: string; locked: boolean; instanceId: string }) => {
   const texture = useTexture(url);
   const image = texture.image as { width?: number; height?: number } | undefined;
   const aspect = image?.width && image?.height ? image.width / image.height : 1;
   const height = 1.2;
   return (
-    <mesh castShadow receiveShadow position={[0, height / 2, 0]} name={name}>
-      <planeGeometry args={[height * aspect, height]} />
-      <meshStandardMaterial map={texture} transparent alphaTest={0.4} side={THREE.DoubleSide} />
-    </mesh>
+    <>
+      <mesh castShadow receiveShadow position={[0, height / 2, 0]} name={name}>
+        <planeGeometry args={[height * aspect, height]} />
+        <meshStandardMaterial map={texture} transparent alphaTest={0.4} side={THREE.DoubleSide} />
+      </mesh>
+      {locked && (
+        <Html position={[0, height + 0.25, 0]} center zIndexRange={[6, 1]}>
+          <LockBadge instanceId={instanceId} />
+        </Html>
+      )}
+    </>
   );
 };
 
