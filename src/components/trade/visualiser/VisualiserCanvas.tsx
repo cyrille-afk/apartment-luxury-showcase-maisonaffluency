@@ -86,6 +86,8 @@ interface VisualiserCanvasProps {
   depthOfField?: boolean;
   /** Blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
+  /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
+  dofFocusSelected?: boolean;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -118,6 +120,7 @@ const VisualiserCanvas = ({
   focusRef,
   depthOfField = false,
   dofStrength = 3,
+  dofFocusSelected = true,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -135,7 +138,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${dofStrength}|${objects
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -247,6 +250,7 @@ const VisualiserCanvas = ({
       <DofPass
         strength={dofStrength}
         focus={(() => {
+          if (!dofFocusSelected) return null;
           const sel = objects.find((o) => o.instanceId === selectedId);
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
         })()}

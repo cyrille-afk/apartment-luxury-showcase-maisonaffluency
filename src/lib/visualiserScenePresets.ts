@@ -8,6 +8,8 @@ export type ScenePresetData = {
   depthOfField?: boolean;
   /** Background blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
+  /** DoF focus mode: true = clicked piece stays sharp, false = view centre. */
+  dofFocusSelected?: boolean;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
