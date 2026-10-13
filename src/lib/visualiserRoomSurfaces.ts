@@ -88,6 +88,12 @@ export function rugColor(value: unknown): RugColor {
 export function rugColorHex(value: unknown): string {
   return RUG_COLORS.find((c) => c.key === rugColor(value))!.hex;
 }
+/** Border cord colour: "match" follows the rug fabric colour, otherwise an explicit RugColor. */
+export type RugBorderColor = RugColor | "match";
+export function rugBorderColor(value: unknown): RugBorderColor {
+  if (value === "match" || value === undefined || value === null) return "match";
+  return rugColor(value);
+}
 
 /** Weave structure of the rug surface. */
 export const RUG_WEAVES = [
