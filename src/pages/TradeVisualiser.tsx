@@ -345,12 +345,20 @@ const TradeVisualiser = () => {
     return () => { cancelled = true; };
   }, [selectedProductId, products]);
   // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
+  // Declared product schemas (components + allowed finish groups) override model detection.
+  const productSchema = useMemo(() => findProductSchema(selected?.product_name), [selected?.product_name]);
   const availableTargets = useMemo<FinishTarget[]>(
-    () => finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
-    [selected, textureParts],
+    () => productSchema
+      ? schemaTargets(productSchema)
+      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
+    [selected, textureParts, productSchema],
   );
   const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
-  const partGroupLabels = usePartGroupLabels(selected?.id);
+  const detectedGroupLabels = usePartGroupLabels(selected?.id);
+  const partGroupLabels = useMemo(
+    () => (productSchema ? { ...detectedGroupLabels, ...schemaLabels(productSchema) } : detectedGroupLabels),
+    [detectedGroupLabels, productSchema],
+  );
   const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
 
   const addObject = (product: CatalogueProduct) => {
