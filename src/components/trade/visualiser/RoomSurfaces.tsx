@@ -28,8 +28,8 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
-        // Glare 0 = near-matte floor (0.9), 100 = polished (0.55); brighter texels stay rougher.
-        const polishedBase = 0.9 - (clampFloorGlare(glare) / 100) * 0.35;
+        // Glare 0 = matte floor (0.75), 100 = satin semi-gloss (0.45); brighter texels stay rougher.
+        const polishedBase = 0.75 - (clampFloorGlare(glare) / 100) * 0.3;
         const value = Math.round((polished ? polishedBase + (1 - light) * 0.14 : 0.88 + (1 - light) * 0.1) * 255);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }

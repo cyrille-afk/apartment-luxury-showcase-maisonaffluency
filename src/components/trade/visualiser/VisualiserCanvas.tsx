@@ -34,6 +34,12 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
+  const scene = useThree((s) => s.scene);
+  // Align the HDRI daylight direction with the front-left key light so shadows fall to the right.
+  useEffect(() => {
+    scene.environmentRotation = new THREE.Euler(0, Math.PI / 4, 0);
+    scene.backgroundRotation = new THREE.Euler(0, Math.PI / 4, 0);
+  }, [scene]);
   useEffect(() => {
     const bump = () => setLocalVersion((v) => v + 1);
     window.addEventListener("ma-local-exr-changed", bump);
@@ -309,6 +315,19 @@ const VisualiserCanvas = ({
         blur={2.6}
         far={4}
         resolution={1024}
+        depthWrite={false}
+      />
+    )}
+    {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
+    {!hasBackdrop && floorFinish !== "none" && (
+      <ContactShadows
+        position={[0, 0.005, 0]}
+        scale={15}
+        opacity={0.65}
+        blur={1.5}
+        far={1}
+        resolution={1024}
+        color="#2b2015"
         depthWrite={false}
       />
     )}
