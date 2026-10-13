@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
@@ -6,6 +6,35 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import { EffectComposer, DepthOfField } from "@react-three/postprocessing";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
+import { SHOWROOM } from "@/lib/showroomRendering";
+
+/** HDR loads independently: furniture stays visible with local IBL on slow/failing networks. */
+const StudioEnvironment = () => {
+  const [map, setMap] = useState<THREE.DataTexture | null>(null);
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    let cancelled = false;
+    let owned: THREE.DataTexture | null = null;
+    new RGBELoader().load(studioAsset.url, (texture) => {
+      if (cancelled) { texture.dispose(); return; }
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      owned = texture;
+      setMap(texture);
+      invalidate();
+    }, undefined, () => { /* Keep local studio reflections if HDR is unavailable. */ });
+    return () => { cancelled = true; owned?.dispose(); };
+  }, [invalidate]);
+  if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
+  return (
+    <Environment resolution={256}>
+      <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
+      <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
+      <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />
+    </Environment>
+  );
+};
 
 /** Exposes a getter for the floor point at the centre of the camera view (raycast onto Y = 0). */
 const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number, number] | null) | null } }) => {
@@ -134,10 +163,17 @@ const VisualiserCanvas = ({
       preserveDrawingBuffer: true,
       powerPreference: "high-performance",
       toneMapping: THREE.ACESFilmicToneMapping,
-      toneMappingExposure: 1.05,
+      toneMappingExposure: SHOWROOM.exposure,
       outputColorSpace: THREE.SRGBColorSpace,
     }}
     dpr={[1, 1.5]}
+    onCreated={({ gl }) => {
+      gl.toneMapping = THREE.ACESFilmicToneMapping;
+      gl.toneMappingExposure = SHOWROOM.exposure;
+      gl.outputColorSpace = THREE.SRGBColorSpace;
+      gl.shadowMap.enabled = true;
+      gl.shadowMap.type = THREE.PCFSoftShadowMap;
+    }}
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
@@ -164,12 +200,13 @@ const VisualiserCanvas = ({
     />
 
     {/* Weak ambient keeps crevices dark; three-point rig does the shaping. */}
-    <ambientLight intensity={0.2} />
+    <ambientLight intensity={SHOWROOM.ambient} />
+    <rectAreaLight position={[-5, 6, 5]} rotation={[-Math.PI / 4, -Math.PI / 4, 0]} width={6} height={4} intensity={3} color={SHOWROOM.key} />
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
       position={[-6, 9, 6]}
-      intensity={1.6}
-      color="#fff6ea"
+      intensity={1.2}
+      color={SHOWROOM.key}
       castShadow
       shadow-mapSize-width={2048}
       shadow-mapSize-height={2048}
@@ -182,18 +219,12 @@ const VisualiserCanvas = ({
       shadow-normalBias={0.02}
     />
     {/* Fill: opposite side, low and cool. */}
-    <directionalLight position={[7, 4, 4]} intensity={0.35} color="#e6ecf5" />
+    <directionalLight position={[7, 4, 4]} intensity={0.4} color={SHOWROOM.fill} />
     {/* Rim: behind the pieces to lift silhouettes. */}
-    <directionalLight position={[0, 6, -9]} intensity={0.7} color="#ffffff" />
-    <hemisphereLight args={["#ffffff", "#d8d3cb", 0.2]} />
+    <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. */}
-    <Environment resolution={512}>
-      <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color="#ffffff" />
-      <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color="#f4efe7" />
-      <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color="#e8e3da" />
-      <Lightformer intensity={0.6} position={[0, -3, 0]} rotation-x={-Math.PI / 2} scale={[14, 14, 1]} color="#d8d3cb" />
-    </Environment>
+    <StudioEnvironment />
 
     {!hasBackdrop && (
       <ContactShadows
