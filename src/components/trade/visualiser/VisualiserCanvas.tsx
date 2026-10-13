@@ -192,6 +192,7 @@ const VisualiserCanvas = ({
   depthOfField = false,
   dofStrength = 3,
   dofFocusSelected = true,
+  environmentSource = "empty-room-exr",
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -216,7 +217,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -262,8 +263,8 @@ const VisualiserCanvas = ({
     {/* Rim: behind the pieces to lift silhouettes. */}
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
-    {/* Local IBL: metals need reflections or they render solid black. */}
-    <StudioEnvironment />
+    {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
+    <StudioEnvironment preferred={environmentSource} />
 
     {!hasBackdrop && (
       <ContactShadows
