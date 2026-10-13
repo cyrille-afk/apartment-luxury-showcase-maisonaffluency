@@ -338,7 +338,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const body = object.glb_url
     ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
-      ? <ImageBody url={object.image_url} name={object.product_name} />
+      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.finishesLocked)} instanceId={object.instanceId} />
       : null;
 
   /** Raycast the pointer onto the y = 0 floor plane. */
