@@ -30,7 +30,7 @@ const ScenePresets = ({ className, current, onLoad }: Props) => {
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setPresets(readScenePresets()); }}>
       <PopoverTrigger asChild>
-        <button className={className} title="Save or reopen named furniture arrangements">[ &#9733; Scene Presets ]</button>
+        <Button variant="ghost" className={className} title="Save or reopen named furniture arrangements">[ &#9733; Scene Presets ]</Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-3" align="end" side="top">
         <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) save(); }}>
