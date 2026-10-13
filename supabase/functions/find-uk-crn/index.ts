@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       if (!m) continue;
       const crn = m[1].toUpperCase();
       if (seen.has(crn)) continue;
-      const title = String(r.title ?? "").replace(/\s*-\s*Find and update company information.*$/i, "").replace(/\s*overview.*$/i, "").trim();
+      const title = String(r.title ?? "").replace(/\s*-\s*(Find and update company information|Companies House).*$/i, "").replace(/\s*overview.*$/i, "").trim();
       seen.set(crn, {
         crn,
         title: title || crn,
