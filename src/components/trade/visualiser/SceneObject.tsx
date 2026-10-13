@@ -9,6 +9,7 @@ import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProd
 import { classifyMeshPart, getPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
+import { snapCoordinate } from "@/lib/visualiserPlacement";
 
 export type PlacedObject = {
   instanceId: string;
