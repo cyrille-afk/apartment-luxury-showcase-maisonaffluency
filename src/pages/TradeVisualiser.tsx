@@ -289,6 +289,7 @@ const TradeVisualiser = () => {
         environmentSource,
         floorFinish,
         showRearWall,
+        wallHeight,
         floorGlare,
       }));
     } catch {
