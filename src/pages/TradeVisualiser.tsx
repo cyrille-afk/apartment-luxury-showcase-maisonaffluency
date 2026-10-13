@@ -145,6 +145,7 @@ const TradeVisualiser = () => {
     const imageUrl = finishes?.fabricImg ?? finishes?.woodImg;
     const name = finishes?.fabric ?? finishes?.wood;
     if (!imageUrl || !name) return;
+    armedMaterialRef.current = true;
     setActiveMaterial({
       id: `concierge-${name}`,
       name,
