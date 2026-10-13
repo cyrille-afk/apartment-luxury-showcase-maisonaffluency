@@ -565,6 +565,28 @@ const TradeVisualiser = () => {
   };
 
   const backdropSrc = backdrop ?? backdropDataUrl;
+
+  // Export a clean PNG mockup: hide the floor grid, let one frame render,
+  // capture the WebGL canvas, then restore the grid exactly as it was.
+  const [exporting, setExporting] = useState(false);
+  const handleExportMockup = async () => {
+    const canvas = canvasWrapRef.current?.querySelector("canvas");
+    if (!canvas || exporting) return;
+    setExporting(true);
+    const hadGrid = showGrid;
+    if (hadGrid) setShowGrid(false);
+    await nextPaintedFrame();
+    await nextPaintedFrame();
+    try {
+      downloadDataUrl(canvas.toDataURL("image/png"), mockupFilename());
+      toast.success("Mockup exported.");
+    } catch {
+      toast.error("Could not export the mockup.");
+    }
+    if (hadGrid) setShowGrid(true);
+    setExporting(false);
+  };
+
   const toolbarButton = cn(
     "font-mono text-[10px] uppercase tracking-[0.15em]",
     "flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
