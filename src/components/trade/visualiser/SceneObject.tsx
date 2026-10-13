@@ -5,8 +5,8 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
-import { classifyTextureNode, type FinishPart } from "@/lib/visualiserFinishTargets";
-import { meshKey, registerModelMeshes, resolvePart, usePartOverrides, type ModelMesh } from "@/lib/visualiserPartMapping";
+import { classifyTextureNode, getPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
+import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 
 export type PlacedObject = {
@@ -25,6 +25,8 @@ export type PlacedObject = {
   topMaterial?: VisualiserMaterial | null;
   baseMaterial?: VisualiserMaterial | null;
   upholsteryMaterial?: VisualiserMaterial | null;
+  /** Finishes for parts beyond top/base/upholstery (frame, drawer, part:<group> …). */
+  partMaterials?: Record<string, VisualiserMaterial | null>;
 };
 
 type Props = {
@@ -165,93 +167,117 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   return material;
 }
 
+/** Loads maps for every distinct finish on a piece (one entry per material id). */
+function useMaterialMapsMany(materials: (VisualiserMaterial | null | undefined)[], maxAnisotropy: number) {
+  const list = useMemo(() => {
+    const byId = new Map<string, VisualiserMaterial>();
+    for (const m of materials) if (m) byId.set(m.id, m);
+    return [...byId.values()];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [materials.map((m) => m ? `${m.id}|${m.diffuse_url ?? m.image_url ?? ""}|${m.normal_url ?? ""}|${m.roughness_url ?? ""}|${m.repeat ?? ""}` : "").join(",")]);
+  const [maps, setMaps] = useState<Map<string, LoadedMaps>>(new Map());
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    let cancelled = false;
+    let owned: LoadedMaps[] = [];
+    void Promise.all(list.map((m) => loadMaterialMaps(m, maxAnisotropy).catch(() => EMPTY_MAPS))).then((loaded) => {
+      if (cancelled) { loaded.forEach(disposeMaps); return; }
+      owned = loaded;
+      setMaps(new Map(list.map((m, i) => [m.id, loaded[i]])));
+      invalidate();
+    });
+    return () => { cancelled = true; const o = owned; queueMicrotask(() => o.forEach(disposeMaps)); };
+  }, [list, maxAnisotropy, invalidate]);
+  return maps;
+}
+
+/** Resolves every mesh to a finishable part: manual mapping → node name → own material group. */
+function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
+  const meshes: THREE.Mesh[] = [];
+  root.traverse((c) => { if ((c as THREE.Mesh).isMesh) meshes.push(c as THREE.Mesh); });
+  const matName = (m: THREE.Mesh) => {
+    const src = Array.isArray(m.material) ? m.material[0] : m.material;
+    return src?.name || src?.uuid || "";
+  };
+  const distinct = new Set(meshes.map(matName)).size;
+  const groupLabels = new Map<string, string>();
+  meshes.forEach((mesh, index) => {
+    const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
+    const key = meshKey(index, mesh.name || mesh.parent?.name || "");
+    const named = classifyTextureNode(nodeName);
+    // Unnamed parts that carry their own GLB material are independently finishable.
+    let auto: FinishPart | null = named;
+    if (!auto && distinct > 1) {
+      const g = `part:${matName(mesh)}`;
+      if (!groupLabels.has(g)) groupLabels.set(g, `Part ${groupLabels.size + 1}`);
+      auto = g as FinishPart;
+    }
+    const o = overrides[key];
+    mesh.userData.partKey = key;
+    mesh.userData.partAuto = auto;
+    mesh.userData.partLabel = mesh.name || mesh.parent?.name || "";
+    mesh.userData.partRole = o === "none" ? null : o ?? auto;
+  });
+  return groupLabels;
+}
+
 /** Normalises any GLB to roughly 1.4m tall and seats it on the floor plane. */
-function useFittedModel(
-  productId: string,
-  url: string,
-  dimensions: string | null,
-  material: VisualiserMaterial | null,
-  topMaterial: VisualiserMaterial | null,
-  baseMaterial: VisualiserMaterial | null,
-  upholsteryMaterial: VisualiserMaterial | null,
-  orientation?: ModelOrientation,
-) {
+function useFittedModel(object: PlacedObject) {
+  const productId = object.id;
+  const url = object.glb_url ?? "";
   // Self-hosted Draco decoder: compressed GLBs stream in a fraction of the
   // bytes, uncompressed ones are unaffected (decoder is fetched on demand).
   const { scene } = useGLTF(url, "/draco/");
   const { gl } = useThree();
   const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
-  const generalMaps = useMaterialMaps(material, maxAnisotropy);
-  const topMaps = useMaterialMaps(topMaterial, maxAnisotropy);
-  const baseMaps = useMaterialMaps(baseMaterial, maxAnisotropy);
-  const upholsteryMaps = useMaterialMaps(upholsteryMaterial, maxAnisotropy);
+  const holder = useMemo(() => ({
+    ...object,
+    baseMaterial: object.baseMaterial ?? (isBondStreetStool(productId) ? BOND_STREET_BASE_FINISH : null),
+  }), [object, productId]);
+  const maps = useMaterialMapsMany([
+    holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial,
+    ...Object.values(holder.partMaterials ?? {}),
+  ], maxAnisotropy);
   const partOverrides = usePartOverrides(productId);
   return useMemo(() => {
     const clone = scene.clone(true);
-    let meshIndex = 0;
+    const groupLabels = assignParts(clone, partOverrides);
+    clone.userData.groupLabels = Object.fromEntries(groupLabels);
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
-      if (mesh.isMesh) {
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        // Sub-mesh roles: manual mapping first, else GLB node names (Table_Top_Mesh, Base_Mesh …).
-        const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`.toLowerCase();
-        const key = meshKey(meshIndex++, mesh.name || mesh.parent?.name || "");
-        mesh.userData.partKey = key;
-        const isBondStreet = isBondStreetStool(productId);
-        const role = resolvePart(nodeName, key, partOverrides);
-        const finish = role === "upholstery"
-          ? upholsteryMaterial
-          : role === "base"
-            ? baseMaterial ?? material
-            : role === "top"
-              ? topMaterial ?? material
-              : material;
-        const maps = role === "upholstery"
-          ? upholsteryMaps
-          : role === "base"
-            ? (baseMaterial ? baseMaps : generalMaps)
-            : role === "top"
-              ? (topMaterial ? topMaps : generalMaps)
-              : generalMaps;
-        const neutralFabric = isBondStreet && role === "upholstery" && !upholsteryMaterial;
-        if (!finish && !neutralFabric) return;
-        const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        const next = source.map((entry) => clonePbrMaterial(entry, finish, maps, neutralFabric));
-        mesh.material = Array.isArray(mesh.material) ? next : next[0];
-      }
+      if (!mesh.isMesh) return;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      const role = mesh.userData.partRole as FinishPart | null;
+      // Upholstery never inherits the whole-piece finish; other parts fall back to it.
+      const own = role ? getPartMaterial(holder, role) : null;
+      const finish = role === "upholstery" ? own : own ?? holder.material ?? null;
+      const neutralFabric = isBondStreetStool(productId) && role === "upholstery" && !own;
+      if (!finish && !neutralFabric) return;
+      const m = (finish && maps.get(finish.id)) || EMPTY_MAPS;
+      const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      const next = source.map((entry) => clonePbrMaterial(entry, finish, m, neutralFabric));
+      mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    return applyModelOrientation(fitUprightModel(clone, dimensions, url), orientation);
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url, orientation, partOverrides]);
+    return applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation);
+  }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation]);
 }
 
 const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: PlacedObject; label?: string; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
-  const model = useFittedModel(
-    object.id,
-    object.glb_url ?? "",
-    object.dimensions,
-    object.material ?? null,
-    object.topMaterial ?? null,
-    object.baseMaterial ?? (isBondStreetStool(object.id) ? BOND_STREET_BASE_FINISH : null),
-    object.upholsteryMaterial ?? null,
-    object.modelOrientation,
-  );
-  const partOverrides = usePartOverrides(object.id);
+  const model = useFittedModel(object);
   useEffect(() => {
     const parts = new Set<FinishPart>();
     const list: ModelMesh[] = [];
+    const groupLabels = (model.userData.groupLabels ?? {}) as Record<string, string>;
     model.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
-      const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
-      const key = String(mesh.userData.partKey ?? "");
-      list.push({ key, label: mesh.name || mesh.parent?.name || "", auto: classifyTextureNode(nodeName) });
-      const part = resolvePart(nodeName.toLowerCase(), key, partOverrides);
-      if (part) parts.add(part);
+      list.push({ key: String(mesh.userData.partKey ?? ""), label: String(mesh.userData.partLabel ?? ""), auto: mesh.userData.partAuto ?? null });
+      if (mesh.userData.partRole) parts.add(mesh.userData.partRole);
     });
-    registerModelMeshes(object.id, list);
+    registerModelMeshes(object.id, list, groupLabels);
     onTextureParts?.(object.instanceId, [...parts]);
-  }, [model, object.id, object.instanceId, onTextureParts, partOverrides]);
+  }, [model, object.id, object.instanceId, onTextureParts]);
   const labelPosition = useMemo<[number, number, number]>(() => {
     const bounds = new THREE.Box3().setFromObject(model);
     const centre = bounds.getCenter(new THREE.Vector3());
