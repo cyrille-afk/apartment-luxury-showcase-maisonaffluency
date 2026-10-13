@@ -66,6 +66,45 @@ export function pickFootprintSlot(
   return slots.find(free) ?? [0, 0, 0];
 }
 
+export type FootprintObstacle = { position: [number, number, number]; radius: number };
+
+/**
+ * Collision-aware dragging: push a dragged piece's candidate position out of
+ * every footprint it would overlap, so a piece can never be dropped inside or
+ * on top of another. Iterates a few times so clusters of pieces resolve too.
+ * Returns the adjusted [x, z] (the original when nothing overlaps).
+ */
+export function resolveDragPosition(
+  x: number,
+  z: number,
+  selfRadius: number,
+  obstacles: FootprintObstacle[],
+): [number, number] {
+  let px = x;
+  let pz = z;
+  for (let iteration = 0; iteration < 8; iteration++) {
+    let moved = false;
+    for (const obstacle of obstacles) {
+      const minDist = obstacle.radius + selfRadius + FOOTPRINT_MARGIN;
+      const dx = px - obstacle.position[0];
+      const dz = pz - obstacle.position[2];
+      const dist = Math.hypot(dx, dz);
+      if (dist >= minDist) continue;
+      if (dist < 1e-4) {
+        // Dead centre on the obstacle: push out along +x arbitrarily.
+        px = obstacle.position[0] + minDist;
+      } else {
+        const push = minDist / dist;
+        px = obstacle.position[0] + dx * push;
+        pz = obstacle.position[2] + dz * push;
+      }
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  return [px, pz];
+}
+
 
 /**
  * Re-lays out every object on the grid at the given spacing, preserving each
