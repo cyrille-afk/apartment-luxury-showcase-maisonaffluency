@@ -976,6 +976,23 @@ const TradeVisualiser = () => {
                   <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; 100% is the full-height cyclorama.</p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel>Wall colour</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={wallColor} onValueChange={(value) => setWallColor(roomWallColor(value))}>
+                  {WALL_COLORS.map((c) => (
+                    <DropdownMenuRadioItem key={c.key} value={c.key}>
+                      <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border align-middle" style={{ backgroundColor: c.hex }} />
+                      {c.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Wall finish</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={wallFinish} onValueChange={(value) => setWallFinish(roomWallFinish(value))}>
+                  {WALL_FINISHES.map((f) => (
+                    <DropdownMenuRadioItem key={f.key} value={f.key}>{f.label}</DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                     <span>Floor Glare</span>
