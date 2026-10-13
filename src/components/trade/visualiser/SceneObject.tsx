@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Html, useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -253,6 +254,12 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
     const centre = bounds.getCenter(new THREE.Vector3());
     return [centre.x, bounds.max.y + 0.18, centre.z];
   }, [model]);
+  // Lock badge floats above the room label (or the piece itself) while finishes are protected.
+  const lockPosition = useMemo<[number, number, number]>(() => {
+    const bounds = new THREE.Box3().setFromObject(model);
+    const centre = bounds.getCenter(new THREE.Vector3());
+    return [centre.x, bounds.max.y + (label ? 0.55 : 0.18), centre.z];
+  }, [model, label]);
   useEffect(() => () => {
     // Only dispose materials we cloned — the cached GLTF originals are shared
     // across every instance and disposing them renders later clones black.
@@ -272,19 +279,42 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
         {label}
       </Button>
     </Html>}
+    {object.finishesLocked && (
+      <Html position={lockPosition} center zIndexRange={[6, 1]}>
+        <LockBadge instanceId={object.instanceId} />
+      </Html>
+    )}
   </>;
 };
 
-const ImageBody = ({ url, name }: { url: string; name: string }) => {
+/** Small non-interactive pill shown above a piece whose finishes are locked. */
+const LockBadge = ({ instanceId }: { instanceId: string }) => (
+  <span
+    data-lock-badge={instanceId}
+    className="pointer-events-none flex select-none items-center gap-1 rounded-full border border-border bg-background/95 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] text-foreground shadow-sm"
+  >
+    <Lock className="h-3 w-3 text-primary" aria-hidden />
+    Locked
+  </span>
+);
+
+const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: string; locked: boolean; instanceId: string }) => {
   const texture = useTexture(url);
   const image = texture.image as { width?: number; height?: number } | undefined;
   const aspect = image?.width && image?.height ? image.width / image.height : 1;
   const height = 1.2;
   return (
-    <mesh castShadow receiveShadow position={[0, height / 2, 0]} name={name}>
-      <planeGeometry args={[height * aspect, height]} />
-      <meshStandardMaterial map={texture} transparent alphaTest={0.4} side={THREE.DoubleSide} />
-    </mesh>
+    <>
+      <mesh castShadow receiveShadow position={[0, height / 2, 0]} name={name}>
+        <planeGeometry args={[height * aspect, height]} />
+        <meshStandardMaterial map={texture} transparent alphaTest={0.4} side={THREE.DoubleSide} />
+      </mesh>
+      {locked && (
+        <Html position={[0, height + 0.25, 0]} center zIndexRange={[6, 1]}>
+          <LockBadge instanceId={instanceId} />
+        </Html>
+      )}
+    </>
   );
 };
 
@@ -308,7 +338,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const body = object.glb_url
     ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
-      ? <ImageBody url={object.image_url} name={object.product_name} />
+      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.finishesLocked)} instanceId={object.instanceId} />
       : null;
 
   /** Raycast the pointer onto the y = 0 floor plane. */
