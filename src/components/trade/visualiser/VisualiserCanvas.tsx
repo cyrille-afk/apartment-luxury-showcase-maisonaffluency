@@ -117,6 +117,7 @@ const VisualiserCanvas = ({
   showGrid = true,
   focusRef,
   depthOfField = false,
+  dofStrength = 3,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -134,7 +135,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${objects
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${dofStrength}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
