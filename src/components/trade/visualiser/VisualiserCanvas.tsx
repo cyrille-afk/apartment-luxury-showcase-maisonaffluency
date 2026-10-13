@@ -10,34 +10,48 @@ import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
+import { EMPTY_ROOM_EXR, validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 
-const EMPTY_ROOM_EXR = "/images/_empty_room_3.exr";
+export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
+export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
 
-/** HDR loads independently: furniture stays visible with local IBL on slow/failing networks. */
+const ENV_STATUS_EVENT = "ma-visualiser-env";
+
+/** Broadcasts which HDRI the canvas ended up on so the page can confirm it. */
+export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
+  window.dispatchEvent(new CustomEvent<VisualiserEnvironmentStatus>(ENV_STATUS_EVENT, { detail: status }));
+}
+
+/** Loads independently: furniture stays visible with local IBL on slow/failing networks. */
 const StudioEnvironment = () => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => {
     let cancelled = false;
     let owned: THREE.DataTexture | null = null;
-    const accept = (texture: THREE.DataTexture) => {
+    const accept = (source: VisualiserEnvironmentSource, exr?: "missing" | "unreadable") => (texture: THREE.DataTexture) => {
       if (cancelled) { texture.dispose(); return; }
       texture.mapping = THREE.EquirectangularReflectionMapping;
       owned = texture;
       setMap(texture);
+      reportEnvironmentStatus({ source, exr });
       invalidate();
     };
-    // Preferred: the studio's own empty-room EXR; falls back to the built-in HDR.
-    new EXRLoader().load(
-      EMPTY_ROOM_EXR,
-      accept,
-      undefined,
-      () => {
-        new RGBELoader().load(studioAsset.url, accept, undefined, () => {
-          /* Keep local studio reflections if both HDRI sources are unavailable. */
-        });
+    const fallbackToStudioHdr = (exr?: "missing" | "unreadable") => {
+      new RGBELoader().load(studioAsset.url, accept("studio-hdr", exr), undefined, () => {
+        /* Keep local studio reflections if both HDRI sources are unavailable. */
+        reportEnvironmentStatus({ source: "local", exr });
+      });
+    };
+    // Preferred: the studio's own empty-room EXR — validated (present + readable) before parsing.
+    validateEmptyRoomExr().then((result) => {
+      if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
+      try {
+        accept("empty-room-exr")(new EXRLoader().parse(result.buffer));
+      } catch {
+        fallbackToStudioHdr("unreadable");
       }
-    );
+    });
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate]);
   if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
