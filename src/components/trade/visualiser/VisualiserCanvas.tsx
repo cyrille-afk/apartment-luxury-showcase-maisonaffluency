@@ -84,6 +84,8 @@ interface VisualiserCanvasProps {
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
   depthOfField?: boolean;
+  /** Blur strength (bokeh scale), 1–10. */
+  dofStrength?: number;
 }
 
 const DofPass = ({ focus }: { focus: [number, number, number] | null }) => {
