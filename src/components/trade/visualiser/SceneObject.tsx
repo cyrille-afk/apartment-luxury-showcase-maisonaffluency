@@ -61,8 +61,28 @@ function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: num
     let cancelled = false;
     const loader = new THREE.TextureLoader();
     const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
+    // Swatch photos are circular thumbnails on a white background. Tiled raw,
+    // the white corners produce a checkered pattern on the model — crop to the
+    // circle's inscribed square (center ~70%) before using one as a texture.
+    const loadDiffuse = (url?: string | null) => new Promise<THREE.Texture | null>((resolve) => {
+      if (!url) { resolve(null); return; }
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const side = Math.floor(Math.min(img.width, img.height) / Math.SQRT2);
+        const canvas = document.createElement("canvas");
+        canvas.width = side;
+        canvas.height = side;
+        const ctx = canvas.getContext("2d");
+        if (!ctx || side < 2) { resolve(new THREE.Texture(img)); return; }
+        ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, side, side);
+        resolve(new THREE.CanvasTexture(canvas));
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
     void Promise.all([
-      load(material?.diffuse_url ?? material?.image_url),
+      loadDiffuse(material?.diffuse_url ?? material?.image_url),
       load(material?.normal_url),
       load(material?.roughness_url),
     ]).then(([diffuse, normal, roughness]) => {
