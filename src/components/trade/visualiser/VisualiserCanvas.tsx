@@ -1,3 +1,4 @@
+import { RUG_TOP_Y } from "./RoomSurfaces";
 import type { RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
 import { Suspense, useEffect, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
@@ -328,10 +329,10 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
-    {/* Raised above the area rug (0.005) so shadows land on the rug fibers. */}
+    {/* Raised just above the extruded rug's top surface so shadows land on the rug fibers. */}
     {!hasBackdrop && floorFinish !== "none" && (
       <ContactShadows
-        position={[0, 0.01, 0]}
+        position={[0, RUG_TOP_Y + 0.002, 0]}
         scale={15}
         opacity={0.65}
         blur={1.5}

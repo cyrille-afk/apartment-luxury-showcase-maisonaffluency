@@ -92,7 +92,7 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
 }
 
 /** Procedural cream wool: warm off-white albedo + tight loop-pile normal map. */
-function useWoolMaps(weave: RugWeave, pile: number) {
+function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [6, 5]) {
   const anisotropy = useThree((s) => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
   const maps = useMemo(() => {
     const size = 512;
@@ -167,13 +167,13 @@ function useWoolMaps(weave: RugWeave, pile: number) {
       normal.colorSpace = THREE.NoColorSpace;
       for (const map of [color, normal]) {
         map.wrapS = map.wrapT = THREE.RepeatWrapping;
-        map.repeat.set(6, 5);
+        map.repeat.set(repeat[0], repeat[1]);
         map.anisotropy = anisotropy;
         map.needsUpdate = true;
       }
     }
     return { color, normal };
-  }, [anisotropy, weave, pile]);
+  }, [anisotropy, weave, pile, repeat[0], repeat[1]]);
   useEffect(() => () => { maps.color?.dispose(); maps.normal?.dispose(); }, [maps]);
   return maps;
 }
@@ -183,16 +183,41 @@ function useWoolMaps(weave: RugWeave, pile: number) {
  * Centered on the arrangement; at least 4.5 × 3.5 m, growing so every
  * piece's footprint sits comfortably inside its boundaries.
  */
+const RUG_THICKNESS_M = 0.015;
+const RUG_BEVEL_M = 0.004;
+/** Height of the rug's top surface — contact shadows sit just above it. */
+export const RUG_TOP_Y = 0.001 + RUG_THICKNESS_M + RUG_BEVEL_M * 2;
+const RUG_TILE: [number, number] = [1.35, 1.35];
+
+/**
+ * Pebble-like asymmetric silhouette from cubic béziers, normalised to the
+ * given overall width × depth (shape X → world X, shape Y → world −Z).
+ */
+export function organicRugShape(width: number, depth: number): THREE.Shape {
+  const w = width / 2, d = depth / 2;
+  const P = (x: number, y: number) => [x * w, y * d] as const;
+  const s = new THREE.Shape();
+  s.moveTo(...P(-0.98, 0.05));
+  s.bezierCurveTo(...P(-1.0, 0.62), ...P(-0.62, 1.0), ...P(-0.12, 0.94));
+  s.bezierCurveTo(...P(0.28, 0.89), ...P(0.42, 0.78), ...P(0.68, 0.84));
+  s.bezierCurveTo(...P(0.95, 0.9), ...P(1.02, 0.46), ...P(0.97, 0.08));
+  s.bezierCurveTo(...P(0.92, -0.38), ...P(1.0, -0.8), ...P(0.52, -0.95));
+  s.bezierCurveTo(...P(0.18, -1.04), ...P(-0.08, -0.84), ...P(-0.42, -0.9));
+  s.bezierCurveTo(...P(-0.82, -0.97), ...P(-0.96, -0.5), ...P(-0.98, 0.05));
+  return s;
+}
+
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
 function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
-  const maps = useWoolMaps(rugWeave(weave), p);
+  // Extruded shape UVs are in metres, so tile ~1.35× per metre (matches the old 6×5 over 4.5×3.8 m).
+  const maps = useWoolMaps(rugWeave(weave), p, RUG_TILE);
   const { cx, cz, width, depth } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
     const zs = objects.map((o) => o.position?.[2] ?? 0);
     const cx = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
     const cz = zs.length ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
-    let halfW = 2.25, halfD = 1.75; // 4.5 × 3.5 m minimum
+    let halfW = 2.25, halfD = 1.9; // 4.5 × 3.8 m minimum
     for (const o of objects) {
       const r = footprintRadius(parseDimensionString(o.dimensions), o.scale) + 0.5;
       halfW = Math.max(halfW, Math.abs((o.position?.[0] ?? 0) - cx) + r);
@@ -205,10 +230,18 @@ function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[];
       depth: clampRugSize(layout?.depth) ?? halfD * 2,
     };
   }, [objects, layout?.width, layout?.depth, layout?.offsetX, layout?.offsetZ]);
+  const geometry = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(organicRugShape(width, depth), {
+      depth: RUG_THICKNESS_M, bevelEnabled: true, bevelThickness: RUG_BEVEL_M, bevelSize: 0.03, bevelSegments: 4, curveSegments: 96,
+    });
+    // Sit the bevelled underside on the floor.
+    g.translate(0, 0, RUG_BEVEL_M);
+    return g;
+  }, [width, depth]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
   if (!maps.color || !maps.normal) return null;
   return (
-    <mesh name="room-area-rug" position={[cx, 0.005, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[width, depth]} />
+    <mesh name="room-area-rug" geometry={geometry} position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 1.35, 0.25 + (p / 100) * 1.35)} roughness={0.86 + (p / 100) * 0.1} metalness={0} envMapIntensity={0.05} />
     </mesh>
   );
