@@ -339,12 +339,6 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     }
   }, [object.position]);
 
-  // Safety: never leave window drag listeners behind if the piece unmounts mid-drag.
-  useEffect(() => () => {
-    window.removeEventListener("pointermove", dragMove);
-    window.removeEventListener("pointerup", endDrag);
-    window.removeEventListener("pointercancel", endDrag);
-  }, [dragMove, endDrag]);
 
   const body = object.glb_url
     ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
