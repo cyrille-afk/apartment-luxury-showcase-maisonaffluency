@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteScenePreset, readScenePresets, saveScenePreset } from "../visualiserScenePresets";
+import { clampWallHeight } from "../visualiserRoomSurfaces";
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
