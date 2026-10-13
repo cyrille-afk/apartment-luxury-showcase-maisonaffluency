@@ -961,7 +961,7 @@ const TradeVisualiser = () => {
                     aria-label="Wall height"
                     className="w-full accent-primary"
                   />
-                  <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; hide the ceiling band entirely at 100%.</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; 100% is the full-height cyclorama.</p>
                 </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
