@@ -79,6 +79,7 @@ type PersistedSandbox = {
   showGrid?: boolean;
   depthOfField?: boolean;
   dofStrength?: number;
+  dofFocusSelected?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -104,6 +105,7 @@ const readSandbox = (): PersistedSandbox => {
       showGrid: parsed.showGrid !== false,
       depthOfField: parsed.depthOfField === true,
       dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
+      dofFocusSelected: parsed.dofFocusSelected !== false,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -144,6 +146,7 @@ const TradeVisualiser = () => {
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
+  const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -257,11 +260,12 @@ const TradeVisualiser = () => {
         showGrid,
         depthOfField,
         dofStrength,
+        dofFocusSelected,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField, dofStrength]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField, dofStrength, dofFocusSelected]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -670,6 +674,7 @@ const TradeVisualiser = () => {
             showGrid={showGrid}
             depthOfField={depthOfField}
             dofStrength={dofStrength}
+            dofFocusSelected={dofFocusSelected}
           />
         </Suspense>
       </div>
@@ -868,6 +873,16 @@ const TradeVisualiser = () => {
             >
               [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
             </button>
+            {depthOfField && (
+              <button
+                className={cn(toolbarButton, dofFocusSelected ? "border-primary text-primary" : "opacity-60")}
+                onClick={() => setDofFocusSelected((value) => !value)}
+                aria-pressed={dofFocusSelected}
+                title="Click a piece to keep it sharp while the background blurs — off keeps focus at the centre of the view"
+              >
+                [ &#10022; Focus: {dofFocusSelected ? "Clicked Piece" : "Centre"} ]
+              </button>
+            )}
             {depthOfField && (
               <label className="flex items-center gap-2" title="How softly the background is blurred">
                 <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
