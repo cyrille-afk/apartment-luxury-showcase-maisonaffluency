@@ -11,7 +11,7 @@ import * as THREE from "three";
 import { EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
-import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
+import { createExrEnvironmentTexture } from "@/lib/visualiserExrTexture";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
@@ -64,21 +64,24 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
       invalidate();
     };
     const fallbackToStudioHdr = (exr?: "missing" | "unreadable") => {
+      if (cancelled) return;
       new RGBELoader().load(studioAsset.url, accept("studio-hdr", exr), undefined, () => {
         /* Keep local studio reflections if both HDRI sources are unavailable. */
+        if (cancelled) return;
         reportEnvironmentStatus({ source: "local", exr });
       });
     };
     const loadEmptyRoom = () => {
       // The studio's own empty-room EXR — validated (present + readable) before parsing.
       validateEmptyRoomExr().then((result) => {
+        if (cancelled) return;
         if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
         try {
-          accept("empty-room-exr")(new EXRLoader().parse(result.buffer) as THREE.DataTexture);
+          accept("empty-room-exr")(createExrEnvironmentTexture(result.buffer));
         } catch {
           fallbackToStudioHdr("unreadable");
         }
-      });
+      }).catch(() => fallbackToStudioHdr("unreadable"));
     };
     if (preferred === "empty-room-exr") loadEmptyRoom();
     else fallbackToStudioHdr();
