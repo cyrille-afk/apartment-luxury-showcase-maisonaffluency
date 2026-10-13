@@ -23,13 +23,12 @@ export const readScenePresets = (): ScenePreset[] => {
   } catch { return []; }
 };
 
-const write = (list: ScenePreset[]) => {
-  try { localStorage.setItem(KEY, JSON.stringify(list)); } catch { /* quota */ }
-  return list;
+const write = (list: ScenePreset[]): ScenePreset[] | null => {
+  try { localStorage.setItem(KEY, JSON.stringify(list)); return list; } catch { return null; }
 };
 
-/** Saving under an existing name (case-insensitive) overwrites that preset. */
-export const saveScenePreset = (name: string, data: ScenePresetData): ScenePreset[] => {
+/** Saving under an existing name (case-insensitive) overwrites that preset. Returns null if storage is full. */
+export const saveScenePreset = (name: string, data: ScenePresetData): ScenePreset[] | null => {
   const clean = name.trim();
   const list = readScenePresets();
   const existing = list.find((p) => p.name.toLowerCase() === clean.toLowerCase());
