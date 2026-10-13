@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
+import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
@@ -93,7 +93,7 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
-    <PerspectiveCamera makeDefault fov={50} position={[0, 5, 10]} near={0.1} far={200} />
+    <PerspectiveCamera makeDefault fov={45} position={[0, 3.4, 9.5]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
@@ -101,8 +101,9 @@ const VisualiserCanvas = ({
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      maxPolarAngle={Math.PI / 2.05}
-      target={[0, 0.6, 0]}
+      minPolarAngle={0.12}
+      maxPolarAngle={Math.PI / 2.2}
+      target={[0, 0.5, 0]}
     />
 
     <ambientLight intensity={0.5} />
@@ -118,6 +119,7 @@ const VisualiserCanvas = ({
       shadow-camera-top={12}
       shadow-camera-bottom={-12}
       shadow-bias={-0.0005}
+      shadow-radius={6}
     />
     <hemisphereLight args={["#ffffff", "#d8d3cb", 0.35]} />
 
@@ -133,17 +135,31 @@ const VisualiserCanvas = ({
       <ContactShadows
         position={[0, 0.002, 0]}
         scale={40}
-        opacity={0.32}
-        blur={1}
-        far={12}
+        opacity={0.45}
+        blur={2.6}
+        far={4}
         resolution={1024}
         depthWrite={false}
       />
     )}
+    {/* Faint floor grid at Y = 0 — the design-canvas ground reference. */}
+    <Grid
+      position={[0, 0.001, 0]}
+      infiniteGrid
+      cellSize={0.25}
+      cellThickness={0.5}
+      cellColor="#E5E7EB"
+      sectionSize={1}
+      sectionThickness={0.8}
+      sectionColor="#D1D5DB"
+      fadeDistance={30}
+      fadeStrength={1.5}
+      followCamera={false}
+    />
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
-      <shadowMaterial transparent opacity={0.4} />
+      <shadowMaterial transparent opacity={0.28} />
     </mesh>
 
     <Suspense fallback={<SceneLoader />}>
