@@ -53,83 +53,49 @@ type LoadedMaps = {
 
 const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
 
-function useMaterialMaps(material: VisualiserMaterial | null, maxAnisotropy: number) {
-  const [maps, setMaps] = useState<LoadedMaps>(EMPTY_MAPS);
-  const liveRef = useRef<LoadedMaps>(EMPTY_MAPS);
-  // frameloop="demand": textures resolve asynchronously, so the scene must be
-  // explicitly re-rendered once they land.
-  const invalidate = useThree((s) => s.invalidate);
+const disposeMaps = (m: LoadedMaps) => { m.diffuse?.dispose(); m.normal?.dispose(); m.roughness?.dispose(); };
 
-  useEffect(() => {
-    let cancelled = false;
-    const loader = new THREE.TextureLoader();
-    const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
-    // Swatch photos are circular thumbnails on a white background. Tiled raw,
-    // the white corners produce a checkered pattern on the model — crop to the
-    // circle's inscribed square (center ~70%) before using one as a texture.
-    const loadDiffuse = (url?: string | null) => new Promise<THREE.Texture | null>((resolve) => {
-      if (!url) { resolve(null); return; }
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        const side = Math.floor(Math.min(img.width, img.height) / Math.SQRT2);
-        const canvas = document.createElement("canvas");
-        canvas.width = side;
-        canvas.height = side;
-        const ctx = canvas.getContext("2d");
-        if (!ctx || side < 2) { resolve(new THREE.Texture(img)); return; }
-        ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, side, side);
-        resolve(new THREE.CanvasTexture(canvas));
-      };
-      img.onerror = () => resolve(null);
-      img.src = url;
-    });
-    void Promise.all([
-      loadDiffuse(material?.diffuse_url ?? material?.image_url),
-      load(material?.normal_url),
-      load(material?.roughness_url),
-    ]).then(([diffuse, normal, roughness]) => {
-      if (cancelled) {
-        diffuse?.dispose();
-        normal?.dispose();
-        roughness?.dispose();
-        return;
-      }
-      // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
-      const repeat = material?.repeat ?? 2;
-      for (const texture of [diffuse, normal, roughness]) {
-        if (!texture) continue;
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(repeat, repeat);
-        texture.anisotropy = maxAnisotropy;
-        texture.needsUpdate = true;
-      }
-      if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
-      if (normal) normal.colorSpace = THREE.NoColorSpace;
-      if (roughness) roughness.colorSpace = THREE.NoColorSpace;
-      const next = { diffuse, normal, roughness };
-      liveRef.current = next;
-      setMaps(next);
-      invalidate();
-    }).catch(() => {
-      liveRef.current = EMPTY_MAPS;
-      setMaps(EMPTY_MAPS);
-      invalidate();
-    });
-    return () => {
-      cancelled = true;
-      // Dispose only the textures this effect owned, after the swap.
-      const owned = liveRef.current;
-      liveRef.current = EMPTY_MAPS;
-      queueMicrotask(() => {
-        owned.diffuse?.dispose();
-        owned.normal?.dispose();
-        owned.roughness?.dispose();
-      });
+async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: number): Promise<LoadedMaps> {
+  const loader = new THREE.TextureLoader();
+  const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
+  // Swatch photos are circular thumbnails on a white background. Tiled raw,
+  // the white corners produce a checkered pattern on the model — crop to the
+  // circle's inscribed square (center ~70%) before using one as a texture.
+  const loadDiffuse = (url?: string | null) => new Promise<THREE.Texture | null>((resolve) => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const side = Math.floor(Math.min(img.width, img.height) / Math.SQRT2);
+      const canvas = document.createElement("canvas");
+      canvas.width = side;
+      canvas.height = side;
+      const ctx = canvas.getContext("2d");
+      if (!ctx || side < 2) { resolve(new THREE.Texture(img)); return; }
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, side, side);
+      resolve(new THREE.CanvasTexture(canvas));
     };
-  }, [material, maxAnisotropy, invalidate]);
-
-  return maps;
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+  const [diffuse, normal, roughness] = await Promise.all([
+    loadDiffuse(material.diffuse_url ?? material.image_url),
+    load(material.normal_url),
+    load(material.roughness_url),
+  ]);
+  // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
+  const repeat = material.repeat ?? 2;
+  for (const texture of [diffuse, normal, roughness]) {
+    if (!texture) continue;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeat, repeat);
+    texture.anisotropy = maxAnisotropy;
+    texture.needsUpdate = true;
+  }
+  if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
+  if (normal) normal.colorSpace = THREE.NoColorSpace;
+  if (roughness) roughness.colorSpace = THREE.NoColorSpace;
+  return { diffuse, normal, roughness };
 }
 
 /**
