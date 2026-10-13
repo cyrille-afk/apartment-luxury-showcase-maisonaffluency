@@ -88,12 +88,13 @@ interface VisualiserCanvasProps {
   dofStrength?: number;
 }
 
-const DofPass = ({ focus }: { focus: [number, number, number] | null }) => {
+const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
   const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
   const target = focus ? new THREE.Vector3(...focus) : controls?.target?.clone() ?? new THREE.Vector3(0, 0.5, 0);
+  const bokehScale = Math.min(10, Math.max(1, strength));
   return (
     <EffectComposer multisampling={4}>
-      <DepthOfField target={target} focalLength={0.03} bokehScale={3} height={720} />
+      <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} />
     </EffectComposer>
   );
 };
