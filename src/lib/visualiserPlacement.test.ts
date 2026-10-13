@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickFreeSlot } from "./visualiserPlacement";
+import { pickFreeSlot, respaceObjects } from "./visualiserPlacement";
 
 describe("pickFreeSlot", () => {
   it("places the first object nearest to the centre", () => {
