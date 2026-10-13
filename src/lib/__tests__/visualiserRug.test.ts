@@ -54,3 +54,20 @@ describe("rug visibility toggle", () => {
     expect(shown.showRug).toBe(true);
   });
 });
+
+describe("rug border colour", () => {
+  it("defaults to matching the rug fabric", () => {
+    expect(rugBorderColor(undefined)).toBe("match");
+    expect(rugBorderColor(null)).toBe("match");
+    expect(rugBorderColor("match")).toBe("match");
+  });
+  it("accepts an explicit rug colour and rejects unknown values", () => {
+    expect(rugBorderColor("charcoal")).toBe("charcoal");
+    expect(rugBorderColor("bogus")).toBe("cream");
+  });
+  it("rides in scene presets", () => {
+    saveScenePreset({ name: "Border", data: { objects: [], rugBorderColor: "navy" } });
+    const loaded = loadScenePresets().find((p) => p.name === "Border");
+    expect(loaded?.data.rugBorderColor).toBe("navy");
+  });
+});
