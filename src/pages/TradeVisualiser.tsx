@@ -161,7 +161,7 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url";
+      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url, source_pick_id";
       const base = () => supabase
         .from("trade_products")
         .select(columns)
