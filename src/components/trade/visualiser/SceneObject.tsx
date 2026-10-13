@@ -339,6 +339,13 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     }
   }, [object.position]);
 
+  // Safety: never leave window drag listeners behind if the piece unmounts mid-drag.
+  useEffect(() => () => {
+    window.removeEventListener("pointermove", dragMove);
+    window.removeEventListener("pointerup", endDrag);
+    window.removeEventListener("pointercancel", endDrag);
+  }, [dragMove, endDrag]);
+
   const body = object.glb_url
     ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
@@ -427,9 +434,13 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       rotation={object.rotation}
       scale={scaleVector ?? object.scale}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={() => endDrag()}
+      onPointerOver={(event) => {
+        event.stopPropagation();
+        if (isEditable && !draggingRef.current) gl.domElement.style.cursor = "grab";
+      }}
+      onPointerOut={() => {
+        if (!draggingRef.current) gl.domElement.style.cursor = "auto";
+      }}
     >
       {body}
     </group>
