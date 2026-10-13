@@ -287,7 +287,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows
