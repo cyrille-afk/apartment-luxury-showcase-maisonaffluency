@@ -27,6 +27,8 @@ export type ScenePresetData = {
   wallFinish?: RoomWallFinish;
   /** Hex value used when wallColor is "custom". */
   wallCustomHex?: string | null;
+  /** How strongly the plaster finish catches light, 0–100 (100 = the finish as designed). */
+  wallFinishIntensity?: number;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
