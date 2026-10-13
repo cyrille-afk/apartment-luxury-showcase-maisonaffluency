@@ -140,8 +140,11 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? (maps.diffuse ? "#ffffff" : "#ffffff"));
   material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : 0.7);
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
-  material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1;
-  material.normalScale.set(0.22, 0.22);
+  // Non-metals get a touch more IBL so stone/wood edges catch thin speculars.
+  material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1.15;
+  // Fabrics (high roughness) need deeper normals so bouclé reads under grazing key light.
+  const n = material.roughness > 0.8 ? 0.6 : 0.35;
+  material.normalScale.set(n, n);
   material.transparent = original.transparent;
   material.side = original.side;
   material.userData.visualiserClone = true;
