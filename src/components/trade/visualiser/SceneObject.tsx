@@ -242,8 +242,22 @@ function useFittedModel(object: PlacedObject) {
       const next = source.map((entry) => clonePbrMaterial(entry, finish, m, neutralFabric));
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    return applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation);
+    return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
   }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation]);
+}
+
+/** Pieces always rest on the floor plane (Y = 0). */
+const FLOOR_Y = 0;
+
+/** Wraps the model so its lowest bounding-box point sits exactly on Y = 0. */
+function groundModel(model: THREE.Object3D): THREE.Object3D {
+  const holder = new THREE.Group();
+  holder.add(model);
+  holder.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(model);
+  if (Number.isFinite(bounds.min.y)) model.position.y -= bounds.min.y;
+  holder.userData = model.userData;
+  return holder;
 }
 
 const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: PlacedObject; label?: string; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
@@ -347,13 +361,13 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const hitRef = useRef(new THREE.Vector3());
   const pointerRef = useRef(new THREE.Vector2());
   // Latest floor height for the piece, readable from window-level drag listeners.
-  const floorYRef = useRef(object.position[1] ?? 0);
-  floorYRef.current = object.position[1] ?? 0;
+  const floorYRef = useRef(FLOOR_Y);
+  floorYRef.current = FLOOR_Y;
 
   // Keep the group in sync when position changes from outside (e.g. reset/restore).
   useEffect(() => {
     if (groupRef.current && !draggingRef.current) {
-      groupRef.current.position.set(object.position[0], object.position[1] ?? 0, object.position[2]);
+      groupRef.current.position.set(object.position[0], FLOOR_Y, object.position[2]);
     }
   }, [object.position]);
 
@@ -449,12 +463,12 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const commit = () => {
     const group = groupRef.current;
     if (!group) return;
-    group.position.y = object.position[1] ?? 0;
+    group.position.y = FLOOR_Y;
     group.rotation.x = 0;
     group.rotation.z = 0;
     onTransform(
       object.instanceId,
-      [group.position.x, object.position[1] ?? 0, group.position.z],
+      [group.position.x, FLOOR_Y, group.position.z],
       [0, group.rotation.y, 0],
     );
   };
@@ -465,7 +479,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
         groupRef.current = node;
         setGroupNode(node);
       }}
-      position={[object.position[0], object.position[1] ?? 0, object.position[2]]}
+      position={[object.position[0], FLOOR_Y, object.position[2]]}
       rotation={object.rotation}
       scale={scaleVector ?? object.scale}
       onPointerDown={handlePointerDown}
@@ -499,7 +513,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
             }}
             onObjectChange={() => {
               const group = groupRef.current;
-              if (group) group.position.y = object.position[1] ?? 0;
+              if (group) group.position.y = FLOOR_Y;
             }}
           />}
           {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
