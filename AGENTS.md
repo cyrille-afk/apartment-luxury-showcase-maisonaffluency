@@ -38,3 +38,4 @@
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
 - Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
+- Visualiser render crashes are caught by SceneErrorBoundary and restore the last scene that rendered cleanly for 4s (visualiserSceneRecovery); a repeat crash within 30s resets to empty — prevents a crash loop.
