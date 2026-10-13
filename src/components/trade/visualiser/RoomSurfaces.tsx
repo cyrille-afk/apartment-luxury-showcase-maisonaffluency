@@ -74,7 +74,7 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
 function PlasterWall({ objects, heightPct, color, finish, customHex, intensity = 100, ceilingHeight, ceilingThickness, ceilingOpening }: CeilingSettings & { objects: PlacedObject[]; heightPct: number; color: RoomWallColor; finish: RoomWallFinish; customHex: string | null; intensity?: number }) {
   const maps = useSurfaceMaps(cementImage, 16, false);
   const spec = wallFinishSpec(finish);
-  const { cx, cz, radius, height } = useMemo(() => {
+  const { cx, cz, radius, backZ, height } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
     const zs = objects.map((o) => o.position?.[2] ?? 0);
     const cx = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
@@ -83,13 +83,15 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
       4,
       ...objects.map((o) => Math.hypot((o.position?.[0] ?? 0) - cx, (o.position?.[2] ?? 0) - cz) + footprintRadius(parseDimensionString(o.dimensions), o.scale)),
     );
-    return { cx, cz, radius: spread + 9, height: (WALL_FULL_HEIGHT_M * clampWallHeight(heightPct)) / 100 };
+    // Flat rear wall sits well behind the furthest piece (at least Z = -8).
+    const backZ = Math.min(-8, ...objects.map((o) => (o.position?.[2] ?? 0) - footprintRadius(parseDimensionString(o.dimensions), o.scale) - 3));
+    return { cx, cz, radius: spread + 9, backZ, height: (WALL_FULL_HEIGHT_M * clampWallHeight(heightPct)) / 100 };
   }, [objects, heightPct]);
   return (
     <group>
-    <mesh name="room-rear-plaster-wall" position={[cx, height / 2, cz]} receiveShadow>
-      <cylinderGeometry args={[radius, radius, height, 64, 1, true]} />
-      <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.BackSide} />
+    <mesh name="room-rear-plaster-wall" position={[cx, height / 2, backZ]} receiveShadow>
+      <planeGeometry args={[80, height]} />
+      <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.FrontSide} />
     </mesh>
     <ArchitecturalCoves cx={cx} cz={cz} radius={radius} height={height} color={wallColorHex(color, customHex)} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />
     </group>
