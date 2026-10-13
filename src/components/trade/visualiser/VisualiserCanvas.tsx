@@ -1,3 +1,4 @@
+import type { RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
 import { Suspense, useEffect, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
@@ -188,6 +189,9 @@ interface VisualiserCanvasProps {
   wallCustomHex?: string | null;
   /** How strongly the plaster finish catches light, 0–100 (100 = the finish as designed). */
   wallFinishIntensity?: number;
+  rugColor?: RugColor;
+  rugWeave?: RugWeave;
+  rugPile?: number;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -231,6 +235,9 @@ const VisualiserCanvas = ({
   wallFinish = "matte",
   wallCustomHex = null,
   wallFinishIntensity = 100,
+  rugColor = "cream",
+  rugWeave = "loop",
+  rugPile = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -255,7 +262,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugWeave}|${rugPile}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -305,7 +312,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugWeave={rugWeave} rugPile={rugPile} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows

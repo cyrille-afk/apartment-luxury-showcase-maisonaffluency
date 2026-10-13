@@ -71,3 +71,37 @@ export function roomWallFinish(value: unknown): RoomWallFinish {
 export function wallFinishSpec(finish: RoomWallFinish) {
   return WALL_FINISHES.find((f) => f.key === finish) ?? WALL_FINISHES[0];
 }
+/** Area-rug wool colours. */
+export const RUG_COLORS = [
+  { key: "cream", label: "Cream Wool", hex: "#efe6d4" },
+  { key: "oatmeal", label: "Oatmeal", hex: "#d6c8b0" },
+  { key: "stone", label: "Stone Grey", hex: "#b4aea4" },
+  { key: "sage", label: "Sage", hex: "#a9b39c" },
+  { key: "terracotta", label: "Terracotta", hex: "#b98a6c" },
+  { key: "charcoal", label: "Charcoal", hex: "#55524e" },
+  { key: "navy", label: "Ink Navy", hex: "#3c4558" },
+] as const;
+export type RugColor = (typeof RUG_COLORS)[number]["key"];
+export function rugColor(value: unknown): RugColor {
+  return RUG_COLORS.some((c) => c.key === value) ? (value as RugColor) : "cream";
+}
+export function rugColorHex(value: unknown): string {
+  return RUG_COLORS.find((c) => c.key === rugColor(value))!.hex;
+}
+
+/** Weave structure of the rug surface. */
+export const RUG_WEAVES = [
+  { key: "loop", label: "Loop Pile" },
+  { key: "flatweave", label: "Basket Flatweave" },
+  { key: "herringbone", label: "Herringbone Berber" },
+  { key: "ribbed", label: "Ribbed Cord" },
+] as const;
+export type RugWeave = (typeof RUG_WEAVES)[number]["key"];
+export function rugWeave(value: unknown): RugWeave {
+  return RUG_WEAVES.some((w) => w.key === value) ? (value as RugWeave) : "loop";
+}
+
+/** Pile depth, 0–100 (0 = flat/low, 100 = deep plush). Default 50. */
+export function clampRugPile(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 50;
+}

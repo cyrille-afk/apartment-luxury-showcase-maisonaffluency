@@ -29,6 +29,10 @@ export type ScenePresetData = {
   wallCustomHex?: string | null;
   /** How strongly the plaster finish catches light, 0–100 (100 = the finish as designed). */
   wallFinishIntensity?: number;
+  /** Area rug colour / weave / pile depth (0–100). */
+  rugColor?: string;
+  rugWeave?: string;
+  rugPile?: number;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
