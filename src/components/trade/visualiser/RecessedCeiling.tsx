@@ -22,7 +22,8 @@ function RecessedCeilingGeometry({ radius, height, ceilingHeight, ceilingThickne
   useEffect(() => () => geometry?.dispose(), [geometry]);
   if (!geometry || !dimensions || !Number.isFinite(height)) return null;
   const { inner } = dimensions;
-  const lipY = clampCeilingHeight(ceilingHeight) ?? height - CEILING.recess;
+  // Never lower than 2.6 m so the frame can't slice through seating.
+  const lipY = Math.max(2.6, clampCeilingHeight(ceilingHeight) ?? height - CEILING.recess);
   const pocketY = lipY + CEILING.recess;
   return <group name="architectural-recessed-ceiling">
     <mesh name="dropped-ceiling-frame" position={[0, lipY, 0]} rotation={[Math.PI / 2, 0, 0]} geometry={geometry} receiveShadow>
