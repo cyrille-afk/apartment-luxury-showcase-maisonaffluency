@@ -70,9 +70,9 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
  * always shows plaster behind the furniture instead of the wall's edge.
  * Centered on the middle of the arrangement, not the world origin.
  */
-function PlasterWall({ objects }: { objects: PlacedObject[] }) {
+function PlasterWall({ objects, heightPct }: { objects: PlacedObject[]; heightPct: number }) {
   const maps = useSurfaceMaps(cementImage, 16, false);
-  const { cx, cz, radius } = useMemo(() => {
+  const { cx, cz, radius, height } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
     const zs = objects.map((o) => o.position?.[2] ?? 0);
     const cx = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
@@ -81,19 +81,19 @@ function PlasterWall({ objects }: { objects: PlacedObject[] }) {
       4,
       ...objects.map((o) => Math.hypot((o.position?.[0] ?? 0) - cx, (o.position?.[2] ?? 0) - cz) + footprintRadius(parseDimensionString(o.dimensions), o.scale)),
     );
-    return { cx, cz, radius: spread + 9 };
-  }, [objects]);
+    return { cx, cz, radius: spread + 9, height: (WALL_FULL_HEIGHT_M * clampWallHeight(heightPct)) / 100 };
+  }, [objects, heightPct]);
   return (
-    <mesh name="room-rear-plaster-wall" position={[cx, 2.25, cz]} receiveShadow>
-      <cylinderGeometry args={[radius, radius, 4.5, 64, 1, true]} />
+    <mesh name="room-rear-plaster-wall" position={[cx, height / 2, cz]} receiveShadow>
+      <cylinderGeometry args={[radius, radius, height, 64, 1, true]} />
       <meshStandardMaterial color={SHOWROOM.plaster} roughness={0.95} bumpMap={maps.bump} bumpScale={0.002} metalness={0} envMapIntensity={0.2} side={THREE.BackSide} />
     </mesh>
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {rearWall && <PlasterWall objects={objects} />}
+    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} />}
   </group>;
 }
