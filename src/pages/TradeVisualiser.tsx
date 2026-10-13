@@ -936,6 +936,7 @@ const TradeVisualiser = () => {
             >
               [ &#9728; Lighting: {environmentSource === "empty-room-exr" ? "Empty Room" : "Studio"} ]
             </Button>
+            <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}

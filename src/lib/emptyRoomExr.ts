@@ -13,6 +13,12 @@ export type EmptyRoomExrResult =
  * reachable, served with 200, and starting with the EXR magic bytes.
  */
 export async function validateEmptyRoomExr(path: string = EMPTY_ROOM_EXR_PATH): Promise<EmptyRoomExrResult> {
+  // A file uploaded from this browser takes precedence over the shared one.
+  if (typeof indexedDB !== "undefined") {
+    const { getLocalExr } = await import("./localEnvironmentExr");
+    const local = await getLocalExr();
+    if (local) return { state: "ok", buffer: local.buffer.slice(0), bytes: local.buffer.byteLength };
+  }
   let response: Response;
   try {
     response = await fetch(path, { headers: { Accept: "image/x-exr,application/octet-stream" } });
