@@ -7,6 +7,8 @@ import PartMappingControl from "@/components/trade/visualiser/PartMappingControl
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import {
   pickFreeSlot,
+  pickFootprintSlot,
+  footprintRadius,
   respaceObjects,
   DEFAULT_SLOT_SPACING,
   MIN_SLOT_SPACING,
@@ -410,7 +412,11 @@ const TradeVisualiser = () => {
       image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
       dimensions: product.dimensions,
       glb_url: product.glb_url,
-      position: pickFreeSlot(objects, spacing),
+      position: pickFootprintSlot(
+        objects.map((o) => ({ position: o.position, radius: footprintRadius(parseDimensionString(o.dimensions), o.scale) })),
+        footprintRadius(parseDimensionString(product.dimensions)),
+        spacing,
+      ),
       rotation: [0, 0, 0],
       scale: 1,
       material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
