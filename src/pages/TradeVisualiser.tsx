@@ -73,6 +73,7 @@ type PersistedSandbox = {
   projectId?: string | null;
   spacing?: number;
   snapToGrid?: boolean;
+  showGrid?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -95,6 +96,7 @@ const readSandbox = (): PersistedSandbox => {
       projectId: parsed.projectId ?? null,
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
       snapToGrid: parsed.snapToGrid === true,
+      showGrid: parsed.showGrid !== false,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -131,6 +133,7 @@ const TradeVisualiser = () => {
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
+  const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -241,11 +244,12 @@ const TradeVisualiser = () => {
         projectId,
         spacing,
         snapToGrid,
+        showGrid,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -596,6 +600,7 @@ const TradeVisualiser = () => {
             onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
             onTextureParts={handleTextureParts}
             snapToGrid={snapToGrid}
+            showGrid={showGrid}
           />
         </Suspense>
       </div>
@@ -777,6 +782,14 @@ const TradeVisualiser = () => {
               title="Snap dragged pieces to a 0.25 m grid"
             >
               [ &#8862; Snap Grid: {snapToGrid ? "On" : "Off"} ]
+            </button>
+            <button
+              className={cn(toolbarButton, showGrid && "border-primary text-primary")}
+              onClick={() => setShowGrid((value) => !value)}
+              aria-pressed={showGrid}
+              title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
+            >
+              [ &#9641; Floor Grid: {showGrid ? "On" : "Off"} ]
             </button>
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
