@@ -24,7 +24,7 @@ export const downloadDataUrl = (dataUrl: string, filename: string) => {
 };
 
 export const mockupFilename = () =>
-  `TradePortal_Mockup_${new Date().toISOString().slice(0, 10)}.png`;
+  `TradePortal_Sandbox_Presentation_${new Date().toISOString().slice(0, 10)}.png`;
 
 /** The sandbox page background — exported PNGs composite onto this so the
  *  transparent WebGL buffer never ships as a see-through image. */

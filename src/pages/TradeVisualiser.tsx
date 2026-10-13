@@ -584,7 +584,7 @@ const TradeVisualiser = () => {
   // Export a clean PNG mockup: hide the floor grid, let one frame render,
   // capture the WebGL canvas, then restore the grid exactly as it was.
   const [exporting, setExporting] = useState(false);
-  const handleExportMockup = async () => {
+  const downloadPresentationMockup = async () => {
     const canvas = canvasWrapRef.current?.querySelector("canvas");
     if (!canvas || exporting) return;
     setExporting(true);
@@ -840,7 +840,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button
             className={toolbarButton}
-            onClick={handleExportMockup}
+            onClick={downloadPresentationMockup}
             disabled={exporting}
             title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
           >
