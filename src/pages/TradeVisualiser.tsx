@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { FINISH_TARGET_LABELS, finishTargetsFromParts, materialFitsTarget, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
@@ -573,6 +574,7 @@ const TradeVisualiser = () => {
                 </button>
               ))}
             </div>
+            <PartMappingControl productId={selected.id} />
             <input
               value={materialSearch}
               onChange={(event) => setMaterialSearch(event.target.value)}

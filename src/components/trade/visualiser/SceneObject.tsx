@@ -6,6 +6,7 @@ import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
 import { classifyTextureNode, type FinishPart } from "@/lib/visualiserFinishTargets";
+import { meshKey, registerModelMeshes, resolvePart, usePartOverrides, type ModelMesh } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 
 export type PlacedObject = {
@@ -184,18 +185,21 @@ function useFittedModel(
   const topMaps = useMaterialMaps(topMaterial, maxAnisotropy);
   const baseMaps = useMaterialMaps(baseMaterial, maxAnisotropy);
   const upholsteryMaps = useMaterialMaps(upholsteryMaterial, maxAnisotropy);
+  const partOverrides = usePartOverrides(productId);
   return useMemo(() => {
     const clone = scene.clone(true);
+    let meshIndex = 0;
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh) {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        // Sub-mesh roles are read from the GLB node names (Table_Top_Mesh, Base_Mesh …)
-        // so a finish lands on the surface the designer actually picked.
+        // Sub-mesh roles: manual mapping first, else GLB node names (Table_Top_Mesh, Base_Mesh …).
         const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`.toLowerCase();
+        const key = meshKey(meshIndex++, mesh.name || mesh.parent?.name || "");
+        mesh.userData.partKey = key;
         const isBondStreet = isBondStreetStool(productId);
-        const role = classifyTextureNode(nodeName);
+        const role = resolvePart(nodeName, key, partOverrides);
         const finish = role === "upholstery"
           ? upholsteryMaterial
           : role === "base"
@@ -218,7 +222,7 @@ function useFittedModel(
       }
     });
     return applyModelOrientation(fitUprightModel(clone, dimensions, url), orientation);
-  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url, orientation]);
+  }, [baseMaps, baseMaterial, generalMaps, material, productId, scene, topMaps, topMaterial, upholsteryMaps, upholsteryMaterial, dimensions, url, orientation, partOverrides]);
 }
 
 const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: PlacedObject; label?: string; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
@@ -232,17 +236,22 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
     object.upholsteryMaterial ?? null,
     object.modelOrientation,
   );
+  const partOverrides = usePartOverrides(object.id);
   useEffect(() => {
-    if (!onTextureParts) return;
     const parts = new Set<FinishPart>();
+    const list: ModelMesh[] = [];
     model.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
-      const part = classifyTextureNode(`${mesh.name} ${mesh.parent?.name ?? ""}`);
+      const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
+      const key = String(mesh.userData.partKey ?? "");
+      list.push({ key, label: mesh.name || mesh.parent?.name || "", auto: classifyTextureNode(nodeName) });
+      const part = resolvePart(nodeName.toLowerCase(), key, partOverrides);
       if (part) parts.add(part);
     });
-    onTextureParts(object.instanceId, [...parts]);
-  }, [model, object.instanceId, onTextureParts]);
+    registerModelMeshes(object.id, list);
+    onTextureParts?.(object.instanceId, [...parts]);
+  }, [model, object.id, object.instanceId, onTextureParts, partOverrides]);
   const labelPosition = useMemo<[number, number, number]>(() => {
     const bounds = new THREE.Box3().setFromObject(model);
     const centre = bounds.getCenter(new THREE.Vector3());
