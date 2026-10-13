@@ -7,6 +7,7 @@ export type FinishPreset = {
   topMaterial: VisualiserMaterial | null;
   baseMaterial: VisualiserMaterial | null;
   upholsteryMaterial: VisualiserMaterial | null;
+  partMaterials?: Record<string, VisualiserMaterial | null>;
   savedAt: string;
 };
 

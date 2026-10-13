@@ -13,7 +13,7 @@ const FinishPresets = ({ object, onRestore }: { object: PlacedObject; onRestore:
   const [name, setName] = useState("");
   useEffect(() => setPresets(listFinishPresets(object.id)), [object.id]);
 
-  const hasFinish = Boolean(object.material || object.topMaterial || object.baseMaterial || object.upholsteryMaterial);
+  const hasFinish = Boolean(object.material || object.topMaterial || object.baseMaterial || object.upholsteryMaterial || Object.values(object.partMaterials ?? {}).some(Boolean));
   const save = () => {
     if (!name.trim()) return;
     setPresets(saveFinishPreset(object.id, {
@@ -22,6 +22,7 @@ const FinishPresets = ({ object, onRestore }: { object: PlacedObject; onRestore:
       topMaterial: object.topMaterial ?? null,
       baseMaterial: object.baseMaterial ?? null,
       upholsteryMaterial: object.upholsteryMaterial ?? null,
+      partMaterials: object.partMaterials ?? {},
     }));
     toast.success(`Saved “${name.trim()}”`);
     setName("");

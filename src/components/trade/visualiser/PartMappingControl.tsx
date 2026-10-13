@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { setPartOverride, useModelMeshes, usePartOverrides, type PartAssignment } from "@/lib/visualiserPartMapping";
+import { setPartOverride, useModelMeshes, usePartGroupLabels, usePartOverrides, type PartAssignment } from "@/lib/visualiserPartMapping";
+import { KNOWN_PARTS, KNOWN_PART_LABELS } from "@/lib/visualiserFinishTargets";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
-const OPTIONS: { value: PartAssignment; label: string }[] = [
+const BASE_OPTIONS: { value: PartAssignment; label: string }[] = [
   { value: "none", label: "Whole Piece only" },
-  { value: "top", label: "Top" },
-  { value: "base", label: "Frame / Base" },
-  { value: "upholstery", label: "Upholstery" },
+  ...KNOWN_PARTS.map((p) => ({ value: p as PartAssignment, label: KNOWN_PART_LABELS[p] })),
 ];
 
 /** Manually assigns unnamed/coded model parts to finish tabs; saved per product. */
 export default function PartMappingControl({ productId }: { productId: string }) {
   const meshes = useModelMeshes(productId);
   const overrides = usePartOverrides(productId);
+  const groups = usePartGroupLabels(productId);
+  const OPTIONS = [...BASE_OPTIONS, ...Object.entries(groups).map(([value, label]) => ({ value: value as PartAssignment, label }))];
   const [open, setOpen] = useState(false);
   if (meshes.length === 0) return null;
   return (

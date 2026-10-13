@@ -1,8 +1,9 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
-import { FINISH_TARGET_LABELS, finishTargetsFromParts, materialFitsTarget, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
+import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
 
@@ -305,12 +306,8 @@ const TradeVisualiser = () => {
     [selected, textureParts],
   );
   const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
-  const targetMaterial = selected
-    ? effectiveTarget === "top" ? selected.topMaterial
-      : effectiveTarget === "base" ? selected.baseMaterial
-        : effectiveTarget === "upholstery" ? selected.upholsteryMaterial
-          : selected.material
-    : null;
+  const partGroupLabels = usePartGroupLabels(selected?.id);
+  const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
 
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
@@ -390,10 +387,7 @@ const TradeVisualiser = () => {
     }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
-      if (effectiveTarget === "top") return { ...object, topMaterial: material };
-      if (effectiveTarget === "base") return { ...object, baseMaterial: material };
-      if (effectiveTarget === "upholstery") return { ...object, upholsteryMaterial: material };
-      return { ...object, material, topMaterial: null, baseMaterial: null };
+      return withPartMaterial(object, effectiveTarget, material);
     }));
   };
 
@@ -401,7 +395,7 @@ const TradeVisualiser = () => {
     if (!selectedId) return;
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId
-        ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null }
+        ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null, partMaterials: {} }
         : object
     )));
   };
@@ -557,7 +551,7 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {(selected.material || selected.topMaterial || selected.baseMaterial || selected.upholsteryMaterial) && (
+              {hasAnyFinish(selected) && (
                 <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
               )}
             </div>
@@ -570,7 +564,7 @@ const TradeVisualiser = () => {
                   onClick={() => setFinishTarget(value)}
                   className={cn(microLabel, effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
                 >
-                  {FINISH_TARGET_LABELS[value]}
+                  {targetLabel(value, partGroupLabels)}
                 </button>
               ))}
             </div>
@@ -594,7 +588,7 @@ const TradeVisualiser = () => {
             <FinishPresets
               object={selected}
               onRestore={(preset) => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId
-                ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial }
+                ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial, partMaterials: preset.partMaterials ?? {} }
                 : object))}
             />
           </div>
