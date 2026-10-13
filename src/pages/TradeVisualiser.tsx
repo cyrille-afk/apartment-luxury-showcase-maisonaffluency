@@ -1,3 +1,4 @@
+import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -75,7 +76,7 @@ type CatalogueProduct = {
 
 type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr";
 
-type PersistedSandbox = {
+type PersistedSandbox = CeilingSettings & {
   backdropDataUrl: string | null;
   backdrop: string | null;
   objects: PlacedObject[];
@@ -140,6 +141,9 @@ const readSandbox = (): PersistedSandbox => {
       floorFinish: roomFloorFinish(parsed.floorFinish),
       showRearWall: parsed.showRearWall !== false,
       wallHeight: clampWallHeight(parsed.wallHeight),
+      ceilingHeight: clampCeilingHeight(parsed.ceilingHeight),
+      ceilingThickness: clampCeilingThickness(parsed.ceilingThickness),
+      ceilingOpening: clampCeilingOpening(parsed.ceilingOpening),
       floorGlare: clampFloorGlare(parsed.floorGlare),
       wallColor: roomWallColor(parsed.wallColor),
       wallFinish: roomWallFinish(parsed.wallFinish),
@@ -203,6 +207,9 @@ const TradeVisualiser = () => {
   const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
   const [wallHeight, setWallHeight] = useState<number>(clampWallHeight(initial.wallHeight));
+  const [ceilingHeight, setCeilingHeight] = useState(clampCeilingHeight(initial.ceilingHeight));
+  const [ceilingThickness, setCeilingThickness] = useState(clampCeilingThickness(initial.ceilingThickness));
+  const [ceilingOpening, setCeilingOpening] = useState(clampCeilingOpening(initial.ceilingOpening));
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
   const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
@@ -349,7 +356,7 @@ const TradeVisualiser = () => {
         environmentSource,
         floorFinish,
         showRearWall,
-        wallHeight,
+        wallHeight, ceilingHeight, ceilingThickness, ceilingOpening,
         floorGlare,
         wallColor,
         wallFinish,
@@ -368,7 +375,7 @@ const TradeVisualiser = () => {
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -784,6 +791,9 @@ const TradeVisualiser = () => {
             floorFinish={floorFinish}
             showRearWall={showRearWall}
             wallHeight={wallHeight}
+            ceilingHeight={ceilingHeight}
+            ceilingThickness={ceilingThickness}
+            ceilingOpening={ceilingOpening}
             floorGlare={floorGlare}
             wallColor={wallColor}
             wallFinish={wallFinish}
@@ -992,7 +1002,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -1009,6 +1019,9 @@ const TradeVisualiser = () => {
               setFloorFinish(roomFloorFinish(data.floorFinish));
               setShowRearWall(data.showRearWall !== false);
               setWallHeight(clampWallHeight(data.wallHeight));
+              setCeilingHeight(clampCeilingHeight(data.ceilingHeight));
+              setCeilingThickness(clampCeilingThickness(data.ceilingThickness));
+              setCeilingOpening(clampCeilingOpening(data.ceilingOpening));
               setFloorGlare(clampFloorGlare(data.floorGlare));
               setWallColor(roomWallColor(data.wallColor));
               setWallFinish(roomWallFinish(data.wallFinish));
@@ -1041,7 +1054,7 @@ const TradeVisualiser = () => {
                   <Box className="mr-2 h-3.5 w-3.5" /> Room: {floorFinish === "oak-chevron" ? "Oak Chevron" : floorFinish === "micro-cement" ? "Micro-Cement" : "Backdrop"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" side="top">
+              <DropdownMenuContent align="start" side="top" className="max-h-[70vh] overflow-y-auto">
                 <DropdownMenuLabel>Floor finish</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={floorFinish} onValueChange={(value) => setFloorFinish(roomFloorFinish(value))}>
                   <DropdownMenuRadioItem value="oak-chevron">Light Oak Chevron</DropdownMenuRadioItem>
@@ -1066,6 +1079,25 @@ const TradeVisualiser = () => {
                     className="w-full accent-primary"
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; 100% is the full-height cyclorama.</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Recessed ceiling</DropdownMenuLabel>
+                <div className="space-y-3 px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                      <span>Frame height</span><span>{ceilingHeight === null ? "Auto · " : ""}{(ceilingHeight ?? WALL_FULL_HEIGHT_M * wallHeight / 100 - 0.25).toFixed(2)} m</span>
+                    </div>
+                    <input type="range" {...CEILING_CONTROLS.height} value={ceilingHeight ?? WALL_FULL_HEIGHT_M * wallHeight / 100 - 0.25} disabled={!showRearWall || Boolean(backdrop || backdropDataUrl)} onChange={(e) => setCeilingHeight(clampCeilingHeight(Number(e.target.value)))} aria-label="Ceiling frame height" className="w-full accent-primary" />
+                    <Button variant="ghost" size="sm" disabled={ceilingHeight === null} onClick={() => setCeilingHeight(null)} className="h-6 px-0 text-[10px]"><RotateCcw className="mr-1 h-3 w-3" />Follow wall height</Button>
+                  </div>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground"><span>Frame thickness</span><span>{Math.round(ceilingThickness * 100)} cm</span></div>
+                    <input type="range" min={CEILING_CONTROLS.thickness.min} max={CEILING_CONTROLS.thickness.max} step={CEILING_CONTROLS.thickness.step} value={ceilingThickness} disabled={!showRearWall || Boolean(backdrop || backdropDataUrl)} onChange={(e) => setCeilingThickness(clampCeilingThickness(Number(e.target.value)))} aria-label="Ceiling frame thickness" className="w-full accent-primary" />
+                  </div>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground"><span>Opening size</span><span>{ceilingOpening}%</span></div>
+                    <input type="range" min={CEILING_CONTROLS.opening.min} max={CEILING_CONTROLS.opening.max} step={CEILING_CONTROLS.opening.step} value={ceilingOpening} disabled={!showRearWall || Boolean(backdrop || backdropDataUrl)} onChange={(e) => setCeilingOpening(clampCeilingOpening(Number(e.target.value)))} aria-label="Ceiling opening size" className="w-full accent-primary" />
+                  </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Wall colour</DropdownMenuLabel>

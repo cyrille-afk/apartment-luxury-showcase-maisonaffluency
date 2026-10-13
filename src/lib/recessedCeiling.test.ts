@@ -1,8 +1,26 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { CEILING, recessedCeilingGeometry, recessedCeilingShape } from "./recessedCeiling";
+import { clampCeilingHeight, clampCeilingOpening, clampCeilingThickness } from "./visualiserCeilingSettings";
 
 describe("recessed ceiling enclosure", () => {
+  it("accepts manual frame height and retains automatic height for older scenes", () => {
+    expect(clampCeilingHeight(3.5)).toBe(3.5);
+    expect(clampCeilingHeight(undefined)).toBeNull();
+    expect(clampCeilingHeight(100)).toBe(6);
+  });
+  it("changes physical lip thickness", () => {
+    const geometry = recessedCeilingGeometry(13, 0.3, 70);
+    geometry.computeBoundingBox();
+    expect(geometry.boundingBox?.max.z).toBeCloseTo(0.3, 5);
+    expect(clampCeilingThickness(undefined)).toBe(0.15);
+    geometry.dispose();
+  });
+  it("changes the cutout span with opening size", () => {
+    const points = recessedCeilingShape(13, 70).holes[0].getPoints();
+    expect(Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x))).toBeCloseTo(18.2, 5);
+    expect(clampCeilingOpening(100)).toBe(95);
+  });
   it("keeps a real central cutout instead of filling the ceiling frame", () => {
     const shape = recessedCeilingShape(13);
     expect(shape.holes).toHaveLength(1);

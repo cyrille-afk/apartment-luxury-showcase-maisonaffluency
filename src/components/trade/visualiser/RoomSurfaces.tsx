@@ -10,6 +10,7 @@ import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SHOWROOM, floorSurfaceRoughness } from "@/lib/showroomRendering";
 import RecessedCeiling from "./RecessedCeiling";
+import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
 function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
@@ -70,7 +71,7 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
  * always shows plaster behind the furniture instead of the wall's edge.
  * Centered on the middle of the arrangement, not the world origin.
  */
-function PlasterWall({ objects, heightPct, color, finish, customHex, intensity = 100 }: { objects: PlacedObject[]; heightPct: number; color: RoomWallColor; finish: RoomWallFinish; customHex: string | null; intensity?: number }) {
+function PlasterWall({ objects, heightPct, color, finish, customHex, intensity = 100, ceilingHeight, ceilingThickness, ceilingOpening }: CeilingSettings & { objects: PlacedObject[]; heightPct: number; color: RoomWallColor; finish: RoomWallFinish; customHex: string | null; intensity?: number }) {
   const maps = useSurfaceMaps(cementImage, 16, false);
   const spec = wallFinishSpec(finish);
   const { cx, cz, radius, height } = useMemo(() => {
@@ -90,14 +91,14 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
       <cylinderGeometry args={[radius, radius, height, 64, 1, true]} />
       <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.BackSide} />
     </mesh>
-    <ArchitecturalCoves cx={cx} cz={cz} radius={radius} height={height} color={wallColorHex(color, customHex)} />
+    <ArchitecturalCoves cx={cx} cz={cz} radius={radius} height={height} color={wallColorHex(color, customHex)} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />
     </group>
   );
 }
 
 /** Concealed perimeter coves: broad emitters face plaster, never the conversation group.
  * Rect-area lights approximate bounced illumination (WebGL does not simulate GI). */
-function ArchitecturalCoves({ cx, cz, radius, height, color }: { cx: number; cz: number; radius: number; height: number; color: string }) {
+function ArchitecturalCoves({ cx, cz, radius, height, color, ceilingHeight, ceilingThickness, ceilingOpening }: CeilingSettings & { cx: number; cz: number; radius: number; height: number; color: string }) {
   const strips = useMemo(() => Array.from({ length: 8 }, (_, i) => {
     const angle = i * Math.PI / 4;
     const x = Math.sin(angle), z = Math.cos(angle);
@@ -107,7 +108,7 @@ function ArchitecturalCoves({ cx, cz, radius, height, color }: { cx: number; cz:
     return { position, rotation };
   }), [radius, height]);
   return <group name="concealed-architectural-coves" position={[cx, 0, cz]}>
-    <RecessedCeiling radius={radius} height={height} />
+    <RecessedCeiling radius={radius} height={height} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />
     {strips.map((strip, i) => <group key={i}>
       <rectAreaLight name={`wall-wash-${i}`} position={strip.position} rotation={strip.rotation} width={radius * 0.68} height={0.12} intensity={4} color={SHOWROOM.cove} />
     </group>)}
@@ -323,10 +324,10 @@ function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderT
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugBorderColor = "match", rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey = "loop", rugPile = 50, rugLayout, showRug = true }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugBorderColor?: RugBorderColor; rugBorderThicknessMm?: number; rugBorderTwistMm?: number; rugBorderRoughness?: number; rugWeave?: RugWeave; rugPile?: number; rugLayout?: RugLayout; showRug?: boolean }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, ceilingHeight, ceilingThickness, ceilingOpening, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugBorderColor = "match", rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey = "loop", rugPile = 50, rugLayout, showRug = true }: CeilingSettings & { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugBorderColor?: RugBorderColor; rugBorderThicknessMm?: number; rugBorderTwistMm?: number; rugBorderRoughness?: number; rugWeave?: RugWeave; rugPile?: number; rugLayout?: RugLayout; showRug?: boolean }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
     {floor !== "none" && showRug && <Rug objects={objects} color={rugColor} borderColor={rugBorderColor} borderThicknessMm={rugBorderThicknessMm} borderTwistMm={rugBorderTwistMm} borderRoughness={rugBorderRoughness} weave={rugWeaveKey} pile={rugPile} layout={rugLayout} />}
-    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} />}
+    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />}
   </group>;
 }
