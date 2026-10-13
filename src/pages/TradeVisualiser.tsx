@@ -573,8 +573,25 @@ const TradeVisualiser = () => {
       return;
     }
     setBackdrop(URL.createObjectURL(file));
+    // Downscale to a storage-friendly data URL so the backdrop can persist
+    // with the scene and inside scene presets without blowing localStorage quota.
     const reader = new FileReader();
-    reader.onload = () => setBackdropDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.onload = () => {
+      const raw = typeof reader.result === "string" ? reader.result : null;
+      if (!raw) { setBackdropDataUrl(null); return; }
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1920;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setBackdropDataUrl(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = () => setBackdropDataUrl(raw);
+      img.src = raw;
+    };
     reader.readAsDataURL(file);
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -884,10 +901,12 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField, dofStrength })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField, dofStrength, backdropDataUrl })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
+              setBackdrop(null);
+              setBackdropDataUrl(data.backdropDataUrl ?? null);
               if (typeof data.spacing === "number") setSpacing(data.spacing);
               setSnapToGrid(data.snapToGrid === true);
               setShowGrid(data.showGrid !== false);
