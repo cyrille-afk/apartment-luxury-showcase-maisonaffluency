@@ -170,6 +170,8 @@ interface VisualiserCanvasProps {
   environmentSource?: VisualiserEnvironmentSource;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
+  /** Floor reflection strength, 0 (matte) – 100 (polished). */
+  floorGlare?: number;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -207,6 +209,7 @@ const VisualiserCanvas = ({
   environmentSource = "empty-room-exr",
   floorFinish = "oak-chevron",
   showRearWall = true,
+  floorGlare = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -231,7 +234,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${floorGlare}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -281,7 +284,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows
