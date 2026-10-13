@@ -24,6 +24,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
+import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
 // three.js / @react-three/* live behind this boundary so they are never part
@@ -53,6 +54,7 @@ type CatalogueProduct = {
   brand_name: string;
   image_url: string | null;
   category: string;
+  subcategory?: string | null;
   dimensions: string | null;
   width_mm?: number | null;
   depth_mm?: number | null;
@@ -122,8 +124,6 @@ const TradeVisualiser = () => {
   const [objects, setObjects] = useState<PlacedObject[]>(initial.objects);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [trayOpen, setTrayOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [only3d, setOnly3d] = useState(false);
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
@@ -197,22 +197,24 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const columns = "id, product_name, brand_name, image_url, category, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id";
+      const columns = "id, product_name, brand_name, image_url, category, subcategory, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id";
       const base = () => supabase
         .from("trade_products")
         .select(columns)
         .eq("is_active", true)
-        .eq("is_hidden", false)
-        .not("image_url", "is", null);
-      const [recent, models] = await Promise.all([
-        base().order("updated_at", { ascending: false }).limit(180),
-        base().not("glb_url", "is", null).order("product_name").limit(120),
-      ]);
-      if (cancelled) return;
-      if (recent.error || models.error) toast.error("The collection index could not be loaded.");
+        .eq("is_hidden", false);
       const merged = new Map<string, CatalogueProduct>();
-      for (const product of [...(models.data ?? []), ...(recent.data ?? [])] as CatalogueProduct[]) {
-        merged.set(product.id, product);
+      for (let offset = 0; ; offset += 500) {
+        const { data, error } = await base().order("id").range(offset, offset + 499);
+        if (cancelled) return;
+        if (error) {
+          toast.error("The collection index could not be loaded.");
+          setLoadingProducts(false);
+          return;
+        }
+        const page = (data ?? []) as CatalogueProduct[];
+        for (const product of page) merged.set(product.id, product);
+        if (page.length < 500) break;
       }
       const hydrated = await hydrateCatalogueDimensions([...merged.values()]);
       if (cancelled) return;
@@ -313,7 +315,7 @@ const TradeVisualiser = () => {
 
       const { data: catalogue } = await sb
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id")
+        .select("id, product_name, brand_name, image_url, category, subcategory, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id")
         .in("id", productIds);
 
       const hydratedCatalogue = await hydrateCatalogueDimensions((catalogue ?? []) as CatalogueProduct[]);
@@ -342,16 +344,6 @@ const TradeVisualiser = () => {
   }, [searchParams]);
 
 
-  const filteredProducts = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return products.filter((product) => {
-      if (only3d && !product.glb_url) return false;
-      if (!query) return true;
-      return `${product.product_name} ${product.brand_name} ${product.category}`.toLowerCase().includes(query);
-    });
-  }, [products, search, only3d]);
-
-  const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
 
   // Load the finishes linked to the selected product so the swatch grid shows
@@ -739,62 +731,7 @@ const TradeVisualiser = () => {
 
       {/* Sourcing tray */}
       {trayOpen && (
-        <div className="absolute bottom-32 left-1/2 z-[60] w-[calc(100%-64px)] max-w-[1040px] -translate-x-1/2 border-t border-foreground/15 bg-white/95 px-6 py-5 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className={cn(microLabel, "text-muted-foreground")}>Designer Collection Index</p>
-            <div className="flex items-center gap-4">
-              <button className={cn(microLabel, only3d ? "text-foreground" : "text-muted-foreground hover:text-foreground")} onClick={() => setOnly3d((value) => !value)}>
-                3D Models Only ({modelCount})
-              </button>
-              <button aria-label="Close index" onClick={() => setTrayOpen(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3 border-b border-foreground/10 pb-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search the collection"
-              aria-label="Search the collection"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-          </div>
-
-          <div className="mt-5 flex gap-5 overflow-x-auto pb-2">
-            {loadingProducts && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            {!loadingProducts && filteredProducts.length === 0 && (
-              <p className={cn(microLabel, "text-muted-foreground")}>No pieces match this search.</p>
-            )}
-            {filteredProducts.slice(0, 60).map((product) => (
-              <button
-                key={product.id}
-                onClick={() => addObject(product)}
-                className="group w-32 shrink-0 text-left"
-              >
-                <div className="relative h-28 w-32">
-                  {product.image_url && (
-                    <img
-                      src={optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS)}
-                      alt={product.product_name}
-                      loading="lazy"
-                      className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                    />
-                  )}
-                  {product.glb_url && (
-                    <span className={cn(microLabel, "absolute right-0 top-0 flex items-center gap-1 text-foreground")}>
-                      <Box className="h-3 w-3" /> 3D
-                    </span>
-                  )}
-                </div>
-                <p className={cn(microLabel, "mt-2 truncate text-muted-foreground")}>{product.brand_name}</p>
-                <p className="truncate text-xs text-foreground">{product.product_name}</p>
-              </button>
-            ))}
-          </div>
-        </div>
+        <CatalogDrawer products={products} loading={loadingProducts} onAdd={addObject} onClose={() => setTrayOpen(false)} />
       )}
 
       {/* Floating executive console */}
