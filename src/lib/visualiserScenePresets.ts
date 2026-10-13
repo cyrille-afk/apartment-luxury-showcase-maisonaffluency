@@ -25,6 +25,8 @@ export type ScenePresetData = {
   wallColor?: RoomWallColor;
   /** Plaster wall finish preset key. */
   wallFinish?: RoomWallFinish;
+  /** Hex value used when wallColor is "custom". */
+  wallCustomHex?: string | null;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };

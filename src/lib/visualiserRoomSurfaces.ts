@@ -28,13 +28,25 @@ export const WALL_COLORS = [
   { key: "midnight", label: "Midnight", hex: "#3a3f44" },
 ] as const;
 
-export type RoomWallColor = (typeof WALL_COLORS)[number]["key"];
+/** Preset keys plus "custom", which resolves through a user-entered hex value. */
+export type RoomWallColor = (typeof WALL_COLORS)[number]["key"] | "custom";
 
 export function roomWallColor(value: unknown): RoomWallColor {
-  return WALL_COLORS.some((c) => c.key === value) ? (value as RoomWallColor) : "warm-white";
+  return value === "custom" || WALL_COLORS.some((c) => c.key === value) ? (value as RoomWallColor) : "warm-white";
 }
 
-export function wallColorHex(color: RoomWallColor): string {
+/** Validate a hex colour (#rgb or #rrggbb) and expand the short form. */
+export function normalizeHexColor(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return undefined;
+  return trimmed.length === 4
+    ? `#${trimmed[1]}${trimmed[1]}${trimmed[2]}${trimmed[2]}${trimmed[3]}${trimmed[3]}`
+    : trimmed;
+}
+
+export function wallColorHex(color: RoomWallColor, customHex?: string | null): string {
+  if (color === "custom") return normalizeHexColor(customHex) ?? WALL_COLORS[0].hex;
   return WALL_COLORS.find((c) => c.key === color)?.hex ?? WALL_COLORS[0].hex;
 }
 
