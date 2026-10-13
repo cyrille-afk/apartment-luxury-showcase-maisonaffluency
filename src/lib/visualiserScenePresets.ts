@@ -8,6 +8,8 @@ export type ScenePresetData = {
   depthOfField?: boolean;
   /** Background blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
+  /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
+  backdropDataUrl?: string | null;
 };
 export type ScenePreset = { id: string; name: string; savedAt: string; data: ScenePresetData };
 
