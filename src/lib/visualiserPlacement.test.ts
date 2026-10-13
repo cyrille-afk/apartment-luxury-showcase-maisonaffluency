@@ -105,3 +105,13 @@ describe("snapCoordinate", () => {
     expect(snapCoordinate(1.3, 0.5)).toBeCloseTo(1.5);
   });
 });
+
+import { footprintRadius, pickFootprintSlot } from "./visualiserPlacement";
+describe("pickFootprintSlot", () => {
+  it("never places a new armchair inside a scaled-up existing armchair", () => {
+    const big = { position: [0, 0, 0] as [number, number, number], radius: footprintRadius({ w: 820, d: 770 }, 2.18) };
+    const r = footprintRadius({ w: 900, d: 920 });
+    const slot = pickFootprintSlot([big], r, 2.8);
+    expect(Math.hypot(slot[0], slot[2])).toBeGreaterThanOrEqual(big.radius + r);
+  });
+});

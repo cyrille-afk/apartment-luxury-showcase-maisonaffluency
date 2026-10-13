@@ -1,3 +1,4 @@
+import { parseDimensionString } from "@/lib/productDimensions";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
@@ -6,7 +7,6 @@ import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/li
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import {
-  pickFreeSlot,
   pickFootprintSlot,
   footprintRadius,
   respaceObjects,
