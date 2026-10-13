@@ -30,6 +30,12 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
 const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSource }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
+  const [localVersion, setLocalVersion] = useState(0);
+  useEffect(() => {
+    const bump = () => setLocalVersion((v) => v + 1);
+    window.addEventListener("ma-local-exr-changed", bump);
+    return () => window.removeEventListener("ma-local-exr-changed", bump);
+  }, []);
   useEffect(() => {
     let cancelled = false;
     let owned: THREE.DataTexture | null = null;
@@ -62,7 +68,7 @@ const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSour
     if (preferred === "empty-room-exr") loadEmptyRoom();
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
-  }, [invalidate, preferred]);
+  }, [invalidate, preferred, localVersion]);
   if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
   return (
     <Environment resolution={256}>

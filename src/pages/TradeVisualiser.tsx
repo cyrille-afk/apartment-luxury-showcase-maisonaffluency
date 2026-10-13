@@ -1,4 +1,5 @@
 import { parseDimensionString } from "@/lib/productDimensions";
+import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
@@ -936,6 +937,7 @@ const TradeVisualiser = () => {
             >
               [ &#9728; Lighting: {environmentSource === "empty-room-exr" ? "Empty Room" : "Studio"} ]
             </Button>
+            <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}
