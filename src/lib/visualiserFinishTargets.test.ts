@@ -12,9 +12,9 @@ describe("visualiser finish targets", () => {
     expect(finishTargetsFromParts([])).toEqual(["all"]);
   });
 
-  it("Frenchmen Street chair exposes upholstery and frame", () => {
+  it("Frenchmen Street chair exposes frame, base (glides) and upholstery", () => {
     const parts = ["WoodFinish", "Glides", "FabricAndLeather"].map(classifyTextureNode).filter(Boolean) as never[];
-    expect(finishTargetsFromParts(parts)).toEqual(["all", "base", "upholstery"]);
+    expect(finishTargetsFromParts(parts)).toEqual(["all", "frame", "base", "upholstery"]);
   });
 
   it("Top shows stone but not fabric; Base shows metal but not marble", () => {
@@ -27,5 +27,15 @@ describe("visualiser finish targets", () => {
   it("explicit target overrides keywords; whole piece shows all", () => {
     expect(materialFitsTarget({ ...m("Metal"), target: "base" }, "top")).toBe(false);
     expect(materialFitsTarget(m("Fabric"), "all")).toBe(true);
+  });
+});
+
+describe("three-axis pieces", () => {
+  it("cabinet exposes frame, drawer and handle", () => {
+    const parts = ["Carcass", "Drawer_Front", "Handle"].map(classifyTextureNode).filter(Boolean) as never[];
+    expect(finishTargetsFromParts(parts)).toEqual(["all", "frame", "drawer", "handle"]);
+  });
+  it("unnamed material groups become their own tabs", () => {
+    expect(finishTargetsFromParts(["part:b" as never, "part:a" as never])).toEqual(["all", "part:a", "part:b"]);
   });
 });

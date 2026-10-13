@@ -11,7 +11,7 @@ export type VisualiserMaterial = {
   diffuse_url?: string | null;
   normal_url?: string | null;
   roughness_url?: string | null;
-  target?: "upholstery" | "base" | "top";
+  target?: import("@/lib/visualiserFinishTargets").KnownPart;
   color?: string;
   repeat?: number;
   roughness?: number;

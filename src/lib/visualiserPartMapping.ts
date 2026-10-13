@@ -10,6 +10,8 @@ const STORAGE_KEY = "ma_visualiser_part_mapping_v1";
 const listeners = new Set<() => void>();
 let overrides: Record<string, PartOverrides> = load();
 let meshes: Record<string, ModelMesh[]> = {};
+let groupLabels: Record<string, Record<string, string>> = {};
+const NO_LABELS: Record<string, string> = {};
 const EMPTY: PartOverrides = {};
 const NO_MESHES: ModelMesh[] = [];
 
@@ -45,9 +47,10 @@ export function setPartOverride(productId: string, key: string, value: PartAssig
   emit();
 }
 
-export function registerModelMeshes(productId: string, list: ModelMesh[]) {
-  if (JSON.stringify(meshes[productId]) === JSON.stringify(list)) return;
+export function registerModelMeshes(productId: string, list: ModelMesh[], labels: Record<string, string> = {}) {
+  if (JSON.stringify(meshes[productId]) === JSON.stringify(list) && JSON.stringify(groupLabels[productId]) === JSON.stringify(labels)) return;
   meshes = { ...meshes, [productId]: list };
+  groupLabels = { ...groupLabels, [productId]: labels };
   emit();
 }
 
@@ -55,3 +58,5 @@ export const usePartOverrides = (productId: string | undefined) =>
   useSyncExternalStore(subscribe, () => (productId && overrides[productId]) || EMPTY);
 export const useModelMeshes = (productId: string | undefined) =>
   useSyncExternalStore(subscribe, () => (productId && meshes[productId]) || NO_MESHES);
+export const usePartGroupLabels = (productId: string | undefined) =>
+  useSyncExternalStore(subscribe, () => (productId && groupLabels[productId]) || NO_LABELS);
