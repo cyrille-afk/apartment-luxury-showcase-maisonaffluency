@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, rugColor as toRugColor, rugWeave as toRugWeave, type RugColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -96,6 +96,9 @@ type PersistedSandbox = {
   wallFinish?: RoomWallFinish;
   wallCustomHex?: string | null;
   wallFinishIntensity?: number;
+  rugColor?: string;
+  rugWeave?: string;
+  rugPile?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -132,6 +135,9 @@ const readSandbox = (): PersistedSandbox => {
       wallFinish: roomWallFinish(parsed.wallFinish),
       wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
       wallFinishIntensity: clampWallFinishIntensity(parsed.wallFinishIntensity),
+      rugColor: toRugColor(parsed.rugColor),
+      rugWeave: toRugWeave(parsed.rugWeave),
+      rugPile: clampRugPile(parsed.rugPile),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -183,6 +189,9 @@ const TradeVisualiser = () => {
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
   const [wallCustomHex, setWallCustomHex] = useState<string | null>(normalizeHexColor(initial.wallCustomHex) ?? null);
   const [wallFinishIntensity, setWallFinishIntensity] = useState<number>(clampWallFinishIntensity(initial.wallFinishIntensity));
+  const [rugColorKey, setRugColorKey] = useState<RugColor>(toRugColor(initial.rugColor));
+  const [rugWeaveKey, setRugWeaveKey] = useState<RugWeave>(toRugWeave(initial.rugWeave));
+  const [rugPile, setRugPile] = useState<number>(clampRugPile(initial.rugPile));
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
     setCustomHexDraft(raw);
@@ -317,11 +326,14 @@ const TradeVisualiser = () => {
         wallFinish,
         wallCustomHex,
         wallFinishIntensity,
+        rugColor: rugColorKey,
+        rugWeave: rugWeaveKey,
+        rugPile,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugWeaveKey, rugPile]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -742,6 +754,9 @@ const TradeVisualiser = () => {
             wallFinish={wallFinish}
             wallCustomHex={wallCustomHex}
             wallFinishIntensity={wallFinishIntensity}
+            rugColor={rugColorKey}
+            rugWeave={rugWeaveKey}
+            rugPile={rugPile}
           />
         </Suspense>
       </div>
@@ -936,7 +951,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugWeave: rugWeaveKey, rugPile })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -960,6 +975,9 @@ const TradeVisualiser = () => {
               setWallCustomHex(restoredHex ?? null);
               if (restoredHex) setCustomHexDraft(restoredHex);
               setWallFinishIntensity(clampWallFinishIntensity(data.wallFinishIntensity));
+              setRugColorKey(toRugColor(data.rugColor));
+              setRugWeaveKey(toRugWeave(data.rugWeave));
+              setRugPile(clampRugPile(data.rugPile));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1056,6 +1074,40 @@ const TradeVisualiser = () => {
                     className="w-full accent-primary"
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">How strongly the plaster catches light — 100% is the finish as designed, lower goes matte.</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug colour</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={rugColorKey} onValueChange={(v) => setRugColorKey(toRugColor(v))}>
+                  {RUG_COLORS.map((c) => (
+                    <DropdownMenuRadioItem key={c.key} value={c.key} disabled={floorFinish === "none"}>
+                      <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.hex }} />
+                      {c.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug weave</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={rugWeaveKey} onValueChange={(v) => setRugWeaveKey(toRugWeave(v))}>
+                  {RUG_WEAVES.map((w) => (
+                    <DropdownMenuRadioItem key={w.key} value={w.key} disabled={floorFinish === "none"}>{w.label}</DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Rug Pile</span>
+                    <span>{rugPile}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={rugPile}
+                    disabled={floorFinish === "none"}
+                    onChange={(e) => setRugPile(clampRugPile(Number(e.target.value)))}
+                    aria-label="Rug pile depth"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">0% is a low flat pile, 100% a deep plush texture. The rug shows when a floor is selected.</p>
                 </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>

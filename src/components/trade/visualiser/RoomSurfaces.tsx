@@ -4,7 +4,7 @@ import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
-import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, rugColorHex, rugWeave, type RugColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -92,7 +92,7 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
 }
 
 /** Procedural cream wool: warm off-white albedo + tight loop-pile normal map. */
-function useWoolMaps() {
+function useWoolMaps(weave: RugWeave, pile: number) {
   const anisotropy = useThree((s) => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
   const maps = useMemo(() => {
     const size = 512;
@@ -107,24 +107,40 @@ function useWoolMaps() {
     if (cctx && nctx) {
       const cimg = cctx.createImageData(size, size);
       const nimg = nctx.createImageData(size, size);
-      // Tight loop pile: small rounded bumps on a grid with slight jitter.
-      const cell = 6;
       const height = new Float32Array(size * size);
+      const contrast = 0.4 + (pile / 100) * 0.9;
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
-          const gx = Math.floor(x / cell), gy = Math.floor(y / cell);
-          // Deterministic pseudo-random jitter per loop.
-          const seed = Math.sin(gx * 127.1 + gy * 311.7) * 43758.5453;
-          const jx = (seed - Math.floor(seed) - 0.5) * 2;
-          const jy = (Math.sin(seed) - 0.5) * 2;
-          const dx = (x % cell) - cell / 2 - jx;
-          const dy = (y % cell) - cell / 2 - jy;
-          const d = Math.sqrt(dx * dx + dy * dy) / (cell / 2);
-          const h = Math.max(0, 1 - d * d);
+          let h = 0;
+          if (weave === "loop") {
+            // Tight loop pile: rounded bumps with per-loop jitter; deeper pile = bigger loops.
+            const cell = pile > 66 ? 8 : pile > 33 ? 6 : 4;
+            const gx = Math.floor(x / cell), gy = Math.floor(y / cell);
+            const seed = Math.sin(gx * 127.1 + gy * 311.7) * 43758.5453;
+            const jx = (seed - Math.floor(seed) - 0.5) * 2;
+            const jy = (Math.sin(seed) - 0.5) * 2;
+            const dx = (x % cell) - cell / 2 - jx;
+            const dy = (y % cell) - cell / 2 - jy;
+            const d = Math.sqrt(dx * dx + dy * dy) / (cell / 2);
+            h = Math.max(0, 1 - d * d);
+          } else if (weave === "flatweave") {
+            // Basket weave: alternating 8px blocks of warp / weft threads.
+            const block = (Math.floor(x / 8) + Math.floor(y / 8)) % 2;
+            h = block ? Math.abs(Math.sin((Math.PI * (y % 4)) / 4)) : Math.abs(Math.sin((Math.PI * (x % 4)) / 4));
+          } else if (weave === "herringbone") {
+            // Zig-zag berber ribs alternating direction every 16px column band.
+            const dir = Math.floor(x / 16) % 2 ? 1 : -1;
+            const t = (((y + dir * x) % 8) + 8) % 8;
+            h = Math.sin((Math.PI * t) / 8);
+          } else {
+            // Ribbed cord: parallel raised ribs with fine fibre noise.
+            h = Math.pow(Math.sin((Math.PI * (y % 10)) / 10), 2) * 0.85 + (Math.sin(x * 12.9898 + y * 78.233) * 0.5 + 0.5) * 0.15;
+          }
           height[y * size + x] = h;
-          const shade = 232 + h * 18 + (Math.sin(seed * 7) * 4);
+          // Neutral fibre shading; material colour tints it.
+          const shade = Math.min(255, 205 + h * 50 * contrast);
           const i = (y * size + x) * 4;
-          cimg.data[i] = shade; cimg.data[i + 1] = shade - 6; cimg.data[i + 2] = shade - 18; cimg.data[i + 3] = 255;
+          cimg.data[i] = cimg.data[i + 1] = cimg.data[i + 2] = shade; cimg.data[i + 3] = 255;
         }
       }
       // Normal map from heightfield (tangent-space, Y-up green).
@@ -157,7 +173,7 @@ function useWoolMaps() {
       }
     }
     return { color, normal };
-  }, [anisotropy]);
+  }, [anisotropy, weave, pile]);
   useEffect(() => () => { maps.color?.dispose(); maps.normal?.dispose(); }, [maps]);
   return maps;
 }
@@ -167,8 +183,9 @@ function useWoolMaps() {
  * Centered on the arrangement; at least 4.5 × 3.5 m, growing so every
  * piece's footprint sits comfortably inside its boundaries.
  */
-function Rug({ objects }: { objects: PlacedObject[] }) {
-  const maps = useWoolMaps();
+function Rug({ objects, color, weave, pile }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number }) {
+  const p = clampRugPile(pile);
+  const maps = useWoolMaps(rugWeave(weave), p);
   const { cx, cz, width, depth } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
     const zs = objects.map((o) => o.position?.[2] ?? 0);
@@ -186,15 +203,15 @@ function Rug({ objects }: { objects: PlacedObject[] }) {
   return (
     <mesh name="room-area-rug" position={[cx, 0.005, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[width, depth]} />
-      <meshStandardMaterial map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8, 0.8)} roughness={0.92} metalness={0} envMapIntensity={0.05} />
+      <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 1.35, 0.25 + (p / 100) * 1.35)} roughness={0.86 + (p / 100) * 0.1} metalness={0} envMapIntensity={0.05} />
     </mesh>
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugWeave: rugWeaveKey = "loop", rugPile = 50 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugWeave?: RugWeave; rugPile?: number }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {floor !== "none" && <Rug objects={objects} />}
+    {floor !== "none" && <Rug objects={objects} color={rugColor} weave={rugWeaveKey} pile={rugPile} />}
     {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} />}
   </group>;
 }
