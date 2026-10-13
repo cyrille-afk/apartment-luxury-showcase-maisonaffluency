@@ -102,9 +102,17 @@ const VisualiserCanvas = ({
   focusRef,
 }: VisualiserCanvasProps) => (
   <Canvas
-    shadows
+    shadows={{ type: THREE.PCFSoftShadowMap }}
     frameloop="demand"
-    gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" }}
+    gl={{
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true,
+      powerPreference: "high-performance",
+      toneMapping: THREE.ACESFilmicToneMapping,
+      toneMappingExposure: 1.05,
+      outputColorSpace: THREE.SRGBColorSpace,
+    }}
     dpr={[1, 1.5]}
     onPointerMissed={() => onSelect(null)}
   >
@@ -131,10 +139,13 @@ const VisualiserCanvas = ({
       target={[0, 0.5, 0]}
     />
 
-    <ambientLight intensity={0.5} />
+    {/* Weak ambient keeps crevices dark; three-point rig does the shaping. */}
+    <ambientLight intensity={0.2} />
+    {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
-      position={[5, 10, 5]}
-      intensity={1.2}
+      position={[-6, 9, 6]}
+      intensity={1.6}
+      color="#fff6ea"
       castShadow
       shadow-mapSize-width={2048}
       shadow-mapSize-height={2048}
@@ -143,13 +154,17 @@ const VisualiserCanvas = ({
       shadow-camera-right={12}
       shadow-camera-top={12}
       shadow-camera-bottom={-12}
-      shadow-bias={-0.0005}
-      shadow-radius={6}
+      shadow-bias={-0.0004}
+      shadow-normalBias={0.02}
     />
-    <hemisphereLight args={["#ffffff", "#d8d3cb", 0.35]} />
+    {/* Fill: opposite side, low and cool. */}
+    <directionalLight position={[7, 4, 4]} intensity={0.35} color="#e6ecf5" />
+    {/* Rim: behind the pieces to lift silhouettes. */}
+    <directionalLight position={[0, 6, -9]} intensity={0.7} color="#ffffff" />
+    <hemisphereLight args={["#ffffff", "#d8d3cb", 0.2]} />
 
     {/* Local IBL: metals need reflections or they render solid black. */}
-    <Environment resolution={256}>
+    <Environment resolution={512}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color="#ffffff" />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color="#f4efe7" />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color="#e8e3da" />
