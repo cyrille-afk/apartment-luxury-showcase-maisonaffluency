@@ -78,7 +78,7 @@ export const hasAnyFinish = (o: PartHolder) =>
 const PART_KEYWORDS: Record<KnownPart, RegExp> = {
   top: /stone|marble|travertine|granite|onyx|quartz|wood|oak|walnut|ash|veneer|glass|lacquer|ceramic|terrazzo|leather/,
   frame: /wood|oak|walnut|ash|veneer|lacquer|metal|bronze|brass|steel|iron|alumin|chrome|nickel|stuc|cement|rattan|cane/,
-  base: /metal|bronze|brass|steel|iron|alumin|chrome|nickel|copper|wood|oak|walnut|ash|lacquer|powder|stone|marble/,
+  base: /metal|bronze|brass|steel|iron|alumin|chrome|nickel|copper|wood|oak|walnut|ash|lacquer|powder/,
   upholstery: /fabric|textile|velvet|linen|wool|boucl|leather|suede|mohair|cotton|silk|chenille/,
   drawer: /wood|oak|walnut|ash|veneer|lacquer|leather|suede|stone|marble|metal/,
   door: /wood|oak|walnut|ash|veneer|lacquer|glass|metal|cane|rattan|stone/,
