@@ -194,6 +194,8 @@ interface VisualiserCanvasProps {
   rugWeave?: RugWeave;
   rugPile?: number;
   rugLayout?: { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
+  /** Hide the rug while arranging furniture (default shown). */
+  showRug?: boolean;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -241,6 +243,7 @@ const VisualiserCanvas = ({
   rugWeave = "loop",
   rugPile = 50,
   rugLayout,
+  showRug = true,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -265,7 +268,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -315,7 +318,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows
@@ -329,10 +332,11 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
-    {/* Raised just above the extruded rug's top surface so shadows land on the rug fibers. */}
+    {/* Raised just above the extruded rug's top surface so shadows land on the rug fibers;
+        when the rug is hidden they drop back onto the floor itself. */}
     {!hasBackdrop && floorFinish !== "none" && (
       <ContactShadows
-        position={[0, RUG_TOP_Y + 0.002, 0]}
+        position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
         scale={15}
         opacity={0.65}
         blur={1.5}
