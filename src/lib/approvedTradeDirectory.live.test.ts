@@ -78,4 +78,14 @@ describe.skipIf(!live)("approved Trade User directory sync (live)", () => {
     if (syncError) throw syncError;
     expect((await synced())[0].notes).toBe("Keep my private notes");
   });
+  it("fills the VAT field from the registration number when no VAT number exists", async () => {
+    const { error } = await client.from("trade_accounts").update({ tax_vat_id: null, business_reg_number: "TEST-REG-123" }).eq("id", accountId);
+    if (error) throw error;
+    expect((await synced())[0].tax_id).toBe("TEST-REG-123");
+  });
+  it("prefers the VAT number over the registration number when both exist", async () => {
+    const { error } = await client.from("trade_accounts").update({ tax_vat_id: "TEST-VAT-2" }).eq("id", accountId);
+    if (error) throw error;
+    expect((await synced())[0].tax_id).toBe("TEST-VAT-2");
+  });
 });
