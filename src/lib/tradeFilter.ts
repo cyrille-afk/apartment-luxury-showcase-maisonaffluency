@@ -35,3 +35,32 @@ export function filterTradeProducts(
     return true;
   });
 }
+
+export interface TradeCollectionCounts {
+  /** Pieces matching every active filter except the collection itself. */
+  total: number;
+  /** Pieces per collection label, keyed by the lower-cased label. */
+  byCollection: Map<string, number>;
+}
+
+/**
+ * How many pieces each collection holds alongside the other active filters.
+ *
+ * The collection filter itself is ignored, so the number beside a collection is
+ * exactly what picking it would show — including when another filter (designer,
+ * category, search) narrows the grid.
+ */
+export function countTradeCollectionPieces(
+  products: TradeProduct[],
+  criteria: TradeFilterCriteria,
+): TradeCollectionCounts {
+  const matching = filterTradeProducts(products, { ...criteria, edition: "all" });
+  const byCollection = new Map<string, number>();
+  for (const p of matching) {
+    const ed = (p.edition || "").trim();
+    if (!ed) continue;
+    const key = ed.toLowerCase();
+    byCollection.set(key, (byCollection.get(key) ?? 0) + 1);
+  }
+  return { total: matching.length, byCollection };
+}
