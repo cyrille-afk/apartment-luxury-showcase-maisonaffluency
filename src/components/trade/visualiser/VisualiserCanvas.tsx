@@ -42,8 +42,8 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
   const scene = useThree((s) => s.scene);
   // Align the HDRI daylight direction with the front-left key light so shadows fall to the right.
   useEffect(() => {
-    scene.environmentRotation = new THREE.Euler(0, Math.PI / 4, 0);
-    scene.backgroundRotation = new THREE.Euler(0, Math.PI / 4, 0);
+    scene.environmentRotation.set(0, Math.PI / 4, 0);
+    scene.backgroundRotation.set(0, Math.PI / 4, 0);
   }, [scene]);
   useEffect(() => {
     const bump = () => setLocalVersion((v) => v + 1);

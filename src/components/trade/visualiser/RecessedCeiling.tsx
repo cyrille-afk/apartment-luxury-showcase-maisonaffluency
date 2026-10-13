@@ -1,16 +1,27 @@
-import { useEffect, useMemo } from "react";
+import { Component, type ErrorInfo, type ReactNode, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { SHOWROOM } from "@/lib/showroomRendering";
-import { CEILING, recessedCeilingGeometry } from "@/lib/recessedCeiling";
+import { CEILING, recessedCeilingGeometry, safeCeilingDimensions } from "@/lib/recessedCeiling";
 import { clampCeilingHeight, clampCeilingOpening, clampCeilingThickness, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
+class CeilingErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Recessed ceiling disabled after a geometry error", error, info);
+  }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
 /** Area lights approximate ceiling bounce; emissive strips alone cannot light WebGL geometry. */
-export default function RecessedCeiling({ radius, height, ceilingHeight, ceilingThickness, ceilingOpening }: { radius: number; height: number } & CeilingSettings) {
+function RecessedCeilingGeometry({ radius, height, ceilingHeight, ceilingThickness, ceilingOpening }: { radius: number; height: number } & CeilingSettings) {
   const thickness = clampCeilingThickness(ceilingThickness);
   const opening = clampCeilingOpening(ceilingOpening);
-  const geometry = useMemo(() => recessedCeilingGeometry(radius, thickness, opening), [radius, thickness, opening]);
-  useEffect(() => () => geometry.dispose(), [geometry]);
-  const inner = radius * opening / 100;
+  const dimensions = safeCeilingDimensions(radius, thickness, opening);
+  const geometry = useMemo(() => dimensions ? recessedCeilingGeometry(dimensions.radius, dimensions.thickness, opening) : null, [dimensions?.radius, dimensions?.thickness, opening]);
+  useEffect(() => () => geometry?.dispose(), [geometry]);
+  if (!geometry || !dimensions || !Number.isFinite(height)) return null;
+  const { inner } = dimensions;
   const lipY = clampCeilingHeight(ceilingHeight) ?? height - CEILING.recess;
   const pocketY = lipY + CEILING.recess;
   return <group name="architectural-recessed-ceiling">
@@ -33,4 +44,9 @@ export default function RecessedCeiling({ radius, height, ceilingHeight, ceiling
       <rectAreaLight name={`recess-bounce-${side}`} position={[0, pocketY - 0.015, inner - 0.3]} rotation={[-Math.PI / 2, 0, 0]} width={inner * 2} height={0.6} intensity={0.35} color={CEILING.glow} />
     </group>)}
   </group>;
+}
+
+/** Ceiling failures stay isolated; floor, rug and furniture remain mounted. */
+export default function RecessedCeiling(props: { radius: number; height: number } & CeilingSettings) {
+  return <CeilingErrorBoundary><RecessedCeilingGeometry {...props} /></CeilingErrorBoundary>;
 }

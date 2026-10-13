@@ -6,3 +6,4 @@
 - [x] Upgrade architectural cove lighting, ambient occlusion and matte/satin materials; 22 tests pass, furnished showroom/DoF/PNG verified, uploaded photos remain visible on desktop/mobile and reload (existing export still excludes the photo).
 - [x] Add physical recessed ceiling frame, inset plaster pocket and concealed warm ceiling wash; 13 tests passed, furnished angled view and unobstructed photo verified without runtime errors.
 - [x] Add ceiling frame height, thickness and opening controls; 19 tests pass, furnished rendering, reload and preset restoration verified without page errors.
+- [ ] Isolate recessed-ceiling geometry failures and verify the furniture, floor and rug survive reload with HDR lighting.
