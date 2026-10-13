@@ -6,7 +6,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
-import { classifyMeshPart, getPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
+import { classifyMeshPart, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate } from "@/lib/visualiserPlacement";
@@ -18,6 +18,10 @@ export type PlacedObject = {
   brand_name: string;
   image_url: string | null;
   dimensions: string | null;
+  width_mm?: number | null;
+  depth_mm?: number | null;
+  height_mm?: number | null;
+  size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
   glb_url: string | null;
   position: [number, number, number];
   rotation: [number, number, number];
@@ -31,6 +35,8 @@ export type PlacedObject = {
   partMaterials?: Record<string, VisualiserMaterial | null>;
   /** When true, swatch clicks, Clear, and preset restores leave this piece's finishes untouched. */
   finishesLocked?: boolean;
+  /** Spatial lock only; never prevents applying finishes. */
+  positionLocked?: boolean;
 };
 
 type Props = {
@@ -224,9 +230,8 @@ function useFittedModel(object: PlacedObject) {
       mesh.receiveShadow = true;
       const role = mesh.userData.partRole as FinishPart | null;
       // Upholstery never inherits the whole-piece finish; other parts fall back to it.
-      const own = role ? getPartMaterial(holder, role) : null;
-      const finish = role === "upholstery" ? own : own ?? holder.material ?? null;
-      const neutralFabric = isBondStreetStool(productId) && role === "upholstery" && !own;
+      const finish = meshPartMaterial(holder, role);
+      const neutralFabric = isBondStreetStool(productId) && role === "upholstery" && !finish;
       if (!finish && !neutralFabric) return;
       const m = (finish && maps.get(finish.id)) || EMPTY_MAPS;
       const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -282,7 +287,7 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
         {label}
       </Button>
     </Html>}
-    {object.finishesLocked && (
+    {(object.positionLocked || object.finishesLocked) && (
       <Html position={lockPosition} center zIndexRange={[6, 1]}>
         <LockBadge instanceId={object.instanceId} />
       </Html>
@@ -346,7 +351,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const body = object.glb_url
     ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
-      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.finishesLocked)} instanceId={object.instanceId} />
+      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.positionLocked || object.finishesLocked)} instanceId={object.instanceId} />
       : null;
 
   /** Raycast the pointer onto the y = 0 floor plane. */
@@ -397,7 +402,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     onSelect(object.instanceId);
-    if (!isEditable) return;
+    if (!isEditable || object.positionLocked) return;
     const hit = floorHit();
     if (!hit || !groupRef.current) return;
     offsetRef.current.set(
@@ -446,7 +451,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       onPointerDown={handlePointerDown}
       onPointerOver={(event) => {
         event.stopPropagation();
-        if (isEditable && !draggingRef.current) gl.domElement.style.cursor = "grab";
+        if (isEditable && !object.positionLocked && !draggingRef.current) gl.domElement.style.cursor = "grab";
       }}
       onPointerOut={() => {
         if (!draggingRef.current) gl.domElement.style.cursor = "auto";
@@ -462,7 +467,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       {isEditable && selected && groupNode && (
         <>
           {/* Floor-plane arrows: X / Z translation only. */}
-          <TransformControls
+          {!object.positionLocked && <TransformControls
             object={groupNode}
             mode="translate"
             showY={false}
@@ -476,7 +481,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
               const group = groupRef.current;
               if (group) group.position.y = object.position[1] ?? 0;
             }}
-          />
+          />}
           {/* Outer ring: free 360° yaw so the piece can be aligned to the backdrop perspective. */}
           <TransformControls
             object={groupNode}

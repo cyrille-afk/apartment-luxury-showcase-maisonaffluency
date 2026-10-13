@@ -64,6 +64,12 @@ type PartHolder = {
   partMaterials?: Record<string, VisualiserMaterial | null>;
 };
 
+/** The canvas and inspector share exactly the same part inheritance policy. */
+export function meshPartMaterial(o: PartHolder, part: FinishPart | null): VisualiserMaterial | null {
+  const own = part ? getPartMaterial(o, part) : null;
+  return part === "upholstery" ? own : own ?? o.material ?? null;
+}
+
 /** Finish on one part; top/base/upholstery keep their legacy fields for saved compositions. */
 export function getPartMaterial(o: PartHolder, part: FinishTarget): VisualiserMaterial | null {
   if (part === "all") return o.material ?? null;
