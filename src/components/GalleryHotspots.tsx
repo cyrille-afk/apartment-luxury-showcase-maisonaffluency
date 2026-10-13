@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings } from "lucide-react";
+import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings, Copy, ClipboardPaste } from "lucide-react";
+import { toast } from "sonner";
+import HotspotPickMapper, { type HotspotPickOption } from "@/components/HotspotPickMapper";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
@@ -123,14 +125,14 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
   // Catalog picks for the manual override dropdown (admin only)
-  const [pickOptions, setPickOptions] = useState<Array<{ id: string; title: string; designer: string }>>([]);
+  const [pickOptions, setPickOptions] = useState<HotspotPickOption[]>([]);
   useEffect(() => {
     if (!editMode) return;
     if (pickOptions.length > 0) return;
     (async () => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
-        supabase.from("designer_curator_picks").select("id, title, designer_id").order("title"),
-        supabase.from("designers").select("id, name"),
+        supabase.from("designer_curator_picks").select("id, title, designer_id, image_url").order("title").range(0, 9999),
+        supabase.from("designers").select("id, name").range(0, 9999),
       ]);
       if (!picks) return;
       const dmap = new Map((designers || []).map((d: any) => [d.id, d.name as string]));
@@ -139,10 +141,27 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
           id: p.id,
           title: p.title,
           designer: dmap.get(p.designer_id) || "Unknown",
+          image_url: p.image_url || null,
         }))
       );
     })();
   }, [editMode, pickOptions.length]);
+
+  // Copy a hotspot's details so they can be pasted into a new pin on any picture.
+  type HotspotForm = typeof formData;
+  const COPY_KEY = "ma-hotspot-clipboard-v1";
+  const [copiedHotspot, setCopiedHotspot] = useState<HotspotForm | null>(() => {
+    try { const raw = localStorage.getItem(COPY_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  });
+  const copyHotspot = (h: Hotspot) => {
+    const data: HotspotForm = {
+      product_name: h.product_name, designer_name: h.designer_name || "",
+      product_image_url: h.product_image_url || "", link_url: h.link_url || "", mapped_pick_id: h.mapped_pick_id || "",
+    };
+    setCopiedHotspot(data);
+    try { localStorage.setItem(COPY_KEY, JSON.stringify(data)); } catch { /* storage full */ }
+    toast.success(`Copied "${h.product_name}" — click another picture to place it`);
+  };
 
   // ── Trade price lookup ──
   const [tradePrices, setTradePrices] = useState<(TradePrice & { name: string })[]>([]);
@@ -524,17 +543,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <div>
-                          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>
-                          <select
-                            value={editData.mapped_pick_id}
-                            onChange={e => setEditData(d => ({ ...d, mapped_pick_id: e.target.value }))}
-                            className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30"
-                          >
-                            <option value="">— Auto-match by name —</option>
-                            {pickOptions.map(p => (
-                              <option key={p.id} value={p.id}>{p.designer} — {p.title}</option>
-                            ))}
-                          </select>
+                          <HotspotPickMapper options={pickOptions} value={editData.mapped_pick_id} onChange={p => setEditData(d => p ? { ...d, mapped_pick_id: p.id, product_name: p.title, designer_name: p.designer, product_image_url: p.image_url || d.product_image_url } : { ...d, mapped_pick_id: "" })} />
                         </div>
                       </div>
                       <div className="flex gap-2 mt-3">
@@ -701,6 +710,9 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             <button onClick={() => startEditing(hotspot)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
                               <Pencil className="w-3 h-3" /> Edit
                             </button>
+                            <button onClick={() => copyHotspot(hotspot)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors">
+                              <Copy className="w-3 h-3" /> Copy
+                            </button>
                             <button onClick={() => deleteHotspot(hotspot.id)} className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors">
                               <Trash2 className="w-3 h-3" /> Remove
                             </button>
@@ -734,7 +746,14 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
             className="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-[280px] bg-white rounded-lg shadow-2xl border border-primary/10 p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h5 className="font-serif text-sm text-foreground mb-3">New Hotspot</h5>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h5 className="font-serif text-sm text-foreground">New Hotspot</h5>
+              {copiedHotspot && (
+                <button type="button" onClick={() => setFormData({ ...copiedHotspot })} className="flex items-center gap-1 text-[11px] text-primary hover:text-primary/80" title={`Paste ${copiedHotspot.product_name}`}>
+                  <ClipboardPaste className="w-3 h-3" /> Paste copied
+                </button>
+              )}
+            </div>
             <div className="space-y-2">
               <input
                 type="text"
@@ -767,16 +786,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
               />
               <div>
                 <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>
-                <select
-                  value={formData.mapped_pick_id}
-                  onChange={e => setFormData(f => ({ ...f, mapped_pick_id: e.target.value }))}
-                  className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30"
-                >
-                  <option value="">— Auto-match by name —</option>
-                  {pickOptions.map(p => (
-                    <option key={p.id} value={p.id}>{p.designer} — {p.title}</option>
-                  ))}
-                </select>
+                <HotspotPickMapper options={pickOptions} value={formData.mapped_pick_id} onChange={p => setFormData(f => p ? { ...f, mapped_pick_id: p.id, product_name: p.title, designer_name: p.designer, product_image_url: p.image_url || f.product_image_url } : { ...f, mapped_pick_id: "" })} />
               </div>
             </div>
             <div className="flex gap-2 mt-3">
