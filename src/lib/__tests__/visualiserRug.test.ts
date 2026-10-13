@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { clampRugPile, rugColor, rugColorHex, rugBorderColor, rugWeave } from "../visualiserRoomSurfaces";
+import { clampRugPile, rugColor, rugColorHex, rugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave } from "../visualiserRoomSurfaces";
 import { saveScenePreset, readScenePresets } from "../visualiserScenePresets";
 
 describe("rug settings", () => {
@@ -69,5 +69,31 @@ describe("rug border colour", () => {
     saveScenePreset("Border", { objects: [], rugBorderColor: "navy" });
     const loaded = readScenePresets().find((p) => p.name === "Border");
     expect(loaded?.data.rugBorderColor).toBe("navy");
+  });
+});
+
+describe("rug border cord controls", () => {
+  it("clamps thickness to 4–20 mm with a 10 mm default", () => {
+    expect(clampRugBorderThicknessMm(undefined)).toBe(10);
+    expect(clampRugBorderThicknessMm(2)).toBe(4);
+    expect(clampRugBorderThicknessMm(30)).toBe(20);
+    expect(clampRugBorderThicknessMm(12)).toBe(12);
+  });
+  it("clamps twist spacing to 10–60 mm with a 25 mm default", () => {
+    expect(clampRugBorderTwistMm(undefined)).toBe(25);
+    expect(clampRugBorderTwistMm(5)).toBe(10);
+    expect(clampRugBorderTwistMm(90)).toBe(60);
+  });
+  it("clamps roughness to 0–100 with a 75 default", () => {
+    expect(clampRugBorderRoughness(undefined)).toBe(75);
+    expect(clampRugBorderRoughness(-10)).toBe(0);
+    expect(clampRugBorderRoughness(140)).toBe(100);
+  });
+  it("rides in scene presets", () => {
+    saveScenePreset("Cord", { objects: [], rugBorderThicknessMm: 14, rugBorderTwistMm: 40, rugBorderRoughness: 55 });
+    const loaded = readScenePresets().find((p) => p.name === "Cord");
+    expect(loaded?.data.rugBorderThicknessMm).toBe(14);
+    expect(loaded?.data.rugBorderTwistMm).toBe(40);
+    expect(loaded?.data.rugBorderRoughness).toBe(55);
   });
 });
