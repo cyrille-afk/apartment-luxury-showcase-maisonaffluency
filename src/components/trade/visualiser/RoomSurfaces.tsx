@@ -4,7 +4,7 @@ import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
-import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, rugColorHex, rugWeave, type RugColor, type RugBorderColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugColorHex, rugWeave, type RugColor, type RugBorderColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -207,7 +207,7 @@ export function organicRugShape(width: number, depth: number): THREE.Shape {
   return s;
 }
 
-const RUG_CORD_RADIUS_M = 0.01;
+const RUG_CORD_RADIUS_M = 0.01; // default; adjustable via clampRugBorderThicknessMm
 
 /** Procedural braided/whip-stitched cord normal map (u runs along the cord). */
 function makeBraidNormalMap(): THREE.CanvasTexture | null {
@@ -236,20 +236,23 @@ function makeBraidNormalMap(): THREE.CanvasTexture | null {
 }
 
 /** Braided piping trim following the rug's top outer lip. */
-function RugBorder({ width, depth, color }: { width: number; depth: number; color: string }) {
+function RugBorder({ width, depth, color, thicknessMm = 10, twistMm = 25, roughness = 75 }: { width: number; depth: number; color: string; thicknessMm?: number; twistMm?: number; roughness?: number }) {
+  const radius = clampRugBorderThicknessMm(thicknessMm) / 1000;
+  const twist = clampRugBorderTwistMm(twistMm) / 1000;
+  const rough = clampRugBorderRoughness(roughness) / 100;
   const normal = useMemo(() => makeBraidNormalMap(), []);
   const geometry = useMemo(() => {
     const topZ = RUG_THICKNESS_M + RUG_BEVEL_M * 2;
     const pts = organicRugShape(width, depth).getSpacedPoints(480).slice(0, -1).map((v) => new THREE.Vector3(v.x, v.y, topZ));
     const curve = new THREE.CatmullRomCurve3(pts, true, "centripetal");
-    return { g: new THREE.TubeGeometry(curve, 960, RUG_CORD_RADIUS_M, 12, true), len: curve.getLength() };
-  }, [width, depth]);
-  useEffect(() => { if (normal) normal.repeat.set(geometry.len / 0.025, 1); }, [normal, geometry.len]);
+    return { g: new THREE.TubeGeometry(curve, 960, radius, 12, true), len: curve.getLength() };
+  }, [width, depth, radius]);
+  useEffect(() => { if (normal) normal.repeat.set(geometry.len / twist, 1); }, [normal, geometry.len, twist]);
   useEffect(() => () => geometry.g.dispose(), [geometry]);
   useEffect(() => () => normal?.dispose(), [normal]);
   return (
     <mesh name="room-area-rug-border" geometry={geometry.g} castShadow receiveShadow>
-      <meshStandardMaterial color={color} normalMap={normal ?? undefined} normalScale={new THREE.Vector2(1.6, 1.6)} roughness={0.75} metalness={0} envMapIntensity={0.08} />
+      <meshStandardMaterial color={color} normalMap={normal ?? undefined} normalScale={new THREE.Vector2(1.6, 1.6)} roughness={rough} metalness={0} envMapIntensity={0.08} />
     </mesh>
   );
 }
