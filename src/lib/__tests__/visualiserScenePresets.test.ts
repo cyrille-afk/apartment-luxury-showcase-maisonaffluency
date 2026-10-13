@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteScenePreset, readScenePresets, saveScenePreset } from "../visualiserScenePresets";
-import { clampWallHeight } from "../visualiserRoomSurfaces";
+import { clampWallHeight, roomWallColor, roomWallFinish } from "../visualiserRoomSurfaces";
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
@@ -35,5 +35,18 @@ describe("scene presets", () => {
     expect(clampWallHeight(60)).toBe(60);
     expect(clampWallHeight(5)).toBe(20);
     expect(clampWallHeight(180)).toBe(100);
+  });
+  it("saves the wall colour and finish with the preset", () => {
+    saveScenePreset("Sage satin", { objects: [obj], showRearWall: true, wallColor: "sage", wallFinish: "satin" });
+    expect(readScenePresets()[0].data.wallColor).toBe("sage");
+    expect(readScenePresets()[0].data.wallFinish).toBe("satin");
+  });
+  it("falls back to warm-white matte plaster for unknown wall values", () => {
+    expect(roomWallColor(undefined)).toBe("warm-white");
+    expect(roomWallColor("neon-pink")).toBe("warm-white");
+    expect(roomWallColor("midnight")).toBe("midnight");
+    expect(roomWallFinish(undefined)).toBe("matte");
+    expect(roomWallFinish("mirror")).toBe("matte");
+    expect(roomWallFinish("polished")).toBe("polished");
   });
 });

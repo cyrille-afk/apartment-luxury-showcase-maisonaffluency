@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, roomFloorFinish, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, roomFloorFinish, roomWallColor, roomWallFinish, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -92,6 +92,8 @@ type PersistedSandbox = {
   showRearWall?: boolean;
   wallHeight?: number;
   floorGlare?: number;
+  wallColor?: RoomWallColor;
+  wallFinish?: RoomWallFinish;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -124,6 +126,8 @@ const readSandbox = (): PersistedSandbox => {
       showRearWall: parsed.showRearWall !== false,
       wallHeight: clampWallHeight(parsed.wallHeight),
       floorGlare: clampFloorGlare(parsed.floorGlare),
+      wallColor: roomWallColor(parsed.wallColor),
+      wallFinish: roomWallFinish(parsed.wallFinish),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -171,6 +175,8 @@ const TradeVisualiser = () => {
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
   const [wallHeight, setWallHeight] = useState<number>(clampWallHeight(initial.wallHeight));
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
+  const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
+  const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -291,11 +297,13 @@ const TradeVisualiser = () => {
         showRearWall,
         wallHeight,
         floorGlare,
+        wallColor,
+        wallFinish,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -712,6 +720,8 @@ const TradeVisualiser = () => {
             showRearWall={showRearWall}
             wallHeight={wallHeight}
             floorGlare={floorGlare}
+            wallColor={wallColor}
+            wallFinish={wallFinish}
           />
         </Suspense>
       </div>
@@ -906,7 +916,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -924,6 +934,8 @@ const TradeVisualiser = () => {
               setShowRearWall(data.showRearWall !== false);
               setWallHeight(clampWallHeight(data.wallHeight));
               setFloorGlare(clampFloorGlare(data.floorGlare));
+              setWallColor(roomWallColor(data.wallColor));
+              setWallFinish(roomWallFinish(data.wallFinish));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -963,6 +975,23 @@ const TradeVisualiser = () => {
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; 100% is the full-height cyclorama.</p>
                 </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Wall colour</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={wallColor} onValueChange={(value) => setWallColor(roomWallColor(value))}>
+                  {WALL_COLORS.map((c) => (
+                    <DropdownMenuRadioItem key={c.key} value={c.key}>
+                      <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border align-middle" style={{ backgroundColor: c.hex }} />
+                      {c.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Wall finish</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={wallFinish} onValueChange={(value) => setWallFinish(roomWallFinish(value))}>
+                  {WALL_FINISHES.map((f) => (
+                    <DropdownMenuRadioItem key={f.key} value={f.key}>{f.label}</DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
