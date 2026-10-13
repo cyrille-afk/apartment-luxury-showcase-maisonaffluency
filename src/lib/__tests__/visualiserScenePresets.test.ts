@@ -25,4 +25,8 @@ describe("scene presets", () => {
     expect(readScenePresets()[0].data.floorFinish).toBe("none");
     expect(readScenePresets()[0].data.showRearWall).toBe(false);
   });
+  it("saves the wall height percentage with the preset", () => {
+    saveScenePreset("Low wall", { objects: [obj], showRearWall: true, wallHeight: 60 });
+    expect(readScenePresets()[0].data.wallHeight).toBe(60);
+  });
 });
