@@ -422,6 +422,7 @@ const StudioGallery = () => {
   // Dropdown -> URL: keep route in sync with dropdown so paginate/search/share stays consistent.
   const handleBrandChange = (value: string) => {
     setSelectedBrand(value);
+    setSelectedEdition("all");
     if (value === "all") {
       if (routeBrandSlug) navigate("/trade/gallery", { replace: false });
       return;
@@ -434,9 +435,13 @@ const StudioGallery = () => {
     }
   };
 
+  const activeBrand = routeBrandName || (selectedBrand === "all" ? null : selectedBrand);
   const editions = useMemo(() => {
     const byKey = new Map<string, string>();
     for (const p of allProducts) {
+      // Scope collections to the chosen designer: offering every studio's
+      // collections once a designer is picked makes no sense.
+      if (activeBrand && p.brand_name !== activeBrand && p.reedition_by !== activeBrand) continue;
       const ed = (p.edition || "").trim();
       if (!ed) continue;
       const key = ed.toLowerCase();
@@ -451,7 +456,14 @@ const StudioGallery = () => {
       const bSize = isSizeLabel(b) ? 1 : 0;
       return aSize - bSize || sortNameKey(a).localeCompare(sortNameKey(b));
     });
-  }, [allProducts]);
+  }, [allProducts, activeBrand]);
+  // Direct navigation (or a saved view) can leave a collection selected that
+  // doesn't belong to the active designer — clear it.
+  useEffect(() => {
+    if (selectedEdition !== "all" && !editions.some((ed) => ed.toLowerCase() === selectedEdition.toLowerCase())) {
+      setSelectedEdition("all");
+    }
+  }, [editions, selectedEdition]);
   const matchedProducts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return filterTradeProducts(visible, {
