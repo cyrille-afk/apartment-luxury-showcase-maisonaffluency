@@ -5,7 +5,7 @@ import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarg
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
-import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
+import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
