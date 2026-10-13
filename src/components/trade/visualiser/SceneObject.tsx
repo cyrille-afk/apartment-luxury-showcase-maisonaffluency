@@ -38,6 +38,8 @@ type Props = {
   onSelect: (instanceId: string) => void;
   onTransform: (instanceId: string, position: [number, number, number], rotation: [number, number, number]) => void;
   onDragStateChange: (dragging: boolean) => void;
+  /** When true, dragged positions snap to the placement grid. */
+  snapToGrid?: boolean;
   /** When false the piece is display-only: no drag, no gizmos. Defaults to true. */
   isEditable?: boolean;
   /** Optional non-uniform scale; overrides `object.scale` when provided. */
