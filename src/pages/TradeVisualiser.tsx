@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, roomFloorFinish, roomWallColor, roomWallFinish, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -94,6 +94,7 @@ type PersistedSandbox = {
   floorGlare?: number;
   wallColor?: RoomWallColor;
   wallFinish?: RoomWallFinish;
+  wallCustomHex?: string | null;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -128,6 +129,7 @@ const readSandbox = (): PersistedSandbox => {
       floorGlare: clampFloorGlare(parsed.floorGlare),
       wallColor: roomWallColor(parsed.wallColor),
       wallFinish: roomWallFinish(parsed.wallFinish),
+      wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -177,6 +179,17 @@ const TradeVisualiser = () => {
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
   const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
+  const [wallCustomHex, setWallCustomHex] = useState<string | null>(normalizeHexColor(initial.wallCustomHex) ?? null);
+  const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
+  const applyCustomHex = (raw: string) => {
+    setCustomHexDraft(raw);
+    const hex = normalizeHexColor(raw);
+    if (hex) {
+      setCustomHexDraft(hex);
+      setWallCustomHex(hex);
+      setWallColor("custom");
+    }
+  };
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -299,11 +312,12 @@ const TradeVisualiser = () => {
         floorGlare,
         wallColor,
         wallFinish,
+        wallCustomHex,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -722,6 +736,7 @@ const TradeVisualiser = () => {
             floorGlare={floorGlare}
             wallColor={wallColor}
             wallFinish={wallFinish}
+            wallCustomHex={wallCustomHex}
           />
         </Suspense>
       </div>
@@ -916,7 +931,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -936,6 +951,9 @@ const TradeVisualiser = () => {
               setFloorGlare(clampFloorGlare(data.floorGlare));
               setWallColor(roomWallColor(data.wallColor));
               setWallFinish(roomWallFinish(data.wallFinish));
+              const restoredHex = normalizeHexColor(data.wallCustomHex);
+              setWallCustomHex(restoredHex ?? null);
+              if (restoredHex) setCustomHexDraft(restoredHex);
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -984,7 +1002,31 @@ const TradeVisualiser = () => {
                       {c.label}
                     </DropdownMenuRadioItem>
                   ))}
+                  <DropdownMenuRadioItem value="custom">
+                    <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border align-middle" style={{ backgroundColor: wallColorHex("custom", wallCustomHex) }} />
+                    Custom colour…
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={wallColorHex("custom", wallCustomHex)}
+                      onChange={(e) => applyCustomHex(e.target.value)}
+                      aria-label="Pick custom wall colour"
+                      className="h-7 w-8 shrink-0 cursor-pointer rounded-sm border border-border bg-transparent p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={customHexDraft}
+                      onChange={(e) => applyCustomHex(e.target.value)}
+                      placeholder="#f4efe7"
+                      aria-label="Custom wall colour hex"
+                      className="w-full rounded-sm border border-border bg-background px-2 py-1 font-mono text-[11px] uppercase"
+                    />
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Any hex value — picking a colour also selects Custom.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Wall finish</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={wallFinish} onValueChange={(value) => setWallFinish(roomWallFinish(value))}>

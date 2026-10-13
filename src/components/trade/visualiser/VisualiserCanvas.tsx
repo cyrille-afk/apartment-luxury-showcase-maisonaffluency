@@ -178,6 +178,8 @@ interface VisualiserCanvasProps {
   wallColor?: RoomWallColor;
   /** Plaster wall finish preset key. */
   wallFinish?: RoomWallFinish;
+  /** Hex value used when wallColor is "custom". */
+  wallCustomHex?: string | null;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -219,6 +221,7 @@ const VisualiserCanvas = ({
   floorGlare = 50,
   wallColor = "warm-white",
   wallFinish = "matte",
+  wallCustomHex = null,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -243,7 +246,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallFinish}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -293,7 +296,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows
