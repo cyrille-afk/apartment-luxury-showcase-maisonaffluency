@@ -279,6 +279,11 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
         {label}
       </Button>
     </Html>}
+    {object.finishesLocked && (
+      <Html position={lockPosition} center zIndexRange={[6, 1]}>
+        <LockBadge instanceId={object.instanceId} />
+      </Html>
+    )}
   </>;
 };
 
