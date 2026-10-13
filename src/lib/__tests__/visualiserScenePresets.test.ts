@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteScenePreset, readScenePresets, saveScenePreset } from "../visualiserScenePresets";
-import { clampWallHeight, normalizeHexColor, roomWallColor, roomWallFinish, wallColorHex } from "../visualiserRoomSurfaces";
+import { clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomWallColor, roomWallFinish, wallColorHex } from "../visualiserRoomSurfaces";
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
@@ -53,6 +53,14 @@ describe("scene presets", () => {
     saveScenePreset("Custom wall", { objects: [obj], showRearWall: true, wallColor: "custom", wallCustomHex: "#123456" });
     expect(readScenePresets()[0].data.wallColor).toBe("custom");
     expect(readScenePresets()[0].data.wallCustomHex).toBe("#123456");
+  });
+  it("saves the finish intensity with the preset and clamps bad values", () => {
+    saveScenePreset("Soft sheen", { objects: [obj], showRearWall: true, wallFinish: "satin", wallFinishIntensity: 35 });
+    expect(readScenePresets()[0].data.wallFinishIntensity).toBe(35);
+    expect(clampWallFinishIntensity(undefined)).toBe(100);
+    expect(clampWallFinishIntensity(120)).toBe(100);
+    expect(clampWallFinishIntensity(-5)).toBe(0);
+    expect(clampWallFinishIntensity(0)).toBe(0);
   });
   it("validates and resolves the custom wall hex", () => {
     expect(normalizeHexColor("#abc")).toBe("#aabbcc");

@@ -936,7 +936,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -959,6 +959,7 @@ const TradeVisualiser = () => {
               const restoredHex = normalizeHexColor(data.wallCustomHex);
               setWallCustomHex(restoredHex ?? null);
               if (restoredHex) setCustomHexDraft(restoredHex);
+              setWallFinishIntensity(clampWallFinishIntensity(data.wallFinishIntensity));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1039,6 +1040,23 @@ const TradeVisualiser = () => {
                     <DropdownMenuRadioItem key={f.key} value={f.key}>{f.label}</DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Finish Intensity</span>
+                    <span>{wallFinishIntensity}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={wallFinishIntensity}
+                    onChange={(e) => setWallFinishIntensity(clampWallFinishIntensity(Number(e.target.value)))}
+                    aria-label="Wall finish intensity"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">How strongly the plaster catches light — 100% is the finish as designed, lower goes matte.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
