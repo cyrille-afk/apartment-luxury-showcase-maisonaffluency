@@ -247,7 +247,7 @@ const VisualiserCanvas = ({
       target={[0, 0.5, 0]}
     />
 
-    {/* Soft ambient lifts deep shadows under base frames. */
+    {/* Soft ambient lifts deep shadows under base frames. */}
     <ambientLight intensity={SHOWROOM.ambient} />
     <rectAreaLight position={[-5, 6, 5]} rotation={[-Math.PI / 4, -Math.PI / 4, 0]} width={6} height={4} intensity={3} color={SHOWROOM.key} />
     {/* Key: soft window light, front-left, casts the shadows. */}
