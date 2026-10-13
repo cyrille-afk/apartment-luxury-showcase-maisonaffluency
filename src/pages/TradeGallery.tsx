@@ -12,7 +12,7 @@ import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { Search, FileDown, Package, ShoppingCart, Check, Scale, Info, X, List } from "lucide-react";
-import { filterTradeProducts } from "@/lib/tradeFilter";
+import { countTradeCollectionPieces, filterTradeProducts } from "@/lib/tradeFilter";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -464,6 +464,22 @@ const StudioGallery = () => {
       setSelectedEdition("all");
     }
   }, [editions, selectedEdition]);
+  // Pieces per collection beside each entry in the collection dropdown. The
+  // collection filter itself is excluded so the number is what picking it
+  // would show, given the designer / category / search already applied.
+  const collectionCounts = useMemo(() => {
+    const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
+    return countTradeCollectionPieces(visible, {
+      search,
+      brand: routeBrandName || (selectedBrand === "all" ? null : selectedBrand),
+      category: selectedCategory,
+      subcategory: selectedSubcategory,
+    });
+  }, [allProducts, hiddenTradeProductIds, search, routeBrandName, selectedBrand, selectedCategory, selectedSubcategory]);
+  const editionCounts = useMemo(
+    () => Object.fromEntries(editions.map((ed) => [ed, collectionCounts.byCollection.get(ed.toLowerCase()) ?? 0])),
+    [editions, collectionCounts],
+  );
   const matchedProducts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return filterTradeProducts(visible, {

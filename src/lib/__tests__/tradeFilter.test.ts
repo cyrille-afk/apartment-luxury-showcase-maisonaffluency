@@ -89,3 +89,39 @@ describe("filterTradeProducts", () => {
     expect(result.map((p) => p.id)).toEqual(["puzzle"]);
   });
 });
+
+describe("countTradeCollectionPieces", () => {
+  const unlabelled = mk({ id: "plain", product_name: "Bare Table", brand_name: "Michel Amar Studio" });
+  const withPlain = [...all, unlabelled];
+
+  it("counts every piece in each collection for the chosen designer", () => {
+    const counts = countTradeCollectionPieces(all, { brand: "Atelier Février" });
+    expect(counts.total).toBe(1);
+    expect(counts.byCollection.get("cc-tapis edition")).toBe(1);
+    expect(counts.byCollection.has("michel amar x emma donnersberg")).toBe(false);
+  });
+
+  it("ignores the collection filter itself but respects the other filters", () => {
+    const counts = countTradeCollectionPieces(all, {
+      category: "Rugs",
+      edition: "CC-Tapis Edition",
+    });
+    expect(counts.total).toBe(2);
+    expect(counts.byCollection.get("cc-tapis edition")).toBe(2);
+    expect(counts.byCollection.has("michel amar x emma donnersberg")).toBe(false);
+  });
+
+  it("narrows counts with search", () => {
+    const counts = countTradeCollectionPieces(all, { search: "mushroom" });
+    expect(counts.total).toBe(1);
+    expect(counts.byCollection.get("cc-tapis edition")).toBe(1);
+  });
+
+  it("counts pieces without a collection in the total only", () => {
+    const counts = countTradeCollectionPieces(withPlain, {});
+    expect(counts.total).toBe(4);
+    expect(counts.byCollection.get("cc-tapis edition")).toBe(2);
+    expect(counts.byCollection.get("michel amar x emma donnersberg")).toBe(1);
+    expect(counts.byCollection.size).toBe(2);
+  });
+});
