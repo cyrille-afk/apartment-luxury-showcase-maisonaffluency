@@ -18,6 +18,8 @@ import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
@@ -81,7 +83,7 @@ const readSandbox = (): PersistedSandbox => {
     return {
       backdrop: parsed.backdrop ?? null,
       backdropDataUrl: parsed.backdropDataUrl ?? null,
-      objects: Array.isArray(parsed.objects) ? parsed.objects : [],
+      objects: Array.isArray(parsed.objects) ? parsed.objects.map((object) => ({ ...object, positionLocked: object.positionLocked ?? object.finishesLocked ?? false, finishesLocked: false })) : [],
       projectId: parsed.projectId ?? null,
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
       snapToGrid: parsed.snapToGrid === true,
@@ -90,6 +92,15 @@ const readSandbox = (): PersistedSandbox => {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
   }
 };
+
+async function hydrateCatalogueDimensions(catalogue: CatalogueProduct[]): Promise<CatalogueProduct[]> {
+  const pickIds = [...new Set(catalogue.filter(product => !visualiserDimensions(product)).map(product => product.source_pick_id).filter((id): id is string => Boolean(id)))];
+  const { data } = pickIds.length
+    ? await supabase.from("designer_curator_picks").select("id, dimensions, width_mm, depth_mm, height_mm, size_variants").in("id", pickIds)
+    : { data: [] };
+  const picks = new Map((data ?? []).map(pick => [pick.id, pick]));
+  return catalogue.map(product => ({ ...product, dimensions: visualiserDimensions(product, picks.get(product.source_pick_id ?? "")) ?? product.dimensions }));
+}
 
 const CanvasLoader = () => (
   <div className="absolute inset-0 flex items-center justify-center">
@@ -199,7 +210,15 @@ const TradeVisualiser = () => {
       for (const product of [...(models.data ?? []), ...(recent.data ?? [])] as CatalogueProduct[]) {
         merged.set(product.id, product);
       }
-      setProducts([...merged.values()]);
+      const hydrated = await hydrateCatalogueDimensions([...merged.values()]);
+      if (cancelled) return;
+      setProducts(hydrated);
+      // Restore missing metadata on existing snapshots without changing their transforms/finishes.
+      const byId = new Map(hydrated.map(product => [product.id, product]));
+      setObjects(current => current.map(object => {
+        const dimensions = visualiserDimensions(object, byId.get(object.id));
+        return dimensions && dimensions !== object.dimensions ? { ...object, dimensions } : object;
+      }));
       setLoadingProducts(false);
     })();
     return () => { cancelled = true; };
@@ -290,10 +309,11 @@ const TradeVisualiser = () => {
 
       const { data: catalogue } = await sb
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url")
+        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url, source_pick_id")
         .in("id", productIds);
 
-      const placed: PlacedObject[] = ((catalogue ?? []) as CatalogueProduct[]).map((product, index) => ({
+      const hydratedCatalogue = await hydrateCatalogueDimensions((catalogue ?? []) as CatalogueProduct[]);
+      const placed: PlacedObject[] = hydratedCatalogue.map((product, index) => ({
         instanceId: `${product.id}-${incoming}-${index}`,
         id: product.id,
         product_name: product.product_name,
@@ -473,29 +493,21 @@ const TradeVisualiser = () => {
       toast.success(`${material.name} is ready for the next object.`);
       return;
     }
-    if (selected?.finishesLocked) {
-      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
-      return;
-    }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
       return withPartMaterial(object, effectiveTarget, material);
     }));
   };
 
-  const toggleFinishesLock = () => {
+  const togglePositionLock = () => {
     if (!selectedId) return;
     setObjects((current) => current.map((object) => (
-      object.instanceId === selectedId ? { ...object, finishesLocked: !object.finishesLocked } : object
+      object.instanceId === selectedId ? { ...object, positionLocked: !object.positionLocked } : object
     )));
   };
 
   const clearFinishes = () => {
     if (!selectedId) return;
-    if (selected?.finishesLocked) {
-      toast.error(`${selected.product_name} is locked. Unlock it to clear finishes.`);
-      return;
-    }
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId
         ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null, partMaterials: {} }
@@ -505,10 +517,6 @@ const TradeVisualiser = () => {
 
   const applyBondStreetFinish = (target: "base" | "upholstery", material: VisualiserMaterial | null) => {
     if (!selectedId) return;
-    if (selected?.finishesLocked) {
-      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
-      return;
-    }
     setObjects((current) => current.map((object) => object.instanceId === selectedId
       ? target === "base"
         ? { ...object, baseMaterial: material }
@@ -606,6 +614,10 @@ const TradeVisualiser = () => {
       {/* Inspector sidebar — reads the shared selection context */}
       <VisualiserInspector onRemove={removeObject} onScale={scaleObject}>
         {selected && (<>
+          <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
+            {selected.positionLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+            {selected.positionLocked ? "Position locked" : "Lock position"}
+          </Button>
           <Suspense fallback={null}>
             <PieceAngleControls
               yaw={selected.rotation?.[1] ?? 0}
@@ -674,32 +686,21 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              <div className="flex items-center gap-3">
-                <button
-                  className={cn(microLabel, "flex items-center gap-1", selected.finishesLocked ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
-                  onClick={toggleFinishesLock}
-                  aria-pressed={Boolean(selected.finishesLocked)}
-                  title={selected.finishesLocked ? "Unlock finishes on this piece" : "Lock finishes on this piece"}
-                >
-                  {selected.finishesLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-                  {selected.finishesLocked ? "Locked" : "Lock"}
-                </button>
-                {hasAnyFinish(selected) && !selected.finishesLocked && (
-                  <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
-                )}
-              </div>
+              {hasAnyFinish(selected) && (
+                <Button variant="ghost" size="sm" className={cn(microLabel, "h-auto px-0 py-1 text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</Button>
+              )}
             </div>
-            <div className="mt-3 flex items-center gap-4">
+            <div role="tablist" aria-label="Finish part" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
               {availableTargets.map((value) => (
-                <button
+                <Button variant="ghost" size="sm"
                   key={value}
                   role="tab"
                   aria-selected={effectiveTarget === value}
                   onClick={() => setFinishTarget(value)}
-                  className={cn(microLabel, effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                  className={cn(microLabel, "h-auto whitespace-normal px-0 py-1 text-left", effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
                 >
                   {targetLabel(value, partGroupLabels)}
-                </button>
+                </Button>
               ))}
             </div>
             <PartMappingControl productId={selected.id} />
@@ -712,20 +713,16 @@ const TradeVisualiser = () => {
             />
             <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
-                <button key={material.id} onClick={() => applyMaterial(material)} className="w-14 shrink-0 text-left" title={`${material.brand_name} — ${material.name}`}>
+                <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} className="h-auto w-14 shrink-0 flex-col items-start gap-0 px-0 py-1 text-left" title={`${material.brand_name} — ${material.name}`}>
                   <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
                   <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
-                </button>
+                </Button>
               ))}
             </div>
             <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" ? selected.material?.name : null) ?? "No finish applied"}</p>
             <FinishPresets
               object={selected}
               onRestore={(preset) => {
-                if (selected.finishesLocked) {
-                  toast.error(`${selected.product_name} is locked. Unlock it to restore a configuration.`);
-                  return;
-                }
                 setObjects((current) => current.map((object) => object.instanceId === selected.instanceId
                   ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial, partMaterials: preset.partMaterials ?? {} }
                   : object));
