@@ -59,6 +59,7 @@ type PersistedSandbox = {
   objects: PlacedObject[];
   projectId?: string | null;
   spacing?: number;
+  snapToGrid?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -80,6 +81,7 @@ const readSandbox = (): PersistedSandbox => {
       objects: Array.isArray(parsed.objects) ? parsed.objects : [],
       projectId: parsed.projectId ?? null,
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
+      snapToGrid: parsed.snapToGrid === true,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -108,6 +110,7 @@ const TradeVisualiser = () => {
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
+  const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -207,11 +210,12 @@ const TradeVisualiser = () => {
         objects,
         projectId,
         spacing,
+        snapToGrid,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -578,6 +582,7 @@ const TradeVisualiser = () => {
             onTransform={transformObject}
             onDragStateChange={(dragging) => setOrbitEnabled(!dragging)}
             onTextureParts={handleTextureParts}
+            snapToGrid={snapToGrid}
           />
         </Suspense>
       </div>
@@ -803,6 +808,14 @@ const TradeVisualiser = () => {
             </button>
             <button className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
               [ &#8596; Respace ]
+            </button>
+            <button
+              className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
+              onClick={() => setSnapToGrid((value) => !value)}
+              aria-pressed={snapToGrid}
+              title="Snap dragged pieces to a 0.25 m grid"
+            >
+              [ &#8862; Snap Grid: {snapToGrid ? "On" : "Off"} ]
             </button>
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />

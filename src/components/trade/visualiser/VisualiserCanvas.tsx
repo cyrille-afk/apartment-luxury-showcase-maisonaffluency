@@ -55,6 +55,8 @@ interface VisualiserCanvasProps {
   onTransform: (instanceId: string, position: [number, number, number], rotation: [number, number, number]) => void;
   onDragStateChange: (dragging: boolean) => void;
   onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
+  /** When true, dragged pieces snap to the placement grid. */
+  snapToGrid?: boolean;
 }
 
 /**
@@ -71,6 +73,7 @@ const VisualiserCanvas = ({
   onTransform,
   onDragStateChange,
   onTextureParts,
+  snapToGrid = false,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows
@@ -151,6 +154,7 @@ const VisualiserCanvas = ({
           onTransform={onTransform}
           onDragStateChange={onDragStateChange}
           onTextureParts={onTextureParts}
+          snapToGrid={snapToGrid}
         />
       ))}
     </Suspense>

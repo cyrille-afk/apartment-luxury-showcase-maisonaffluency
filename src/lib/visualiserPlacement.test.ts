@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickFreeSlot, respaceObjects } from "./visualiserPlacement";
+import { pickFreeSlot, respaceObjects, snapCoordinate } from "./visualiserPlacement";
 
 describe("pickFreeSlot", () => {
   it("places the first object nearest to the centre", () => {
@@ -84,5 +84,18 @@ describe("respaceObjects", () => {
     expect(respaced.find((o) => o.id === "a")?.scale).toBe(2);
     // The centre piece stays at the centre.
     expect(respaced.find((o) => o.id === "b")?.position).toEqual([0, 0, 0]);
+  });
+});
+
+describe("snapCoordinate", () => {
+  it("rounds to the nearest 0.25 m grid line", () => {
+    expect(snapCoordinate(1.13)).toBeCloseTo(1.25);
+    expect(snapCoordinate(1.12)).toBeCloseTo(1);
+    expect(snapCoordinate(-0.4)).toBeCloseTo(-0.5);
+    expect(snapCoordinate(0)).toBe(0);
+  });
+
+  it("respects a custom step", () => {
+    expect(snapCoordinate(1.3, 0.5)).toBeCloseTo(1.5);
   });
 });
