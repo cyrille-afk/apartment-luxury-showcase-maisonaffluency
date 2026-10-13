@@ -5,7 +5,14 @@ import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarg
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
-import { pickFreeSlot } from "@/lib/visualiserPlacement";
+import {
+  pickFreeSlot,
+  respaceObjects,
+  DEFAULT_SLOT_SPACING,
+  MIN_SLOT_SPACING,
+  MAX_SLOT_SPACING,
+  SLOT_SPACING_STEP,
+} from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
@@ -51,6 +58,7 @@ type PersistedSandbox = {
   backdrop: string | null;
   objects: PlacedObject[];
   projectId?: string | null;
+  spacing?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -71,6 +79,7 @@ const readSandbox = (): PersistedSandbox => {
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects : [],
       projectId: parsed.projectId ?? null,
+      spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
