@@ -172,7 +172,12 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
     material.roughnessMap = maps.roughness ?? original.roughnessMap;
   }
   material.metalnessMap = isMetal ? null : original.metalnessMap;
-  material.color.set(neutralFabric ? "#d8d4cc" : finish?.color ?? (maps.diffuse ? "#ffffff" : "#ffffff"));
+  // Baked vertex colours multiply over the swatch texture and flatten it into a
+  // solid tint — a finish texture must own the surface colour.
+  if (!neutralFabric && material.map) material.vertexColors = false;
+  // A loaded swatch texture carries the true colour; tinting it again with the
+  // finish's flat colour is what made fabrics read as solid paint.
+  material.color.set(neutralFabric ? "#d8d4cc" : maps.diffuse && !isMetal ? "#ffffff" : finish?.color ?? "#ffffff");
   material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : 0.7);
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
   // Non-metals get a touch more IBL so stone/wood edges catch thin speculars.
