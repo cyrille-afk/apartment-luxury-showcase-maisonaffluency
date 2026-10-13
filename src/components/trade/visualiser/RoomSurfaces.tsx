@@ -65,20 +65,35 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
   );
 }
 
-function PlasterWall({ z }: { z: number }) {
+/**
+ * Curved cyclorama wall wrapping the whole scene, so orbiting the camera
+ * always shows plaster behind the furniture instead of the wall's edge.
+ * Centered on the middle of the arrangement, not the world origin.
+ */
+function PlasterWall({ objects }: { objects: PlacedObject[] }) {
   const maps = useSurfaceMaps(cementImage, 16, false);
+  const { cx, cz, radius } = useMemo(() => {
+    const xs = objects.map((o) => o.position?.[0] ?? 0);
+    const zs = objects.map((o) => o.position?.[2] ?? 0);
+    const cx = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
+    const cz = zs.length ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
+    const spread = Math.max(
+      4,
+      ...objects.map((o) => Math.hypot((o.position?.[0] ?? 0) - cx, (o.position?.[2] ?? 0) - cz) + footprintRadius(parseDimensionString(o.dimensions), o.scale)),
+    );
+    return { cx, cz, radius: spread + 9 };
+  }, [objects]);
   return (
-    <mesh name="room-rear-plaster-wall" position={[0, 1.9, z]} receiveShadow>
-      <planeGeometry args={[80, 3.8]} />
-      <meshStandardMaterial color={SHOWROOM.plaster} roughness={0.95} bumpMap={maps.bump} bumpScale={0.002} metalness={0} envMapIntensity={0.2} side={THREE.DoubleSide} />
+    <mesh name="room-rear-plaster-wall" position={[cx, 2.25, cz]} receiveShadow>
+      <cylinderGeometry args={[radius, radius, 4.5, 64, 1, true]} />
+      <meshStandardMaterial color={SHOWROOM.plaster} roughness={0.95} bumpMap={maps.bump} bumpScale={0.002} metalness={0} envMapIntensity={0.2} side={THREE.BackSide} />
     </mesh>
   );
 }
 
 export default function RoomSurfaces({ floor, rearWall, objects, glare = 50 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number }) {
-  const rearZ = Math.min(-4, ...objects.map((o) => (o.position?.[2] ?? 0) - footprintRadius(parseDimensionString(o.dimensions), o.scale) - 1.5));
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {rearWall && <PlasterWall z={rearZ} />}
+    {rearWall && <PlasterWall objects={objects} />}
   </group>;
 }
