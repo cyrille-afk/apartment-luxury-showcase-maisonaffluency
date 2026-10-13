@@ -11948,6 +11948,7 @@ export type Database = {
         Args: { _board_id: string; _email: string; _role: string }
         Returns: Json
       }
+      currency_for_country: { Args: { p_country: string }; Returns: string }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
