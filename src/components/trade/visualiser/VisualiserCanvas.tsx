@@ -86,6 +86,8 @@ interface VisualiserCanvasProps {
   depthOfField?: boolean;
   /** Blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
+  /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
+  dofFocusSelected?: boolean;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -118,6 +120,7 @@ const VisualiserCanvas = ({
   focusRef,
   depthOfField = false,
   dofStrength = 3,
+  dofFocusSelected = true,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -247,6 +250,7 @@ const VisualiserCanvas = ({
       <DofPass
         strength={dofStrength}
         focus={(() => {
+          if (!dofFocusSelected) return null;
           const sel = objects.find((o) => o.instanceId === selectedId);
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
         })()}
