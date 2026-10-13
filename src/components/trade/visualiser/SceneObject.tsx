@@ -27,6 +27,8 @@ export type PlacedObject = {
   upholsteryMaterial?: VisualiserMaterial | null;
   /** Finishes for parts beyond top/base/upholstery (frame, drawer, part:<group> …). */
   partMaterials?: Record<string, VisualiserMaterial | null>;
+  /** When true, swatch clicks, Clear, and preset restores leave this piece's finishes untouched. */
+  finishesLocked?: boolean;
 };
 
 type Props = {

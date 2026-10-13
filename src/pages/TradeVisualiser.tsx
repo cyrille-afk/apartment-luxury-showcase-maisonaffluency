@@ -5,7 +5,7 @@ import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarg
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
-import { Box, ImageUp, Loader2, Plus, RotateCcw, Search, X } from "lucide-react";
+import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -391,14 +391,29 @@ const TradeVisualiser = () => {
       toast.success(`${material.name} is ready for the next object.`);
       return;
     }
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
       return withPartMaterial(object, effectiveTarget, material);
     }));
   };
 
+  const toggleFinishesLock = () => {
+    if (!selectedId) return;
+    setObjects((current) => current.map((object) => (
+      object.instanceId === selectedId ? { ...object, finishesLocked: !object.finishesLocked } : object
+    )));
+  };
+
   const clearFinishes = () => {
     if (!selectedId) return;
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to clear finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId
         ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null, partMaterials: {} }
@@ -408,6 +423,10 @@ const TradeVisualiser = () => {
 
   const applyBondStreetFinish = (target: "base" | "upholstery", material: VisualiserMaterial | null) => {
     if (!selectedId) return;
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => object.instanceId === selectedId
       ? target === "base"
         ? { ...object, baseMaterial: material }
@@ -557,9 +576,20 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {hasAnyFinish(selected) && (
-                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
-              )}
+              <div className="flex items-center gap-3">
+                <button
+                  className={cn(microLabel, "flex items-center gap-1", selected.finishesLocked ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
+                  onClick={toggleFinishesLock}
+                  aria-pressed={Boolean(selected.finishesLocked)}
+                  title={selected.finishesLocked ? "Unlock finishes on this piece" : "Lock finishes on this piece"}
+                >
+                  {selected.finishesLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                  {selected.finishesLocked ? "Locked" : "Lock"}
+                </button>
+                {hasAnyFinish(selected) && !selected.finishesLocked && (
+                  <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
+                )}
+              </div>
             </div>
             <div className="mt-3 flex items-center gap-4">
               {availableTargets.map((value) => (
@@ -593,9 +623,15 @@ const TradeVisualiser = () => {
             <p data-testid="active-finish" aria-live="polite" className={cn(microLabel, "mt-1 truncate text-foreground")}>{targetMaterial?.name ?? (effectiveTarget !== "all" && effectiveTarget !== "upholstery" ? selected.material?.name : null) ?? "No finish applied"}</p>
             <FinishPresets
               object={selected}
-              onRestore={(preset) => setObjects((current) => current.map((object) => object.instanceId === selected.instanceId
-                ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial, partMaterials: preset.partMaterials ?? {} }
-                : object))}
+              onRestore={(preset) => {
+                if (selected.finishesLocked) {
+                  toast.error(`${selected.product_name} is locked. Unlock it to restore a configuration.`);
+                  return;
+                }
+                setObjects((current) => current.map((object) => object.instanceId === selected.instanceId
+                  ? { ...object, material: preset.material, topMaterial: preset.topMaterial, baseMaterial: preset.baseMaterial, upholsteryMaterial: preset.upholsteryMaterial, partMaterials: preset.partMaterials ?? {} }
+                  : object));
+              }}
             />
           </div>
           )}
