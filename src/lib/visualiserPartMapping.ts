@@ -58,6 +58,24 @@ export function clearPartOverrides(productId: string) {
 }
 
 export function registerModelMeshes(productId: string, list: ModelMesh[], labels: Record<string, string> = {}) {
+  // Upgrade the old shared upholstery assignment only on a declared backrest;
+  // all unrelated manual mappings stay as the user saved them.
+  const saved = overrides[productId];
+  if (saved) {
+    const next = { ...saved };
+    let changed = false;
+    for (const mesh of list) {
+      if (mesh.auto === "backrest" && next[mesh.key] === "upholstery") {
+        delete next[mesh.key];
+        changed = true;
+      }
+    }
+    if (changed) {
+      overrides = { ...overrides, [productId]: next };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides)); } catch { /* storage blocked */ }
+      emit();
+    }
+  }
   if (JSON.stringify(meshes[productId]) === JSON.stringify(list) && JSON.stringify(groupLabels[productId]) === JSON.stringify(labels)) return;
   meshes = { ...meshes, [productId]: list };
   groupLabels = { ...groupLabels, [productId]: labels };
