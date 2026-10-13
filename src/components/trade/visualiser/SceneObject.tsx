@@ -11,7 +11,7 @@ import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart }
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
-import { textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates } from "@/lib/showroomRendering";
+import { applyMatteTextile, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates } from "@/lib/showroomRendering";
 
 export type PlacedObject = {
   instanceId: string;
@@ -201,10 +201,11 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   // finish's flat colour is what made fabrics read as solid paint.
   material.color.set(neutralFabric ? "#d8d4cc" : maps.diffuse && !isMetal ? "#ffffff" : finish?.color ?? "#ffffff");
   const baseRoughness = neutralFabric ? 0.65 : finish?.roughness ?? (isMetal ? 0.25 : finish && isTextileMaterial(finish) ? 0.65 : maps.roughness ? 1 : 0.7);
-  // Fabrics stay in 0.5–0.7 so they catch light instead of reading black in indirect light.
+  // Matte textiles retain their colour and normal maps, never metal response.
   const isFabric = neutralFabric || (!!finish && isTextileMaterial(finish));
-  material.roughness = isFabric ? THREE.MathUtils.clamp(baseRoughness, 0.5, 0.7) : baseRoughness;
+  material.roughness = baseRoughness;
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
+  if (isFabric) applyMatteTextile(material);
   // Non-metals get a touch more IBL so stone/wood edges catch thin speculars.
   material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1.15;
   // Fabrics (high roughness) need deeper normals so bouclé reads under grazing key light.
@@ -321,6 +322,7 @@ function useFittedModel(object: PlacedObject) {
         const next = source.map((entry) => {
           const material = toPbrMaterial(entry);
           material.userData.visualiserClone = true;
+          if (role === "upholstery" || role === "backrest") applyMatteTextile(material);
           if ((role === "upholstery" || role === "backrest") && material.normalMap) material.normalScale.multiplyScalar(1.2);
           return material;
         });

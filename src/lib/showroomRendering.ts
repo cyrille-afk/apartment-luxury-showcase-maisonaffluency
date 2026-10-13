@@ -2,13 +2,30 @@ import * as THREE from "three";
 
 /** Shared scene-lighting tokens, kept separate from catalogue finishes. */
 export const SHOWROOM = {
-  exposure: 2.0,
-  ambient: 0.4,
+  exposure: 1.3,
+  ambient: 0.2,
+  cove: "#fff3e0",
+  textileRoughness: 0.9,
   key: "#fff7ed",
   fill: "#edf3ff",
   rim: "#ffffff",
   plaster: "#f3f2ee",
 };
+
+/** Matte mineral floors; wood retains a satin midpoint and the existing glare control. */
+export function floorSurfaceRoughness(oak: boolean, glare: number): number {
+  const amount = THREE.MathUtils.clamp(glare, 0, 100) / 100;
+  return oak ? 0.65 - amount * 0.3 : 0.95 - amount * 0.1;
+}
+
+/** Fabrics retain colour/normal detail but never inherit metallic or glossy coatings. */
+export function applyMatteTextile(material: THREE.MeshStandardMaterial): void {
+  material.roughness = SHOWROOM.textileRoughness;
+  material.metalness = 0;
+  material.metalnessMap = null;
+  material.roughnessMap = null;
+  if (material instanceof THREE.MeshPhysicalMaterial) material.clearcoat = 0;
+}
 
 /** Preserve authored maps and transparency when upgrading legacy unlit materials. */
 export function toPbrMaterial(source: THREE.Material): THREE.MeshStandardMaterial {

@@ -8,6 +8,7 @@ import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWal
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
+import { SHOWROOM, floorSurfaceRoughness } from "@/lib/showroomRendering";
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
 function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
@@ -28,9 +29,8 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
-        // Glare 0 = matte floor (0.75), 100 = satin semi-gloss (0.45); brighter texels stay rougher.
-        const polishedBase = 0.75 - (clampFloorGlare(glare) / 100) * 0.3;
-        const value = Math.round((polished ? polishedBase + (1 - light) * 0.14 : 0.88 + (1 - light) * 0.1) * 255);
+        const base = floorSurfaceRoughness(polished, glare);
+        const value = Math.round(Math.min(0.95, base + (1 - light) * (polished ? 0.06 : 0.02)) * 255);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }
       ctx.putImageData(pixels, 0, 0);
@@ -53,7 +53,7 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
 }
 
 function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; glare: number }) {
-  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, finish === "oak-chevron" ? 32 : 20, true, glare);
+  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, finish === "oak-chevron" ? 32 : 20, finish === "oak-chevron", glare);
   // Glare 0 = 0.05 env reflection, 100 = 0.45.
   const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (
@@ -84,11 +84,43 @@ function PlasterWall({ objects, heightPct, color, finish, customHex, intensity =
     return { cx, cz, radius: spread + 9, height: (WALL_FULL_HEIGHT_M * clampWallHeight(heightPct)) / 100 };
   }, [objects, heightPct]);
   return (
+    <group>
     <mesh name="room-rear-plaster-wall" position={[cx, height / 2, cz]} receiveShadow>
       <cylinderGeometry args={[radius, radius, height, 64, 1, true]} />
       <meshStandardMaterial color={wallColorHex(color, customHex)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity * (clampWallFinishIntensity(intensity) / 100)} side={THREE.BackSide} />
     </mesh>
+    <ArchitecturalCoves cx={cx} cz={cz} radius={radius} height={height} color={wallColorHex(color, customHex)} />
+    </group>
   );
+}
+
+/** Concealed perimeter coves: broad emitters face plaster, never the conversation group.
+ * Rect-area lights approximate bounced illumination (WebGL does not simulate GI). */
+function ArchitecturalCoves({ cx, cz, radius, height, color }: { cx: number; cz: number; radius: number; height: number; color: string }) {
+  const strips = useMemo(() => Array.from({ length: 8 }, (_, i) => {
+    const angle = i * Math.PI / 4;
+    const x = Math.sin(angle), z = Math.cos(angle);
+    const position = new THREE.Vector3(x * (radius - 0.65), height - 0.22, z * (radius - 0.65));
+    const target = new THREE.Vector3(x * radius, height - 0.05, z * radius);
+    const rotation = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().lookAt(position, target, new THREE.Vector3(0, 1, 0)));
+    return { position, rotation };
+  }), [radius, height]);
+  return <group name="concealed-architectural-coves" position={[cx, 0, cz]}>
+    {/* Narrow recessed ceiling perimeter, not a lid over the canvas. */}
+    <mesh name="ceiling-cove-recess" position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+      <ringGeometry args={[radius - 0.85, radius, 96]} />
+      <meshStandardMaterial color={color} roughness={0.92} metalness={0} side={THREE.DoubleSide} />
+    </mesh>
+    {/* The lower lip conceals the light sources from furniture-height views. */}
+    <mesh name="ceiling-cove-lip" position={[0, height - 0.3, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <ringGeometry args={[radius - 0.88, radius - 0.52, 96]} />
+      <meshStandardMaterial color={color} roughness={0.92} metalness={0} side={THREE.DoubleSide} />
+    </mesh>
+    {strips.map((strip, i) => <group key={i}>
+      <rectAreaLight name={`wall-wash-${i}`} position={strip.position} rotation={strip.rotation} width={radius * 0.68} height={0.12} intensity={4} color={SHOWROOM.cove} />
+      {i % 2 === 0 && <rectAreaLight name={`ceiling-wash-${i}`} position={[strip.position.x, height - 0.18, strip.position.z]} rotation={[Math.PI / 2, 0, i * Math.PI / 4]} width={radius * 0.7} height={0.35} intensity={2.5} color={SHOWROOM.cove} />}
+    </group>)}
+  </group>;
 }
 
 /** Procedural cream wool: warm off-white albedo + tight loop-pile normal map. */
