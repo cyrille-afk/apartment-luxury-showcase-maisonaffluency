@@ -1,0 +1,2 @@
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS company_registration_number text;
+COMMENT ON COLUMN public.clients.company_registration_number IS 'UK Companies House Company Registration Number (CRN), confirmed by staff from web lookup candidates.';
