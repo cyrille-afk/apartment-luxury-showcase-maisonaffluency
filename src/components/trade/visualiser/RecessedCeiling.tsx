@@ -10,13 +10,14 @@ export default function RecessedCeiling({ radius, height }: { radius: number; he
   const inner = radius - CEILING.ledge;
   const lipY = height - CEILING.recess;
   return <group name="architectural-recessed-ceiling">
-    <mesh name="dropped-ceiling-frame" position={[0, lipY, 0]} rotation={[Math.PI / 2, 0, 0]} geometry={geometry} castShadow receiveShadow>
+    <mesh name="dropped-ceiling-frame" position={[0, lipY, 0]} rotation={[Math.PI / 2, 0, 0]} geometry={geometry} receiveShadow>
       <meshStandardMaterial color={SHOWROOM.plaster} roughness={CEILING.roughness} metalness={0} />
     </mesh>
     <mesh name="recessed-ceiling-pocket" position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[inner * 2 + 0.4, inner * 2 + 0.4]} />
       <meshStandardMaterial color={SHOWROOM.plaster} roughness={CEILING.roughness} metalness={0} side={THREE.DoubleSide} />
     </mesh>
+    <rectAreaLight name="diffuse-ceiling-return" position={[0, lipY - 0.4, 0]} rotation={[Math.PI / 2, 0, 0]} width={radius * 2} height={radius * 2} intensity={0.65} color={CEILING.glow} />
     {[0, 1, 2, 3].map((side) => <group key={side} rotation={[0, side * Math.PI / 2, 0]}>
       {/* Above the solid ledge, facing up: the dropped frame hides the source. */}
       <mesh name={`concealed-ceiling-strip-${side}`} position={[0, lipY + 0.055, inner + 0.06]} rotation={[-Math.PI / 2, 0, 0]}>
