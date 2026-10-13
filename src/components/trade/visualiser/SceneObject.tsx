@@ -254,6 +254,12 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
     const centre = bounds.getCenter(new THREE.Vector3());
     return [centre.x, bounds.max.y + 0.18, centre.z];
   }, [model]);
+  // Lock badge floats above the room label (or the piece itself) while finishes are protected.
+  const lockPosition = useMemo<[number, number, number]>(() => {
+    const bounds = new THREE.Box3().setFromObject(model);
+    const centre = bounds.getCenter(new THREE.Vector3());
+    return [centre.x, bounds.max.y + (label ? 0.55 : 0.18), centre.z];
+  }, [model, label]);
   useEffect(() => () => {
     // Only dispose materials we cloned — the cached GLTF originals are shared
     // across every instance and disposing them renders later clones black.
