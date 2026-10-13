@@ -107,6 +107,10 @@ const TradeVisualiser = () => {
     setTextureParts((current) => (current[instanceId]?.join() === parts.join() ? current : { ...current, [instanceId]: parts }));
   }, []);
   const { activeMaterial, setActiveMaterial } = useVisualiserMaterial();
+  // Only a finish picked with nothing selected (or from Felix) is "armed" for the next piece;
+  // finishes locked onto an existing piece must never leak onto newly added items.
+  const armedMaterialRef = useRef(true);
+  useEffect(() => { setFinishTarget("all"); }, [selectedId]);
   const { session: conciergeSession } = useConciergeSession();
 
   useEffect(() => {
@@ -275,7 +279,7 @@ const TradeVisualiser = () => {
         position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
         rotation: [0, 0, 0],
         scale: 1,
-        material: isBondStreetStool(product.id) ? null : activeMaterial,
+        material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
         baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
         upholsteryMaterial: null,
       }));
@@ -326,7 +330,7 @@ const TradeVisualiser = () => {
       position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
       rotation: [0, 0, 0],
       scale: 1,
-      material: isBondStreetStool(product.id) ? null : activeMaterial,
+      material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
       baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
       upholsteryMaterial: null,
     };
@@ -381,6 +385,7 @@ const TradeVisualiser = () => {
   /** Applies a swatch to the whole piece or to a single GLB sub-mesh group. */
   const applyMaterial = (material: VisualiserMaterial) => {
     setActiveMaterial(material);
+    armedMaterialRef.current = !selectedId;
     if (!selectedId) {
       toast.success(`${material.name} is ready for the next object.`);
       return;
