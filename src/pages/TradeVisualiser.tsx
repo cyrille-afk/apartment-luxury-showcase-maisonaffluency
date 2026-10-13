@@ -107,6 +107,7 @@ const TradeVisualiser = () => {
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -205,11 +206,12 @@ const TradeVisualiser = () => {
         backdropDataUrl,
         objects,
         projectId,
+        spacing,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -385,7 +387,7 @@ const TradeVisualiser = () => {
       image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
       dimensions: product.dimensions,
       glb_url: product.glb_url,
-      position: pickFreeSlot(objects),
+      position: pickFreeSlot(objects, spacing),
       rotation: [0, 0, 0],
       scale: 1,
       material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
