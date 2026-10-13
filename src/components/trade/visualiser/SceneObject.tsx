@@ -11,6 +11,7 @@ import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart }
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
+import { textileNormalPixels, toPbrMaterial } from "@/lib/showroomRendering";
 
 export type PlacedObject = {
   instanceId: string;
@@ -78,6 +79,26 @@ const disposeMaps = (m: LoadedMaps) => { m.diffuse?.dispose(); m.normal?.dispose
 const STONE_RE = /\b(stone|marble|ceppo|travertin|granite|onyx|limestone|quartzite|terrazzo|basalt|slate)/i;
 export const isStoneMaterial = (m: VisualiserMaterial) =>
   STONE_RE.test(`${m.name} ${m.material_type ?? ""} ${m.category ?? ""}`);
+const isTextileMaterial = (m: VisualiserMaterial) =>
+  /\b(fabric|textile|boucl[eé]|upholstery|linen|wool|velvet|cotton)\b/i.test(`${m.name} ${m.material_type ?? ""} ${m.category ?? ""}`);
+
+function deriveTextileNormal(diffuse: THREE.Texture | null): THREE.Texture | null {
+  const source = diffuse?.image as HTMLCanvasElement | HTMLImageElement | undefined;
+  if (!source?.width) return null;
+  const canvas = document.createElement("canvas");
+  const ratio = Math.min(1, 1024 / Math.max(source.width, source.height));
+  canvas.width = Math.max(1, Math.round(source.width * ratio));
+  canvas.height = Math.max(1, Math.round(source.height * ratio));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  image.data.set(textileNormalPixels(image.data, canvas.width, canvas.height));
+  ctx.putImageData(image, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.userData.derivedTextile = true;
+  return texture;
+}
 
 /**
  * Stone swatches rarely ship a roughness map. Derive a high-res one from the
@@ -107,7 +128,7 @@ function deriveStoneRoughness(diffuse: THREE.Texture | null): THREE.Texture | nu
 
 async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: number): Promise<LoadedMaps> {
   const loader = new THREE.TextureLoader();
-  const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
+  const load = (url?: string | null) => url ? loader.loadAsync(url).catch(() => null) : Promise.resolve(null);
   // Swatch photos are circular thumbnails on a white background. Tiled raw,
   // the white corners produce a checkered pattern on the model — crop to the
   // circle's inscribed square (center ~70%) before using one as a texture.
@@ -129,14 +150,15 @@ async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: num
     img.src = url;
   });
   const [diffuse, normal, roughness] = await Promise.all([
-    loadDiffuse(material.diffuse_url ?? material.image_url),
+    material.diffuse_url ? load(material.diffuse_url) : loadDiffuse(material.image_url),
     load(material.normal_url),
     load(material.roughness_url),
   ]);
   const finalRoughness = roughness ?? (isStoneMaterial(material) ? deriveStoneRoughness(diffuse) : null);
+  const finalNormal = normal ?? (isTextileMaterial(material) ? deriveTextileNormal(diffuse) : null);
   // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
   const repeat = material.repeat ?? 2;
-  for (const texture of [diffuse, normal, finalRoughness]) {
+  for (const texture of [diffuse, finalNormal, finalRoughness]) {
     if (!texture) continue;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(repeat, repeat);
@@ -144,9 +166,9 @@ async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: num
     texture.needsUpdate = true;
   }
   if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
-  if (normal) normal.colorSpace = THREE.NoColorSpace;
+  if (finalNormal) finalNormal.colorSpace = THREE.NoColorSpace;
   if (finalRoughness) finalRoughness.colorSpace = THREE.NoColorSpace;
-  return { diffuse, normal, roughness: finalRoughness };
+  return { diffuse, normal: finalNormal, roughness: finalRoughness };
 }
 
 /**
@@ -155,8 +177,8 @@ async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: num
  * rendering solid black when no reflection source contributes.
  */
 function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | null, maps: LoadedMaps, neutralFabric = false) {
-  const original = source as THREE.MeshStandardMaterial;
-  const material = original.clone();
+  const material = toPbrMaterial(source);
+  const original = material;
   const metalness = neutralFabric ? 0 : finish?.metalness ?? 0;
   // Polished metals read from reflections, not a tiled swatch photo — a swatch
   // stretched over brass or chrome is exactly what produced the grey noise.
@@ -168,7 +190,7 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   } else {
     // Keep the GLB's own authored maps whenever the finish does not supply one.
     material.map = isMetal ? null : maps.diffuse ?? original.map;
-    material.normalMap = maps.normal ?? original.normalMap;
+    material.normalMap = maps.normal?.userData.derivedTextile ? original.normalMap ?? maps.normal : maps.normal ?? original.normalMap;
     material.roughnessMap = maps.roughness ?? original.roughnessMap;
   }
   material.metalnessMap = isMetal ? null : original.metalnessMap;
@@ -178,12 +200,12 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   // A loaded swatch texture carries the true colour; tinting it again with the
   // finish's flat colour is what made fabrics read as solid paint.
   material.color.set(neutralFabric ? "#d8d4cc" : maps.diffuse && !isMetal ? "#ffffff" : finish?.color ?? "#ffffff");
-  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : 0.7);
+  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : finish && isTextileMaterial(finish) ? 0.9 : maps.roughness ? 1 : 0.7);
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
   // Non-metals get a touch more IBL so stone/wood edges catch thin speculars.
   material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1.15;
   // Fabrics (high roughness) need deeper normals so bouclé reads under grazing key light.
-  const n = material.roughness > 0.8 ? 0.6 : 0.35;
+  const n = finish && isTextileMaterial(finish) ? 0.85 : 0.35;
   material.normalScale.set(n, n);
   material.transparent = original.transparent;
   material.side = original.side;
@@ -290,7 +312,17 @@ function useFittedModel(object: PlacedObject) {
       // Upholstery never inherits the whole-piece finish; other parts fall back to it.
       const finish = meshPartMaterial(holder, role);
       const neutralFabric = isBondStreetStool(productId) && role === "upholstery" && !finish;
-      if (!finish && !neutralFabric) return;
+      if (!finish && !neutralFabric) {
+        const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const next = source.map((entry) => {
+          const material = toPbrMaterial(entry);
+          material.userData.visualiserClone = true;
+          if (role === "upholstery" && material.normalMap) material.normalScale.multiplyScalar(1.2);
+          return material;
+        });
+        mesh.material = Array.isArray(mesh.material) ? next : next[0];
+        return;
+      }
       const m = (finish && maps.get(finish.id)) || EMPTY_MAPS;
       const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       const next = source.map((entry) => clonePbrMaterial(entry, finish, m, neutralFabric));
