@@ -710,6 +710,7 @@ const TradeVisualiser = () => {
             environmentSource={environmentSource}
             floorFinish={floorFinish}
             showRearWall={showRearWall}
+            wallHeight={wallHeight}
             floorGlare={floorGlare}
           />
         </Suspense>
@@ -905,7 +906,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, floorGlare })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
