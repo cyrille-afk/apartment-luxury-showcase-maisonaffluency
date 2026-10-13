@@ -351,6 +351,39 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     return raycaster.ray.intersectPlane(FLOOR_PLANE, point) ? point : null;
   }, [raycaster]);
 
+  /**
+   * Window-level drag tracking: once a drag starts, pointermove/up are read
+   * from the window and raycast manually, so the piece keeps following the
+   * cursor even when it moves faster than the model or leaves the mesh.
+   */
+  const dragMove = useCallback((event: PointerEvent) => {
+    const group = groupRef.current;
+    if (!draggingRef.current || !group) return;
+    const rect = gl.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    pointerRef.current.set(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    raycaster.setFromCamera(pointerRef.current, camera);
+    const hit = raycaster.ray.intersectPlane(FLOOR_PLANE, hitRef.current);
+    if (!hit) return;
+    // Floor lock: X/Z translation only, y stays on its depth layer.
+    group.position.set(hit.x + offsetRef.current.x, floorYRef.current, hit.z + offsetRef.current.z);
+  }, [gl, raycaster, camera]);
+
+  const endDrag = useCallback(() => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    window.removeEventListener("pointermove", dragMove);
+    onDragStateChange(false);
+    gl.domElement.style.cursor = "auto";
+    const group = groupRef.current;
+    if (group) {
+      onTransform(object.instanceId, [group.position.x, floorYRef.current, group.position.z], object.rotation);
+    }
+  }, [dragMove, gl, onDragStateChange, onTransform, object.instanceId, object.rotation]);
+
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     onSelect(object.instanceId);
@@ -364,29 +397,10 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     );
     draggingRef.current = true;
     onDragStateChange(true);
-    (event.target as Element | null)?.setPointerCapture?.(event.pointerId);
+    window.addEventListener("pointermove", dragMove);
+    window.addEventListener("pointerup", endDrag, { once: true });
+    window.addEventListener("pointercancel", endDrag, { once: true });
     gl.domElement.style.cursor = "grabbing";
-  };
-
-  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!draggingRef.current || !groupRef.current) return;
-    event.stopPropagation();
-    const hit = floorHit();
-    if (!hit) return;
-    // Floor lock: X/Z translation only, y is pinned to 0.
-    groupRef.current.position.set(hit.x + offsetRef.current.x, object.position[1] ?? 0, hit.z + offsetRef.current.z);
-  };
-
-  const endDrag = (event?: ThreeEvent<PointerEvent>) => {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    onDragStateChange(false);
-    gl.domElement.style.cursor = "auto";
-    if (event) (event.target as Element | null)?.releasePointerCapture?.(event.pointerId);
-    const group = groupRef.current;
-    if (group) {
-      onTransform(object.instanceId, [group.position.x, object.position[1] ?? 0, group.position.z], object.rotation);
-    }
   };
 
   /** Persist the gizmo result back into React state (floor-locked, upright). */
