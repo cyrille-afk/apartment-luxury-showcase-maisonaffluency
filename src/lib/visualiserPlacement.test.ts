@@ -59,6 +59,12 @@ describe("spacing parameter", () => {
 });
 
 describe("respaceObjects", () => {
+  it("never moves a position-locked piece when respacing the scene", () => {
+    const fixed = { id: "locked", positionLocked: true, position: [0, 0, 0] as [number, number, number] };
+    const moved = respaceObjects([fixed, { id: "free", positionLocked: false, position: [0.1, 0, 0] as [number, number, number] }], 2);
+    expect(moved.find(object => object.id === "locked")).toBe(fixed);
+    expect(moved.find(object => object.id === "free")?.position).not.toEqual(fixed.position);
+  });
   it("keeps every piece on the grid at the new spacing with no overlaps", () => {
     const objects = [
       { id: "a", position: [0, 0, 0] as [number, number, number] },

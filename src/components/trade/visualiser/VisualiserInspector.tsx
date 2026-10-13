@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
 import { useVisualiserSelection } from "./VisualiserSelectionContext";
 
@@ -52,16 +53,16 @@ const VisualiserInspector = ({
           <p className={cn(microLabel, "text-muted-foreground")}>{selected.brand_name}</p>
           <p className="mt-1 font-serif text-base leading-tight text-foreground">{selected.product_name}</p>
         </div>
-        <button
+        <Button variant="ghost" size="icon-sm"
           aria-label="Remove object"
           onClick={() => onRemove(selected.instanceId)}
           className="text-muted-foreground hover:text-foreground"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
       <p className={cn(microLabel, "mt-3 text-muted-foreground")}>
-        {formatDimensions(resolveDimensions({ dimensions: selected.dimensions })) ?? DIMENSIONS_PLACEHOLDER}
+        {formatDimensions(resolveDimensions(selected)) ?? DIMENSIONS_PLACEHOLDER}
       </p>
 
       <label className={cn(microLabel, "mt-5 block text-muted-foreground")}>

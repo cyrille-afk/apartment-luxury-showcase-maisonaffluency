@@ -43,7 +43,7 @@ export function pickFreeSlot(
  * object's current relative order (sorted by distance from centre, then row)
  * so the scene keeps its rough arrangement while the gaps change.
  */
-export function respaceObjects<T extends { position: [number, number, number] }>(
+export function respaceObjects<T extends { position: [number, number, number]; positionLocked?: boolean }>(
   objects: T[],
   spacing: number = DEFAULT_SLOT_SPACING,
 ): T[] {
@@ -53,8 +53,9 @@ export function respaceObjects<T extends { position: [number, number, number] }>
     if (da !== db) return da - db;
     return a.position[2] - b.position[2] || a.position[0] - b.position[0];
   });
-  const placed: { position: [number, number, number] }[] = [];
+  const placed: { position: [number, number, number] }[] = objects.filter(object => object.positionLocked);
   return ordered.map((object) => {
+    if (object.positionLocked) return object;
     const position = pickFreeSlot(placed, spacing);
     placed.push({ position });
     return { ...object, position };

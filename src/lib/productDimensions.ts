@@ -48,6 +48,13 @@ export function parseDimensionString(raw?: string | null): ProductDimensions | n
     return { w: dia, d: dia, h: toMm(height[1], unitFactor) };
   }
 
+  // Canvas snapshots also carry canonical, unlabelled W × D × H strings.
+  const triple = text.match(/^\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*[×xX]\s*([\d.]+)\s*(mm|cm)\b/i);
+  if (triple) {
+    const factor = triple[4].toLowerCase() === "mm" ? 1 : 10;
+    return { w: toMm(triple[1], factor), d: toMm(triple[2], factor), h: toMm(triple[3], factor) };
+  }
+
   return null;
 }
 
