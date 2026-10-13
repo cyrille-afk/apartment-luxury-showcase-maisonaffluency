@@ -245,6 +245,7 @@ const VisualiserCanvas = ({
     </Suspense>
     {depthOfField && (
       <DofPass
+        strength={dofStrength}
         focus={(() => {
           const sel = objects.find((o) => o.instanceId === selectedId);
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
