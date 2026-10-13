@@ -122,6 +122,7 @@ const readSandbox = (): PersistedSandbox => {
       environmentSource: parsed.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr",
       floorFinish: roomFloorFinish(parsed.floorFinish),
       showRearWall: parsed.showRearWall !== false,
+      wallHeight: clampWallHeight(parsed.wallHeight),
       floorGlare: clampFloorGlare(parsed.floorGlare),
     };
   } catch {
@@ -168,6 +169,7 @@ const TradeVisualiser = () => {
   const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
   const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
+  const [wallHeight, setWallHeight] = useState<number>(clampWallHeight(initial.wallHeight));
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
