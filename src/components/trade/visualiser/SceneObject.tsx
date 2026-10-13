@@ -71,6 +71,37 @@ const EMPTY_MAPS: LoadedMaps = { diffuse: null, normal: null, roughness: null };
 
 const disposeMaps = (m: LoadedMaps) => { m.diffuse?.dispose(); m.normal?.dispose(); m.roughness?.dispose(); };
 
+
+const STONE_RE = /\b(stone|marble|ceppo|travertin|granite|onyx|limestone|quartzite|terrazzo|basalt|slate)/i;
+export const isStoneMaterial = (m: VisualiserMaterial) =>
+  STONE_RE.test(`${m.name} ${m.material_type ?? ""} ${m.category ?? ""}`);
+
+/**
+ * Stone swatches rarely ship a roughness map. Derive a high-res one from the
+ * diffuse luminance so polished vs. matte segments (clasts, veins, cement)
+ * reflect light unevenly instead of reading as one uniform sheen.
+ */
+function deriveStoneRoughness(diffuse: THREE.Texture | null): THREE.Texture | null {
+  const src = diffuse?.image as HTMLCanvasElement | HTMLImageElement | undefined;
+  if (!src || !src.width) return null;
+  const size = Math.min(2048, Math.max(src.width, src.height));
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(src, 0, 0, size, size);
+  const img = ctx.getImageData(0, 0, size, size);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const lum = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+    // Light clasts polish brighter (lower roughness); dark matrix stays matte.
+    const r = Math.round((0.75 - lum * 0.5) * 255);
+    d[i] = d[i + 1] = d[i + 2] = r;
+  }
+  ctx.putImageData(img, 0, 0);
+  return new THREE.CanvasTexture(c);
+}
+
 async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: number): Promise<LoadedMaps> {
   const loader = new THREE.TextureLoader();
   const load = (url?: string | null) => url ? loader.loadAsync(url) : Promise.resolve(null);
@@ -99,9 +130,10 @@ async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: num
     load(material.normal_url),
     load(material.roughness_url),
   ]);
+  const finalRoughness = roughness ?? (isStoneMaterial(material) ? deriveStoneRoughness(diffuse) : null);
   // Furniture-scale tiling: a swatch tiled 6x on a side table reads as grey noise.
   const repeat = material.repeat ?? 2;
-  for (const texture of [diffuse, normal, roughness]) {
+  for (const texture of [diffuse, normal, finalRoughness]) {
     if (!texture) continue;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(repeat, repeat);
@@ -110,8 +142,8 @@ async function loadMaterialMaps(material: VisualiserMaterial, maxAnisotropy: num
   }
   if (diffuse) diffuse.colorSpace = THREE.SRGBColorSpace;
   if (normal) normal.colorSpace = THREE.NoColorSpace;
-  if (roughness) roughness.colorSpace = THREE.NoColorSpace;
-  return { diffuse, normal, roughness };
+  if (finalRoughness) finalRoughness.colorSpace = THREE.NoColorSpace;
+  return { diffuse, normal, roughness: finalRoughness };
 }
 
 /**
