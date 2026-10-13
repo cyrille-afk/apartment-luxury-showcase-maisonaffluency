@@ -17,10 +17,10 @@ describe("showroom rendering", () => {
     const source = new THREE.BoxGeometry();
     expect(withFallbackTextureCoordinates(source)).toBe(source);
   });
-  it("keeps exposure within 1.0–1.2 and ambient at 0.15", () => {
-    expect(SHOWROOM.exposure).toBeGreaterThanOrEqual(1);
-    expect(SHOWROOM.exposure).toBeLessThanOrEqual(1.2);
-    expect(SHOWROOM.ambient).toBe(0.15);
+  it("keeps exposure within 1.8–2.2 and ambient at 0.4", () => {
+    expect(SHOWROOM.exposure).toBeGreaterThanOrEqual(1.8);
+    expect(SHOWROOM.exposure).toBeLessThanOrEqual(2.2);
+    expect(SHOWROOM.ambient).toBe(0.4);
   });
   it("upgrades unlit assets without losing their colour map or transparency", () => {
     const map = new THREE.Texture();
