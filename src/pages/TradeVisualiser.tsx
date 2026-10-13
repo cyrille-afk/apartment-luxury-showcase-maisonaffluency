@@ -876,7 +876,7 @@ const TradeVisualiser = () => {
               aria-pressed={showLabels}
               title="Show or hide the floating name labels and lock badges above pieces"
             >
-              [ &#127991; Labels: {showLabels ? "On" : "Off"} ]
+              [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
             </button>
             <button
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
