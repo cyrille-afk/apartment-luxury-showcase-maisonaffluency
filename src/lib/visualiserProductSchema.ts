@@ -51,10 +51,14 @@ export const PRODUCT_FINISH_SCHEMAS: ProductFinishSchema[] = [
 
 const key = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
+/** Catalogue names often carry the maker ("Madison Avenue Side Table by Yabu Pushelberg"). */
+const stripTrailingBrand = (k: string) => k.replace(/ by [a-z0-9 ]+$/, "");
+
 export function findProductSchema(productName?: string | null): ProductFinishSchema | null {
   if (!productName) return null;
   const k = key(productName);
-  return PRODUCT_FINISH_SCHEMAS.find((s) => key(s.name) === k) ?? null;
+  const bare = stripTrailingBrand(k);
+  return PRODUCT_FINISH_SCHEMAS.find((s) => key(s.name) === k || key(s.name) === bare) ?? null;
 }
 
 export function schemaTargets(schema: ProductFinishSchema): FinishTarget[] {
