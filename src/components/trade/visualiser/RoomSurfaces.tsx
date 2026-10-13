@@ -183,8 +183,8 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
  * Centered on the arrangement; at least 4.5 × 3.5 m, growing so every
  * piece's footprint sits comfortably inside its boundaries.
  */
-const RUG_THICKNESS_M = 0.015;
-const RUG_BEVEL_M = 0.004;
+const RUG_THICKNESS_M = 0.018;
+const RUG_BEVEL_M = 0.005;
 /** Height of the rug's top surface — contact shadows sit just above it. */
 export const RUG_TOP_Y = 0.001 + RUG_THICKNESS_M + RUG_BEVEL_M * 2;
 const RUG_TILE: [number, number] = [1.35, 1.35];
@@ -232,7 +232,7 @@ function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[];
   }, [objects, layout?.width, layout?.depth, layout?.offsetX, layout?.offsetZ]);
   const geometry = useMemo(() => {
     const g = new THREE.ExtrudeGeometry(organicRugShape(width, depth), {
-      depth: RUG_THICKNESS_M, bevelEnabled: true, bevelThickness: RUG_BEVEL_M, bevelSize: 0.03, bevelSegments: 4, curveSegments: 96,
+      depth: RUG_THICKNESS_M, bevelEnabled: true, bevelThickness: RUG_BEVEL_M, bevelSize: 0.03, bevelSegments: 3, curveSegments: 96,
     });
     // Sit the bevelled underside on the floor.
     g.translate(0, 0, RUG_BEVEL_M);
@@ -241,8 +241,8 @@ function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[];
   useEffect(() => () => geometry.dispose(), [geometry]);
   if (!maps.color || !maps.normal) return null;
   return (
-    <mesh name="room-area-rug" geometry={geometry} position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 1.35, 0.25 + (p / 100) * 1.35)} roughness={0.86 + (p / 100) * 0.1} metalness={0} envMapIntensity={0.05} />
+    <mesh name="room-area-rug" geometry={geometry} position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8 + (p / 100) * 1.6, 0.8 + (p / 100) * 1.6)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
   );
 }
