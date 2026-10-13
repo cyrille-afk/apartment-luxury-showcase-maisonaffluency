@@ -1,4 +1,5 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type ScenePresetData = {
   objects: PlacedObject[];
@@ -14,6 +15,8 @@ export type ScenePresetData = {
   dofFocusSelected?: boolean;
   /** Which HDRI the environment loads: empty-room EXR or built-in studio HDRI. */
   environmentSource?: "empty-room-exr" | "studio-hdr";
+  floorFinish?: RoomFloorFinish;
+  showRearWall?: boolean;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };

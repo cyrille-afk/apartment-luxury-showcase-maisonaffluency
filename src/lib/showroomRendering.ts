@@ -7,6 +7,7 @@ export const SHOWROOM = {
   key: "#fff7ed",
   fill: "#edf3ff",
   rim: "#ffffff",
+  plaster: "#f3f2ee",
 };
 
 /** Preserve authored maps and transparency when upgrading legacy unlit materials. */

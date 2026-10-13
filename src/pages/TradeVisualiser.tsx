@@ -24,6 +24,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+import { roomFloorFinish, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -86,6 +88,8 @@ type PersistedSandbox = {
   dofStrength?: number;
   dofFocusSelected?: boolean;
   environmentSource?: EnvironmentSourcePref;
+  floorFinish?: RoomFloorFinish;
+  showRearWall?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -114,6 +118,8 @@ const readSandbox = (): PersistedSandbox => {
       dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
       dofFocusSelected: parsed.dofFocusSelected !== false,
       environmentSource: parsed.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr",
+      floorFinish: roomFloorFinish(parsed.floorFinish),
+      showRearWall: parsed.showRearWall !== false,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -157,6 +163,8 @@ const TradeVisualiser = () => {
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
   const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
+  const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
+  const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -273,11 +281,13 @@ const TradeVisualiser = () => {
         dofStrength,
         dofFocusSelected,
         environmentSource,
+        floorFinish,
+        showRearWall,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -690,6 +700,8 @@ const TradeVisualiser = () => {
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
+            floorFinish={floorFinish}
+            showRearWall={showRearWall}
           />
         </Suspense>
       </div>
@@ -884,7 +896,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -898,6 +910,8 @@ const TradeVisualiser = () => {
               if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
               setDofFocusSelected(data.dofFocusSelected !== false);
               setEnvironmentSource(data.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr");
+              setFloorFinish(roomFloorFinish(data.floorFinish));
+              setShowRearWall(data.showRearWall !== false);
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -905,6 +919,23 @@ const TradeVisualiser = () => {
         </div>
         <div className="h-px w-full bg-border" />
           <div className="visualiser-toolbar-row visualiser-toolbar-settings" role="group" aria-label="View settings" tabIndex={0}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className={toolbarButton} aria-label="Room surfaces">
+                  <Box className="mr-2 h-3.5 w-3.5" /> Room: {floorFinish === "oak-chevron" ? "Oak Chevron" : floorFinish === "micro-cement" ? "Micro-Cement" : "Backdrop"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="top">
+                <DropdownMenuLabel>Floor finish</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={floorFinish} onValueChange={(value) => setFloorFinish(roomFloorFinish(value))}>
+                  <DropdownMenuRadioItem value="oak-chevron">Light Oak Chevron</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="micro-cement">Premium Micro-Cement</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="none">No Floor / Backdrop</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked={showRearWall} onCheckedChange={setShowRearWall}>Plaster Rear Wall</DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost"
               className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
               onClick={() => setSnapToGrid((value) => !value)}

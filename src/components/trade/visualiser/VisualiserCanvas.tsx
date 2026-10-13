@@ -11,6 +11,8 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
+import RoomSurfaces from "./RoomSurfaces";
+import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -166,6 +168,8 @@ interface VisualiserCanvasProps {
   dofFocusSelected?: boolean;
   /** Which HDRI the environment should load: the empty-room EXR or the built-in studio HDRI. */
   environmentSource?: VisualiserEnvironmentSource;
+  floorFinish?: RoomFloorFinish;
+  showRearWall?: boolean;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -201,6 +205,8 @@ const VisualiserCanvas = ({
   dofStrength = 3,
   dofFocusSelected = true,
   environmentSource = "empty-room-exr",
+  floorFinish = "oak-chevron",
+  showRearWall = true,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -225,7 +231,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -274,7 +280,10 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
-    {!hasBackdrop && (
+    <Suspense fallback={null}>
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} />
+    </Suspense>
+    {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows
         position={[0, 0.002, 0]}
         scale={40}
@@ -302,10 +311,10 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {floorFinish === "none" && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
-    </mesh>
+    </mesh>}
 
     <Suspense fallback={<SceneLoader />}>
       {objects.map((object) => (

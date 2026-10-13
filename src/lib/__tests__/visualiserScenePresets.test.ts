@@ -15,4 +15,14 @@ describe("scene presets", () => {
     const [b] = saveScenePreset("B", { objects: [obj] });
     expect(deleteScenePreset(b.id).map((p) => p.name)).toEqual(["A"]);
   });
+  it("restores the chosen floor and plaster wall with a furniture preset", () => {
+    saveScenePreset("Cement room", { objects: [obj], floorFinish: "micro-cement", showRearWall: true });
+    expect(readScenePresets()[0].data.floorFinish).toBe("micro-cement");
+    expect(readScenePresets()[0].data.showRearWall).toBe(true);
+  });
+  it("preserves backdrop-only surfaces when the floor and wall are disabled", () => {
+    saveScenePreset("Photo room", { objects: [obj], floorFinish: "none", showRearWall: false });
+    expect(readScenePresets()[0].data.floorFinish).toBe("none");
+    expect(readScenePresets()[0].data.showRearWall).toBe(false);
+  });
 });
