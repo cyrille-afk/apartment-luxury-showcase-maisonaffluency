@@ -1,3 +1,3 @@
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
 - [x] Improve stone roughness and textile micro-normal handling; verify tests and live furniture rendering.
-- [ ] Diagnose GUM texture detail and separate backrest/seat finishes; verify with the real chair.
+- [x] Diagnose GUM texture detail and separate backrest/seat finishes; verified real fabric changes, independent finishes and reopening, with 32 passing tests.
