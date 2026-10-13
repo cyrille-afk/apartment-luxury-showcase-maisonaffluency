@@ -255,7 +255,7 @@ function RugBorder({ width, depth, color }: { width: number; depth: number; colo
 }
 
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
-function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
+function Rug({ objects, color, borderColor = "match", weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
   // Extruded shape UVs are in metres, so tile ~1.35× per metre (matches the old 6×5 over 4.5×3.8 m).
   const maps = useWoolMaps(rugWeave(weave), p, RUG_TILE);
@@ -292,7 +292,7 @@ function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[];
     <mesh name="room-area-rug" geometry={geometry} castShadow receiveShadow>
       <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8 + (p / 100) * 1.6, 0.8 + (p / 100) * 1.6)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
-    <RugBorder width={width} depth={depth} color={rugColorHex(color)} />
+    <RugBorder width={width} depth={depth} color={rugColorHex(borderColor === "match" ? color : borderColor)} />
     </group>
   );
 }
