@@ -125,3 +125,22 @@ export function clampRugOffset(value: unknown): number {
 export function rugVisible(value: unknown): boolean {
   return value !== false;
 }
+
+/** Braided border cord: thickness (radius) in mm, 4–20, default 10. */
+export function clampRugBorderThicknessMm(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 10;
+  return Math.min(20, Math.max(4, Math.round(n)));
+}
+/** Braided border cord: twist spacing in mm, 10–60, default 25. */
+export function clampRugBorderTwistMm(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 25;
+  return Math.min(60, Math.max(10, Math.round(n)));
+}
+/** Braided border cord: roughness 0–100, default 75 (higher = more matte). */
+export function clampRugBorderRoughness(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 75;
+  return Math.min(100, Math.max(0, Math.round(n)));
+}
