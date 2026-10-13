@@ -41,4 +41,4 @@ export const saveScenePreset = (name: string, data: ScenePresetData): ScenePrese
   return write([preset, ...list.filter((p) => p.id !== preset.id)]);
 };
 
-export const deleteScenePreset = (id: string) => write(readScenePresets().filter((p) => p.id !== id));
+export const deleteScenePreset = (id: string) => write(readScenePresets().filter((p) => p.id !== id)) ?? readScenePresets();
