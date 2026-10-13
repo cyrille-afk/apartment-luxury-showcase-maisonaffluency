@@ -77,6 +77,7 @@ type PersistedSandbox = {
   spacing?: number;
   snapToGrid?: boolean;
   showGrid?: boolean;
+  showLabels?: boolean;
   depthOfField?: boolean;
   dofStrength?: number;
   dofFocusSelected?: boolean;
@@ -103,6 +104,7 @@ const readSandbox = (): PersistedSandbox => {
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
+      showLabels: parsed.showLabels !== false,
       depthOfField: parsed.depthOfField === true,
       dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
       dofFocusSelected: parsed.dofFocusSelected !== false,
@@ -144,6 +146,7 @@ const TradeVisualiser = () => {
   const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
+  const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
@@ -258,6 +261,7 @@ const TradeVisualiser = () => {
         spacing,
         snapToGrid,
         showGrid,
+        showLabels,
         depthOfField,
         dofStrength,
         dofFocusSelected,
@@ -265,7 +269,7 @@ const TradeVisualiser = () => {
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField, dofStrength, dofFocusSelected]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -672,6 +676,7 @@ const TradeVisualiser = () => {
             onTextureParts={handleTextureParts}
             snapToGrid={snapToGrid}
             showGrid={showGrid}
+            showLabels={showLabels}
             depthOfField={depthOfField}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
@@ -866,6 +871,14 @@ const TradeVisualiser = () => {
               [ &#127760; Show Grid: {showGrid ? "On" : "Off"} ]
             </button>
             <button
+              className={cn(toolbarButton, showLabels ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setShowLabels((value) => !value)}
+              aria-pressed={showLabels}
+              title="Show or hide the floating name labels and lock badges above pieces"
+            >
+              [ &#127991; Labels: {showLabels ? "On" : "Off"} ]
+            </button>
+            <button
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}
               aria-pressed={depthOfField}
@@ -916,7 +929,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -925,6 +938,7 @@ const TradeVisualiser = () => {
               if (typeof data.spacing === "number") setSpacing(data.spacing);
               setSnapToGrid(data.snapToGrid === true);
               setShowGrid(data.showGrid !== false);
+              setShowLabels(data.showLabels !== false);
               setDepthOfField(data.depthOfField === true);
               if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
               setDofFocusSelected(data.dofFocusSelected !== false);
