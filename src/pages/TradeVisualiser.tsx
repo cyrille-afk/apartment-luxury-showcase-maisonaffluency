@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugColor as toRugColor, rugWeave as toRugWeave, type RugColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugWeave as toRugWeave, type RugColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -103,6 +103,8 @@ type PersistedSandbox = {
   rugDepth?: number | null;
   rugOffsetX?: number;
   rugOffsetZ?: number;
+  /** Hide the rug while arranging furniture (default shown). */
+  showRug?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -146,6 +148,7 @@ const readSandbox = (): PersistedSandbox => {
       rugDepth: clampRugSize(parsed.rugDepth),
       rugOffsetX: clampRugOffset(parsed.rugOffsetX),
       rugOffsetZ: clampRugOffset(parsed.rugOffsetZ),
+      showRug: rugVisible(parsed.showRug),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -204,6 +207,7 @@ const TradeVisualiser = () => {
   const [rugDepth, setRugDepth] = useState<number | null>(clampRugSize(initial.rugDepth));
   const [rugOffsetX, setRugOffsetX] = useState<number>(clampRugOffset(initial.rugOffsetX));
   const [rugOffsetZ, setRugOffsetZ] = useState<number>(clampRugOffset(initial.rugOffsetZ));
+  const [showRug, setShowRug] = useState<boolean>(rugVisible(initial.showRug));
   const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
@@ -343,11 +347,12 @@ const TradeVisualiser = () => {
         rugWeave: rugWeaveKey,
         rugPile,
         rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
+        showRug,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -772,6 +777,7 @@ const TradeVisualiser = () => {
             rugWeave={rugWeaveKey}
             rugPile={rugPile}
             rugLayout={rugLayout}
+            showRug={showRug}
           />
         </Suspense>
       </div>
@@ -966,7 +972,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -997,6 +1003,7 @@ const TradeVisualiser = () => {
               setRugDepth(clampRugSize(data.rugDepth));
               setRugOffsetX(clampRugOffset(data.rugOffsetX));
               setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
+              setShowRug(rugVisible(data.showRug));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1095,6 +1102,7 @@ const TradeVisualiser = () => {
                   <p className="mt-1 text-[10px] text-muted-foreground">How strongly the plaster catches light — 100% is the finish as designed, lower goes matte.</p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked={showRug} onCheckedChange={setShowRug} disabled={floorFinish === "none"}>Show Rug</DropdownMenuCheckboxItem>
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug colour</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={rugColorKey} onValueChange={(v) => setRugColorKey(toRugColor(v))}>
                   {RUG_COLORS.map((c) => (

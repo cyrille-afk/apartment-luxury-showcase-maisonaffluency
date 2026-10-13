@@ -35,3 +35,22 @@ describe("rug layout", () => {
     expect([d.rugWidth, d.rugDepth, d.rugOffsetX, d.rugOffsetZ]).toEqual([6, 4, -1.2, 0.5]);
   });
 });
+
+import { rugVisible } from "../visualiserRoomSurfaces";
+describe("rug visibility toggle", () => {
+  it("shows the rug unless explicitly hidden", () => {
+    expect(rugVisible(undefined)).toBe(true);
+    expect(rugVisible(null)).toBe(true);
+    expect(rugVisible(true)).toBe(true);
+    expect(rugVisible(false)).toBe(false);
+    expect(rugVisible("false")).toBe(true);
+  });
+  it("rides in presets", () => {
+    saveScenePreset("Rug hidden", { objects: [], showRug: false });
+    saveScenePreset("Rug shown", { objects: [], showRug: true });
+    const hidden = readScenePresets().find((p) => p.name === "Rug hidden")!.data;
+    const shown = readScenePresets().find((p) => p.name === "Rug shown")!.data;
+    expect(hidden.showRug).toBe(false);
+    expect(shown.showRug).toBe(true);
+  });
+});
