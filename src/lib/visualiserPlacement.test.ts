@@ -115,3 +115,34 @@ describe("pickFootprintSlot", () => {
     expect(Math.hypot(slot[0], slot[2])).toBeGreaterThanOrEqual(big.radius + r);
   });
 });
+
+import { resolveDragPosition } from "./visualiserPlacement";
+describe("resolveDragPosition", () => {
+  const chair = { position: [0, 0, 0] as [number, number, number], radius: 0.8 };
+
+  it("leaves a clear position untouched", () => {
+    expect(resolveDragPosition(5, 5, 0.5, [chair])).toEqual([5, 5]);
+  });
+
+  it("pushes a dropped piece out of another piece's footprint", () => {
+    const [x, z] = resolveDragPosition(0.3, 0, 0.5, [chair]);
+    expect(Math.hypot(x, z)).toBeGreaterThanOrEqual(0.8 + 0.5);
+  });
+
+  it("handles a drop dead-centre on another piece", () => {
+    const [x, z] = resolveDragPosition(0, 0, 0.5, [chair]);
+    expect(Math.hypot(x, z)).toBeGreaterThanOrEqual(0.8 + 0.5);
+  });
+
+  it("resolves against a cluster of pieces", () => {
+    const obstacles = [
+      chair,
+      { position: [1.6, 0, 0] as [number, number, number], radius: 0.8 },
+      { position: [0.8, 0, 1.4] as [number, number, number], radius: 0.8 },
+    ];
+    const [x, z] = resolveDragPosition(0.8, 0, 0.5, obstacles);
+    for (const o of obstacles) {
+      expect(Math.hypot(x - o.position[0], z - o.position[2])).toBeGreaterThanOrEqual(o.radius + 0.5);
+    }
+  });
+});
