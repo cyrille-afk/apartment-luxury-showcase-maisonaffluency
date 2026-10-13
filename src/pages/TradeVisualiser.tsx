@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { clampFloorGlare, roomFloorFinish, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, roomFloorFinish, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -90,6 +90,7 @@ type PersistedSandbox = {
   environmentSource?: EnvironmentSourcePref;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
+  wallHeight?: number;
   floorGlare?: number;
 };
 
@@ -121,6 +122,7 @@ const readSandbox = (): PersistedSandbox => {
       environmentSource: parsed.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr",
       floorFinish: roomFloorFinish(parsed.floorFinish),
       showRearWall: parsed.showRearWall !== false,
+      wallHeight: clampWallHeight(parsed.wallHeight),
       floorGlare: clampFloorGlare(parsed.floorGlare),
     };
   } catch {
@@ -167,6 +169,7 @@ const TradeVisualiser = () => {
   const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
   const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
+  const [wallHeight, setWallHeight] = useState<number>(clampWallHeight(initial.wallHeight));
   const [floorGlare, setFloorGlare] = useState<number>(clampFloorGlare(initial.floorGlare));
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
@@ -286,12 +289,13 @@ const TradeVisualiser = () => {
         environmentSource,
         floorFinish,
         showRearWall,
+        wallHeight,
         floorGlare,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, floorGlare]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -706,6 +710,7 @@ const TradeVisualiser = () => {
             environmentSource={environmentSource}
             floorFinish={floorFinish}
             showRearWall={showRearWall}
+            wallHeight={wallHeight}
             floorGlare={floorGlare}
           />
         </Suspense>
@@ -901,7 +906,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, floorGlare })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -917,6 +922,7 @@ const TradeVisualiser = () => {
               setEnvironmentSource(data.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr");
               setFloorFinish(roomFloorFinish(data.floorFinish));
               setShowRearWall(data.showRearWall !== false);
+              setWallHeight(clampWallHeight(data.wallHeight));
               setFloorGlare(clampFloorGlare(data.floorGlare));
             }}
           />
@@ -940,6 +946,23 @@ const TradeVisualiser = () => {
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem checked={showRearWall} onCheckedChange={setShowRearWall}>Plaster Rear Wall</DropdownMenuCheckboxItem>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Wall Height</span>
+                    <span>{Math.round((WALL_FULL_HEIGHT_M * wallHeight) / 100 * 10) / 10} m</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={20}
+                    max={100}
+                    step={5}
+                    value={wallHeight}
+                    onChange={(e) => setWallHeight(clampWallHeight(Number(e.target.value)))}
+                    aria-label="Wall height"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">Lower the wall to frame the furniture display; 100% is the full-height cyclorama.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">

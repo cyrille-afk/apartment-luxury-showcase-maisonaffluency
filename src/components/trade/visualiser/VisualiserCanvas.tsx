@@ -170,6 +170,8 @@ interface VisualiserCanvasProps {
   environmentSource?: VisualiserEnvironmentSource;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
+  /** Wall height percentage of the full cyclorama (20–100). */
+  wallHeight?: number;
   /** Floor reflection strength, 0 (matte) – 100 (polished). */
   floorGlare?: number;
 }
@@ -209,6 +211,7 @@ const VisualiserCanvas = ({
   environmentSource = "empty-room-exr",
   floorFinish = "oak-chevron",
   showRearWall = true,
+  wallHeight = 100,
   floorGlare = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
@@ -234,7 +237,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${floorGlare}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -284,7 +287,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows

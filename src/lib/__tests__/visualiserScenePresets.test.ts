@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteScenePreset, readScenePresets, saveScenePreset } from "../visualiserScenePresets";
+import { clampWallHeight } from "../visualiserRoomSurfaces";
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
@@ -24,5 +25,15 @@ describe("scene presets", () => {
     saveScenePreset("Photo room", { objects: [obj], floorFinish: "none", showRearWall: false });
     expect(readScenePresets()[0].data.floorFinish).toBe("none");
     expect(readScenePresets()[0].data.showRearWall).toBe(false);
+  });
+  it("saves the wall height percentage with the preset", () => {
+    saveScenePreset("Low wall", { objects: [obj], showRearWall: true, wallHeight: 60 });
+    expect(readScenePresets()[0].data.wallHeight).toBe(60);
+  });
+  it("clamps wall height to 20–100 and defaults to full height", () => {
+    expect(clampWallHeight(undefined)).toBe(100);
+    expect(clampWallHeight(60)).toBe(60);
+    expect(clampWallHeight(5)).toBe(20);
+    expect(clampWallHeight(180)).toBe(100);
   });
 });
