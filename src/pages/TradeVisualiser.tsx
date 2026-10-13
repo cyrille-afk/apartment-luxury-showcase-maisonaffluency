@@ -41,6 +41,7 @@ type CatalogueProduct = {
   category: string;
   dimensions: string | null;
   glb_url: string | null;
+  source_pick_id: string | null;
 };
 
 type PersistedSandbox = {
