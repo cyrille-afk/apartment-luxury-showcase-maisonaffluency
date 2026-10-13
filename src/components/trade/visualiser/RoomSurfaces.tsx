@@ -23,8 +23,9 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean) {
     canvas.width = canvas.height = 512;
     const ctx = canvas.getContext("2d");
     let roughness: THREE.CanvasTexture | null = null;
-    if (ctx) {
-      ctx.drawImage(source.image, 0, 0, 512, 512);
+    const image = source.image;
+    if (ctx && image instanceof HTMLImageElement) {
+      ctx.drawImage(image, 0, 0, 512, 512);
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
