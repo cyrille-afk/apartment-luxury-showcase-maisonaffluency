@@ -70,6 +70,8 @@ type CatalogueProduct = {
   source_pick_id: string | null;
 };
 
+type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr";
+
 type PersistedSandbox = {
   backdropDataUrl: string | null;
   backdrop: string | null;
@@ -82,6 +84,7 @@ type PersistedSandbox = {
   depthOfField?: boolean;
   dofStrength?: number;
   dofFocusSelected?: boolean;
+  environmentSource?: EnvironmentSourcePref;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -109,6 +112,7 @@ const readSandbox = (): PersistedSandbox => {
       depthOfField: parsed.depthOfField === true,
       dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
       dofFocusSelected: parsed.dofFocusSelected !== false,
+      environmentSource: parsed.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr",
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -151,6 +155,7 @@ const TradeVisualiser = () => {
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
+  const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
