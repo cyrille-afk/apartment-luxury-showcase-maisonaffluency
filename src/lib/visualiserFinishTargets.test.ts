@@ -12,6 +12,11 @@ describe("visualiser finish targets", () => {
     expect(finishTargetsFromParts([])).toEqual(["all"]);
   });
 
+  it("Frenchmen Street chair exposes upholstery and frame", () => {
+    const parts = ["WoodFinish", "Glides", "FabricAndLeather"].map(classifyTextureNode).filter(Boolean) as never[];
+    expect(finishTargetsFromParts(parts)).toEqual(["all", "base", "upholstery"]);
+  });
+
   it("Top shows stone but not fabric; Base shows metal but not marble", () => {
     expect(materialFitsTarget(m("Stone", "Marble"), "top")).toBe(true);
     expect(materialFitsTarget(m("Fabric"), "top")).toBe(false);
