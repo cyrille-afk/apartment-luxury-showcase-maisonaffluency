@@ -101,6 +101,9 @@ const TradeVisualiser = () => {
   const [loadingProject, setLoadingProject] = useState(false);
   const intakeRef = useRef<string | null>(null);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
+  // Finishes linked to the selected product (product_fabrics → fabrics).
+  // null = no selection or none linked → show the global library.
+  const [linkedMaterials, setLinkedMaterials] = useState<VisualiserMaterial[] | null>(null);
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<FinishTarget>("all");
   const [textureParts, setTextureParts] = useState<Record<string, FinishPart[]>>({});
