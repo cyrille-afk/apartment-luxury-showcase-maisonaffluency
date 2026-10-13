@@ -76,6 +76,7 @@ type PersistedSandbox = {
   spacing?: number;
   snapToGrid?: boolean;
   showGrid?: boolean;
+  depthOfField?: boolean;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -99,6 +100,7 @@ const readSandbox = (): PersistedSandbox => {
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
+      depthOfField: parsed.depthOfField === true,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -137,6 +139,7 @@ const TradeVisualiser = () => {
   const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
+  const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -248,11 +251,12 @@ const TradeVisualiser = () => {
         spacing,
         snapToGrid,
         showGrid,
+        depthOfField,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -642,6 +646,7 @@ const TradeVisualiser = () => {
             onTextureParts={handleTextureParts}
             snapToGrid={snapToGrid}
             showGrid={showGrid}
+            depthOfField={depthOfField}
           />
         </Suspense>
       </div>
@@ -831,6 +836,14 @@ const TradeVisualiser = () => {
               title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
             >
               [ &#127760; Show Grid: {showGrid ? "On" : "Off"} ]
+            </button>
+            <button
+              className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setDepthOfField((value) => !value)}
+              aria-pressed={depthOfField}
+              title="Blur the background — focuses on the selected piece, or the centre of the view"
+            >
+              [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
             </button>
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
