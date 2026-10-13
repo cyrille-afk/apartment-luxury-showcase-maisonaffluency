@@ -1,7 +1,7 @@
 export const EMPTY_ROOM_EXR_PATH = "/images/_empty_room_3.exr";
 
-/** EXR files begin with the magic bytes 0x76 0x2e 0x31 0x01 ("v.1\x01"). */
-const EXR_MAGIC = [0x76, 0x2e, 0x31, 0x01];
+/** EXR files begin with the magic bytes 0x76 0x2f 0x31 0x01 ("v.1\x01"). */
+const EXR_MAGIC = [0x76, 0x2f, 0x31, 0x01];
 
 export type EmptyRoomExrResult =
   | { state: "ok"; buffer: ArrayBuffer; bytes: number }
