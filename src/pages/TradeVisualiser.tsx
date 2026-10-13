@@ -606,10 +606,12 @@ const TradeVisualiser = () => {
       {/* Inspector sidebar — reads the shared selection context */}
       <VisualiserInspector onRemove={removeObject} onScale={scaleObject}>
         {selected && (<>
-          <PieceAngleControls
-            yaw={selected.rotation?.[1] ?? 0}
-            onChange={(yaw) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, rotation: [0, yaw, 0] } : object))}
-          />
+          <Suspense fallback={null}>
+            <PieceAngleControls
+              yaw={selected.rotation?.[1] ?? 0}
+              onChange={(yaw) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, rotation: [0, yaw, 0] } : object))}
+            />
+          </Suspense>
           {selected.glb_url && <Suspense fallback={null}>
             <details className="mt-4 border-t border-border pt-3">
               <summary className="cursor-pointer select-none text-[10px] uppercase text-muted-foreground">
