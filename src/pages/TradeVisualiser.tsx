@@ -20,6 +20,7 @@ import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -122,6 +123,7 @@ const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
 
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -565,6 +567,31 @@ const TradeVisualiser = () => {
   };
 
   const backdropSrc = backdrop ?? backdropDataUrl;
+
+  // Export a clean PNG mockup: hide the floor grid, let one frame render,
+  // capture the WebGL canvas, then restore the grid exactly as it was.
+  const [exporting, setExporting] = useState(false);
+  const handleExportMockup = async () => {
+    const canvas = canvasWrapRef.current?.querySelector("canvas");
+    if (!canvas || exporting) return;
+    setExporting(true);
+    const hadGrid = showGrid;
+    const hadSelection = selectedId;
+    if (hadGrid) setShowGrid(false);
+    if (hadSelection) setSelectedId(null); // keep the transform gizmo out of client mockups
+    await nextPaintedFrame();
+    await nextPaintedFrame();
+    try {
+      downloadDataUrl(captureCanvasPng(canvas), mockupFilename());
+      toast.success("Mockup exported.");
+    } catch {
+      toast.error("Could not export the mockup.");
+    }
+    if (hadGrid) setShowGrid(true);
+    if (hadSelection) setSelectedId(hadSelection);
+    setExporting(false);
+  };
+
   const toolbarButton = cn(
     "font-mono text-[10px] uppercase tracking-[0.15em]",
     "flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
@@ -588,7 +615,7 @@ const TradeVisualiser = () => {
         />
       )}
 
-      <div className="absolute inset-0 z-10">
+      <div ref={canvasWrapRef} className="absolute inset-0 z-10">
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
             objects={objects}
@@ -795,6 +822,15 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
             [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
+          </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button
+            className={toolbarButton}
+            onClick={handleExportMockup}
+            disabled={exporting}
+            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
+          >
+            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
           </button>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
