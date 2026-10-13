@@ -54,6 +54,10 @@ type CatalogueProduct = {
   image_url: string | null;
   category: string;
   dimensions: string | null;
+  width_mm?: number | null;
+  depth_mm?: number | null;
+  height_mm?: number | null;
+  size_variants?: PlacedObject["size_variants"];
   glb_url: string | null;
   source_pick_id: string | null;
 };
@@ -98,7 +102,7 @@ async function hydrateCatalogueDimensions(catalogue: CatalogueProduct[]): Promis
   const { data } = pickIds.length
     ? await supabase.from("designer_curator_picks").select("id, dimensions, width_mm, depth_mm, height_mm, size_variants").in("id", pickIds)
     : { data: [] };
-  const picks = new Map((data ?? []).map(pick => [pick.id, pick]));
+  const picks = new Map((data ?? []).map(pick => [pick.id, { ...pick, size_variants: Array.isArray(pick.size_variants) ? pick.size_variants as PlacedObject["size_variants"] : null }]));
   return catalogue.map(product => ({ ...product, dimensions: visualiserDimensions(product, picks.get(product.source_pick_id ?? "")) ?? product.dimensions }));
 }
 
@@ -193,7 +197,7 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url, source_pick_id";
+      const columns = "id, product_name, brand_name, image_url, category, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id";
       const base = () => supabase
         .from("trade_products")
         .select(columns)
@@ -309,7 +313,7 @@ const TradeVisualiser = () => {
 
       const { data: catalogue } = await sb
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, dimensions, glb_url, source_pick_id")
+        .select("id, product_name, brand_name, image_url, category, dimensions, width_mm, depth_mm, height_mm, size_variants, glb_url, source_pick_id")
         .in("id", productIds);
 
       const hydratedCatalogue = await hydrateCatalogueDimensions((catalogue ?? []) as CatalogueProduct[]);
@@ -431,7 +435,7 @@ const TradeVisualiser = () => {
     rotation: [number, number, number],
   ) => {
     setObjects((current) => current.map((object) => (
-      object.instanceId === instanceId ? { ...object, position, rotation } : object
+      object.instanceId === instanceId ? { ...object, position: object.positionLocked ? object.position : position, rotation } : object
     )));
   }, []);
 
