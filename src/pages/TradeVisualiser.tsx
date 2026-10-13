@@ -30,6 +30,7 @@ import { VisualiserSelectionProvider } from "@/components/trade/visualiser/Visua
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
 import ScenePresets from "@/components/trade/visualiser/ScenePresets";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
+import "@/components/trade/visualiser/visualiserToolbar.css";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
 // three.js / @react-three/* live behind this boundary so they are never part
@@ -640,19 +641,20 @@ const TradeVisualiser = () => {
   };
 
   const toolbarButton = cn(
-    "font-mono text-[10px] uppercase tracking-[0.15em]",
+    "h-auto min-h-9 rounded-sm font-mono text-[10px] uppercase tracking-normal",
     "flex items-center gap-2 whitespace-nowrap px-3 py-2 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
 
   return (
     <VisualiserSelectionProvider objects={objects} selectedId={selectedId} setSelectedId={setSelectedId}>
-    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#F9F8F6]">
+    <div className="visualiser-workspace relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-visualiser-canvas">
       <Helmet>
         <title>Visualiser Sandbox | Maison Affluency Trade</title>
         <meta name="description" content="Compose interiors in a live 3D sandbox with collectible design assets." />
         <meta name="robots" content="noindex" />
       </Helmet>
 
+      <div className="relative min-h-0 flex-1 overflow-hidden">
       {backdropSrc && (
         <img
           src={backdropSrc}
@@ -686,7 +688,7 @@ const TradeVisualiser = () => {
 
 
       {/* Header */}
-      <div className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-8 pt-6">
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-4 pt-4 sm:px-8 sm:pt-6">
         <div>
           <h1 className="font-serif text-2xl text-foreground">Visualiser Sandbox</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
@@ -694,7 +696,7 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <p className={cn(microLabel, "text-muted-foreground")}>Drag to orbit // Scroll to zoom</p>
+        <p className={cn(microLabel, "hidden text-muted-foreground lg:block")}>Drag to orbit // Scroll to zoom</p>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
@@ -824,52 +826,54 @@ const TradeVisualiser = () => {
         <CatalogDrawer products={products} loading={loadingProducts} onAdd={addObject} onClose={() => setTrayOpen(false)} />
       )}
 
-      {/* Floating executive console */}
-      <div data-testid="visualiser-toolbar" className="absolute bottom-6 left-1/2 z-[60] w-max max-w-[calc(100%-2rem)] -translate-x-1/2">
-        <div className="flex flex-col items-stretch gap-1 rounded-3xl border border-[#E5E5E5] bg-[#FFFFFF] px-3 py-2 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.15)]">
-        <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1" aria-label="Scene actions">
-          <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
+      </div>
+
+      {/* Dock reserves its own space: controls never cover the canvas. */}
+      <div data-testid="visualiser-toolbar" role="toolbar" aria-label="Visualiser controls" className="relative z-[60] w-full shrink-0 border-t border-border bg-background px-1 pb-[env(safe-area-inset-bottom)] sm:px-3">
+        <div className="flex flex-col items-stretch">
+        <div className="visualiser-toolbar-row" role="group" aria-label="Scene actions" tabIndex={0}>
+          <Button variant="ghost" className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</Button>
+          <span className="h-5 w-px bg-border" />
+          <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</Button>
+          <span className="h-5 w-px bg-border" />
           <div className="flex items-center gap-1" aria-label="Object spacing">
-            <button
+            <Button variant="ghost"
               className={toolbarButton}
               aria-label="Decrease spacing"
               disabled={spacing <= MIN_SLOT_SPACING}
               onClick={() => adjustSpacing(-SLOT_SPACING_STEP)}
             >
               [ &#8722;
-            </button>
+            </Button>
             <span className={cn(microLabel, "min-w-14 text-center text-muted-foreground")} title="Distance between pieces">
               {spacing.toFixed(1)} m
             </span>
-            <button
+            <Button variant="ghost"
               className={toolbarButton}
               aria-label="Increase spacing"
               disabled={spacing >= MAX_SLOT_SPACING}
               onClick={() => adjustSpacing(SLOT_SPACING_STEP)}
             >
               + ]
-            </button>
-            <button className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
+            </Button>
+            <Button variant="ghost" className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
               [ &#8596; Respace ]
-            </button>
+            </Button>
           </div>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
+          <span className="h-5 w-px bg-border" />
+          <Button variant="ghost" className={toolbarButton} onClick={() => fileRef.current?.click()}>
             [ &#8593; {backdropSrc ? "Change Backdrop" : "Upload Backdrop"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button
+          </Button>
+          <span className="h-5 w-px bg-border" />
+          <Button variant="ghost"
             className={toolbarButton}
             onClick={downloadPresentationMockup}
             disabled={exporting}
             title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
           >
             [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
+          </Button>
+          <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
             current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
@@ -887,55 +891,55 @@ const TradeVisualiser = () => {
               setDofFocusSelected(data.dofFocusSelected !== false);
             }}
           />
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
+          <span className="h-5 w-px bg-border" />
+          <Button variant="ghost" className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</Button>
         </div>
-        <div className="h-px w-full bg-[#E5E5E5]" />
-          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1" aria-label="View settings">
-            <button
+        <div className="h-px w-full bg-border" />
+          <div className="visualiser-toolbar-row visualiser-toolbar-settings" role="group" aria-label="View settings" tabIndex={0}>
+            <Button variant="ghost"
               className={cn(toolbarButton, snapToGrid && "border-primary text-primary")}
               onClick={() => setSnapToGrid((value) => !value)}
               aria-pressed={snapToGrid}
               title="Snap dragged pieces to a 0.25 m grid"
             >
               [ &#8862; Snap Grid: {snapToGrid ? "On" : "Off"} ]
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               className={cn(toolbarButton, showGrid ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setShowGrid((value) => !value)}
               aria-pressed={showGrid}
               title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
             >
               [ &#127760; Show Grid: {showGrid ? "On" : "Off"} ]
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               className={cn(toolbarButton, showLabels ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setShowLabels((value) => !value)}
               aria-pressed={showLabels}
               title="Show or hide the floating name labels and lock badges above pieces"
             >
               [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}
               aria-pressed={depthOfField}
               title="Blur the background — focuses on the selected piece, or the centre of the view"
             >
               [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
-            </button>
+            </Button>
             {depthOfField && (
-              <button
+              <Button variant="ghost"
                 className={cn(toolbarButton, dofFocusSelected ? "border-primary text-primary" : "opacity-60")}
                 onClick={() => setDofFocusSelected((value) => !value)}
                 aria-pressed={dofFocusSelected}
                 title="Click a piece to keep it sharp while the background blurs — off keeps focus at the centre of the view"
               >
                 [ &#10022; Focus: {dofFocusSelected ? "Clicked Piece" : "Centre"} ]
-              </button>
+              </Button>
             )}
             {depthOfField && (
-              <label className="flex items-center gap-2" title="How softly the background is blurred">
+              <label className="visualiser-toolbar-blur flex items-center gap-2" title="How softly the background is blurred">
                 <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
                 <input
                   type="range"
