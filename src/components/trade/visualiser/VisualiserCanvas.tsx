@@ -10,7 +10,7 @@ import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
-import { EMPTY_ROOM_EXR, validateEmptyRoomExr } from "@/lib/emptyRoomExr";
+import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 
 export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -47,7 +47,7 @@ const StudioEnvironment = () => {
     validateEmptyRoomExr().then((result) => {
       if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
       try {
-        accept("empty-room-exr")(new EXRLoader().parse(result.buffer));
+        accept("empty-room-exr")(new EXRLoader().parse(result.buffer) as THREE.DataTexture);
       } catch {
         fallbackToStudioHdr("unreadable");
       }
