@@ -9,7 +9,7 @@ import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProd
 import { classifyMeshPart, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
-import { snapCoordinate } from "@/lib/visualiserPlacement";
+import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
 
 export type PlacedObject = {
   instanceId: string;
@@ -47,6 +47,10 @@ type Props = {
   onDragStateChange: (dragging: boolean) => void;
   /** When true, dragged positions snap to the placement grid. */
   snapToGrid?: boolean;
+  /** Other pieces' footprints; dragged positions are pushed out of these. */
+  obstacles?: FootprintObstacle[];
+  /** This piece's own footprint radius in metres (defaults to a generic estimate). */
+  selfRadius?: number;
   /** When false the piece is display-only: no drag, no gizmos. Defaults to true. */
   isEditable?: boolean;
   /** Optional non-uniform scale; overrides `object.scale` when provided. */
