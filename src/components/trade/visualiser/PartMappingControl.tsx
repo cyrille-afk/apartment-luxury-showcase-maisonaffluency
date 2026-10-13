@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { setPartOverride, useModelMeshes, usePartGroupLabels, usePartOverrides, type PartAssignment } from "@/lib/visualiserPartMapping";
+import { clearPartOverrides, setPartOverride, useModelMeshes, usePartGroupLabels, usePartOverrides, type PartAssignment } from "@/lib/visualiserPartMapping";
 import { KNOWN_PARTS, KNOWN_PART_LABELS } from "@/lib/visualiserFinishTargets";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
