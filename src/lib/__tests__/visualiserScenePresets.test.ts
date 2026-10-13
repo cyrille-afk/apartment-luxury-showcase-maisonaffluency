@@ -30,4 +30,10 @@ describe("scene presets", () => {
     saveScenePreset("Low wall", { objects: [obj], showRearWall: true, wallHeight: 60 });
     expect(readScenePresets()[0].data.wallHeight).toBe(60);
   });
+  it("clamps wall height to 20–100 and defaults to full height", () => {
+    expect(clampWallHeight(undefined)).toBe(100);
+    expect(clampWallHeight(60)).toBe(60);
+    expect(clampWallHeight(5)).toBe(20);
+    expect(clampWallHeight(180)).toBe(100);
+  });
 });
