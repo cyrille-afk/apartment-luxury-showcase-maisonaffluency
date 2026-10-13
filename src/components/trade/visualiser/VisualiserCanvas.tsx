@@ -3,6 +3,8 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import { footprintRadius } from "@/lib/visualiserPlacement";
+import { parseDimensionString } from "@/lib/productDimensions";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
 
