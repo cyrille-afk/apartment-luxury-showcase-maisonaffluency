@@ -323,10 +323,14 @@ const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts }: Props) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
-  const { raycaster, gl } = useThree();
+  const { raycaster, gl, camera } = useThree();
   const draggingRef = useRef(false);
   const offsetRef = useRef(new THREE.Vector3());
   const hitRef = useRef(new THREE.Vector3());
+  const pointerRef = useRef(new THREE.Vector2());
+  // Latest floor height for the piece, readable from window-level drag listeners.
+  const floorYRef = useRef(object.position[1] ?? 0);
+  floorYRef.current = object.position[1] ?? 0;
 
   // Keep the group in sync when position changes from outside (e.g. reset/restore).
   useEffect(() => {
