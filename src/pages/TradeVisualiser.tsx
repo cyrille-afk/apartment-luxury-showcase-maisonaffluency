@@ -478,11 +478,12 @@ const TradeVisualiser = () => {
     // plain "arsene quinoa" query still matches.
     const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const query = norm(materialSearch);
-    return materials.filter((material) => (
+    const source = linkedMaterials ?? materials;
+    return source.filter((material) => (
       materialFitsTarget(material, effectiveTarget)
       && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
-  }, [materialSearch, materials, effectiveTarget]);
+  }, [materialSearch, materials, linkedMaterials, effectiveTarget]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
