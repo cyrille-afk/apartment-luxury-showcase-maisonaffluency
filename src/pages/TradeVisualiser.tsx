@@ -271,11 +271,12 @@ const TradeVisualiser = () => {
         depthOfField,
         dofStrength,
         dofFocusSelected,
+        environmentSource,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -687,6 +688,7 @@ const TradeVisualiser = () => {
             depthOfField={depthOfField}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
+            environmentSource={environmentSource}
           />
         </Suspense>
       </div>
@@ -881,7 +883,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -894,6 +896,7 @@ const TradeVisualiser = () => {
               setDepthOfField(data.depthOfField === true);
               if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
               setDofFocusSelected(data.dofFocusSelected !== false);
+              setEnvironmentSource(data.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr");
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -924,6 +927,14 @@ const TradeVisualiser = () => {
               title="Show or hide the floating name labels and lock badges above pieces"
             >
               [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
+            </Button>
+            <Button variant="ghost"
+              className={cn(toolbarButton, environmentSource === "empty-room-exr" ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => setEnvironmentSource((value) => (value === "empty-room-exr" ? "studio-hdr" : "empty-room-exr"))}
+              aria-pressed={environmentSource === "empty-room-exr"}
+              title="Switch the environment reflections between the uploaded empty-room EXR and the built-in studio HDRI"
+            >
+              [ &#9728; Lighting: {environmentSource === "empty-room-exr" ? "Empty Room" : "Studio"} ]
             </Button>
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
