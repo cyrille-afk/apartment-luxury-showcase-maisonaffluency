@@ -32,6 +32,12 @@ describe("validateEmptyRoomExr", () => {
     expect(result.state).toBe("missing");
   });
 
+  it("reports missing when the host answers with the app shell instead of the file", async () => {
+    stubFetch(async () => new Response(NOT_EXR, { status: 200, headers: { "content-type": "text/html" } }));
+    const result = await validateEmptyRoomExr();
+    expect(result.state).toBe("missing");
+  });
+
   it("rejects a non-EXR payload served at the path", async () => {
     stubFetch(async () => new Response(NOT_EXR));
     const result = await validateEmptyRoomExr();

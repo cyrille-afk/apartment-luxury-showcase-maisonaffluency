@@ -20,6 +20,8 @@ export async function validateEmptyRoomExr(path: string = EMPTY_ROOM_EXR_PATH): 
     return { state: "missing" };
   }
   if (!response.ok) return { state: "missing" };
+  // SPA hosts answer unknown paths with the app shell (200, text/html) — that is not the file.
+  if ((response.headers.get("content-type") ?? "").includes("text/html")) return { state: "missing" };
   let buffer: ArrayBuffer;
   try {
     buffer = await response.arrayBuffer();
