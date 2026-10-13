@@ -784,12 +784,12 @@ const TradeVisualiser = () => {
               [ &#8862; Snap Grid: {snapToGrid ? "On" : "Off"} ]
             </button>
             <button
-              className={cn(toolbarButton, showGrid && "border-primary text-primary")}
+              className={cn(toolbarButton, showGrid ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setShowGrid((value) => !value)}
               aria-pressed={showGrid}
               title="Show or hide the faint floor grid — hide it when using a room photo backdrop"
             >
-              [ &#9641; Floor Grid: {showGrid ? "On" : "Off"} ]
+              [ &#127760; Show Grid: {showGrid ? "On" : "Off"} ]
             </button>
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
