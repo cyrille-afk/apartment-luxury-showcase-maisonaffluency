@@ -631,6 +631,7 @@ const TradeVisualiser = () => {
       <div ref={canvasWrapRef} className="absolute inset-0 z-10">
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
+            focusRef={focusRef}
             objects={objects}
             selectedId={selectedId}
             orbitEnabled={orbitEnabled}
