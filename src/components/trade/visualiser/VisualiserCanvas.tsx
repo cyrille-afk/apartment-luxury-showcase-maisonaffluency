@@ -6,9 +6,12 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import { EffectComposer, DepthOfField } from "@react-three/postprocessing";
+import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
+
+const EMPTY_ROOM_EXR = "/images/_empty_room_3.exr";
 
 /** HDR loads independently: furniture stays visible with local IBL on slow/failing networks. */
 const StudioEnvironment = () => {
@@ -17,13 +20,24 @@ const StudioEnvironment = () => {
   useEffect(() => {
     let cancelled = false;
     let owned: THREE.DataTexture | null = null;
-    new RGBELoader().load(studioAsset.url, (texture) => {
+    const accept = (texture: THREE.DataTexture) => {
       if (cancelled) { texture.dispose(); return; }
       texture.mapping = THREE.EquirectangularReflectionMapping;
       owned = texture;
       setMap(texture);
       invalidate();
-    }, undefined, () => { /* Keep local studio reflections if HDR is unavailable. */ });
+    };
+    // Preferred: the studio's own empty-room EXR; falls back to the built-in HDR.
+    new EXRLoader().load(
+      EMPTY_ROOM_EXR,
+      accept,
+      undefined,
+      () => {
+        new RGBELoader().load(studioAsset.url, accept, undefined, () => {
+          /* Keep local studio reflections if both HDRI sources are unavailable. */
+        });
+      }
+    );
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate]);
   if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
