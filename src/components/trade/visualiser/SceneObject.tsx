@@ -6,7 +6,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
-import { classifyMeshPart, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
+import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
@@ -183,6 +183,12 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
   };
   const distinct = new Set(meshes.map(matName)).size;
   const groupLabels = new Map<string, string>();
+  const usedLabels = new Map<string, number>();
+  const uniqueLabel = (base: string) => {
+    const n = (usedLabels.get(base) ?? 0) + 1;
+    usedLabels.set(base, n);
+    return n === 1 ? base : `${base} ${n}`;
+  };
   meshes.forEach((mesh, index) => {
     const nodeName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
     const key = meshKey(index, mesh.name || mesh.parent?.name || "");
@@ -193,7 +199,11 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
     let auto: FinishPart | null = named;
     if (!auto && distinct > 1) {
       const g = `part:${matName(mesh)}`;
-      if (!groupLabels.has(g)) groupLabels.set(g, `Part ${groupLabels.size + 1}`);
+      if (!groupLabels.has(g)) {
+        // Name the tab after what it textures ("Wood Finish"), never "Part 3".
+        const readable = humanizePartName(mesh.name || mesh.parent?.name || matName(mesh));
+        groupLabels.set(g, readable ? uniqueLabel(readable) : `Part ${groupLabels.size + 1}`);
+      }
       auto = g as FinishPart;
     }
     const o = overrides[key];

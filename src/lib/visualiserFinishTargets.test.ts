@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, materialFitsTarget, meshPartMaterial, withPartMaterial } from "./visualiserFinishTargets";
+import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, humanizePartName, materialFitsTarget, meshPartMaterial, targetLabel, withPartMaterial } from "./visualiserFinishTargets";
 
 const m = (category: string, material_type: string | null = null) => ({
   id: category, name: category, brand_name: "x", category, material_type, color_family: null, image_url: null,
