@@ -194,6 +194,7 @@ function Rug({ objects }: { objects: PlacedObject[] }) {
 export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
+    {floor !== "none" && <Rug objects={objects} />}
     {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} />}
   </group>;
 }

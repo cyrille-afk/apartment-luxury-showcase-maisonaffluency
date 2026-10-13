@@ -320,8 +320,9 @@ const VisualiserCanvas = ({
     )}
     {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
     {!hasBackdrop && floorFinish !== "none" && (
+      {/* Raised above the area rug (0.005) so shadows land on the rug fibers. */}
       <ContactShadows
-        position={[0, 0.005, 0]}
+        position={[0, 0.01, 0]}
         scale={15}
         opacity={0.65}
         blur={1.5}
