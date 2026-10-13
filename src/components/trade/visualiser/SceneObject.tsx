@@ -332,7 +332,13 @@ const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: strin
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false, obstacles, selfRadius }: Props) => {
+  // Refs so the window-level drag handlers always read the latest obstacles
+  // without changing dragMove's identity mid-drag (listener removal depends on it).
+  const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
+  obstaclesRef.current = obstacles ?? [];
+  const selfRadiusRef = useRef(selfRadius ?? DEFAULT_FOOTPRINT_RADIUS);
+  selfRadiusRef.current = selfRadius ?? DEFAULT_FOOTPRINT_RADIUS;
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl, camera } = useThree();
@@ -387,6 +393,8 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       x = snapCoordinate(x);
       z = snapCoordinate(z);
     }
+    // Collision-aware: never let the piece settle inside another footprint.
+    [x, z] = resolveDragPosition(x, z, selfRadiusRef.current, obstaclesRef.current);
     // Floor lock: X/Z translation only, y stays on its depth layer.
     group.position.set(x, floorYRef.current, z);
   }, [gl, raycaster, camera, snapToGrid]);
