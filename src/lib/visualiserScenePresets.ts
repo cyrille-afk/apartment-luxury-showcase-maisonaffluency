@@ -17,6 +17,8 @@ export type ScenePresetData = {
   environmentSource?: "empty-room-exr" | "studio-hdr";
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
+  /** Floor reflection strength, 0 (matte) – 100 (polished). */
+  floorGlare?: number;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
