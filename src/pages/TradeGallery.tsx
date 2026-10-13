@@ -441,7 +441,7 @@ const StudioGallery = () => {
     for (const p of allProducts) {
       // Scope collections to the chosen designer: offering every studio's
       // collections once a designer is picked makes no sense.
-      if (activeBrand && (p.brand || "").trim().toLowerCase() !== activeBrand.toLowerCase()) continue;
+      if (activeBrand && p.brand_name !== activeBrand && p.reedition_by !== activeBrand) continue;
       const ed = (p.edition || "").trim();
       if (!ed) continue;
       const key = ed.toLowerCase();
