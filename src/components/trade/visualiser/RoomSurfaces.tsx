@@ -330,6 +330,6 @@ export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wal
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
     {floor !== "none" && showRug && <Rug objects={objects} color={rugColor} borderColor={rugBorderColor} borderThicknessMm={rugBorderThicknessMm} borderTwistMm={rugBorderTwistMm} borderRoughness={rugBorderRoughness} weave={rugWeaveKey} pile={rugPile} layout={rugLayout} />}
-    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} />}
+    {/* Rear wall removed by request — floor, rug and furniture only. */}
   </group>;
 }
