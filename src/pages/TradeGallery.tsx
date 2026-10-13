@@ -455,7 +455,7 @@ const StudioGallery = () => {
       const bSize = isSizeLabel(b) ? 1 : 0;
       return aSize - bSize || sortNameKey(a).localeCompare(sortNameKey(b));
     });
-  }, [allProducts]);
+  }, [allProducts, activeBrand]);
   const matchedProducts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return filterTradeProducts(visible, {
