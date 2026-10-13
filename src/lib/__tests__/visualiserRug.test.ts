@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { clampRugPile, rugColor, rugColorHex, rugWeave } from "../visualiserRoomSurfaces";
+import { clampRugPile, rugColor, rugColorHex, rugBorderColor, rugWeave } from "../visualiserRoomSurfaces";
 import { saveScenePreset, readScenePresets } from "../visualiserScenePresets";
 
 describe("rug settings", () => {
