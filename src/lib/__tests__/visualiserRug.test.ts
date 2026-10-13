@@ -66,8 +66,8 @@ describe("rug border colour", () => {
     expect(rugBorderColor("bogus")).toBe("cream");
   });
   it("rides in scene presets", () => {
-    saveScenePreset({ name: "Border", data: { objects: [], rugBorderColor: "navy" } });
-    const loaded = loadScenePresets().find((p) => p.name === "Border");
+    saveScenePreset("Border", { objects: [], rugBorderColor: "navy" });
+    const loaded = readScenePresets().find((p) => p.name === "Border");
     expect(loaded?.data.rugBorderColor).toBe("navy");
   });
 });
