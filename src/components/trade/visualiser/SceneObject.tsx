@@ -322,7 +322,7 @@ const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: strin
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false }: Props) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl, camera } = useThree();
@@ -371,9 +371,15 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     raycaster.setFromCamera(pointerRef.current, camera);
     const hit = raycaster.ray.intersectPlane(FLOOR_PLANE, hitRef.current);
     if (!hit) return;
+    let x = hit.x + offsetRef.current.x;
+    let z = hit.z + offsetRef.current.z;
+    if (snapToGrid) {
+      x = snapCoordinate(x);
+      z = snapCoordinate(z);
+    }
     // Floor lock: X/Z translation only, y stays on its depth layer.
-    group.position.set(hit.x + offsetRef.current.x, floorYRef.current, hit.z + offsetRef.current.z);
-  }, [gl, raycaster, camera]);
+    group.position.set(x, floorYRef.current, z);
+  }, [gl, raycaster, camera, snapToGrid]);
 
   const endDrag = useCallback(() => {
     if (!draggingRef.current) return;
