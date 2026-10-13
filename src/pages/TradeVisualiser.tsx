@@ -1,5 +1,7 @@
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
+import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
+import { LAST_GOOD_KEY, STABLE_AFTER_MS, recoverScene, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -184,6 +186,18 @@ const CanvasLoader = () => (
 
 const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
+  const crashHandledRef = useRef(false);
+  const handleSceneCrash = useCallback(() => {
+    if (crashHandledRef.current) return;
+    crashHandledRef.current = true;
+    try { recoverScene(STORAGE_KEY); } catch { sessionStorage.removeItem(STORAGE_KEY); }
+    window.location.reload();
+  }, []);
+  useEffect(() => {
+    const notice = takeRecoveryNotice();
+    if (notice === "restored") toast.warning("A display error occurred — your last working room scene was restored.");
+    else if (notice === "reset") toast.warning("A display error occurred again — the room was reset to an empty scene.");
+  }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
@@ -340,8 +354,9 @@ const TradeVisualiser = () => {
   }, []);
 
   useEffect(() => {
+    let sandboxJson: string | null = null;
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+      sandboxJson = JSON.stringify({
         backdrop: backdrop?.startsWith("blob:") ? null : backdrop,
         backdropDataUrl,
         objects,
@@ -371,10 +386,18 @@ const TradeVisualiser = () => {
         rugPile,
         rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
         showRug,
-      }));
+      });
+      sessionStorage.setItem(STORAGE_KEY, sandboxJson);
     } catch {
       /* quota exceeded — composition stays in memory */
     }
+    // Promote to "last working scene" once it has rendered cleanly for a few seconds.
+    const json = sandboxJson;
+    if (!json) return;
+    const timer = window.setTimeout(() => {
+      try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
+    }, STABLE_AFTER_MS);
+    return () => window.clearTimeout(timer);
   }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
 
   useEffect(() => {
@@ -770,6 +793,7 @@ const TradeVisualiser = () => {
       )}
 
       <div ref={canvasWrapRef} className="absolute inset-0 z-10">
+        <SceneErrorBoundary onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
             focusRef={focusRef}
@@ -810,6 +834,7 @@ const TradeVisualiser = () => {
             showRug={showRug}
           />
         </Suspense>
+        </SceneErrorBoundary>
       </div>
 
 

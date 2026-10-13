@@ -14,3 +14,5 @@
 - Angling a piece = placement yaw via PieceAngleControls (object.rotation[1]); ModelOrientationControls is collapsed "import repair only" — it tips the model itself and must never be the way users rotate pieces.
 - Dragging is collision-aware: `resolveDragPosition` (visualiserPlacement.ts) pushes a dragged piece out of every other footprint (size × scale + margin); obstacles/selfRadius flow VisualiserCanvas → SceneObject via refs. The window drag-listener cleanup effect must stay mount-only (refs) — depending on dragMove/endDrag identity lets a parent re-render (e.g. selection) remove the live listeners and silently kill the drag.
 - Finish sub-tabs are named from the product schema ("Table Top", "Base Structure") or the model's own mesh/material names via `humanizePartName` — never "Part 1/2/3"; the tab row is one scrollable horizontal track (`overflow-x-auto whitespace-nowrap scrollbar-none`), never wrapping.
+
+- Visualiser render crashes are caught by SceneErrorBoundary and restore the last scene that rendered cleanly for 4s (visualiserSceneRecovery); a repeat crash within 30s resets to empty — prevents a crash loop.
