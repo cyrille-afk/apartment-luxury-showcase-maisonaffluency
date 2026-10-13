@@ -391,14 +391,29 @@ const TradeVisualiser = () => {
       toast.success(`${material.name} is ready for the next object.`);
       return;
     }
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => {
       if (object.instanceId !== selectedId) return object;
       return withPartMaterial(object, effectiveTarget, material);
     }));
   };
 
+  const toggleFinishesLock = () => {
+    if (!selectedId) return;
+    setObjects((current) => current.map((object) => (
+      object.instanceId === selectedId ? { ...object, finishesLocked: !object.finishesLocked } : object
+    )));
+  };
+
   const clearFinishes = () => {
     if (!selectedId) return;
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to clear finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => (
       object.instanceId === selectedId
         ? { ...object, material: null, topMaterial: null, baseMaterial: null, upholsteryMaterial: null, partMaterials: {} }
@@ -408,6 +423,10 @@ const TradeVisualiser = () => {
 
   const applyBondStreetFinish = (target: "base" | "upholstery", material: VisualiserMaterial | null) => {
     if (!selectedId) return;
+    if (selected?.finishesLocked) {
+      toast.error(`${selected.product_name} is locked. Unlock it to change finishes.`);
+      return;
+    }
     setObjects((current) => current.map((object) => object.instanceId === selectedId
       ? target === "base"
         ? { ...object, baseMaterial: material }
