@@ -68,3 +68,32 @@ describe("three-axis pieces", () => {
     expect(finishTargetsFromParts(["part:b" as never, "part:a" as never])).toEqual(["all", "part:a", "part:b"]);
   });
 });
+
+describe("component tab labels", () => {
+  it("humanizes GLB material and node names into component names", () => {
+    expect(humanizePartName("WoodFinish")).toBe("Wood Finish");
+    expect(humanizePartName("Table_Top_Mesh")).toBe("Table Top Mesh");
+    expect(humanizePartName("part:Glides")).toBe("Glides");
+    expect(humanizePartName("FabricAndLeather")).toBe("Fabric And Leather");
+  });
+
+  it("rejects names with no readable component word", () => {
+    expect(humanizePartName("Material.001")).toBe("");
+    expect(humanizePartName("Object_12")).toBe("");
+    expect(humanizePartName("a3f1b2c4-5d6e-7f80-9101-121314151617")).toBe("");
+    expect(humanizePartName("")).toBe("");
+  });
+
+  it("tabs never render a bare 'Part' when the model name is readable", () => {
+    expect(targetLabel("part:WoodFinish")).toBe("Wood Finish");
+    expect(targetLabel("part:Table_Top")).toBe("Table Top");
+    // A declared label still wins over the raw name.
+    expect(targetLabel("part:WoodFinish", { "part:WoodFinish": "Table Top" })).toBe("Table Top");
+  });
+
+  it("known roles keep their own labels", () => {
+    expect(targetLabel("all")).toBe("Whole Piece");
+    expect(targetLabel("top")).toBe("Top");
+    expect(targetLabel("base")).toBe("Base");
+  });
+});
