@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { clampRugPile, rugColor, rugColorHex, rugWeave } from "../visualiserRoomSurfaces";
+import { clampRugPile, rugColor, rugColorHex, rugBorderColor, rugWeave } from "../visualiserRoomSurfaces";
 import { saveScenePreset, readScenePresets } from "../visualiserScenePresets";
 
 describe("rug settings", () => {
@@ -52,5 +52,22 @@ describe("rug visibility toggle", () => {
     const shown = readScenePresets().find((p) => p.name === "Rug shown")!.data;
     expect(hidden.showRug).toBe(false);
     expect(shown.showRug).toBe(true);
+  });
+});
+
+describe("rug border colour", () => {
+  it("defaults to matching the rug fabric", () => {
+    expect(rugBorderColor(undefined)).toBe("match");
+    expect(rugBorderColor(null)).toBe("match");
+    expect(rugBorderColor("match")).toBe("match");
+  });
+  it("accepts an explicit rug colour and rejects unknown values", () => {
+    expect(rugBorderColor("charcoal")).toBe("charcoal");
+    expect(rugBorderColor("bogus")).toBe("cream");
+  });
+  it("rides in scene presets", () => {
+    saveScenePreset("Border", { objects: [], rugBorderColor: "navy" });
+    const loaded = readScenePresets().find((p) => p.name === "Border");
+    expect(loaded?.data.rugBorderColor).toBe("navy");
   });
 });
