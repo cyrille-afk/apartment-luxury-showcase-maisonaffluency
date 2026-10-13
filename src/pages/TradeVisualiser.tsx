@@ -422,6 +422,22 @@ const TradeVisualiser = () => {
   };
 
 
+  const adjustSpacing = (delta: number) => {
+    setSpacing((current) => {
+      const next = Math.round((current + delta) * 10) / 10;
+      return Math.min(MAX_SLOT_SPACING, Math.max(MIN_SLOT_SPACING, next));
+    });
+  };
+
+  const applySpacingToScene = () => {
+    if (objects.length < 2) {
+      toast.message("Add at least two pieces to respace the scene.");
+      return;
+    }
+    setObjects((current) => respaceObjects(current, spacing));
+    toast.success(`Scene respaced at ${spacing.toFixed(1)} m between pieces.`);
+  };
+
   const DEPTH_LEVELS = [0, 0.012, 0.024];
 
   /** Cycles the selected piece through floor depth layers so rugs can slide beneath seating. */
@@ -764,6 +780,31 @@ const TradeVisualiser = () => {
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <div className="flex items-center gap-1" aria-label="Object spacing">
+            <button
+              className={toolbarButton}
+              aria-label="Decrease spacing"
+              disabled={spacing <= MIN_SLOT_SPACING}
+              onClick={() => adjustSpacing(-SLOT_SPACING_STEP)}
+            >
+              [ &#8722;
+            </button>
+            <span className={cn(microLabel, "min-w-14 text-center text-muted-foreground")} title="Distance between pieces">
+              {spacing.toFixed(1)} m
+            </span>
+            <button
+              className={toolbarButton}
+              aria-label="Increase spacing"
+              disabled={spacing >= MAX_SLOT_SPACING}
+              onClick={() => adjustSpacing(SLOT_SPACING_STEP)}
+            >
+              + ]
+            </button>
+            <button className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
+              [ &#8596; Respace ]
+            </button>
+          </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
             [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
