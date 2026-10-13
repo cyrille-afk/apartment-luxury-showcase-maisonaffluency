@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 /** Shared scene-lighting tokens, kept separate from catalogue finishes. */
 export const SHOWROOM = {
-  exposure: 1.1,
-  ambient: 0.15,
+  exposure: 2.0,
+  ambient: 0.4,
   key: "#fff7ed",
   fill: "#edf3ff",
   rim: "#ffffff",

@@ -247,13 +247,13 @@ const VisualiserCanvas = ({
       target={[0, 0.5, 0]}
     />
 
-    {/* Weak ambient keeps crevices dark; three-point rig does the shaping. */}
+    {/* Soft ambient lifts deep shadows under base frames. */}
     <ambientLight intensity={SHOWROOM.ambient} />
     <rectAreaLight position={[-5, 6, 5]} rotation={[-Math.PI / 4, -Math.PI / 4, 0]} width={6} height={4} intensity={3} color={SHOWROOM.key} />
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
       position={[-6, 9, 6]}
-      intensity={1.2}
+      intensity={2.5}
       color={SHOWROOM.key}
       castShadow
       shadow-mapSize-width={2048}

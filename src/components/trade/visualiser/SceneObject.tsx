@@ -200,7 +200,10 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   // A loaded swatch texture carries the true colour; tinting it again with the
   // finish's flat colour is what made fabrics read as solid paint.
   material.color.set(neutralFabric ? "#d8d4cc" : maps.diffuse && !isMetal ? "#ffffff" : finish?.color ?? "#ffffff");
-  material.roughness = neutralFabric ? 0.96 : finish?.roughness ?? (isMetal ? 0.25 : finish && isTextileMaterial(finish) ? 0.9 : maps.roughness ? 1 : 0.7);
+  const baseRoughness = neutralFabric ? 0.65 : finish?.roughness ?? (isMetal ? 0.25 : finish && isTextileMaterial(finish) ? 0.65 : maps.roughness ? 1 : 0.7);
+  // Fabrics stay in 0.5–0.7 so they catch light instead of reading black in indirect light.
+  const isFabric = neutralFabric || (!!finish && isTextileMaterial(finish));
+  material.roughness = isFabric ? THREE.MathUtils.clamp(baseRoughness, 0.5, 0.7) : baseRoughness;
   material.metalness = THREE.MathUtils.clamp(metalness, 0, 0.92);
   // Non-metals get a touch more IBL so stone/wood edges catch thin speculars.
   material.envMapIntensity = isMetal ? 1.8 : metalness > 0.2 ? 1.5 : 1.15;
