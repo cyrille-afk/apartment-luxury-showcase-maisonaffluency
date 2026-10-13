@@ -39,6 +39,11 @@ export function classifyTextureNode(nodeName: string): KnownPart | null {
   return null;
 }
 
+/** Classifies a mesh by node name, falling back to its material name when unnamed. */
+export function classifyMeshPart(nodeName: string, materialName: string): KnownPart | null {
+  return classifyTextureNode(nodeName) ?? classifyTextureNode(materialName);
+}
+
 /** Sub-tabs for a product: Whole Piece plus each part its model actually contains. */
 export function finishTargetsFromParts(parts: Iterable<FinishPart>): FinishTarget[] {
   const found = new Set(parts);
