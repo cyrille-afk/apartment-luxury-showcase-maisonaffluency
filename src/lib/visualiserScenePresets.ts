@@ -6,6 +6,8 @@ export type ScenePresetData = {
   snapToGrid?: boolean;
   showGrid?: boolean;
   depthOfField?: boolean;
+  /** Background blur strength (bokeh scale), 1–10. */
+  dofStrength?: number;
 };
 export type ScenePreset = { id: string; name: string; savedAt: string; data: ScenePresetData };
 

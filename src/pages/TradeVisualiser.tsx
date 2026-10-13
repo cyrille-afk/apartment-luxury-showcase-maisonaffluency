@@ -78,6 +78,7 @@ type PersistedSandbox = {
   snapToGrid?: boolean;
   showGrid?: boolean;
   depthOfField?: boolean;
+  dofStrength?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -102,6 +103,7 @@ const readSandbox = (): PersistedSandbox => {
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
       depthOfField: parsed.depthOfField === true,
+      dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -141,6 +143,7 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
+  const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -253,11 +256,12 @@ const TradeVisualiser = () => {
         snapToGrid,
         showGrid,
         depthOfField,
+        dofStrength,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField, dofStrength]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -648,6 +652,7 @@ const TradeVisualiser = () => {
             snapToGrid={snapToGrid}
             showGrid={showGrid}
             depthOfField={depthOfField}
+            dofStrength={dofStrength}
           />
         </Suspense>
       </div>
@@ -846,6 +851,22 @@ const TradeVisualiser = () => {
             >
               [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
             </button>
+            {depthOfField && (
+              <label className="flex items-center gap-2" title="How softly the background is blurred">
+                <span className={cn(microLabel, "text-muted-foreground")}>Blur</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={dofStrength}
+                  onChange={(event) => setDofStrength(Number(event.target.value))}
+                  className="h-1 w-24 cursor-pointer accent-primary"
+                  aria-label="Background blur strength"
+                />
+                <span className={cn(microLabel, "w-4 text-muted-foreground")}>{dofStrength}</span>
+              </label>
+            )}
           </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
@@ -863,7 +884,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField, dofStrength })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -871,6 +892,7 @@ const TradeVisualiser = () => {
               setSnapToGrid(data.snapToGrid === true);
               setShowGrid(data.showGrid !== false);
               setDepthOfField(data.depthOfField === true);
+              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
             }}
           />
           <span className="h-5 w-px bg-[#E5E5E5]" />

@@ -84,14 +84,17 @@ interface VisualiserCanvasProps {
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
   depthOfField?: boolean;
+  /** Blur strength (bokeh scale), 1–10. */
+  dofStrength?: number;
 }
 
-const DofPass = ({ focus }: { focus: [number, number, number] | null }) => {
+const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
   const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
   const target = focus ? new THREE.Vector3(...focus) : controls?.target?.clone() ?? new THREE.Vector3(0, 0.5, 0);
+  const bokehScale = Math.min(10, Math.max(1, strength));
   return (
     <EffectComposer multisampling={4}>
-      <DepthOfField target={target} focalLength={0.03} bokehScale={3} height={720} />
+      <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} />
     </EffectComposer>
   );
 };
@@ -114,6 +117,7 @@ const VisualiserCanvas = ({
   showGrid = true,
   focusRef,
   depthOfField = false,
+  dofStrength = 3,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -131,7 +135,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${objects
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${dofStrength}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -241,6 +245,7 @@ const VisualiserCanvas = ({
     </Suspense>
     {depthOfField && (
       <DofPass
+        strength={dofStrength}
         focus={(() => {
           const sel = objects.find((o) => o.instanceId === selectedId);
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
