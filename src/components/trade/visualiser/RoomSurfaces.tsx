@@ -50,19 +50,21 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
       map.needsUpdate = true;
     }
     return { color, bump, roughness };
-  }, [source, repeat, polished, anisotropy]);
+  }, [source, repeat, polished, glare, anisotropy]);
   useEffect(() => () => {
     maps.color.dispose(); maps.bump.dispose(); maps.roughness?.dispose();
   }, [maps]);
   return maps;
 }
 
-function Floor({ finish }: { finish: Exclude<RoomFloorFinish, "none"> }) {
-  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, finish === "oak-chevron" ? 32 : 20, true);
+function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; glare: number }) {
+  const maps = useSurfaceMaps(finish === "oak-chevron" ? oakImage : cementImage, finish === "oak-chevron" ? 32 : 20, true, glare);
+  // Glare 0 = 0.05 env reflection, 100 = 0.45.
+  const envMapIntensity = 0.05 + (clampFloorGlare(glare) / 100) * 0.4;
   return (
     <mesh name={`room-floor-${finish}`} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[80, 80]} />
-      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={1} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={0.25} />
+      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={1} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
     </mesh>
   );
 }
@@ -77,10 +79,10 @@ function PlasterWall({ z }: { z: number }) {
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[] }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number }) {
   const rearZ = Math.min(-4, ...objects.map((o) => (o.position?.[2] ?? 0) - footprintRadius(parseDimensionString(o.dimensions), o.scale) - 1.5));
   return <group name="architectural-room-surfaces">
-    {floor !== "none" && <Floor key={floor} finish={floor} />}
+    {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
     {rearWall && <PlasterWall z={rearZ} />}
   </group>;
 }
