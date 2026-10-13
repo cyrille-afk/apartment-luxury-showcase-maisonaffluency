@@ -7,7 +7,7 @@ export type FinishTarget = "all" | FinishPart;
 export const FINISH_TARGET_LABELS: Record<FinishTarget, string> = {
   all: "Whole Piece",
   top: "Top",
-  base: "Base",
+  base: "Frame / Base",
   upholstery: "Upholstery",
 };
 
@@ -17,7 +17,8 @@ const PART_ORDER: FinishPart[] = ["top", "base", "upholstery"];
 export function classifyTextureNode(nodeName: string): FinishPart | null {
   const name = nodeName.toLowerCase();
   if (/upholstery|fabric|cushion|seat|cover|textile/.test(name)) return "upholstery";
-  if (/base|frame|leg|stem|pedestal|foot|column|bracket/.test(name)) return "base";
+  // Exporters often name the frame by its material (e.g. Man of Parts "WoodFinish", "Glides").
+  if (/base|frame|leg|stem|pedestal|foot|column|bracket|wood|timber|metal|glide|finish|structure/.test(name)) return "base";
   if (/top|surface|plate|tabletop|marble|stone|counter|shelf/.test(name)) return "top";
   return null;
 }
