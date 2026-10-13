@@ -7,7 +7,9 @@ import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
-import { EffectComposer, DepthOfField } from "@react-three/postprocessing";
+import { EffectComposer, DepthOfField, SSAO } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
+import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
@@ -202,13 +204,14 @@ interface VisualiserCanvasProps {
   showRug?: boolean;
 }
 
-const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
+const ShowroomEffects = ({ focus, strength = 3, depthOfField, hasBackdrop }: { focus: [number, number, number] | null; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
   const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
   const target = focus ? new THREE.Vector3(...focus) : controls?.target?.clone() ?? new THREE.Vector3(0, 0.5, 0);
   const bokehScale = Math.min(10, Math.max(1, strength));
   return (
-    <EffectComposer multisampling={4}>
-      <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} />
+    <EffectComposer multisampling={4} enableNormalPass>
+      <SSAO blendFunction={BlendFunction.MULTIPLY} samples={16} rings={4} radius={0.12} intensity={hasBackdrop ? 0.7 : 1.15} luminanceInfluence={0.5} bias={0.025} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.4} worldProximityFalloff={0.15} />
+      {depthOfField ? <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} /> : <></>}
     </EffectComposer>
   );
 };
@@ -267,6 +270,7 @@ const VisualiserCanvas = ({
     }}
     dpr={[1, 1.5]}
     onCreated={({ gl }) => {
+      RectAreaLightUniformsLib.init();
       gl.toneMapping = THREE.ACESFilmicToneMapping;
       gl.toneMappingExposure = SHOWROOM.exposure;
       gl.outputColorSpace = THREE.SRGBColorSpace;
@@ -398,8 +402,9 @@ const VisualiserCanvas = ({
         />
       ))}
     </Suspense>
-    {depthOfField && (
-      <DofPass
+    <ShowroomEffects
+        depthOfField={depthOfField}
+        hasBackdrop={hasBackdrop}
         strength={dofStrength}
         focus={(() => {
           if (!dofFocusSelected) return null;
@@ -407,7 +412,6 @@ const VisualiserCanvas = ({
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
         })()}
       />
-    )}
   </Canvas>
 );
 
