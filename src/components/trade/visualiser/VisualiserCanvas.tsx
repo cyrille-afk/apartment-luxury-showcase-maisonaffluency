@@ -170,6 +170,8 @@ interface VisualiserCanvasProps {
   environmentSource?: VisualiserEnvironmentSource;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
+  /** Wall height percentage of the full cyclorama (20–100). */
+  wallHeight?: number;
   /** Floor reflection strength, 0 (matte) – 100 (polished). */
   floorGlare?: number;
 }

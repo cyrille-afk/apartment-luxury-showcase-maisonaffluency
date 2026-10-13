@@ -5,7 +5,7 @@ import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
 import { SHOWROOM } from "@/lib/showroomRendering";
-import { clampFloorGlare, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
