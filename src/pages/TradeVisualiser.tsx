@@ -951,39 +951,6 @@ const TradeVisualiser = () => {
               </label>
             )}
           </div>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
-            [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button
-            className={toolbarButton}
-            onClick={downloadPresentationMockup}
-            disabled={exporting}
-            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
-          >
-            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
-          </button>
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <ScenePresets
-            className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl })}
-            onLoad={(data) => {
-              setSelectedId(null);
-              setObjects(data.objects);
-              setBackdrop(null);
-              setBackdropDataUrl(data.backdropDataUrl ?? null);
-              if (typeof data.spacing === "number") setSpacing(data.spacing);
-              setSnapToGrid(data.snapToGrid === true);
-              setShowGrid(data.showGrid !== false);
-              setShowLabels(data.showLabels !== false);
-              setDepthOfField(data.depthOfField === true);
-              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
-              setDofFocusSelected(data.dofFocusSelected !== false);
-            }}
-          />
-          <span className="h-5 w-px bg-[#E5E5E5]" />
-          <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
         </div>
       </div>
 
