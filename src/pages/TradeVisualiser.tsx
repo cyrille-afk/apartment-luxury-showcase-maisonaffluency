@@ -41,6 +41,7 @@ type CatalogueProduct = {
   category: string;
   dimensions: string | null;
   glb_url: string | null;
+  source_pick_id: string | null;
 };
 
 type PersistedSandbox = {
@@ -100,6 +101,9 @@ const TradeVisualiser = () => {
   const [loadingProject, setLoadingProject] = useState(false);
   const intakeRef = useRef<string | null>(null);
   const [materials, setMaterials] = useState<VisualiserMaterial[]>([]);
+  // Finishes linked to the selected product (product_fabrics → fabrics).
+  // null = no selection or none linked → show the global library.
+  const [linkedMaterials, setLinkedMaterials] = useState<VisualiserMaterial[] | null>(null);
   const [materialSearch, setMaterialSearch] = useState("");
   const [finishTarget, setFinishTarget] = useState<FinishTarget>("all");
   const [textureParts, setTextureParts] = useState<Record<string, FinishPart[]>>({});
@@ -160,7 +164,7 @@ const TradeVisualiser = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url";
+      const columns = "id, product_name, brand_name, image_url, category, dimensions, glb_url, source_pick_id";
       const base = () => supabase
         .from("trade_products")
         .select(columns)
@@ -305,6 +309,41 @@ const TradeVisualiser = () => {
 
   const modelCount = useMemo(() => products.filter((product) => product.glb_url).length, [products]);
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
+
+  // Load the finishes linked to the selected product so the swatch grid shows
+  // that piece's own finishes instead of the global library.
+  const selectedProductId = selected?.id ?? null;
+  useEffect(() => {
+    if (!selectedProductId) {
+      setLinkedMaterials(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const product = products.find((p) => p.id === selectedProductId);
+      const pickId = product?.source_pick_id ?? selectedProductId;
+      const { data: links } = await supabase
+        .from("product_fabrics")
+        .select("sort_order, fabrics(id, name, supplier, category, image_url, is_active)")
+        .eq("pick_id", pickId)
+        .order("sort_order", { ascending: true });
+      if (cancelled) return;
+      const linked = (links ?? [])
+        .map((link) => (link as unknown as { fabrics: { id: string; name: string; supplier: string | null; category: string | null; image_url: string | null; is_active: boolean } | null }).fabrics)
+        .filter((fabric): fabric is NonNullable<typeof fabric> => Boolean(fabric?.is_active && fabric.image_url))
+        .map((fabric) => ({
+          id: fabric.id,
+          name: fabric.name,
+          brand_name: fabric.supplier ?? product?.brand_name ?? "",
+          category: fabric.category ?? "Fabric",
+          material_type: fabric.category,
+          color_family: null,
+          image_url: fabric.image_url,
+        }));
+      setLinkedMaterials(linked.length ? linked : null);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedProductId, products]);
   // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
   const availableTargets = useMemo<FinishTarget[]>(
     () => finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
@@ -439,11 +478,12 @@ const TradeVisualiser = () => {
     // plain "arsene quinoa" query still matches.
     const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const query = norm(materialSearch);
-    return materials.filter((material) => (
+    const source = linkedMaterials ?? materials;
+    return source.filter((material) => (
       materialFitsTarget(material, effectiveTarget)
       && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
-  }, [materialSearch, materials, effectiveTarget]);
+  }, [materialSearch, materials, linkedMaterials, effectiveTarget]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
