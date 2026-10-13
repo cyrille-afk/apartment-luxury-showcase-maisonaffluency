@@ -1002,7 +1002,31 @@ const TradeVisualiser = () => {
                       {c.label}
                     </DropdownMenuRadioItem>
                   ))}
+                  <DropdownMenuRadioItem value="custom">
+                    <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border align-middle" style={{ backgroundColor: wallColorHex("custom", wallCustomHex) }} />
+                    Custom colour…
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={wallColorHex("custom", wallCustomHex)}
+                      onChange={(e) => applyCustomHex(e.target.value)}
+                      aria-label="Pick custom wall colour"
+                      className="h-7 w-8 shrink-0 cursor-pointer rounded-sm border border-border bg-transparent p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={customHexDraft}
+                      onChange={(e) => applyCustomHex(e.target.value)}
+                      placeholder="#f4efe7"
+                      aria-label="Custom wall colour hex"
+                      className="w-full rounded-sm border border-border bg-background px-2 py-1 font-mono text-[11px] uppercase"
+                    />
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Any hex value — picking a colour also selects Custom.</p>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Wall finish</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={wallFinish} onValueChange={(value) => setWallFinish(roomWallFinish(value))}>
