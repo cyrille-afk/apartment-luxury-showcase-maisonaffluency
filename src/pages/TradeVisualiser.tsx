@@ -738,14 +738,14 @@ const TradeVisualiser = () => {
                 <Button variant="ghost" size="sm" className={cn(microLabel, "h-auto px-0 py-1 text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</Button>
               )}
             </div>
-            <div role="tablist" aria-label="Finish part" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div role="tablist" aria-label="Finish part" className="mt-3 flex flex-row items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-none pb-2">
               {availableTargets.map((value) => (
                 <Button variant="ghost" size="sm"
                   key={value}
                   role="tab"
                   aria-selected={effectiveTarget === value}
                   onClick={() => setFinishTarget(value)}
-                  className={cn(microLabel, "h-auto whitespace-normal px-0 py-1 text-left", effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                  className={cn(microLabel, "h-auto shrink-0 whitespace-nowrap px-0 py-1 text-left", effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
                 >
                   {targetLabel(value, partGroupLabels)}
                 </Button>
