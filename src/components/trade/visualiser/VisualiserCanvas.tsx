@@ -59,6 +59,8 @@ interface VisualiserCanvasProps {
   onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
   /** When true, dragged pieces snap to the placement grid. */
   snapToGrid?: boolean;
+  /** When true, the faint design-canvas floor grid renders at Y = 0. */
+  showGrid?: boolean;
 }
 
 /**
@@ -76,6 +78,7 @@ const VisualiserCanvas = ({
   onDragStateChange,
   onTextureParts,
   snapToGrid = false,
+  showGrid = true,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows
@@ -142,20 +145,22 @@ const VisualiserCanvas = ({
         depthWrite={false}
       />
     )}
-    {/* Faint floor grid at Y = 0 — the design-canvas ground reference. */}
-    <Grid
-      position={[0, 0.001, 0]}
-      infiniteGrid
-      cellSize={0.25}
-      cellThickness={0.5}
-      cellColor="#E5E7EB"
-      sectionSize={1}
-      sectionThickness={0.8}
-      sectionColor="#D1D5DB"
-      fadeDistance={30}
-      fadeStrength={1.5}
-      followCamera={false}
-    />
+    {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
+    {showGrid && (
+      <Grid
+        position={[0, 0.001, 0]}
+        infiniteGrid
+        cellSize={0.25}
+        cellThickness={0.5}
+        cellColor="#E5E7EB"
+        sectionSize={1}
+        sectionThickness={0.8}
+        sectionColor="#D1D5DB"
+        fadeDistance={30}
+        fadeStrength={1.5}
+        followCamera={false}
+      />
+    )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
