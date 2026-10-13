@@ -403,6 +403,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   }, [gl, raycaster, camera, snapToGrid]);
 
   const endDrag = useCallback(() => {
+    (window as unknown as { __dragDbg?: string[] }).__dragDbg?.push(`end dragging=${draggingRef.current}`);
     if (!draggingRef.current) return;
     draggingRef.current = false;
     window.removeEventListener("pointermove", dragMove);
@@ -417,6 +418,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     onSelect(object.instanceId);
+    (window as unknown as { __dragDbg?: string[] }).__dragDbg?.push(
+      `down editable=${isEditable} locked=${!!object.positionLocked}`,
+    );
     if (!isEditable || object.positionLocked) return;
     const hit = floorHit();
     if (!hit || !groupRef.current) return;
