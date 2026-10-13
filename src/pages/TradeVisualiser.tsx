@@ -367,7 +367,21 @@ const TradeVisualiser = () => {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
       return;
     }
-    const index = objects.length;
+    const SLOT = 1.4;
+    const GRID_RANGE = 6;
+    const slots: [number, number, number][] = [];
+    for (let x = -GRID_RANGE; x <= GRID_RANGE; x++) {
+      for (let z = -GRID_RANGE; z <= GRID_RANGE; z++) {
+        slots.push([x * SLOT, 0, z * SLOT]);
+      }
+    }
+    slots.sort((a, b) => (a[0] * a[0] + a[2] * a[2]) - (b[0] * b[0] + b[2] * b[2]));
+    const isOccupied = (slot: [number, number, number]) =>
+      objects.some((object) =>
+        Math.abs(object.position[0] - slot[0]) < SLOT * 0.5 &&
+        Math.abs(object.position[2] - slot[2]) < SLOT * 0.5
+      );
+    const position = slots.find((slot) => !isOccupied(slot)) ?? [0, 0, 0];
     const next: PlacedObject = {
       instanceId: `${product.id}-${Date.now()}`,
       id: product.id,
@@ -376,7 +390,7 @@ const TradeVisualiser = () => {
       image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
       dimensions: product.dimensions,
       glb_url: product.glb_url,
-      position: [((index % 4) - 1.5) * 1.4, 0, Math.floor(index / 4) * -1.4],
+      position,
       rotation: [0, 0, 0],
       scale: 1,
       material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
