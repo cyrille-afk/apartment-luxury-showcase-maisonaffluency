@@ -9,6 +9,7 @@ import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SHOWROOM, floorSurfaceRoughness } from "@/lib/showroomRendering";
+import RecessedCeiling from "./RecessedCeiling";
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
 function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
@@ -106,19 +107,9 @@ function ArchitecturalCoves({ cx, cz, radius, height, color }: { cx: number; cz:
     return { position, rotation };
   }), [radius, height]);
   return <group name="concealed-architectural-coves" position={[cx, 0, cz]}>
-    {/* Narrow recessed ceiling perimeter, not a lid over the canvas. */}
-    <mesh name="ceiling-cove-recess" position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
-      <ringGeometry args={[radius - 0.85, radius, 96]} />
-      <meshStandardMaterial color={color} roughness={0.92} metalness={0} side={THREE.DoubleSide} />
-    </mesh>
-    {/* The lower lip conceals the light sources from furniture-height views. */}
-    <mesh name="ceiling-cove-lip" position={[0, height - 0.3, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <ringGeometry args={[radius - 0.88, radius - 0.52, 96]} />
-      <meshStandardMaterial color={color} roughness={0.92} metalness={0} side={THREE.DoubleSide} />
-    </mesh>
+    <RecessedCeiling radius={radius} height={height} />
     {strips.map((strip, i) => <group key={i}>
       <rectAreaLight name={`wall-wash-${i}`} position={strip.position} rotation={strip.rotation} width={radius * 0.68} height={0.12} intensity={4} color={SHOWROOM.cove} />
-      {i % 2 === 0 && <rectAreaLight name={`ceiling-wash-${i}`} position={[strip.position.x, height - 0.18, strip.position.z]} rotation={[Math.PI / 2, 0, i * Math.PI / 4]} width={radius * 0.7} height={0.35} intensity={2.5} color={SHOWROOM.cove} />}
     </group>)}
   </group>;
 }
