@@ -70,8 +70,9 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
  * always shows plaster behind the furniture instead of the wall's edge.
  * Centered on the middle of the arrangement, not the world origin.
  */
-function PlasterWall({ objects, heightPct }: { objects: PlacedObject[]; heightPct: number }) {
+function PlasterWall({ objects, heightPct, color, finish }: { objects: PlacedObject[]; heightPct: number; color: RoomWallColor; finish: RoomWallFinish }) {
   const maps = useSurfaceMaps(cementImage, 16, false);
+  const spec = wallFinishSpec(finish);
   const { cx, cz, radius, height } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
     const zs = objects.map((o) => o.position?.[2] ?? 0);
@@ -86,14 +87,14 @@ function PlasterWall({ objects, heightPct }: { objects: PlacedObject[]; heightPc
   return (
     <mesh name="room-rear-plaster-wall" position={[cx, height / 2, cz]} receiveShadow>
       <cylinderGeometry args={[radius, radius, height, 64, 1, true]} />
-      <meshStandardMaterial color={SHOWROOM.plaster} roughness={0.95} bumpMap={maps.bump} bumpScale={0.002} metalness={0} envMapIntensity={0.2} side={THREE.BackSide} />
+      <meshStandardMaterial color={wallColorHex(color)} roughness={spec.roughness} bumpMap={maps.bump} bumpScale={spec.bumpScale} metalness={0} envMapIntensity={spec.envMapIntensity} side={THREE.BackSide} />
     </mesh>
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte" }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} />}
+    {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} />}
   </group>;
 }
