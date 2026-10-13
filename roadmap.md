@@ -5,4 +5,4 @@
 - [x] Add organic pebble rug with colour/weave/pile, size/position and show/hide controls; verified toggle, reload persistence and preset round-trip; 17 tests passed.
 - [x] Upgrade architectural cove lighting, ambient occlusion and matte/satin materials; 22 tests pass, furnished showroom/DoF/PNG verified, uploaded photos remain visible on desktop/mobile and reload (existing export still excludes the photo).
 - [x] Add physical recessed ceiling frame, inset plaster pocket and concealed warm ceiling wash; 13 tests passed, furnished angled view and unobstructed photo verified without runtime errors.
-- [ ] Add ceiling frame height, thickness and opening controls with scene/preset persistence; verify a furnished scene.
+- [x] Add ceiling frame height, thickness and opening controls; 19 tests pass, furnished rendering, reload and preset restoration verified without page errors.
