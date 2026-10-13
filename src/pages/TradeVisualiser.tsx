@@ -415,10 +415,13 @@ const TradeVisualiser = () => {
   };
 
   const filteredMaterials = useMemo(() => {
-    const query = materialSearch.trim().toLowerCase();
+    // Normalize away punctuation (e.g. the "·" in "ARSENE · QUINOA") so a
+    // plain "arsene quinoa" query still matches.
+    const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const query = norm(materialSearch);
     return materials.filter((material) => (
       materialFitsTarget(material, effectiveTarget)
-      && (!query || `${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`.toLowerCase().includes(query))
+      && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
   }, [materialSearch, materials, effectiveTarget]);
 
