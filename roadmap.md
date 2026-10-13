@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Fix active Visualiser dimensions, independent position locks and exclusive material-tab targeting; verify on actual models.
 - [x] Persist consented IP currency on signed-in profiles and linked clients; 14 tests pass, deployed detection saved BE/EUR and linked account sheet displayed it, preferred currency unchanged, submitted locations and direct overwrites rejected. Final direct profile-read retest blocked by expired preview session and session-mint gateway timeout.
 - [x] Add precise model rotation degree inputs and six common up-axis presets; 19 unit tests pass, signed-in GUM decimal inputs/all presets/reload/reset verified, placement and scale retained, full decimal values visible, no page errors, build OK.
 - [x] Display country and available IP-detected currency on Client Management profiles; six tests pass, real signed-in Singapore/SGD account sheet and directory verified without page errors, build OK. No linked IP detections currently recorded; shown as unavailable, never inferred from the admin browser. Pricing preferences unchanged.
