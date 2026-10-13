@@ -1146,6 +1146,28 @@ const TradeVisualiser = () => {
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Border thickness</span>
+                    <span>{rugBorderThicknessMm} mm</span>
+                  </div>
+                  <input type="range" min={4} max={20} step={1} value={rugBorderThicknessMm} disabled={floorFinish === "none"} onChange={(e) => setRugBorderThicknessMm(clampRugBorderThicknessMm(Number(e.target.value)))} aria-label="Rug border thickness" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Border twist</span>
+                    <span>{rugBorderTwistMm} mm</span>
+                  </div>
+                  <input type="range" min={10} max={60} step={1} value={rugBorderTwistMm} disabled={floorFinish === "none"} onChange={(e) => setRugBorderTwistMm(clampRugBorderTwistMm(Number(e.target.value)))} aria-label="Rug border twist spacing" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Border roughness</span>
+                    <span>{rugBorderRoughness}%</span>
+                  </div>
+                  <input type="range" min={0} max={100} step={5} value={rugBorderRoughness} disabled={floorFinish === "none"} onChange={(e) => setRugBorderRoughness(clampRugBorderRoughness(Number(e.target.value)))} aria-label="Rug border roughness" className="w-full accent-primary" />
+                  <p className="mt-1 text-[10px] text-muted-foreground">Lower = glossier cord with sharper highlights; higher = matte.</p>
+                </div>
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug weave</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={rugWeaveKey} onValueChange={(v) => setRugWeaveKey(toRugWeave(v))}>
                   {RUG_WEAVES.map((w) => (
