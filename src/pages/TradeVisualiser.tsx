@@ -576,7 +576,9 @@ const TradeVisualiser = () => {
     if (!canvas || exporting) return;
     setExporting(true);
     const hadGrid = showGrid;
+    const hadSelection = selectedId;
     if (hadGrid) setShowGrid(false);
+    if (hadSelection) setSelectedId(null); // keep the transform gizmo out of client mockups
     await nextPaintedFrame();
     await nextPaintedFrame();
     try {
@@ -586,6 +588,7 @@ const TradeVisualiser = () => {
       toast.error("Could not export the mockup.");
     }
     if (hadGrid) setShowGrid(true);
+    if (hadSelection) setSelectedId(hadSelection);
     setExporting(false);
   };
 
