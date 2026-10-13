@@ -5,7 +5,7 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProductFinishes";
-import { classifyTextureNode, getPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
+import { classifyMeshPart, getPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 
@@ -172,7 +172,7 @@ function assignParts(root: THREE.Object3D, overrides: PartOverrides) {
     const key = meshKey(index, mesh.name || mesh.parent?.name || "");
     // Unnamed meshes are still classifiable by their material name
     // (e.g. Man of Parts "WoodFinish" → frame, "Glides" → base).
-    const named = classifyTextureNode(nodeName) ?? classifyTextureNode(matName(mesh));
+    const named = classifyMeshPart(nodeName, matName(mesh));
     // Unnamed parts that carry their own GLB material are independently finishable.
     let auto: FinishPart | null = named;
     if (!auto && distinct > 1) {
