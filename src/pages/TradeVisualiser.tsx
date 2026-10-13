@@ -8,6 +8,7 @@ import PartMappingControl from "@/components/trade/visualiser/PartMappingControl
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import {
   pickFootprintSlot,
+  SPAWN_STAGGER_X,
   footprintRadius,
   respaceObjects,
   DEFAULT_SLOT_SPACING,
@@ -405,6 +406,8 @@ const TradeVisualiser = () => {
   );
   const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
 
+  const focusRef = useRef<(() => [number, number] | null) | null>(null);
+  const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
@@ -422,6 +425,16 @@ const TradeVisualiser = () => {
         objects.map((o) => ({ position: o.position, radius: footprintRadius(parseDimensionString(o.dimensions), o.scale) })),
         footprintRadius(parseDimensionString(product.dimensions)),
         spacing,
+        (() => {
+          const focus = focusRef.current?.() ?? [0, 0];
+          const streak = spawnStreakRef.current;
+          const now = Date.now();
+          const same = now - streak.at < 4000 && Math.hypot(focus[0] - streak.focus[0], focus[1] - streak.focus[1]) < 0.05;
+          streak.count = same ? streak.count + 1 : 0;
+          streak.at = now;
+          streak.focus = focus;
+          return [focus[0] + streak.count * SPAWN_STAGGER_X, focus[1]] as [number, number];
+        })(),
       ),
       rotation: [0, 0, 0],
       scale: 1,
