@@ -23,7 +23,7 @@ const run = async <T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
 
 export const isExrBuffer = (buffer: ArrayBuffer) => {
   const h = new Uint8Array(buffer, 0, Math.min(4, buffer.byteLength));
-  return buffer.byteLength >= 8 && h[0] === 0x76 && h[1] === 0x2e && h[2] === 0x31 && h[3] === 0x01;
+  return buffer.byteLength >= 8 && h[0] === 0x76 && h[1] === 0x2f && h[2] === 0x31 && h[3] === 0x01;
 };
 
 export async function getLocalExr(): Promise<{ name: string; buffer: ArrayBuffer } | null> {
