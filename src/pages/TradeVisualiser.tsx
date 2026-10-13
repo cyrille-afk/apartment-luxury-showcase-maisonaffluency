@@ -28,6 +28,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
+import ScenePresets from "@/components/trade/visualiser/ScenePresets";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
@@ -859,6 +860,19 @@ const TradeVisualiser = () => {
           >
             [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
           </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <ScenePresets
+            className={toolbarButton}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField })}
+            onLoad={(data) => {
+              setSelectedId(null);
+              setObjects(data.objects);
+              if (typeof data.spacing === "number") setSpacing(data.spacing);
+              setSnapToGrid(data.snapToGrid === true);
+              setShowGrid(data.showGrid !== false);
+              setDepthOfField(data.depthOfField === true);
+            }}
+          />
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
         </div>
