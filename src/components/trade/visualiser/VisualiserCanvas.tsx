@@ -174,6 +174,10 @@ interface VisualiserCanvasProps {
   wallHeight?: number;
   /** Floor reflection strength, 0 (matte) – 100 (polished). */
   floorGlare?: number;
+  /** Plaster wall colour preset key. */
+  wallColor?: RoomWallColor;
+  /** Plaster wall finish preset key. */
+  wallFinish?: RoomWallFinish;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -213,6 +217,8 @@ const VisualiserCanvas = ({
   showRearWall = true,
   wallHeight = 100,
   floorGlare = 50,
+  wallColor = "warm-white",
+  wallFinish = "matte",
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -237,7 +243,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${floorGlare}|${wallColor}|${wallFinish}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -287,7 +293,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     <Suspense fallback={null}>
-      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} />
+      <RoomSurfaces floor={floorFinish} rearWall={showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} wallColor={wallColor} wallFinish={wallFinish} />
     </Suspense>
     {!hasBackdrop && floorFinish === "none" && (
       <ContactShadows

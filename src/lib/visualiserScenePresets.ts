@@ -1,5 +1,5 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
-import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type ScenePresetData = {
   objects: PlacedObject[];
@@ -21,6 +21,10 @@ export type ScenePresetData = {
   wallHeight?: number;
   /** Floor reflection strength, 0 (matte) – 100 (polished). */
   floorGlare?: number;
+  /** Plaster wall colour preset key. */
+  wallColor?: RoomWallColor;
+  /** Plaster wall finish preset key. */
+  wallFinish?: RoomWallFinish;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
