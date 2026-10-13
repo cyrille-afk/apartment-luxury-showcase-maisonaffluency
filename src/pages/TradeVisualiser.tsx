@@ -190,13 +190,13 @@ const TradeVisualiser = () => {
   const handleSceneCrash = useCallback(() => {
     if (crashHandledRef.current) return;
     crashHandledRef.current = true;
-    try { recoverScene(STORAGE_KEY); } catch { sessionStorage.removeItem(STORAGE_KEY); }
+    try { recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
     window.location.reload();
   }, []);
   useEffect(() => {
     const notice = takeRecoveryNotice();
     if (notice === "restored") toast.warning("A display error occurred — your last working room scene was restored.");
-    else if (notice === "reset") toast.warning("A display error occurred again — the room was reset to an empty scene.");
+    else if (notice === "reset") toast.warning("A display error occurred again — your scene was kept as is and reloaded.");
   }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);

@@ -1,5 +1,6 @@
 /** Last-known-good scene recovery for the Visualiser sandbox. */
 export const LAST_GOOD_KEY = "trade-visualiser-last-good-v1";
+export const CRASH_BACKUP_KEY = "trade-visualiser-crash-backup-v1";
 export const RECOVERY_KEY = "trade-visualiser-recovery-v1";
 /** A scene counts as "working" once it has rendered this long without error. */
 export const STABLE_AFTER_MS = 4000;
@@ -27,11 +28,11 @@ export const recoverScene = (storageKey: string, storage: Storage = sessionStora
   const lastAt = raw ? Number(JSON.parse(raw).at) : null;
   const now = Date.now();
   const plan = planRecovery(storage.getItem(LAST_GOOD_KEY), Number.isFinite(lastAt) ? lastAt : null, now);
+  // Never destroy a configuration: keep the crashed scene as a backup and only
+  // overwrite it when a known-good snapshot exists.
+  const current = storage.getItem(storageKey);
+  if (current) storage.setItem(CRASH_BACKUP_KEY, current);
   if (plan.sandbox) storage.setItem(storageKey, plan.sandbox);
-  else {
-    storage.removeItem(storageKey);
-    storage.removeItem(LAST_GOOD_KEY);
-  }
   storage.setItem(RECOVERY_KEY, JSON.stringify({ at: now, outcome: plan.outcome, notified: false }));
   return plan.outcome;
 };
