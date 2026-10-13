@@ -4,7 +4,7 @@ import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
-import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, rugColorHex, rugWeave, type RugColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, rugColorHex, rugWeave, type RugColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -183,7 +183,8 @@ function useWoolMaps(weave: RugWeave, pile: number) {
  * Centered on the arrangement; at least 4.5 × 3.5 m, growing so every
  * piece's footprint sits comfortably inside its boundaries.
  */
-function Rug({ objects, color, weave, pile }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number }) {
+export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
+function Rug({ objects, color, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
   const maps = useWoolMaps(rugWeave(weave), p);
   const { cx, cz, width, depth } = useMemo(() => {
@@ -197,8 +198,13 @@ function Rug({ objects, color, weave, pile }: { objects: PlacedObject[]; color: 
       halfW = Math.max(halfW, Math.abs((o.position?.[0] ?? 0) - cx) + r);
       halfD = Math.max(halfD, Math.abs((o.position?.[2] ?? 0) - cz) + r);
     }
-    return { cx, cz, width: halfW * 2, depth: halfD * 2 };
-  }, [objects]);
+    return {
+      cx: cx + clampRugOffset(layout?.offsetX),
+      cz: cz + clampRugOffset(layout?.offsetZ),
+      width: clampRugSize(layout?.width) ?? halfW * 2,
+      depth: clampRugSize(layout?.depth) ?? halfD * 2,
+    };
+  }, [objects, layout?.width, layout?.depth, layout?.offsetX, layout?.offsetZ]);
   if (!maps.color || !maps.normal) return null;
   return (
     <mesh name="room-area-rug" position={[cx, 0.005, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
@@ -208,10 +214,10 @@ function Rug({ objects, color, weave, pile }: { objects: PlacedObject[]; color: 
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugWeave: rugWeaveKey = "loop", rugPile = 50 }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugWeave?: RugWeave; rugPile?: number }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugWeave: rugWeaveKey = "loop", rugPile = 50, rugLayout }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugWeave?: RugWeave; rugPile?: number; rugLayout?: RugLayout }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {floor !== "none" && <Rug objects={objects} color={rugColor} weave={rugWeaveKey} pile={rugPile} />}
+    {floor !== "none" && <Rug objects={objects} color={rugColor} weave={rugWeaveKey} pile={rugPile} layout={rugLayout} />}
     {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} />}
   </group>;
 }

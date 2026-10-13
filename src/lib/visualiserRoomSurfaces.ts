@@ -105,3 +105,12 @@ export function rugWeave(value: unknown): RugWeave {
 export function clampRugPile(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 50;
 }
+
+/** Rug dimension in metres (1–8 m, 0.1 m steps); null = auto-fit the layout. */
+export function clampRugSize(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.min(8, Math.max(1, Math.round(value * 10) / 10)) : null;
+}
+/** Rug offset from the layout centre in metres (−4…4 m, 0.1 m steps). */
+export function clampRugOffset(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(4, Math.max(-4, Math.round(value * 10) / 10)) : 0;
+}

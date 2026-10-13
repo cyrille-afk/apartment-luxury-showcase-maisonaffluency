@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, rugColor as toRugColor, rugWeave as toRugWeave, type RugColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugColor as toRugColor, rugWeave as toRugWeave, type RugColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -99,6 +99,10 @@ type PersistedSandbox = {
   rugColor?: string;
   rugWeave?: string;
   rugPile?: number;
+  rugWidth?: number | null;
+  rugDepth?: number | null;
+  rugOffsetX?: number;
+  rugOffsetZ?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -138,6 +142,10 @@ const readSandbox = (): PersistedSandbox => {
       rugColor: toRugColor(parsed.rugColor),
       rugWeave: toRugWeave(parsed.rugWeave),
       rugPile: clampRugPile(parsed.rugPile),
+      rugWidth: clampRugSize(parsed.rugWidth),
+      rugDepth: clampRugSize(parsed.rugDepth),
+      rugOffsetX: clampRugOffset(parsed.rugOffsetX),
+      rugOffsetZ: clampRugOffset(parsed.rugOffsetZ),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -192,6 +200,11 @@ const TradeVisualiser = () => {
   const [rugColorKey, setRugColorKey] = useState<RugColor>(toRugColor(initial.rugColor));
   const [rugWeaveKey, setRugWeaveKey] = useState<RugWeave>(toRugWeave(initial.rugWeave));
   const [rugPile, setRugPile] = useState<number>(clampRugPile(initial.rugPile));
+  const [rugWidth, setRugWidth] = useState<number | null>(clampRugSize(initial.rugWidth));
+  const [rugDepth, setRugDepth] = useState<number | null>(clampRugSize(initial.rugDepth));
+  const [rugOffsetX, setRugOffsetX] = useState<number>(clampRugOffset(initial.rugOffsetX));
+  const [rugOffsetZ, setRugOffsetZ] = useState<number>(clampRugOffset(initial.rugOffsetZ));
+  const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
     setCustomHexDraft(raw);
@@ -329,11 +342,12 @@ const TradeVisualiser = () => {
         rugColor: rugColorKey,
         rugWeave: rugWeaveKey,
         rugPile,
+        rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugWeaveKey, rugPile]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -757,6 +771,7 @@ const TradeVisualiser = () => {
             rugColor={rugColorKey}
             rugWeave={rugWeaveKey}
             rugPile={rugPile}
+            rugLayout={rugLayout}
           />
         </Suspense>
       </div>
@@ -951,7 +966,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugWeave: rugWeaveKey, rugPile })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -978,6 +993,10 @@ const TradeVisualiser = () => {
               setRugColorKey(toRugColor(data.rugColor));
               setRugWeaveKey(toRugWeave(data.rugWeave));
               setRugPile(clampRugPile(data.rugPile));
+              setRugWidth(clampRugSize(data.rugWidth));
+              setRugDepth(clampRugSize(data.rugDepth));
+              setRugOffsetX(clampRugOffset(data.rugOffsetX));
+              setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1108,6 +1127,40 @@ const TradeVisualiser = () => {
                     className="w-full accent-primary"
                   />
                   <p className="mt-1 text-[10px] text-muted-foreground">0% is a low flat pile, 100% a deep plush texture. The rug shows when a floor is selected.</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug size &amp; position</DropdownMenuLabel>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Rug Width</span>
+                    <span>{rugWidth == null ? "Auto" : `${rugWidth.toFixed(1)} m`}</span>
+                  </div>
+                  <input type="range" min={1} max={8} step={0.1} value={rugWidth ?? 4.5} disabled={floorFinish === "none"} onChange={(e) => setRugWidth(clampRugSize(Number(e.target.value)))} aria-label="Rug width" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Rug Depth</span>
+                    <span>{rugDepth == null ? "Auto" : `${rugDepth.toFixed(1)} m`}</span>
+                  </div>
+                  <input type="range" min={1} max={8} step={0.1} value={rugDepth ?? 3.5} disabled={floorFinish === "none"} onChange={(e) => setRugDepth(clampRugSize(Number(e.target.value)))} aria-label="Rug depth" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Move Left / Right</span>
+                    <span>{`${rugOffsetX > 0 ? "+" : ""}${rugOffsetX.toFixed(1)} m`}</span>
+                  </div>
+                  <input type="range" min={-4} max={4} step={0.1} value={rugOffsetX} disabled={floorFinish === "none"} onChange={(e) => setRugOffsetX(clampRugOffset(Number(e.target.value)))} aria-label="Rug left right position" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Move Back / Front</span>
+                    <span>{`${rugOffsetZ > 0 ? "+" : ""}${rugOffsetZ.toFixed(1)} m`}</span>
+                  </div>
+                  <input type="range" min={-4} max={4} step={0.1} value={rugOffsetZ} disabled={floorFinish === "none"} onChange={(e) => setRugOffsetZ(clampRugOffset(Number(e.target.value)))} aria-label="Rug back front position" className="w-full accent-primary" />
+                </div>
+                <div className="px-2 pb-2">
+                  <button type="button" disabled={floorFinish === "none"} onClick={() => { setRugWidth(null); setRugDepth(null); setRugOffsetX(0); setRugOffsetZ(0); }} className="w-full border border-border px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground disabled:opacity-40">Auto-fit rug to furniture</button>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Auto sizes the rug around every piece and centres it; moves are measured from the layout centre.</p>
                 </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>

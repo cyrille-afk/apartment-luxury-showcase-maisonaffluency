@@ -33,6 +33,11 @@ export type ScenePresetData = {
   rugColor?: string;
   rugWeave?: string;
   rugPile?: number;
+  /** Rug size in metres (null = auto-fit) and offset from the layout centre. */
+  rugWidth?: number | null;
+  rugDepth?: number | null;
+  rugOffsetX?: number;
+  rugOffsetZ?: number;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
