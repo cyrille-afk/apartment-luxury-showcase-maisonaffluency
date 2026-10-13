@@ -42,3 +42,47 @@ describe("pickFreeSlot", () => {
     ).toBe(false);
   });
 });
+
+describe("spacing parameter", () => {
+  it("places the next piece one spacing unit away from an occupied centre", () => {
+    const slot = pickFreeSlot([{ position: [0, 0, 0] }], 2);
+    const distance = Math.hypot(slot[0], slot[2]);
+    expect(distance).toBeCloseTo(2);
+  });
+
+  it("clamps spacing to the supported range", () => {
+    const tight = pickFreeSlot([{ position: [0, 0, 0] }], 0.1);
+    expect(Math.hypot(tight[0], tight[2])).toBeCloseTo(0.6);
+    const wide = pickFreeSlot([{ position: [0, 0, 0] }], 99);
+    expect(Math.hypot(wide[0], wide[2])).toBeCloseTo(3);
+  });
+});
+
+describe("respaceObjects", () => {
+  it("keeps every piece on the grid at the new spacing with no overlaps", () => {
+    const objects = [
+      { id: "a", position: [0, 0, 0] as [number, number, number] },
+      { id: "b", position: [0.2, 0, 0.1] as [number, number, number] },
+      { id: "c", position: [5, 0, 5] as [number, number, number] },
+    ];
+    const respaced = respaceObjects(objects, 2);
+    expect(respaced).toHaveLength(3);
+    for (const object of respaced) {
+      expect(object.position[0] % 2).toBeCloseTo(0);
+      expect(object.position[2] % 2).toBeCloseTo(0);
+    }
+    const keys = new Set(respaced.map((o) => `${o.position[0]},${o.position[2]}`));
+    expect(keys.size).toBe(3);
+  });
+
+  it("preserves object identity and non-position fields", () => {
+    const objects = [
+      { id: "a", scale: 2, position: [3, 0, 0] as [number, number, number] },
+      { id: "b", scale: 1, position: [0, 0, 0] as [number, number, number] },
+    ];
+    const respaced = respaceObjects(objects, 1);
+    expect(respaced.find((o) => o.id === "a")?.scale).toBe(2);
+    // The centre piece stays at the centre.
+    expect(respaced.find((o) => o.id === "b")?.position).toEqual([0, 0, 0]);
+  });
+});
