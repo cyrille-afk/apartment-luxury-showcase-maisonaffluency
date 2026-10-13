@@ -12,7 +12,7 @@ import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
-import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
