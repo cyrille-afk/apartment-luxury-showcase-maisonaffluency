@@ -102,6 +102,23 @@ export function resolveDragPosition(
     }
     if (!moved) break;
   }
+  const clear = (cx: number, cz: number) =>
+    obstacles.every(
+      (o) => Math.hypot(cx - o.position[0], cz - o.position[2]) >= o.radius + selfRadius + FOOTPRINT_MARGIN,
+    );
+  if (clear(px, pz)) return [px, pz];
+  // Tight clusters can make push-out oscillate; fall back to the nearest
+  // clearly-free spot on a growing ring around the target.
+  for (let ring = 1; ring <= 40; ring++) {
+    const radiusStep = ring * 0.2;
+    const steps = Math.max(8, ring * 8);
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const cx = x + Math.cos(angle) * radiusStep;
+      const cz = z + Math.sin(angle) * radiusStep;
+      if (clear(cx, cz)) return [cx, cz];
+    }
+  }
   return [px, pz];
 }
 
