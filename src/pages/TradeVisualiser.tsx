@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
@@ -345,12 +346,20 @@ const TradeVisualiser = () => {
     return () => { cancelled = true; };
   }, [selectedProductId, products]);
   // Sub-tabs come from the selected model's texture nodes; Bond Street declares its own parts.
+  // Declared product schemas (components + allowed finish groups) override model detection.
+  const productSchema = useMemo(() => findProductSchema(selected?.product_name), [selected?.product_name]);
   const availableTargets = useMemo<FinishTarget[]>(
-    () => finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
-    [selected, textureParts],
+    () => productSchema
+      ? schemaTargets(productSchema)
+      : finishTargetsFromParts(selected ? textureParts[selected.instanceId] ?? [] : []),
+    [selected, textureParts, productSchema],
   );
   const effectiveTarget: FinishTarget = availableTargets.includes(finishTarget) ? finishTarget : "all";
-  const partGroupLabels = usePartGroupLabels(selected?.id);
+  const detectedGroupLabels = usePartGroupLabels(selected?.id);
+  const partGroupLabels = useMemo(
+    () => (productSchema ? { ...detectedGroupLabels, ...schemaLabels(productSchema) } : detectedGroupLabels),
+    [detectedGroupLabels, productSchema],
+  );
   const targetMaterial = selected ? getPartMaterial(selected, effectiveTarget) : null;
 
   const addObject = (product: CatalogueProduct) => {
@@ -480,10 +489,10 @@ const TradeVisualiser = () => {
     const query = norm(materialSearch);
     const source = linkedMaterials ?? materials;
     return source.filter((material) => (
-      materialFitsTarget(material, effectiveTarget)
+      (productSchema ? schemaFits(productSchema, material, effectiveTarget) : materialFitsTarget(material, effectiveTarget))
       && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
-  }, [materialSearch, materials, linkedMaterials, effectiveTarget]);
+  }, [materialSearch, materials, linkedMaterials, effectiveTarget, productSchema]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
