@@ -404,6 +404,13 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     gl.domElement.style.cursor = "grabbing";
   };
 
+  // Safety: never leave window drag listeners behind if the piece unmounts mid-drag.
+  useEffect(() => () => {
+    window.removeEventListener("pointermove", dragMove);
+    window.removeEventListener("pointerup", endDrag);
+    window.removeEventListener("pointercancel", endDrag);
+  }, [dragMove, endDrag]);
+
   /** Persist the gizmo result back into React state (floor-locked, upright). */
   const commit = () => {
     const group = groupRef.current;
