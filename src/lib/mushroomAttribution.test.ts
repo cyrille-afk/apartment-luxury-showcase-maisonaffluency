@@ -16,12 +16,7 @@ describe("Mushroom rug attribution", () => {
 
   it("carries the CC-Tapis Edition card label", () => {
     expect(
-      formatCuratorialEditionLine({
-        id: MUSHROOM_ID,
-        designer_id: "eb7741a8-2b2c-4619-9746-37d2cfda0ec8",
-        slug: "mushroom",
-        edition: "CC-Tapis Edition",
-      }),
+      formatCuratorialEditionLine({ edition: "CC-Tapis Edition" }),
     ).toBe("CC-Tapis Edition");
   });
 });
