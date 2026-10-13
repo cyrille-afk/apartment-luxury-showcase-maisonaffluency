@@ -20,7 +20,7 @@ import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
+import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -580,7 +580,7 @@ const TradeVisualiser = () => {
     await nextPaintedFrame();
     await nextPaintedFrame();
     try {
-      downloadDataUrl(canvas.toDataURL("image/png"), mockupFilename());
+      downloadDataUrl(captureCanvasPng(canvas), mockupFilename());
       toast.success("Mockup exported.");
     } catch {
       toast.error("Could not export the mockup.");

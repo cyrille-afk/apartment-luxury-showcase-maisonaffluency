@@ -25,3 +25,25 @@ export const downloadDataUrl = (dataUrl: string, filename: string) => {
 
 export const mockupFilename = () =>
   `TradePortal_Mockup_${new Date().toISOString().slice(0, 10)}.png`;
+
+/** The sandbox page background — exported PNGs composite onto this so the
+ *  transparent WebGL buffer never ships as a see-through image. */
+export const MOCKUP_BACKGROUND = "#F9F8F6";
+
+/**
+ * Capture the WebGL canvas as an opaque PNG data URL. The renderer runs with
+ * `alpha: true`, so raw `toDataURL` would produce transparent pixels wherever
+ * no geometry was drawn; compositing onto the page background keeps client
+ * mockups clean and printable.
+ */
+export const captureCanvasPng = (canvas: HTMLCanvasElement, background: string = MOCKUP_BACKGROUND): string => {
+  const composite = document.createElement("canvas");
+  composite.width = canvas.width;
+  composite.height = canvas.height;
+  const ctx = composite.getContext("2d");
+  if (!ctx) return canvas.toDataURL("image/png");
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, composite.width, composite.height);
+  ctx.drawImage(canvas, 0, 0);
+  return composite.toDataURL("image/png");
+};
