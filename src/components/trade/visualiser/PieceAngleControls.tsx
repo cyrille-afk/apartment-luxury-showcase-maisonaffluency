@@ -32,7 +32,7 @@ export default function PieceAngleControls({ yaw, onChange }: Props) {
           <span className="text-xs tabular-nums text-muted-foreground">{degrees}°</span>
         </div>
         <div className="mt-2 flex items-center gap-2">
-          {([−45, 45] as const).map((delta) => (
+          {([-45, 45] as const).map((delta) => (
             <Tooltip key={delta}>
               <TooltipTrigger asChild>
                 <Button
