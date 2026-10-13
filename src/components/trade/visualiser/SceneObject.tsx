@@ -377,6 +377,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
    */
   const dragMove = useCallback((event: PointerEvent) => {
     const group = groupRef.current;
+    (window as unknown as { __dragDbg?: string[] }).__dragDbg?.push(
+      `move dragging=${draggingRef.current} group=${!!group}`,
+    );
     if (!draggingRef.current || !group) return;
     const rect = gl.domElement.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
