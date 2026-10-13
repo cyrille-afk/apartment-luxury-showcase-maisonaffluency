@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { deleteScenePreset, readScenePresets, saveScenePreset, type ScenePreset, type ScenePresetData } from "@/lib/visualiserScenePresets";
+import { deleteScenePreset, makePresetThumbnail, readScenePresets, saveScenePreset, type ScenePreset, type ScenePresetData } from "@/lib/visualiserScenePresets";
 
 interface Props {
   className: string;
@@ -17,10 +17,10 @@ const ScenePresets = ({ className, current, onLoad }: Props) => {
   const [name, setName] = useState("");
   const [presets, setPresets] = useState<ScenePreset[]>(() => readScenePresets());
 
-  const save = () => {
+  const save = async () => {
     const data = current();
     if (!data.objects.length) { toast.error("Add at least one piece before saving a preset"); return; }
-    const saved = saveScenePreset(name, data);
+    const saved = saveScenePreset(name, data, await makePresetThumbnail(data.backdropDataUrl));
     if (!saved) { toast.error("Couldn't save — the room photo is too large for browser storage. Try a smaller image."); return; }
     setPresets(saved);
     toast.success(`Saved "${name.trim()}"`);
@@ -37,14 +37,17 @@ const ScenePresets = ({ className, current, onLoad }: Props) => {
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Preset name" className="h-8 text-xs" aria-label="Preset name" />
           <Button type="submit" size="sm" className="h-8" disabled={!name.trim()}>Save</Button>
         </form>
-        <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
+        <div className="mt-3 max-h-96 space-y-1 overflow-y-auto">
           {presets.length === 0 && <p className="text-xs text-muted-foreground">No presets yet.</p>}
           {presets.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted">
+            <div key={p.id} className="flex items-start gap-2 rounded px-2 py-1.5 hover:bg-muted">
               <button
                 className="min-w-0 flex-1 text-left"
                 onClick={() => { onLoad(p.data); setOpen(false); toast.success(`Opened "${p.name}"`); }}
               >
+                {p.thumbnail
+                  ? <img src={p.thumbnail} alt="" className="mb-1 aspect-[8/5] w-full rounded border border-border object-cover" />
+                  : <span className="mb-1 flex aspect-[8/5] w-full items-center justify-center rounded border border-dashed border-border text-[10px] text-muted-foreground">No preview</span>}
                 <span className="block truncate text-xs font-medium">{p.name}</span>
                 <span className="block text-[10px] text-muted-foreground">{p.data.objects.length} pieces · {new Date(p.savedAt).toLocaleDateString()}</span>
               </button>
