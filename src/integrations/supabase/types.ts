@@ -11944,6 +11944,7 @@ export type Database = {
         Args: { _product_id: string; _token: string }
         Returns: string
       }
+      country_for_phone: { Args: { p_phone: string }; Returns: string }
       create_board_invite: {
         Args: { _board_id: string; _email: string; _role: string }
         Returns: Json
