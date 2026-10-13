@@ -22,13 +22,18 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
   window.dispatchEvent(new CustomEvent<VisualiserEnvironmentStatus>(ENV_STATUS_EVENT, { detail: status }));
 }
 
-/** Loads independently: furniture stays visible with local IBL on slow/failing networks. */
-const StudioEnvironment = () => {
+/**
+ * Loads independently: furniture stays visible with local IBL on slow/failing
+ * networks. `preferred` lets the toolbar switch between the studio's empty-room
+ * EXR and the built-in studio HDRI without remounting the canvas.
+ */
+const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSource }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => {
     let cancelled = false;
     let owned: THREE.DataTexture | null = null;
+    setMap(null);
     const accept = (source: VisualiserEnvironmentSource, exr?: "missing" | "unreadable") => (texture: THREE.DataTexture) => {
       if (cancelled) { texture.dispose(); return; }
       texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -43,17 +48,21 @@ const StudioEnvironment = () => {
         reportEnvironmentStatus({ source: "local", exr });
       });
     };
-    // Preferred: the studio's own empty-room EXR — validated (present + readable) before parsing.
-    validateEmptyRoomExr().then((result) => {
-      if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
-      try {
-        accept("empty-room-exr")(new EXRLoader().parse(result.buffer) as THREE.DataTexture);
-      } catch {
-        fallbackToStudioHdr("unreadable");
-      }
-    });
+    const loadEmptyRoom = () => {
+      // The studio's own empty-room EXR — validated (present + readable) before parsing.
+      validateEmptyRoomExr().then((result) => {
+        if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
+        try {
+          accept("empty-room-exr")(new EXRLoader().parse(result.buffer) as THREE.DataTexture);
+        } catch {
+          fallbackToStudioHdr("unreadable");
+        }
+      });
+    };
+    if (preferred === "empty-room-exr") loadEmptyRoom();
+    else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
-  }, [invalidate]);
+  }, [invalidate, preferred]);
   if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
   return (
     <Environment resolution={256}>
@@ -147,6 +156,8 @@ interface VisualiserCanvasProps {
   dofStrength?: number;
   /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
   dofFocusSelected?: boolean;
+  /** Which HDRI the environment should load: the empty-room EXR or the built-in studio HDRI. */
+  environmentSource?: VisualiserEnvironmentSource;
 }
 
 const DofPass = ({ focus, strength = 3 }: { focus: [number, number, number] | null; strength?: number }) => {
@@ -181,6 +192,7 @@ const VisualiserCanvas = ({
   depthOfField = false,
   dofStrength = 3,
   dofFocusSelected = true,
+  environmentSource = "empty-room-exr",
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -205,7 +217,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -251,8 +263,8 @@ const VisualiserCanvas = ({
     {/* Rim: behind the pieces to lift silhouettes. */}
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
-    {/* Local IBL: metals need reflections or they render solid black. */}
-    <StudioEnvironment />
+    {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
+    <StudioEnvironment preferred={environmentSource} />
 
     {!hasBackdrop && (
       <ContactShadows

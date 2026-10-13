@@ -12,6 +12,8 @@ export type ScenePresetData = {
   dofStrength?: number;
   /** DoF focus mode: true = clicked piece stays sharp, false = view centre. */
   dofFocusSelected?: boolean;
+  /** Which HDRI the environment loads: empty-room EXR or built-in studio HDRI. */
+  environmentSource?: "empty-room-exr" | "studio-hdr";
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
