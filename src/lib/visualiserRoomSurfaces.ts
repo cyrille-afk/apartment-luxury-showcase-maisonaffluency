@@ -114,3 +114,8 @@ export function clampRugSize(value: unknown): number | null {
 export function clampRugOffset(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.min(4, Math.max(-4, Math.round(value * 10) / 10)) : 0;
 }
+
+/** Whether the area rug is shown. Only an explicit `false` hides it — missing/legacy state shows it. */
+export function rugVisible(value: unknown): boolean {
+  return value !== false;
+}

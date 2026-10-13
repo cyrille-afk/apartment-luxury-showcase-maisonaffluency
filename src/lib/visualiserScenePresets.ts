@@ -38,6 +38,8 @@ export type ScenePresetData = {
   rugDepth?: number | null;
   rugOffsetX?: number;
   rugOffsetZ?: number;
+  /** Whether the rug is shown (default true) — hide it to check furniture placement. */
+  showRug?: boolean;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
 };
