@@ -884,7 +884,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, depthOfField, dofStrength })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -892,6 +892,7 @@ const TradeVisualiser = () => {
               setSnapToGrid(data.snapToGrid === true);
               setShowGrid(data.showGrid !== false);
               setDepthOfField(data.depthOfField === true);
+              if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
             }}
           />
           <span className="h-5 w-px bg-[#E5E5E5]" />
