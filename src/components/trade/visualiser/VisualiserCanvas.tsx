@@ -39,12 +39,6 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
-  const scene = useThree((s) => s.scene);
-  // Align the HDRI daylight direction with the front-left key light so shadows fall to the right.
-  useEffect(() => {
-    scene.environmentRotation.set(0, Math.PI / 4, 0);
-    scene.backgroundRotation.set(0, Math.PI / 4, 0);
-  }, [scene]);
   useEffect(() => {
     const bump = () => setLocalVersion((v) => v + 1);
     window.addEventListener("ma-local-exr-changed", bump);
@@ -87,9 +81,9 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
-  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} />;
+  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} environmentRotation={[0, Math.PI / 4, 0]} backgroundRotation={[0, Math.PI / 4, 0]} />;
   return (
-    <Environment resolution={256}>
+    <Environment resolution={256} environmentRotation={[0, Math.PI / 4, 0]}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />
