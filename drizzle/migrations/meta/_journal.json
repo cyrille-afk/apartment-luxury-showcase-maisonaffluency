@@ -1191,6 +1191,13 @@
       "when": 1791852836088,
       "tag": "0169_phone_country_detection",
       "breakpoints": true
+    },
+    {
+      "idx": 170,
+      "version": "7",
+      "when": 1791853177382,
+      "tag": "0170_sync_reg_number_to_client_tax_id",
+      "breakpoints": true
     }
   ]
 }
