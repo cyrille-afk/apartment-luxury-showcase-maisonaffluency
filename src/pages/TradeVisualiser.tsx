@@ -20,6 +20,7 @@ import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -122,6 +123,7 @@ const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
 
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -610,7 +612,7 @@ const TradeVisualiser = () => {
         />
       )}
 
-      <div className="absolute inset-0 z-10">
+      <div ref={canvasWrapRef} className="absolute inset-0 z-10">
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
             objects={objects}
@@ -817,6 +819,15 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
             [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
+          </button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <button
+            className={toolbarButton}
+            onClick={handleExportMockup}
+            disabled={exporting}
+            title="Download a clean PNG of the canvas — the floor grid is hidden during capture"
+          >
+            [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
           </button>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={resetSandbox}>[ &#10005; Reset Canvas ]</button>
