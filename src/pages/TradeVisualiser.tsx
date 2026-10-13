@@ -576,9 +576,20 @@ const TradeVisualiser = () => {
           <div className="mt-5 border-t border-foreground/10 pt-4">
             <div className="flex items-center justify-between gap-3">
               <p className={cn(microLabel, "text-muted-foreground")}>Material / Finish</p>
-              {hasAnyFinish(selected) && (
-                <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
-              )}
+              <div className="flex items-center gap-3">
+                <button
+                  className={cn(microLabel, "flex items-center gap-1", selected.finishesLocked ? "text-foreground" : "text-muted-foreground hover:text-foreground")}
+                  onClick={toggleFinishesLock}
+                  aria-pressed={Boolean(selected.finishesLocked)}
+                  title={selected.finishesLocked ? "Unlock finishes on this piece" : "Lock finishes on this piece"}
+                >
+                  {selected.finishesLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                  {selected.finishesLocked ? "Locked" : "Lock"}
+                </button>
+                {hasAnyFinish(selected) && !selected.finishesLocked && (
+                  <button className={cn(microLabel, "text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</button>
+                )}
+              </div>
             </div>
             <div className="mt-3 flex items-center gap-4">
               {availableTargets.map((value) => (
