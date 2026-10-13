@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -95,6 +95,7 @@ type PersistedSandbox = {
   wallColor?: RoomWallColor;
   wallFinish?: RoomWallFinish;
   wallCustomHex?: string | null;
+  wallFinishIntensity?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -130,6 +131,7 @@ const readSandbox = (): PersistedSandbox => {
       wallColor: roomWallColor(parsed.wallColor),
       wallFinish: roomWallFinish(parsed.wallFinish),
       wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
+      wallFinishIntensity: clampWallFinishIntensity(parsed.wallFinishIntensity),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -180,6 +182,7 @@ const TradeVisualiser = () => {
   const [wallColor, setWallColor] = useState<RoomWallColor>(roomWallColor(initial.wallColor));
   const [wallFinish, setWallFinish] = useState<RoomWallFinish>(roomWallFinish(initial.wallFinish));
   const [wallCustomHex, setWallCustomHex] = useState<string | null>(normalizeHexColor(initial.wallCustomHex) ?? null);
+  const [wallFinishIntensity, setWallFinishIntensity] = useState<number>(clampWallFinishIntensity(initial.wallFinishIntensity));
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
     setCustomHexDraft(raw);
@@ -313,11 +316,12 @@ const TradeVisualiser = () => {
         wallColor,
         wallFinish,
         wallCustomHex,
+        wallFinishIntensity,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -737,6 +741,7 @@ const TradeVisualiser = () => {
             wallColor={wallColor}
             wallFinish={wallFinish}
             wallCustomHex={wallCustomHex}
+            wallFinishIntensity={wallFinishIntensity}
           />
         </Suspense>
       </div>
