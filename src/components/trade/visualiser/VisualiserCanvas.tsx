@@ -5,6 +5,7 @@ import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
+import { EffectComposer, DepthOfField } from "@react-three/postprocessing";
 
 /** Exposes a getter for the floor point at the centre of the camera view (raycast onto Y = 0). */
 const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number, number] | null) | null } }) => {
@@ -81,7 +82,19 @@ interface VisualiserCanvasProps {
   showGrid?: boolean;
   /** Filled with a getter returning the floor point the camera is looking at. */
   focusRef?: { current: (() => [number, number] | null) | null };
+  /** Subtle background blur focused on the selected piece (or orbit target). */
+  depthOfField?: boolean;
 }
+
+const DofPass = ({ focus }: { focus: [number, number, number] | null }) => {
+  const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
+  const target = focus ? new THREE.Vector3(...focus) : controls?.target?.clone() ?? new THREE.Vector3(0, 0.5, 0);
+  return (
+    <EffectComposer multisampling={4}>
+      <DepthOfField target={target} focalLength={0.03} bokehScale={3} height={720} />
+    </EffectComposer>
+  );
+};
 
 /**
  * Heavy WebGL layer. Kept in its own module so React Three Fiber, drei and
@@ -100,6 +113,7 @@ const VisualiserCanvas = ({
   snapToGrid = false,
   showGrid = true,
   focusRef,
+  depthOfField = false,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -117,7 +131,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${objects
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -225,6 +239,14 @@ const VisualiserCanvas = ({
         />
       ))}
     </Suspense>
+    {depthOfField && (
+      <DofPass
+        focus={(() => {
+          const sel = objects.find((o) => o.instanceId === selectedId);
+          return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
+        })()}
+      />
+    )}
   </Canvas>
 );
 
