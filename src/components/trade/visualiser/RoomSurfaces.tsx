@@ -29,7 +29,7 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean) {
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
-        const value = Math.round((polished ? 0.52 + (1 - light) * 0.18 : 0.88 + (1 - light) * 0.1) * 255);
+        const value = Math.round((polished ? 0.78 + (1 - light) * 0.14 : 0.88 + (1 - light) * 0.1) * 255);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }
       ctx.putImageData(pixels, 0, 0);
@@ -56,7 +56,7 @@ function Floor({ finish }: { finish: Exclude<RoomFloorFinish, "none"> }) {
   return (
     <mesh name={`room-floor-${finish}`} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[80, 80]} />
-      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={1} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={0.45} />
+      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={1} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={0.25} />
     </mesh>
   );
 }
