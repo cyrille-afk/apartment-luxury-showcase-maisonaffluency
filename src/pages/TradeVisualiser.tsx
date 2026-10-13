@@ -5,7 +5,14 @@ import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarg
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
-import { pickFreeSlot } from "@/lib/visualiserPlacement";
+import {
+  pickFreeSlot,
+  respaceObjects,
+  DEFAULT_SLOT_SPACING,
+  MIN_SLOT_SPACING,
+  MAX_SLOT_SPACING,
+  SLOT_SPACING_STEP,
+} from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
 import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
@@ -51,6 +58,7 @@ type PersistedSandbox = {
   backdrop: string | null;
   objects: PlacedObject[];
   projectId?: string | null;
+  spacing?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -71,6 +79,7 @@ const readSandbox = (): PersistedSandbox => {
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects : [],
       projectId: parsed.projectId ?? null,
+      spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -98,6 +107,7 @@ const TradeVisualiser = () => {
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
   const [orbitEnabled, setOrbitEnabled] = useState(true);
+  const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -196,11 +206,12 @@ const TradeVisualiser = () => {
         backdropDataUrl,
         objects,
         projectId,
+        spacing,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -376,7 +387,7 @@ const TradeVisualiser = () => {
       image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
       dimensions: product.dimensions,
       glb_url: product.glb_url,
-      position: pickFreeSlot(objects),
+      position: pickFreeSlot(objects, spacing),
       rotation: [0, 0, 0],
       scale: 1,
       material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
@@ -410,6 +421,22 @@ const TradeVisualiser = () => {
     )));
   };
 
+
+  const adjustSpacing = (delta: number) => {
+    setSpacing((current) => {
+      const next = Math.round((current + delta) * 10) / 10;
+      return Math.min(MAX_SLOT_SPACING, Math.max(MIN_SLOT_SPACING, next));
+    });
+  };
+
+  const applySpacingToScene = () => {
+    if (objects.length < 2) {
+      toast.message("Add at least two pieces to respace the scene.");
+      return;
+    }
+    setObjects((current) => respaceObjects(current, spacing));
+    toast.success(`Scene respaced at ${spacing.toFixed(1)} m between pieces.`);
+  };
 
   const DEPTH_LEVELS = [0, 0.012, 0.024];
 
@@ -753,6 +780,31 @@ const TradeVisualiser = () => {
           <button className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</button>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</button>
+          <span className="h-5 w-px bg-[#E5E5E5]" />
+          <div className="flex items-center gap-1" aria-label="Object spacing">
+            <button
+              className={toolbarButton}
+              aria-label="Decrease spacing"
+              disabled={spacing <= MIN_SLOT_SPACING}
+              onClick={() => adjustSpacing(-SLOT_SPACING_STEP)}
+            >
+              [ &#8722;
+            </button>
+            <span className={cn(microLabel, "min-w-14 text-center text-muted-foreground")} title="Distance between pieces">
+              {spacing.toFixed(1)} m
+            </span>
+            <button
+              className={toolbarButton}
+              aria-label="Increase spacing"
+              disabled={spacing >= MAX_SLOT_SPACING}
+              onClick={() => adjustSpacing(SLOT_SPACING_STEP)}
+            >
+              + ]
+            </button>
+            <button className={toolbarButton} onClick={applySpacingToScene} disabled={objects.length < 2}>
+              [ &#8596; Respace ]
+            </button>
+          </div>
           <span className="h-5 w-px bg-[#E5E5E5]" />
           <button className={toolbarButton} onClick={() => fileRef.current?.click()}>
             [ &#8593; {backdropSrc ? "Change Canvas Backdrop" : "Upload Canvas Backdrop"} ]
