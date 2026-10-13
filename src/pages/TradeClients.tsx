@@ -636,7 +636,7 @@ export default function TradeClients() {
                       onClick={() => setConfirmDelete(c)}
                       className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                     >
-                      [ Archive Studio File ]
+                      [ Delete Studio ]
                     </button>
                     <button
                       type="button"

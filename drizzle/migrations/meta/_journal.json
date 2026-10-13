@@ -1198,6 +1198,13 @@
       "when": 1791853177382,
       "tag": "0170_sync_reg_number_to_client_tax_id",
       "breakpoints": true
+    },
+    {
+      "idx": 171,
+      "version": "7",
+      "when": 1791853769004,
+      "tag": "0171_thailand_thb_currency",
+      "breakpoints": true
     }
   ]
 }
