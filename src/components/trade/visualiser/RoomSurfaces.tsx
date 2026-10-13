@@ -5,14 +5,10 @@ import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
 import { SHOWROOM } from "@/lib/showroomRendering";
-import type { RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
+import { clampFloorGlare, type RoomFloorFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
-
-/** Clamp a persisted glare value (0–100) to a safe slider range. */
-export const clampFloorGlare = (value: unknown): number =>
-  typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 50;
 
 /** Isolate UV repeats and linear data maps from the shared image cache. */
 function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 50) {
