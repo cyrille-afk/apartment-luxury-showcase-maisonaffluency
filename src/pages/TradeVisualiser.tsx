@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Helmet } from "react-helmet-async";
 import { useSearchParams } from "react-router-dom";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
+import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
 import { usePartGroupLabels } from "@/lib/visualiserPartMapping";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
@@ -488,10 +489,10 @@ const TradeVisualiser = () => {
     const query = norm(materialSearch);
     const source = linkedMaterials ?? materials;
     return source.filter((material) => (
-      materialFitsTarget(material, effectiveTarget)
+      (productSchema ? schemaFits(productSchema, material, effectiveTarget) : materialFitsTarget(material, effectiveTarget))
       && (!query || norm(`${material.name} ${material.brand_name} ${material.category} ${material.material_type ?? ""}`).includes(query))
     ));
-  }, [materialSearch, materials, linkedMaterials, effectiveTarget]);
+  }, [materialSearch, materials, linkedMaterials, effectiveTarget, productSchema]);
 
   const uploadBackdrop = (file: File | null) => {
     if (!file) return;
