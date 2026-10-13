@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 
 import { floorFocusPoint as _ffp, pickFootprintSlot as _pfs } from "@/lib/visualiserPlacement";
 describe("camera-focus spawning", () => {
