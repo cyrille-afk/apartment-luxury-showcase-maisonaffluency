@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyTextureNode, finishTargetsFromParts, materialFitsTarget } from "./visualiserFinishTargets";
+import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, materialFitsTarget } from "./visualiserFinishTargets";
 
 const m = (category: string, material_type: string | null = null) => ({
   id: category, name: category, brand_name: "x", category, material_type, color_family: null, image_url: null,
@@ -15,6 +15,15 @@ describe("visualiser finish targets", () => {
   it("Frenchmen Street chair exposes frame, base (glides) and upholstery", () => {
     const parts = ["WoodFinish", "Glides", "FabricAndLeather"].map(classifyTextureNode).filter(Boolean) as never[];
     expect(finishTargetsFromParts(parts)).toEqual(["all", "frame", "base", "upholstery"]);
+  });
+
+  it("unnamed meshes classify by material name, so Frame and Base stay separate tabs", () => {
+    // Frenchmen Street GLB: mesh names are null, materials are WoodFinish / Glides / fabric.
+    expect(classifyMeshPart("", "WoodFinish")).toBe("frame");
+    expect(classifyMeshPart("", "Glides")).toBe("base");
+    expect(classifyMeshPart("", "FabricAndLeather")).toBe("upholstery");
+    const parts = ["WoodFinish", "Glides"].map((mat) => classifyMeshPart("", mat)).filter(Boolean) as never[];
+    expect(finishTargetsFromParts(parts)).toEqual(["all", "frame", "base"]);
   });
 
   it("Top shows stone but not fabric; Base shows metal but not marble", () => {
