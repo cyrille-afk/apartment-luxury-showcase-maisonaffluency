@@ -210,11 +210,12 @@ const TradeVisualiser = () => {
         objects,
         projectId,
         spacing,
+        snapToGrid,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
