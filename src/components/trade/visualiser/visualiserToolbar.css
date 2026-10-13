@@ -2,6 +2,12 @@
   container-type: inline-size;
 }
 
+@media (max-width: 767px) {
+  .visualiser-workspace {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+}
+
 .visualiser-toolbar-row {
   display: flex;
   align-items: center;
