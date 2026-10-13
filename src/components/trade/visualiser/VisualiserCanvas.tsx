@@ -27,7 +27,8 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSource }) => {
+const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: VisualiserEnvironmentSource; showBackground?: boolean }) => {
+  const [loadedSource, setLoadedSource] = useState<VisualiserEnvironmentSource | null>(null);
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
@@ -45,6 +46,7 @@ const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSour
       texture.mapping = THREE.EquirectangularReflectionMapping;
       owned = texture;
       setMap(texture);
+      setLoadedSource(source);
       reportEnvironmentStatus({ source, exr });
       invalidate();
     };
@@ -69,7 +71,7 @@ const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSour
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
-  if (map) return <Environment map={map} background={false} environmentIntensity={0.65} />;
+  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} />;
   return (
     <Environment resolution={256}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
@@ -270,7 +272,7 @@ const VisualiserCanvas = ({
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
-    <StudioEnvironment preferred={environmentSource} />
+    <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
 
     {!hasBackdrop && (
       <ContactShadows
