@@ -1,5 +1,5 @@
 import { defineTool } from "@lovable.dev/mcp-js";
-import { createClient } from "@supabase/supabase-js";
+import { PostgrestClient } from "@supabase/postgrest-js";
 import { z } from "zod";
 
 // Public, unauthenticated. Returns the full public-safe spec for a single curator
@@ -14,7 +14,7 @@ const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 function getClient() {
   const url = process.env.SUPABASE_URL!;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!;
-  return createClient(url, anon, { auth: { persistSession: false, autoRefreshToken: false } });
+  return new PostgrestClient(`${url}/rest/v1`, { headers: { apikey: anon, Authorization: `Bearer ${anon}` } });
 }
 
 export default defineTool({

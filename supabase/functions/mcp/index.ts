@@ -7,7 +7,7 @@ import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.0.4";
 
 // src/lib/mcp/tools/search-curator-picks.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@3.0.4";
-import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
+import { PostgrestClient } from "npm:@supabase/postgrest-js@^2.116.0";
 import { z } from "npm:zod@^3.25.76";
 var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 var trackProductUrl = (slug, pickId) => `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
@@ -15,7 +15,7 @@ var TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 function getClient() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
-  return createClient(url, anon, { auth: { persistSession: false, autoRefreshToken: false } });
+  return new PostgrestClient(`${url}/rest/v1`, { headers: { apikey: anon, Authorization: `Bearer ${anon}` } });
 }
 var search_curator_picks_default = defineTool({
   name: "search_curator_picks",
@@ -177,7 +177,7 @@ var search_curator_picks_default = defineTool({
 
 // src/lib/mcp/tools/get-product.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@3.0.4";
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
+import { PostgrestClient as PostgrestClient2 } from "npm:@supabase/postgrest-js@^2.116.0";
 import { z as z2 } from "npm:zod@^3.25.76";
 var CLICK_ORIGIN2 = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
 var trackProductUrl2 = (slug, pickId) => `${CLICK_ORIGIN2}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
@@ -185,7 +185,7 @@ var TRADE_SIGNUP_URL2 = `${CLICK_ORIGIN2}?to=signup`;
 function getClient2() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
-  return createClient2(url, anon, { auth: { persistSession: false, autoRefreshToken: false } });
+  return new PostgrestClient2(`${url}/rest/v1`, { headers: { apikey: anon, Authorization: `Bearer ${anon}` } });
 }
 var get_product_default = defineTool2({
   name: "get_product",
