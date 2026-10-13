@@ -3,6 +3,8 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
+import { footprintRadius } from "@/lib/visualiserPlacement";
+import { parseDimensionString } from "@/lib/productDimensions";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
 
@@ -155,6 +157,13 @@ const VisualiserCanvas = ({
           onDragStateChange={onDragStateChange}
           onTextureParts={onTextureParts}
           snapToGrid={snapToGrid}
+          selfRadius={footprintRadius(parseDimensionString(object.dimensions), object.scale)}
+          obstacles={objects
+            .filter((other) => other.instanceId !== object.instanceId)
+            .map((other) => ({
+              position: other.position,
+              radius: footprintRadius(parseDimensionString(other.dimensions), other.scale),
+            }))}
         />
       ))}
     </Suspense>

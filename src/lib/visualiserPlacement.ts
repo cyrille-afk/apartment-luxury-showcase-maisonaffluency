@@ -66,6 +66,62 @@ export function pickFootprintSlot(
   return slots.find(free) ?? [0, 0, 0];
 }
 
+export type FootprintObstacle = { position: [number, number, number]; radius: number };
+
+/**
+ * Collision-aware dragging: push a dragged piece's candidate position out of
+ * every footprint it would overlap, so a piece can never be dropped inside or
+ * on top of another. Iterates a few times so clusters of pieces resolve too.
+ * Returns the adjusted [x, z] (the original when nothing overlaps).
+ */
+export function resolveDragPosition(
+  x: number,
+  z: number,
+  selfRadius: number,
+  obstacles: FootprintObstacle[],
+): [number, number] {
+  let px = x;
+  let pz = z;
+  for (let iteration = 0; iteration < 8; iteration++) {
+    let moved = false;
+    for (const obstacle of obstacles) {
+      const minDist = obstacle.radius + selfRadius + FOOTPRINT_MARGIN;
+      const dx = px - obstacle.position[0];
+      const dz = pz - obstacle.position[2];
+      const dist = Math.hypot(dx, dz);
+      if (dist >= minDist) continue;
+      if (dist < 1e-4) {
+        // Dead centre on the obstacle: push out along +x arbitrarily.
+        px = obstacle.position[0] + minDist;
+      } else {
+        const push = minDist / dist;
+        px = obstacle.position[0] + dx * push;
+        pz = obstacle.position[2] + dz * push;
+      }
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  const clear = (cx: number, cz: number) =>
+    obstacles.every(
+      (o) => Math.hypot(cx - o.position[0], cz - o.position[2]) >= o.radius + selfRadius + FOOTPRINT_MARGIN,
+    );
+  if (clear(px, pz)) return [px, pz];
+  // Tight clusters can make push-out oscillate; fall back to the nearest
+  // clearly-free spot on a growing ring around the target.
+  for (let ring = 1; ring <= 40; ring++) {
+    const radiusStep = ring * 0.2;
+    const steps = Math.max(8, ring * 8);
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const cx = x + Math.cos(angle) * radiusStep;
+      const cz = z + Math.sin(angle) * radiusStep;
+      if (clear(cx, cz)) return [cx, cz];
+    }
+  }
+  return [px, pz];
+}
+
 
 /**
  * Re-lays out every object on the grid at the given spacing, preserving each

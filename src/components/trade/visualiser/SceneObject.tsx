@@ -9,7 +9,7 @@ import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProd
 import { classifyMeshPart, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
-import { snapCoordinate } from "@/lib/visualiserPlacement";
+import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
 
 export type PlacedObject = {
   instanceId: string;
@@ -47,6 +47,10 @@ type Props = {
   onDragStateChange: (dragging: boolean) => void;
   /** When true, dragged positions snap to the placement grid. */
   snapToGrid?: boolean;
+  /** Other pieces' footprints; dragged positions are pushed out of these. */
+  obstacles?: FootprintObstacle[];
+  /** This piece's own footprint radius in metres (defaults to a generic estimate). */
+  selfRadius?: number;
   /** When false the piece is display-only: no drag, no gizmos. Defaults to true. */
   isEditable?: boolean;
   /** Optional non-uniform scale; overrides `object.scale` when provided. */
@@ -328,7 +332,13 @@ const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: strin
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false, obstacles, selfRadius }: Props) => {
+  // Refs so the window-level drag handlers always read the latest obstacles
+  // without changing dragMove's identity mid-drag (listener removal depends on it).
+  const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
+  obstaclesRef.current = obstacles ?? [];
+  const selfRadiusRef = useRef(selfRadius ?? DEFAULT_FOOTPRINT_RADIUS);
+  selfRadiusRef.current = selfRadius ?? DEFAULT_FOOTPRINT_RADIUS;
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl, camera } = useThree();
@@ -383,6 +393,8 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
       x = snapCoordinate(x);
       z = snapCoordinate(z);
     }
+    // Collision-aware: never let the piece settle inside another footprint.
+    [x, z] = resolveDragPosition(x, z, selfRadiusRef.current, obstaclesRef.current);
     // Floor lock: X/Z translation only, y stays on its depth layer.
     group.position.set(x, floorYRef.current, z);
   }, [gl, raycaster, camera, snapToGrid]);
@@ -418,12 +430,20 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     gl.domElement.style.cursor = "grabbing";
   };
 
-  // Safety: never leave window drag listeners behind if the piece unmounts mid-drag.
+  // Safety: never leave window drag listeners behind if the piece unmounts
+  // mid-drag. Mount-only via refs: depending on [dragMove, endDrag] would
+  // remove the live listeners whenever a parent re-render (e.g. selection)
+  // changes their identity, silently killing the drag.
+  const dragMoveRef = useRef(dragMove);
+  dragMoveRef.current = dragMove;
+  const endDragRef = useRef(endDrag);
+  endDragRef.current = endDrag;
   useEffect(() => () => {
-    window.removeEventListener("pointermove", dragMove);
-    window.removeEventListener("pointerup", endDrag);
-    window.removeEventListener("pointercancel", endDrag);
-  }, [dragMove, endDrag]);
+    window.removeEventListener("pointermove", dragMoveRef.current);
+    window.removeEventListener("pointerup", endDragRef.current);
+    window.removeEventListener("pointercancel", endDragRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** Persist the gizmo result back into React state (floor-locked, upright). */
   const commit = () => {
