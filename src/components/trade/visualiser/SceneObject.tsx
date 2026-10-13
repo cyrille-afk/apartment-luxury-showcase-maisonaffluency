@@ -59,6 +59,8 @@ type Props = {
   label?: string;
   /** Reports which texturable parts (top/base/upholstery) the GLB contains. */
   onTextureParts?: (instanceId: string, parts: FinishPart[]) => void;
+  /** When false, floating name labels and lock badges unmount for a clean canvas. */
+  showLabels?: boolean;
 };
 
 type LoadedMaps = {
@@ -305,7 +307,7 @@ function groundModel(model: THREE.Object3D): THREE.Object3D {
   return holder;
 }
 
-const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: PlacedObject; label?: string; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
+const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts }: { object: PlacedObject; label?: string; showLabels?: boolean; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
   const model = useFittedModel(object);
   useEffect(() => {
     const parts = new Set<FinishPart>();
@@ -345,12 +347,12 @@ const ModelBody = ({ object, label, onSelect, onTextureParts }: { object: Placed
   }, [model]);
   return <>
     <primitive object={model} />
-    {label && <Html position={labelPosition} center zIndexRange={[5, 0]}>
+    {showLabels && label && <Html position={labelPosition} center zIndexRange={[5, 0]}>
       <Button variant="outline" aria-label={`Select ${label}`} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.stopPropagation(); onSelect(object.instanceId); }} data-room-piece-label={object.instanceId} className="h-auto w-36 whitespace-normal bg-background/95 px-2 py-1.5 text-center text-[11px] leading-snug text-foreground shadow-sm break-words select-none">
         {label}
       </Button>
     </Html>}
-    {(object.positionLocked || object.finishesLocked) && (
+    {showLabels && (object.positionLocked || object.finishesLocked) && (
       <Html position={lockPosition} center zIndexRange={[6, 1]}>
         <LockBadge instanceId={object.instanceId} />
       </Html>
@@ -369,7 +371,7 @@ const LockBadge = ({ instanceId }: { instanceId: string }) => (
   </span>
 );
 
-const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: string; locked: boolean; instanceId: string }) => {
+const ImageBody = ({ url, name, locked, showLabels = true, instanceId }: { url: string; name: string; locked: boolean; showLabels?: boolean; instanceId: string }) => {
   const texture = useTexture(url);
   const image = texture.image as { width?: number; height?: number } | undefined;
   const aspect = image?.width && image?.height ? image.width / image.height : 1;
@@ -380,7 +382,7 @@ const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: strin
         <planeGeometry args={[height * aspect, height]} />
         <meshStandardMaterial map={texture} transparent alphaTest={0.4} side={THREE.DoubleSide} />
       </mesh>
-      {locked && (
+      {locked && showLabels && (
         <Html position={[0, height + 0.25, 0]} center zIndexRange={[6, 1]}>
           <LockBadge instanceId={instanceId} />
         </Html>
@@ -391,7 +393,7 @@ const ImageBody = ({ url, name, locked, instanceId }: { url: string; name: strin
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, onTextureParts, snapToGrid = false, obstacles, selfRadius }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius }: Props) => {
   // Refs so the window-level drag handlers always read the latest obstacles
   // without changing dragMove's identity mid-drag (listener removal depends on it).
   const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
@@ -418,9 +420,9 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
 
 
   const body = object.glb_url
-    ? <ModelBody object={object} label={label} onSelect={onSelect} onTextureParts={onTextureParts} />
+    ? <ModelBody object={object} label={label} showLabels={showLabels} onSelect={onSelect} onTextureParts={onTextureParts} />
     : object.image_url
-      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.positionLocked || object.finishesLocked)} instanceId={object.instanceId} />
+      ? <ImageBody url={object.image_url} name={object.product_name} locked={Boolean(object.positionLocked || object.finishesLocked)} showLabels={showLabels} instanceId={object.instanceId} />
       : null;
 
   /** Raycast the pointer onto the y = 0 floor plane. */

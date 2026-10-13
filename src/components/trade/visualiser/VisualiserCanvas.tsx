@@ -80,6 +80,8 @@ interface VisualiserCanvasProps {
   snapToGrid?: boolean;
   /** When true, the faint design-canvas floor grid renders at Y = 0. */
   showGrid?: boolean;
+  /** When false, floating name labels and lock badges are unmounted for a clean canvas. */
+  showLabels?: boolean;
   /** Filled with a getter returning the floor point the camera is looking at. */
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
@@ -117,6 +119,7 @@ const VisualiserCanvas = ({
   onTextureParts,
   snapToGrid = false,
   showGrid = true,
+  showLabels = true,
   focusRef,
   depthOfField = false,
   dofStrength = 3,
@@ -138,7 +141,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -236,6 +239,7 @@ const VisualiserCanvas = ({
           onDragStateChange={onDragStateChange}
           onTextureParts={onTextureParts}
           snapToGrid={snapToGrid}
+          showLabels={showLabels}
           selfRadius={footprintRadius(parseDimensionString(object.dimensions), object.scale)}
           obstacles={objects
             .filter((other) => other.instanceId !== object.instanceId)

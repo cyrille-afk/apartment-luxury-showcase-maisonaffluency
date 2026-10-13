@@ -5,6 +5,8 @@ export type ScenePresetData = {
   spacing?: number;
   snapToGrid?: boolean;
   showGrid?: boolean;
+  /** Labels/badges visibility state saved with the preset. */
+  showLabels?: boolean;
   depthOfField?: boolean;
   /** Background blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
