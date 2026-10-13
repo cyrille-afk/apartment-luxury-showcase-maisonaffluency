@@ -258,7 +258,7 @@ function RugBorder({ width, depth, color, thicknessMm = 10, twistMm = 25, roughn
 }
 
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
-function Rug({ objects, color, borderColor = "match", weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; weave: RugWeave; pile: number; layout?: RugLayout }) {
+function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderTwistMm, borderRoughness, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; borderThicknessMm?: number; borderTwistMm?: number; borderRoughness?: number; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
   // Extruded shape UVs are in metres, so tile ~1.35× per metre (matches the old 6×5 over 4.5×3.8 m).
   const maps = useWoolMaps(rugWeave(weave), p, RUG_TILE);
@@ -295,15 +295,15 @@ function Rug({ objects, color, borderColor = "match", weave, pile, layout }: { o
     <mesh name="room-area-rug" geometry={geometry} castShadow receiveShadow>
       <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8 + (p / 100) * 1.6, 0.8 + (p / 100) * 1.6)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
-    <RugBorder width={width} depth={depth} color={rugColorHex(borderColor === "match" ? color : borderColor)} />
+    <RugBorder width={width} depth={depth} color={rugColorHex(borderColor === "match" ? color : borderColor)} thicknessMm={borderThicknessMm} twistMm={borderTwistMm} roughness={borderRoughness} />
     </group>
   );
 }
 
-export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugBorderColor = "match", rugWeave: rugWeaveKey = "loop", rugPile = 50, rugLayout, showRug = true }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugBorderColor?: RugBorderColor; rugWeave?: RugWeave; rugPile?: number; rugLayout?: RugLayout; showRug?: boolean }) {
+export default function RoomSurfaces({ floor, rearWall, objects, glare = 50, wallHeight = 100, wallColor = "warm-white", wallFinish = "matte", wallCustomHex = null, wallFinishIntensity = 100, rugColor = "cream", rugBorderColor = "match", rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey = "loop", rugPile = 50, rugLayout, showRug = true }: { floor: RoomFloorFinish; rearWall: boolean; objects: PlacedObject[]; glare?: number; wallHeight?: number; wallColor?: RoomWallColor; wallFinish?: RoomWallFinish; wallCustomHex?: string | null; wallFinishIntensity?: number; rugColor?: RugColor; rugBorderColor?: RugBorderColor; rugBorderThicknessMm?: number; rugBorderTwistMm?: number; rugBorderRoughness?: number; rugWeave?: RugWeave; rugPile?: number; rugLayout?: RugLayout; showRug?: boolean }) {
   return <group name="architectural-room-surfaces">
     {floor !== "none" && <Floor key={floor} finish={floor} glare={glare} />}
-    {floor !== "none" && showRug && <Rug objects={objects} color={rugColor} borderColor={rugBorderColor} weave={rugWeaveKey} pile={rugPile} layout={rugLayout} />}
+    {floor !== "none" && showRug && <Rug objects={objects} color={rugColor} borderColor={rugBorderColor} borderThicknessMm={rugBorderThicknessMm} borderTwistMm={rugBorderTwistMm} borderRoughness={rugBorderRoughness} weave={rugWeaveKey} pile={rugPile} layout={rugLayout} />}
     {rearWall && <PlasterWall objects={objects} heightPct={wallHeight} color={roomWallColor(wallColor)} finish={roomWallFinish(wallFinish)} customHex={wallCustomHex} intensity={wallFinishIntensity} />}
   </group>;
 }
