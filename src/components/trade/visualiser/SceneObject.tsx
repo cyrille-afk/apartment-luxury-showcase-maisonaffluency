@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Html, useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
