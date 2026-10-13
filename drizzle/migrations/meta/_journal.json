@@ -1219,6 +1219,13 @@
       "when": 1791854635891,
       "tag": "0173_directory_sync_one_company_per_studio",
       "breakpoints": true
+    },
+    {
+      "idx": 174,
+      "version": "7",
+      "when": 1791855200969,
+      "tag": "0174_client_company_registration_number",
+      "breakpoints": true
     }
   ]
 }

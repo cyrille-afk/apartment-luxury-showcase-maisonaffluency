@@ -1871,6 +1871,7 @@ export type Database = {
           billing_country: string | null
           billing_postal_code: string | null
           billing_region: string | null
+          company_registration_number: string | null
           created_at: string
           created_by: string
           default_currency: string | null
@@ -1901,6 +1902,7 @@ export type Database = {
           billing_country?: string | null
           billing_postal_code?: string | null
           billing_region?: string | null
+          company_registration_number?: string | null
           created_at?: string
           created_by: string
           default_currency?: string | null
@@ -1931,6 +1933,7 @@ export type Database = {
           billing_country?: string | null
           billing_postal_code?: string | null
           billing_region?: string | null
+          company_registration_number?: string | null
           created_at?: string
           created_by?: string
           default_currency?: string | null

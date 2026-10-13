@@ -1,3 +1,4 @@
+import { UkCrnField, isUkCountry } from "@/components/trade/UkCrnField";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Plus, Search, Trash2, Star, Building2, Loader2 } from "lucide-react";
@@ -38,6 +39,7 @@ type Client = {
   type: ClientType;
   website: string | null;
   tax_id: string | null;
+  company_registration_number?: string | null;
   default_currency: string | null;
   ip_detected_country?: string | null;
   ip_detected_currency?: string | null;
@@ -392,6 +394,7 @@ export default function TradeClients() {
         type: (editing.type || "company") as ClientType,
         website: editing.website || null,
         tax_id: editing.tax_id || null,
+        company_registration_number: editing.company_registration_number?.trim() || null,
         default_currency:
           editing.default_currency || currencyForCountry(editing.billing_country) || null,
         billing_address_line1: editing.billing_address_line1 || null,
@@ -746,6 +749,13 @@ export default function TradeClients() {
                       onChange={(e) => setEditing({ ...editing, tax_id: e.target.value })}
                     />
                   </div>
+                  {(isUkCountry(editing.billing_country) || editing.company_registration_number) && (
+                    <UkCrnField
+                      value={editing.company_registration_number || ""}
+                      companyName={editing.name || ""}
+                      onChange={(v) => setEditing({ ...editing, company_registration_number: v })}
+                    />
+                  )}
                 </div>
               </section>
 
