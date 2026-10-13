@@ -32,6 +32,9 @@ const VisualiserCanvas = lazy(
 const ModelOrientationControls = lazy(
   lazyImportWithRetry(() => import("@/components/trade/visualiser/ModelOrientationControls")),
 );
+const PieceAngleControls = lazy(
+  lazyImportWithRetry(() => import("@/components/trade/visualiser/PieceAngleControls")),
+);
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
@@ -603,12 +606,26 @@ const TradeVisualiser = () => {
       {/* Inspector sidebar — reads the shared selection context */}
       <VisualiserInspector onRemove={removeObject} onScale={scaleObject}>
         {selected && (<>
-          {selected.glb_url && <Suspense fallback={null}>
-            <ModelOrientationControls
-              orientation={selected.modelOrientation}
-              onChange={(modelOrientation) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation } : object))}
-              onReset={() => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation: undefined, rotation: [0, 0, 0] } : object))}
+          <Suspense fallback={null}>
+            <PieceAngleControls
+              yaw={selected.rotation?.[1] ?? 0}
+              onChange={(yaw) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, rotation: [0, yaw, 0] } : object))}
             />
+          </Suspense>
+          {selected.glb_url && <Suspense fallback={null}>
+            <details className="mt-4 border-t border-border pt-3">
+              <summary className="cursor-pointer select-none text-[10px] uppercase text-muted-foreground">
+                Model orientation — import repair only
+              </summary>
+              <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
+                Only touch these if the 3D file itself imports tipped over. To angle a piece, use Piece angle above.
+              </p>
+              <ModelOrientationControls
+                orientation={selected.modelOrientation}
+                onChange={(modelOrientation) => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation } : object))}
+                onReset={() => setObjects(current => current.map(object => object.instanceId === selected.instanceId ? { ...object, modelOrientation: undefined, rotation: [0, 0, 0] } : object))}
+              />
+            </details>
           </Suspense>}
 
           {isBondStreetStool(selected.id) ? (
