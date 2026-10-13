@@ -1,2 +1,2 @@
-- [ ] Upgrade showroom lighting with HDR reflections and preserve current layout.
-- [ ] Improve stone roughness and textile micro-normal handling; verify tests and live furniture rendering.
+- [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
+- [x] Improve stone roughness and textile micro-normal handling; verify tests and live furniture rendering.
