@@ -30,7 +30,7 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
         const base = floorSurfaceRoughness(polished, glare);
-        const value = Math.round(Math.min(polished ? 0.95 : 0.95, base + (1 - light) * (polished ? 0.06 : 0.02)) * 255);
+        const value = Math.round(Math.min(0.95, base + (1 - light) * (polished ? 0.06 : 0.02)) * 255);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }
       ctx.putImageData(pixels, 0, 0);
