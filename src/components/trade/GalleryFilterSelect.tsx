@@ -18,17 +18,17 @@ export default function GalleryFilterSelect({ value, onChange, label, allLabel, 
         <SelectValue />
       </SelectTrigger>
       <SelectContent className={`max-w-[calc(100vw-2rem)]${hasCounts ? " min-w-[20rem]" : ""}`}>
-        <SelectItem value="all">
+        <SelectItem value="all" className={hasCounts ? "pr-14" : ""}>
           {allLabel}
           {allCount !== undefined && (
-            <span className="gallery-filter-count ml-auto pl-4 text-xs tabular-nums text-muted-foreground">{allCount}</span>
+            <span className="gallery-filter-count absolute right-4 top-1/2 -translate-y-1/2 text-xs tabular-nums text-muted-foreground">{allCount}</span>
           )}
         </SelectItem>
         {options.map((option) => (
-          <SelectItem key={option} value={option}>
+          <SelectItem key={option} value={option} className={hasCounts ? "pr-14" : ""}>
             {option}
             {counts?.[option] !== undefined && (
-              <span className="gallery-filter-count ml-auto pl-4 text-xs tabular-nums text-muted-foreground">{counts[option]}</span>
+              <span className="gallery-filter-count absolute right-4 top-1/2 -translate-y-1/2 text-xs tabular-nums text-muted-foreground">{counts[option]}</span>
             )}
           </SelectItem>
         ))}
