@@ -78,6 +78,7 @@ type PersistedSandbox = {
   snapToGrid?: boolean;
   showGrid?: boolean;
   depthOfField?: boolean;
+  dofStrength?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -102,6 +103,7 @@ const readSandbox = (): PersistedSandbox => {
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
       depthOfField: parsed.depthOfField === true,
+      dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -141,6 +143,7 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
+  const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [projectId, setProjectId] = useState<string | null>(initial.projectId ?? null);
   const [projectName, setProjectName] = useState<string | null>(null);
   const [loadingProject, setLoadingProject] = useState(false);
@@ -253,11 +256,12 @@ const TradeVisualiser = () => {
         snapToGrid,
         showGrid,
         depthOfField,
+        dofStrength,
       }));
     } catch {
       /* quota exceeded — composition stays in memory */
     }
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, depthOfField, dofStrength]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
