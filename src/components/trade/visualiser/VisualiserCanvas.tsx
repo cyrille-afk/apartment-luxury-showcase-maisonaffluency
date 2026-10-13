@@ -7,8 +7,8 @@ import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
-import { EffectComposer, DepthOfField, SSAO } from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
+import { EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
+import { BlendFunction, ToneMappingMode } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
@@ -212,6 +212,8 @@ const ShowroomEffects = ({ focus, strength = 3, depthOfField, hasBackdrop }: { f
     <EffectComposer multisampling={4} enableNormalPass>
       <SSAO blendFunction={BlendFunction.MULTIPLY} samples={16} rings={4} radius={0.12} intensity={hasBackdrop ? 0.7 : 1.15} luminanceInfluence={0.5} bias={0.025} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.4} worldProximityFalloff={0.15} />
       {depthOfField ? <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} /> : <></>}
+      {/* Composer disables renderer tone mapping; apply ACES once after the HDR effects. */}
+      <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
   );
 };
