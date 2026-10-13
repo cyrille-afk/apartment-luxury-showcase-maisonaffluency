@@ -9,6 +9,11 @@ describe("product finish schema", () => {
     expect(schemaTargets(s)).toEqual(["all", "top", "base"]);
     expect(schemaLabels(s)).toEqual({ top: "Table Top", base: "Base Structure" });
   });
+  it("matches catalogue names that carry the maker suffix", () => {
+    const s = findProductSchema("Madison Avenue Side Table by Yabu Pushelberg")!;
+    expect(schemaLabels(s)).toEqual({ top: "Table Top", base: "Base Structure" });
+    expect(findProductSchema("BOB Armchair by Christophe Delcourt")).not.toBeNull();
+  });
   it("Madison top allows stones only, base metals only", () => {
     const s = findProductSchema("madison avenue side table")!;
     expect(schemaFits(s, m("Onice", "Stone"), "top")).toBe(true);

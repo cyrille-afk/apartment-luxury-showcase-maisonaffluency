@@ -51,9 +51,39 @@ export function finishTargetsFromParts(parts: Iterable<FinishPart>): FinishTarge
   return ["all", ...PART_ORDER.filter((part) => found.has(part)), ...custom];
 }
 
+const GENERIC_PART_NAME = /^(material|object|mesh|group|node|geometry|scene|model|part|component|defaultmaterial)$/i;
+
+/**
+ * Turns a raw GLB material/node name into a readable component label
+ * ("WoodFinish" → "Wood Finish", "Table_Top_Mesh" → "Table Top Mesh").
+ * Returns "" for names that carry no usable words (UUIDs, "Material.001").
+ */
+export function humanizePartName(raw: string): string {
+  const cleaned = raw
+    .replace(/^part:/, "")
+    .replace(/\.\d+$/, "")
+    .replace(/[_\-.]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleaned) return "";
+  if (/^[0-9a-f-]+$/i.test(cleaned) && cleaned.length >= 16) return "";
+  if (!/[a-z]{3}/i.test(cleaned)) return "";
+  const label = cleaned
+    .split(" ")
+    .map((word) => (word === "and" || word === "of" ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()))
+    .join(" ");
+  const stem = label.replace(/\s+\d+$/, "");
+  return GENERIC_PART_NAME.test(stem) ? "" : label;
+}
+
 export function targetLabel(target: FinishTarget, customLabels: Record<string, string> = {}): string {
-  if (target === "all" || isKnownPart(target)) return FINISH_TARGET_LABELS[target as "all" | KnownPart];
-  return customLabels[target] ?? "Part";
+  // A declared component name ("Table Top") always beats the generic role label ("Top").
+  return customLabels[target]
+    || (target === "all" || isKnownPart(target)
+      ? FINISH_TARGET_LABELS[target as "all" | KnownPart]
+      : humanizePartName(target))
+    || "Part";
 }
 
 type PartHolder = {

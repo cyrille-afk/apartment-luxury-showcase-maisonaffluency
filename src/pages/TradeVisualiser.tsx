@@ -738,14 +738,14 @@ const TradeVisualiser = () => {
                 <Button variant="ghost" size="sm" className={cn(microLabel, "h-auto px-0 py-1 text-muted-foreground hover:text-foreground")} onClick={clearFinishes}>Clear</Button>
               )}
             </div>
-            <div role="tablist" aria-label="Finish part" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div role="tablist" aria-label="Finish part" className="mt-3 flex flex-row items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-none pb-2">
               {availableTargets.map((value) => (
                 <Button variant="ghost" size="sm"
                   key={value}
                   role="tab"
                   aria-selected={effectiveTarget === value}
                   onClick={() => setFinishTarget(value)}
-                  className={cn(microLabel, "h-auto whitespace-normal px-0 py-1 text-left", effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
+                  className={cn(microLabel, "h-auto shrink-0 whitespace-nowrap px-0 py-1 text-left", effectiveTarget === value ? "text-foreground underline underline-offset-4" : "text-muted-foreground hover:text-foreground")}
                 >
                   {targetLabel(value, partGroupLabels)}
                 </Button>
@@ -763,7 +763,7 @@ const TradeVisualiser = () => {
               {filteredMaterials.slice(0, 24).map((material) => (
                 <Button variant="ghost" key={material.id} aria-label={`Apply ${material.name} to ${targetLabel(effectiveTarget, partGroupLabels)}`} onClick={() => applyMaterial(material)} className="h-auto w-14 shrink-0 flex-col items-start gap-0 px-0 py-1 text-left" title={`${material.brand_name} — ${material.name}`}>
                   <img src={material.image_url ?? "/placeholder.svg"} alt="" className={cn("h-10 w-10 object-cover", targetMaterial?.id === material.id && "ring-1 ring-foreground ring-offset-2")} />
-                  <span className="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
+                  <span className="mt-1 block w-full truncate font-mono text-[8px] uppercase tracking-[0.15em] text-muted-foreground">{material.name}</span>
                 </Button>
               ))}
             </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, materialFitsTarget, meshPartMaterial, withPartMaterial } from "./visualiserFinishTargets";
+import { classifyMeshPart, classifyTextureNode, finishTargetsFromParts, humanizePartName, materialFitsTarget, meshPartMaterial, targetLabel, withPartMaterial } from "./visualiserFinishTargets";
 
 const m = (category: string, material_type: string | null = null) => ({
   id: category, name: category, brand_name: "x", category, material_type, color_family: null, image_url: null,
@@ -66,5 +66,40 @@ describe("three-axis pieces", () => {
   });
   it("unnamed material groups become their own tabs", () => {
     expect(finishTargetsFromParts(["part:b" as never, "part:a" as never])).toEqual(["all", "part:a", "part:b"]);
+  });
+});
+
+describe("component tab labels", () => {
+  it("humanizes GLB material and node names into component names", () => {
+    expect(humanizePartName("WoodFinish")).toBe("Wood Finish");
+    expect(humanizePartName("Table_Top_Mesh")).toBe("Table Top Mesh");
+    expect(humanizePartName("part:Glides")).toBe("Glides");
+    expect(humanizePartName("FabricAndLeather")).toBe("Fabric And Leather");
+  });
+
+  it("rejects names with no readable component word", () => {
+    expect(humanizePartName("Material.001")).toBe("");
+    expect(humanizePartName("Object_12")).toBe("");
+    expect(humanizePartName("a3f1b2c4-5d6e-7f80-9101-121314151617")).toBe("");
+    expect(humanizePartName("")).toBe("");
+  });
+
+  it("tabs never render a bare 'Part' when the model name is readable", () => {
+    expect(targetLabel("part:WoodFinish")).toBe("Wood Finish");
+    expect(targetLabel("part:Table_Top")).toBe("Table Top");
+    // A declared label still wins over the raw name.
+    expect(targetLabel("part:WoodFinish", { "part:WoodFinish": "Table Top" })).toBe("Table Top");
+  });
+
+  it("a declared component name beats the generic role label", () => {
+    expect(targetLabel("top", { top: "Table Top", base: "Base Structure" })).toBe("Table Top");
+    expect(targetLabel("base", { top: "Table Top", base: "Base Structure" })).toBe("Base Structure");
+    expect(targetLabel("all", { top: "Table Top" })).toBe("Whole Piece");
+  });
+
+  it("known roles keep their own labels", () => {
+    expect(targetLabel("all")).toBe("Whole Piece");
+    expect(targetLabel("top")).toBe("Top");
+    expect(targetLabel("base")).toBe("Base");
   });
 });
