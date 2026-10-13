@@ -437,12 +437,20 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     gl.domElement.style.cursor = "grabbing";
   };
 
-  // Safety: never leave window drag listeners behind if the piece unmounts mid-drag.
+  // Safety: never leave window drag listeners behind if the piece unmounts
+  // mid-drag. Mount-only via refs: depending on [dragMove, endDrag] would
+  // remove the live listeners whenever a parent re-render (e.g. selection)
+  // changes their identity, silently killing the drag.
+  const dragMoveRef = useRef(dragMove);
+  dragMoveRef.current = dragMove;
+  const endDragRef = useRef(endDrag);
+  endDragRef.current = endDrag;
   useEffect(() => () => {
-    window.removeEventListener("pointermove", dragMove);
-    window.removeEventListener("pointerup", endDrag);
-    window.removeEventListener("pointercancel", endDrag);
-  }, [dragMove, endDrag]);
+    window.removeEventListener("pointermove", dragMoveRef.current);
+    window.removeEventListener("pointerup", endDragRef.current);
+    window.removeEventListener("pointercancel", endDragRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** Persist the gizmo result back into React state (floor-locked, upright). */
   const commit = () => {
