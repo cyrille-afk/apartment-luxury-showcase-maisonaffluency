@@ -32,6 +32,9 @@ const VisualiserCanvas = lazy(
 const ModelOrientationControls = lazy(
   lazyImportWithRetry(() => import("@/components/trade/visualiser/ModelOrientationControls")),
 );
+const PieceAngleControls = lazy(
+  lazyImportWithRetry(() => import("@/components/trade/visualiser/PieceAngleControls")),
+);
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
