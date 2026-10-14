@@ -5,6 +5,11 @@ import { WebGLPathTracer } from "three-gpu-pathtracer";
 import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 
+const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
+  for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
+  return true;
+};
+
 /** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
 const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality }) => {
   const { gl, scene, camera, invalidate } = useThree();
@@ -75,9 +80,10 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }:
     }
     const now = performance.now();
     try {
-      // Detect actual matrices, not only OrbitControls events (zoom, scripted motion, resize).
+      // Detect real camera motion with a tolerance: float jitter from controls/resize
+      // must not reset accumulation every frame (that froze the image at sample 1).
       camera.updateMatrixWorld();
-      if (!current.world.equals(camera.matrixWorld) || !current.projection.equals(camera.projectionMatrix)) {
+      if (!matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
         current.world.copy(camera.matrixWorld);
         current.projection.copy(camera.projectionMatrix);
         current.movedAt = now;
