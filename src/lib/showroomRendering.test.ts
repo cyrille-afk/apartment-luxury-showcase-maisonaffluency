@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { SHOWROOM, applyMatteTextile, floorSurfaceRoughness, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "./showroomRendering";
+import { SHOWROOM, applyMatteTextile, floorSurfaceRoughness, floorRoughnessTexel, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "./showroomRendering";
 
 describe("showroom rendering", () => {
   it("repairs missing UVs without modifying the cached geometry", () => {
@@ -17,8 +17,24 @@ describe("showroom rendering", () => {
     const source = new THREE.BoxGeometry();
     expect(withFallbackTextureCoordinates(source)).toBe(source);
   });
-  it("uses the requested 1.3 exposure", () => {
-    expect(SHOWROOM.exposure).toBe(1.3);
+  it("uses neutral ACES exposure without amplifying HDR lighting", () => {
+    expect(SHOWROOM.exposure).toBe(1);
+  });
+  it("reduces environment intensity in live and photoreal rendering", () => {
+    expect(SHOWROOM.environmentIntensity).toBe(0.35);
+    expect(1.6 * SHOWROOM.photorealEnvironmentScale).toBe(0.8);
+  });
+  it("keeps oak scalar and mapped roughness within 0.4–0.6 at every glare level", () => {
+    for (let glare = 0; glare <= 100; glare++) {
+      const base = floorSurfaceRoughness(true, glare);
+      expect(base).toBeGreaterThanOrEqual(0.4 - 1e-10);
+      expect(base).toBeLessThanOrEqual(0.6);
+      for (const luminance of [0, 0.5, 1]) {
+        const effective = base * floorRoughnessTexel(true, glare, luminance) / 255;
+        expect(effective).toBeGreaterThanOrEqual(0.4 - 0.002);
+        expect(effective).toBeLessThanOrEqual(0.6);
+      }
+    }
   });
   it("keeps ambient at 0.2 for architectural accents", () => {
     expect(SHOWROOM.ambient).toBe(0.2);
