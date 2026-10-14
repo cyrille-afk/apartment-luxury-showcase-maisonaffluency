@@ -1,5 +1,5 @@
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
-- [ ] Verify floor/furniture PBR roughness maps and smooth curved GLTF shading without changing the layout.
+- [x] Verify floor/furniture PBR roughness maps and smooth curved GLTF shading without changing the layout; 20 tests pass, build clean, signed-in Frenchmen Street chair renders on oak floor (real-GPU photoreal quality unverified).
 - [x] Improve stone roughness and textile micro-normal handling; verify tests and live furniture rendering.
 - [x] Diagnose GUM texture detail and separate backrest/seat finishes; verified real fabric changes, independent finishes and reopening, with 32 passing tests.
 - [x] Add oak-chevron / micro-cement floors and plaster rear wall; preserved approved lighting, verified with IBO/GUM, surface switching, wall toggle, preset/reload persistence and PNG export; 10 tests passed.
