@@ -15,13 +15,16 @@ export interface PathTraceQuality {
   maxSamples: number;
   /** Final render resolution multiplier (0.5–2). */
   renderScale: number;
+  /** HDRI lighting strength in photoreal mode (0.2–3). */
+  lightIntensity: number;
 }
-export const DEFAULT_PT_QUALITY: PathTraceQuality = { previewScale: PATH_TRACING.movingScale, maxSamples: 0, renderScale: PATH_TRACING.settledScale };
+export const DEFAULT_PT_QUALITY: PathTraceQuality = { previewScale: PATH_TRACING.movingScale, maxSamples: 0, renderScale: PATH_TRACING.settledScale, lightIntensity: 1.6 };
 export const PT_QUALITY_KEY = "trade-visualiser-pt-quality-v1";
 export const clampPtQuality = (q: Partial<PathTraceQuality>): PathTraceQuality => ({
   previewScale: Math.min(1, Math.max(0.1, Number(q.previewScale) || DEFAULT_PT_QUALITY.previewScale)),
   maxSamples: Math.min(10000, Math.max(0, Math.round(Number(q.maxSamples) || 0))),
   renderScale: Math.min(2, Math.max(0.5, Number(q.renderScale) || DEFAULT_PT_QUALITY.renderScale)),
+  lightIntensity: Math.min(3, Math.max(0.2, Number(q.lightIntensity) || DEFAULT_PT_QUALITY.lightIntensity)),
 });
 export function loadPtQuality(): PathTraceQuality {
   try { return clampPtQuality(JSON.parse(localStorage.getItem(PT_QUALITY_KEY) || "{}")); } catch { return DEFAULT_PT_QUALITY; }

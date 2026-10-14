@@ -35,7 +35,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, pathTrace = false }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1.6 }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
