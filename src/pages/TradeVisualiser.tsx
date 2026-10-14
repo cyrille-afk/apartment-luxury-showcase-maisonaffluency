@@ -196,8 +196,16 @@ const TradeVisualiser = () => {
   const handleSceneCrash = useCallback(() => {
     if (crashHandledRef.current) return;
     crashHandledRef.current = true;
-    try { recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
-    window.location.reload();
+    let outcome: "restored" | "reset" = "reset";
+    try { outcome = recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
+    // Reload only when a different, known-good scene was restored. Repeated or
+    // scene-independent crashes (no WebGL, failed chunk) must not loop reloads.
+    if (outcome === "restored") {
+      window.location.reload();
+      return;
+    }
+    try { takeRecoveryNotice(); } catch { /* noop */ }
+    toast.error("The 3D view couldn't start in this browser. Your scene is kept — reload the page to try again.");
   }, []);
   useEffect(() => {
     const notice = takeRecoveryNotice();
