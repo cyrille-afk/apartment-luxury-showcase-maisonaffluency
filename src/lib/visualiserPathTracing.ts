@@ -42,7 +42,8 @@ export function tracedSceneRevision(scene: THREE.Scene): string {
     const materials = Array.isArray(object.material) ? object.material : [object.material];
     const position = object.geometry.getAttribute("position");
     const positionVersion = position instanceof THREE.InterleavedBufferAttribute ? position.data.version : position?.version;
-    parts.push(object.uuid, object.geometry.uuid, String(positionVersion), object.matrixWorld.elements.join(","));
+    // Rounded so float jitter never registers as "objects moved" and resets accumulation.
+    parts.push(object.uuid, object.geometry.uuid, String(positionVersion), object.matrixWorld.elements.map((v) => v.toFixed(4)).join(","));
     for (const material of materials) {
       const pbr = material as THREE.MeshStandardMaterial;
       parts.push(material.uuid, String(material.version), pbr.color.getHexString(), String(pbr.roughness), String(pbr.metalness));
