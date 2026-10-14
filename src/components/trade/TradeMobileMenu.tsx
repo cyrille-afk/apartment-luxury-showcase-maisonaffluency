@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 import { cn } from "@/lib/utils";
+import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
+import { Scan } from "lucide-react";
 import { useProjects, pushRecentProject } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";
 
@@ -48,7 +50,9 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
   }, [location.pathname, activeProjects, projectBoards]);
   // Approved trade accounts and admins use the Curated Showroom dashboard only.
   const hasTradeAccess = isAdmin || isTradeUser || applicationStatus === "approved";
-  const items = hasTradeAccess
+  const items = TRADE_SANDBOX_ONLY
+    ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
+    : hasTradeAccess
     ? coreItems.filter((i) => i.url !== "/trade/me")
     : coreItems.filter((i) => i.url !== "/trade/concierge");
 

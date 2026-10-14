@@ -500,6 +500,11 @@ const TradeLayout = () => {
     }
   }
 
+  // Sandbox-only mode: the portal home lands straight on the Visualiser.
+  if (TRADE_SANDBOX_ONLY && location.pathname.replace(/\/$/, "") === "/trade") {
+    return <Navigate to="/trade/visualiser" replace />;
+  }
+
   // The Visualiser runs as a fixed-viewport workspace: no page scroll, no main padding.
   const fullBleed = location.pathname.replace(/\/$/, "") === "/trade/visualiser";
 

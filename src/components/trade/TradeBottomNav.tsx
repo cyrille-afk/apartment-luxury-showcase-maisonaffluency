@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, MapPin, Heart, FileText, Image } from "lucide-react";
+import { LayoutDashboard, MapPin, Heart, FileText, Image, Scan } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 
-const navItems = [
+const fullNavItems = [
   { id: "/trade", label: "Home", icon: LayoutDashboard, end: true },
   { id: "/trade/the-collection", label: "Collection", icon: MapPin },
   { id: "/trade/gallery", label: "Gallery", icon: Image },
   { id: "/trade/favorites", label: "Favorites", icon: Heart },
   { id: "/trade/quotes", label: "Quotes", icon: FileText },
 ];
+
+const navItems = TRADE_SANDBOX_ONLY
+  ? [{ id: "/trade/visualiser", label: "Visualiser", icon: Scan }]
+  : fullNavItems;
 
 const TradeBottomNav = () => {
   const location = useLocation();
