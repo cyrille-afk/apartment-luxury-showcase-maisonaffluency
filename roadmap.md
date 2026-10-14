@@ -7,3 +7,4 @@
 - [x] Add physical recessed ceiling frame, inset plaster pocket and concealed warm ceiling wash; 13 tests passed, furnished angled view and unobstructed photo verified without runtime errors.
 - [x] Add ceiling frame height, thickness and opening controls; 19 tests pass, furnished rendering, reload and preset restoration verified without page errors.
 - [x] Isolate recessed-ceiling geometry failures; fix EXR texture creation and environment rotation; 14 tests pass, furniture/floor/rug survive real EXR upload, reload and lighting switches without canvas errors.
+- [x] Upgrade existing GPU path tracing with quarter-resolution motion preview, unlimited stationary accumulation, and asynchronous furniture/HDRI refresh; 17 tests pass, build clean, signed-in real-chair rendering, camera orbit/refinement and mode-off verified (software GPU; final noise-free convergence not verified).
