@@ -408,7 +408,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -842,6 +842,8 @@ const TradeVisualiser = () => {
             rugPile={rugPile}
             rugLayout={rugLayout}
             showRug={showRug}
+            backdropColor={backdropColor}
+            backdropBrightness={backdropBrightness}
           />
         </Suspense>
         </SceneErrorBoundary>
@@ -1037,7 +1039,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -1076,6 +1078,8 @@ const TradeVisualiser = () => {
               setRugOffsetX(clampRugOffset(data.rugOffsetX));
               setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
               setShowRug(rugVisible(data.showRug));
+              setBackdropColor(normalizeHexColor(data.backdropColor) ?? null);
+              setBackdropBrightness(clampBackdropBrightness(data.backdropBrightness));
             }}
           />
           <span className="h-5 w-px bg-border" />
