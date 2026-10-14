@@ -2,11 +2,11 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WebGLPathTracer } from "three-gpu-pathtracer";
-import { isTraceableMesh, PATH_TRACING, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
+import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 
 /** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
-const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSamples?: (n: number) => void }) => {
+const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
   const report = useRef(onSamples);
@@ -47,6 +47,19 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
       invalidate();
     };
   }, [gl, invalidate]);
+
+  const maxSamples = useRef(quality.maxSamples);
+  maxSamples.current = quality.maxSamples;
+  useEffect(() => {
+    const pt = tracer.current;
+    if (!pt) return;
+    pt.lowResScale = quality.previewScale;
+    if (pt.renderScale !== quality.renderScale) {
+      pt.renderScale = quality.renderScale;
+      state.current.dirty = true; // resolution change requires a fresh accumulation
+    }
+    invalidate();
+  }, [quality.previewScale, quality.renderScale, quality.maxSamples, invalidate]);
 
   useEffect(() => {
     state.current.dirty = true;
@@ -101,7 +114,9 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
       }
       // During movement renderSample uses one quarter-resolution preview sample.
       // Full-resolution tiles begin only after movement has settled.
-      pt.pausePathTracing = now - current.movedAt < PATH_TRACING.settleMs;
+      const cap = maxSamples.current;
+      const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
+      pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
       pt.renderSample();
       const samples = Math.floor(pt.samples);
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
@@ -109,8 +124,8 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
         current.reportedAt = now;
         report.current?.(samples);
       }
-      // No arbitrary sample cap: keep converging for as long as Photoreal mode is on.
-      invalidate();
+      // Keep converging until the user's final sample count (0 = unlimited).
+      if (!capped) invalidate();
     } catch (error) {
       current.failed = true;
       report.current?.(0);

@@ -8,6 +8,25 @@ export const PATH_TRACING = {
   fadeMs: 200,
 } as const;
 
+export interface PathTraceQuality {
+  /** Resolution fraction while the camera moves (0.1–1). */
+  previewScale: number;
+  /** Stop refining at this sample count; 0 = unlimited. */
+  maxSamples: number;
+  /** Final render resolution multiplier (0.5–2). */
+  renderScale: number;
+}
+export const DEFAULT_PT_QUALITY: PathTraceQuality = { previewScale: PATH_TRACING.movingScale, maxSamples: 0, renderScale: PATH_TRACING.settledScale };
+export const PT_QUALITY_KEY = "trade-visualiser-pt-quality-v1";
+export const clampPtQuality = (q: Partial<PathTraceQuality>): PathTraceQuality => ({
+  previewScale: Math.min(1, Math.max(0.1, Number(q.previewScale) || DEFAULT_PT_QUALITY.previewScale)),
+  maxSamples: Math.min(10000, Math.max(0, Math.round(Number(q.maxSamples) || 0))),
+  renderScale: Math.min(2, Math.max(0.5, Number(q.renderScale) || DEFAULT_PT_QUALITY.renderScale)),
+});
+export function loadPtQuality(): PathTraceQuality {
+  try { return clampPtQuality(JSON.parse(localStorage.getItem(PT_QUALITY_KEY) || "{}")); } catch { return DEFAULT_PT_QUALITY; }
+}
+
 export function isTraceableMesh(object: THREE.Object3D): object is THREE.Mesh {
   if (!(object as THREE.Mesh).isMesh || (object as THREE.Line).isLine || (object as THREE.Points).isPoints) return false;
   const material = (object as THREE.Mesh).material;
