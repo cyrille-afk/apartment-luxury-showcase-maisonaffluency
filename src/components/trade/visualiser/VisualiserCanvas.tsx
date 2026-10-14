@@ -173,6 +173,7 @@ interface VisualiserCanvasProps {
   /** Progressive GPU path tracing (offline-quality GI) while the camera is still. */
   pathTrace?: boolean;
   onPathTraceSamples?: (n: number) => void;
+  pathTraceQuality?: import("@/lib/visualiserPathTracing").PathTraceQuality;
   /** Blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
   /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
@@ -249,6 +250,7 @@ const VisualiserCanvas = ({
   depthOfField = false,
   pathTrace = false,
   onPathTraceSamples,
+  pathTraceQuality,
   dofStrength = 3,
   dofFocusSelected = true,
   environmentSource = "empty-room-exr",
@@ -423,6 +425,7 @@ const VisualiserCanvas = ({
     {pathTrace && (
       <PathTracerLayer
         onSamples={onPathTraceSamples}
+        quality={pathTraceQuality}
         signature={`${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
           .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
           .join("|")}`}

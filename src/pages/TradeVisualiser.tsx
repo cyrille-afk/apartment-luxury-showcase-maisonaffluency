@@ -1,3 +1,4 @@
+import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
@@ -230,6 +231,12 @@ const TradeVisualiser = () => {
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [pathTrace, setPathTrace] = useState(false);
   const [ptSamples, setPtSamples] = useState(0);
+  const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
+  const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
+    const next = clampPtQuality({ ...q, ...patch });
+    try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify(next)); } catch { /* storage full */ }
+    return next;
+  });
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
@@ -831,6 +838,7 @@ const TradeVisualiser = () => {
             depthOfField={depthOfField}
             pathTrace={pathTrace}
             onPathTraceSamples={setPtSamples}
+            pathTraceQuality={ptQuality}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
@@ -1411,8 +1419,30 @@ const TradeVisualiser = () => {
               aria-pressed={pathTrace}
               title="Offline-quality path tracing: real light bounces and reflections, refining while the camera is still"
             >
-              [ &#10022; Photoreal Render: {pathTrace ? `On · ${ptSamples} spp` : "Off"} ]
+              [ &#10022; Photoreal Render: {pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"} ]
             </Button>
+            {pathTrace && (
+              <>
+                <label className={cn(toolbarButton, "gap-1")} title="Resolution used while the camera is moving">
+                  Preview
+                  <select aria-label="Preview quality" className="bg-transparent outline-none" value={ptQuality.previewScale} onChange={(e) => setPtQuality({ previewScale: Number(e.target.value) })}>
+                    <option value={0.15}>Draft</option><option value={0.25}>Low</option><option value={0.5}>Medium</option><option value={1}>Full</option>
+                  </select>
+                </label>
+                <label className={cn(toolbarButton, "gap-1")} title="Stop refining after this many samples">
+                  Samples
+                  <select aria-label="Final sample count" className="bg-transparent outline-none" value={ptQuality.maxSamples} onChange={(e) => { setPtSamples(0); setPtQuality({ maxSamples: Number(e.target.value) }); }}>
+                    <option value={64}>64</option><option value={256}>256</option><option value={512}>512</option><option value={1024}>1024</option><option value={2048}>2048</option><option value={0}>Unlimited</option>
+                  </select>
+                </label>
+                <label className={cn(toolbarButton, "gap-1")} title="Final render resolution relative to the screen">
+                  Resolution
+                  <select aria-label="Render resolution" className="bg-transparent outline-none" value={ptQuality.renderScale} onChange={(e) => { setPtSamples(0); setPtQuality({ renderScale: Number(e.target.value) }); }}>
+                    <option value={0.5}>50%</option><option value={0.75}>75%</option><option value={1}>100%</option><option value={1.5}>150%</option><option value={2}>200%</option>
+                  </select>
+                </label>
+              </>
+            )}
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}
