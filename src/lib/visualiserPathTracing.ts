@@ -21,7 +21,9 @@ export function tracedSceneRevision(scene: THREE.Scene): string {
   scene.traverseVisible((object) => {
     if (!isTraceableMesh(object)) return;
     const materials = Array.isArray(object.material) ? object.material : [object.material];
-    parts.push(object.uuid, object.geometry.uuid, String(object.geometry.getAttribute("position")?.version), object.matrixWorld.elements.join(","));
+    const position = object.geometry.getAttribute("position");
+    const positionVersion = position instanceof THREE.InterleavedBufferAttribute ? position.data.version : position?.version;
+    parts.push(object.uuid, object.geometry.uuid, String(positionVersion), object.matrixWorld.elements.join(","));
     for (const material of materials) {
       const pbr = material as THREE.MeshStandardMaterial;
       parts.push(material.uuid, String(material.version), pbr.color.getHexString(), String(pbr.roughness), String(pbr.metalness));
