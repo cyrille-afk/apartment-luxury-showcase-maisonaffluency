@@ -3,6 +3,7 @@ import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
 import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
+import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -498,6 +499,11 @@ const TradeLayout = () => {
     if (!PUBLIC_ALLOWED.includes(path)) {
       return <Navigate to="/trade/me?restricted=1" replace />;
     }
+  }
+
+  // Sandbox-only mode: the portal home lands straight on the Visualiser.
+  if (TRADE_SANDBOX_ONLY && location.pathname.replace(/\/$/, "") === "/trade") {
+    return <Navigate to="/trade/visualiser" replace />;
   }
 
   // The Visualiser runs as a fixed-viewport workspace: no page scroll, no main padding.

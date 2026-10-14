@@ -22,6 +22,8 @@ import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardT
 import { Button } from "@/components/ui/button";
 import { SidebarPwaBadge } from "@/components/trade/PwaInstall";
 import { useClientTierUpgrades } from "@/hooks/useClientTierUpgrades";
+import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
+import { Scan } from "lucide-react";
 import { usePendingInquiryCount } from "@/hooks/usePendingInquiryCount";
 
 
@@ -110,6 +112,12 @@ export function TradeSidebar() {
       ? topItems.filter((i) => i.url !== "/trade/me")
       : topItems.filter((i) => i.url !== "/trade/concierge" && i.url !== "/trade/ai-layout")
   ).filter((i) => i.url !== "/trade/beta-feedboard" || canSeeBetaFeedboard);
+  // Sandbox-only mode: the whole portal menu collapses to the Visualiser.
+  const navTopItems: NavItem[] = TRADE_SANDBOX_ONLY
+    ? [{ title: "Visualiser Sandbox", url: "/trade/visualiser", icon: Scan }]
+    : visibleTopItems;
+  const navProjectItems: NavItem[] = TRADE_SANDBOX_ONLY ? [] : projectItems;
+  const showAdminNav = isAdmin && !TRADE_SANDBOX_ONLY;
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
@@ -188,7 +196,7 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {visibleTopItems.map((item) => (
+              {navTopItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild className="h-auto">
                     <NavLink
@@ -236,7 +244,7 @@ export function TradeSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {projectItems.map((item) => {
+              {navProjectItems.map((item) => {
                 const isProjects = item.url === "/trade/projects";
                 const showDot = isProjects && bridgeCount > 0;
                 const isClients = item.url === "/trade/client-management";
@@ -334,7 +342,7 @@ export function TradeSidebar() {
         </SidebarGroup>
 
 
-        {isAdmin && (
+        {showAdminNav && (
           <SidebarGroup>
             <SidebarGroupLabel className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               {!collapsed && "Admin"}
