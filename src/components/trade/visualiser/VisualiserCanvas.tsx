@@ -8,6 +8,7 @@ import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
+import PathTracerLayer from "./PathTracerLayer";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
@@ -169,6 +170,9 @@ interface VisualiserCanvasProps {
   focusRef?: { current: (() => [number, number] | null) | null };
   /** Subtle background blur focused on the selected piece (or orbit target). */
   depthOfField?: boolean;
+  /** Progressive GPU path tracing (offline-quality GI) while the camera is still. */
+  pathTrace?: boolean;
+  onPathTraceSamples?: (n: number) => void;
   /** Blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
   /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
@@ -243,6 +247,8 @@ const VisualiserCanvas = ({
   showLabels = true,
   focusRef,
   depthOfField = false,
+  pathTrace = false,
+  onPathTraceSamples,
   dofStrength = 3,
   dofFocusSelected = true,
   environmentSource = "empty-room-exr",
@@ -414,7 +420,15 @@ const VisualiserCanvas = ({
         />
       ))}
     </Suspense>
-    <ShowroomEffects
+    {pathTrace && (
+      <PathTracerLayer
+        onSamples={onPathTraceSamples}
+        signature={`${environmentSource}|${floorFinish}|${rugColor}|${rugWeave}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
+          .map((o) => `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
+          .join("|")}`}
+      />
+    )}
+    {!pathTrace && <ShowroomEffects
         depthOfField={depthOfField}
         hasBackdrop={hasBackdrop}
         strength={dofStrength}
@@ -423,7 +437,7 @@ const VisualiserCanvas = ({
           const sel = objects.find((o) => o.instanceId === selectedId);
           return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
         })()}
-      />
+      />}
   </Canvas>
 );
 
