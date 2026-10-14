@@ -34,8 +34,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: VisualiserEnvironmentSource; showBackground?: boolean }) => {
-  const [loadedSource, setLoadedSource] = useState<VisualiserEnvironmentSource | null>(null);
+const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSource }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
@@ -53,7 +52,6 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
       texture.mapping = THREE.EquirectangularReflectionMapping;
       owned = texture;
       setMap(texture);
-      setLoadedSource(source);
       reportEnvironmentStatus({ source, exr });
       invalidate();
     };
@@ -81,7 +79,8 @@ const StudioEnvironment = ({ preferred, showBackground = false }: { preferred: V
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
-  if (map) return <Environment map={map} background={showBackground && loadedSource === "empty-room-exr"} backgroundIntensity={0.9} environmentIntensity={0.65} environmentRotation={[0, Math.PI / 4, 0]} backgroundRotation={[0, Math.PI / 4, 0]} />;
+  // HDR images supply reflections only: their curtains/wallpaper must never become scene geometry or a visible backdrop.
+  if (map) return <Environment map={map} background={false} environmentIntensity={0.65} environmentRotation={[0, Math.PI / 4, 0]} />;
   return (
     <Environment resolution={256} environmentRotation={[0, Math.PI / 4, 0]}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
@@ -331,7 +330,8 @@ const VisualiserCanvas = ({
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
-    <StudioEnvironment preferred={environmentSource} showBackground={!hasBackdrop} />
+    {!hasBackdrop && <color attach="background" args={[SHOWROOM.rim]} />}
+    <StudioEnvironment preferred={environmentSource} />
 
     <Suspense fallback={null}>
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
