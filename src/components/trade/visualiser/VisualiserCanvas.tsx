@@ -17,7 +17,7 @@ import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
-import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -202,6 +202,10 @@ interface VisualiserCanvasProps {
   rugLayout?: { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
   /** Hide the rug while arranging furniture (default shown). */
   showRug?: boolean;
+  /** Seamless studio stage colour (hex) when no room photo is loaded. */
+  backdropColor?: string | null;
+  /** Stage brightness, 0–100 (50 = the colour as chosen). */
+  backdropBrightness?: number;
 }
 
 const ShowroomEffects = ({ focus, strength = 3, depthOfField, hasBackdrop }: { focus: [number, number, number] | null; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
@@ -258,6 +262,8 @@ const VisualiserCanvas = ({
   rugPile = 50,
   rugLayout,
   showRug = true,
+  backdropColor = null,
+  backdropBrightness = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -283,7 +289,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -330,7 +336,7 @@ const VisualiserCanvas = ({
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
-    {!hasBackdrop && <color attach="background" args={[SHOWROOM.rim]} />}
+    {!hasBackdrop && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
     <StudioEnvironment preferred={environmentSource} />
 
     <Suspense fallback={null}>

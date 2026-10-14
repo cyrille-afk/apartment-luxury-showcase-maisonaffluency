@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteScenePreset, readScenePresets, saveScenePreset } from "../visualiserScenePresets";
-import { clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomWallColor, roomWallFinish, wallColorHex } from "../visualiserRoomSurfaces";
+import { backdropStageColor, clampBackdropBrightness, clampWallFinishIntensity, clampWallHeight, normalizeHexColor, roomWallColor, roomWallFinish, wallColorHex } from "../visualiserRoomSurfaces";
 const obj = { instanceId: "a" } as never;
 describe("scene presets", () => {
   beforeEach(() => localStorage.clear());
@@ -81,5 +81,21 @@ describe("scene presets", () => {
     expect(roomWallColor("custom")).toBe("custom");
     expect(wallColorHex("custom", "#123456")).toBe("#123456");
     expect(wallColorHex("custom", "nope")).toBe("#f4efe7");
+  });
+  it("saves the studio backdrop colour and brightness with the preset", () => {
+    saveScenePreset("Charcoal stage", { objects: [obj], backdropColor: "#3a3a3c", backdropBrightness: 70 });
+    const preset = readScenePresets()[0];
+    expect(preset.data.backdropColor).toBe("#3a3a3c");
+    expect(preset.data.backdropBrightness).toBe(70);
+  });
+  it("clamps backdrop brightness and mixes the stage colour toward black or white", () => {
+    expect(clampBackdropBrightness(undefined)).toBe(50);
+    expect(clampBackdropBrightness(120)).toBe(100);
+    expect(clampBackdropBrightness(-5)).toBe(0);
+    expect(backdropStageColor("#808080", 50)).toBe("#808080");
+    expect(backdropStageColor("#808080", 0)).toBe("#000000");
+    expect(backdropStageColor("#808080", 100)).toBe("#ffffff");
+    expect(backdropStageColor(undefined, 50)).toBe("#ffffff");
+    expect(backdropStageColor("nope", 50)).toBe("#ffffff");
   });
 });

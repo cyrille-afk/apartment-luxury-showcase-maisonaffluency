@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { BACKDROP_SWATCHES, WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampBackdropBrightness, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -112,6 +112,10 @@ type PersistedSandbox = CeilingSettings & {
   rugOffsetZ?: number;
   /** Hide the rug while arranging furniture (default shown). */
   showRug?: boolean;
+  /** Seamless studio stage colour (hex) when no room photo is loaded. */
+  backdropColor?: string | null;
+  /** Stage brightness, 0–100 (50 = the colour as chosen). */
+  backdropBrightness?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -163,6 +167,8 @@ const readSandbox = (): PersistedSandbox => {
       rugOffsetX: clampRugOffset(parsed.rugOffsetX),
       rugOffsetZ: clampRugOffset(parsed.rugOffsetZ),
       showRug: rugVisible(parsed.showRug),
+      backdropColor: normalizeHexColor(parsed.backdropColor) ?? null,
+      backdropBrightness: clampBackdropBrightness(parsed.backdropBrightness),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -241,6 +247,8 @@ const TradeVisualiser = () => {
   const [rugOffsetX, setRugOffsetX] = useState<number>(clampRugOffset(initial.rugOffsetX));
   const [rugOffsetZ, setRugOffsetZ] = useState<number>(clampRugOffset(initial.rugOffsetZ));
   const [showRug, setShowRug] = useState<boolean>(rugVisible(initial.showRug));
+  const [backdropColor, setBackdropColor] = useState<string | null>(normalizeHexColor(initial.backdropColor) ?? null);
+  const [backdropBrightness, setBackdropBrightness] = useState<number>(clampBackdropBrightness(initial.backdropBrightness));
   const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
@@ -386,6 +394,8 @@ const TradeVisualiser = () => {
         rugPile,
         rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
         showRug,
+        backdropColor,
+        backdropBrightness,
       });
       sessionStorage.setItem(STORAGE_KEY, sandboxJson);
     } catch {
@@ -398,7 +408,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -832,6 +842,8 @@ const TradeVisualiser = () => {
             rugPile={rugPile}
             rugLayout={rugLayout}
             showRug={showRug}
+            backdropColor={backdropColor}
+            backdropBrightness={backdropBrightness}
           />
         </Suspense>
         </SceneErrorBoundary>
@@ -1027,7 +1039,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -1066,6 +1078,8 @@ const TradeVisualiser = () => {
               setRugOffsetX(clampRugOffset(data.rugOffsetX));
               setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
               setShowRug(rugVisible(data.showRug));
+              setBackdropColor(normalizeHexColor(data.backdropColor) ?? null);
+              setBackdropBrightness(clampBackdropBrightness(data.backdropBrightness));
             }}
           />
           <span className="h-5 w-px bg-border" />
@@ -1080,6 +1094,49 @@ const TradeVisualiser = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="top" className="max-h-[70vh] overflow-y-auto">
+                <DropdownMenuLabel>Studio backdrop</DropdownMenuLabel>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {BACKDROP_SWATCHES.map((c) => (
+                      <button
+                        key={c.hex}
+                        type="button"
+                        aria-label={`Backdrop ${c.label}`}
+                        title={c.label}
+                        disabled={Boolean(backdropSrc)}
+                        onClick={() => setBackdropColor(c.hex)}
+                        className={cn("h-5 w-5 rounded-full border", (backdropColor ?? "#ffffff") === c.hex ? "border-primary ring-1 ring-primary" : "border-border", Boolean(backdropSrc) && "opacity-40")}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
+                    <input
+                      type="color"
+                      aria-label="Custom backdrop colour"
+                      title="Custom backdrop colour"
+                      disabled={Boolean(backdropSrc)}
+                      value={backdropColor ?? "#ffffff"}
+                      onChange={(e) => setBackdropColor(normalizeHexColor(e.target.value) ?? backdropColor)}
+                      className="h-5 w-5 cursor-pointer rounded-full border border-border bg-transparent p-0"
+                    />
+                  </div>
+                  <div className="mb-1 mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Backdrop Brightness</span>
+                    <span>{backdropBrightness}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={backdropBrightness}
+                    disabled={Boolean(backdropSrc)}
+                    onChange={(e) => setBackdropBrightness(clampBackdropBrightness(Number(e.target.value)))}
+                    aria-label="Backdrop brightness"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">50% = the colour as chosen; lower darkens, higher lightens.</p>
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Floor finish</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={floorFinish} onValueChange={(value) => setFloorFinish(roomFloorFinish(value))}>
                   <DropdownMenuRadioItem value="oak-chevron">Light Oak Chevron</DropdownMenuRadioItem>

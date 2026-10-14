@@ -144,3 +144,34 @@ export function clampRugBorderRoughness(value: unknown): number {
   if (!Number.isFinite(n)) return 75;
   return Math.min(100, Math.max(0, Math.round(n)));
 }
+
+/** Seamless studio stage backdrop palette. */
+export const BACKDROP_SWATCHES = [
+  { label: "Studio White", hex: "#ffffff" },
+  { label: "Warm Ivory", hex: "#f3ede2" },
+  { label: "Soft Sand", hex: "#d8cfc0" },
+  { label: "Cool Grey", hex: "#c6cbd2" },
+  { label: "Greige", hex: "#b3aa9d" },
+  { label: "Charcoal", hex: "#3a3a3c" },
+  { label: "Ink Black", hex: "#101014" },
+] as const;
+
+/** Clamp a persisted backdrop brightness (0–100; 50 = the colour as chosen). */
+export function clampBackdropBrightness(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 50;
+  return Math.min(100, Math.max(0, Math.round(n)));
+}
+
+/**
+ * The seamless studio stage colour: the chosen hex darkened toward black
+ * (below 50) or lifted toward white (above 50); 50 renders it as chosen.
+ */
+export function backdropStageColor(hex: unknown, brightness: unknown): string {
+  const base = normalizeHexColor(hex) ?? "#ffffff";
+  const t = (clampBackdropBrightness(brightness) - 50) / 50;
+  const target = t >= 0 ? 255 : 0;
+  const mix = (channel: number) => Math.round(channel + (target - channel) * Math.abs(t));
+  const channels = [parseInt(base.slice(1, 3), 16), parseInt(base.slice(3, 5), 16), parseInt(base.slice(5, 7), 16)];
+  return `#${channels.map((c) => mix(c).toString(16).padStart(2, "0")).join("")}`;
+}
