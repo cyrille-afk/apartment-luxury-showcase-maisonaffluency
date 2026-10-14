@@ -11,7 +11,7 @@ import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart }
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
-import { applyMatteTextile, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates } from "@/lib/showroomRendering";
+import { applyMatteTextile, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
 
 export type PlacedObject = {
   instanceId: string;
@@ -312,7 +312,9 @@ function useFittedModel(object: PlacedObject) {
       if (!mesh.isMesh) return;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      mesh.geometry = withFallbackTextureCoordinates(mesh.geometry);
+      const smoothGeometry = withSmoothAssetNormals(mesh.geometry);
+      mesh.geometry = withFallbackTextureCoordinates(smoothGeometry);
+      if (mesh.geometry !== smoothGeometry) smoothGeometry.dispose();
       const role = mesh.userData.partRole as FinishPart | null;
       // Upholstery never inherits the whole-piece finish; other parts fall back to it.
       const finish = meshPartMaterial(holder, role);
@@ -385,7 +387,7 @@ const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts 
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh) return;
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      if (mesh.geometry.userData.visualiserUvFallback) mesh.geometry.dispose();
+      if (mesh.geometry.userData.visualiserOwnedGeometry || mesh.geometry.userData.visualiserUvFallback) mesh.geometry.dispose();
       materials.forEach((entry) => {
         if (entry?.userData?.visualiserClone) entry.dispose();
       });

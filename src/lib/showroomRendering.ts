@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 /** Shared scene-lighting tokens, kept separate from catalogue finishes. */
 export const SHOWROOM = {
@@ -23,13 +24,16 @@ export function applyMatteTextile(material: THREE.MeshStandardMaterial): void {
   material.roughness = SHOWROOM.textileRoughness;
   material.metalness = 0;
   material.metalnessMap = null;
-  material.roughnessMap = null;
   if (material instanceof THREE.MeshPhysicalMaterial) material.clearcoat = 0;
 }
 
 /** Preserve authored maps and transparency when upgrading legacy unlit materials. */
 export function toPbrMaterial(source: THREE.Material): THREE.MeshStandardMaterial {
-  if (source instanceof THREE.MeshStandardMaterial) return source.clone();
+  if (source instanceof THREE.MeshStandardMaterial) {
+    const material = source.clone();
+    material.flatShading = false;
+    return material;
+  }
   const legacy = source as THREE.MeshBasicMaterial;
   return new THREE.MeshStandardMaterial({
     name: source.name,
@@ -44,6 +48,16 @@ export function toPbrMaterial(source: THREE.Material): THREE.MeshStandardMateria
     roughness: 0.65,
     metalness: 0,
   });
+}
+
+/** Smooth curves across UV seams, retaining sharp joinery and cached GLTF data. */
+export function withSmoothAssetNormals(source: THREE.BufferGeometry): THREE.BufferGeometry {
+  const cloned = source.clone();
+  if (cloned.getAttribute("position")) cloned.computeVertexNormals();
+  const geometry = cloned.getAttribute("position") ? toCreasedNormals(cloned, Math.PI / 3) : cloned;
+  if (geometry !== cloned) cloned.dispose();
+  geometry.userData.visualiserOwnedGeometry = true;
+  return geometry;
 }
 
 /** Box-projected fallback for exports missing UVs; never replaces authored UVs. */
