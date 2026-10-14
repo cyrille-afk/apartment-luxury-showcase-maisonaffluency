@@ -35,7 +35,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSource }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
@@ -80,10 +80,23 @@ const StudioEnvironment = ({ preferred }: { preferred: VisualiserEnvironmentSour
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
-  // HDR images supply reflections only: their curtains/wallpaper must never become scene geometry or a visible backdrop.
-  if (map) return <Environment map={map} background={false} environmentIntensity={0.65} environmentRotation={[0, Math.PI / 4, 0]} />;
+  // Raster: HDRI is reflections only. Photoreal: HDRI is bound to scene.environment at physical
+  // intensity AND to scene.background (heavily blurred so its curtains/wallpaper never read as a backdrop),
+  // so escaping rays gather real light instead of a grey void.
+  const rotation: [number, number, number] = [0, Math.PI / 4, 0];
+  if (map) return (
+    <Environment
+      map={map}
+      background={pathTrace}
+      environmentIntensity={pathTrace ? 1.6 : 0.65}
+      backgroundIntensity={pathTrace ? 1.6 : 1}
+      backgroundBlurriness={pathTrace ? 0.85 : 0}
+      environmentRotation={rotation}
+      backgroundRotation={rotation}
+    />
+  );
   return (
-    <Environment resolution={256} environmentRotation={[0, Math.PI / 4, 0]}>
+    <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={pathTrace ? 1.6 : 1} environmentRotation={rotation} backgroundRotation={rotation}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />
@@ -346,8 +359,9 @@ const VisualiserCanvas = ({
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
-    {!hasBackdrop && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} />
+    {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
+    {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
+    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} />
 
     <Suspense fallback={null}>
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
