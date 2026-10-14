@@ -350,7 +350,7 @@ const VisualiserCanvas = ({
     <Suspense fallback={null}>
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
     </Suspense>
-    {!hasBackdrop && floorFinish === "none" && (
+    {!pathTrace && !hasBackdrop && floorFinish === "none" && (
       <ContactShadows
         position={[0, 0.002, 0]}
         scale={40}
@@ -364,7 +364,7 @@ const VisualiserCanvas = ({
     {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
     {/* Raised just above the extruded rug's top surface so shadows land on the rug fibers;
         when the rug is hidden they drop back onto the floor itself. */}
-    {!hasBackdrop && floorFinish !== "none" && (
+    {!pathTrace && !hasBackdrop && floorFinish !== "none" && (
       <ContactShadows
         position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
         scale={15}
@@ -423,8 +423,8 @@ const VisualiserCanvas = ({
     {pathTrace && (
       <PathTracerLayer
         onSamples={onPathTraceSamples}
-        signature={`${environmentSource}|${floorFinish}|${rugColor}|${rugWeave}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
-          .map((o) => `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
+        signature={`${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
+          .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
           .join("|")}`}
       />
     )}
