@@ -12,6 +12,7 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
   const { gl, scene, camera, controls, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
   const lastReport = useRef(0);
+  const warned = useRef(false);
 
   useEffect(() => {
     const pt = new WebGLPathTracer(gl);
@@ -62,7 +63,8 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
     if (!pt) return;
     try {
       pt.renderSample();
-    } catch {
+    } catch (err) {
+      if (!warned.current) { warned.current = true; console.warn("[pathtracer] renderSample failed", err); }
       gl.render(scene, camera);
       return;
     }
