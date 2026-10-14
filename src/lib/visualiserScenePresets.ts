@@ -47,6 +47,10 @@ export type ScenePresetData = CeilingSettings & {
   showRug?: boolean;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
+  /** Seamless studio stage colour (hex) shown when no room photo is loaded. */
+  backdropColor?: string | null;
+  /** Stage brightness, 0–100 (50 = the colour as chosen). */
+  backdropBrightness?: number;
 };
 export type ScenePreset = { id: string; name: string; savedAt: string; data: ScenePresetData; thumbnail?: string };
 

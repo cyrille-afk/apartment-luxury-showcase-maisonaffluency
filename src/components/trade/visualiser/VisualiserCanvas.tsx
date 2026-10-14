@@ -17,7 +17,7 @@ import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
-import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -202,6 +202,10 @@ interface VisualiserCanvasProps {
   rugLayout?: { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
   /** Hide the rug while arranging furniture (default shown). */
   showRug?: boolean;
+  /** Seamless studio stage colour (hex) when no room photo is loaded. */
+  backdropColor?: string | null;
+  /** Stage brightness, 0–100 (50 = the colour as chosen). */
+  backdropBrightness?: number;
 }
 
 const ShowroomEffects = ({ focus, strength = 3, depthOfField, hasBackdrop }: { focus: [number, number, number] | null; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
