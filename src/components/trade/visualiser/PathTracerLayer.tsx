@@ -2,92 +2,121 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WebGLPathTracer } from "three-gpu-pathtracer";
+import { isTraceableMesh, PATH_TRACING, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
+import { SHOWROOM } from "@/lib/showroomRendering";
 
-/**
- * Progressive path tracing (true GI, multi-bounce light, refraction) using the
- * scene's existing HDRI environment and PBR materials. Samples accumulate while
- * the camera is still; any camera move or scene change restarts accumulation.
- * Takes over rendering (priority 1) so the raster post-processing chain is bypassed.
- */
+/** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
 const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSamples?: (n: number) => void }) => {
-  const { gl, scene, camera, controls, invalidate } = useThree();
+  const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
-  const lastReport = useRef(0);
-  const warned = useRef(false);
+  const report = useRef(onSamples);
+  report.current = onSamples;
+  const state = useRef({ ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: 0, reportedAt: 0, samples: -1, world: new THREE.Matrix4(), projection: new THREE.Matrix4() });
 
   useEffect(() => {
-    const pt = new WebGLPathTracer(gl);
-    pt.bounces = 6;
-    pt.transmissiveBounces = 8;
-    pt.filterGlossyFactor = 0.5;
-    pt.tiles.set(2, 2);
-    pt.renderScale = 1;
-    pt.minSamples = 3;
-    pt.fadeDuration = 300;
-    tracer.current = pt;
+    const current = state.current;
+    Object.assign(current, { ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: performance.now(), samples: -1 });
+    // EffectComposer can leave NoToneMapping behind when switching modes.
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = SHOWROOM.exposure;
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+    let pt: WebGLPathTracer | null = null;
+    try {
+      pt = new WebGLPathTracer(gl);
+      pt.bounces = 10;
+      pt.transmissiveBounces = 10;
+      // No biased glossy blur: preserve authored reflections/refraction.
+      pt.filterGlossyFactor = 0;
+      pt.multipleImportanceSampling = true;
+      pt.tiles.set(2, 2);
+      pt.dynamicLowRes = true;
+      pt.lowResScale = PATH_TRACING.movingScale;
+      pt.renderScale = PATH_TRACING.settledScale;
+      pt.renderDelay = PATH_TRACING.settleMs;
+      pt.minSamples = PATH_TRACING.minSamples;
+      pt.fadeDuration = PATH_TRACING.fadeMs;
+      tracer.current = pt;
+    } catch (error) {
+      current.failed = true;
+      console.warn("[pathtracer] initialization failed; retaining live scene", error);
+    }
+    invalidate();
     return () => {
-      pt.dispose();
+      pt?.dispose();
       tracer.current = null;
       invalidate();
     };
   }, [gl, invalidate]);
 
-  // Rebuild the BVH/material set when the scene composition changes.
   useEffect(() => {
-    const pt = tracer.current;
-    if (!pt) return;
-    const id = window.setTimeout(() => {
-      // Only PBR-compatible meshes can be traced; hide helpers (grid, contact-shadow
-      // planes, shader overlays) while the BVH is built, then restore them.
-      const hidden: THREE.Object3D[] = [];
-      scene.traverse((o) => {
-        const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
-        if (!m || !o.visible) return;
-        const mats = Array.isArray(m) ? m : [m];
-        const ok = mats.every((x) => (x as THREE.MeshStandardMaterial).color && !(x instanceof THREE.ShaderMaterial) && !(x instanceof THREE.ShadowMaterial));
-        if (!ok || (o as THREE.Line).isLine || (o as THREE.Points).isPoints) { o.visible = false; hidden.push(o); }
-      });
-      try {
-        pt.setScene(scene, camera);
-      } catch (err) {
-        console.warn("[pathtracer] setScene failed", err);
-      } finally {
-        hidden.forEach((o) => (o.visible = true));
-      }
-      invalidate();
-    }, 250);
-    return () => window.clearTimeout(id);
-  }, [signature, scene, camera, invalidate]);
-
-  // Restart accumulation whenever the camera moves.
-  useEffect(() => {
-    const c = controls as unknown as { addEventListener?: (t: string, f: () => void) => void; removeEventListener?: (t: string, f: () => void) => void } | null;
-    if (!c?.addEventListener) return;
-    const onChange = () => {
-      tracer.current?.updateCamera();
-      invalidate();
-    };
-    c.addEventListener("change", onChange);
-    return () => c.removeEventListener?.("change", onChange);
-  }, [controls, invalidate]);
+    state.current.dirty = true;
+    invalidate();
+  }, [signature, invalidate]);
 
   useFrame(() => {
     const pt = tracer.current;
-    if (!pt) return;
-    try {
-      pt.renderSample();
-    } catch (err) {
-      if (!warned.current) { warned.current = true; console.warn("[pathtracer] renderSample failed", err); }
+    const current = state.current;
+    if (!pt || current.failed) {
       gl.render(scene, camera);
       return;
     }
-    const n = Math.floor(pt.samples);
-    if (onSamples && n !== lastReport.current) {
-      lastReport.current = n;
-      onSamples(n);
+    const now = performance.now();
+    try {
+      // Detect actual matrices, not only OrbitControls events (zoom, scripted motion, resize).
+      camera.updateMatrixWorld();
+      if (!current.world.equals(camera.matrixWorld) || !current.projection.equals(camera.projectionMatrix)) {
+        current.world.copy(camera.matrixWorld);
+        current.projection.copy(camera.projectionMatrix);
+        current.movedAt = now;
+        if (current.ready) pt.updateCamera(); // updateCamera ALWAYS resets; never call unconditionally.
+      }
+      if (current.dirty || now - current.checkedAt >= 250) {
+        current.checkedAt = now;
+        scene.updateMatrixWorld(true);
+        const revision = tracedSceneRevision(scene);
+        const environment = tracedEnvironmentRevision(scene);
+        if (current.dirty || revision !== current.revision) {
+          const hidden: THREE.Object3D[] = [];
+          scene.traverse((object) => {
+            const drawable = (object as THREE.Mesh).isMesh || (object as THREE.Line).isLine || (object as THREE.Points).isPoints;
+            if (object.visible && drawable && !isTraceableMesh(object)) {
+              object.visible = false;
+              hidden.push(object);
+            }
+          });
+          try {
+            pt.setScene(scene, camera);
+          } finally {
+            hidden.forEach((object) => { object.visible = true; });
+          }
+          current.ready = true;
+          current.dirty = false;
+          current.revision = revision;
+          current.environment = environment;
+          current.movedAt = now;
+        } else if (environment !== current.environment) {
+          pt.updateEnvironment();
+          current.environment = environment;
+        }
+      }
+      // During movement renderSample uses one quarter-resolution preview sample.
+      // Full-resolution tiles begin only after movement has settled.
+      pt.pausePathTracing = now - current.movedAt < PATH_TRACING.settleMs;
+      pt.renderSample();
+      const samples = Math.floor(pt.samples);
+      if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
+        current.samples = samples;
+        current.reportedAt = now;
+        report.current?.(samples);
+      }
+      // No arbitrary sample cap: keep converging for as long as Photoreal mode is on.
+      invalidate();
+    } catch (error) {
+      current.failed = true;
+      report.current?.(0);
+      console.warn("[pathtracer] rendering failed; retaining live scene", error);
+      gl.render(scene, camera);
     }
-    // Keep refining up to a V-Ray-like convergence budget, then idle.
-    if (pt.samples < 1024) invalidate();
   }, 1);
 
   return null;
