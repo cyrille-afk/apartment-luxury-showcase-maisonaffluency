@@ -84,19 +84,20 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1.6 
   // intensity AND to scene.background (heavily blurred so its curtains/wallpaper never read as a backdrop),
   // so escaping rays gather real light instead of a grey void.
   const rotation: [number, number, number] = [0, Math.PI / 4, 0];
+  const environmentIntensity = pathTrace ? lightIntensity * SHOWROOM.photorealEnvironmentScale : SHOWROOM.environmentIntensity;
   if (map) return (
     <Environment
       map={map}
       background={pathTrace}
-      environmentIntensity={pathTrace ? lightIntensity : 0.65}
-      backgroundIntensity={pathTrace ? lightIntensity : 1}
+      environmentIntensity={environmentIntensity}
+      backgroundIntensity={pathTrace ? environmentIntensity : 1}
       backgroundBlurriness={pathTrace ? 0.85 : 0}
       environmentRotation={rotation}
       backgroundRotation={rotation}
     />
   );
   return (
-    <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={pathTrace ? lightIntensity : 1} environmentRotation={rotation} backgroundRotation={rotation}>
+    <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={environmentIntensity} backgroundIntensity={pathTrace ? environmentIntensity : 1} environmentRotation={rotation} backgroundRotation={rotation}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />

@@ -3,7 +3,9 @@ import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.j
 
 /** Shared scene-lighting tokens, kept separate from catalogue finishes. */
 export const SHOWROOM = {
-  exposure: 1.3,
+  exposure: 1,
+  environmentIntensity: 0.35,
+  photorealEnvironmentScale: 0.5,
   ambient: 0.2,
   cove: "#fff3e0",
   textileRoughness: 0.9,
@@ -16,7 +18,15 @@ export const SHOWROOM = {
 /** Matte mineral floors; wood retains a satin midpoint and the existing glare control. */
 export function floorSurfaceRoughness(oak: boolean, glare: number): number {
   const amount = THREE.MathUtils.clamp(glare, 0, 100) / 100;
-  return oak ? 0.65 - amount * 0.3 : 0.95 - amount * 0.1;
+  return oak ? 0.6 - amount * 0.2 : 0.95 - amount * 0.1;
+}
+
+/** Texture green multiplies material roughness: encode variation relative to the scalar. */
+export function floorRoughnessTexel(oak: boolean, glare: number, luminance: number): number {
+  const base = floorSurfaceRoughness(oak, glare);
+  const detail = THREE.MathUtils.clamp(luminance, 0, 1);
+  const effective = oak ? Math.max(0.4, base - detail * 0.02) : Math.max(0.85, base - detail * 0.01);
+  return Math.round(effective / base * 255);
 }
 
 /** Fabrics retain colour/normal detail but never inherit metallic or glossy coatings. */

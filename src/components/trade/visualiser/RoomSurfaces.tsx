@@ -8,7 +8,7 @@ import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWal
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
 import { parseDimensionString } from "@/lib/productDimensions";
-import { SHOWROOM, floorSurfaceRoughness } from "@/lib/showroomRendering";
+import { SHOWROOM, floorSurfaceRoughness, floorRoughnessTexel } from "@/lib/showroomRendering";
 import RecessedCeiling from "./RecessedCeiling";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
@@ -31,8 +31,7 @@ function useSurfaceMaps(url: string, repeat: number, polished: boolean, glare = 
       const pixels = ctx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < pixels.data.length; i += 4) {
         const light = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 765;
-        const base = floorSurfaceRoughness(polished, glare);
-        const value = Math.round(Math.min(0.95, base + (1 - light) * (polished ? 0.06 : 0.02)) * 255);
+        const value = floorRoughnessTexel(polished, glare, light);
         pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
       }
       ctx.putImageData(pixels, 0, 0);
@@ -61,7 +60,7 @@ function Floor({ finish, glare }: { finish: Exclude<RoomFloorFinish, "none">; gl
   return (
     <mesh name={`room-floor-${finish}`} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[80, 80]} />
-      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={1} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
+      <meshStandardMaterial map={maps.color} roughnessMap={maps.roughness} roughness={floorSurfaceRoughness(finish === "oak-chevron", glare)} bumpMap={maps.bump} bumpScale={finish === "oak-chevron" ? 0.008 : 0.003} metalness={0} envMapIntensity={envMapIntensity} />
     </mesh>
   );
 }
