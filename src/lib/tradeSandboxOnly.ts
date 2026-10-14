@@ -3,4 +3,4 @@
  * Sandbox and lands /trade on it. Nothing is deleted — flip to false to restore
  * the full portal navigation exactly as it was.
  */
-export const TRADE_SANDBOX_ONLY = true;
+export const TRADE_SANDBOX_ONLY = false;
