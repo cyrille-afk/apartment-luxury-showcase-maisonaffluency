@@ -220,6 +220,8 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
+  const [pathTrace, setPathTrace] = useState(false);
+  const [ptSamples, setPtSamples] = useState(0);
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
@@ -819,6 +821,8 @@ const TradeVisualiser = () => {
             showGrid={showGrid}
             showLabels={showLabels}
             depthOfField={depthOfField}
+            pathTrace={pathTrace}
+            onPathTraceSamples={setPtSamples}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
@@ -1393,6 +1397,14 @@ const TradeVisualiser = () => {
               [ &#9728; Lighting: {environmentSource === "empty-room-exr" ? "Empty Room" : "Studio"} ]
             </Button>
             <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
+            <Button variant="ghost"
+              className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
+              onClick={() => { setPtSamples(0); setPathTrace((v) => !v); }}
+              aria-pressed={pathTrace}
+              title="Offline-quality path tracing: real light bounces and reflections, refining while the camera is still"
+            >
+              [ &#10022; Photoreal Render: {pathTrace ? `On · ${ptSamples} spp` : "Off"} ]
+            </Button>
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
               onClick={() => setDepthOfField((value) => !value)}
