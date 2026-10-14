@@ -262,6 +262,8 @@ const VisualiserCanvas = ({
   rugPile = 50,
   rugLayout,
   showRug = true,
+  backdropColor = null,
+  backdropBrightness = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
     shadows={{ type: THREE.PCFSoftShadowMap }}
@@ -287,7 +289,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -334,7 +336,7 @@ const VisualiserCanvas = ({
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
-    {!hasBackdrop && <color attach="background" args={[SHOWROOM.rim]} />}
+    {!hasBackdrop && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
     <StudioEnvironment preferred={environmentSource} />
 
     <Suspense fallback={null}>
