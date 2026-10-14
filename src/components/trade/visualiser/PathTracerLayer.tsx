@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import { WebGLPathTracer } from "three-gpu-pathtracer";
 
 /**
@@ -36,10 +37,22 @@ const PathTracerLayer = ({ signature, onSamples }: { signature: string; onSample
     const pt = tracer.current;
     if (!pt) return;
     const id = window.setTimeout(() => {
+      // Only PBR-compatible meshes can be traced; hide helpers (grid, contact-shadow
+      // planes, shader overlays) while the BVH is built, then restore them.
+      const hidden: THREE.Object3D[] = [];
+      scene.traverse((o) => {
+        const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+        if (!m || !o.visible) return;
+        const mats = Array.isArray(m) ? m : [m];
+        const ok = mats.every((x) => (x as THREE.MeshStandardMaterial).color && !(x instanceof THREE.ShaderMaterial) && !(x instanceof THREE.ShadowMaterial));
+        if (!ok || (o as THREE.Line).isLine || (o as THREE.Points).isPoints) { o.visible = false; hidden.push(o); }
+      });
       try {
         pt.setScene(scene, camera);
       } catch (err) {
         console.warn("[pathtracer] setScene failed", err);
+      } finally {
+        hidden.forEach((o) => (o.visible = true));
       }
       invalidate();
     }, 250);
