@@ -88,15 +88,15 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1.6 
     <Environment
       map={map}
       background={pathTrace}
-      environmentIntensity={pathTrace ? 1.6 : 0.65}
-      backgroundIntensity={pathTrace ? 1.6 : 1}
+      environmentIntensity={pathTrace ? lightIntensity : 0.65}
+      backgroundIntensity={pathTrace ? lightIntensity : 1}
       backgroundBlurriness={pathTrace ? 0.85 : 0}
       environmentRotation={rotation}
       backgroundRotation={rotation}
     />
   );
   return (
-    <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={pathTrace ? 1.6 : 1} environmentRotation={rotation} backgroundRotation={rotation}>
+    <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={pathTrace ? lightIntensity : 1} environmentRotation={rotation} backgroundRotation={rotation}>
       <Lightformer intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color={SHOWROOM.rim} />
       <Lightformer intensity={1.1} position={[-6, 2, 2]} rotation-y={Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.key} />
       <Lightformer intensity={0.9} position={[6, 2, -2]} rotation-y={-Math.PI / 2} scale={[14, 6, 1]} color={SHOWROOM.fill} />
@@ -361,7 +361,7 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
     {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} />
+    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={pathTraceQuality?.lightIntensity ?? 1.6} />
 
     <Suspense fallback={null}>
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
