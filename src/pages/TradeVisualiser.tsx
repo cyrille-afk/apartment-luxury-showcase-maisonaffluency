@@ -1094,6 +1094,49 @@ const TradeVisualiser = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" side="top" className="max-h-[70vh] overflow-y-auto">
+                <DropdownMenuLabel>Studio backdrop</DropdownMenuLabel>
+                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {BACKDROP_SWATCHES.map((c) => (
+                      <button
+                        key={c.hex}
+                        type="button"
+                        aria-label={`Backdrop ${c.label}`}
+                        title={c.label}
+                        disabled={Boolean(backdropSrc)}
+                        onClick={() => setBackdropColor(c.hex)}
+                        className={cn("h-5 w-5 rounded-full border", (backdropColor ?? "#ffffff") === c.hex ? "border-primary ring-1 ring-primary" : "border-border", Boolean(backdropSrc) && "opacity-40")}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
+                    <input
+                      type="color"
+                      aria-label="Custom backdrop colour"
+                      title="Custom backdrop colour"
+                      disabled={Boolean(backdropSrc)}
+                      value={backdropColor ?? "#ffffff"}
+                      onChange={(e) => setBackdropColor(normalizeHexColor(e.target.value) ?? backdropColor)}
+                      className="h-5 w-5 cursor-pointer rounded-full border border-border bg-transparent p-0"
+                    />
+                  </div>
+                  <div className="mb-1 mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <span>Backdrop Brightness</span>
+                    <span>{backdropBrightness}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={backdropBrightness}
+                    disabled={Boolean(backdropSrc)}
+                    onChange={(e) => setBackdropBrightness(clampBackdropBrightness(Number(e.target.value)))}
+                    aria-label="Backdrop brightness"
+                    className="w-full accent-primary"
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">50% = the colour as chosen; lower darkens, higher lightens.</p>
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Floor finish</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={floorFinish} onValueChange={(value) => setFloorFinish(roomFloorFinish(value))}>
                   <DropdownMenuRadioItem value="oak-chevron">Light Oak Chevron</DropdownMenuRadioItem>
