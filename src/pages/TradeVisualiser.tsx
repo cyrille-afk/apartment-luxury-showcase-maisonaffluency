@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import { BACKDROP_SWATCHES, WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampBackdropBrightness, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -112,6 +112,10 @@ type PersistedSandbox = CeilingSettings & {
   rugOffsetZ?: number;
   /** Hide the rug while arranging furniture (default shown). */
   showRug?: boolean;
+  /** Seamless studio stage colour (hex) when no room photo is loaded. */
+  backdropColor?: string | null;
+  /** Stage brightness, 0–100 (50 = the colour as chosen). */
+  backdropBrightness?: number;
 };
 
 const STORAGE_KEY = "trade-visualiser-sandbox-v3";
@@ -163,6 +167,8 @@ const readSandbox = (): PersistedSandbox => {
       rugOffsetX: clampRugOffset(parsed.rugOffsetX),
       rugOffsetZ: clampRugOffset(parsed.rugOffsetZ),
       showRug: rugVisible(parsed.showRug),
+      backdropColor: normalizeHexColor(parsed.backdropColor) ?? null,
+      backdropBrightness: clampBackdropBrightness(parsed.backdropBrightness),
     };
   } catch {
     return { backdrop: null, backdropDataUrl: null, objects: [], projectId: null };
@@ -241,6 +247,8 @@ const TradeVisualiser = () => {
   const [rugOffsetX, setRugOffsetX] = useState<number>(clampRugOffset(initial.rugOffsetX));
   const [rugOffsetZ, setRugOffsetZ] = useState<number>(clampRugOffset(initial.rugOffsetZ));
   const [showRug, setShowRug] = useState<boolean>(rugVisible(initial.showRug));
+  const [backdropColor, setBackdropColor] = useState<string | null>(normalizeHexColor(initial.backdropColor) ?? null);
+  const [backdropBrightness, setBackdropBrightness] = useState<number>(clampBackdropBrightness(initial.backdropBrightness));
   const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
@@ -386,6 +394,8 @@ const TradeVisualiser = () => {
         rugPile,
         rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
         showRug,
+        backdropColor,
+        backdropBrightness,
       });
       sessionStorage.setItem(STORAGE_KEY, sandboxJson);
     } catch {
