@@ -66,3 +66,13 @@ describe("progressive path tracing", () => {
     expect(tracedEnvironmentRevision(scene)).toBe(interior);
   });
 });
+import { adaptPathTraceTiles } from "./visualiserPathTracing";
+describe("adaptive tiles", () => {
+  it("splits work when frames are slow and merges when fast, within 2–4", () => {
+    expect(adaptPathTraceTiles(2, 60)).toBe(3);
+    expect(adaptPathTraceTiles(4, 90)).toBe(4);
+    expect(adaptPathTraceTiles(3, 8)).toBe(2);
+    expect(adaptPathTraceTiles(2, 5)).toBe(2);
+    expect(adaptPathTraceTiles(3, 25)).toBe(3);
+  });
+});

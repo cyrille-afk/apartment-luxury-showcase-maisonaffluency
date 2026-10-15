@@ -76,3 +76,16 @@ export function tracedEnvironmentRevision(scene: THREE.Scene): string {
     background instanceof THREE.Color ? background.getHexString() : background?.uuid,
     scene.backgroundIntensity, scene.backgroundBlurriness, scene.backgroundRotation.toArray().join(",")].join("|");
 }
+/**
+ * Adaptive tile grid: split each full-resolution sample into more tiles when a
+ * frame takes too long (prevents GPU watchdog stalls), fewer when the GPU has
+ * headroom. Resolution, DPR and antialiasing are untouched — only how much of
+ * one sample is drawn per frame changes.
+ */
+export const PT_TILES = { min: 2, max: 4, slowMs: 40, fastMs: 14 } as const;
+export function adaptPathTraceTiles(current: number, frameMs: number): number {
+  if (!Number.isFinite(frameMs) || frameMs <= 0) return current;
+  if (frameMs > PT_TILES.slowMs) return Math.min(PT_TILES.max, current + 1);
+  if (frameMs < PT_TILES.fastMs) return Math.max(PT_TILES.min, current - 1);
+  return current;
+}
