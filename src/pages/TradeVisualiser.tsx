@@ -210,6 +210,7 @@ const CanvasLoader = () => (
 const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
   const crashHandledRef = useRef(false);
+  const crashStageRef = useRef(0);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
   const handleSceneCrash = useCallback(() => {
     // Stage 0: restore last-good; 1: retry with an empty scene; 2: give up (scene-independent crash).
