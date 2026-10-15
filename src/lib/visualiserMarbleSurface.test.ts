@@ -1,9 +1,33 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { applyMarbleSurface, physicalCoffeeTableMarble } from "./visualiserMarbleSurface";
-import { clampMarbleSurface } from "./visualiserMarbleSettings";
+import { clampMarbleSurface, MARBLE_SURFACE_PRESETS, marbleSurfacePreset } from "./visualiserMarbleSettings";
 
 describe("coffee table marble controls", () => {
+  it.each([
+    ["polished", 0.5, 0.15],
+    ["honed", 0.25, 0.6],
+    ["satin", 0.4, 0.3],
+  ] as const)("applies %s reflectivity and roughness together to the marble top", (id, reflectivity, roughness) => {
+    const preset = MARBLE_SURFACE_PRESETS.find((item) => item.id === id);
+    if (!preset) throw new Error(`Missing preset: ${id}`);
+    const material = new THREE.MeshPhysicalMaterial();
+    material.userData.visualiserPolishedMarble = true;
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), material);
+    mesh.userData.partRole = "top";
+    applyMarbleSurface(mesh, "Coffee Table", preset.settings);
+    expect(material.reflectivity).toBeCloseTo(reflectivity);
+    expect(material.roughness).toBe(roughness);
+    expect(material.metalness).toBe(0);
+    expect(marbleSurfacePreset(preset.settings)).toBe(id);
+  });
+
+  it("recognises custom slider values and restored preset pairs", () => {
+    expect(marbleSurfacePreset({ reflectivity: 0.8, roughness: 0.35 })).toBeUndefined();
+    expect(marbleSurfacePreset(JSON.parse(JSON.stringify(MARBLE_SURFACE_PRESETS[1].settings)))).toBe("honed");
+    expect(marbleSurfacePreset()).toBe("polished");
+  });
+
   it("changes physical reflectivity and roughness without changing maps, geometry or placement", () => {
     const source = new THREE.MeshStandardMaterial({ roughness: 0.15, map: new THREE.Texture(), roughnessMap: new THREE.Texture() });
     source.userData.visualiserPolishedMarble = true;
