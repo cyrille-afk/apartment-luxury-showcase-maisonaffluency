@@ -49,6 +49,8 @@ export type ScenePresetData = CeilingSettings & {
   rugRotation?: number;
   /** Whether the rug is shown (default true) — hide it to check furniture placement. */
   showRug?: boolean;
+  /** Surface of the three-slab feature wall behind the furniture. */
+  featureWallFinish?: FeatureWallFinish;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
   backdropDataUrl?: string | null;
   /** Seamless studio stage colour (hex) shown when no room photo is loaded. */
