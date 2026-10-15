@@ -38,3 +38,5 @@
 - AI layout rules: src/components/trade/visualiser/AGENTS.md; shared comparisons reuse playback paths to avoid drift; preset switches blend poses, retain playback state.
 - Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
 - Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
+
+- Advanced visualiser controls share visualiserAdvancedRendering mappings and persist with scenes/presets; hosted EXR pointers feed the same raster/path-traced environment loader so switching cannot drift between modes.

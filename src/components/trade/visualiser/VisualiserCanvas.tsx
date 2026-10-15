@@ -1,3 +1,7 @@
+import { advancedSceneLighting, DEFAULT_ADVANCED_RENDERING, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
+import softboxAsset from "@/assets/studio-softbox.exr.asset.json";
+import windowAsset from "@/assets/window-interior.exr.asset.json";
+import emptyRoomAsset from "@/assets/small-empty-room.exr.asset.json";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { RUG_TOP_Y } from "./RoomSurfaces";
 import type { RugBorderColor, RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
@@ -20,7 +24,7 @@ import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
-export type VisualiserEnvironmentSource = "empty-room-exr" | "studio-hdr" | "local";
+export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
 
 const ENV_STATUS_EVENT = "ma-visualiser-env";
@@ -64,11 +68,18 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1.6 
         reportEnvironmentStatus({ source: "local", exr });
       });
     };
+    const loadHostedExr = (source: VisualiserEnvironmentSource, url: string) => {
+      fetch(url).then(async (response) => {
+        if (!response.ok) throw new Error("EXR unavailable");
+        const buffer = await response.arrayBuffer();
+        if (!cancelled) accept(source)(createExrEnvironmentTexture(buffer));
+      }).catch(() => fallbackToStudioHdr("unreadable"));
+    };
     const loadEmptyRoom = () => {
       // The studio's own empty-room EXR — validated (present + readable) before parsing.
       validateEmptyRoomExr().then((result) => {
         if (cancelled) return;
-        if (result.state !== "ok") { fallbackToStudioHdr(result.state); return; }
+        if (result.state !== "ok") { loadHostedExr("empty-room-exr", emptyRoomAsset.url); return; }
         try {
           accept("empty-room-exr")(createExrEnvironmentTexture(result.buffer));
         } catch {
@@ -77,6 +88,8 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1.6 
       }).catch(() => fallbackToStudioHdr("unreadable"));
     };
     if (preferred === "empty-room-exr") loadEmptyRoom();
+    else if (preferred === "studio-softbox-exr") loadHostedExr(preferred, softboxAsset.url);
+    else if (preferred === "window-interior-exr") loadHostedExr(preferred, windowAsset.url);
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
   }, [invalidate, preferred, localVersion]);
@@ -194,6 +207,7 @@ interface VisualiserCanvasProps {
   dofFocusSelected?: boolean;
   /** Which HDRI the environment should load: the empty-room EXR or the built-in studio HDRI. */
   environmentSource?: VisualiserEnvironmentSource;
+  advancedRendering?: AdvancedRenderingSettings;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
   /** Wall height percentage of the full cyclorama (20–100). */
@@ -268,6 +282,7 @@ const VisualiserCanvas = ({
   dofStrength = 3,
   dofFocusSelected = true,
   environmentSource = "empty-room-exr",
+  advancedRendering = DEFAULT_ADVANCED_RENDERING,
   floorFinish = "oak-chevron",
   showRearWall = true,
   wallHeight = 100,
@@ -290,7 +305,7 @@ const VisualiserCanvas = ({
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => (
   <Canvas
-    shadows={{ type: THREE.PCFSoftShadowMap }}
+    shadows={{ type: THREE.PCFShadowMap }}
     frameloop="demand"
     gl={{
       alpha: true,
@@ -308,12 +323,12 @@ const VisualiserCanvas = ({
       gl.toneMappingExposure = SHOWROOM.exposure;
       gl.outputColorSpace = THREE.SRGBColorSpace;
       gl.shadowMap.enabled = true;
-      gl.shadowMap.type = THREE.PCFSoftShadowMap;
+      gl.shadowMap.type = THREE.PCFShadowMap;
     }}
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`lighting:${JSON.stringify(advancedRendering)}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${rugLayout?.width ?? ""}x${rugLayout?.depth ?? ""}@${rugLayout?.offsetX ?? 0},${rugLayout?.offsetZ ?? 0}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -336,12 +351,12 @@ const VisualiserCanvas = ({
     />
 
     {/* Soft ambient lifts deep shadows under base frames. */}
-    <ambientLight intensity={SHOWROOM.ambient} />
+    <ambientLight intensity={advancedSceneLighting(advancedRendering).ambientIntensity} />
     <rectAreaLight position={[-5, 6, 5]} rotation={[-Math.PI / 4, -Math.PI / 4, 0]} width={6} height={4} intensity={3} color={SHOWROOM.key} />
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
       position={[-6, 9, 6]}
-      intensity={2.5}
+      intensity={advancedSceneLighting(advancedRendering).directionalIntensity}
       color={SHOWROOM.key}
       castShadow
       shadow-mapSize-width={2048}
@@ -351,11 +366,12 @@ const VisualiserCanvas = ({
       shadow-camera-right={12}
       shadow-camera-top={12}
       shadow-camera-bottom={-12}
-      shadow-bias={-0.0004}
-      shadow-normalBias={0.02}
+      shadow-bias={advancedSceneLighting(advancedRendering).shadowBias}
+      shadow-normalBias={advancedSceneLighting(advancedRendering).shadowNormalBias}
+      shadow-radius={advancedSceneLighting(advancedRendering).shadowRadius}
     />
     {/* Fill: opposite side, low and cool. */}
-    <directionalLight position={[7, 4, 4]} intensity={0.4} color={SHOWROOM.fill} />
+    <directionalLight position={[7, 4, 4]} intensity={advancedSceneLighting(advancedRendering).fillIntensity} color={SHOWROOM.fill} />
     {/* Rim: behind the pieces to lift silhouettes. */}
     <directionalLight position={[0, 6, -9]} intensity={0.6} color={SHOWROOM.rim} />
 
@@ -372,7 +388,7 @@ const VisualiserCanvas = ({
         position={[0, 0.002, 0]}
         scale={40}
         opacity={0.45}
-        blur={2.6}
+        blur={advancedSceneLighting(advancedRendering).contactBlur * (2.6 / 1.5)}
         far={4}
         resolution={1024}
         depthWrite={false}
@@ -386,7 +402,7 @@ const VisualiserCanvas = ({
         position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
         scale={15}
         opacity={0.65}
-        blur={1.5}
+        blur={advancedSceneLighting(advancedRendering).contactBlur}
         far={1}
         resolution={1024}
         color="#2b2015"
@@ -441,7 +457,7 @@ const VisualiserCanvas = ({
       <PathTracerLayer
         onSamples={onPathTraceSamples}
         quality={pathTraceQuality}
-        signature={`${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
+        signature={`${JSON.stringify(advancedRendering)}|${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
           .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
           .join("|")}`}
       />
