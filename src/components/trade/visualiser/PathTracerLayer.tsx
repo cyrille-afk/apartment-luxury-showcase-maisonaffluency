@@ -171,6 +171,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
       pt.renderSample();
       const samples = Math.floor(pt.samples);
+      if (location.hostname==="localhost" && samples < current.samples) console.log("[ptdbg] drop", current.samples, samples, gl.domElement.width, gl.domElement.height, pt.pausePathTracing);
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
         current.samples = samples;
         current.reportedAt = now;
