@@ -11,8 +11,10 @@ export function architecturalRoomLayout(bounds: THREE.Box3, rearZ: number) {
   const valid = !bounds.isEmpty();
   const rightX = Math.max(3.6, valid ? bounds.max.x + ARCHITECTURE.columnClearance : 3.6);
   const nearZ = Math.max(1.4, valid ? bounds.max.z + 0.6 : 1.4);
+  const height = Math.max(ARCHITECTURE.height, valid ? bounds.max.y + 4 : ARCHITECTURE.height);
   return {
-    height: Math.max(ARCHITECTURE.height, valid ? bounds.max.y + 4 : ARCHITECTURE.height),
+    height,
+    balconyY: height - ARCHITECTURE.slabThickness / 2,
     balconyFrontZ: rearZ + ARCHITECTURE.balconyDepth,
     columns: [[rightX, nearZ], [rightX + 0.55, Math.min(-2.6, nearZ - 4)]] as [number, number][],
   };

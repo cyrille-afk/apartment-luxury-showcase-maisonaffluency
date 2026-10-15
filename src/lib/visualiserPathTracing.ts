@@ -1,11 +1,11 @@
 import * as THREE from "three";
 
 export const PATH_TRACING = {
-  movingScale: 0.25,
+  movingScale: 1,
   settledScale: 1,
   settleMs: 150,
-  minSamples: 3,
-  fadeMs: 200,
+  minSamples: 1,
+  fadeMs: 0,
 } as const;
 
 export interface PathTraceQuality {
@@ -27,7 +27,17 @@ export const clampPtQuality = (q: Partial<PathTraceQuality>): PathTraceQuality =
   lightIntensity: Math.min(3, Math.max(0.2, Number(q.lightIntensity) || DEFAULT_PT_QUALITY.lightIntensity)),
 });
 export function loadPtQuality(): PathTraceQuality {
-  try { return clampPtQuality(JSON.parse(localStorage.getItem(PT_QUALITY_KEY) || "{}")); } catch { return DEFAULT_PT_QUALITY; }
+  try {
+    const saved = JSON.parse(localStorage.getItem(PT_QUALITY_KEY) || "{}");
+    const quality = restorePhotorealQuality(saved);
+    localStorage.setItem(PT_QUALITY_KEY, JSON.stringify({ ...quality, qualityVersion: 2 }));
+    return quality;
+  } catch { return DEFAULT_PT_QUALITY; }
+}
+
+/** Restore native-quality preview once, preserving later explicit quality choices. */
+export function restorePhotorealQuality(saved: Partial<PathTraceQuality> & { qualityVersion?: number }): PathTraceQuality {
+  return clampPtQuality(saved.qualityVersion === 2 ? saved : { ...saved, previewScale: 1, renderScale: Math.max(1, Number(saved.renderScale) || 1) });
 }
 
 export function isTraceableMesh(object: THREE.Object3D): object is THREE.Mesh {

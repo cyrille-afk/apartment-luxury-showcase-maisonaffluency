@@ -250,7 +250,7 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
-  const [pathTrace, setPathTrace] = useState(false);
+  const [pathTrace, setPathTrace] = useState(true);
   const [keepPhotorealGhost, setKeepPhotorealGhost] = useState(loadPhotorealGhostPreference);
   const [photorealGhost, setPhotorealGhost] = useState<string | null>(null);
   const frameCaptureRef = useRef<PhotorealFrameCaptureRef["current"]>(null);
@@ -268,7 +268,7 @@ const TradeVisualiser = () => {
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
     const next = clampPtQuality({ ...q, ...patch });
-    try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify(next)); } catch { /* storage full */ }
+    try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify({ ...next, qualityVersion: 2 })); } catch { /* storage full */ }
     return next;
   });
   const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? true);

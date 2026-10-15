@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { isTraceableMesh, PATH_TRACING, tracedEnvironmentRevision, tracedSceneRevision } from "./visualiserPathTracing";
+import { isTraceableMesh, PATH_TRACING, restorePhotorealQuality, tracedEnvironmentRevision, tracedSceneRevision } from "./visualiserPathTracing";
 
 describe("progressive path tracing", () => {
-  it("uses a quarter-resolution moving preview and full-resolution settled image", () => {
-    expect(PATH_TRACING.movingScale).toBe(0.25);
+  it("uses a full-resolution moving preview and settled image", () => {
+    expect(PATH_TRACING.movingScale).toBe(1);
     expect(PATH_TRACING.settledScale).toBe(1);
+  });
+  it("restores old low-resolution preferences once without overriding later explicit choices", () => {
+    expect(restorePhotorealQuality({ previewScale: 0.25, renderScale: 0.5 })).toMatchObject({ previewScale: 1, renderScale: 1 });
+    expect(restorePhotorealQuality({ previewScale: 0.5, renderScale: 1.5, qualityVersion: 2 })).toMatchObject({ previewScale: 0.5, renderScale: 1.5 });
+    expect(restorePhotorealQuality({ renderScale: 2 }).renderScale).toBe(2);
   });
   it("ignores raster-only helpers and shadow catchers", () => {
     expect(isTraceableMesh(new THREE.Mesh(new THREE.PlaneGeometry(), new THREE.ShadowMaterial()))).toBe(false);

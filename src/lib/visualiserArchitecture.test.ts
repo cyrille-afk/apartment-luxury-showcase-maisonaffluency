@@ -3,6 +3,13 @@ import * as THREE from "three";
 import { ARCHITECTURE, architecturalRoomLayout } from "./visualiserArchitecture";
 
 describe("architectural room placement", () => {
+  it("raises the horizontal slab to the column tops instead of cutting their middle", () => {
+    for (const top of [2, 6]) {
+      const layout = architecturalRoomLayout(new THREE.Box3(new THREE.Vector3(-2, 0, -3), new THREE.Vector3(2, top, 2)), -8);
+      expect(layout.balconyY + ARCHITECTURE.slabThickness / 2).toBe(layout.height);
+      expect(layout.balconyY - ARCHITECTURE.slabThickness / 2).toBeGreaterThan(top + 3);
+    }
+  });
   it("places both right-side columns outside furniture without moving its bounds", () => {
     const bounds = new THREE.Box3(new THREE.Vector3(-2, 0, -3), new THREE.Vector3(5, 2, 2));
     const before = bounds.clone();
