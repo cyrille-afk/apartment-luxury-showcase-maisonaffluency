@@ -37,6 +37,17 @@ export default function RugLayoutControls(props: Props) {
     </PopoverTrigger>
     <PopoverContent side="top" align="start" className="z-[80] w-80 max-w-[calc(100vw-2rem)] space-y-5" aria-label="Rug size and position">
       <div className="flex items-center justify-between"><h3 className="text-sm font-medium">Rug size &amp; position</h3><Switch checked={props.visible} onCheckedChange={props.onVisibleChange} disabled={props.disabled} aria-label="Show rug" /></div>
+      <output aria-live="polite" aria-label="Rug dimensions and rotation" className="block rounded-md border border-border bg-muted/40 px-3 py-2 text-xs tabular-nums">
+        {(() => {
+          const w = props.width ?? 4.5; const d = props.depth ?? 3.8;
+          const inches = (m: number) => { const t = Math.round(m * 39.3701); return `${Math.floor(t / 12)}′${t % 12}″`; };
+          const auto = props.width === null || props.depth === null;
+          return <>
+            <div className="font-medium">{w.toFixed(1)} × {d.toFixed(1)} m{auto ? " (Auto)" : ""} · {Math.round(props.rotation)}°</div>
+            <div className="text-muted-foreground">{inches(w)} × {inches(d)}</div>
+          </>;
+        })()}
+      </output>
       {controls.map((control) => <div key={control.aria} className="space-y-3">
         <div className="flex items-center justify-between text-xs"><span>{control.label}</span><output className="tabular-nums text-muted-foreground">{control.display}</output></div>
         <Slider thumbLabel={control.aria} min={control.min} max={control.max} step={0.1} value={[control.value]} disabled={inactive} onValueChange={([value]) => { if (value !== undefined) control.change(value); }} />
