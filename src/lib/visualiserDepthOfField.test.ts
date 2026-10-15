@@ -1,8 +1,39 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { photographicBokeh, photographicFocusDistance, selectedObjectFocus } from "./visualiserDepthOfField";
+import { architecturalDofSettings, foregroundFurnitureFocus, photographicBokeh, photographicFocusDistance, selectedObjectFocus } from "./visualiserDepthOfField";
+import { SHOWROOM } from "./showroomRendering";
 
 describe("selected furniture depth of field", () => {
+  it("uses a full-frame 50mm lens with slightly stronger grounding", () => {
+    expect(SHOWROOM.cameraFov).toBeCloseTo(26.9915, 4);
+    expect(SHOWROOM.contactOpacity).toBe(0.72);
+    expect(SHOWROOM.aoIntensity).toBe(1.28);
+  });
+  it("adopts subtle DoF once and retains later explicit OFF choices", () => {
+    expect(architecturalDofSettings({ depthOfField: false, dofStrength: 3 })).toEqual({ depthOfField: true, dofStrength: 1 });
+    expect(architecturalDofSettings({ dofRenderVersion: 1, depthOfField: false, dofStrength: 4 })).toEqual({ depthOfField: false, dofStrength: 4 });
+  });
+  it("keeps foreground side table and armchair in one sharp band, excluding distant chairs", () => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(0, 1, 10);
+    const objects = [
+      { instanceId: "chair", product_name: "GUM armchair", z: 2 },
+      { instanceId: "table", product_name: "Side Table", z: 0 },
+      { instanceId: "far", product_name: "GUM armchair", z: -7 },
+    ];
+    for (const object of objects) {
+      const piece = new THREE.Group();
+      piece.userData.visualiserInstanceId = object.instanceId;
+      piece.position.set(0, 1, object.z);
+      piece.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1)));
+      scene.add(piece);
+    }
+    const target = new THREE.Vector3();
+    expect(foregroundFurnitureFocus(scene, camera, objects, target)).toBeCloseTo(3.8);
+    expect(photographicFocusDistance(camera, target)).toBeCloseTo(9);
+    expect(foregroundFurnitureFocus(new THREE.Scene(), camera, objects, target)).toBeNull();
+  });
   it("focuses the actual transformed bounding-box centre, not the floor position or gizmos", () => {
     const scene = new THREE.Scene();
     const piece = new THREE.Group();
