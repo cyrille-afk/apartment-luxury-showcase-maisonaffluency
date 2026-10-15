@@ -35,7 +35,7 @@ export function cachedModelBytes(url: string, fetcher: typeof fetch = fetch): Pr
 }
 
 /** drei `useGLTF` extension: routes GLB downloads through the persistent cache. */
-export function useCachedModelLoader(loader: GLTFLoader) {
+export function withCachedModelLoader(loader: GLTFLoader) {
   loader.load = (url, onLoad, _onProgress, onError) => {
     const resolved = loader.manager.resolveURL(url);
     const base = loader.path || resolved.slice(0, resolved.lastIndexOf("/") + 1);

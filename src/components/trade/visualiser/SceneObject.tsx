@@ -17,7 +17,7 @@ import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMater
 import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry } from "@/lib/visualiserSubdivision";
 import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps } from "@/lib/visualiserMarbleProjection";
-import { useCachedModelLoader } from "@/lib/visualiserModelCache";
+import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 
 export type PlacedObject = {
   instanceId: string;
@@ -299,7 +299,7 @@ function useFittedModel(object: PlacedObject) {
   const url = object.glb_url ?? "";
   // Self-hosted Draco decoder: compressed GLBs stream in a fraction of the
   // bytes, uncompressed ones are unaffected (decoder is fetched on demand).
-  const { scene } = useGLTF(url, "/draco/", undefined, useCachedModelLoader);
+  const { scene } = useGLTF(url, "/draco/", undefined, withCachedModelLoader);
   const { gl } = useThree();
   const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
   const holder = useMemo(() => ({
