@@ -6,6 +6,7 @@ import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
 import woolImage from "@/assets/cream-wool-rug.jpg";
 import { roundedRugGeometry, RUG_TOP_Y } from "@/lib/visualiserRug";
+import { rugYaw } from "@/lib/visualiserRugRotation";
 export { RUG_TOP_Y } from "@/lib/visualiserRug";
 import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugColorHex, rugWeave, type RugColor, type RugBorderColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
@@ -231,7 +232,7 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
  */
 const RUG_TILE: [number, number] = [1.35, 1.35];
 
-export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
+export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number; rotation?: number };
 function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderTwistMm, borderRoughness, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; borderThicknessMm?: number; borderTwistMm?: number; borderRoughness?: number; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
   // Metre-space UVs preserve yarn scale when the rug is resized.
@@ -258,10 +259,12 @@ function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderT
   useEffect(() => () => geometry.dispose(), [geometry]);
   if (!maps.color || !maps.normal) return null;
   return (
-    <group position={[cx, RUG_TOP_Y, cz]} rotation={[-Math.PI / 2, 0, 0]}>
+    <group name="room-rug-placement" position={[cx, RUG_TOP_Y, cz]} rotation={[0, rugYaw(layout?.rotation), 0]}>
+    <group rotation={[-Math.PI / 2, 0, 0]}>
     <mesh name="room-area-rug" geometry={geometry} receiveShadow>
       <meshStandardMaterial color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
+    </group>
     </group>
   );
 }

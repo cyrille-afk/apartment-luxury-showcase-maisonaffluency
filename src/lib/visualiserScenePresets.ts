@@ -45,6 +45,8 @@ export type ScenePresetData = CeilingSettings & {
   rugDepth?: number | null;
   rugOffsetX?: number;
   rugOffsetZ?: number;
+  /** Rotation about the rug centre in degrees. */
+  rugRotation?: number;
   /** Whether the rug is shown (default true) — hide it to check furniture placement. */
   showRug?: boolean;
   /** Uploaded room-photo backdrop (data URL, downscaled for storage). */
