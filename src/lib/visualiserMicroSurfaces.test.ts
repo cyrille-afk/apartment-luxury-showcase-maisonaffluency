@@ -19,6 +19,14 @@ describe("furniture micro-surfaces", () => {
       expect(m.normalScale.x).toBe(1);
     }
   });
+  it("provides lightweight woven normals for colour-only armchair upholstery", () => {
+    const m = new THREE.MeshStandardMaterial();
+    deepenArmchairWeave(m, "Frenchmen Street Armchair", true);
+    expect(m.normalMap).toBeInstanceOf(THREE.DataTexture);
+    expect(m.normalMap?.userData.visualiserOwnedWeave).toBe(true);
+    expect(m.normalMap?.colorSpace).toBe(THREE.NoColorSpace);
+    expect(m.normalScale.toArray()).toEqual([1.5, 1.5]);
+  });
   it("adds subtle linear roughness aligned to wood colour UVs", () => {
     const m = new THREE.MeshStandardMaterial({ map: new THREE.Texture(), roughness: 0.5 });
     m.map?.repeat.set(2, 3);
