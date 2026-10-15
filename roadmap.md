@@ -1,3 +1,4 @@
+- [ ] Refine architectural rendering: stronger grounding, 50mm-equivalent lens and subtle foreground furniture focus; verify furnished view and saved preferences.
 - [x] Add Polished, Honed and Satin marble presets; seven tests pass and build clean. Signed-in marble tabletop confirms paired material updates, unchanged bases/geometry/placement, reload selection, Custom after manual adjustment and Reset without page errors.
 - [x] Add 0–360° rug rotation; four tests pass and build clean. Signed-in furnished scene verifies 90° rotation stays flat, preserves centre/geometry/furniture, and survives reload and preset round-trip without page errors.
 - [x] Add per-coffee-table marble reflectivity and roughness controls; 26 tests pass, clean build, signed-in marble tabletop verifies 80% reflectivity/35% roughness, unchanged bases/geometry/placement, reload persistence and Reset, with no page errors. Final photoreal GPU output remains unverified.
