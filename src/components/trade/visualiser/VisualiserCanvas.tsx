@@ -418,16 +418,16 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Grounding shadows where legs/bases meet the room floor — stops pieces floating on the wood. */}
-    {/* Raised just above the extruded rug's top surface so shadows land on the rug fibers;
+    {/* Raised just above the flat rug's surface so shadows land on the rug fibers;
         when the rug is hidden they drop back onto the floor itself. */}
     {!pathTrace && !hasBackdrop && floorFinish !== "none" && (
       <ContactShadows
         position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
         scale={15}
         opacity={0.65}
-        blur={lighting.contactBlur}
+        blur={lighting.contactBlur * 0.6}
         far={1}
-        resolution={1024}
+        resolution={2048}
         color="#2b2015"
         depthWrite={false}
       />

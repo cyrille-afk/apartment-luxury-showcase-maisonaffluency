@@ -102,6 +102,7 @@ type PersistedSandbox = CeilingSettings & {
   wallCustomHex?: string | null;
   wallFinishIntensity?: number;
   rugColor?: string;
+  rugSurfaceVersion?: number;
   rugBorderColor?: string;
   rugBorderThicknessMm?: number;
   rugBorderTwistMm?: number;
@@ -158,7 +159,7 @@ const readSandbox = (): PersistedSandbox => {
       wallFinish: roomWallFinish(parsed.wallFinish),
       wallCustomHex: normalizeHexColor(parsed.wallCustomHex) ?? null,
       wallFinishIntensity: clampWallFinishIntensity(parsed.wallFinishIntensity),
-      rugColor: toRugColor(parsed.rugColor),
+      rugColor: parsed.rugSurfaceVersion === 2 ? toRugColor(parsed.rugColor) : "cream",
       rugBorderColor: toRugBorderColor(parsed.rugBorderColor),
       rugBorderThicknessMm: clampRugBorderThicknessMm(parsed.rugBorderThicknessMm),
       rugBorderTwistMm: clampRugBorderTwistMm(parsed.rugBorderTwistMm),
@@ -406,6 +407,7 @@ const TradeVisualiser = () => {
         wallFinish,
         wallCustomHex,
         wallFinishIntensity,
+        rugSurfaceVersion: 2,
         rugColor: rugColorKey,
         rugBorderColor: rugBorderColorKey,
         rugBorderThicknessMm,
@@ -1276,38 +1278,6 @@ const TradeVisualiser = () => {
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug border</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={rugBorderColorKey} onValueChange={(v) => setRugBorderColorKey(toRugBorderColor(v))}>
-                  <DropdownMenuRadioItem value="match" disabled={floorFinish === "none"}>Match rug</DropdownMenuRadioItem>
-                  {RUG_COLORS.map((c) => (
-                    <DropdownMenuRadioItem key={c.key} value={c.key} disabled={floorFinish === "none"}>
-                      <span className="mr-2 inline-block h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.hex }} />
-                      {c.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Border thickness</span>
-                    <span>{rugBorderThicknessMm} mm</span>
-                  </div>
-                  <input type="range" min={4} max={20} step={1} value={rugBorderThicknessMm} disabled={floorFinish === "none"} onChange={(e) => setRugBorderThicknessMm(clampRugBorderThicknessMm(Number(e.target.value)))} aria-label="Rug border thickness" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Border twist</span>
-                    <span>{rugBorderTwistMm} mm</span>
-                  </div>
-                  <input type="range" min={10} max={60} step={1} value={rugBorderTwistMm} disabled={floorFinish === "none"} onChange={(e) => setRugBorderTwistMm(clampRugBorderTwistMm(Number(e.target.value)))} aria-label="Rug border twist spacing" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Border roughness</span>
-                    <span>{rugBorderRoughness}%</span>
-                  </div>
-                  <input type="range" min={0} max={100} step={5} value={rugBorderRoughness} disabled={floorFinish === "none"} onChange={(e) => setRugBorderRoughness(clampRugBorderRoughness(Number(e.target.value)))} aria-label="Rug border roughness" className="w-full accent-primary" />
-                  <p className="mt-1 text-[10px] text-muted-foreground">Lower = glossier cord with sharper highlights; higher = matte.</p>
-                </div>
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug weave</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={rugWeaveKey} onValueChange={(v) => setRugWeaveKey(toRugWeave(v))}>
                   {RUG_WEAVES.map((w) => (
