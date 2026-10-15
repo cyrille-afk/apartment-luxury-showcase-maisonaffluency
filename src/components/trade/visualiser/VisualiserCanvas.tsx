@@ -14,6 +14,7 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
+import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
@@ -211,6 +212,7 @@ interface VisualiserCanvasProps {
   depthOfField?: boolean;
   /** Progressive GPU path tracing (offline-quality GI) while the camera is still. */
   pathTrace?: boolean;
+  frameCaptureRef?: PhotorealFrameCaptureRef;
   onPathTraceSamples?: (n: number) => void;
   pathTraceQuality?: import("@/lib/visualiserPathTracing").PathTraceQuality;
   /** Blur strength (bokeh scale), 1–10. */
@@ -310,6 +312,7 @@ const VisualiserCanvas = ({
   focusRef,
   depthOfField = true,
   pathTrace = false,
+  frameCaptureRef,
   onPathTraceSamples,
   pathTraceQuality,
   dofStrength = 1,
@@ -495,6 +498,7 @@ const VisualiserCanvas = ({
     </Suspense>
     {pathTrace && (
       <PathTracerLayer
+        frameCaptureRef={frameCaptureRef}
         onSamples={onPathTraceSamples}
         quality={pathTraceQuality}
         depthOfField={depthOfField}

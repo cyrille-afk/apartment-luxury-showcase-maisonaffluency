@@ -1,4 +1,5 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
+import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
 import { clampRugRotation } from "@/lib/visualiserRugRotation";
@@ -31,7 +32,7 @@ import {
   SLOT_SPACING_STEP,
 } from "@/lib/visualiserPlacement";
 import FinishPresets from "@/components/trade/visualiser/FinishPresets";
-import { Box, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
+import { Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -250,6 +251,19 @@ const TradeVisualiser = () => {
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [pathTrace, setPathTrace] = useState(false);
+  const [keepPhotorealGhost, setKeepPhotorealGhost] = useState(loadPhotorealGhostPreference);
+  const [photorealGhost, setPhotorealGhost] = useState<string | null>(null);
+  const frameCaptureRef = useRef<PhotorealFrameCaptureRef["current"]>(null);
+  const showPhotorealGhost = keepPhotorealGhost && !pathTrace && Boolean(photorealGhost);
+  const togglePhotoreal = () => {
+    if (pathTrace && keepPhotorealGhost) {
+      const frame = frameCaptureRef.current?.();
+      if (frame) setPhotorealGhost(frame);
+      else toast.info("No settled photoreal frame yet — let the image refine before switching off.");
+    }
+    setPtSamples(0);
+    setPathTrace((value) => !value);
+  };
   const [ptSamples, setPtSamples] = useState(0);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
@@ -846,7 +860,10 @@ const TradeVisualiser = () => {
         />
       )}
 
-      <div ref={canvasWrapRef} className="absolute inset-0 z-10">
+      {showPhotorealGhost && photorealGhost && (
+        <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
+      )}
+      <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
@@ -865,6 +882,7 @@ const TradeVisualiser = () => {
             showLabels={showLabels}
             depthOfField={depthOfField}
             pathTrace={pathTrace}
+            frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}
             dofStrength={dofStrength}
@@ -1379,11 +1397,22 @@ const TradeVisualiser = () => {
             <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
             <Button variant="ghost"
               className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => { setPtSamples(0); setPathTrace((v) => !v); }}
+              onClick={togglePhotoreal}
               aria-pressed={pathTrace}
               title="Offline-quality path tracing: real light bounces and reflections, refining while the camera is still"
             >
               [ &#10022; Photoreal Render: {pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"} ]
+            </Button>
+            <Button variant="ghost" className={cn(toolbarButton, !keepPhotorealGhost && "opacity-60")}
+              aria-label="Keep photoreal ghost" aria-pressed={keepPhotorealGhost}
+              title="Keep the last settled photoreal frame behind the interactive live view when Photoreal Render is off. The frame stays fixed as you edit or move the camera."
+              onClick={() => {
+                const enabled = !keepPhotorealGhost;
+                setKeepPhotorealGhost(enabled);
+                if (!enabled) setPhotorealGhost(null);
+                try { localStorage.setItem(PHOTOREAL_GHOST_KEY, String(enabled)); } catch { /* storage unavailable */ }
+              }}>
+              <Ghost className="h-3.5 w-3.5" /> Keep Ghost: {keepPhotorealGhost ? "On" : "Off"}
             </Button>
             {pathTrace && (
               <>
