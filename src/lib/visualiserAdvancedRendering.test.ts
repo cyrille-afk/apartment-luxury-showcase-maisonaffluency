@@ -2,6 +2,29 @@ import { describe, expect, it } from "vitest";
 import { advancedSceneLighting, clampAdvancedRendering, DEFAULT_ADVANCED_RENDERING, environmentSourcePref } from "./visualiserAdvancedRendering";
 
 describe("advanced rendering scene mappings", () => {
+  it("keeps 100% lighting at the baseline", () => {
+    const lighting = advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, 1);
+    expect(lighting.directionalIntensity).toBe(2.5);
+    expect(lighting.lightScale).toBe(1);
+    expect(lighting.shadowBias).toBeCloseTo(-0.0004);
+    expect(lighting.shadowNormalBias).toBeCloseTo(0.02);
+  });
+  it("scales key and environment strength proportionally at 128% and beyond", () => {
+    for (const scale of [1.28, 2, 3]) {
+      const lighting = advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, scale);
+      expect(lighting.directionalIntensity).toBeCloseTo(2.5 * scale);
+      expect(lighting.lightScale * 0.5).toBeCloseTo(0.5 * scale);
+      expect(lighting.ambientIntensity).toBeCloseTo(0.2 * scale);
+      expect(lighting.fillIntensity).toBeCloseTo(0.4 * scale);
+    }
+  });
+  it("tightens both shadow biases above 100% without changing shadow sharpness", () => {
+    const lighting = advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, 1.28);
+    expect(lighting.shadowBias).toBeCloseTo(-0.0004 / 1.28);
+    expect(lighting.shadowNormalBias).toBeCloseTo(0.02 / 1.28);
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, 3).shadowNormalBias).toBeLessThan(lighting.shadowNormalBias);
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING, 0.2).shadowNormalBias).toBeCloseTo(0.02);
+  });
   it("sharpens contact shadows through bias, radius and contact blur", () => {
     const soft = advancedSceneLighting({ shadowSharpness: 0, contrastIntensity: 50 });
     const sharp = advancedSceneLighting({ shadowSharpness: 100, contrastIntensity: 50 });

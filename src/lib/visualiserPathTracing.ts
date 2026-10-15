@@ -15,7 +15,7 @@ export interface PathTraceQuality {
   maxSamples: number;
   /** Final render resolution multiplier (0.5–2). */
   renderScale: number;
-  /** HDRI lighting strength in photoreal mode (0.2–3). */
+  /** Active key/environment lighting multiplier (0.2–3; 1 = baseline). */
   lightIntensity: number;
 }
 export const DEFAULT_PT_QUALITY: PathTraceQuality = { previewScale: PATH_TRACING.movingScale, maxSamples: 0, renderScale: PATH_TRACING.settledScale, lightIntensity: 1.6 };
