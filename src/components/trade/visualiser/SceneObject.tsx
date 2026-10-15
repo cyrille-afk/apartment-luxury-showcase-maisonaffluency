@@ -18,6 +18,7 @@ import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry }
 import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps, isStoneSlabFinish } from "@/lib/visualiserMarbleProjection";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
+import { addWoodRoughness, deepenArmchairWeave, disposeMicroSurfaceMaps } from "@/lib/visualiserMicroSurfaces";
 
 export type PlacedObject = {
   instanceId: string;
@@ -105,6 +106,29 @@ function deriveTextileNormal(diffuse: THREE.Texture | null): THREE.Texture | nul
   const texture = new THREE.CanvasTexture(canvas);
   texture.userData.derivedTextile = true;
   return texture;
+}
+
+function applyFurnitureMicroSurfaces(material: THREE.MeshStandardMaterial, product: string, textile: boolean, description: string) {
+  if (textile && /armchair|\bchair\b/i.test(product) && !material.normalMap && material.map) {
+    // Legacy GLBs sometimes have only fabric colour; keep this approximation owned.
+    try {
+      const normal = deriveTextileNormal(material.map);
+      if (normal) {
+        const source = material.map;
+        normal.colorSpace = THREE.NoColorSpace;
+        normal.wrapS = source.wrapS; normal.wrapT = source.wrapT;
+        normal.repeat.copy(source.repeat); normal.offset.copy(source.offset);
+        normal.center.copy(source.center); normal.rotation = source.rotation;
+        normal.flipY = source.flipY; normal.channel = source.channel;
+        normal.anisotropy = source.anisotropy;
+        normal.userData.visualiserOwnedWeave = true;
+        normal.needsUpdate = true;
+        material.normalMap = normal;
+      }
+    } catch { /* Unreadable colour textures retain the supplier material. */ }
+  }
+  deepenArmchairWeave(material, product, textile);
+  if (!textile && /table|chair/i.test(product)) addWoodRoughness(material, description);
 }
 
 /**
@@ -344,6 +368,7 @@ function useFittedModel(object: PlacedObject) {
           if (role === "upholstery" || role === "backrest") applyMatteTextile(material);
           if ((role === "upholstery" || role === "backrest") && material.normalMap) material.normalScale.multiplyScalar(1.2);
           if (role !== "upholstery" && role !== "backrest") applyPolishedMarble(material, `${entry.name} ${mesh.name}`);
+          applyFurnitureMicroSurfaces(material, object.product_name, role === "upholstery" || role === "backrest", `${entry.name} ${mesh.name}`);
           return physicalCoffeeTableMarble(material, object.product_name, role);
         });
         mesh.material = Array.isArray(mesh.material) ? next : next[0];
@@ -351,7 +376,11 @@ function useFittedModel(object: PlacedObject) {
       }
       const m = (finish && maps.get(finish.id)) || EMPTY_MAPS;
       const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      const next = source.map((entry) => physicalCoffeeTableMarble(clonePbrMaterial(entry, finish, m, neutralFabric), object.product_name, role));
+      const next = source.map((entry) => {
+        const material = clonePbrMaterial(entry, finish, m, neutralFabric);
+        applyFurnitureMicroSurfaces(material, object.product_name, !neutralFabric && !!finish && isTextileMaterial(finish), finish ? `${finish.name} ${finish.material_type ?? ""} ${finish.category ?? ""}` : `${entry.name} ${mesh.name}`);
+        return physicalCoffeeTableMarble(material, object.product_name, role);
+      });
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
     const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
@@ -417,6 +446,7 @@ const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts 
       materials.forEach((entry) => {
         if (entry?.userData?.visualiserClone) {
           disposeMarbleSlabMaps(entry);
+          disposeMicroSurfaceMaps(entry);
           entry.dispose();
         }
       });
