@@ -1,3 +1,4 @@
+- [ ] Add Advanced Rendering Options: shadow sharpness, contrast/intensity and three real EXR environments; verify controls against the live scene and persistence.
 - [x] Selectively subdivide curved furniture once with OpenSubdiv Catmull-Clark; 22 tests pass, loaded Frenchmen/GUM upholstery and Cinnamon column/shade confirm level 1 with structural parts unchanged; real-GPU photoreal convergence remains unverified.
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
 - [x] Reduce floor halo: lower environment lighting, oak roughness 0.4–0.6 with normalized map, neutral ACES exposure; 22 tests pass, build clean, signed-in furnished before/after confirms restored floor detail (real-GPU photoreal unverified).
