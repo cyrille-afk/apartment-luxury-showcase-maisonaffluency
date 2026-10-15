@@ -5,6 +5,7 @@ import { WebGLPathTracer, PhysicalCamera } from "three-gpu-pathtracer";
 import { photographicBokeh, photographicFocusDistance } from "@/lib/visualiserDepthOfField";
 import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
+import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -12,7 +13,7 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
-const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3 }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number }) => {
+const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
   const physicalCamera = useRef(new PhysicalCamera());
@@ -20,6 +21,31 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
   const report = useRef(onSamples);
   report.current = onSamples;
   const state = useRef({ ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: 0, reportedAt: 0, samples: -1, world: new THREE.Matrix4(), projection: new THREE.Matrix4() });
+  const retained = useRef<HTMLCanvasElement | null>(null);
+  const retainFrame = () => {
+    const pt = tracer.current;
+    const current = state.current;
+    if (!frameCaptureRef || !pt || !current.ready || current.failed ||
+      !canRetainPhotorealFrame(pt.samples, performance.now() - current.movedAt, PATH_TRACING.settleMs, PATH_TRACING.minSamples)) return;
+    // Copy only on a reset or explicit mode switch, never every accumulated sample.
+    const snapshot = retained.current ?? document.createElement("canvas");
+    snapshot.width = gl.domElement.width;
+    snapshot.height = gl.domElement.height;
+    try {
+      const context = snapshot.getContext("2d");
+      if (!context) return;
+      context.drawImage(gl.domElement, 0, 0);
+      retained.current = snapshot;
+    } catch { /* A capture failure must never stop live rendering. */ }
+  };
+  useEffect(() => {
+    if (!frameCaptureRef) { retained.current = null; return; }
+    frameCaptureRef.current = () => {
+      retainFrame();
+      try { return retained.current?.toDataURL("image/png") ?? null; } catch { return null; }
+    };
+    return () => { frameCaptureRef.current = null; retained.current = null; };
+  }, [frameCaptureRef, gl]);
 
   useEffect(() => {
     const current = state.current;
@@ -94,6 +120,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       const focusChanged = Math.abs(lastFocus.current.bokeh - renderCamera.bokehSize) > 0.001 ||
         (depthOfField && Math.abs(lastFocus.current.distance - renderCamera.focusDistance) > 0.001);
       if (focusChanged || !matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
+        retainFrame();
         lastFocus.current = { distance: renderCamera.focusDistance, bokeh: renderCamera.bokehSize };
         current.world.copy(camera.matrixWorld);
         current.projection.copy(camera.projectionMatrix);
@@ -108,6 +135,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         scene.updateMatrixWorld(true);
         const revision = tracedSceneRevision(scene);
         if (current.dirty || revision !== current.revision) {
+          retainFrame();
           const hidden: THREE.Object3D[] = [];
           scene.traverse((object) => {
             const drawable = (object as THREE.Mesh).isMesh || (object as THREE.Line).isLine || (object as THREE.Points).isPoints;
@@ -129,6 +157,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         }
       }
       if (current.ready && environment !== current.environment) {
+        retainFrame();
         pt.updateEnvironment(); // rebind lighting/background and reset old samples
         current.environment = environment;
       }
