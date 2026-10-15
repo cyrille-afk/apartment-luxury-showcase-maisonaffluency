@@ -15,7 +15,7 @@ import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
-import { BlendFunction, ToneMappingMode } from "postprocessing";
+import { BlendFunction, ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { createExrEnvironmentTexture } from "@/lib/visualiserExrTexture";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
@@ -254,13 +254,15 @@ const SelectedPieceFocus = ({ selectedId, enabled, target }: { selectedId: strin
 };
 
 const ShowroomEffects = ({ target, strength = 3, depthOfField, hasBackdrop }: { target: THREE.Vector3; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
+  const effect = useRef<DepthOfFieldEffect>(null);
+  useFrame(() => { effect.current?.target?.copy(target); });
   const bokehScale = Math.min(10, Math.max(1, strength));
   return (
     <EffectComposer multisampling={4} enableNormalPass>
       <SSAO blendFunction={BlendFunction.MULTIPLY} samples={16} rings={4} radius={0.12} intensity={hasBackdrop ? 0.7 : 1.15} luminanceInfluence={0.5} bias={0.025} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.4} worldProximityFalloff={0.15} />
       {/* Subtle bloom: only HDR highlights above ~0.9 luminance glow softly. */}
       <Bloom intensity={0.25} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
-      {depthOfField ? <DepthOfField target={target} worldFocusRange={1.2} bokehScale={bokehScale} height={720} /> : <></>}
+      {depthOfField ? <DepthOfField ref={effect} target={target} worldFocusRange={1.2} bokehScale={bokehScale} height={720} /> : <></>}
       {/* Composer disables renderer tone mapping; apply ACES once after the HDR effects. */}
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
