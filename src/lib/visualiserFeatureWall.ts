@@ -1,5 +1,20 @@
 import * as THREE from "three";
 
+export type FeatureWallFinish = "travertine" | "microcement" | "raw-concrete";
+
+export const FEATURE_WALL_FINISHES: Record<FeatureWallFinish, { label: string; roughness: number; bumpScale: number; tint: string }> = {
+  travertine: { label: "Travertine", roughness: 0.88, bumpScale: 0.008, tint: "#ffffff" },
+  microcement: { label: "Microcement", roughness: 0.92, bumpScale: 0.005, tint: "#ffffff" },
+  "raw-concrete": { label: "Raw Concrete", roughness: 0.95, bumpScale: 0.011, tint: "#f6f6f4" },
+};
+
+const FINISH_IDS = Object.keys(FEATURE_WALL_FINISHES) as FeatureWallFinish[];
+
+/** Normalise any stored value; unknown finishes fall back to travertine. */
+export function featureWallFinish(value: unknown): FeatureWallFinish {
+  return FINISH_IDS.includes(value as FeatureWallFinish) ? (value as FeatureWallFinish) : "travertine";
+}
+
 export const FEATURE_WALL = {
   panels: 3, gap: 0.012, thickness: 0.12, height: 4.4,
   minWidth: 9, rearZ: -3.5, clearance: 1.2,
