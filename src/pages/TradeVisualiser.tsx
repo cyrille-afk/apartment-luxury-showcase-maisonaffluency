@@ -1,5 +1,6 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
+import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -1024,6 +1025,8 @@ const TradeVisualiser = () => {
         <div className="visualiser-toolbar-row" role="group" aria-label="Scene actions" tabIndex={0}>
           <Button variant="ghost" className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</Button>
           <span className="h-5 w-px bg-border" />
+          <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onVisibleChange={setShowRug} />
+          <span className="h-5 w-px bg-border" />
           <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</Button>
           <span className="h-5 w-px bg-border" />
           <div className="flex items-center gap-1" aria-label="Object spacing">
@@ -1303,39 +1306,6 @@ const TradeVisualiser = () => {
                   <p className="mt-1 text-[10px] text-muted-foreground">0% is a low flat pile, 100% a deep plush texture. The rug shows when a floor is selected.</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Rug size &amp; position</DropdownMenuLabel>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Rug Width</span>
-                    <span>{rugWidth == null ? "Auto" : `${rugWidth.toFixed(1)} m`}</span>
-                  </div>
-                  <input type="range" min={1} max={8} step={0.1} value={rugWidth ?? 4.5} disabled={floorFinish === "none"} onChange={(e) => setRugWidth(clampRugSize(Number(e.target.value)))} aria-label="Rug width" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Rug Depth</span>
-                    <span>{rugDepth == null ? "Auto" : `${rugDepth.toFixed(1)} m`}</span>
-                  </div>
-                  <input type="range" min={1} max={8} step={0.1} value={rugDepth ?? 3.5} disabled={floorFinish === "none"} onChange={(e) => setRugDepth(clampRugSize(Number(e.target.value)))} aria-label="Rug depth" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Move Left / Right</span>
-                    <span>{`${rugOffsetX > 0 ? "+" : ""}${rugOffsetX.toFixed(1)} m`}</span>
-                  </div>
-                  <input type="range" min={-4} max={4} step={0.1} value={rugOffsetX} disabled={floorFinish === "none"} onChange={(e) => setRugOffsetX(clampRugOffset(Number(e.target.value)))} aria-label="Rug left right position" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
-                  <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                    <span>Move Back / Front</span>
-                    <span>{`${rugOffsetZ > 0 ? "+" : ""}${rugOffsetZ.toFixed(1)} m`}</span>
-                  </div>
-                  <input type="range" min={-4} max={4} step={0.1} value={rugOffsetZ} disabled={floorFinish === "none"} onChange={(e) => setRugOffsetZ(clampRugOffset(Number(e.target.value)))} aria-label="Rug back front position" className="w-full accent-primary" />
-                </div>
-                <div className="px-2 pb-2">
-                  <button type="button" disabled={floorFinish === "none"} onClick={() => { setRugWidth(null); setRugDepth(null); setRugOffsetX(0); setRugOffsetZ(0); }} className="w-full border border-border px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground disabled:opacity-40">Auto-fit rug to furniture</button>
-                  <p className="mt-1 text-[10px] text-muted-foreground">Auto sizes the rug around every piece and centres it; moves are measured from the layout centre.</p>
-                </div>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5" onPointerDown={(e) => e.stopPropagation()}>
                   <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
