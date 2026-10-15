@@ -25,6 +25,9 @@ export function isCurvedFurniturePart(product: string, part: string | null, mesh
 
 const cache = new WeakMap<THREE.BufferGeometry, THREE.BufferGeometry>();
 
+/** One Catmull-Clark level multiplies triangles ×6; larger sources froze the page and exhausted GPU memory. */
+export const MAX_SUBDIVISION_SOURCE_TRIANGLES = 20000;
+
 /** True Catmull-Clark on welded position topology, with separate face-varying UVs. */
 export function subdivideCurvedGeometry(source: THREE.BufferGeometry, module: OpenSubdivModule): THREE.BufferGeometry {
   const cached = cache.get(source);
@@ -32,7 +35,7 @@ export function subdivideCurvedGeometry(source: THREE.BufferGeometry, module: Op
   const position = source.getAttribute("position"), uv = source.getAttribute("uv");
   const count = source.index?.count ?? position?.count ?? 0;
   // Avoid unsupported animated/coloured assets, mixed material boundaries and unbounded expansion.
-  if (!position || count === 0 || count % 3 || count / 3 > 150000 || source.groups.length > 1
+  if (!position || count === 0 || count % 3 || count / 3 > MAX_SUBDIVISION_SOURCE_TRIANGLES || source.groups.length > 1
     || source.getAttribute("skinIndex") || source.getAttribute("color") || Object.keys(source.morphAttributes).length
     || source.userData.visualiserSubdivisionLevel) return source;
   const positions: number[] = [], welded = new Map<string, number>();
