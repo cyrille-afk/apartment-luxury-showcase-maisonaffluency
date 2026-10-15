@@ -212,22 +212,37 @@ const TradeVisualiser = () => {
   const crashHandledRef = useRef(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
   const handleSceneCrash = useCallback(() => {
+    // Stage 0: restore last-good; 1: retry with an empty scene; 2: give up (scene-independent crash).
     if (crashHandledRef.current) return;
-    crashHandledRef.current = true;
+    const stage = crashStageRef.current;
     let outcome: "restored" | "reset" = "reset";
     try { outcome = recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
-    // Reload only when a different, known-good scene was restored. Repeated or
-    // scene-independent crashes (no WebGL, failed chunk) must not loop reloads.
-    // Never reload the page: a reload re-downloads every model and, when the
-    // crash is memory-related, repeats it. Remount only the 3D view instead.
     try { takeRecoveryNotice(); } catch { /* noop */ }
-    if (outcome === "restored") {
+    // Never reload the page: a reload re-downloads every model and, when the
+    // crash is memory-related, repeats it. Remount only the 3D view, with the
+    // restored scene applied to state so the crashing props aren't reused.
+    if (outcome === "restored" && stage === 0) {
+      let restored: SandboxObject[] | null = null;
+      try { restored = readSandbox().objects; } catch { /* fall through to reset */ }
+      if (restored) {
+        crashStageRef.current = 1;
+        setObjects(restored);
+        setSelectedId(null);
+        setCanvasEpoch((n) => n + 1);
+        toast.warning("A display error occurred — the 3D view was restarted with your last working scene.");
+        return;
+      }
+    }
+    if (stage < 2) {
+      crashStageRef.current = 2;
+      setObjects([]);
+      setSelectedId(null);
       setCanvasEpoch((n) => n + 1);
-      window.setTimeout(() => { crashHandledRef.current = false; }, 30000);
-      toast.warning("A display error occurred — the 3D view was restarted without reloading the page.");
+      toast.warning("The scene kept crashing the 3D view, so it was cleared. A backup of it was kept.");
       return;
     }
-    toast.error("The 3D view couldn't start in this browser. Your scene is kept — reload the page to try again.");
+    crashHandledRef.current = true;
+    toast.error("The 3D view couldn't start in this browser. Reload the page to try again.");
   }, []);
   useEffect(() => {
     const notice = takeRecoveryNotice();
