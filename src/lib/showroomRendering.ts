@@ -3,8 +3,11 @@ import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.j
 
 /** Shared scene-lighting tokens, kept separate from catalogue finishes. */
 export const SHOWROOM = {
-  // Vertical FOV of a full-frame 24mm-high sensor with a 50mm lens.
-  cameraFov: THREE.MathUtils.radToDeg(2 * Math.atan(24 / (2 * 50))),
+  // Architectural two-point perspective: level camera, horizontal orbit only.
+  cameraFov: 35,
+  cameraPosition: [0, 1.8, 20] as [number, number, number],
+  cameraTarget: [0, 1.8, 0] as [number, number, number],
+  cameraPolarAngle: Math.PI / 2,
   contactOpacity: 0.72,
   aoIntensity: 1.28,
   exposure: 1,
