@@ -389,7 +389,7 @@ const VisualiserCanvas = ({
       maxDistance={24}
       minPolarAngle={0.12}
       maxPolarAngle={Math.PI / 2.2}
-      target={[0, 0.5, 0]}
+      target={[0, 1.8, 0]}
     />
 
     {/* Soft ambient lifts deep shadows under base frames. */}
