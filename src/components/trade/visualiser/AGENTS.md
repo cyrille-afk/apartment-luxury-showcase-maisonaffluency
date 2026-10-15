@@ -18,3 +18,4 @@
 - Visualiser render crashes are caught by SceneErrorBoundary and restore the last scene that rendered cleanly for 4s (visualiserSceneRecovery); a repeat crash within 30s resets to empty — prevents a crash loop.
 - Shared comparisons reuse playback paths to avoid drift; preset switches blend poses and retain playback state.
 - Advanced visualiser controls share visualiserAdvancedRendering mappings and persist with scenes/presets; one Light multiplier scales key/environment and tightens bias, and joins raster/path-trace invalidation signatures so edits update both renderers. Hosted EXR pointers use the same environment loader in both modes.
+- Depth of field shares a live world-space furniture bounding-box target, excluding gizmos/labels; raster uses postprocessing and photoreal uses a PhysicalCamera, with focus-change-only accumulation resets so composers never overwrite traced output.

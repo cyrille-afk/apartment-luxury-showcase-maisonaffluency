@@ -1458,9 +1458,9 @@ const TradeVisualiser = () => {
             )}
             <Button variant="ghost"
               className={cn(toolbarButton, depthOfField ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => setDepthOfField((value) => !value)}
+              onClick={() => { if (!depthOfField) setDofFocusSelected(true); setDepthOfField((value) => !value); }}
               aria-pressed={depthOfField}
-              title="Blur the background — focuses on the selected piece, or the centre of the view"
+              title="Photographic focus on the selected piece, with gentle foreground and background blur"
             >
               [ &#9673; Depth of Field: {depthOfField ? "On" : "Off"} ]
             </Button>
