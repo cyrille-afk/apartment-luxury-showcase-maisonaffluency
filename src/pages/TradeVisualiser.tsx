@@ -1,6 +1,7 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
+import { clampRugRotation } from "@/lib/visualiserRugRotation";
 import MarbleSurfaceControls from "@/components/trade/visualiser/MarbleSurfaceControls";
 import { isCoffeeTable } from "@/lib/visualiserMarbleSettings";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
@@ -116,6 +117,7 @@ type PersistedSandbox = CeilingSettings & {
   rugDepth?: number | null;
   rugOffsetX?: number;
   rugOffsetZ?: number;
+  rugRotation?: number;
   /** Hide the rug while arranging furniture (default shown). */
   showRug?: boolean;
   /** Seamless studio stage colour (hex) when no room photo is loaded. */
@@ -173,6 +175,7 @@ const readSandbox = (): PersistedSandbox => {
       rugDepth: clampRugSize(parsed.rugDepth),
       rugOffsetX: clampRugOffset(parsed.rugOffsetX),
       rugOffsetZ: clampRugOffset(parsed.rugOffsetZ),
+      rugRotation: clampRugRotation(parsed.rugRotation),
       showRug: rugVisible(parsed.showRug),
       backdropColor: normalizeHexColor(parsed.backdropColor) ?? null,
       backdropBrightness: clampBackdropBrightness(parsed.backdropBrightness),
@@ -270,10 +273,11 @@ const TradeVisualiser = () => {
   const [rugDepth, setRugDepth] = useState<number | null>(clampRugSize(initial.rugDepth));
   const [rugOffsetX, setRugOffsetX] = useState<number>(clampRugOffset(initial.rugOffsetX));
   const [rugOffsetZ, setRugOffsetZ] = useState<number>(clampRugOffset(initial.rugOffsetZ));
+  const [rugRotation, setRugRotation] = useState(() => clampRugRotation(initial.rugRotation));
   const [showRug, setShowRug] = useState<boolean>(rugVisible(initial.showRug));
   const [backdropColor, setBackdropColor] = useState<string | null>(normalizeHexColor(initial.backdropColor) ?? null);
   const [backdropBrightness, setBackdropBrightness] = useState<number>(clampBackdropBrightness(initial.backdropBrightness));
-  const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ]);
+  const rugLayout = useMemo(() => ({ width: rugWidth, depth: rugDepth, offsetX: rugOffsetX, offsetZ: rugOffsetZ, rotation: rugRotation }), [rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation]);
   const [customHexDraft, setCustomHexDraft] = useState<string>(normalizeHexColor(initial.wallCustomHex) ?? "#f4efe7");
   const applyCustomHex = (raw: string) => {
     setCustomHexDraft(raw);
@@ -418,7 +422,7 @@ const TradeVisualiser = () => {
         rugBorderRoughness,
         rugWeave: rugWeaveKey,
         rugPile,
-        rugWidth, rugDepth, rugOffsetX, rugOffsetZ,
+        rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation,
         showRug,
         backdropColor,
         backdropBrightness,
@@ -434,7 +438,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -1027,7 +1031,7 @@ const TradeVisualiser = () => {
         <div className="visualiser-toolbar-row" role="group" aria-label="Scene actions" tabIndex={0}>
           <Button variant="ghost" className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</Button>
           <span className="h-5 w-px bg-border" />
-          <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onVisibleChange={setShowRug} />
+          <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} rotation={rugRotation} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onRotationChange={setRugRotation} onVisibleChange={setShowRug} />
           <MarbleSurfaceControls className={toolbarButton} tables={objects.filter((object) => Boolean(object.glb_url) && isCoffeeTable(object.product_name))} selectedId={selectedId} onSelect={setSelectedId} onChange={(id, marbleSurface) => setObjects((current) => current.map((object) => object.instanceId === id ? { ...object, marbleSurface } : object))} />
           <span className="h-5 w-px bg-border" />
           <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</Button>
@@ -1072,7 +1076,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -1111,6 +1115,7 @@ const TradeVisualiser = () => {
               setRugDepth(clampRugSize(data.rugDepth));
               setRugOffsetX(clampRugOffset(data.rugOffsetX));
               setRugOffsetZ(clampRugOffset(data.rugOffsetZ));
+              setRugRotation(clampRugRotation(data.rugRotation));
               setShowRug(rugVisible(data.showRug));
               setBackdropColor(normalizeHexColor(data.backdropColor) ?? null);
               setBackdropBrightness(clampBackdropBrightness(data.backdropBrightness));

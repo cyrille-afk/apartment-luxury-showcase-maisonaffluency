@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { clampRugOffset, clampRugSize } from "@/lib/visualiserRoomSurfaces";
+import { clampRugRotation } from "@/lib/visualiserRugRotation";
 
 type Props = {
   className?: string;
@@ -11,12 +12,14 @@ type Props = {
   depth: number | null;
   offsetX: number;
   offsetZ: number;
+  rotation: number;
   visible: boolean;
   disabled: boolean;
   onWidthChange: (value: number | null) => void;
   onDepthChange: (value: number | null) => void;
   onOffsetXChange: (value: number) => void;
   onOffsetZChange: (value: number) => void;
+  onRotationChange: (value: number) => void;
   onVisibleChange: (value: boolean) => void;
 };
 
@@ -38,6 +41,10 @@ export default function RugLayoutControls(props: Props) {
         <div className="flex items-center justify-between text-xs"><span>{control.label}</span><output className="tabular-nums text-muted-foreground">{control.display}</output></div>
         <Slider thumbLabel={control.aria} min={control.min} max={control.max} step={0.1} value={[control.value]} disabled={inactive} onValueChange={([value]) => { if (value !== undefined) control.change(value); }} />
       </div>)}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs"><span>Rotation</span><output className="tabular-nums text-muted-foreground">{Math.round(props.rotation)}°</output></div>
+        <Slider thumbLabel="Rug rotation" min={0} max={360} step={1} value={[props.rotation]} disabled={inactive} onValueChange={([value]) => { if (value !== undefined) props.onRotationChange(clampRugRotation(value)); }} />
+      </div>
       <div className="flex gap-2 border-t border-border pt-3">
         <Button variant="outline" size="sm" className="flex-1 text-xs" disabled={inactive} onClick={() => { props.onWidthChange(null); props.onDepthChange(null); props.onOffsetXChange(0); props.onOffsetZChange(0); }}><RotateCcw className="mr-1.5 h-3.5 w-3.5" />Auto-fit</Button>
         <Button variant="outline" size="sm" className="flex-1 text-xs" disabled={inactive} onClick={() => { props.onOffsetXChange(0); props.onOffsetZChange(0); }}><Move className="mr-1.5 h-3.5 w-3.5" />Centre</Button>
