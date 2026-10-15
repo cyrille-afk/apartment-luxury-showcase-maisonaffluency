@@ -1,3 +1,4 @@
+- [ ] Selectively subdivide curved furniture once with Catmull-Clark; preserve finishes and structural parts, verify tests and loaded models.
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
 - [x] Reduce floor halo: lower environment lighting, oak roughness 0.4–0.6 with normalized map, neutral ACES exposure; 22 tests pass, build clean, signed-in furnished before/after confirms restored floor detail (real-GPU photoreal unverified).
 - [x] Verify floor/furniture PBR roughness maps and smooth curved GLTF shading without changing the layout; 20 tests pass, build clean, signed-in Frenchmen Street chair renders on oak floor (real-GPU photoreal quality unverified).
