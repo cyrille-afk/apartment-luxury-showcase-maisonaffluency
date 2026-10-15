@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { WebGLPathTracer } from "three-gpu-pathtracer";
+import { WebGLPathTracer, PhysicalCamera } from "three-gpu-pathtracer";
+import { photographicBokeh, photographicFocusDistance } from "@/lib/visualiserDepthOfField";
 import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 
@@ -11,9 +12,11 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
-const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality }) => {
+const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3 }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
+  const physicalCamera = useRef(new PhysicalCamera());
+  const lastFocus = useRef({ distance: -1, bokeh: -1 });
   const report = useRef(onSamples);
   report.current = onSamples;
   const state = useRef({ ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: 0, reportedAt: 0, samples: -1, world: new THREE.Matrix4(), projection: new THREE.Matrix4() });
@@ -83,7 +86,15 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }:
       // Detect real camera motion with a tolerance: float jitter from controls/resize
       // must not reset accumulation every frame (that froze the image at sample 1).
       camera.updateMatrixWorld();
-      if (!matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
+      const renderCamera = physicalCamera.current;
+      // Copy the view without PhysicalCamera.copy reading absent lens properties.
+      THREE.PerspectiveCamera.prototype.copy.call(renderCamera, camera, false);
+      renderCamera.bokehSize = photographicBokeh(depthOfField, dofStrength);
+      renderCamera.focusDistance = photographicFocusDistance(camera, focusTarget);
+      const focusChanged = Math.abs(lastFocus.current.bokeh - renderCamera.bokehSize) > 0.001 ||
+        (depthOfField && Math.abs(lastFocus.current.distance - renderCamera.focusDistance) > 0.001);
+      if (focusChanged || !matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
+        lastFocus.current = { distance: renderCamera.focusDistance, bokeh: renderCamera.bokehSize };
         current.world.copy(camera.matrixWorld);
         current.projection.copy(camera.projectionMatrix);
         current.movedAt = now;
@@ -104,7 +115,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY }:
             }
           });
           try {
-            pt.setScene(scene, camera);
+            pt.setScene(scene, renderCamera);
           } finally {
             hidden.forEach((object) => { object.visible = true; });
           }

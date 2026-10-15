@@ -5,8 +5,9 @@ import emptyRoomAsset from "@/assets/small-empty-room.exr.asset.json";
 import type { CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { RUG_TOP_Y } from "./RoomSurfaces";
 import type { RugBorderColor, RugColor, RugWeave } from "@/lib/visualiserRoomSurfaces";
-import { Suspense, useEffect, useState } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useState, useRef } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { selectedObjectFocus } from "@/lib/visualiserDepthOfField";
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import type { FinishPart } from "@/lib/visualiserFinishTargets";
 import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/SceneObject";
@@ -241,16 +242,25 @@ interface VisualiserCanvasProps {
   backdropBrightness?: number;
 }
 
-const ShowroomEffects = ({ focus, strength = 3, depthOfField, hasBackdrop }: { focus: [number, number, number] | null; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
-  const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
-  const target = focus ? new THREE.Vector3(...focus) : controls?.target?.clone() ?? new THREE.Vector3(0, 0.5, 0);
+const SelectedPieceFocus = ({ selectedId, enabled, target }: { selectedId: string | null; enabled: boolean; target: THREE.Vector3 }) => {
+  useFrame(({ scene, controls }) => {
+    const orbit = controls as unknown as { target?: THREE.Vector3 } | null;
+    if (!enabled || !selectedObjectFocus(scene, selectedId, target)) {
+      if (orbit?.target) target.copy(orbit.target);
+      else target.set(0, 0.5, 0);
+    }
+  }, -1);
+  return null;
+};
+
+const ShowroomEffects = ({ target, strength = 3, depthOfField, hasBackdrop }: { target: THREE.Vector3; strength?: number; depthOfField: boolean; hasBackdrop: boolean }) => {
   const bokehScale = Math.min(10, Math.max(1, strength));
   return (
     <EffectComposer multisampling={4} enableNormalPass>
       <SSAO blendFunction={BlendFunction.MULTIPLY} samples={16} rings={4} radius={0.12} intensity={hasBackdrop ? 0.7 : 1.15} luminanceInfluence={0.5} bias={0.025} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.4} worldProximityFalloff={0.15} />
       {/* Subtle bloom: only HDR highlights above ~0.9 luminance glow softly. */}
       <Bloom intensity={0.25} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
-      {depthOfField ? <DepthOfField target={target} focalLength={0.03} bokehScale={bokehScale} height={720} /> : <></>}
+      {depthOfField ? <DepthOfField target={target} worldFocusRange={1.2} bokehScale={bokehScale} height={720} /> : <></>}
       {/* Composer disables renderer tone mapping; apply ACES once after the HDR effects. */}
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
@@ -305,6 +315,7 @@ const VisualiserCanvas = ({
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
+  const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
   return (
   <Canvas
     shadows={{ type: THREE.PCFShadowMap }}
@@ -339,6 +350,7 @@ const VisualiserCanvas = ({
         .join("|")}`}
     />
     {focusRef && <FloorFocusReporter focusRef={focusRef} />}
+    <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} />
     <PerspectiveCamera makeDefault fov={45} position={[0, 3.4, 9.5]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
@@ -459,6 +471,9 @@ const VisualiserCanvas = ({
       <PathTracerLayer
         onSamples={onPathTraceSamples}
         quality={pathTraceQuality}
+        depthOfField={depthOfField}
+        focusTarget={dofTarget.current}
+        dofStrength={dofStrength}
         signature={`${JSON.stringify(advancedRendering)}|light:${lighting.lightScale}|${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
           .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}`)
           .join("|")}`}
@@ -468,11 +483,7 @@ const VisualiserCanvas = ({
         depthOfField={depthOfField}
         hasBackdrop={hasBackdrop}
         strength={dofStrength}
-        focus={(() => {
-          if (!dofFocusSelected) return null;
-          const sel = objects.find((o) => o.instanceId === selectedId);
-          return sel?.position ? [sel.position[0], 0.4, sel.position[2]] : null;
-        })()}
+        target={dofTarget.current}
       />}
   </Canvas>
   );

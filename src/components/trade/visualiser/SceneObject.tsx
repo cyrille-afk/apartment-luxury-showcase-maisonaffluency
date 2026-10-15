@@ -587,6 +587,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
         setGroupNode(node);
       }}
       position={[object.position[0], FLOOR_Y, object.position[2]]}
+      userData={{ visualiserInstanceId: object.instanceId }}
       rotation={object.rotation}
       scale={scaleVector ?? object.scale}
       onPointerDown={handlePointerDown}
