@@ -1,5 +1,12 @@
 import * as THREE from "three";
 
+/** Slab mapping is independent of polish: Pall Stone must not keep tiled supplier UVs. */
+export function isStoneSlabFinish(name: string): boolean {
+  return /\b(marble|stone|travertine|onyx)\b/i.test(name.replace(/[_-]/g, " "));
+}
+
+const isSlabMaterial = (material: THREE.Material) => material.userData.visualiserPolishedMarble || material.userData.visualiserStoneSlab;
+
 /** Bake one Y-axis planar projection across the entire slab for both renderers. */
 export function marblePlanarGeometry(
   source: THREE.BufferGeometry,
@@ -25,7 +32,7 @@ export function marblePlanarGeometry(
     uv[i * 2 + 1] = THREE.MathUtils.clamp((point.z - bounds.min.z) / depth, 0, 1);
   }
   geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
-  // Supplier tangents belong to the old UV layout, not the new box projection.
+  // Supplier tangents belong to the old UV layout, not the new planar projection.
   geometry.deleteAttribute("tangent");
   geometry.userData.visualiserOwnedGeometry = true;
   geometry.userData.visualiserMarbleProjection = "planar-y";
@@ -62,7 +69,7 @@ export function applyCoffeeTableMarbleProjection(root: THREE.Object3D, productNa
     const role = mesh.userData.partRole;
     if (["base", "frame", "upholstery", "backrest"].includes(role)) return;
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    if (!materials.some((m) => m.userData.visualiserPolishedMarble)) return;
+    if (!materials.some(isSlabMaterial)) return;
     meshes.push(mesh);
     mesh.geometry.computeBoundingBox();
     if (mesh.geometry.boundingBox) bounds.union(mesh.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld)));
@@ -73,7 +80,7 @@ export function applyCoffeeTableMarbleProjection(root: THREE.Object3D, productNa
     if (previous.userData.visualiserOwnedGeometry || previous.userData.visualiserUvFallback) previous.dispose();
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const entry of materials) {
-      if (!(entry instanceof THREE.MeshStandardMaterial) || !entry.userData.visualiserPolishedMarble) continue;
+      if (!(entry instanceof THREE.MeshStandardMaterial) || !isSlabMaterial(entry)) continue;
       for (const key of MAP_KEYS) {
         const texture = entry[key];
         if (texture) entry[key] = marbleSlabTexture(texture);

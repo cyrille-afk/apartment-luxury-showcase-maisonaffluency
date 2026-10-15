@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { applyCoffeeTableMarbleProjection, marblePlanarGeometry, marbleSlabTexture } from "./visualiserMarbleProjection";
+import { applyCoffeeTableMarbleProjection, isStoneSlabFinish, marblePlanarGeometry, marbleSlabTexture } from "./visualiserMarbleProjection";
 import { applyPolishedMarble } from "./showroomRendering";
 
 describe("marble slab Y-axis planar projection", () => {
@@ -8,7 +8,7 @@ describe("marble slab Y-axis planar projection", () => {
     const source = new THREE.BoxGeometry(4, 0.2, 2, 4, 1, 4).toNonIndexed();
     const original = source.getAttribute("uv").array.slice();
     const geometry = marblePlanarGeometry(source);
-    const p = geometry.getAttribute("position"), n = geometry.getAttribute("normal"), uv = geometry.getAttribute("uv");
+    const p = geometry.getAttribute("position"), uv = geometry.getAttribute("uv");
     for (let i = 0; i < p.count; i++) {
       expect(uv.getX(i)).toBeGreaterThanOrEqual(0);
       expect(uv.getX(i)).toBeLessThanOrEqual(1);
@@ -88,5 +88,20 @@ describe("marble slab Y-axis planar projection", () => {
     const source = mesh.geometry;
     applyCoffeeTableMarbleProjection(root, "Dining Table");
     expect(mesh.geometry).toBe(source);
+  });
+  it("projects Pall Stone without changing its authored roughness or polishing other finishes", () => {
+    expect(isStoneSlabFinish("Pall Stone")).toBe(true);
+    expect(isStoneSlabFinish("Natural Walnut")).toBe(false);
+    const material = new THREE.MeshStandardMaterial({ map: new THREE.Texture(), roughness: 1 });
+    material.map?.repeat.set(2, 2);
+    material.userData.visualiserStoneSlab = isStoneSlabFinish("Pall Stone");
+    const top = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 2), material);
+    top.userData.partRole = "top";
+    const root = new THREE.Group(); root.add(top);
+    applyCoffeeTableMarbleProjection(root, "Praia da Granja Coffee Table");
+    expect(top.geometry.userData.visualiserMarbleProjection).toBe("planar-y");
+    expect(material.map?.repeat.toArray()).toEqual([1, 1]);
+    expect(material.map?.wrapS).toBe(THREE.ClampToEdgeWrapping);
+    expect(material.roughness).toBe(1);
   });
 });
