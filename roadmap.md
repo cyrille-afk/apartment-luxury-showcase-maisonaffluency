@@ -25,3 +25,4 @@
 - [x] Isolate recessed-ceiling geometry failures; fix EXR texture creation and environment rotation; 14 tests pass, furniture/floor/rug survive real EXR upload, reload and lighting switches without canvas errors.
 - [x] Upgrade existing GPU path tracing with quarter-resolution motion preview, unlimited stationary accumulation, and asynchronous furniture/HDRI refresh; 17 tests pass, build clean, signed-in real-chair rendering, camera orbit/refinement and mode-off verified (software GPU; final noise-free convergence not verified).
 - [x] Custom marble presets: save current reflectivity/roughness as named presets (localStorage trade-visualiser-marble-presets-v1, max 12, delete chips); verified live
+- [x] Wall control tooltip: explains the finish switch and why a loaded room photo disables it; disabled trigger wrapped in a focusable span so the note still shows on hover/keyboard; verified live in both states, no page errors.
