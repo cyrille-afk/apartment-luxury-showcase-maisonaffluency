@@ -4,6 +4,7 @@ import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
 import { clampRugRotation } from "@/lib/visualiserRugRotation";
 import MarbleSurfaceControls from "@/components/trade/visualiser/MarbleSurfaceControls";
 import { isCoffeeTable } from "@/lib/visualiserMarbleSettings";
+import { architecturalDofSettings } from "@/lib/visualiserDepthOfField";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -93,6 +94,7 @@ type PersistedSandbox = CeilingSettings & {
   showGrid?: boolean;
   showLabels?: boolean;
   depthOfField?: boolean;
+  dofRenderVersion?: number;
   dofStrength?: number;
   dofFocusSelected?: boolean;
   environmentSource?: EnvironmentSourcePref;
@@ -148,8 +150,7 @@ const readSandbox = (): PersistedSandbox => {
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
       showLabels: parsed.showLabels !== false,
-      depthOfField: parsed.depthOfField === true,
-      dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
+      ...architecturalDofSettings(parsed),
       dofFocusSelected: parsed.dofFocusSelected !== false,
       environmentSource: environmentSourcePref(parsed.environmentSource),
       advancedRendering: clampAdvancedRendering(parsed.advancedRendering),
@@ -251,8 +252,8 @@ const TradeVisualiser = () => {
     try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify(next)); } catch { /* storage full */ }
     return next;
   });
-  const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? false);
-  const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
+  const [depthOfField, setDepthOfField] = useState<boolean>(initial.depthOfField ?? true);
+  const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 1);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
   const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
   const [advancedRendering, setAdvancedRendering] = useState(() => clampAdvancedRendering(initial.advancedRendering));
@@ -407,6 +408,7 @@ const TradeVisualiser = () => {
         showGrid,
         showLabels,
         depthOfField,
+        dofRenderVersion: 1,
         dofStrength,
         dofFocusSelected,
         environmentSource,
