@@ -190,7 +190,8 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
       }
       // Authentic-looking high-resolution yarn detail; the procedural weave
       // remains the adjustable micro-relief, never a strong painted shadow.
-      cctx.drawImage(source.image, 0, 0, size, size);
+      const image = source.image;
+      if (image instanceof HTMLImageElement) cctx.drawImage(image, 0, 0, size, size);
       const fibers = cctx.getImageData(0, 0, size, size);
       for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
         const i = (y * size + x) * 4;
