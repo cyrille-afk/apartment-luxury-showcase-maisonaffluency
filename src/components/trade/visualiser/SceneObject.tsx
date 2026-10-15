@@ -14,6 +14,7 @@ import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type Foo
 import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
 import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry } from "@/lib/visualiserSubdivision";
 import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
+import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps } from "@/lib/visualiserMarbleProjection";
 
 export type PlacedObject = {
   instanceId: string;
@@ -348,6 +349,7 @@ function useFittedModel(object: PlacedObject) {
       const next = source.map((entry) => clonePbrMaterial(entry, finish, m, neutralFabric));
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
+    applyCoffeeTableMarbleProjection(clone, object.product_name);
     return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
   }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation, subdivision]);
 }
@@ -401,7 +403,10 @@ const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts 
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       if (mesh.geometry.userData.visualiserOwnedGeometry || mesh.geometry.userData.visualiserUvFallback) mesh.geometry.dispose();
       materials.forEach((entry) => {
-        if (entry?.userData?.visualiserClone) entry.dispose();
+        if (entry?.userData?.visualiserClone) {
+          disposeMarbleSlabMaps(entry);
+          entry.dispose();
+        }
       });
     });
   }, [model]);
