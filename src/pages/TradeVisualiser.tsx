@@ -1401,7 +1401,8 @@ const TradeVisualiser = () => {
               aria-pressed={pathTrace}
               title="Offline-quality path tracing: real light bounces and reflections, refining while the camera is still"
             >
-              [ &#10022; Photoreal Render: {pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"} ]
+              {/* Fixed-width counter: growing digits must never reflow the toolbar and resize the canvas (a resize restarts accumulation). */}
+              [ &#10022; Photoreal Render: <span className="inline-block min-w-[11ch] text-left tabular-nums">{pathTrace ? `On · ${ptSamples}${ptQuality.maxSamples ? `/${ptQuality.maxSamples}` : ""} spp` : "Off"}</span> ]
             </Button>
             <Button variant="ghost" className={cn(toolbarButton, !keepPhotorealGhost && "opacity-60")}
               aria-label="Keep photoreal ghost" aria-pressed={keepPhotorealGhost}
