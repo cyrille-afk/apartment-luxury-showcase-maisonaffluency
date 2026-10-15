@@ -25,6 +25,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
+import ArchitecturalDownlights from "./ArchitecturalDownlights";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
@@ -281,7 +282,8 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
   const bokehScale = Math.min(10, Math.max(1, strength));
   return (
     <EffectComposer multisampling={4} enableNormalPass>
-      <SSAO blendFunction={BlendFunction.MULTIPLY} samples={16} rings={4} radius={0.12} intensity={hasBackdrop ? 0.7 : SHOWROOM.aoIntensity} luminanceInfluence={0.5} bias={0.025} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.4} worldProximityFalloff={0.15} />
+      {/* Contact SSAO: tight radius + low bias darkens the crevices where legs/rug meet the floor. */}
+      <SSAO blendFunction={BlendFunction.MULTIPLY} samples={24} rings={5} radius={0.07} intensity={hasBackdrop ? 0.9 : SHOWROOM.aoIntensity * 1.6} luminanceInfluence={0.35} bias={0.012} worldDistanceThreshold={30} worldDistanceFalloff={10} worldProximityThreshold={0.25} worldProximityFalloff={0.08} />
       {/* Subtle bloom: only HDR highlights above ~0.9 luminance glow softly. */}
       <Bloom intensity={0.25} luminanceThreshold={0.9} luminanceSmoothing={0.2} mipmapBlur />
       {depthOfField ? <DepthOfField ref={effect} target={target} worldFocusRange={DEFAULT_ARCHITECTURAL_DOF.focusRange} bokehScale={bokehScale} height={720} /> : <></>}
@@ -392,9 +394,8 @@ const VisualiserCanvas = ({
       target={[0, 1.8, 0]}
     />
 
-    {/* Soft ambient lifts deep shadows under base frames. */}
-    <ambientLight intensity={lighting.ambientIntensity} />
-    <rectAreaLight position={[-5, 6, 5]} rotation={[-Math.PI / 4, -Math.PI / 4, 0]} width={6} height={4} intensity={3 * lighting.lightScale} color={SHOWROOM.key} />
+    {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
+    {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
       position={[-6, 9, 6]}
@@ -408,8 +409,8 @@ const VisualiserCanvas = ({
       shadow-camera-right={12}
       shadow-camera-top={12}
       shadow-camera-bottom={-12}
-      shadow-bias={lighting.shadowBias}
-      shadow-normalBias={lighting.shadowNormalBias}
+      shadow-bias={lighting.shadowBias * 0.4}
+      shadow-normalBias={lighting.shadowNormalBias * 0.4}
       shadow-radius={lighting.shadowRadius}
     />
     {/* Fill: opposite side, low and cool. */}
