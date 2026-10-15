@@ -380,18 +380,19 @@ const VisualiserCanvas = ({
     />
     {focusRef && <FloorFocusReporter focusRef={focusRef} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
-    {/* Dolly back with the narrower lens to retain the arrangement's original framing. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={[0, 5.5, 16.4]} near={0.1} far={200} />
+    {/* A level, dollied-back camera preserves parallel architectural verticals. */}
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
       enablePan
+      screenSpacePanning
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={0.12}
-      maxPolarAngle={Math.PI / 2.2}
-      target={[0, 1.8, 0]}
+      minPolarAngle={SHOWROOM.cameraPolarAngle}
+      maxPolarAngle={SHOWROOM.cameraPolarAngle}
+      target={SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}

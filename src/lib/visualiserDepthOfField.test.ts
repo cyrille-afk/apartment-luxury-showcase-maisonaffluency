@@ -4,10 +4,28 @@ import { architecturalDofSettings, foregroundFurnitureFocus, photographicBokeh, 
 import { SHOWROOM } from "./showroomRendering";
 
 describe("selected furniture depth of field", () => {
-  it("uses a full-frame 50mm lens with slightly stronger grounding", () => {
-    expect(SHOWROOM.cameraFov).toBeCloseTo(26.9915, 4);
+  it("uses the requested 35 degree architectural lens with slightly stronger grounding", () => {
+    expect(SHOWROOM.cameraFov).toBe(35);
     expect(SHOWROOM.contactOpacity).toBe(0.72);
     expect(SHOWROOM.aoIntensity).toBe(1.28);
+  });
+  it("dollies back and keeps projected verticals upright through horizontal orbit and pan", () => {
+    expect(SHOWROOM.cameraPosition[2]).toBeGreaterThan(16.4);
+    expect(SHOWROOM.cameraPosition[1]).toBe(SHOWROOM.cameraTarget[1]);
+    expect(SHOWROOM.cameraPolarAngle).toBe(Math.PI / 2);
+    const camera = new THREE.PerspectiveCamera(SHOWROOM.cameraFov, 1.6, 0.1, 200);
+    const target = new THREE.Vector3(...SHOWROOM.cameraTarget);
+    for (const yaw of [0, 0.6, -0.9, Math.PI]) {
+      for (const panY of [0, 2, -1]) {
+        camera.position.set(Math.sin(yaw) * 20, target.y + panY, Math.cos(yaw) * 20);
+        camera.lookAt(target.clone().add(new THREE.Vector3(0, panY, 0)));
+        camera.updateMatrixWorld();
+        const bottom = new THREE.Vector3(2, 0, -4).project(camera);
+        const top = new THREE.Vector3(2, 7.6, -4).project(camera);
+        expect(top.x).toBeCloseTo(bottom.x, 10);
+        expect(top.y).toBeGreaterThan(bottom.y);
+      }
+    }
   });
   it("adopts subtle DoF once and retains later explicit OFF choices", () => {
     expect(architecturalDofSettings({ depthOfField: false, dofStrength: 3 })).toEqual({ depthOfField: true, dofStrength: 1 });
