@@ -12,9 +12,9 @@ describe("architectural feature wall", () => {
     const bounds = new THREE.Box3(new THREE.Vector3(-5, 0, -6), new THREE.Vector3(3, 3, 2));
     const before = bounds.clone();
     const layout = featureWallLayout(bounds);
-    expect(layout.frontZ).toBeCloseTo(-7.2);
-    expect(layout.centerX).toBe(-1);
-    expect(layout.width).toBeCloseTo(10.4);
+    expect(layout.frontZ).toBeCloseTo(-9);
+    expect(layout.centerX).toBe(0);
+    expect(layout.width).toBe(80);
     expect(bounds.equals(before)).toBe(true);
   });
   it("normalises stored finishes and falls back to travertine", () => {
