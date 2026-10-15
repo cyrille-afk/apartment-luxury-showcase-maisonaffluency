@@ -24,6 +24,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
+import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
@@ -192,6 +193,8 @@ interface VisualiserCanvasProps {
   selectedId: string | null;
   orbitEnabled: boolean;
   hasBackdrop: boolean;
+  /** Surface of the three-slab architectural backdrop wall (default travertine). */
+  featureWallFinish?: FeatureWallFinish;
   onSelect: (id: string | null) => void;
   onTransform: (instanceId: string, position: [number, number, number], rotation: [number, number, number]) => void;
   onDragStateChange: (dragging: boolean) => void;
@@ -296,6 +299,7 @@ const VisualiserCanvas = ({
   selectedId,
   orbitEnabled,
   hasBackdrop,
+  featureWallFinish = "travertine",
   onSelect,
   onTransform,
   onDragStateChange,
@@ -361,7 +365,7 @@ const VisualiserCanvas = ({
     onPointerMissed={() => onSelect(null)}
   >
     <RenderOnDemand
-      signature={`lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -416,7 +420,7 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} />
 
     <Suspense fallback={null}>
-      {!hasBackdrop && <ArchitecturalFeatureWall />}
+      {!hasBackdrop && <ArchitecturalFeatureWall finish={featureWallFinish} />}
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
     </Suspense>
     {!pathTrace && !hasBackdrop && floorFinish === "none" && (
