@@ -6,7 +6,16 @@ export const PATH_TRACING = {
   settleMs: 150,
   minSamples: 1,
   fadeMs: 0,
+  /** Interior GI bounces; beyond ~5 the enclosed room adds cost, not visible light. */
+  bounces: 5,
+  transmissiveBounces: 6,
+  /** Traced pixel density cap; accumulated jittered samples are already antialiased. */
+  maxTracePixelRatio: 1.5,
 } as const;
+
+/** Tracer render scale for a canvas DPR: the live view keeps full DPR, tracing caps at 1.5×. */
+export const tracedRenderScale = (renderScale: number, pixelRatio: number) =>
+  renderScale * Math.min(1, PATH_TRACING.maxTracePixelRatio / Math.max(1, pixelRatio || 1));
 
 export interface PathTraceQuality {
   /** Resolution fraction while the camera moves (0.1–1). */

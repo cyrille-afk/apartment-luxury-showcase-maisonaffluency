@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WebGLPathTracer, PhysicalCamera } from "three-gpu-pathtracer";
 import { photographicBokeh, photographicFocusDistance } from "@/lib/visualiserDepthOfField";
-import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
+import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedRenderScale, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 
@@ -57,15 +57,15 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
     let pt: WebGLPathTracer | null = null;
     try {
       pt = new WebGLPathTracer(gl);
-      pt.bounces = 10;
-      pt.transmissiveBounces = 10;
+      pt.bounces = PATH_TRACING.bounces;
+      pt.transmissiveBounces = PATH_TRACING.transmissiveBounces;
       // No biased glossy blur: preserve authored reflections/refraction.
       pt.filterGlossyFactor = 0;
       pt.multipleImportanceSampling = true;
       pt.tiles.set(2, 2);
       pt.dynamicLowRes = true;
       pt.lowResScale = PATH_TRACING.movingScale;
-      pt.renderScale = PATH_TRACING.settledScale;
+      pt.renderScale = tracedRenderScale(PATH_TRACING.settledScale, gl.getPixelRatio());
       pt.renderDelay = 0;
       pt.minSamples = PATH_TRACING.minSamples;
       pt.fadeDuration = PATH_TRACING.fadeMs;
@@ -88,12 +88,13 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
     const pt = tracer.current;
     if (!pt) return;
     pt.lowResScale = quality.previewScale;
-    if (pt.renderScale !== quality.renderScale) {
-      pt.renderScale = quality.renderScale;
+    const renderScale = tracedRenderScale(quality.renderScale, gl.getPixelRatio());
+    if (pt.renderScale !== renderScale) {
+      pt.renderScale = renderScale;
       state.current.dirty = true; // resolution change requires a fresh accumulation
     }
     invalidate();
-  }, [quality.previewScale, quality.renderScale, quality.maxSamples, invalidate]);
+  }, [gl, quality.previewScale, quality.renderScale, quality.maxSamples, invalidate]);
 
   useEffect(() => {
     state.current.dirty = true;
