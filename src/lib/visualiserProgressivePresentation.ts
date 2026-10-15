@@ -14,7 +14,7 @@ export function configureProgressivePresentation(tracer: Pick<WebGLPathTracer, "
     // output shader needs the chunks as well as the DITHERING material define.
     const material = quad.material;
     if (material instanceof ShaderMaterial && !material.dithering) {
-      material.fragmentShader = `#include <dithering_pars_fragment>\n${material.fragmentShader}`
+      material.fragmentShader = `#include <common>\n#include <dithering_pars_fragment>\n${material.fragmentShader}`
         .replace("#include <premultiplied_alpha_fragment>",
           "#include <premultiplied_alpha_fragment>\n#include <dithering_fragment>");
       material.dithering = true;
