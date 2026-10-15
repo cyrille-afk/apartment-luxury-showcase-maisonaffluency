@@ -1,3 +1,4 @@
+- [ ] Add Polished, Honed and Satin marble presets that update reflectivity/roughness together; verify material changes and saved selection.
 - [x] Add 0–360° rug rotation; four tests pass and build clean. Signed-in furnished scene verifies 90° rotation stays flat, preserves centre/geometry/furniture, and survives reload and preset round-trip without page errors.
 - [x] Add per-coffee-table marble reflectivity and roughness controls; 26 tests pass, clean build, signed-in marble tabletop verifies 80% reflectivity/35% roughness, unchanged bases/geometry/placement, reload persistence and Reset, with no page errors. Final photoreal GPU output remains unverified.
 - [x] Dedicated Rug dock popover exposes width/depth, left/right/back/front, visibility, Centre and Auto-fit; signed-in table verifies 1.2×8m geometry and ±0.1m offsets, centring, auto-fit, reload persistence and unchanged furniture positions, with no page errors and clean build.
