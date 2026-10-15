@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-/** Bake box projection into UVs so raster and GPU path tracing sample the same slab. */
-export function marbleBoxGeometry(
+/** Bake one Y-axis planar projection across the entire slab for both renderers. */
+export function marblePlanarGeometry(
   source: THREE.BufferGeometry,
   transform = new THREE.Matrix4(),
   slabBounds?: THREE.Box3,
@@ -15,28 +15,20 @@ export function marbleBoxGeometry(
     for (let i = 0; i < positions.count; i++) bounds.expandByPoint(point.fromBufferAttribute(positions, i).applyMatrix4(transform));
   }
   const size = bounds.getSize(new THREE.Vector3());
-  const unit = Math.max(size.x, size.y, size.z, 1e-6);
-  const center = bounds.getCenter(new THREE.Vector3());
+  const width = Math.max(size.x, 1e-6);
+  const depth = Math.max(size.z, 1e-6);
   const uv = new Float32Array(positions.count * 2);
-  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
-  const normal = new THREE.Vector3();
-  for (let i = 0; i + 2 < positions.count; i += 3) {
-    a.fromBufferAttribute(positions, i).applyMatrix4(transform);
-    b.fromBufferAttribute(positions, i + 1).applyMatrix4(transform).sub(a);
-    c.fromBufferAttribute(positions, i + 2).applyMatrix4(transform).sub(a);
-    normal.crossVectors(b, c);
-    const x = Math.abs(normal.x), y = Math.abs(normal.y), z = Math.abs(normal.z);
-    for (let v = i; v < i + 3; v++) {
-      point.fromBufferAttribute(positions, v).applyMatrix4(transform).sub(center).divideScalar(unit);
-      uv[v * 2] = 0.5 + (x >= y && x >= z ? point.z : point.x);
-      uv[v * 2 + 1] = 0.5 + (y >= x && y >= z ? point.z : point.y);
-    }
+  // Never switch axes at curved rims or restart the UV range for each triangle/mesh.
+  for (let i = 0; i < positions.count; i++) {
+    point.fromBufferAttribute(positions, i).applyMatrix4(transform);
+    uv[i * 2] = THREE.MathUtils.clamp((point.x - bounds.min.x) / width, 0, 1);
+    uv[i * 2 + 1] = THREE.MathUtils.clamp((point.z - bounds.min.z) / depth, 0, 1);
   }
   geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
   // Supplier tangents belong to the old UV layout, not the new box projection.
   geometry.deleteAttribute("tangent");
   geometry.userData.visualiserOwnedGeometry = true;
-  geometry.userData.visualiserMarbleProjection = "box";
+  geometry.userData.visualiserMarbleProjection = "planar-y";
   return geometry;
 }
 
@@ -50,7 +42,7 @@ export function marbleSlabTexture(source: THREE.Texture): THREE.Texture {
   texture.channel = 0;
   texture.matrixAutoUpdate = true;
   texture.updateMatrix();
-  texture.userData.visualiserMarbleProjection = "box";
+  texture.userData.visualiserMarbleProjection = "planar-y";
   texture.needsUpdate = true;
   return texture;
 }
@@ -77,7 +69,7 @@ export function applyCoffeeTableMarbleProjection(root: THREE.Object3D, productNa
   });
   for (const mesh of meshes) {
     const previous = mesh.geometry;
-    mesh.geometry = marbleBoxGeometry(previous, new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld), bounds);
+    mesh.geometry = marblePlanarGeometry(previous, new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld), bounds);
     if (previous.userData.visualiserOwnedGeometry || previous.userData.visualiserUvFallback) previous.dispose();
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const entry of materials) {
@@ -86,7 +78,7 @@ export function applyCoffeeTableMarbleProjection(root: THREE.Object3D, productNa
         const texture = entry[key];
         if (texture) entry[key] = marbleSlabTexture(texture);
       }
-      entry.userData.visualiserMarbleProjection = "box";
+      entry.userData.visualiserMarbleProjection = "planar-y";
       entry.needsUpdate = true;
     }
   }
@@ -96,6 +88,6 @@ export function disposeMarbleSlabMaps(material: THREE.Material): void {
   if (!(material instanceof THREE.MeshStandardMaterial)) return;
   for (const key of MAP_KEYS) {
     const texture = material[key];
-    if (texture?.userData.visualiserMarbleProjection === "box") texture.dispose();
+    if (texture?.userData.visualiserMarbleProjection) texture.dispose();
   }
 }
