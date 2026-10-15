@@ -1,4 +1,4 @@
-import type { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import type { GLTF, GLTFLoader } from "three-stdlib";
 
 /** Persistent browser cache for furniture models so reloads and 3D restarts skip re-downloading. */
 export const MODEL_CACHE_NAME = "ma-visualiser-models-v1";
