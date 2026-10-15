@@ -16,7 +16,7 @@ import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type Foo
 import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
 import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry } from "@/lib/visualiserSubdivision";
 import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
-import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps } from "@/lib/visualiserMarbleProjection";
+import { applyCoffeeTableMarbleProjection, disposeMarbleSlabMaps, isStoneSlabFinish } from "@/lib/visualiserMarbleProjection";
 import { withCachedModelLoader } from "@/lib/visualiserModelCache";
 
 export type PlacedObject = {
@@ -219,6 +219,7 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   const n = finish && isTextileMaterial(finish) ? 0.85 : 0.35;
   material.normalScale.set(n, n);
   if (!isFabric && finish) applyPolishedMarble(material, `${finish.name} ${finish.material_type ?? ""} ${finish.category ?? ""}`);
+  material.userData.visualiserStoneSlab = !isFabric && !!finish && isStoneSlabFinish(`${finish.name} ${finish.material_type ?? ""} ${finish.category ?? ""}`);
   material.transparent = original.transparent;
   material.side = original.side;
   material.userData.visualiserClone = true;
@@ -353,8 +354,10 @@ function useFittedModel(object: PlacedObject) {
       const next = source.map((entry) => physicalCoffeeTableMarble(clonePbrMaterial(entry, finish, m, neutralFabric), object.product_name, role));
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    applyCoffeeTableMarbleProjection(clone, object.product_name);
-    return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
+    const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
+    // Project only after import-axis correction: this frame is actually Y-up.
+    applyCoffeeTableMarbleProjection(model, object.product_name);
+    return model;
   }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision]);
 }
 
