@@ -396,7 +396,7 @@ const VisualiserCanvas = ({
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
-    {false && !hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
+    {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
       position={[-6, 9, 6]}
