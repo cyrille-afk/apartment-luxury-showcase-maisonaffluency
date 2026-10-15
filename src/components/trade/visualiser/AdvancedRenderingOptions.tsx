@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
-
-const environments = [
-  { value: "studio-softbox-exr", label: "Studio Softbox" },
-  { value: "window-interior-exr", label: "Window Interior" },
-  { value: "empty-room-exr", label: "Small Empty Room" },
-] as const;
+import { VISUALISER_ENVIRONMENTS, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 
 export default function AdvancedRenderingOptions({ settings, onChange, environment, onEnvironmentChange, className, pathTrace }: {
   settings: AdvancedRenderingSettings;
@@ -19,7 +13,7 @@ export default function AdvancedRenderingOptions({ settings, onChange, environme
   className?: string;
   pathTrace: boolean;
 }) {
-  const label = environments.find((item) => item.value === environment)?.label ?? "Legacy Studio HDR";
+  const label = VISUALISER_ENVIRONMENTS.find((item) => item.value === environment)?.label ?? "Studio";
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -43,7 +37,7 @@ export default function AdvancedRenderingOptions({ settings, onChange, environme
             <DropdownMenuTrigger asChild><Button variant="outline" className="w-full justify-between text-xs" aria-label="EXR Environment">{label}<span aria-hidden="true">▾</span></Button></DropdownMenuTrigger>
             <DropdownMenuContent className="z-[90]" align="start">
               <DropdownMenuRadioGroup value={environment} onValueChange={(value) => onEnvironmentChange(environmentSourcePref(value))}>
-                {environments.map((item) => <DropdownMenuRadioItem key={item.value} value={item.value}>{item.label}</DropdownMenuRadioItem>)}
+                {VISUALISER_ENVIRONMENTS.map((item) => <DropdownMenuRadioItem key={item.value} value={item.value}>{item.label}</DropdownMenuRadioItem>)}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>

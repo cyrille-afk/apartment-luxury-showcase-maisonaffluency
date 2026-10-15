@@ -1,5 +1,5 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
-import { clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
+import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -1490,7 +1490,7 @@ const TradeVisualiser = () => {
                 <span className={cn(microLabel, "w-4 text-muted-foreground")}>{dofStrength}</span>
               </label>
             )}
-            <EnvironmentStatusChip />
+            <EnvironmentStatusChip environment={environmentSource} onChange={setEnvironmentSource} className={toolbarButton} />
           </div>
         </div>
       </div>
@@ -1513,41 +1513,33 @@ export default TradeVisualiser;
 // here would pull the whole three.js canvas into the main bundle.
 const ENV_STATUS_EVENT = "ma-visualiser-env";
 
-type EnvStatus = { source: "empty-room-exr" | "studio-hdr" | "local"; exr?: "missing" | "unreadable" };
+type EnvStatus = { source: EnvironmentSourcePref | "local"; exr?: "missing" | "unreadable" };
 
 /** Confirms which HDRI source the Visualiser is using — the empty-room EXR when valid. */
-function EnvironmentStatusChip() {
+function EnvironmentStatusChip({ environment, onChange, className }: { environment: EnvironmentSourcePref; onChange: (source: EnvironmentSourcePref) => void; className: string }) {
   const [status, setStatus] = useState<EnvStatus | null>(null);
   useEffect(() => {
     const onStatus = (event: Event) => setStatus((event as CustomEvent<EnvStatus>).detail);
     window.addEventListener(ENV_STATUS_EVENT, onStatus);
     return () => window.removeEventListener(ENV_STATUS_EVENT, onStatus);
   }, []);
-  if (!status) return null;
-  const label = status.source === "empty-room-exr"
-    ? "HDR: Empty Room"
-    : status.source === "studio-hdr"
-      ? status.exr ? `HDR: Studio · EXR ${status.exr}` : "HDR: Studio"
-      : "HDR: Local";
-  const title = status.source === "empty-room-exr"
-    ? "Environment reflections load from /images/_empty_room_3.exr — present and readable"
-    : status.source === "studio-hdr"
-      ? status.exr === "missing"
-        ? "The empty-room EXR (/images/_empty_room_3.exr) is not present — the built-in studio HDRI is in use"
-        : status.exr === "unreadable"
-          ? "The empty-room EXR is present but not a readable EXR file — the built-in studio HDRI is in use"
-          : "Built-in studio HDRI in use"
-      : "No HDRI could be loaded — local studio reflections are in use";
+  const label = VISUALISER_ENVIRONMENTS.find((item) => item.value === environment)?.label ?? "Studio";
+  const activeLabel = VISUALISER_ENVIRONMENTS.find((item) => item.value === status?.source)?.label ?? "Local";
+  const title = !status ? "Choose an HDR environment" : status.source === environment
+    ? `${activeLabel} lighting and reflections active`
+    : `Selected: ${label}. Active: ${activeLabel}${status.exr ? " (fallback)" : ""}`;
   return (
-    <span
-      className={cn(
-        microLabel,
-        "hidden lg:inline-flex items-center rounded-full border border-border px-2.5 py-1",
-        status.source === "empty-room-exr" ? "border-primary text-primary" : "text-muted-foreground",
-      )}
-      title={title}
-    >
-      {label}
-    </span>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className={className} aria-label="HDR environment" title={title}>
+          HDR: {label} <span aria-hidden="true">▾</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="end">
+        <DropdownMenuRadioGroup value={environment} onValueChange={(value) => onChange(environmentSourcePref(value))}>
+          {VISUALISER_ENVIRONMENTS.map((item) => <DropdownMenuRadioItem key={item.value} value={item.value}>{item.label}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
