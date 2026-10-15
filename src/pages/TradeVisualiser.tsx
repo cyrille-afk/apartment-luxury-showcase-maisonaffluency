@@ -1,6 +1,8 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
+import MarbleSurfaceControls from "@/components/trade/visualiser/MarbleSurfaceControls";
+import { isCoffeeTable } from "@/lib/visualiserMarbleSettings";
 import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -1026,6 +1028,7 @@ const TradeVisualiser = () => {
           <Button variant="ghost" className={toolbarButton} onClick={() => setTrayOpen((value) => !value)}>[ + Add 3D Object ]</Button>
           <span className="h-5 w-px bg-border" />
           <RugLayoutControls className={toolbarButton} width={rugWidth} depth={rugDepth} offsetX={rugOffsetX} offsetZ={rugOffsetZ} visible={showRug} disabled={floorFinish === "none" || Boolean(backdropSrc)} onWidthChange={setRugWidth} onDepthChange={setRugDepth} onOffsetXChange={setRugOffsetX} onOffsetZChange={setRugOffsetZ} onVisibleChange={setShowRug} />
+          <MarbleSurfaceControls className={toolbarButton} tables={objects.filter((object) => Boolean(object.glb_url) && isCoffeeTable(object.product_name))} selectedId={selectedId} onSelect={setSelectedId} onChange={(id, marbleSurface) => setObjects((current) => current.map((object) => object.instanceId === id ? { ...object, marbleSurface } : object))} />
           <span className="h-5 w-px bg-border" />
           <Button variant="ghost" className={toolbarButton} onClick={cycleDepth} disabled={!selected}>[ &#9099; Depth Stack ]</Button>
           <span className="h-5 w-px bg-border" />

@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { applyMarbleSurface, physicalCoffeeTableMarble } from "@/lib/visualiserMarbleSurface";
+import type { MarbleSurfaceSettings } from "@/lib/visualiserMarbleSettings";
 import { Html, useGLTF, useTexture, TransformControls } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
@@ -38,6 +40,7 @@ export type PlacedObject = {
   upholsteryMaterial?: VisualiserMaterial | null;
   /** Finishes for parts beyond top/base/upholstery (frame, drawer, part:<group> …). */
   partMaterials?: Record<string, VisualiserMaterial | null>;
+  marbleSurface?: MarbleSurfaceSettings;
   /** When true, swatch clicks, Clear, and preset restores leave this piece's finishes untouched. */
   finishesLocked?: boolean;
   /** Spatial lock only; never prevents applying finishes. */
@@ -301,7 +304,7 @@ function useFittedModel(object: PlacedObject) {
   const holder = useMemo(() => ({
     ...object,
     baseMaterial: object.baseMaterial ?? (isBondStreetStool(productId) ? BOND_STREET_BASE_FINISH : null),
-  }), [object, productId]);
+  }), [object.material, object.topMaterial, object.baseMaterial, object.upholsteryMaterial, object.partMaterials, productId]);
   const maps = useMaterialMapsMany([
     holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial,
     ...Object.values(holder.partMaterials ?? {}),
@@ -339,19 +342,19 @@ function useFittedModel(object: PlacedObject) {
           if (role === "upholstery" || role === "backrest") applyMatteTextile(material);
           if ((role === "upholstery" || role === "backrest") && material.normalMap) material.normalScale.multiplyScalar(1.2);
           if (role !== "upholstery" && role !== "backrest") applyPolishedMarble(material, `${entry.name} ${mesh.name}`);
-          return material;
+          return physicalCoffeeTableMarble(material, object.product_name, role);
         });
         mesh.material = Array.isArray(mesh.material) ? next : next[0];
         return;
       }
       const m = (finish && maps.get(finish.id)) || EMPTY_MAPS;
       const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      const next = source.map((entry) => clonePbrMaterial(entry, finish, m, neutralFabric));
+      const next = source.map((entry) => physicalCoffeeTableMarble(clonePbrMaterial(entry, finish, m, neutralFabric), object.product_name, role));
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
     applyCoffeeTableMarbleProjection(clone, object.product_name);
     return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
-  }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation, subdivision]);
+  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision]);
 }
 
 /** Pieces always rest on the floor plane (Y = 0). */
@@ -370,6 +373,11 @@ function groundModel(model: THREE.Object3D): THREE.Object3D {
 
 const ModelBody = ({ object, label, showLabels = true, onSelect, onTextureParts }: { object: PlacedObject; label?: string; showLabels?: boolean; onSelect: (id: string) => void; onTextureParts?: Props["onTextureParts"] }) => {
   const model = useFittedModel(object);
+  const invalidate = useThree((state) => state.invalidate);
+  useLayoutEffect(() => {
+    applyMarbleSurface(model, object.product_name, object.marbleSurface);
+    invalidate();
+  }, [model, object.product_name, object.marbleSurface, invalidate]);
   useEffect(() => {
     const parts = new Set<FinishPart>();
     const list: ModelMesh[] = [];
