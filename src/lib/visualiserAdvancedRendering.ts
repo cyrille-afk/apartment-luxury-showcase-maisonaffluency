@@ -15,17 +15,20 @@ export const environmentSourcePref = (value: unknown): EnvironmentSourcePref =>
   value === "studio-hdr" || value === "studio-softbox-exr" || value === "window-interior-exr" ? value : "empty-room-exr";
 
 /** Midpoints preserve the existing key/ambient balance and contact-shadow blur. */
-export function advancedSceneLighting(settings: AdvancedRenderingSettings) {
+export function advancedSceneLighting(settings: AdvancedRenderingSettings, lightIntensity = 1) {
   const { shadowSharpness, contrastIntensity } = clampAdvancedRendering(settings);
   const sharpness = shadowSharpness / 100;
   const contrast = contrastIntensity / 100;
+  const lightScale = Number.isFinite(lightIntensity) ? Math.min(3, Math.max(0.2, lightIntensity)) : 1;
+  const biasScale = Math.max(1, lightScale);
   return {
-    shadowBias: -0.0007 + sharpness * 0.0006,
-    shadowNormalBias: 0.035 - sharpness * 0.03,
+    lightScale,
+    shadowBias: (-0.0007 + sharpness * 0.0006) / biasScale,
+    shadowNormalBias: (0.035 - sharpness * 0.03) / biasScale,
     shadowRadius: 4 - sharpness * 3.75,
     contactBlur: 2.8 - sharpness * 2.6,
-    directionalIntensity: 1.25 + contrast * 2.5,
-    ambientIntensity: 0.35 - contrast * 0.3,
-    fillIntensity: 0.6 - contrast * 0.4,
+    directionalIntensity: (1.25 + contrast * 2.5) * lightScale,
+    ambientIntensity: (0.35 - contrast * 0.3) * lightScale,
+    fillIntensity: (0.6 - contrast * 0.4) * lightScale,
   };
 }

@@ -1440,14 +1440,14 @@ const TradeVisualiser = () => {
                     <option value={0.5}>50%</option><option value={0.75}>75%</option><option value={1}>100%</option><option value={1.5}>150%</option><option value={2}>200%</option>
                   </select>
                 </label>
-                <label className={cn(toolbarButton, "gap-1")} title="HDRI lighting strength in the photoreal render">
+                <label className={cn(toolbarButton, "gap-1")} title="Key and environment lighting strength (100% = baseline)">
                   Light
                   <input
                     type="range"
                     aria-label="Lighting strength"
                     min={0.2}
                     max={3}
-                    step={0.1}
+                    step={0.01}
                     className="w-20 accent-current"
                     value={ptQuality.lightIntensity}
                     onChange={(e) => setPtQuality({ lightIntensity: Number(e.target.value) })}
