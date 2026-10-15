@@ -1,4 +1,4 @@
-- [ ] Make Light proportionally scale key/environment from 100% baseline, tighten shadow bias at higher values and verify the signed-in slider flow.
+- [x] Make Light proportionally scale key/environment from 100% baseline and tighten shadow bias; 13 tests pass, clean build, signed-in GUM slider confirms 128% key 2.5→3.2/environment 0.5→0.64 and reduced biases. Browser-only tracer interception was necessary on software GPU; full photoreal output remains unverified.
 - [x] Add Advanced Rendering Options: shadow bias/radius/contact blur, key/ambient balance and three hosted EXRs; 29 tests pass, signed-in GUM scene confirms slider properties, all three 1024px EXRs and reload persistence, no page errors. Local asset routing required hosted-response forwarding for verification; real-GPU photoreal quality remains unverified.
 - [x] Selectively subdivide curved furniture once with OpenSubdiv Catmull-Clark; 22 tests pass, loaded Frenchmen/GUM upholstery and Cinnamon column/shade confirm level 1 with structural parts unchanged; real-GPU photoreal convergence remains unverified.
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
