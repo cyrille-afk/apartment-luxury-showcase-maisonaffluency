@@ -353,8 +353,10 @@ function useFittedModel(object: PlacedObject) {
       const next = source.map((entry) => physicalCoffeeTableMarble(clonePbrMaterial(entry, finish, m, neutralFabric), object.product_name, role));
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
-    applyCoffeeTableMarbleProjection(clone, object.product_name);
-    return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
+    const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
+    // Project only after import-axis correction: this frame is actually Y-up.
+    applyCoffeeTableMarbleProjection(model, object.product_name);
+    return model;
   }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision]);
 }
 
