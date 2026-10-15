@@ -223,7 +223,7 @@ const TradeVisualiser = () => {
     // crash is memory-related, repeats it. Remount only the 3D view, with the
     // restored scene applied to state so the crashing props aren't reused.
     if (outcome === "restored" && stage === 0) {
-      let restored: SandboxObject[] | null = null;
+      let restored: PlacedObject[] | null = null;
       try { restored = readSandbox().objects; } catch { /* fall through to reset */ }
       if (restored) {
         crashStageRef.current = 1;
