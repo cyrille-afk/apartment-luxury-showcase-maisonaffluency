@@ -120,7 +120,6 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       const focusChanged = Math.abs(lastFocus.current.bokeh - renderCamera.bokehSize) > 0.001 ||
         (depthOfField && Math.abs(lastFocus.current.distance - renderCamera.focusDistance) > 0.001);
       if (focusChanged || !matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
-        if (location.hostname==="localhost") console.log("[ptdbg] camera", focusChanged, current.ready);
         retainFrame();
         lastFocus.current = { distance: renderCamera.focusDistance, bokeh: renderCamera.bokehSize };
         current.world.copy(camera.matrixWorld);
@@ -136,7 +135,6 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         scene.updateMatrixWorld(true);
         const revision = tracedSceneRevision(scene);
         if (current.dirty || revision !== current.revision) {
-          if (location.hostname==="localhost") { const a=current.revision.split("|"), b=revision.split("|"); const i=a.findIndex((v,k)=>v!==b[k]); console.log("[ptdbg] scene", current.dirty, a.length, b.length, i, a[i], b[i]); }
           retainFrame();
           const hidden: THREE.Object3D[] = [];
           scene.traverse((object) => {
@@ -159,7 +157,6 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         }
       }
       if (current.ready && environment !== current.environment) {
-        if (location.hostname==="localhost") console.log("[ptdbg] env", current.environment, environment);
         retainFrame();
         pt.updateEnvironment(); // rebind lighting/background and reset old samples
         current.environment = environment;
@@ -171,7 +168,6 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
       pt.renderSample();
       const samples = Math.floor(pt.samples);
-      if (location.hostname==="localhost" && samples < current.samples) console.log("[ptdbg] drop", current.samples, samples, gl.domElement.width, gl.domElement.height, pt.pausePathTracing);
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
         current.samples = samples;
         current.reportedAt = now;
