@@ -4,6 +4,9 @@ import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
+import woolImage from "@/assets/cream-wool-rug.jpg";
+import { roundedRugGeometry, RUG_TOP_Y } from "@/lib/visualiserRug";
+export { RUG_TOP_Y } from "@/lib/visualiserRug";
 import { WALL_FULL_HEIGHT_M, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, roomWallColor, roomWallFinish, wallColorHex, wallFinishSpec, clampRugPile, clampRugSize, clampRugOffset, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugColorHex, rugWeave, type RugColor, type RugBorderColor, type RugWeave, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { PlacedObject } from "./SceneObject";
 import { footprintRadius } from "@/lib/visualiserPlacement";
@@ -118,9 +121,10 @@ function ArchitecturalCoves({ cx, cz, radius, height, color, ceilingHeight, ceil
 
 /** Procedural cream wool: warm off-white albedo + tight loop-pile normal map. */
 function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [6, 5]) {
-  const anisotropy = useThree((s) => Math.min(8, s.gl.capabilities.getMaxAnisotropy()));
+  const source = useTexture(woolImage);
+  const anisotropy = useThree((s) => Math.min(16, s.gl.capabilities.getMaxAnisotropy()));
   const maps = useMemo(() => {
-    const size = 512;
+    const size = 1536;
     const colorCanvas = document.createElement("canvas");
     colorCanvas.width = colorCanvas.height = size;
     const cctx = colorCanvas.getContext("2d");
@@ -184,7 +188,23 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
           nimg.data[i + 3] = 255;
         }
       }
-      cctx.putImageData(cimg, 0, 0);
+      // Authentic-looking high-resolution yarn detail; the procedural weave
+      // remains the adjustable micro-relief, never a strong painted shadow.
+      cctx.drawImage(source.image, 0, 0, size, size);
+      const fibers = cctx.getImageData(0, 0, size, size);
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        const i = (y * size + x) * 4;
+        const l = (y * size + ((x - 1 + size) % size)) * 4;
+        const r = (y * size + ((x + 1) % size)) * 4;
+        const u = (((y - 1 + size) % size) * size + x) * 4;
+        const d = (((y + 1) % size) * size + x) * 4;
+        const nx = (fibers.data[l] - fibers.data[r]) / 255 + (nimg.data[i] / 255 - 0.5) * 0.15;
+        const ny = (fibers.data[d] - fibers.data[u]) / 255 + (nimg.data[i + 1] / 255 - 0.5) * 0.15;
+        const length = Math.hypot(nx, ny, 1);
+        nimg.data[i] = (nx / length * 0.5 + 0.5) * 255;
+        nimg.data[i + 1] = (ny / length * 0.5 + 0.5) * 255;
+        nimg.data[i + 2] = (1 / length * 0.5 + 0.5) * 255;
+      }
       nctx.putImageData(nimg, 0, 0);
       color = new THREE.CanvasTexture(colorCanvas);
       color.colorSpace = THREE.SRGBColorSpace;
@@ -198,7 +218,7 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
       }
     }
     return { color, normal };
-  }, [anisotropy, weave, pile, repeat[0], repeat[1]]);
+  }, [source, anisotropy, weave, pile, repeat[0], repeat[1]]);
   useEffect(() => () => { maps.color?.dispose(); maps.normal?.dispose(); }, [maps]);
   return maps;
 }
@@ -208,84 +228,12 @@ function useWoolMaps(weave: RugWeave, pile: number, repeat: [number, number] = [
  * Centered on the arrangement; at least 4.5 × 3.5 m, growing so every
  * piece's footprint sits comfortably inside its boundaries.
  */
-const RUG_THICKNESS_M = 0.018;
-const RUG_BEVEL_M = 0.005;
-/** Height of the rug's top surface — contact shadows sit just above it. */
-export const RUG_TOP_Y = 0.001 + RUG_THICKNESS_M + RUG_BEVEL_M * 2;
 const RUG_TILE: [number, number] = [1.35, 1.35];
-
-/**
- * Pebble-like asymmetric silhouette from cubic béziers, normalised to the
- * given overall width × depth (shape X → world X, shape Y → world −Z).
- */
-export function organicRugShape(width: number, depth: number): THREE.Shape {
-  const w = width / 2, d = depth / 2;
-  const P = (x: number, y: number) => [x * w, y * d] as const;
-  const s = new THREE.Shape();
-  s.moveTo(...P(-0.98, 0.05));
-  s.bezierCurveTo(...P(-1.0, 0.62), ...P(-0.62, 1.0), ...P(-0.12, 0.94));
-  s.bezierCurveTo(...P(0.28, 0.89), ...P(0.42, 0.78), ...P(0.68, 0.84));
-  s.bezierCurveTo(...P(0.95, 0.9), ...P(1.02, 0.46), ...P(0.97, 0.08));
-  s.bezierCurveTo(...P(0.92, -0.38), ...P(1.0, -0.8), ...P(0.52, -0.95));
-  s.bezierCurveTo(...P(0.18, -1.04), ...P(-0.08, -0.84), ...P(-0.42, -0.9));
-  s.bezierCurveTo(...P(-0.82, -0.97), ...P(-0.96, -0.5), ...P(-0.98, 0.05));
-  return s;
-}
-
-const RUG_CORD_RADIUS_M = 0.01; // default; adjustable via clampRugBorderThicknessMm
-
-/** Procedural braided/whip-stitched cord normal map (u runs along the cord). */
-function makeBraidNormalMap(): THREE.CanvasTexture | null {
-  if (typeof document === "undefined") return null;
-  const W = 256, H = 64;
-  const c = document.createElement("canvas"); c.width = W; c.height = H;
-  const ctx = c.getContext("2d"); if (!ctx) return null;
-  const img = ctx.createImageData(W, H);
-  // Height field: two interleaved diagonal strands → braided twist.
-  const h = (x: number, y: number) => {
-    const a = Math.sin(((x / W) * 4 + (y / H)) * Math.PI * 2);
-    const b = Math.sin(((x / W) * 4 - (y / H)) * Math.PI * 2 + Math.PI);
-    return Math.max(a, b) * 0.5 + 0.5 + Math.sin((x / W) * Math.PI * 64) * 0.04;
-  };
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const dx = h((x + 1) % W, y) - h((x - 1 + W) % W, y);
-    const dy = h(x, (y + 1) % H) - h(x, (y - 1 + H) % H);
-    const n = new THREE.Vector3(-dx * 3, -dy * 3, 1).normalize();
-    const i = (y * W + x) * 4;
-    img.data[i] = (n.x * 0.5 + 0.5) * 255; img.data[i + 1] = (n.y * 0.5 + 0.5) * 255; img.data[i + 2] = (n.z * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
-  }
-  ctx.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.NoColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
-  return t;
-}
-
-/** Braided piping trim following the rug's top outer lip. */
-function RugBorder({ width, depth, color, thicknessMm = 10, twistMm = 25, roughness = 75 }: { width: number; depth: number; color: string; thicknessMm?: number; twistMm?: number; roughness?: number }) {
-  const radius = clampRugBorderThicknessMm(thicknessMm) / 1000;
-  const twist = clampRugBorderTwistMm(twistMm) / 1000;
-  const rough = clampRugBorderRoughness(roughness) / 100;
-  const normal = useMemo(() => makeBraidNormalMap(), []);
-  const geometry = useMemo(() => {
-    const topZ = RUG_THICKNESS_M + RUG_BEVEL_M * 2;
-    const pts = organicRugShape(width, depth).getSpacedPoints(480).slice(0, -1).map((v) => new THREE.Vector3(v.x, v.y, topZ));
-    const curve = new THREE.CatmullRomCurve3(pts, true, "centripetal");
-    return { g: new THREE.TubeGeometry(curve, 960, radius, 12, true), len: curve.getLength() };
-  }, [width, depth, radius]);
-  useEffect(() => { if (normal) normal.repeat.set(geometry.len / twist, 1); }, [normal, geometry.len, twist]);
-  useEffect(() => () => geometry.g.dispose(), [geometry]);
-  useEffect(() => () => normal?.dispose(), [normal]);
-  return (
-    <mesh name="room-area-rug-border" geometry={geometry.g} castShadow receiveShadow>
-      <meshStandardMaterial color={color} normalMap={normal ?? undefined} normalScale={new THREE.Vector2(1.6, 1.6)} roughness={rough} metalness={0} envMapIntensity={0.08} />
-    </mesh>
-  );
-}
 
 export type RugLayout = { width?: number | null; depth?: number | null; offsetX?: number; offsetZ?: number };
 function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderTwistMm, borderRoughness, weave, pile, layout }: { objects: PlacedObject[]; color: RugColor; borderColor?: RugBorderColor; borderThicknessMm?: number; borderTwistMm?: number; borderRoughness?: number; weave: RugWeave; pile: number; layout?: RugLayout }) {
   const p = clampRugPile(pile);
-  // Extruded shape UVs are in metres, so tile ~1.35× per metre (matches the old 6×5 over 4.5×3.8 m).
+  // Metre-space UVs preserve yarn scale when the rug is resized.
   const maps = useWoolMaps(rugWeave(weave), p, RUG_TILE);
   const { cx, cz, width, depth } = useMemo(() => {
     const xs = objects.map((o) => o.position?.[0] ?? 0);
@@ -305,22 +253,14 @@ function Rug({ objects, color, borderColor = "match", borderThicknessMm, borderT
       depth: clampRugSize(layout?.depth) ?? halfD * 2,
     };
   }, [objects, layout?.width, layout?.depth, layout?.offsetX, layout?.offsetZ]);
-  const geometry = useMemo(() => {
-    const g = new THREE.ExtrudeGeometry(organicRugShape(width, depth), {
-      depth: RUG_THICKNESS_M, bevelEnabled: true, bevelThickness: RUG_BEVEL_M, bevelSize: 0.03, bevelSegments: 3, curveSegments: 96,
-    });
-    // Sit the bevelled underside on the floor.
-    g.translate(0, 0, RUG_BEVEL_M);
-    return g;
-  }, [width, depth]);
+  const geometry = useMemo(() => roundedRugGeometry(width, depth), [width, depth]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   if (!maps.color || !maps.normal) return null;
   return (
-    <group position={[cx, 0.001, cz]} rotation={[-Math.PI / 2, 0, 0]}>
-    <mesh name="room-area-rug" geometry={geometry} castShadow receiveShadow>
-      <meshStandardMaterial color={rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.8 + (p / 100) * 1.6, 0.8 + (p / 100) * 1.6)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
+    <group position={[cx, RUG_TOP_Y, cz]} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh name="room-area-rug" geometry={geometry} receiveShadow>
+      <meshStandardMaterial color={color === "cream" ? SHOWROOM.rim : rugColorHex(color)} map={maps.color} normalMap={maps.normal} normalScale={new THREE.Vector2(0.25 + (p / 100) * 0.25, 0.25 + (p / 100) * 0.25)} roughness={0.88 + (p / 100) * 0.04} metalness={0} envMapIntensity={0.05} />
     </mesh>
-    <RugBorder width={width} depth={depth} color={rugColorHex(borderColor === "match" ? color : borderColor)} thicknessMm={borderThicknessMm} twistMm={borderTwistMm} roughness={borderRoughness} />
     </group>
   );
 }
