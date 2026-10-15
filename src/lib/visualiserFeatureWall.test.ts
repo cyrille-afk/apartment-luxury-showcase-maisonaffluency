@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { FEATURE_WALL, featureWallLayout } from "./visualiserFeatureWall";
+import { FEATURE_WALL, featureWallLayout, featureWallFinish } from "./visualiserFeatureWall";
 
 describe("architectural feature wall", () => {
   it("creates exactly three slabs separated by two inset gaps", () => {
@@ -16,5 +16,12 @@ describe("architectural feature wall", () => {
     expect(layout.centerX).toBe(-1);
     expect(layout.width).toBeCloseTo(10.4);
     expect(bounds.equals(before)).toBe(true);
+  });
+  it("normalises stored finishes and falls back to travertine", () => {
+    expect(featureWallFinish("microcement")).toBe("microcement");
+    expect(featureWallFinish("raw-concrete")).toBe("raw-concrete");
+    expect(featureWallFinish("travertine")).toBe("travertine");
+    expect(featureWallFinish("marble")).toBe("travertine");
+    expect(featureWallFinish(undefined)).toBe("travertine");
   });
 });

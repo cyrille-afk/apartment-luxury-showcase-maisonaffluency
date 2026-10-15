@@ -2,6 +2,7 @@ import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { CeilingSettings } from "./visualiserCeilingSettings";
 import type { AdvancedRenderingSettings, EnvironmentSourcePref } from "./visualiserAdvancedRendering";
 import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import type { FeatureWallFinish } from "./visualiserFeatureWall";
 
 export type ScenePresetData = CeilingSettings & {
   objects: PlacedObject[];
