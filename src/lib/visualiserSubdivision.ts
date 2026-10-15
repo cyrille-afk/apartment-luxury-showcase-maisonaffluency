@@ -1,9 +1,13 @@
 import * as THREE from "three";
-import OpenSubdiv, { type OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
+import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 
 let engine: Promise<OpenSubdivModule> | undefined;
 export function loadSubdivisionEngine(): Promise<OpenSubdivModule> {
-  engine ??= OpenSubdiv({ locateFile: () => new URL("../../node_modules/@nasedkinpv/opensubdiv-wasm/dist/opensubdiv.wasm", import.meta.url).href });
+  if (typeof window === "undefined") return Promise.reject(new Error("Subdivision is browser-only"));
+  // Called from the model's effect after hydration; the binary remains a public URL.
+  engine ??= import("@nasedkinpv/opensubdiv-wasm")
+    .then(({ default: OpenSubdiv }) => OpenSubdiv({ locateFile: () => "/wasm/opensubdiv.wasm" }))
+    .catch((error: unknown) => { engine = undefined; throw error; });
   return engine;
 }
 
