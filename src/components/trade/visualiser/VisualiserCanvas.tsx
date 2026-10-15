@@ -500,7 +500,7 @@ const VisualiserCanvas = ({
         depthOfField={depthOfField}
         focusTarget={dofTarget.current}
         dofStrength={dofStrength}
-        signature={`${JSON.stringify(advancedRendering)}|light:${lighting.lightScale}|${environmentSource}|${hasBackdrop}|${floorFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
+        signature={`${JSON.stringify(advancedRendering)}|light:${lighting.lightScale}|${environmentSource}|${hasBackdrop}|${floorFinish}|${featureWallFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
           .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}:${JSON.stringify(o.marbleSurface ?? {})}`)
           .join("|")}`}
       />
