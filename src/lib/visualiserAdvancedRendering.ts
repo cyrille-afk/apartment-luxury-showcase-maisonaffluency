@@ -1,5 +1,12 @@
 export type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr" | "studio-softbox-exr" | "window-interior-exr";
 
+export const VISUALISER_ENVIRONMENTS = [
+  { value: "studio-hdr", label: "Studio" },
+  { value: "studio-softbox-exr", label: "Studio Softbox" },
+  { value: "window-interior-exr", label: "Window Interior" },
+  { value: "empty-room-exr", label: "Small Empty Room" },
+] as const;
+
 export interface AdvancedRenderingSettings {
   shadowSharpness: number;
   contrastIntensity: number;

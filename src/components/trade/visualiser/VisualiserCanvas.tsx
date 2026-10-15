@@ -99,8 +99,15 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1 }:
   // so escaping rays gather real light instead of a grey void.
   const rotation: [number, number, number] = [0, Math.PI / 4, 0];
   const environmentIntensity = lightIntensity * (pathTrace ? SHOWROOM.photorealEnvironmentScale : SHOWROOM.environmentIntensity);
+  // Environment binds the map in its layout effect. Wake the demand loop AFTER
+  // that commit, not only when the download completes, so PMREM and the tracer
+  // see the new texture even after reaching the final sample cap.
+  useEffect(() => {
+    invalidate();
+  }, [map, environmentIntensity, pathTrace, invalidate]);
   if (map) return (
     <Environment
+      key={map.uuid}
       map={map}
       background={pathTrace}
       environmentIntensity={environmentIntensity}

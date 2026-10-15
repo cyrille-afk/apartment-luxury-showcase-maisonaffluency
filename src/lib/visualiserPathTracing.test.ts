@@ -47,4 +47,17 @@ describe("progressive path tracing", () => {
     scene.add(group, new THREE.GridHelper());
     expect(tracedSceneRevision(scene)).toBe(before);
   });
+  it("detects an HDR preset swap without changing furniture or waiting for camera movement", () => {
+    const scene = new THREE.Scene();
+    scene.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshPhysicalMaterial({ roughness: 0.15, metalness: 0 })));
+    scene.environment = new THREE.DataTexture();
+    const furniture = tracedSceneRevision(scene);
+    const studio = tracedEnvironmentRevision(scene);
+    scene.environment = new THREE.DataTexture();
+    scene.background = scene.environment;
+    const interior = tracedEnvironmentRevision(scene);
+    expect(interior).not.toBe(studio);
+    expect(tracedSceneRevision(scene)).toBe(furniture);
+    expect(tracedEnvironmentRevision(scene)).toBe(interior);
+  });
 });

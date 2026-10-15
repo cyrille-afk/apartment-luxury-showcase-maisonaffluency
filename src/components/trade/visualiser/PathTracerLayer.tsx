@@ -100,11 +100,13 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         current.movedAt = now;
         if (current.ready) pt.updateCamera(); // updateCamera ALWAYS resets; never call unconditionally.
       }
+      // Cheap environment checks run every painted frame, including the first
+      // frame woken by an async HDR commit and when accumulation was capped.
+      const environment = tracedEnvironmentRevision(scene);
       if (current.dirty || now - current.checkedAt >= 250) {
         current.checkedAt = now;
         scene.updateMatrixWorld(true);
         const revision = tracedSceneRevision(scene);
-        const environment = tracedEnvironmentRevision(scene);
         if (current.dirty || revision !== current.revision) {
           const hidden: THREE.Object3D[] = [];
           scene.traverse((object) => {
@@ -124,10 +126,11 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
           current.revision = revision;
           current.environment = environment;
           current.movedAt = now;
-        } else if (environment !== current.environment) {
-          pt.updateEnvironment();
-          current.environment = environment;
         }
+      }
+      if (current.ready && environment !== current.environment) {
+        pt.updateEnvironment(); // rebind lighting/background and reset old samples
+        current.environment = environment;
       }
       // During movement renderSample uses one quarter-resolution preview sample.
       // Full-resolution tiles begin only after movement has settled.
