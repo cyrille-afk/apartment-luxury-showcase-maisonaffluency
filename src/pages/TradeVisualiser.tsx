@@ -203,6 +203,7 @@ const CanvasLoader = () => (
 const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
   const crashHandledRef = useRef(false);
+  const [canvasEpoch, setCanvasEpoch] = useState(0);
   const handleSceneCrash = useCallback(() => {
     if (crashHandledRef.current) return;
     crashHandledRef.current = true;
@@ -210,11 +211,15 @@ const TradeVisualiser = () => {
     try { outcome = recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
     // Reload only when a different, known-good scene was restored. Repeated or
     // scene-independent crashes (no WebGL, failed chunk) must not loop reloads.
+    // Never reload the page: a reload re-downloads every model and, when the
+    // crash is memory-related, repeats it. Remount only the 3D view instead.
+    try { takeRecoveryNotice(); } catch { /* noop */ }
     if (outcome === "restored") {
-      window.location.reload();
+      setCanvasEpoch((n) => n + 1);
+      window.setTimeout(() => { crashHandledRef.current = false; }, 30000);
+      toast.warning("A display error occurred — the 3D view was restarted without reloading the page.");
       return;
     }
-    try { takeRecoveryNotice(); } catch { /* noop */ }
     toast.error("The 3D view couldn't start in this browser. Your scene is kept — reload the page to try again.");
   }, []);
   useEffect(() => {
@@ -833,7 +838,7 @@ const TradeVisualiser = () => {
       )}
 
       <div ref={canvasWrapRef} className="absolute inset-0 z-10">
-        <SceneErrorBoundary onError={handleSceneCrash}>
+        <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
             focusRef={focusRef}
