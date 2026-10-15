@@ -49,7 +49,16 @@ describe("advanced rendering scene mappings", () => {
     expect(environmentSourcePref("unknown")).toBe("empty-room-exr");
   });
   it("clamps invalid saved slider settings", () => {
-    expect(clampAdvancedRendering({ shadowSharpness: 200, contrastIntensity: -1 })).toEqual({ shadowSharpness: 100, contrastIntensity: 0 });
+    expect(clampAdvancedRendering({ shadowSharpness: 200, contrastIntensity: -1 })).toEqual({ shadowSharpness: 100, contrastIntensity: 0, contactShadowIntensity: 72 });
     expect(clampAdvancedRendering({ shadowSharpness: NaN })).toEqual(DEFAULT_ADVANCED_RENDERING);
+  });
+  it("preserves 0.72 contact opacity for default and legacy saved scenes", () => {
+    expect(advancedSceneLighting(DEFAULT_ADVANCED_RENDERING).contactOpacity).toBe(0.72);
+    expect(advancedSceneLighting({ shadowSharpness: 50, contrastIntensity: 50 }).contactOpacity).toBe(0.72);
+  });
+  it("maps adjustable contact intensity directly to opacity and clamps saved values", () => {
+    for (const [percentage, opacity] of [[0, 0], [35, 0.35], [100, 1], [200, 1], [-1, 0]]) {
+      expect(advancedSceneLighting({ ...DEFAULT_ADVANCED_RENDERING, contactShadowIntensity: percentage }).contactOpacity).toBe(opacity);
+    }
   });
 });

@@ -1,3 +1,4 @@
+- [ ] Fine-tune contact shadow intensity and DoF with unchanged defaults; verify saved values and live controls.
 - [x] Refine architectural rendering: AO 1.28/contact opacity 0.72, full-frame 50mm vertical lens (26.99°), subtle DoF default and foreground armchair/side-table focus. Fourteen tests pass; signed-in GUM/Madison scene verifies lens, focus band, unchanged placement and OFF persistence on reload without page errors. Final photoreal GPU output remains unverified.
 - [x] Add Polished, Honed and Satin marble presets; seven tests pass and build clean. Signed-in marble tabletop confirms paired material updates, unchanged bases/geometry/placement, reload selection, Custom after manual adjustment and Reset without page errors.
 - [x] Add 0–360° rug rotation; four tests pass and build clean. Signed-in furnished scene verifies 90° rotation stays flat, preserves centre/geometry/furniture, and survives reload and preset round-trip without page errors.
