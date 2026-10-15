@@ -13,6 +13,7 @@ describe("selective Catmull-Clark subdivision", () => {
     expect(isCurvedFurniturePart("GUM armchair", "backrest", "Backrest")).toBe(true);
     expect(isCurvedFurniturePart("Frenchmen Street Lounge Chair", "upholstery", "FabricAndLeather")).toBe(true);
     expect(isCurvedFurniturePart("Cinnamon Gardens Floor Lamp", null, "Curved Stem")).toBe(true);
+    expect(isCurvedFurniturePart("Cinnamon Gardens Floor Lamp", "frame", "WoodenBase")).toBe(true);
     expect(isCurvedFurniturePart("GUM armchair", "frame", "Frame Legs")).toBe(false);
     expect(isCurvedFurniturePart("Cinnamon Gardens Floor Lamp", "base", "Base Plate")).toBe(false);
     expect(isCurvedFurniturePart("Praia da Granja Coffee Table", "top", "Table Top")).toBe(false);
@@ -28,6 +29,9 @@ describe("selective Catmull-Clark subdivision", () => {
     expect(output.getAttribute("uv").count).toBe(output.getAttribute("position").count);
     expect(Array.from(output.getAttribute("position").array).every(Number.isFinite)).toBe(true);
     expect(Array.from(output.getAttribute("position").array)).not.toEqual(before);
+    // A welded valence-four octahedron vertex follows (F + 2R + (n-3)P)/n, not Loop.
+    const positions = output.getAttribute("position");
+    expect(Array.from({ length: positions.count }, (_, i) => positions.getX(i)).some(x => Math.abs(x - 7 / 12) < 1e-6)).toBe(true);
     expect(Array.from(source.getAttribute("position").array)).toEqual(before);
     expect(subdivideCurvedGeometry(output, engine)).toBe(output);
   });

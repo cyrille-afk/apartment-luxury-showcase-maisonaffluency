@@ -13,6 +13,8 @@ export function isCurvedFurniturePart(product: string, part: string | null, mesh
   if (/\b(legs?|glides?|feet|foot|frame|structure|socket|bulb|cable|plate)\b/i.test(name)) return false;
   const chair = /\b(GUM|BOB|Frenchmen Street|tub chair|barrel chair)\b/i.test(product);
   if (chair) return part === "upholstery" || part === "backrest";
+  // Supplier names the Cinnamon Gardens sculptural wooden column "WoodenBase".
+  if (/\bCinnamon Gardens\b/i.test(product) && /\bWoodenBase\b/i.test(name)) return true;
   return /\b(Cinnamon Gardens|organic floor lamp)\b/i.test(product)
     && /\b(shade|stem|body|organic|curved)\b/i.test(name);
 }
