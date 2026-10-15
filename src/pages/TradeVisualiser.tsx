@@ -1365,7 +1365,7 @@ const TradeVisualiser = () => {
             >
               [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
             </Button>
-            <AdvancedRenderingOptions className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} />
+            <AdvancedRenderingOptions className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} depthOfField={depthOfField} onDepthOfFieldChange={(enabled) => { if (enabled) setDofFocusSelected(true); setDepthOfField(enabled); }} dofStrength={dofStrength} onDofStrengthChange={setDofStrength} />
             <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
             <Button variant="ghost"
               className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
@@ -1436,13 +1436,13 @@ const TradeVisualiser = () => {
                   type="range"
                   min={1}
                   max={10}
-                  step={1}
+                  step={0.1}
                   value={dofStrength}
                   onChange={(event) => setDofStrength(Number(event.target.value))}
                   className="h-1 w-24 cursor-pointer accent-primary"
                   aria-label="Background blur strength"
                 />
-                <span className={cn(microLabel, "w-4 text-muted-foreground")}>{dofStrength}</span>
+                <span className={cn(microLabel, "w-8 tabular-nums text-muted-foreground")}>{dofStrength.toFixed(1)}</span>
               </label>
             )}
             <EnvironmentStatusChip environment={environmentSource} onChange={setEnvironmentSource} className={toolbarButton} />

@@ -421,7 +421,7 @@ const VisualiserCanvas = ({
       <ContactShadows
         position={[0, 0.002, 0]}
         scale={40}
-        opacity={0.45}
+        opacity={lighting.contactOpacity * (0.45 / SHOWROOM.contactOpacity)}
         blur={lighting.contactBlur * (2.6 / 1.5)}
         far={4}
         resolution={1024}
@@ -435,7 +435,7 @@ const VisualiserCanvas = ({
       <ContactShadows
         position={[0, (showRug ? RUG_TOP_Y : 0) + 0.002, 0]}
         scale={15}
-        opacity={SHOWROOM.contactOpacity}
+        opacity={lighting.contactOpacity}
         blur={lighting.contactBlur * 0.6}
         far={1}
         resolution={2048}

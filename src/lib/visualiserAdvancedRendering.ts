@@ -10,13 +10,15 @@ export const VISUALISER_ENVIRONMENTS = [
 export interface AdvancedRenderingSettings {
   shadowSharpness: number;
   contrastIntensity: number;
+  contactShadowIntensity?: number;
 }
 
-export const DEFAULT_ADVANCED_RENDERING: AdvancedRenderingSettings = { shadowSharpness: 50, contrastIntensity: 50 };
+export const DEFAULT_ADVANCED_RENDERING: AdvancedRenderingSettings = { shadowSharpness: 50, contrastIntensity: 50, contactShadowIntensity: 72 };
 const percentage = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 50;
 export const clampAdvancedRendering = (value?: Partial<AdvancedRenderingSettings>): AdvancedRenderingSettings => ({
   shadowSharpness: percentage(value?.shadowSharpness),
   contrastIntensity: percentage(value?.contrastIntensity),
+  contactShadowIntensity: typeof value?.contactShadowIntensity === "number" && Number.isFinite(value.contactShadowIntensity) ? percentage(value.contactShadowIntensity) : 72,
 });
 export const environmentSourcePref = (value: unknown): EnvironmentSourcePref =>
   value === "studio-hdr" || value === "studio-softbox-exr" || value === "window-interior-exr" ? value : "empty-room-exr";
@@ -30,6 +32,7 @@ export function advancedSceneLighting(settings: AdvancedRenderingSettings, light
   const biasScale = Math.max(1, lightScale);
   return {
     lightScale,
+    contactOpacity: (clampAdvancedRendering(settings).contactShadowIntensity ?? 72) / 100,
     shadowBias: (-0.0007 + sharpness * 0.0006) / biasScale,
     shadowNormalBias: (0.035 - sharpness * 0.03) / biasScale,
     shadowRadius: 4 - sharpness * 3.75,

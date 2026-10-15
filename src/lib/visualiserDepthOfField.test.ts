@@ -66,5 +66,8 @@ describe("selected furniture depth of field", () => {
   it("disables aperture blur when off and keeps default bokeh subtle", () => {
     expect(photographicBokeh(false, 3)).toBe(0);
     expect(photographicBokeh(true, 3)).toBe(6);
+    expect(photographicBokeh(true, 1)).toBe(2);
+    expect(photographicBokeh(true, 1.1)).toBeCloseTo(2.2);
+    expect(architecturalDofSettings({ dofRenderVersion: 1, dofStrength: 1.1 })).toEqual({ depthOfField: true, dofStrength: 1.1 });
   });
 });
