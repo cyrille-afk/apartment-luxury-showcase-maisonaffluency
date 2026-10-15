@@ -11,7 +11,7 @@ import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart }
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
-import { applyMatteTextile, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
+import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
 
 export type PlacedObject = {
   instanceId: string;
@@ -211,6 +211,7 @@ function clonePbrMaterial(source: THREE.Material, finish: VisualiserMaterial | n
   // Fabrics (high roughness) need deeper normals so bouclé reads under grazing key light.
   const n = finish && isTextileMaterial(finish) ? 0.85 : 0.35;
   material.normalScale.set(n, n);
+  if (!isFabric && finish) applyPolishedMarble(material, `${finish.name} ${finish.material_type ?? ""} ${finish.category ?? ""}`);
   material.transparent = original.transparent;
   material.side = original.side;
   material.userData.visualiserClone = true;
@@ -326,6 +327,7 @@ function useFittedModel(object: PlacedObject) {
           material.userData.visualiserClone = true;
           if (role === "upholstery" || role === "backrest") applyMatteTextile(material);
           if ((role === "upholstery" || role === "backrest") && material.normalMap) material.normalScale.multiplyScalar(1.2);
+          if (role !== "upholstery" && role !== "backrest") applyPolishedMarble(material, `${entry.name} ${mesh.name}`);
           return material;
         });
         mesh.material = Array.isArray(mesh.material) ? next : next[0];

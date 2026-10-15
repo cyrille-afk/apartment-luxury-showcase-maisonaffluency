@@ -37,6 +37,16 @@ export function applyMatteTextile(material: THREE.MeshStandardMaterial): void {
   if (material instanceof THREE.MeshPhysicalMaterial) material.clearcoat = 0;
 }
 
+/** Polish identified marble only; keep its veining and authored surface maps. */
+export function applyPolishedMarble(material: THREE.MeshStandardMaterial, finishName: string): boolean {
+  if (!/\bmarble\b/i.test(finishName.replace(/[_-]/g, " "))) return false;
+  material.roughness = 0.15;
+  material.metalness = 0;
+  material.metalnessMap = null;
+  material.needsUpdate = true;
+  return true;
+}
+
 /** Preserve authored maps and transparency when upgrading legacy unlit materials. */
 export function toPbrMaterial(source: THREE.Material): THREE.MeshStandardMaterial {
   if (source instanceof THREE.MeshStandardMaterial) {

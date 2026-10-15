@@ -1,8 +1,30 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { SHOWROOM, applyMatteTextile, floorSurfaceRoughness, floorRoughnessTexel, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "./showroomRendering";
+import { SHOWROOM, applyMatteTextile, applyPolishedMarble, floorSurfaceRoughness, floorRoughnessTexel, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "./showroomRendering";
 
 describe("showroom rendering", () => {
+  it("sets marble roughness to 0.15 while retaining veining and roughness maps", () => {
+    const material = new THREE.MeshPhysicalMaterial({ roughness: 0.9, map: new THREE.Texture(), roughnessMap: new THREE.Texture() });
+    const map = material.map, roughnessMap = material.roughnessMap;
+    expect(applyPolishedMarble(material, "TableTop_Marble_Carrara")).toBe(true);
+    expect(material.roughness).toBe(0.15);
+    expect(material.map).toBe(map);
+    expect(material.roughnessMap).toBe(roughnessMap);
+  });
+  it("keeps polished marble dielectric with zero metalness", () => {
+    const material = new THREE.MeshStandardMaterial({ metalness: 0.8, metalnessMap: new THREE.Texture() });
+    applyPolishedMarble(material, "Marble Nero Marquina");
+    expect(material.metalness).toBe(0);
+    expect(material.metalnessMap).toBeNull();
+  });
+  it("does not polish wood, upholstery, metal or other stone finishes", () => {
+    for (const name of ["Oak Table Top", "Bouclé", "Brass Base", "Honed Limestone"]) {
+      const material = new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0.4 });
+      expect(applyPolishedMarble(material, name)).toBe(false);
+      expect(material.roughness).toBe(0.85);
+      expect(material.metalness).toBe(0.4);
+    }
+  });
   it("repairs missing UVs without modifying the cached geometry", () => {
     const source = new THREE.BoxGeometry(1, 2, 1);
     source.deleteAttribute("uv");
