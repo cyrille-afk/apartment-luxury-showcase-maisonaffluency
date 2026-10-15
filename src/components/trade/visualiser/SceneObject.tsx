@@ -12,6 +12,8 @@ import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type Pa
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
 import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
+import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry } from "@/lib/visualiserSubdivision";
+import type { OpenSubdivModule } from "@nasedkinpv/opensubdiv-wasm";
 
 export type PlacedObject = {
   instanceId: string;
@@ -304,6 +306,12 @@ function useFittedModel(object: PlacedObject) {
     ...Object.values(holder.partMaterials ?? {}),
   ], maxAnisotropy);
   const partOverrides = usePartOverrides(productId);
+  const [subdivision, setSubdivision] = useState<OpenSubdivModule | null>(null);
+  useEffect(() => {
+    let active = true;
+    void loadSubdivisionEngine().then((module) => { if (active) setSubdivision(module); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   return useMemo(() => {
     const clone = scene.clone(true);
     const groupLabels = assignParts(clone, partOverrides, findProductSchema(object.product_name)?.materialRoles ?? {});
@@ -313,10 +321,12 @@ function useFittedModel(object: PlacedObject) {
       if (!mesh.isMesh) return;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      const smoothGeometry = withSmoothAssetNormals(mesh.geometry);
+      const role = mesh.userData.partRole as FinishPart | null;
+      const subdivided = subdivision && isCurvedFurniturePart(object.product_name, role, `${mesh.name} ${mesh.parent?.name ?? ""}`)
+        ? subdivideCurvedGeometry(mesh.geometry, subdivision) : mesh.geometry;
+      const smoothGeometry = subdivided !== mesh.geometry ? subdivided : withSmoothAssetNormals(mesh.geometry);
       mesh.geometry = withFallbackTextureCoordinates(smoothGeometry);
       if (mesh.geometry !== smoothGeometry) smoothGeometry.dispose();
-      const role = mesh.userData.partRole as FinishPart | null;
       // Upholstery never inherits the whole-piece finish; other parts fall back to it.
       const finish = meshPartMaterial(holder, role);
       const neutralFabric = isBondStreetStool(productId) && role === "upholstery" && !finish;
@@ -339,7 +349,7 @@ function useFittedModel(object: PlacedObject) {
       mesh.material = Array.isArray(mesh.material) ? next : next[0];
     });
     return groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
-  }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation]);
+  }, [scene, partOverrides, holder, maps, productId, object.dimensions, url, object.modelOrientation, subdivision]);
 }
 
 /** Pieces always rest on the floor plane (Y = 0). */

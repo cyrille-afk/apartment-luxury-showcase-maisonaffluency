@@ -31,6 +31,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/cloud-auth-js": "^1.2.0",
     "@lovable.dev/mcp-js": "^3.0.4",
+    "@nasedkinpv/opensubdiv-wasm": "0.2.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",

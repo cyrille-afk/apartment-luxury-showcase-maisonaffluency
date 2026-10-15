@@ -1,3 +1,4 @@
+- [x] Selectively subdivide curved furniture once with OpenSubdiv Catmull-Clark; 22 tests pass, loaded Frenchmen/GUM upholstery and Cinnamon column/shade confirm level 1 with structural parts unchanged; real-GPU photoreal convergence remains unverified.
 - [x] Upgrade showroom lighting with HDR reflections and preserve current layout.
 - [x] Reduce floor halo: lower environment lighting, oak roughness 0.4–0.6 with normalized map, neutral ACES exposure; 22 tests pass, build clean, signed-in furnished before/after confirms restored floor detail (real-GPU photoreal unverified).
 - [x] Verify floor/furniture PBR roughness maps and smooth curved GLTF shading without changing the layout; 20 tests pass, build clean, signed-in Frenchmen Street chair renders on oak floor (real-GPU photoreal quality unverified).
