@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { WebGLPathTracer, PhysicalCamera } from "three-gpu-pathtracer";
 import { photographicBokeh, photographicFocusDistance } from "@/lib/visualiserDepthOfField";
-import { adaptPathTraceTiles, DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
+import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 
@@ -20,7 +20,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
   const lastFocus = useRef({ distance: -1, bokeh: -1 });
   const report = useRef(onSamples);
   report.current = onSamples;
-  const state = useRef({ ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: 0, reportedAt: 0, samples: -1, tiles: 2, lastFrameAt: 0, world: new THREE.Matrix4(), projection: new THREE.Matrix4() });
+  const state = useRef({ ready: false, failed: false, dirty: true, revision: "", environment: "", checkedAt: 0, movedAt: 0, reportedAt: 0, samples: -1, world: new THREE.Matrix4(), projection: new THREE.Matrix4() });
   const retained = useRef<HTMLCanvasElement | null>(null);
   const retainFrame = () => {
     const pt = tracer.current;
@@ -166,12 +166,6 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       const cap = maxSamples.current;
       const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
-      // Time only real sampling frames; adapt the tile split so one frame never stalls the GPU.
-      if (!pt.pausePathTracing && current.lastFrameAt > 0) {
-        const tiles = adaptPathTraceTiles(current.tiles, now - current.lastFrameAt);
-        if (tiles !== current.tiles) { current.tiles = tiles; pt.tiles.set(tiles, tiles); }
-      }
-      current.lastFrameAt = pt.pausePathTracing ? 0 : now;
       pt.renderSample();
       const samples = Math.floor(pt.samples);
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
