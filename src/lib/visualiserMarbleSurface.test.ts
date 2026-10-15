@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { applyMarbleSurface, physicalCoffeeTableMarble } from "./visualiserMarbleSurface";
-import { clampMarbleSurface, MARBLE_SURFACE_PRESETS, marbleSurfacePreset } from "./visualiserMarbleSettings";
+import { addCustomMarblePreset, clampMarbleSurface, customMarblePresetMatch, loadCustomMarblePresets, MARBLE_SURFACE_PRESETS, marbleSurfacePreset, saveCustomMarblePresets } from "./visualiserMarbleSettings";
 
 describe("coffee table marble controls", () => {
   it.each([
@@ -71,5 +71,27 @@ describe("coffee table marble controls", () => {
     expect(clampMarbleSurface()).toEqual({ roughness: 0.15, reflectivity: 0.5 });
     expect(clampMarbleSurface({ roughness: -2, reflectivity: 3 })).toEqual({ roughness: 0, reflectivity: 1 });
     expect(clampMarbleSurface({ roughness: NaN, reflectivity: Infinity })).toEqual({ roughness: 0.15, reflectivity: 0.5 });
+  });
+
+  it("saves, matches and reloads custom marble presets", () => {
+    const store = new Map<string, string>();
+    const storage = { getItem: (key: string) => store.get(key) ?? null, setItem: (key: string, value: string) => { store.set(key, value); } };
+    const presets = addCustomMarblePreset([], "Evening Stone", { reflectivity: 0.72, roughness: 0.42 });
+    expect(presets).toHaveLength(1);
+    expect(customMarblePresetMatch(presets, { reflectivity: 0.72, roughness: 0.42 })).toBe(presets[0]?.id);
+    expect(customMarblePresetMatch(presets, { reflectivity: 0.5, roughness: 0.15 })).toBeUndefined();
+    saveCustomMarblePresets(presets, storage);
+    expect(loadCustomMarblePresets(storage)).toEqual(presets);
+    const renamed = addCustomMarblePreset(presets, "evening stone", { reflectivity: 0.1, roughness: 0.9 });
+    expect(renamed).toHaveLength(1);
+    expect(renamed[0]?.settings).toEqual({ reflectivity: 0.1, roughness: 0.9 });
+  });
+
+  it("drops invalid stored custom presets", () => {
+    const storage = { getItem: () => JSON.stringify([{ id: "a", label: "Good", settings: { reflectivity: 0.3, roughness: 0.3 } }, { id: "b" }, { label: "No id", settings: {} }, "junk"]) };
+    const loaded = loadCustomMarblePresets(storage);
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0]?.label).toBe("Good");
+    expect(loadCustomMarblePresets({ getItem: () => "not json" })).toEqual([]);
   });
 });
