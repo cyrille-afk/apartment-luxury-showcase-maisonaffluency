@@ -1,4 +1,6 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
+import { clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
+import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRenderingOptions";
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
@@ -77,8 +79,6 @@ type CatalogueProduct = {
   source_pick_id: string | null;
 };
 
-type EnvironmentSourcePref = "empty-room-exr" | "studio-hdr";
-
 type PersistedSandbox = CeilingSettings & {
   backdropDataUrl: string | null;
   backdrop: string | null;
@@ -92,6 +92,7 @@ type PersistedSandbox = CeilingSettings & {
   dofStrength?: number;
   dofFocusSelected?: boolean;
   environmentSource?: EnvironmentSourcePref;
+  advancedRendering?: AdvancedRenderingSettings;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
   wallHeight?: number;
@@ -144,7 +145,8 @@ const readSandbox = (): PersistedSandbox => {
       depthOfField: parsed.depthOfField === true,
       dofStrength: typeof parsed.dofStrength === "number" && Number.isFinite(parsed.dofStrength) ? Math.min(10, Math.max(1, parsed.dofStrength)) : undefined,
       dofFocusSelected: parsed.dofFocusSelected !== false,
-      environmentSource: parsed.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr",
+      environmentSource: environmentSourcePref(parsed.environmentSource),
+      advancedRendering: clampAdvancedRendering(parsed.advancedRendering),
       floorFinish: roomFloorFinish(parsed.floorFinish),
       showRearWall: parsed.showRearWall !== false,
       wallHeight: clampWallHeight(parsed.wallHeight),
@@ -241,6 +243,7 @@ const TradeVisualiser = () => {
   const [dofStrength, setDofStrength] = useState<number>(initial.dofStrength ?? 3);
   const [dofFocusSelected, setDofFocusSelected] = useState<boolean>(initial.dofFocusSelected ?? true);
   const [environmentSource, setEnvironmentSource] = useState<EnvironmentSourcePref>(initial.environmentSource ?? "empty-room-exr");
+  const [advancedRendering, setAdvancedRendering] = useState(() => clampAdvancedRendering(initial.advancedRendering));
   const [floorFinish, setFloorFinish] = useState<RoomFloorFinish>(roomFloorFinish(initial.floorFinish));
   const [showRearWall, setShowRearWall] = useState(initial.showRearWall !== false);
   const [wallHeight, setWallHeight] = useState<number>(clampWallHeight(initial.wallHeight));
@@ -394,6 +397,7 @@ const TradeVisualiser = () => {
         dofStrength,
         dofFocusSelected,
         environmentSource,
+        advancedRendering,
         floorFinish,
         showRearWall,
         wallHeight, ceilingHeight, ceilingThickness, ceilingOpening,
@@ -425,7 +429,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness]);
+  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -842,6 +846,7 @@ const TradeVisualiser = () => {
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
+            advancedRendering={advancedRendering}
             floorFinish={floorFinish}
             showRearWall={showRearWall}
             wallHeight={wallHeight}
@@ -1059,7 +1064,7 @@ const TradeVisualiser = () => {
           <span className="h-5 w-px bg-border" />
           <ScenePresets
             className={toolbarButton}
-            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness })}
+            current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, showRug, backdropColor, backdropBrightness })}
             onLoad={(data) => {
               setSelectedId(null);
               setObjects(data.objects);
@@ -1072,7 +1077,8 @@ const TradeVisualiser = () => {
               setDepthOfField(data.depthOfField === true);
               if (typeof data.dofStrength === "number") setDofStrength(Math.min(10, Math.max(1, data.dofStrength)));
               setDofFocusSelected(data.dofFocusSelected !== false);
-              setEnvironmentSource(data.environmentSource === "studio-hdr" ? "studio-hdr" : "empty-room-exr");
+              setEnvironmentSource(environmentSourcePref(data.environmentSource));
+              setAdvancedRendering(clampAdvancedRendering(data.advancedRendering));
               setFloorFinish(roomFloorFinish(data.floorFinish));
               setShowRearWall(data.showRearWall !== false);
               setWallHeight(clampWallHeight(data.wallHeight));
@@ -1404,14 +1410,7 @@ const TradeVisualiser = () => {
             >
               [ &#128065;&#65039; Show Labels: {showLabels ? "On" : "Off"} ]
             </Button>
-            <Button variant="ghost"
-              className={cn(toolbarButton, environmentSource === "empty-room-exr" ? "border-primary text-primary" : "opacity-60")}
-              onClick={() => setEnvironmentSource((value) => (value === "empty-room-exr" ? "studio-hdr" : "empty-room-exr"))}
-              aria-pressed={environmentSource === "empty-room-exr"}
-              title="Switch the environment reflections between the uploaded empty-room EXR and the built-in studio HDRI"
-            >
-              [ &#9728; Lighting: {environmentSource === "empty-room-exr" ? "Empty Room" : "Studio"} ]
-            </Button>
+            <AdvancedRenderingOptions className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} />
             <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
             <Button variant="ghost"
               className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
