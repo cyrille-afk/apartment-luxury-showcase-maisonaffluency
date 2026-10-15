@@ -358,7 +358,7 @@ const VisualiserCanvas = ({
       toneMappingExposure: SHOWROOM.exposure,
       outputColorSpace: THREE.SRGBColorSpace,
     }}
-    dpr={[1, 1.5]}
+    dpr={Math.min(window.devicePixelRatio, 2)}
     onCreated={({ gl }) => {
       RectAreaLightUniformsLib.init();
       gl.toneMapping = THREE.ACESFilmicToneMapping;

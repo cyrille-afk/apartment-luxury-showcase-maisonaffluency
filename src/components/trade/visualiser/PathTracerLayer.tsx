@@ -12,7 +12,7 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   return true;
 };
 
-/** Owns the demand loop: cheap moving preview, progressive full-resolution GI at rest. */
+/** Owns the demand loop: native-quality tracing preview and progressive GI at rest. */
 const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
@@ -66,7 +66,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       pt.dynamicLowRes = true;
       pt.lowResScale = PATH_TRACING.movingScale;
       pt.renderScale = PATH_TRACING.settledScale;
-      pt.renderDelay = PATH_TRACING.settleMs;
+      pt.renderDelay = 0;
       pt.minSamples = PATH_TRACING.minSamples;
       pt.fadeDuration = PATH_TRACING.fadeMs;
       tracer.current = pt;
@@ -161,8 +161,8 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         pt.updateEnvironment(); // rebind lighting/background and reset old samples
         current.environment = environment;
       }
-      // During movement renderSample uses one quarter-resolution preview sample.
-      // Full-resolution tiles begin only after movement has settled.
+      // A full-resolution traced preview remains active through geometry resets;
+      // accumulation resumes once motion settles without reducing canvas DPR.
       const cap = maxSamples.current;
       const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
