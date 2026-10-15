@@ -16,3 +16,5 @@
 - Finish sub-tabs are named from the product schema ("Table Top", "Base Structure") or the model's own mesh/material names via `humanizePartName` — never "Part 1/2/3"; the tab row is one scrollable horizontal track (`overflow-x-auto whitespace-nowrap scrollbar-none`), never wrapping.
 
 - Visualiser render crashes are caught by SceneErrorBoundary and restore the last scene that rendered cleanly for 4s (visualiserSceneRecovery); a repeat crash within 30s resets to empty — prevents a crash loop.
+- Shared comparisons reuse playback paths to avoid drift; preset switches blend poses and retain playback state.
+- Advanced visualiser controls share visualiserAdvancedRendering mappings and persist with scenes/presets; hosted EXR pointers feed the same raster/path-traced environment loader so switching cannot drift between modes.

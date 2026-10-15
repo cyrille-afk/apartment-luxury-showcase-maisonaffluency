@@ -1,5 +1,6 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { CeilingSettings } from "./visualiserCeilingSettings";
+import type { AdvancedRenderingSettings, EnvironmentSourcePref } from "./visualiserAdvancedRendering";
 import type { RoomFloorFinish, RoomWallColor, RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 
 export type ScenePresetData = CeilingSettings & {
@@ -15,7 +16,8 @@ export type ScenePresetData = CeilingSettings & {
   /** DoF focus mode: true = clicked piece stays sharp, false = view centre. */
   dofFocusSelected?: boolean;
   /** Which HDRI the environment loads: empty-room EXR or built-in studio HDRI. */
-  environmentSource?: "empty-room-exr" | "studio-hdr";
+  environmentSource?: EnvironmentSourcePref;
+  advancedRendering?: AdvancedRenderingSettings;
   floorFinish?: RoomFloorFinish;
   showRearWall?: boolean;
   /** Wall height percentage of the full cyclorama (20–100). */
