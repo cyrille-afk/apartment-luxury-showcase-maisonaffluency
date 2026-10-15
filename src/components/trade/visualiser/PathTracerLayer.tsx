@@ -6,6 +6,7 @@ import { photographicBokeh, photographicFocusDistance } from "@/lib/visualiserDe
 import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQuality, tracedEnvironmentRevision, tracedRenderScale, tracedSceneRevision } from "@/lib/visualiserPathTracing";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
+import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -57,6 +58,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
     let pt: WebGLPathTracer | null = null;
     try {
       pt = new WebGLPathTracer(gl);
+      configureProgressivePresentation(pt);
       pt.bounces = PATH_TRACING.bounces;
       pt.transmissiveBounces = PATH_TRACING.transmissiveBounces;
       // No biased glossy blur: preserve authored reflections/refraction.
@@ -167,6 +169,8 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       const cap = maxSamples.current;
       const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
+      // The engine advances stratified pixel jitter once per complete sample.
+      // Keep one tile per tick; only publish once all four tiles share that sample.
       pt.renderSample();
       const samples = Math.floor(pt.samples);
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
