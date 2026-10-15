@@ -43,6 +43,7 @@ export function applyPolishedMarble(material: THREE.MeshStandardMaterial, finish
   material.roughness = 0.15;
   material.metalness = 0;
   material.metalnessMap = null;
+  material.userData.visualiserPolishedMarble = true;
   material.needsUpdate = true;
   return true;
 }
