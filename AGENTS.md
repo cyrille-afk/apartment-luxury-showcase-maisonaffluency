@@ -38,3 +38,4 @@
 - Visualiser rules: src/components/trade/visualiser/AGENTS.md; read before editing its components/page. Per-piece material controls persist with scene objects to keep presets consistent.
 - Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
 - Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
+- Curator-pick slugs: the set_curator_pick_slug trigger replaces truncated/ambiguous slugs (1–2 chars, cut-off untitled-piec…) with title slugs; curator_pick_slug_audit lists any remaining truncated/duplicate slugs — truncated slugs made product pages resolve to other designers' items. Old URLs go in src/lib/legacyProductSlugs.ts.
