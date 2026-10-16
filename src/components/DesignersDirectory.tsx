@@ -197,6 +197,8 @@ const INSTAGRAM_LINKS: Record<string, string> = {
 // ─── Hover-pick image overrides (keyed by DB slug) ───────────────────────────
 // Used for the card hover/tap reveal that normally shows the first curator pick.
 const HOVER_PICK_OVERRIDES: Record<string, string> = {
+  "gilles-boissier":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1792116642/Screen_Shot_2026-10-16_at_10.09.56_AM_db4xmh.png",
   "amelie-vermersch":
     "https://res.cloudinary.com/dif1oamtj/image/upload/v1787568580/maison%20affluency/curators-picks/Amelie%20Vermersch/maj-stool-variants-01.jpg",
   "arnold-madsen":
@@ -676,9 +678,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
           </div>
         )}
         {/* Hover/tap reveal — first curator pick fades in over the portrait (desktop: hover; mobile/PWA: tap) */}
-        {hasHoverPick && (
+        {hasHoverPick && hoverPickImageUrl && (
           <img
-            {...cldResponsiveImg(hoverPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
+            {...cldResponsiveImg(hoverPickImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
             alt=""
             aria-hidden="true"
             draggable={false}
