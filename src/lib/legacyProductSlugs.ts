@@ -24,6 +24,16 @@ export const LEGACY_PRODUCT_SLUGS: Record<string, Record<string, string>> = {
   "emma-donnersberg": {
     y: "yucca-console-travertin",
   },
+  // Truncated slugs fixed 2026-10-16.
+  "gilles-boissier": {
+    "a-2": "albus-dining-chair", "a-3": "alda-table-lamp", "t-3": "amarre", a: "atlas-gueridon-table",
+    "c-3": "caliope-sofa", c: "cere-coffee-table", "c-2": "circe-armchair", "d-2": "delphes",
+    d: "demeter-coffee-table", "d-3": "diane-banquette", e: "egee-dining-table", p: "grand-plume",
+    h: "helene-lamp", "untitled-piecei": "isis-armchair", i: "isos-room-divider", "i-2": "ithaque-dining-table",
+    j: "jumeaux", l: "lascaux-table-lamp", "untitled-piec-2": "morphee-bed", "untitled-piec": "muse-guedridon-table",
+    "p-2": "paro-bench", "s-3": "selene-table-lamp", "s-2": "seurat-table-lamp", s: "songe-pendant-light",
+    t: "thetis-coffee-table", "t-2": "titan-sideboard", "t-4": "totem-floor-lamp",
+  },
   "oa-london": {
     a: "avena-wall-light",
     h: "horas-dining-table",
