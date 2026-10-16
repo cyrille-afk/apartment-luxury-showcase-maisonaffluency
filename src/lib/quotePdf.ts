@@ -671,7 +671,7 @@ function drawCompanyAndMeta(
   // When we have structured company info, the CLIENT field shows ONLY the
   // company (the contact is rendered in its own CONTACT panel below to avoid
   // duplication). Falls back to legacy clientName parsing otherwise.
-  const company = (args.clientCompany ?? "").trim();
+  const company = displayNameForContact((args.clientCompany ?? "").trim()) || "";
   let clientLines: string[];
   if (company) {
     clientLines = [company];
