@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { displayNameForContact } from "@/lib/quoteContact";
 
 export type PickedClient = {
   id: string;
@@ -38,6 +39,8 @@ type Props = {
   showManageLink?: boolean;
   /** Render the inline contact details + manage link (default true). Set false when the parent renders its own card. */
   showContactDetails?: boolean;
+  /** Quote-only display formatting; selection and saved names stay untouched. */
+  readableNames?: boolean;
   /** Fires whenever the resolved client (with primary contact) changes, including on initial load. */
   onResolved?: (client: PickedClient | null) => void;
   className?: string;
@@ -54,7 +57,7 @@ type ContactRow = {
 
 export default function ClientPicker({
   value, onChange, size = "md", placeholder = "Select a client…",
-  disabled, showManageLink = true, showContactDetails = true, onResolved, className,
+  disabled, showManageLink = true, showContactDetails = true, readableNames = false, onResolved, className,
 }: Props) {
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
@@ -216,7 +219,7 @@ export default function ClientPicker({
               )}
             >
               <span className={cn("truncate", !picked && "text-muted-foreground")}>
-                {picked ? picked.name : placeholder}
+                {picked ? (readableNames ? displayNameForContact(picked.name, picked.primary_contact?.email) : picked.name) : placeholder}
               </span>
               <ChevronsUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
             </button>
@@ -269,12 +272,12 @@ export default function ClientPicker({
                       <Check className={cn("h-4 w-4 mt-0.5 shrink-0", isSel ? "opacity-100 text-primary" : "opacity-0")} />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-body text-sm text-foreground truncate">{c.name}</span>
+                          <span className="font-body text-sm text-foreground truncate">{readableNames ? displayNameForContact(c.name, p?.email) : c.name}</span>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.type}</span>
                         </div>
                         {p && (
                           <div className="text-xs font-body text-muted-foreground truncate">
-                            {[p.first_name, p.last_name].filter(Boolean).join(" ")}
+                            {readableNames ? displayNameForContact([p.first_name, p.last_name].filter(Boolean).join(" "), p.email) : [p.first_name, p.last_name].filter(Boolean).join(" ")}
                             {p.email && <> · {p.email}</>}
                           </div>
                         )}
@@ -309,7 +312,7 @@ export default function ClientPicker({
         <div className="text-xs font-body text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5">
           <span className="flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
-            {[picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" ") || "—"}
+            {(readableNames ? displayNameForContact([picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" "), picked.primary_contact.email) : [picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" ")) || "—"}
             {picked.primary_contact.role_title && <> · {picked.primary_contact.role_title}</>}
           </span>
           {picked.primary_contact.email && <span>{picked.primary_contact.email}</span>}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { displayNameForContact, suggestEmailName } from "@/lib/quoteContact";
+import { displayNameForContact as emailDisplayName } from "../../../supabase/functions/_shared/quoteContactDisplay";
 
 describe("suggestEmailName", () => {
   it("title-cases dotted local parts", () => {
@@ -8,6 +9,13 @@ describe("suggestEmailName", () => {
 });
 
 describe("displayNameForContact", () => {
+  it("uses the same readable name for editor/PDF and quote emails without mutating saved details", () => {
+    const contact = Object.freeze({ name: "pollyanna.baker", email: "pollyanna.baker@icloud.com" });
+    expect(displayNameForContact(contact.name, contact.email)).toBe("Pollyanna Baker");
+    expect(emailDisplayName(contact.name, contact.email)).toBe("Pollyanna Baker");
+    expect(contact.name).toBe("pollyanna.baker");
+    expect(emailDisplayName("Maison Affluency")).toBe("Maison Affluency");
+  });
   it("renders an email local-part name as a person name (no dot)", () => {
     expect(displayNameForContact("pollyanna.baker", "pollyanna.baker@icloud.com")).toBe("Pollyanna Baker");
   });

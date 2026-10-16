@@ -6,6 +6,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
 import { formatCurrency } from './currency.ts'
+import { displayNameForContact } from '../quoteContactDisplay.ts'
 
 const SITE_NAME = 'Maison Affluency'
 
@@ -52,7 +53,7 @@ const ClientQuotePaymentEmail = ({
         <Hr style={divider} />
 
         <Heading style={h1}>
-          {recipientName ? `Dear ${recipientName},` : 'Dear Client,'}
+          {`Dear ${displayNameForContact(recipientName) || 'Client'},`}
         </Heading>
 
         <Text style={text}>

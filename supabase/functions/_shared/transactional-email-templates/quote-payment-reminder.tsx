@@ -5,6 +5,7 @@ import {
   Body, Container, Head, Heading, Html, Preview, Text, Button, Img, Hr, Section,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.tsx'
+import { displayNameForContact } from '../quoteContactDisplay.ts'
 import { formatCurrency } from './currency.ts'
 
 const SITE_NAME = 'Maison Affluency'
@@ -43,7 +44,7 @@ const QuotePaymentReminderEmail = ({
         </Section>
         <Hr style={divider} />
 
-        <Heading style={h1}>{recipientName ? `Dear ${recipientName},` : 'Dear Client,'}</Heading>
+          <Heading style={h1}>{`Dear ${displayNameForContact(recipientName) || 'Client'},`}</Heading>
 
         <Text style={text}>
           {secondReminder

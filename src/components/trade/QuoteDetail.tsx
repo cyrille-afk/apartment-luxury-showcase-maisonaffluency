@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveQuoteContact } from "@/lib/quoteContact";
+import { displayNameForContact, resolveQuoteContact } from "@/lib/quoteContact";
 import ManualFreightQuote from "@/components/trade/ManualFreightQuote";
 import { packingMissing } from "@/lib/manualFreight";
 import { getQuoteBankTransfer } from "@/config/quoteBankTransfer";
@@ -435,6 +435,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [quotePdfLocale, setQuotePdfLocale] = useState<PdfLocalePreset | null>(null);
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
+  const [shipToNameEditing, setShipToNameEditing] = useState(false);
+  const shipToNameBeforeEdit = useRef("");
   const [clientId, setClientId] = useState<string | null>(null);
   const [clientApproval, setClientApproval] = useState<{ approved: boolean; email: string | null; status: string | null }>({ approved: false, email: null, status: null });
   const [emailLog, setEmailLog] = useState<Array<{ id: string; recipient_email: string; sent_by_email: string | null; created_at: string; note: string | null }>>([]);
@@ -2759,7 +2761,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 }
                 setEmailSubject(`Quote ${quoteNumber} from Maison Affluency${projectName ? ` — ${projectName}` : ""}`);
                 setEmailBody(
-                  `Dear ${(clientName || "Client").split(" ")[0]},\n\n` +
+                  `Dear ${(displayNameForContact(clientName, shipTo.email) || "Client").split(" ")[0]},\n\n` +
                   `Please use the secure PDF download link below to view quote ${quoteNumber}${projectName ? ` for ${projectName}` : ""}.\n\n` +
                   `Do let us know if you have any questions or would like to proceed.\n\n` +
                   `With kind regards,\nMaison Affluency`
@@ -2885,6 +2887,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <ClientPicker
                     value={clientId}
                     size="sm"
+                    readableNames
                     showManageLink={false}
                     placeholder="Select or create a client…"
                     onChange={(c) => {
@@ -2936,7 +2939,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div>
                     <span className="text-[10px] text-muted-foreground uppercase tracking-widest block">Client</span>
                     <p className="font-display text-sm text-foreground uppercase tracking-wider">
-                      {clientName}
+                      {displayNameForContact(clientName, shipTo.email)}
                     </p>
                   </div>
                 )
@@ -3018,9 +3021,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-0.5">{labelMap[key]}</span>
                             <input
                               type="text"
-                              value={shipTo[key] || ""}
+                              value={key === "name" && !shipToNameEditing ? (displayNameForContact(shipTo.name, shipTo.email) || "") : (shipTo[key] || "")}
+                              onFocus={() => {
+                                if (key === "name") {
+                                  shipToNameBeforeEdit.current = shipTo.name || "";
+                                  setShipToNameEditing(true);
+                                }
+                              }}
                               onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
                               onBlur={async (e) => {
+                                if (key === "name") {
+                                  setShipToNameEditing(false);
+                                  // Merely focusing a formatted name must never rewrite the saved identity.
+                                  if (e.target.value === shipToNameBeforeEdit.current) return;
+                                }
                                 const { error } = await supabase.from("trade_quotes")
                                   .update({ [dbCol]: e.target.value || null } as any)
                                   .eq("id", quoteId);
@@ -3044,7 +3058,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       Ship to {incoterm ? `· ${incoterm}` : ""}
                     </span>
                     <p className="font-body text-xs text-foreground leading-relaxed">
-                      {[shipTo.name, shipTo.attention].filter(Boolean).join(" — ")}
+                      {[displayNameForContact(shipTo.name, shipTo.email), shipTo.attention].filter(Boolean).join(" — ")}
                       {shipTo.address1 && <><br />{shipTo.address1}</>}
                       {shipTo.address2 && <><br />{shipTo.address2}</>}
                       {(shipTo.city || shipTo.postal_code) && <><br />{[shipTo.postal_code, shipTo.city].filter(Boolean).join(" ")}{shipTo.state ? `, ${shipTo.state}` : ""}</>}
@@ -4633,7 +4647,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       quoteCurrency={currency}
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
-                      clientName={clientName || null}
+                      clientName={displayNameForContact(clientName, shipTo.email)}
                       initialCbm={landedCostSettings.cbm}
                       initialKg={landedCostSettings.kg}
                       initialMode={landedCostSettings.mode}
@@ -4650,7 +4664,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       quoteCurrency={currency}
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
-                      clientName={clientName || null}
+                      clientName={displayNameForContact(clientName, shipTo.email)}
                       initialCbm={hkLandedSettings.cbm}
                       initialKg={hkLandedSettings.kg}
                       initialMode={hkLandedSettings.mode}
@@ -5219,7 +5233,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <span className="text-foreground">Maison Affluency &lt;notify@maisonaffluency.com&gt;</span>
               <span className="uppercase tracking-[0.12em] text-muted-foreground">To</span>
               <div>
-                <span className="text-foreground">{clientName ? `${clientName} <${clientApproval.email ?? "—"}>` : (clientApproval.email ?? "—")}</span>
+                <span className="text-foreground">{clientName ? `${displayNameForContact(clientName, clientApproval.email)} <${clientApproval.email ?? "—"}>` : (clientApproval.email ?? "—")}</span>
                 {(() => {
                   const email = (clientApproval.email ?? "").trim();
                   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
