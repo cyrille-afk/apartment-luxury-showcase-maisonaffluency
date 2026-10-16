@@ -375,9 +375,19 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
 
   const handleAdd = async () => {
     const order = picks.length;
+    // New items inherit the designer's saved pickup details from any sibling
+    // pick that has them, even before packing dimensions are entered.
+    const donor = picks.find((p: any) => p.pickup_address || p.pickup_country || p.pickup_postcode) as any;
+    const inherited = donor
+      ? {
+          pickup_address: donor.pickup_address || null,
+          pickup_country: donor.pickup_country || null,
+          pickup_postcode: donor.pickup_postcode || null,
+        }
+      : {};
     const { data, error } = await supabase
       .from("designer_curator_picks")
-      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order } as any)
+      .insert({ designer_id: designerId, title: "Untitled Piece", image_url: "", sort_order: order, ...inherited } as any)
       .select()
       .single();
     if (error) {
