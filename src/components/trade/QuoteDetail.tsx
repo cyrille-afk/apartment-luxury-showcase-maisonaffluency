@@ -3530,6 +3530,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   if (b === "Unassigned") return -1;
                   return 0;
                 });
+                // No rooms at all (e.g. a private client's single item): no room heading.
+                const roomless = keys.length === 1 && keys[0] === "Unassigned";
                 return keys.map((roomKey) => {
                   const groupItems = groups.get(roomKey)!;
                   const groupSubtotal = groupItems.reduce((sum, it) => {
@@ -3539,9 +3541,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   }, 0);
                   return (
                     <div key={roomKey} className="border-t border-border first:border-t-0">
-                      <div className="flex items-center justify-between gap-3 pt-4 pb-2">
+                      {!roomless && <div className="flex items-center justify-between gap-3 pt-4 pb-2">
                         <h3 className="font-display text-[11px] md:text-xs text-foreground uppercase tracking-widest">
-                          {roomKey}
+                          {roomKey === "Unassigned" ? "Other items" : roomKey}
                           <span className="ml-2 font-body text-[10px] text-muted-foreground normal-case tracking-normal">
                             · {groupItems.length} {groupItems.length === 1 ? "item" : "items"}
                           </span>
@@ -3549,7 +3551,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <span className="font-body text-[10px] md:text-[11px] text-muted-foreground tabular-nums">
                           {groupSubtotal > 0 ? `${currencySymbol(currency)} ${formatPriceRaw(groupSubtotal, currency)}` : ""}
                         </span>
-                      </div>
+                      </div>}
                       <div className="divide-y divide-border">
                         {groupItems.map((item) => {
                   const product = item.trade_products;
