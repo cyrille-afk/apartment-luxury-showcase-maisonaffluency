@@ -1928,6 +1928,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       }
     }
 
+    // Same-address quotes still need the captured client contact, even when
+    // no address-book client or postal address has been recorded.
+    if (shipToSameAsBill) {
+      clientContact = {
+        ...clientContact,
+        ...resolveQuoteContact(clientContact ?? {}, shipTo),
+      };
+    }
+
     return {
       quoteNumber,
       status: quoteStatus,
@@ -2931,6 +2940,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     </p>
                   </div>
                 )
+              )}
+
+              {!isDraft && shipToSameAsBill && (shipTo.email || shipTo.phone) && (
+                <div className="mt-1 space-y-0.5 font-body text-xs text-foreground leading-relaxed break-words">
+                  {shipTo.email && <p>{shipTo.email}</p>}
+                  {shipTo.phone && <p>Tel: {shipTo.phone}</p>}
+                </div>
               )}
 
               {/* Ship-to & Incoterm */}
