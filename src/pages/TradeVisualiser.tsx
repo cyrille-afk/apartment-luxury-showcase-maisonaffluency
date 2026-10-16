@@ -1,4 +1,4 @@
-import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
+import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
@@ -1419,13 +1419,47 @@ const TradeVisualiser = () => {
             </Button>
             {pathTrace && (
               <>
-                <label className={cn(toolbarButton, "gap-1")} title={`Presets adapt samples and resolution to this device's graphics (${gpuTier} performance). Walls, columns and mezzanine always stay in the render.`}>
-                  Preset
-                  <select aria-label="Photoreal preset" className="bg-transparent outline-none" value={matchPhotorealPreset(ptQuality, gpuTier)}
-                    onChange={(e) => { if (e.target.value === "custom") return; setPtSamples(0); setPtQuality(photorealPreset(e.target.value as PhotorealPresetName, gpuTier, ptQuality.lightIntensity)); }}>
-                    <option value="balanced">Balanced</option><option value="high">High Quality</option><option value="custom" disabled>Custom</option>
-                  </select>
-                </label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className={cn(toolbarButton, "min-w-[17ch] justify-between")} aria-label="Photoreal preset"
+                      title={`Presets adapt samples and resolution to this device's graphics (${GPU_TIER_LABEL[gpuTier]} performance). Walls, columns and mezzanine always stay in the render.`}>
+                      Preset: {activePhotorealPreset === "custom" ? "Custom" : PHOTOREAL_PRESET_LABEL[activePhotorealPreset]}
+                      <span aria-hidden="true">▾</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="top" className="z-[90] w-72">
+                    <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Graphics: {GPU_TIER_LABEL[gpuTier]} performance
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuRadioGroup value={activePhotorealPreset} onValueChange={(value) => {
+                      if (value === "custom") return;
+                      setPtSamples(0);
+                      setPtQuality(photorealPreset(value as PhotorealPresetName, gpuTier, ptQuality.lightIntensity));
+                    }}>
+                      {(Object.keys(PHOTOREAL_PRESET_LABEL) as PhotorealPresetName[]).map((name) => {
+                        const settings = photorealPresetSettings(name, gpuTier);
+                        return (
+                          <DropdownMenuRadioItem key={name} value={name}>
+                            <span className="flex flex-col gap-0.5 py-0.5">
+                              <span>{PHOTOREAL_PRESET_LABEL[name]}</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {sampleCountLabel(settings.maxSamples)} · {renderScaleLabel(settings.renderScale)} resolution · {previewScaleLabel(settings.previewScale)} preview
+                              </span>
+                            </span>
+                          </DropdownMenuRadioItem>
+                        );
+                      })}
+                    </DropdownMenuRadioGroup>
+                    <DropdownMenuSeparator />
+                    <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
+                      <div className="mb-0.5 uppercase tracking-[0.15em]">
+                        Active{activePhotorealPreset === "custom" ? " · custom settings" : ""}
+                      </div>
+                      <div className="tabular-nums text-foreground/80">{photorealQualitySummary(ptQuality)}</div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <label className={cn(toolbarButton, "gap-1")} title="Resolution used while the camera is moving">
                   Preview
                   <select aria-label="Preview quality" className="bg-transparent outline-none" value={ptQuality.previewScale} onChange={(e) => setPtQuality({ previewScale: Number(e.target.value) })}>

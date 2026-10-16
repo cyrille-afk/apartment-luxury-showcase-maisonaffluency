@@ -133,3 +133,26 @@ export function detectGpuTier(): GpuTier {
     return classifyGpu(String(renderer), navigator.hardwareConcurrency || 4);
   } catch { return "mid"; }
 }
+
+/** Human label for the detected GPU class, shown in the preset menu. */
+export const GPU_TIER_LABEL: Record<GpuTier, string> = { low: "Low", mid: "Mid", high: "High" };
+
+/** Menu labels for the built-in presets, so the toolbar and the menu cannot drift apart. */
+export const PHOTOREAL_PRESET_LABEL: Record<PhotorealPresetName, string> = { balanced: "Balanced", high: "High Quality" };
+
+/** Sampling/resolution a preset applies on this GPU class (the menu reads the same table presets come from). */
+export const photorealPresetSettings = (name: PhotorealPresetName, tier: GpuTier) => PRESETS[name][tier];
+
+/** "512 samples" / "Unlimited samples" for display. */
+export const sampleCountLabel = (maxSamples: number) => (maxSamples > 0 ? `${maxSamples} samples` : "Unlimited samples");
+
+/** "100%" for display. */
+export const renderScaleLabel = (renderScale: number) => `${Math.round(renderScale * 100)}%`;
+
+/** Preview wording matching the toolbar's Draft/Low/Medium/Full options. */
+export const previewScaleLabel = (previewScale: number) =>
+  previewScale <= 0.15 ? "Draft" : previewScale <= 0.25 ? "Low" : previewScale <= 0.5 ? "Medium" : "Full";
+
+/** Active sampling and resolution readout shown at the foot of the preset menu. */
+export const photorealQualitySummary = (q: PathTraceQuality) =>
+  `${sampleCountLabel(q.maxSamples)} · ${renderScaleLabel(q.renderScale)} resolution · ${previewScaleLabel(q.previewScale)} preview`;
