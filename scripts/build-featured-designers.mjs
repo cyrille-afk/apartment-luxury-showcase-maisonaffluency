@@ -44,6 +44,7 @@ const FEATURED_SLUGS = [
   "delcourt-collection",
   "emmanuel-levet-stenne",
   "garnier-linker",
+  "gilles-boissier",
   "collection-particuliere",
   "hamrei",
   "humbert-poyet",

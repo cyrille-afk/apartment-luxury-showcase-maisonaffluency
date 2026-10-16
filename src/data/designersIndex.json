@@ -68,6 +68,10 @@
     "name": "Toulemonde Bochart"
   },
   {
+    "slug": "gilles-boissier",
+    "name": "Gilles & Boissier"
+  },
+  {
     "slug": "pierre-bonnefille",
     "name": "Pierre Bonnefille"
   },
@@ -364,6 +368,10 @@
     "name": "Ozone"
   },
   {
+    "slug": "studio-parisien",
+    "name": "Studio Parisien"
+  },
+  {
     "slug": "stephane-parmentier",
     "name": "Stéphane Parmentier"
   },
@@ -422,10 +430,6 @@
   {
     "slug": "saint-louis",
     "name": "Saint-Louis"
-  },
-  {
-    "slug": "eric-schmitt-studio",
-    "name": "Eric Schmitt Studio"
   },
   {
     "slug": "leo-sentou",

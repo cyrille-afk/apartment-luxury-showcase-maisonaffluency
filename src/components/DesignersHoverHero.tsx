@@ -335,6 +335,7 @@ const FEATURED_GROUPS = [
       "emmanuel-levet-stenne",
 
       "garnier-linker",
+      "gilles-boissier",
       "hamrei",
       "collection-particuliere",
       "humbert-poyet",
@@ -349,7 +350,7 @@ const FEATURED_GROUPS = [
 ];
 
 const MOBILE_ONLY_EXCLUDED_DESIGNERS = new Set(["paul-laszlo", "pouenat"]);
-const DESKTOP_ONLY_FEATURED_SLUGS = new Set(["garnier-linker"]);
+const DESKTOP_ONLY_FEATURED_SLUGS = new Set(["garnier-linker", "gilles-boissier"]);
 
 
 const MOBILE_BG_OVERRIDES: Record<string, string> = {
