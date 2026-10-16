@@ -64,7 +64,7 @@ export default function ManualFreightQuote(p: Props) {
         saved = data; setRecord(data);
       }
       if (!saved) throw new Error('Request was not saved');
-      const recipients = ['concierge@maisonaffluency.com', ...(isAdmin || isSuperAdmin ? ['cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com'] : [])];
+      const recipients = ['concierge@maisonaffluency.com', 'cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com'];
       for (const recipientEmail of recipients) {
         const { data, error } = await supabase.functions.invoke('send-transactional-email', { body: {
           templateName: 'manual-shipping-quote-request', recipientEmail,
