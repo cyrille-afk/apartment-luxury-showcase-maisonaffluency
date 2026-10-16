@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyGpu, photorealPreset, matchPhotorealPreset } from "../visualiserPathTracing";
+import { classifyGpu, photorealPreset, matchPhotorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, sampleCountLabel, renderScaleLabel, previewScaleLabel, photorealQualitySummary } from "../visualiserPathTracing";
 
 describe("Photoreal presets", () => {
   it("classifies software GPUs as low and discrete as high", () => {
