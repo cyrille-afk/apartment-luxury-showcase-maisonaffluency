@@ -13,6 +13,8 @@ import FunnelReminderPauseToggle from "@/components/trade/FunnelReminderPauseTog
 import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
 import OutboundMetricsCard from "@/components/trade/OutboundMetricsCard";
 
+import { suggestEmailName } from "@/lib/quoteContact";
+
 const RANGES = [
   { id: 7, label: "Last 7 days" },
   { id: 30, label: "Last 30 days" },
@@ -65,6 +67,16 @@ const EntryCard = ({ entry, urgent = false, quoteCard = false }: { entry: Funnel
         {entry.email && entry.sublabel && (
           <p className="mt-0.5 truncate font-body text-[10px] text-muted-foreground/80">
             {entry.sublabel}
+          </p>
+        )}
+        {entry.phone && (
+          <p className="mt-0.5 font-body text-[11px] text-muted-foreground">
+            <a href={`tel:${entry.phone.replace(/[^+\d]/g, "")}`}>{entry.phone}</a>
+          </p>
+        )}
+        {suggestEmailName(entry.email) && entry.sublabel === entry.email?.split("@")[0] && (
+          <p className="mt-0.5 font-body text-[10px] text-muted-foreground" title="Suggested from the email address; identity has not been verified.">
+            Suggested name: {suggestEmailName(entry.email)} (unverified)
           </p>
         )}
       </div>

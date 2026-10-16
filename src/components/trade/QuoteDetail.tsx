@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveQuoteContact } from "@/lib/quoteContact";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
@@ -718,7 +719,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id, size_variants), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
-        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes, ceiling_ledger_mode, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label, pdf_locale").eq("id", quoteId).single(),
+        supabase.from("trade_quotes").select("currency, exchange_rate_at_creation, exchange_rate_base_currency, exchange_rate_locked_at, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes, ceiling_ledger_mode, target_ceiling_cents, client_markup_pct, ceiling_trade_discount_pct, ceiling_tier_label, pdf_locale, source_inquiry:inquiries!trade_quotes_source_inquiry_id_fkey(name, email, phone)").eq("id", quoteId).single(),
         user ? supabase.from("profiles").select("company, first_name, last_name").eq("id", user.id).single() : null,
       ]);
       let loadedItems = (itemsRes.data as QuoteItemWithProduct[]) || [];
@@ -1016,8 +1017,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         if (!q.ship_to_same_as_bill) setShipToOpen(true);
       }
       if (q?.incoterm) setIncoterm(q.incoterm as Incoterm);
+      const capturedContact = resolveQuoteContact({ name: q?.ship_to_name, email: q?.ship_to_email, phone: q?.ship_to_phone }, q?.source_inquiry);
       setShipTo({
-        name: q?.ship_to_name ?? "",
+        name: capturedContact.name,
         attention: q?.ship_to_attention ?? "",
         address1: q?.ship_to_address1 ?? "",
         address2: q?.ship_to_address2 ?? "",
@@ -1025,8 +1027,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         state: q?.ship_to_state ?? "",
         postal_code: q?.ship_to_postal_code ?? "",
         country: q?.ship_to_country ?? "",
-        phone: q?.ship_to_phone ?? "",
-        email: q?.ship_to_email ?? "",
+        phone: capturedContact.phone,
+        email: capturedContact.email,
         notes: q?.ship_to_notes ?? "",
       });
       if (profileRes?.data?.company) setClientCompany(profileRes.data.company);
