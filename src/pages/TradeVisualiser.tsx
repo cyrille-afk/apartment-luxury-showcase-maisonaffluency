@@ -1,4 +1,5 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, previewScaleLabel, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
+import { adaptiveSummary, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
@@ -39,6 +40,9 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+
+/** localStorage key for the adaptive Photoreal sampling preference (default on). */
+const PT_ADAPTIVE_KEY = "trade-visualiser-pt-adaptive-v1";
 import { BACKDROP_SWATCHES, WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampBackdropBrightness, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -256,6 +260,17 @@ const TradeVisualiser = () => {
   const [ptSamples, setPtSamples] = useState(0);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const [gpuTier] = useState<GpuTier>(() => detectGpuTier());
+  // Adaptive sampling (default on): measures real per-sample cost and steps
+  // resolution/samples down on slow GPUs and back up on fast ones.
+  const [ptAdaptive, setPtAdaptiveState] = useState<boolean>(() => {
+    try { return localStorage.getItem(PT_ADAPTIVE_KEY) !== "off"; } catch { return true; }
+  });
+  const [ptAdaptiveInfo, setPtAdaptiveInfo] = useState<AdaptiveSamplingState | null>(null);
+  const setPtAdaptive = (on: boolean) => {
+    setPtAdaptiveState(on);
+    if (!on) setPtAdaptiveInfo(null);
+    try { localStorage.setItem(PT_ADAPTIVE_KEY, on ? "on" : "off"); } catch { /* storage unavailable */ }
+  };
   const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
     const next = clampPtQuality({ ...q, ...patch });
     try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify({ ...next, qualityVersion: 2 })); } catch { /* storage full */ }
@@ -890,6 +905,8 @@ const TradeVisualiser = () => {
             frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}
+            pathTraceAdaptive={ptAdaptive}
+            onPathTraceAdaptiveChange={setPtAdaptiveInfo}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
@@ -1455,11 +1472,23 @@ const TradeVisualiser = () => {
                       })}
                     </DropdownMenuRadioGroup>
                     <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem checked={ptAdaptive} onCheckedChange={(checked) => setPtAdaptive(checked === true)}>
+                      <span className="flex flex-col gap-0.5 py-0.5">
+                        <span>Adaptive sampling</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          Measures render speed and adjusts samples and resolution to this GPU
+                        </span>
+                      </span>
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
                     <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
                       <div className="mb-0.5 uppercase tracking-[0.15em]">
                         Active{activePhotorealPreset === "custom" ? " · custom settings" : ""}
                       </div>
                       <div className="tabular-nums text-foreground/80">{photorealQualitySummary(ptQuality)}</div>
+                      {ptAdaptive && (
+                        <div className="tabular-nums">{ptAdaptiveInfo ? adaptiveSummary(ptAdaptiveInfo) : "Adaptive: running at preset"}</div>
+                      )}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>

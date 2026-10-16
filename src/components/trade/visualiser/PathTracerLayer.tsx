@@ -7,6 +7,7 @@ import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQualit
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
+import { adaptiveQuality, createAdaptiveState, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -14,7 +15,7 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: native-quality tracing preview and progressive GI at rest. */
-const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef }) => {
+const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
   const physicalCamera = useRef(new PhysicalCamera());
@@ -86,7 +87,17 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
 
   const maxSamples = useRef(quality.maxSamples);
   maxSamples.current = quality.maxSamples;
+  // Adaptive sampling: the user's quality is the ceiling; measured per-sample
+  // cost can step resolution/preview/cap down and back up, never above it.
+  const adaptiveState = useRef<AdaptiveSamplingState>(createAdaptiveState(quality));
+  const adaptiveReport = useRef(onAdaptiveChange);
+  adaptiveReport.current = onAdaptiveChange;
+  const adaptiveOn = useRef(adaptive);
+  adaptiveOn.current = adaptive;
+  const timing = useRef({ samples: -1, at: 0 });
   useEffect(() => {
+    adaptiveState.current = resetAdaptiveState(adaptiveState.current, quality);
+    timing.current = { samples: -1, at: 0 };
     const pt = tracer.current;
     if (!pt) return;
     pt.lowResScale = quality.previewScale;
@@ -166,13 +177,31 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       }
       // A full-resolution traced preview remains active through geometry resets;
       // accumulation resumes once motion settles without reducing canvas DPR.
-      const cap = maxSamples.current;
+      const cap = adaptiveOn.current ? adaptiveState.current.maxSamples : maxSamples.current;
       const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
       // The engine advances stratified pixel jitter once per complete sample.
       // Keep one tile per tick; only publish once all four tiles share that sample.
       pt.renderSample();
       const samples = Math.floor(pt.samples);
+      // Measure the real per-sample cost while settled and accumulating; on a
+      // slow GPU step resolution/preview/cap down, on a fast one back up.
+      if (adaptiveOn.current && current.ready && !capped && now - current.movedAt >= PATH_TRACING.settleMs) {
+        const last = timing.current;
+        if (last.samples >= 0 && samples > last.samples && last.at > 0) {
+          const adjusted = recordSampleDuration(adaptiveState.current, (now - last.at) / (samples - last.samples), now);
+          if (adjusted) {
+            const effective = adaptiveQuality(adaptiveState.current);
+            pt.lowResScale = effective.previewScale;
+            pt.renderScale = tracedRenderScale(effective.renderScale, gl.getPixelRatio());
+            current.dirty = true; // resolution change requires a fresh accumulation
+            adaptiveReport.current?.(adaptiveState.current);
+          }
+        }
+        timing.current = { samples, at: now };
+      } else if (!adaptiveOn.current) {
+        timing.current = { samples: -1, at: 0 };
+      }
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
         current.samples = samples;
         current.reportedAt = now;
