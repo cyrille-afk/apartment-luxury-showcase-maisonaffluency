@@ -216,6 +216,9 @@ interface VisualiserCanvasProps {
   frameCaptureRef?: PhotorealFrameCaptureRef;
   onPathTraceSamples?: (n: number) => void;
   pathTraceQuality?: import("@/lib/visualiserPathTracing").PathTraceQuality;
+  /** Measure real per-sample cost and adapt resolution/samples to the GPU. */
+  pathTraceAdaptive?: boolean;
+  onPathTraceAdaptiveChange?: (state: import("@/lib/visualiserAdaptiveSampling").AdaptiveSamplingState) => void;
   /** Blur strength (bokeh scale), 1–10. */
   dofStrength?: number;
   /** When true, DoF focus follows the clicked/selected piece; when false, the view centre. */
@@ -317,6 +320,8 @@ const VisualiserCanvas = ({
   frameCaptureRef,
   onPathTraceSamples,
   pathTraceQuality,
+  pathTraceAdaptive = false,
+  onPathTraceAdaptiveChange,
   dofStrength = 1,
   dofFocusSelected = true,
   environmentSource = "empty-room-exr",
@@ -504,6 +509,8 @@ const VisualiserCanvas = ({
         frameCaptureRef={frameCaptureRef}
         onSamples={onPathTraceSamples}
         quality={pathTraceQuality}
+        adaptive={pathTraceAdaptive}
+        onAdaptiveChange={onPathTraceAdaptiveChange}
         depthOfField={depthOfField}
         focusTarget={dofTarget.current}
         dofStrength={dofStrength}
