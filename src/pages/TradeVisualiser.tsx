@@ -1,4 +1,5 @@
 import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, previewScaleLabel, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
+import { adaptiveSummary, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
@@ -256,6 +257,17 @@ const TradeVisualiser = () => {
   const [ptSamples, setPtSamples] = useState(0);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const [gpuTier] = useState<GpuTier>(() => detectGpuTier());
+  // Adaptive sampling (default on): measures real per-sample cost and steps
+  // resolution/samples down on slow GPUs and back up on fast ones.
+  const [ptAdaptive, setPtAdaptiveState] = useState<boolean>(() => {
+    try { return localStorage.getItem(PT_ADAPTIVE_KEY) !== "off"; } catch { return true; }
+  });
+  const [ptAdaptiveInfo, setPtAdaptiveInfo] = useState<AdaptiveSamplingState | null>(null);
+  const setPtAdaptive = (on: boolean) => {
+    setPtAdaptiveState(on);
+    if (!on) setPtAdaptiveInfo(null);
+    try { localStorage.setItem(PT_ADAPTIVE_KEY, on ? "on" : "off"); } catch { /* storage unavailable */ }
+  };
   const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
     const next = clampPtQuality({ ...q, ...patch });
     try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify({ ...next, qualityVersion: 2 })); } catch { /* storage full */ }
