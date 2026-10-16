@@ -215,6 +215,11 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 /** Inline Curator Picks manager for each designer */
 const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
 
+// Pickup details are shared across a designer's whole catalogue: saving one
+// pick's pickup address/country/postcode applies it to every pick of that
+// designer (the mirror trigger propagates to trade_products).
+const PICKUP_SHARED_FIELDS = new Set(["pickup_address", "pickup_country", "pickup_postcode"]);
+
 function CuratorPicksManager({ designerId, designerName, designerSlug }: { designerId: string; designerName?: string; designerSlug?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -426,11 +431,14 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
 
   const persistPickField = useCallback((id: string, field: string, value: any) => {
     const run = async () => {
-      const attempt = () =>
-        supabase
+      const attempt = () => {
+        const query = supabase
           .from("designer_curator_picks")
-          .update({ [field]: value } as any)
-          .eq("id", id);
+          .update({ [field]: value } as any);
+        return PICKUP_SHARED_FIELDS.has(field)
+          ? query.eq("designer_id", designerId)
+          : query.eq("id", id);
+      };
 
       let { error } = await attempt();
       if (error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
@@ -455,7 +463,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       if (pickWriteChainRef.current.get(id) === next) pickWriteChainRef.current.delete(id);
     });
     return next;
-  }, [loadPicks, toast, queryClient]);
+  }, [loadPicks, toast, queryClient, designerId]);
 
   const flushPendingWrites = useCallback(() => {
     const entries = Array.from(pendingWritesRef.current.values());
@@ -486,8 +494,9 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
   }, [flushPendingWrites]);
 
   const updateField = (id: string, field: string, value: any) => {
-    setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
-    const key = `${id}::${field}`;
+    const shared = PICKUP_SHARED_FIELDS.has(field);
+    setPicks((prev) => prev.map((p) => (shared || p.id === id ? { ...p, [field]: value } : p)));
+    const key = shared ? `designer::${field}` : `${id}::${field}`;
     const existing = pendingWritesRef.current.get(key);
     if (existing) {
       window.clearTimeout(existing.timer);
@@ -520,26 +529,6 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     toast({ title: `Applied ${field} to all ${picks.length} picks` });
   };
 
-  // Pickup details are shared across a designer's whole catalogue — the
-  // mirror trigger propagates them to trade_products for every pick.
-  const applyPickupToAll = async (pick: any) => {
-    const values = {
-      pickup_address: pick.pickup_address || null,
-      pickup_country: pick.pickup_country || null,
-      pickup_postcode: pick.pickup_postcode || null,
-    };
-    setPicks((prev) => prev.map((p) => ({ ...p, ...values })));
-    const { error } = await supabase
-      .from("designer_curator_picks")
-      .update(values as any)
-      .eq("designer_id", designerId);
-    if (error) {
-      toast({ title: "Apply to all failed", description: error.message, variant: "destructive" });
-      await loadPicks();
-      return;
-    }
-    toast({ title: `Applied pickup address to all ${picks.length} picks` });
-  };
 
   const movePick = async (id: string, direction: -1 | 1) => {
     const idx = picks.findIndex((p) => p.id === id);
@@ -935,25 +924,13 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="text-[10px] text-muted-foreground">Pickup address <span className="italic">(internal, for carriers)</span></label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={pick.pickup_address || ""}
-                          onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
-                          placeholder="Atelier, 12 rue de Charonne, Paris"
-                          className="text-xs"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] h-8 whitespace-nowrap"
-                          onClick={() => applyPickupToAll(pick)}
-                          title="Copy this pickup address, country and postcode to all picks for this designer"
-                        >
-                          Apply to all
-                        </Button>
-                      </div>
+                      <label className="text-[10px] text-muted-foreground">Pickup address <span className="italic">(internal, for carriers — shared by all of this designer's items)</span></label>
+                      <Input
+                        value={pick.pickup_address || ""}
+                        onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
+                        placeholder="Atelier, 12 rue de Charonne, Paris"
+                        className="text-xs"
+                      />
                     </div>
                     <div>
                       <label className="text-[10px] text-muted-foreground">HS code <span className="italic">(customs)</span></label>
