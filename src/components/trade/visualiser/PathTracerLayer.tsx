@@ -177,13 +177,31 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       }
       // A full-resolution traced preview remains active through geometry resets;
       // accumulation resumes once motion settles without reducing canvas DPR.
-      const cap = maxSamples.current;
+      const cap = adaptiveOn.current ? adaptiveState.current.maxSamples : maxSamples.current;
       const capped = cap > 0 && pt.samples >= cap && now - current.movedAt >= PATH_TRACING.settleMs;
       pt.pausePathTracing = capped || now - current.movedAt < PATH_TRACING.settleMs;
       // The engine advances stratified pixel jitter once per complete sample.
       // Keep one tile per tick; only publish once all four tiles share that sample.
       pt.renderSample();
       const samples = Math.floor(pt.samples);
+      // Measure the real per-sample cost while settled and accumulating; on a
+      // slow GPU step resolution/preview/cap down, on a fast one back up.
+      if (adaptiveOn.current && current.ready && !capped && now - current.movedAt >= PATH_TRACING.settleMs) {
+        const last = timing.current;
+        if (last.samples >= 0 && samples > last.samples && last.at > 0) {
+          const adjusted = recordSampleDuration(adaptiveState.current, (now - last.at) / (samples - last.samples), now);
+          if (adjusted) {
+            const effective = adaptiveQuality(adaptiveState.current);
+            pt.lowResScale = effective.previewScale;
+            pt.renderScale = tracedRenderScale(effective.renderScale, gl.getPixelRatio());
+            current.dirty = true; // resolution change requires a fresh accumulation
+            adaptiveReport.current?.(adaptiveState.current);
+          }
+        }
+        timing.current = { samples, at: now };
+      } else if (!adaptiveOn.current) {
+        timing.current = { samples: -1, at: 0 };
+      }
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
         current.samples = samples;
         current.reportedAt = now;
