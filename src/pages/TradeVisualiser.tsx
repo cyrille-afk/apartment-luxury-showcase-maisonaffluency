@@ -1,4 +1,4 @@
-import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
+import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, GPU_TIER_LABEL, PHOTOREAL_PRESET_LABEL, photorealPresetSettings, photorealQualitySummary, previewScaleLabel, renderScaleLabel, sampleCountLabel, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
@@ -838,6 +838,9 @@ const TradeVisualiser = () => {
     "h-auto min-h-9 rounded-sm font-mono text-[10px] uppercase tracking-normal",
     "flex items-center gap-2 whitespace-nowrap px-3 py-2 text-foreground/80 transition-colors duration-200 hover:text-foreground hover:bg-foreground/[0.04] disabled:opacity-40",
   );
+
+  // Which preset (if any) the current sampling settings match on this device.
+  const activePhotorealPreset = matchPhotorealPreset(ptQuality, gpuTier);
 
   return (
     <VisualiserSelectionProvider objects={objects} selectedId={selectedId} setSelectedId={setSelectedId}>
