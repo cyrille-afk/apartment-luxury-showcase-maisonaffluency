@@ -42,3 +42,4 @@
 - [x] Custom marble presets: save current reflectivity/roughness as named presets (localStorage trade-visualiser-marble-presets-v1, max 12, delete chips); verified live
 - [x] Wall control tooltip: explains the finish switch and why a loaded room photo disables it; disabled trigger wrapped in a focusable span so the note still shows on hover/keyboard; verified live in both states, no page errors.
 - [x] Photoreal Balanced/High Quality presets adapting to GPU
+- [x] Adaptive Photoreal sampling: measured per-sample cost steps resolution/preview/sample cap down on slow GPUs and back up toward the preset ceiling on fast ones (2s cooldown, 8-sample window); toolbar toggle default on, preset menu shows live adaptive status; 9 tests pass, build clean.
