@@ -12,7 +12,7 @@ import AdvancedRenderingOptions from "@/components/trade/visualiser/AdvancedRend
 import { CEILING_CONTROLS, clampCeilingHeight, clampCeilingThickness, clampCeilingOpening, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
-import { LAST_GOOD_KEY, STABLE_AFTER_MS, recoverScene, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
+import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -209,41 +209,14 @@ const CanvasLoader = () => (
 
 const TradeVisualiser = () => {
   const initial = useMemo(readSandbox, []);
-  const crashHandledRef = useRef(false);
-  const crashStageRef = useRef(0);
+  const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
   const handleSceneCrash = useCallback(() => {
-    // Stage 0: restore last-good; 1: retry with an empty scene; 2: give up (scene-independent crash).
-    if (crashHandledRef.current) return;
-    const stage = crashStageRef.current;
-    let outcome: "restored" | "reset" = "reset";
-    try { outcome = recoverScene(STORAGE_KEY); } catch { /* keep the scene untouched */ }
-    try { takeRecoveryNotice(); } catch { /* noop */ }
-    // Never reload the page: a reload re-downloads every model and, when the
-    // crash is memory-related, repeats it. Remount only the 3D view, with the
-    // restored scene applied to state so the crashing props aren't reused.
-    if (outcome === "restored" && stage === 0) {
-      let restored: PlacedObject[] | null = null;
-      try { restored = readSandbox().objects; } catch { /* fall through to reset */ }
-      if (restored) {
-        crashStageRef.current = 1;
-        setObjects(restored);
-        setSelectedId(null);
-        setCanvasEpoch((n) => n + 1);
-        toast.warning("A display error occurred — the 3D view was restarted with your last working scene.");
-        return;
-      }
-    }
-    if (stage < 2) {
-      crashStageRef.current = 2;
-      setObjects([]);
-      setSelectedId(null);
-      setCanvasEpoch((n) => n + 1);
-      toast.warning("The scene kept crashing the 3D view, so it was cleared. A backup of it was kept.");
-      return;
-    }
-    crashHandledRef.current = true;
-    toast.error("The 3D view couldn't start in this browser. Reload the page to try again.");
+    // A renderer failure is not permission to edit the designer's composition.
+    // Stop automatic retries; an explicit retry remounts only the renderer.
+    try { preserveSceneBackup(STORAGE_KEY); } catch { /* composition remains in memory */ }
+    setSceneFailed(true);
+    toast.error("The 3D view stopped. Your furniture layout is unchanged.");
   }, []);
   useEffect(() => {
     const notice = takeRecoveryNotice();
@@ -477,12 +450,12 @@ const TradeVisualiser = () => {
     }
     // Promote to "last working scene" once it has rendered cleanly for a few seconds.
     const json = sandboxJson;
-    if (!json) return;
+    if (!json || sceneFailed) return;
     const timer = window.setTimeout(() => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
+  }, [sceneFailed, backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -888,6 +861,10 @@ const TradeVisualiser = () => {
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
       )}
       <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
+        {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
+          <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
+          <Button variant="outline" onClick={() => { setSceneFailed(false); setCanvasEpoch((n) => n + 1); }}>Retry 3D view</Button>
+        </div>}
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas

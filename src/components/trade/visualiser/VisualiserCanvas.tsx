@@ -425,8 +425,8 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} />
 
     <Suspense fallback={null}>
-      {/* Photoreal traces furniture only: the room filling the frame cost ~3.5x per sample. */}
-      {!hasBackdrop && !pathTrace && <ArchitecturalFeatureWall finish={featureWallFinish} />}
+      {/* Both renderers retain the designed architecture; only room photos suppress it. */}
+      {!hasBackdrop && <ArchitecturalFeatureWall finish={featureWallFinish} />}
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
     </Suspense>
     {!pathTrace && !hasBackdrop && floorFinish === "none" && (
