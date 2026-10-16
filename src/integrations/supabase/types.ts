@@ -1188,6 +1188,13 @@ export type Database = {
             foreignKeyName: "board_recommendations_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_recommendations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
@@ -4582,6 +4589,13 @@ export type Database = {
             foreignKeyName: "gallery_hotspots_mapped_pick_id_fkey"
             columns: ["mapped_pick_id"]
             isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_hotspots_mapped_pick_id_fkey"
+            columns: ["mapped_pick_id"]
+            isOneToOne: false
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
@@ -6226,6 +6240,13 @@ export type Database = {
             foreignKeyName: "product_descriptor_links_pick_id_fkey"
             columns: ["pick_id"]
             isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_descriptor_links_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
@@ -6280,6 +6301,13 @@ export type Database = {
           verbatim_title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "product_embeddings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "product_embeddings_product_id_fkey"
             columns: ["product_id"]
@@ -6390,6 +6418,13 @@ export type Database = {
             foreignKeyName: "product_fabrics_pick_id_fkey"
             columns: ["pick_id"]
             isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fabrics_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
@@ -6435,6 +6470,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "material_taxonomy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_material_links_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
             referencedColumns: ["id"]
           },
           {
@@ -10054,6 +10096,13 @@ export type Database = {
             foreignKeyName: "trade_product_pricing_pick_id_fkey"
             columns: ["pick_id"]
             isOneToOne: true
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_product_pricing_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
@@ -10292,6 +10341,13 @@ export type Database = {
           wood_label_override?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trade_products_source_pick_id_fkey"
+            columns: ["source_pick_id"]
+            isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trade_products_source_pick_id_fkey"
             columns: ["source_pick_id"]
@@ -11655,6 +11711,16 @@ export type Database = {
       }
     }
     Views: {
+      curator_pick_slug_audit: {
+        Row: {
+          designer_slug: string | null
+          id: string | null
+          issue: string | null
+          slug: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       designer_brand_names: {
         Row: {
           display_name: string | null
@@ -11726,6 +11792,13 @@ export type Database = {
           source_pick_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trade_products_source_pick_id_fkey"
+            columns: ["source_pick_id"]
+            isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trade_products_source_pick_id_fkey"
             columns: ["source_pick_id"]

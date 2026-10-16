@@ -36,5 +36,6 @@
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
 - Visualiser rules: src/components/trade/visualiser/AGENTS.md; read before editing its components/page. Per-piece material controls persist with scene objects to keep presets consistent.
-- Spec-sheet viewer opens same-tab on the current origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose the sign-in.
-- Trade shell styling overrides are scoped to `.trade-portal-shell:not([data-presentation])` so Presentation Mode renders public site styling.
+- Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
+- Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
+- Product slug guard rules: src/lib/AGENTS.md.
