@@ -98,10 +98,10 @@ export default function ManualFreightQuote(p: Props) {
     finally { setBusy(false); }
   }
   if (!p.packingMissing && !record) return null;
-  return <div className="md:col-span-4 mt-2 print:hidden font-body text-xs text-muted-foreground">
+  return <div data-trade-sensitive className="md:col-span-4 mt-2 print:hidden font-body text-xs text-muted-foreground">
     <div className="flex flex-wrap items-center gap-2">
       <Truck className="h-3.5 w-3.5 shrink-0" />
-      <span>{record?.status === 'quoted' ? `Manual freight: ${record.currency} ${formatPdfMoney(record.amount_cents || 0)} · ${record.carrier}` : record ? 'Manual freight requested · awaiting supplier quote' : 'Shipping estimate unavailable — packing details missing.'}</span>
+      <span>{record?.status === 'quoted' ? `Manual freight: ${formatPdfMoney(record.amount_cents || 0, record.currency)} · ${record.carrier}` : record ? 'Manual freight requested · awaiting supplier quote' : 'Shipping estimate unavailable — packing details missing.'}</span>
       <Button variant="link" size="sm" disabled={!ready} onClick={() => setOpen(true)}>{record ? 'View freight request' : 'Request manual freight'}</Button>
     </div>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">

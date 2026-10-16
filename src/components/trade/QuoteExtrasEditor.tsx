@@ -31,6 +31,7 @@ const EXTRA_CURRENCIES = ["EUR", "USD", "GBP", "SGD", "HKD", "CHF", "AED", "AUD"
 
 type Extra = {
   id: string;
+  manual_freight_request_id?: string | null;
   label: string;
   amount_cents: number;
   currency: string | null;
@@ -82,7 +83,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       setLoading(true);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
-      .select("id, label, amount_cents, currency, quantity, sort_order")
+      .select("id, label, amount_cents, currency, quantity, sort_order, manual_freight_request_id")
       .eq("quote_id", quoteId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -208,7 +209,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
             const showConversion = rowCcy !== currency.toUpperCase();
             return (
               <div key={e.id} className="flex items-center gap-2">
-                {isReadOnly ? (
+                {isReadOnly || e.manual_freight_request_id ? (
                   <>
                     <span className="flex-1 font-body text-xs text-foreground truncate">
                       {e.label}
