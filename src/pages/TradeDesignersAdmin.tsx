@@ -936,12 +936,24 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     </div>
                     <div className="col-span-2">
                       <label className="text-[10px] text-muted-foreground">Pickup address <span className="italic">(internal, for carriers)</span></label>
-                      <Input
-                        value={pick.pickup_address || ""}
-                        onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
-                        placeholder="Atelier, 12 rue de Charonne, Paris"
-                        className="text-xs"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={pick.pickup_address || ""}
+                          onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
+                          placeholder="Atelier, 12 rue de Charonne, Paris"
+                          className="text-xs"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-8 whitespace-nowrap"
+                          onClick={() => applyPickupToAll(pick)}
+                          title="Copy this pickup address, country and postcode to all picks for this designer"
+                        >
+                          Apply to all
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <label className="text-[10px] text-muted-foreground">HS code <span className="italic">(customs)</span></label>
