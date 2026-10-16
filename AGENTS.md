@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Inquiry-created quotes copy contact fields; funnel and resumed drafts fall back to the linked inquiry without replacing explicit quote contacts. Email names are display-only unverified suggestions — avoids contact loss and false identity claims.
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 - Product modes reuse the Client View store and editorial layout in the trade shell; a display-only currency policy keeps account preferences unchanged and presentation retail-only.
 - Spec-sheet workspace renders all composed PDF pages with bundled PDF.js on every device — avoids native-viewer dependencies and missing mobile covers.

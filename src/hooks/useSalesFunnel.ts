@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
+import { resolveQuoteContact } from "@/lib/quoteContact";
+
 export interface FunnelEntry {
   id: string;
   label: string;
@@ -10,6 +12,7 @@ export interface FunnelEntry {
   amountLabel: string | null;
   href: string | null;
   email: string | null;
+  phone?: string | null;
   imageUrl: string | null;
   finish?: string | null;
   leadTime?: string | null;
@@ -59,7 +62,7 @@ export function useSalesFunnel(days: number) {
   const queryClient = useQueryClient();
 
   // Live pipeline: a Stripe webhook writing a settled card refreshes the board.
-  useRealtimeTables(["funnel_card_payments", "trade_quotes", "acquisition_leads"], () => {
+  useRealtimeTables(["funnel_card_payments", "trade_quotes", "inquiries", "acquisition_leads"], () => {
     queryClient.invalidateQueries({ queryKey: ["sales-funnel"] });
   });
 
@@ -84,12 +87,12 @@ export function useSalesFunnel(days: number) {
       ] = await Promise.all([
           supabase
             .from("inquiries")
-            .select("id, product_name, company, email, created_at, status, linked_quote_id")
+            .select("id, product_name, company, email, phone, created_at, status, linked_quote_id")
             .gte("created_at", since)
             .order("created_at", { ascending: false }),
           supabase
             .from("trade_quotes")
-            .select("id, client_name, currency, status, created_at, submitted_at, ship_to_email")
+            .select("id, client_name, currency, status, created_at, submitted_at, ship_to_email, ship_to_phone, source_inquiry:inquiries!trade_quotes_source_inquiry_id_fkey(name, email, phone)")
             .gte("created_at", since)
             .order("created_at", { ascending: false }),
           supabase
@@ -226,6 +229,7 @@ export function useSalesFunnel(days: number) {
             amountLabel: null,
             href: "/trade/admin/inquiries",
             email: (i.email as string) ?? null,
+            phone: i.phone,
             imageUrl: null,
           })),
         },
@@ -235,6 +239,7 @@ export function useSalesFunnel(days: number) {
           description: "Drafts still sitting with the trade desk",
           entries: draftQuotes.map((q) => {
             const product = quoteProduct(q.id as string);
+            const contact = resolveQuoteContact({ email: q.ship_to_email, phone: q.ship_to_phone }, q.source_inquiry);
             return {
               id: q.id as string,
               label: product.name,
@@ -242,7 +247,8 @@ export function useSalesFunnel(days: number) {
               createdAt: q.created_at as string,
               amountLabel: null,
               href: `/trade/quotes/${q.id}`,
-              email: (q.ship_to_email as string) ?? null,
+              email: contact.email || null,
+              phone: contact.phone || null,
               imageUrl: product.imageUrl,
               finish: product.finish,
               leadTime: product.leadTime,
@@ -256,6 +262,7 @@ export function useSalesFunnel(days: number) {
           entries: sentUnpaid.map((q) => {
             const link = linkByQuote.get(q.id as string);
             const product = quoteProduct(q.id as string);
+            const contact = resolveQuoteContact({ email: q.ship_to_email, phone: q.ship_to_phone }, q.source_inquiry);
             return {
               id: q.id as string,
               label: ref(q.id as string),
@@ -266,7 +273,8 @@ export function useSalesFunnel(days: number) {
               createdAt: (q.submitted_at as string) ?? (q.created_at as string),
               amountLabel: link ? money(link.amount_cents as number, link.currency as string) : null,
               href: `/trade/quotes/${q.id}`,
-              email: (link?.payer_email as string) ?? (q.ship_to_email as string) ?? null,
+              email: link?.payer_email || contact.email || null,
+              phone: contact.phone || null,
               imageUrl: product.imageUrl,
               finish: product.finish,
               leadTime: product.leadTime,
