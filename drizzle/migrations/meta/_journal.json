@@ -1233,6 +1233,13 @@
       "when": 1792138619308,
       "tag": "0175_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 176,
+      "version": "7",
+      "when": 1792190508797,
+      "tag": "0176_manual_freight_requests",
+      "breakpoints": true
     }
   ]
 }

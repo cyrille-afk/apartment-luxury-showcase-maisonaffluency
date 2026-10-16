@@ -5153,6 +5153,84 @@ export type Database = {
           },
         ]
       }
+      manual_freight_requests: {
+        Row: {
+          amount_cents: number | null
+          carrier: string | null
+          currency: string
+          destination_country: string
+          id: string
+          origin_country: string
+          product_name: string
+          quantity: number
+          quote_id: string
+          quote_item_id: string
+          recorded_at: string | null
+          request_notes: string | null
+          requested_at: string
+          requested_by: string
+          status: string
+          supplier_notes: string | null
+          supplier_reference: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          carrier?: string | null
+          currency?: string
+          destination_country?: string
+          id?: string
+          origin_country?: string
+          product_name: string
+          quantity?: number
+          quote_id: string
+          quote_item_id: string
+          recorded_at?: string | null
+          request_notes?: string | null
+          requested_at?: string
+          requested_by: string
+          status?: string
+          supplier_notes?: string | null
+          supplier_reference?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          carrier?: string | null
+          currency?: string
+          destination_country?: string
+          id?: string
+          origin_country?: string
+          product_name?: string
+          quantity?: number
+          quote_id?: string
+          quote_item_id?: string
+          recorded_at?: string | null
+          request_notes?: string | null
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          supplier_notes?: string | null
+          supplier_reference?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_freight_requests_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_freight_requests_quote_item_id_fkey"
+            columns: ["quote_item_id"]
+            isOneToOne: true
+            referencedRelation: "trade_quote_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markup_annotations: {
         Row: {
           created_at: string
@@ -10463,6 +10541,7 @@ export type Database = {
           currency: string | null
           id: string
           label: string
+          manual_freight_request_id: string | null
           quantity: number
           quote_id: string
           sort_order: number
@@ -10474,6 +10553,7 @@ export type Database = {
           currency?: string | null
           id?: string
           label: string
+          manual_freight_request_id?: string | null
           quantity?: number
           quote_id: string
           sort_order?: number
@@ -10485,12 +10565,20 @@ export type Database = {
           currency?: string | null
           id?: string
           label?: string
+          manual_freight_request_id?: string | null
           quantity?: number
           quote_id?: string
           sort_order?: number
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trade_quote_extras_manual_freight_request_id_fkey"
+            columns: ["manual_freight_request_id"]
+            isOneToOne: true
+            referencedRelation: "manual_freight_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trade_quote_extras_quote_id_fkey"
             columns: ["quote_id"]
