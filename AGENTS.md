@@ -38,4 +38,4 @@
 - Visualiser rules: src/components/trade/visualiser/AGENTS.md; read before editing its components/page. Per-piece material controls persist with scene objects to keep presets consistent.
 - Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
-- Curator-pick slug guard (trigger + `curator_pick_slug_audit`) and legacy-URL rules: src/lib/AGENTS.md.
+- Product slug guard rules: src/lib/AGENTS.md.
