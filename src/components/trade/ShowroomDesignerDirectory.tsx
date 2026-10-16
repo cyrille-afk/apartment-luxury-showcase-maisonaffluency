@@ -67,7 +67,9 @@ const ShowroomDesignerDirectory = ({
           slug: d.slug,
           image_url: d.image_url,
           specialty: d.specialty,
-          productImageUrl: productImage,
+          productImageUrl: d.slug === "gilles-boissier"
+            ? "https://res.cloudinary.com/dif1oamtj/image/upload/v1792116642/Screen_Shot_2026-10-16_at_10.09.56_AM_db4xmh.png"
+            : productImage,
         });
       });
       return Array.from(byId.values()).sort((a, b) =>
