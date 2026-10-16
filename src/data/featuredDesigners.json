@@ -27,6 +27,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
   },
   {
+    "id": "63dd0737-d56f-427d-8a0e-42cddef9f198",
+    "slug": "gilles-boissier",
+    "name": "Gilles & Boissier",
+    "founder": "Pouenat",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779961728/Screenshot_2026-05-28_at_5.48.25_PM_mxyruf.png",
+    "image_url": "https://eteline.com/upload/designers/9-portrait_gille_et_boissier.jpeg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1792123034/Screen_Shot_2026-10-16_at_11.56.01_AM_axtvyl.png"
+  },
+  {
     "id": "5d99b52f-4197-485e-a74b-eabb3292ef2a",
     "slug": "garnier-linker",
     "name": "Garnier & Linker",
