@@ -508,11 +508,37 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
 
   const applyFieldToAll = async (field: string, value: any) => {
     setPicks((prev) => prev.map((p) => ({ ...p, [field]: value })));
-    await supabase
+    const { error } = await supabase
       .from("designer_curator_picks")
       .update({ [field]: value } as any)
       .eq("designer_id", designerId);
+    if (error) {
+      toast({ title: "Apply to all failed", description: error.message, variant: "destructive" });
+      await loadPicks();
+      return;
+    }
     toast({ title: `Applied ${field} to all ${picks.length} picks` });
+  };
+
+  // Pickup details are shared across a designer's whole catalogue — the
+  // mirror trigger propagates them to trade_products for every pick.
+  const applyPickupToAll = async (pick: any) => {
+    const values = {
+      pickup_address: pick.pickup_address || null,
+      pickup_country: pick.pickup_country || null,
+      pickup_postcode: pick.pickup_postcode || null,
+    };
+    setPicks((prev) => prev.map((p) => ({ ...p, ...values })));
+    const { error } = await supabase
+      .from("designer_curator_picks")
+      .update(values as any)
+      .eq("designer_id", designerId);
+    if (error) {
+      toast({ title: "Apply to all failed", description: error.message, variant: "destructive" });
+      await loadPicks();
+      return;
+    }
+    toast({ title: `Applied pickup address to all ${picks.length} picks` });
   };
 
   const movePick = async (id: string, direction: -1 | 1) => {
@@ -910,12 +936,24 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
                     </div>
                     <div className="col-span-2">
                       <label className="text-[10px] text-muted-foreground">Pickup address <span className="italic">(internal, for carriers)</span></label>
-                      <Input
-                        value={pick.pickup_address || ""}
-                        onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
-                        placeholder="Atelier, 12 rue de Charonne, Paris"
-                        className="text-xs"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={pick.pickup_address || ""}
+                          onChange={(e) => updateField(pick.id, "pickup_address", e.target.value || null)}
+                          placeholder="Atelier, 12 rue de Charonne, Paris"
+                          className="text-xs"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-[10px] h-8 whitespace-nowrap"
+                          onClick={() => applyPickupToAll(pick)}
+                          title="Copy this pickup address, country and postcode to all picks for this designer"
+                        >
+                          Apply to all
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <label className="text-[10px] text-muted-foreground">HS code <span className="italic">(customs)</span></label>
