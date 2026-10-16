@@ -104,7 +104,7 @@ export default function ManualFreightQuote(p: Props) {
       <span>{record?.status === 'quoted' ? `Manual freight: ${formatPdfMoney(record.amount_cents || 0, record.currency)} · ${record.carrier}` : record ? 'Manual freight requested · awaiting supplier quote' : 'Shipping estimate unavailable — packing details missing.'}</span>
       <Button variant="link" size="sm" disabled={!ready} onClick={() => setOpen(true)}>{record ? 'View freight request' : 'Request manual freight'}</Button>
     </div>
-    <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={setOpen}><DialogContent data-trade-sensitive className="max-w-lg max-h-[85vh] overflow-y-auto">
       <DialogHeader><DialogTitle>Manual freight · {p.productName}</DialogTitle></DialogHeader>
       <p className="text-sm text-muted-foreground">{p.brandName} · Qty {record?.quantity || p.quantity} · {record?.origin_country || p.origin || 'Origin pending'} → {record?.destination_country || p.destination || 'Destination pending'}</p>
       {record && <p className="text-xs text-muted-foreground">Requested {new Date(record.requested_at).toLocaleString('en-GB')}{record.recorded_at ? ` · Recorded ${new Date(record.recorded_at).toLocaleString('en-GB')}` : ''}</p>}
