@@ -40,6 +40,9 @@ import { cn } from "@/lib/utils";
 import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+
+/** localStorage key for the adaptive Photoreal sampling preference (default on). */
+const PT_ADAPTIVE_KEY = "trade-visualiser-pt-adaptive-v1";
 import { BACKDROP_SWATCHES, WALL_COLORS, WALL_FINISHES, WALL_FULL_HEIGHT_M, clampBackdropBrightness, clampFloorGlare, clampWallFinishIntensity, clampWallHeight, RUG_COLORS, RUG_WEAVES, clampRugPile, clampRugSize, clampRugOffset, rugVisible, rugColor as toRugColor, rugBorderColor as toRugBorderColor, clampRugBorderThicknessMm, clampRugBorderTwistMm, clampRugBorderRoughness, rugWeave as toRugWeave, type RugColor, type RugBorderColor, type RugWeave, normalizeHexColor, roomFloorFinish, roomWallColor, roomWallFinish, wallColorHex, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import { visualiserDimensions } from "@/lib/visualiserProductMetadata";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
@@ -902,6 +905,8 @@ const TradeVisualiser = () => {
             frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}
+            pathTraceAdaptive={ptAdaptive}
+            onPathTraceAdaptiveChange={setPtAdaptiveInfo}
             dofStrength={dofStrength}
             dofFocusSelected={dofFocusSelected}
             environmentSource={environmentSource}
