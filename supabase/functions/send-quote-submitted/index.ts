@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { displayNameForContact } from "../_shared/quoteContactDisplay.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
     const userName = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : user.email;
     const company = profile?.company || "N/A";
     const currency = quote.currency || "SGD";
-    const clientName = quote.client_name || "";
+    const clientName = displayNameForContact(quote.client_name, quote.ship_to_email) || "";
     const notes = quote.notes || "";
     const itemCount = items.length;
 

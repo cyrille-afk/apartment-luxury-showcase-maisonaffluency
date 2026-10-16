@@ -41,5 +41,6 @@
 - [x] Upgrade existing GPU path tracing with quarter-resolution motion preview, unlimited stationary accumulation, and asynchronous furniture/HDRI refresh; 17 tests pass, build clean, signed-in real-chair rendering, camera orbit/refinement and mode-off verified (software GPU; final noise-free convergence not verified).
 - [x] Custom marble presets: save current reflectivity/roughness as named presets (localStorage trade-visualiser-marble-presets-v1, max 12, delete chips); verified live
 - [x] Wall control tooltip: explains the finish switch and why a loaded room photo disables it; disabled trigger wrapped in a focusable span so the note still shows on hover/keyboard; verified live in both states, no page errors.
+- [ ] Apply readable client names consistently to quote editor and quote emails; verify without sending an unsolicited client email.
 - [x] Photoreal Balanced/High Quality presets adapting to GPU
 - [x] Adaptive Photoreal sampling: measured per-sample cost steps resolution/preview/sample cap down on slow GPUs and back up toward the preset ceiling on fast ones (2s cooldown, 8-sample window); toolbar toggle default on, preset menu shows live adaptive status; 9 tests pass, build clean.
