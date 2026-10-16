@@ -7,6 +7,7 @@ import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQualit
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
+import { adaptiveQuality, createAdaptiveState, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
