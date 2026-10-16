@@ -744,7 +744,7 @@ function drawCompanyAndMeta(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    const billHeader = company || (clientLines[clientLines.length - 1] ?? "");
+    const billHeader = company || displayNameForContact(clientLines[clientLines.length - 1], cEmail) || "";
     let lyL = pyt + 12;
     if (billHeader) {
       doc.setFont("helvetica", "bold");
