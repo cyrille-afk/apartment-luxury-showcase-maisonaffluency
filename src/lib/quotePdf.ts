@@ -24,6 +24,7 @@ import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDime
 import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
 import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
 import { getQuoteBankTransfer } from "@/config/quoteBankTransfer";
+import { displayNameForContact } from "@/lib/quoteContact";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -670,7 +671,7 @@ function drawCompanyAndMeta(
   // When we have structured company info, the CLIENT field shows ONLY the
   // company (the contact is rendered in its own CONTACT panel below to avoid
   // duplication). Falls back to legacy clientName parsing otherwise.
-  const company = (args.clientCompany ?? "").trim();
+  const company = displayNameForContact((args.clientCompany ?? "").trim()) || "";
   let clientLines: string[];
   if (company) {
     clientLines = [company];
@@ -723,9 +724,9 @@ function drawCompanyAndMeta(
   if (cityLine) addr.push(cityLine);
   if (b.country) addr.push(b.country);
 
-  const cName = (c.name || "").trim();
-  const cRole = (c.role || "").trim();
   const cEmail = (c.email || "").trim();
+  const cName = displayNameForContact((c.name || "").trim(), cEmail) || "";
+  const cRole = (c.role || "").trim();
   const cPhone = (c.phone || "").trim();
   const hasContact = !!(cName || cRole || cEmail || cPhone);
 
@@ -743,7 +744,7 @@ function drawCompanyAndMeta(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    const billHeader = company || (clientLines[clientLines.length - 1] ?? "");
+    const billHeader = company || displayNameForContact(clientLines[clientLines.length - 1], cEmail) || "";
     let lyL = pyt + 12;
     if (billHeader) {
       doc.setFont("helvetica", "bold");
