@@ -15,7 +15,7 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: native-quality tracing preview and progressive GI at rest. */
-const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef }) => {
+const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
   const { gl, scene, camera, invalidate } = useThree();
   const tracer = useRef<WebGLPathTracer | null>(null);
   const physicalCamera = useRef(new PhysicalCamera());
