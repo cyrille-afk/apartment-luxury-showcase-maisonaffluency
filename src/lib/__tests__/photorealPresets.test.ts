@@ -33,7 +33,7 @@ describe("Photoreal presets", () => {
     expect(previewScaleLabel(1)).toBe("Full");
   });
   it("summarises the active sampling and resolution", () => {
-    expect(photorealQualitySummary(photorealPreset("high", "high", 1))).toBe("2048 samples · 150% resolution · Low preview");
+    expect(photorealQualitySummary(photorealPreset("high", "high", 1))).toBe("2048 samples · 150% resolution · Full preview");
     expect(photorealQualitySummary({ ...photorealPreset("balanced", "mid"), maxSamples: 0 })).toContain("Unlimited samples");
   });
 });
