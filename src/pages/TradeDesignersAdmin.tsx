@@ -426,11 +426,14 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
 
   const persistPickField = useCallback((id: string, field: string, value: any) => {
     const run = async () => {
-      const attempt = () =>
-        supabase
+      const attempt = () => {
+        const query = supabase
           .from("designer_curator_picks")
-          .update({ [field]: value } as any)
-          .eq("id", id);
+          .update({ [field]: value } as any);
+        return PICKUP_SHARED_FIELDS.has(field)
+          ? query.eq("designer_id", designerId)
+          : query.eq("id", id);
+      };
 
       let { error } = await attempt();
       if (error && (error.code === "57014" || /statement timeout/i.test(error.message))) {
