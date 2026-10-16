@@ -277,7 +277,7 @@ export default function ClientPicker({
                         </div>
                         {p && (
                           <div className="text-xs font-body text-muted-foreground truncate">
-                            {[p.first_name, p.last_name].filter(Boolean).join(" ")}
+                            {readableNames ? displayNameForContact([p.first_name, p.last_name].filter(Boolean).join(" "), p.email) : [p.first_name, p.last_name].filter(Boolean).join(" ")}
                             {p.email && <> · {p.email}</>}
                           </div>
                         )}
@@ -312,7 +312,7 @@ export default function ClientPicker({
         <div className="text-xs font-body text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5">
           <span className="flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
-            {[picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" ") || "—"}
+            {(readableNames ? displayNameForContact([picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" "), picked.primary_contact.email) : [picked.primary_contact.first_name, picked.primary_contact.last_name].filter(Boolean).join(" ")) || "—"}
             {picked.primary_contact.role_title && <> · {picked.primary_contact.role_title}</>}
           </span>
           {picked.primary_contact.email && <span>{picked.primary_contact.email}</span>}

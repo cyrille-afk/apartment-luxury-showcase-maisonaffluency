@@ -5,6 +5,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx'
 import { prepareTradeActivation } from '../_shared/tradeActivation.ts'
 import { welcomeDesignerData } from '../_shared/welcomeDesignerCount.ts'
+import { displayNameForContact } from '../_shared/quoteContactDisplay.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -413,6 +414,12 @@ Deno.serve(async (req) => {
 
   // 4. Render React Email template to HTML and plain text
   templateData = await welcomeDesignerData(supabase, templateName, templateData)
+  if (['client-quote-payment', 'quote-confirmation-payment-link', 'quote-payment-reminder'].includes(templateName)) {
+    templateData = {
+      ...templateData,
+      recipientName: displayNameForContact(templateData.recipientName, effectiveRecipient) || undefined,
+    }
+  }
   const html = await renderAsync(
     React.createElement(template.component, templateData)
   )
