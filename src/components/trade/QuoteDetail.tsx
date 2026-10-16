@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveQuoteContact } from "@/lib/quoteContact";
+import { getQuoteBankTransfer } from "@/config/quoteBankTransfer";
 import { getDestinationTax } from "@/lib/destinationTax";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, getFxMeta, invalidateFxCache, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
@@ -428,6 +429,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [notes, setNotes] = useState(quoteNotes || "");
   const [adminNotes, setAdminNotes] = useState("");
   const [currency, setCurrency] = useState<Currency>("SGD");
+  const bankTransfer = getQuoteBankTransfer(currency);
   const [quotePdfLocale, setQuotePdfLocale] = useState<PdfLocalePreset | null>(null);
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
@@ -3173,9 +3175,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">
                   Trade discount
                 </span>
-                <span className="font-body text-[10px] text-foreground uppercase tracking-widest">
+                {discountApplies && <span className="font-body text-[10px] text-foreground uppercase tracking-widest">
                   · {isMsrpOnly ? "n/a — MSRP only" : `${tierLabel} ${tradeDiscountLabel}`}
-                </span>
+                </span>}
               </button>
 
               <div className="flex items-center gap-2">
@@ -4767,7 +4769,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             </summary>
 
             <div className="mt-4 space-y-5">
-              <div>
+              {discountApplies && <div>
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">Trade Tiers</p>
                 <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1">
                   {(["silver", "gold", "platinum"] as const).map((t, i) => {
@@ -4786,7 +4788,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     );
                   })}
                 </div>
-              </div>
+              </div>}
 
               <ul className="font-body text-[10px] md:text-[11px] leading-relaxed text-muted-foreground space-y-1.5 list-disc list-inside">
                 <li>60% deposit due on order confirmation; 40% balance due before shipment. Both instalments are calculated on the order total including the current shipping estimate.</li>
@@ -4806,25 +4808,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <p className="font-medium text-foreground">AFFLUENCY ETC PTE LTD</p>
               <p>1 Grange Garden, #16-05, Singapore, 249631, Singapore</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-              <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
-                <p className="font-medium text-foreground uppercase tracking-wider text-[9px] md:text-[10px]">Main · EUR (SEPA)</p>
-                <p>IBAN: LT73 3250 0692 1856 8740</p>
-                <p>BIC: REVOLT21</p>
-                <p>Bank: Revolut Bank UAB</p>
-                <p className="text-muted-foreground">Konstitucijos ave. 21B, 08130, Vilnius, Lithuania</p>
-              </div>
-              <div className="font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5">
-                <p className="font-medium text-foreground uppercase tracking-wider text-[9px] md:text-[10px]">Global · SWIFT (outside EEA)</p>
-                <p>Account: 885111609218375</p>
-                <p>SWIFT/BIC: REVOSGS2</p>
-                <p>Intermediary BIC: BARCDEFF</p>
-                <p>Bank: Revolut Technologies Singapore Pte. Ltd</p>
-                <p className="text-muted-foreground">6 Battery Road, Floor 6-01, 049909, Singapore</p>
-              </div>
+            <div className={cn("grid grid-cols-1 gap-4 mt-3", bankTransfer.blocks.length > 1 && "md:grid-cols-2")}>
+              {bankTransfer.blocks.map((block) => (
+                <div key={block.title} className={cn("font-body text-[10px] md:text-[11px] leading-relaxed text-foreground/80 space-y-0.5", currency === "GBP" && "border-l-2 border-primary pl-3")}>
+                  <p className="font-medium text-foreground uppercase tracking-wider text-[9px] md:text-[10px]">{block.title}</p>
+                  {block.rows.map((row) => <p key={row.label}>{row.label}: {row.value}</p>)}
+                </div>
+              ))}
             </div>
             <p className="font-body text-[9px] md:text-[10px] text-muted-foreground italic mt-2">
-              Please reference the quote number on your transfer. EUR transfers preferred to avoid FX conversion.
+              {bankTransfer.note}
             </p>
           </div>
 
@@ -4892,7 +4885,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         })()}
 
         {/* Billing mode selector — show whenever the quote is editable or being paid */}
-        {(isDraft || isPriced) && (
+        {discountApplies && (isDraft || isPriced) && (
           <div id="quote-billing-mode">
             <BillingModeCard
               quoteId={quoteId}
