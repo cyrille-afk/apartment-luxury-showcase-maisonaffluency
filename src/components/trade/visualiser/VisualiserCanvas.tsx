@@ -480,7 +480,7 @@ const VisualiserCanvas = ({
     <Suspense fallback={<SceneLoader />}>
       {objects.map((object) => (
         <SceneObject
-          key={object.instanceId}
+          key={`${object.instanceId}:${object.restoreKey ?? 0}`}
           object={object}
           selected={object.instanceId === selectedId}
           onSelect={onSelect}

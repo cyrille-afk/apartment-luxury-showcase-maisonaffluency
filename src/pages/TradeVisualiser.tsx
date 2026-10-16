@@ -691,6 +691,14 @@ const TradeVisualiser = () => {
     setSelectedId((current) => (current === instanceId ? null : current));
   };
 
+  // Remounts a vanished piece: fresh mesh, rebuilt materials, forced visible.
+  // Position, rotation, scale and finishes are kept untouched.
+  const restoreObject = (instanceId: string) => {
+    setObjects((current) => current.map((object) => (
+      object.instanceId === instanceId ? { ...object, restoreKey: Date.now() } : object
+    )));
+  };
+
   const scaleObject = (instanceId: string, scale: number) => {
     setObjects((current) => current.map((object) => (
       object.instanceId === instanceId
@@ -946,7 +954,7 @@ const TradeVisualiser = () => {
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
-      <VisualiserInspector onRemove={removeObject} onScale={scaleObject}>
+      <VisualiserInspector onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject}>
         {selected && (<>
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
             {selected.positionLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}

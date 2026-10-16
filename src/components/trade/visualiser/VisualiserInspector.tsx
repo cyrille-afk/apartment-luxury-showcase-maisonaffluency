@@ -23,10 +23,12 @@ const panelClass =
 const VisualiserInspector = ({
   onRemove,
   onScale,
+  onRestore,
   children,
 }: {
   onRemove: (instanceId: string) => void;
   onScale: (instanceId: string, scale: number) => void;
+  onRestore?: (instanceId: string) => void;
   children?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
@@ -77,6 +79,19 @@ const VisualiserInspector = ({
         onChange={(event) => onScale(selected.instanceId, Number(event.target.value) / 100)}
         className="mt-2 w-full accent-foreground"
       />
+
+      {onRestore && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3 w-full text-xs"
+          title="Piece invisible? Rebuilds its mesh and materials, keeping position, size and finishes."
+          onClick={() => onRestore(selected.instanceId)}
+        >
+          Restore piece
+        </Button>
+      )}
+
 
       {children}
     </aside>
