@@ -25,6 +25,15 @@ export const LEGACY_PRODUCT_SLUGS: Record<string, Record<string, string>> = {
     y: "yucca-console-travertin",
   },
   // Truncated slugs fixed 2026-10-16.
+  "francois-champsaur": { p: "pepper-dining-table", s: "sydney-bookcase" },
+  "michel-amar-studio": {
+    a: "agora-wall-sculpture", c: "canyon-console", v: "coba-sconce", e: "eze-suspension",
+    j: "jules-jim-chair", "j-2": "jules-lamp", k: "kisseh-stool", "p-2": "puzzle-console",
+    "p-3": "puzzle-desk", p: "puzzle-dining-table", r: "ring-chandelier", s: "small-vence-table",
+    "s-2": "swan-lamp", "untitled-piec": "vence-dining-table",
+  },
+  "studio-parisien": { m: "mikado" },
+  "tristan-auer": { v: "voyelle-console" },
   "gilles-boissier": {
     "a-2": "albus-dining-chair", "a-3": "alda-table-lamp", "t-3": "amarre", a: "atlas-gueridon-table",
     "c-3": "caliope-sofa", c: "cere-coffee-table", "c-2": "circe-armchair", "d-2": "delphes",
