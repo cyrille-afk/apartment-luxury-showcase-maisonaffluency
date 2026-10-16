@@ -189,6 +189,38 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Client acknowledgement: fixed-content receipt to the quote's client
+    // (ship-to email, else linked inquiry email, else the submitting account).
+    let clientEmail: string | null = (quote.ship_to_email || "").trim() || null;
+    let clientRawName: string | null = quote.ship_to_name || quote.client_name || null;
+    if (!clientEmail && quote.source_inquiry_id) {
+      const { data: inq } = await adminClient.from("inquiries").select("email, name").eq("id", quote.source_inquiry_id).maybeSingle();
+      clientEmail = (inq?.email || "").trim() || null;
+      clientRawName = clientRawName || inq?.name || null;
+    }
+    if (!clientEmail) {
+      clientEmail = (profile?.email || "").trim() || null;
+      clientRawName = clientRawName || userName || null;
+    }
+    if (clientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+      const { error: ackErr } = await adminClient.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "quote-received",
+          recipientEmail: clientEmail,
+          idempotencyKey: `quote-received-${quoteId}`,
+          templateData: {
+            name: displayNameForContact(clientRawName, clientEmail) || undefined,
+            quoteNumber,
+            items: items.map((item: any) => {
+              const p = Array.isArray(item.trade_products) ? item.trade_products[0] : item.trade_products;
+              return { name: p?.product_name || "Item", brand: p?.brand_name || "", quantity: item.quantity };
+            }),
+          },
+        },
+      });
+      if (ackErr) console.error("Client acknowledgement enqueue failed", { quoteId, error: String(ackErr.message || ackErr) });
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
