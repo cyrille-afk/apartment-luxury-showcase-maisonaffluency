@@ -215,6 +215,11 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 /** Inline Curator Picks manager for each designer */
 const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
 
+// Pickup details are shared across a designer's whole catalogue: saving one
+// pick's pickup address/country/postcode applies it to every pick of that
+// designer (the mirror trigger propagates to trade_products).
+const PICKUP_SHARED_FIELDS = new Set(["pickup_address", "pickup_country", "pickup_postcode"]);
+
 function CuratorPicksManager({ designerId, designerName, designerSlug }: { designerId: string; designerName?: string; designerSlug?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -458,7 +463,7 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
       if (pickWriteChainRef.current.get(id) === next) pickWriteChainRef.current.delete(id);
     });
     return next;
-  }, [loadPicks, toast, queryClient]);
+  }, [loadPicks, toast, queryClient, designerId]);
 
   const flushPendingWrites = useCallback(() => {
     const entries = Array.from(pendingWritesRef.current.values());
