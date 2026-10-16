@@ -225,7 +225,7 @@ const TradeQuoteReview = () => {
     const review: ItemRow[] = [];
     let total = 0;
     for (const it of items) {
-      const key = it.room?.trim() || "Unassigned";
+      const key = it.room?.trim() || "Other items";
       (groups[key] ||= []).push(it);
       const effective =
         it.unit_price_cents ??
