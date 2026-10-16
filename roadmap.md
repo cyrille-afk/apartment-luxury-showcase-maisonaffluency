@@ -1,3 +1,4 @@
+- [ ] Add a quote-linked manual freight request and supplier-price record when packing details are missing; verify saved readback and quote totals.
 - [x] Make GBP quote bank instructions currency-specific and hide Trade Tiers/Billing Mode with trade discount off. Signed-in populated quote and downloaded PDF confirm GBP-only SWIFT with BARCGB22, no tiers/billing section; 3 tests pass and build clean.
 - [x] Restore inquiry contact continuity in funnel and Resume Draft; signed-in Pollyanna flow confirms phone and prefilled email. Five tests pass; deployed draft creator persists test contact fields, verified by readback. Email-derived names remain unverified suggestions, no profile scraping.
 - [x] Restore Gilles & Boissier portrait and change only its hover photo; correct Pouenat product attribution. Public and signed-in Trade checks confirm separate collections, restored portrait and hover-only chair photo without page errors; build clean.
