@@ -158,7 +158,9 @@ Deno.serve(async (req) => {
           Date.now() - created > 15 * 60 * 1000
         ) return deny(403, 'Forbidden')
       } else if (templateName === 'manual-shipping-quote-request' && callerId) {
-        recipientEmail = 'concierge@maisonaffluency.com'
+        const freightInboxes = ['concierge@maisonaffluency.com', 'cyrille@maisonaffluency.com', 'gregoire@maisonaffluency.com']
+        recipientEmail = freightInboxes.includes(String(recipientEmail).toLowerCase())
+          ? String(recipientEmail).toLowerCase() : freightInboxes[0]
       } else {
         return deny(callerId ? 403 : 401, callerId ? 'Forbidden' : 'Unauthorized')
       }
