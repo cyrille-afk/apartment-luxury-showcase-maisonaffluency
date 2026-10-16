@@ -488,11 +488,6 @@ function CuratorPicksManager({ designerId, designerName, designerSlug }: { desig
     };
   }, [flushPendingWrites]);
 
-  // Pickup details are shared across a designer's whole catalogue: saving one
-  // pick's pickup address/country/postcode applies it to every pick of that
-  // designer (the mirror trigger propagates to trade_products).
-  const PICKUP_SHARED_FIELDS = new Set(["pickup_address", "pickup_country", "pickup_postcode"]);
-
   const updateField = (id: string, field: string, value: any) => {
     const shared = PICKUP_SHARED_FIELDS.has(field);
     setPicks((prev) => prev.map((p) => (shared || p.id === id ? { ...p, [field]: value } : p)));
