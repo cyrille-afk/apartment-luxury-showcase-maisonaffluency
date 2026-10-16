@@ -436,6 +436,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
   const [shipToNameEditing, setShipToNameEditing] = useState(false);
+  const shipToNameBeforeEdit = useRef("");
   const [clientId, setClientId] = useState<string | null>(null);
   const [clientApproval, setClientApproval] = useState<{ approved: boolean; email: string | null; status: string | null }>({ approved: false, email: null, status: null });
   const [emailLog, setEmailLog] = useState<Array<{ id: string; recipient_email: string; sent_by_email: string | null; created_at: string; note: string | null }>>([]);
@@ -3021,16 +3022,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             <input
                               type="text"
                               value={key === "name" && !shipToNameEditing ? (displayNameForContact(shipTo.name, shipTo.email) || "") : (shipTo[key] || "")}
-                              onFocus={() => { if (key === "name") setShipToNameEditing(true); }}
+                              onFocus={() => {
+                                if (key === "name") {
+                                  shipToNameBeforeEdit.current = shipTo.name || "";
+                                  setShipToNameEditing(true);
+                                }
+                              }}
                               onChange={(e) => setShipTo((s) => ({ ...s, [key]: e.target.value }))}
                               onBlur={async (e) => {
                                 if (key === "name") {
                                   setShipToNameEditing(false);
                                   // Merely focusing a formatted name must never rewrite the saved identity.
-                                  if (e.target.value === shipTo.name) {
-                                    const { data } = await supabase.from("trade_quotes").select("ship_to_name").eq("id", quoteId).single();
-                                    if ((data?.ship_to_name || "") === e.target.value) return;
-                                  }
+                                  if (e.target.value === shipToNameBeforeEdit.current) return;
                                 }
                                 const { error } = await supabase.from("trade_quotes")
                                   .update({ [dbCol]: e.target.value || null } as any)
