@@ -87,7 +87,17 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
 
   const maxSamples = useRef(quality.maxSamples);
   maxSamples.current = quality.maxSamples;
+  // Adaptive sampling: the user's quality is the ceiling; measured per-sample
+  // cost can step resolution/preview/cap down and back up, never above it.
+  const adaptiveState = useRef<AdaptiveSamplingState>(createAdaptiveState(quality));
+  const adaptiveReport = useRef(onAdaptiveChange);
+  adaptiveReport.current = onAdaptiveChange;
+  const adaptiveOn = useRef(adaptive);
+  adaptiveOn.current = adaptive;
+  const timing = useRef({ samples: -1, at: 0 });
   useEffect(() => {
+    adaptiveState.current = resetAdaptiveState(adaptiveState.current, quality);
+    timing.current = { samples: -1, at: 0 };
     const pt = tracer.current;
     if (!pt) return;
     pt.lowResScale = quality.previewScale;
