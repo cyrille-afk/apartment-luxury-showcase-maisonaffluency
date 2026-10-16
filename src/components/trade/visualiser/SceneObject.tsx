@@ -22,6 +22,8 @@ import { addWoodRoughness, deepenArmchairWeave, disposeMicroSurfaceMaps } from "
 
 export type PlacedObject = {
   instanceId: string;
+  /** Bumped by "Restore piece" to remount the mesh and rebuild its materials. */
+  restoreKey?: number;
   id: string;
   product_name: string;
   brand_name: string;
