@@ -85,3 +85,51 @@ export function tracedEnvironmentRevision(scene: THREE.Scene): string {
     background instanceof THREE.Color ? background.getHexString() : background?.uuid,
     scene.backgroundIntensity, scene.backgroundBlurriness, scene.backgroundRotation.toArray().join(",")].join("|");
 }
+
+/** GPU class used to size Photoreal presets; presets only change sampling/resolution, never scene contents. */
+export type GpuTier = "low" | "mid" | "high";
+export type PhotorealPresetName = "balanced" | "high";
+
+/** Classify the GPU from the WebGL renderer string (software/integrated → low, discrete → high). */
+export function classifyGpu(renderer: string | null | undefined, cores = 4): GpuTier {
+  const r = (renderer || "").toLowerCase();
+  if (!r || /swiftshader|llvmpipe|software|basic render|mali-[gt][0-9]{1,2}\b|adreno \(tm\) [3-5]/.test(r)) return "low";
+  if (/rtx|radeon rx|radeon pro|apple m[1-9] (pro|max|ultra)|apple m[3-9]|quadro|arc a/.test(r)) return "high";
+  if (/intel|uhd|iris|adreno|mali|powervr/.test(r)) return cores >= 8 ? "mid" : "low";
+  return "mid";
+}
+
+const PRESETS: Record<PhotorealPresetName, Record<GpuTier, Omit<PathTraceQuality, "lightIntensity">>> = {
+  balanced: {
+    low: { previewScale: 0.25, maxSamples: 256, renderScale: 0.75 },
+    mid: { previewScale: 0.5, maxSamples: 512, renderScale: 1 },
+    high: { previewScale: 1, maxSamples: 1024, renderScale: 1 },
+  },
+  high: {
+    low: { previewScale: 0.25, maxSamples: 1024, renderScale: 1 },
+    mid: { previewScale: 0.5, maxSamples: 2048, renderScale: 1 },
+    high: { previewScale: 1, maxSamples: 2048, renderScale: 1.5 },
+  },
+};
+
+/** Preset quality for a GPU tier; keeps the user's lighting choice. */
+export const photorealPreset = (name: PhotorealPresetName, tier: GpuTier, lightIntensity = DEFAULT_PT_QUALITY.lightIntensity): PathTraceQuality =>
+  clampPtQuality({ ...PRESETS[name][tier], lightIntensity });
+
+/** Which preset (if any) the current quality matches for this tier. */
+export const matchPhotorealPreset = (q: PathTraceQuality, tier: GpuTier): PhotorealPresetName | "custom" =>
+  (Object.keys(PRESETS) as PhotorealPresetName[]).find((n) => {
+    const p = PRESETS[n][tier];
+    return p.previewScale === q.previewScale && p.maxSamples === q.maxSamples && p.renderScale === q.renderScale;
+  }) ?? "custom";
+
+export function detectGpuTier(): GpuTier {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl2") as WebGL2RenderingContext | null;
+    if (!gl) return "low";
+    const ext = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return classifyGpu(String(renderer), navigator.hardwareConcurrency || 4);
+  } catch { return "mid"; }
+}

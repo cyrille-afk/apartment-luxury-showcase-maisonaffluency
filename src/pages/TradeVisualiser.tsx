@@ -1,4 +1,4 @@
-import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality } from "@/lib/visualiserPathTracing";
+import { clampPtQuality, loadPtQuality, PT_QUALITY_KEY, type PathTraceQuality, detectGpuTier, matchPhotorealPreset, photorealPreset, type GpuTier, type PhotorealPresetName } from "@/lib/visualiserPathTracing";
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
@@ -255,6 +255,7 @@ const TradeVisualiser = () => {
   };
   const [ptSamples, setPtSamples] = useState(0);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
+  const [gpuTier] = useState<GpuTier>(() => detectGpuTier());
   const setPtQuality = (patch: Partial<PathTraceQuality>) => setPtQualityState((q) => {
     const next = clampPtQuality({ ...q, ...patch });
     try { localStorage.setItem(PT_QUALITY_KEY, JSON.stringify({ ...next, qualityVersion: 2 })); } catch { /* storage full */ }
@@ -1418,6 +1419,13 @@ const TradeVisualiser = () => {
             </Button>
             {pathTrace && (
               <>
+                <label className={cn(toolbarButton, "gap-1")} title={`Presets adapt samples and resolution to this device's graphics (${gpuTier} performance). Walls, columns and mezzanine always stay in the render.`}>
+                  Preset
+                  <select aria-label="Photoreal preset" className="bg-transparent outline-none" value={matchPhotorealPreset(ptQuality, gpuTier)}
+                    onChange={(e) => { if (e.target.value === "custom") return; setPtSamples(0); setPtQuality(photorealPreset(e.target.value as PhotorealPresetName, gpuTier, ptQuality.lightIntensity)); }}>
+                    <option value="balanced">Balanced</option><option value="high">High Quality</option><option value="custom" disabled>Custom</option>
+                  </select>
+                </label>
                 <label className={cn(toolbarButton, "gap-1")} title="Resolution used while the camera is moving">
                   Preview
                   <select aria-label="Preview quality" className="bg-transparent outline-none" value={ptQuality.previewScale} onChange={(e) => setPtQuality({ previewScale: Number(e.target.value) })}>
