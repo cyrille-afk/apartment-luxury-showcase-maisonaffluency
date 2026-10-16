@@ -23,6 +23,7 @@ import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBudget";
 import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
+import { getQuoteBankTransfer } from "@/config/quoteBankTransfer";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -1731,11 +1732,13 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   });
 
   y += 10;
-  // Bank box — two side-by-side, vertically aligned transfer options.
+  // Bank box — currency-specific instructions shared with the quote screen.
   // The box is tall, so page-break before it rather than splitting it.
   y = ensureSpace(doc, y, 218, doc.internal.pageSize.getHeight());
   const rowH = 16;
-  const boxH = 154;
+  const bankTransfer = getQuoteBankTransfer(args.currency);
+  const isGbp = args.currency.toUpperCase() === "GBP";
+  const boxH = isGbp ? 210 : 170;
   doc.setFillColor(250, 249, 246);
   doc.rect(M, y, contentW, boxH, "F");
   doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
@@ -1756,10 +1759,10 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   doc.text("1 Grange Garden, #16-05, Singapore, 249631, Singapore", M + 12, y + 40);
 
   const gutter = 20;
-  const colW = (contentW - 24 - gutter) / 2;
+  const colW = isGbp ? contentW - 24 : (contentW - 24 - gutter) / 2;
   const leftX = M + 12;
   const rightX = leftX + colW + gutter;
-  const labelW = 74;
+  const labelW = isGbp ? 100 : 74;
   // Row renderer: muted small-caps label in a fixed-width column + value beside it.
   const drawRow = (rowX: number, rowY: number, label: string, value: string, muted = false) => {
     doc.setFont("helvetica", "bold");
@@ -1767,9 +1770,9 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
     doc.text(label.toUpperCase(), rowX, rowY);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(isGbp ? 8.5 : 7);
     doc.setTextColor(...(muted ? MUTED : FG) as [number, number, number]);
-    doc.text(value, rowX + labelW, rowY);
+    doc.text(doc.splitTextToSize(value, colW - labelW), rowX + labelW, rowY);
   };
   const blockHeader = (rowX: number, rowY: number, label: string) => {
     doc.setFont("helvetica", "bold");
@@ -1779,18 +1782,18 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
   };
 
   const ry = y + 62;
-  blockHeader(leftX, ry, "Option A: EUR SEPA Transfers (Revolut Lithuania)");
-  drawRow(leftX, ry + rowH, "IBAN", "LT73 3250 0692 1856 8740");
-  drawRow(leftX, ry + rowH * 2, "BIC", "REVOLT21");
-  drawRow(leftX, ry + rowH * 3, "Bank", "Revolut Bank UAB");
-  drawRow(leftX, ry + rowH * 4, "Address", "Konstitucijos ave. 21B, Vilnius", true);
-
-  doc.line(rightX - gutter / 2, ry - 10, rightX - gutter / 2, y + boxH - 12);
-  blockHeader(rightX, ry, "Option B: Global SWIFT Wires (Revolut Singapore)");
-  drawRow(rightX, ry + rowH, "Account", "885111609218375");
-  drawRow(rightX, ry + rowH * 2, "SWIFT/BIC", "REVOSGS2");
-  drawRow(rightX, ry + rowH * 3, "Intermediary", "BARCDEFF");
-  drawRow(rightX, ry + rowH * 4, "Bank", "Revolut Technologies Singapore", true);
+  bankTransfer.blocks.forEach((block, index) => {
+    const rowX = index === 0 ? leftX : rightX;
+    if (index > 0) doc.line(rightX - gutter / 2, ry - 10, rightX - gutter / 2, y + boxH - 12);
+    blockHeader(rowX, ry, block.title);
+    block.rows.forEach((row, rowIndex) => drawRow(rowX, ry + rowH * (rowIndex + 1), row.label, row.value, row.label === "Address"));
+  });
+  if (isGbp) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text(doc.splitTextToSize(bankTransfer.note, contentW - 24), leftX, ry + rowH * 6 + 8);
+  }
 
   return y + boxH;
 }
