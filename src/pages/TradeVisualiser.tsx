@@ -1472,11 +1472,23 @@ const TradeVisualiser = () => {
                       })}
                     </DropdownMenuRadioGroup>
                     <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem checked={ptAdaptive} onCheckedChange={(checked) => setPtAdaptive(checked === true)}>
+                      <span className="flex flex-col gap-0.5 py-0.5">
+                        <span>Adaptive sampling</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          Measures render speed and adjusts samples and resolution to this GPU
+                        </span>
+                      </span>
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
                     <div className="px-2 py-1.5 text-[10px] text-muted-foreground">
                       <div className="mb-0.5 uppercase tracking-[0.15em]">
                         Active{activePhotorealPreset === "custom" ? " · custom settings" : ""}
                       </div>
                       <div className="tabular-nums text-foreground/80">{photorealQualitySummary(ptQuality)}</div>
+                      {ptAdaptive && (
+                        <div className="tabular-nums">{ptAdaptiveInfo ? adaptiveSummary(ptAdaptiveInfo) : "Adaptive: running at preset"}</div>
+                      )}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
