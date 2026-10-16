@@ -38,6 +38,7 @@ import { template as designerPurchaseOrder } from './designer-purchase-order.tsx
 import { template as clientQuotePayment } from './client-quote-payment.tsx'
 import { template as cartReminder } from './cart-reminder.tsx'
 import { template as quotePaymentReminder } from './quote-payment-reminder.tsx'
+import { template as quoteReceived } from './quote-received.tsx'
 import { template as quoteConfirmationPaymentLink } from './quote-confirmation-payment-link.tsx'
 import { template as quoteConfirmationInternalCopy } from './quote-confirmation-internal-copy.tsx'
 import { template as funnelStallAlert } from './funnel-stall-alert.tsx'
@@ -79,6 +80,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'client-quote-payment': clientQuotePayment,
   'cart-reminder': cartReminder,
   'quote-payment-reminder': quotePaymentReminder,
+  'quote-received': quoteReceived,
   'quote-confirmation-payment-link': quoteConfirmationPaymentLink,
   'quote-confirmation-internal-copy': quoteConfirmationInternalCopy,
   'funnel-stall-alert': funnelStallAlert,
