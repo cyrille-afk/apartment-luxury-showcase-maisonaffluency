@@ -45,7 +45,8 @@ export const createAdaptiveState = (ceiling: PathTraceQuality): AdaptiveSampling
   previewScale: ceiling.previewScale,
   maxSamples: ceiling.maxSamples,
   durations: [],
-  lastAdjustAt: 0,
+  // Negative so the first adjustment is allowed as soon as enough samples are measured.
+  lastAdjustAt: -ADAPTIVE_COOLDOWN_MS,
   adjusted: false,
 });
 
