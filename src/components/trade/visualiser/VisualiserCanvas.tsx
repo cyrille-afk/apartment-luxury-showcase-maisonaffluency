@@ -14,6 +14,8 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
+import LuxuryBackdrop from "./LuxuryBackdrop";
+import { LUXURY_BACKDROP, windowLightPosition } from "./luxuryBackdropSettings";
 import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
@@ -200,6 +202,7 @@ interface VisualiserCanvasProps {
   selectedId: string | null;
   orbitEnabled: boolean;
   hasBackdrop: boolean;
+  defaultLuxuryBackdrop?: boolean;
   /** Surface of the three-slab architectural backdrop wall (default travertine). */
   featureWallFinish?: FeatureWallFinish;
   onSelect: (id: string | null) => void;
@@ -314,7 +317,8 @@ const VisualiserCanvas = ({
   objects,
   selectedId,
   orbitEnabled,
-  hasBackdrop,
+  hasBackdrop: hasCustomBackdrop,
+  defaultLuxuryBackdrop = false,
   featureWallFinish = "travertine",
   onSelect,
   onTransform,
@@ -358,6 +362,9 @@ const VisualiserCanvas = ({
   backdropColor = null,
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
+  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop;
+  const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop;
+  const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
   const dofRange = useRef<number>(DEFAULT_ARCHITECTURAL_DOF.focusRange);
@@ -406,21 +413,24 @@ const VisualiserCanvas = ({
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
-      enablePan
+      enablePan={!showLuxuryBackdrop}
       screenSpacePanning
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={SHOWROOM.cameraPolarAngle}
-      maxPolarAngle={SHOWROOM.cameraPolarAngle}
+      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      maxPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
+      maxAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
       target={SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
     {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
+    {showLuxuryBackdrop && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
-      position={[-6, 9, 6]}
+      position={showLuxuryBackdrop ? windowLightPosition(center) : [-6, 9, 6]}
       intensity={lighting.directionalIntensity}
       color={SHOWROOM.key}
       castShadow
@@ -446,9 +456,10 @@ const VisualiserCanvas = ({
     <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} onReady={environmentLoaded} />
 
     <Suspense fallback={null}>
+      {showLuxuryBackdrop && <LuxuryBackdrop />}
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
       {!hasBackdrop && <ArchitecturalFeatureWall finish={featureWallFinish} />}
-      <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
+      <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />
       <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
     {!pathTrace && !hasBackdrop && floorFinish === "none" && (
@@ -478,7 +489,8 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
-    {showGrid && (
+    {!pathTrace && showLuxuryBackdrop && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+    {showGrid && !showLuxuryBackdrop && (
       <Grid
         position={[0, 0.001, 0]}
         infiniteGrid
