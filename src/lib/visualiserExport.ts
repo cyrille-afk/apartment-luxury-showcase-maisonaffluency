@@ -47,3 +47,14 @@ export const captureCanvasPng = (canvas: HTMLCanvasElement, background: string =
   ctx.drawImage(canvas, 0, 0);
   return composite.toDataURL("image/png");
 };
+
+/**
+ * Scene changes needed before capturing a mockup. Photoreal output never
+ * contains the grid or transform gizmo, and deselecting would move the
+ * depth-of-field focus and restart accumulation — so a Photoreal export
+ * captures the current accumulated frame untouched.
+ */
+export const mockupCapturePrep = (pathTrace: boolean, showGrid: boolean, selectedId: string | null) => ({
+  hideGrid: !pathTrace && showGrid,
+  clearSelection: !pathTrace && selectedId !== null,
+});
