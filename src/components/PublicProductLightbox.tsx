@@ -34,6 +34,7 @@ import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyTog
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
+import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
  *  Accents are transliterated (GÉLULE → gelule) so the generated URL matches
@@ -774,6 +775,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start md:gap-8">
 
               {/* LEFT COLUMN — standardized hero image container */}
+              <div className="min-w-0">
                <div className="relative flex w-full min-h-0 items-center justify-center md:max-h-[300px]">
                 {product.image_url ? (
                   <>
@@ -861,6 +863,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
+              <PicturedFinishesStrip pickId={product.id} activeIndex={finishImageIdx ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={productPageDesignerSlug === "bieke-casteleyn"} />
+              </div>
               {/* RIGHT COLUMN — specs card + CTAs */}
                <div className="flex w-full flex-col md:border-l md:border-border/40 md:pl-8">
                  <div className="pr-1">

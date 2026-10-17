@@ -12,6 +12,7 @@
 - Expanded biographies interleave mobile media between narrative paragraphs independently of desktop staggered rows — prevents trailing photos and video/photo stacks on phones.
 - Product technical legends use the shared `technicalSpecs` length policy after size controls — keeps disclosure and ordering consistent across modes.
 - Visualiser ceiling settings use a lightweight shared contract for page, presets and lazy-loaded geometry; emitters follow the opening and frame height so saved settings render consistently.
+- Product pages and lightboxes reuse PicturedFinishesStrip with the displayed photo index; multi-material mappings stay visible when pictured together — prevents missing photo legends.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
