@@ -872,12 +872,12 @@ const StudioGallery = () => {
                    </button>
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button
+                    <Button variant="outline" size="sm"
                       onClick={() => handleAddToQuote(product)}
                       disabled={isAdding || product.hidden_in_trade}
                       className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors ${
                         isAdded
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-foreground text-background hover:bg-foreground/90"
                       } disabled:opacity-60`}
                     >
@@ -889,7 +889,7 @@ const StudioGallery = () => {
                         <ShoppingCart className="h-3 w-3" />
                       )}
                       {product.hidden_in_trade ? "Hidden in Trade" : isAdded ? "Added" : "Add to Quote"}
-                    </button>
+                    </Button>
                     {product.pdf_url && (
                       <a
                         href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)}
@@ -980,12 +980,12 @@ const StudioGallery = () => {
                 ) : (
                   renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap", product.brand_name)
                 )}
-                <button
+                <Button variant="outline" size="sm"
                   onClick={() => handleAddToQuote(product)}
                   disabled={isAdding || product.hidden_in_trade}
                   className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors shrink-0 ${
                     isAdded
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
                   } disabled:opacity-60`}
                 >
@@ -997,7 +997,7 @@ const StudioGallery = () => {
                     <ShoppingCart className="h-3 w-3" />
                   )}
                   {product.hidden_in_trade ? "Hidden in Trade" : isAdded ? "Added" : "Add"}
-                </button>
+                </Button>
                 {product.pdf_url && (
                   <a href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">
