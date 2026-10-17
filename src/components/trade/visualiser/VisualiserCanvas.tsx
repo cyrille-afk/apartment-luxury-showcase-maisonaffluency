@@ -14,6 +14,7 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
+import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
@@ -44,7 +45,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1 }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
@@ -71,6 +72,7 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1 }:
         /* Keep local studio reflections if both HDRI sources are unavailable. */
         if (cancelled) return;
         reportEnvironmentStatus({ source: "local", exr });
+        onReady?.();
       });
     };
     const loadHostedExr = (source: VisualiserEnvironmentSource, url: string) => {
@@ -108,7 +110,8 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1 }:
   // see the new texture even after reaching the final sample cap.
   useEffect(() => {
     invalidate();
-  }, [map, environmentIntensity, pathTrace, invalidate]);
+    if (map) onReady?.();
+  }, [map, environmentIntensity, pathTrace, invalidate, onReady]);
   if (map) return (
     <Environment
       key={map.uuid}
@@ -191,6 +194,7 @@ const SceneLoader = () => (
 );
 
 interface VisualiserCanvasProps {
+  onInitialReady?: () => void;
   isEditable?: boolean;
   objects: PlacedObject[];
   selectedId: string | null;
@@ -305,6 +309,7 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
  * Visualiser route actually mounts.
  */
 const VisualiserCanvas = ({
+  onInitialReady,
   isEditable = true,
   objects,
   selectedId,
@@ -356,6 +361,10 @@ const VisualiserCanvas = ({
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
   const dofRange = useRef<number>(DEFAULT_ARCHITECTURAL_DOF.focusRange);
+  const [roomReady, setRoomReady] = useState(false);
+  const [objectsReady, setObjectsReady] = useState(false);
+  const [environmentReady, setEnvironmentReady] = useState(false);
+  const environmentLoaded = useRef(() => setEnvironmentReady(true)).current;
   return (
   <Canvas
     shadows={{ type: THREE.PCFShadowMap }}
@@ -380,6 +389,7 @@ const VisualiserCanvas = ({
     }}
     onPointerMissed={() => onSelect(null)}
   >
+    {onInitialReady && <InitialRoomReveal ready={roomReady && objectsReady && environmentReady} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} onReady={onInitialReady} />}
     <RenderOnDemand
       signature={`lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
@@ -433,12 +443,13 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
     {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} />
+    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} onReady={environmentLoaded} />
 
     <Suspense fallback={null}>
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
       {!hasBackdrop && <ArchitecturalFeatureWall finish={featureWallFinish} />}
       <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug} />
+      <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
     {!pathTrace && !hasBackdrop && floorFinish === "none" && (
       <ContactShadows
@@ -510,6 +521,7 @@ const VisualiserCanvas = ({
             }))}
         />
       ))}
+      <InitialAssetsCommitted onReady={setObjectsReady} />
     </Suspense>
     {pathTrace && (
       <PathTracerLayer

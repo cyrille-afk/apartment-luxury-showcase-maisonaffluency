@@ -250,6 +250,8 @@ const TradeVisualiser = () => {
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
   const [pathTrace, setPathTrace] = useState(false);
+  const [initialRoomReady, setInitialRoomReady] = useState(false);
+  const revealInitialRoom = useCallback(() => setInitialRoomReady(true), []);
   const [keepPhotorealGhost, setKeepPhotorealGhost] = useState(loadPhotorealGhostPreference);
   const [photorealGhost, setPhotorealGhost] = useState<string | null>(null);
   const frameCaptureRef = useRef<PhotorealFrameCaptureRef["current"]>(null);
@@ -895,7 +897,7 @@ const TradeVisualiser = () => {
       {showPhotorealGhost && photorealGhost && (
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
       )}
-      {!pathTrace && !sceneFailed && (
+      {!pathTrace && !sceneFailed && initialRoomReady && (
         <div className="absolute bottom-3 left-3 z-30">
           <Button variant="outline" size="sm" onClick={togglePhotoreal} className="gap-2 bg-background/90 text-xs backdrop-blur-sm">
             <span aria-hidden="true">✦</span> Start Photoreal Render
@@ -909,6 +911,7 @@ const TradeVisualiser = () => {
         </div>
       )}
       <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
+        {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
         {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
           <Button variant="outline" onClick={() => { setSceneFailed(false); setCanvasEpoch((n) => n + 1); }}>Retry 3D view</Button>
@@ -916,6 +919,7 @@ const TradeVisualiser = () => {
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
+            onInitialReady={revealInitialRoom}
             focusRef={focusRef}
             objects={objects}
             selectedId={selectedId}

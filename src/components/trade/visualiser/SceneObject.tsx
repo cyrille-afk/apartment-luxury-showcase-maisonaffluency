@@ -339,9 +339,10 @@ function useFittedModel(object: PlacedObject) {
   ], maxAnisotropy);
   const partOverrides = usePartOverrides(productId);
   const [subdivision, setSubdivision] = useState<OpenSubdivModule | null>(null);
+  const [subdivisionSettled, setSubdivisionSettled] = useState(false);
   useEffect(() => {
     let active = true;
-    void loadSubdivisionEngine().then((module) => { if (active) setSubdivision(module); }).catch(() => {});
+    void loadSubdivisionEngine().then((module) => { if (active) setSubdivision(module); }).catch(() => {}).finally(() => { if (active) setSubdivisionSettled(true); });
     return () => { active = false; };
   }, []);
   return useMemo(() => {
@@ -388,8 +389,9 @@ function useFittedModel(object: PlacedObject) {
     const model = groundModel(applyModelOrientation(fitUprightModel(clone, object.dimensions, url), object.modelOrientation));
     // Project only after import-axis correction: this frame is actually Y-up.
     applyCoffeeTableMarbleProjection(model, object.product_name);
+    model.userData.visualiserInitialReady = subdivisionSettled && [holder.material, holder.topMaterial, holder.baseMaterial, holder.upholsteryMaterial, ...Object.values(holder.partMaterials ?? {})].every((finish) => !finish || maps.has(finish.id));
     return model;
-  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision]);
+  }, [scene, partOverrides, holder, maps, productId, object.product_name, object.dimensions, url, object.modelOrientation, subdivision, subdivisionSettled]);
 }
 
 /** Pieces always rest on the floor plane (Y = 0). */

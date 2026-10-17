@@ -1,0 +1,42 @@
+import { act, render } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import * as THREE from "three";
+import InitialRoomReveal from "./InitialRoomReveal";
+
+const harness = vi.hoisted(() => ({ frame: null as null | ((state: { scene: THREE.Scene; invalidate: () => void }) => void) }));
+vi.mock("@react-three/fiber", () => ({ useFrame: (fn: typeof harness.frame) => { harness.frame = fn; } }));
+afterEach(() => { vi.restoreAllMocks(); });
+
+it("waits for all initial assets, finish maps and two full-resolution frames, then reveals only once", () => {
+  const queued: FrameRequestCallback[] = [];
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => { queued.push(fn); return queued.length; });
+  const scene = new THREE.Scene();
+  const model = new THREE.Group();
+  scene.add(model);
+  const onReady = vi.fn();
+  const state = { scene, invalidate: vi.fn() };
+  const view = render(<InitialRoomReveal ready={false} modelCount={1} onReady={onReady} />);
+  act(() => harness.frame?.(state));
+  expect(queued).toHaveLength(0);
+  view.rerender(<InitialRoomReveal ready modelCount={1} onReady={onReady} />);
+  act(() => harness.frame?.(state));
+  expect(queued).toHaveLength(0);
+  model.userData.visualiserInitialReady = true;
+  const inner = new THREE.Group();
+  inner.userData = model.userData;
+  model.add(inner);
+  view.rerender(<InitialRoomReveal ready modelCount={2} onReady={onReady} />);
+  act(() => { harness.frame?.(state); harness.frame?.(state); });
+  expect(queued).toHaveLength(0);
+  view.rerender(<InitialRoomReveal ready modelCount={1} onReady={onReady} />);
+  act(() => harness.frame?.(state));
+  expect(queued).toHaveLength(0);
+  act(() => harness.frame?.(state));
+  expect(queued).toHaveLength(1);
+  act(() => queued[0]?.(0));
+  expect(onReady).toHaveBeenCalledTimes(1);
+  view.rerender(<InitialRoomReveal ready={false} modelCount={2} onReady={onReady} />);
+  act(() => harness.frame?.(state));
+  expect(queued).toHaveLength(1);
+  expect(onReady).toHaveBeenCalledTimes(1);
+});
