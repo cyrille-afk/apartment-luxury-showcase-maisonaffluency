@@ -409,7 +409,7 @@ const VisualiserCanvas = ({
     {focusRef && <FloorFocusReporter focusRef={focusRef} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} />
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
@@ -418,11 +418,11 @@ const VisualiserCanvas = ({
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
       maxPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
       minAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
       maxAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
-      target={SHOWROOM.cameraTarget}
+      target={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
@@ -506,7 +506,7 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {(hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!showLuxuryBackdrop && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
     </mesh>}
