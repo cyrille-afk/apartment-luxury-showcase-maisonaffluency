@@ -839,13 +839,12 @@ const TradeVisualiser = () => {
   };
 
   // Clears any saved lighting file / room photo and returns to the generated
-  // industrial room; furniture layout is kept, every piece is rebuilt fresh.
+  // industrial room without remounting furniture or reloading its finish maps.
   const resetIndustrialRoom = async () => {
     try { await clearLocalExr(); } catch { /* nothing stored */ }
     setEnvironmentSource("studio-hdr");
     setBackdrop(null);
     setBackdropDataUrl(null);
-    setObjects((current) => current.map((object) => ({ ...object, restoreKey: Date.now() })));
     toast.success("Industrial room restored.");
   };
 
