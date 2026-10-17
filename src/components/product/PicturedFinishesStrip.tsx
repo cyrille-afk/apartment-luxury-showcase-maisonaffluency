@@ -44,8 +44,8 @@ export default function PicturedFinishesStrip({
         .eq("pick_id", pickId);
       if (cancelled || error) return;
       setSwatches(
-        (data || []).filter(
-          (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
+        (data || []).filter((r: any) => r && r.is_active !== false).map(
+          (r: any) => ({ ...r, image_indices: Array.isArray(r.image_indices) ? r.image_indices : [] }),
         ),
       );
     })();

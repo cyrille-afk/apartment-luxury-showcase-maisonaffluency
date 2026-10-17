@@ -21,6 +21,20 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 describe("pictured finishes for any product", () => {
+  it("keeps available finishes without photo mappings visible but not photo-selectable", async () => {
+    rowsByPick["unmapped-available"] = [
+      { fabric_id: "ebonized", name: "Ebonized Oak", category: "Wood", image_url: "https://example.com/oak.jpg", image_indices: null, is_active: true },
+      { fabric_id: "bleached", name: "Bleached Oak", category: "Wood", image_url: "https://example.com/bleached.jpg", image_indices: [1], is_active: true },
+    ];
+    const onSelectImage = vi.fn();
+    render(<PicturedFinishesStrip available pickId="unmapped-available" activeIndex={0} imageCount={3} onSelectImage={onSelectImage} />);
+    await waitFor(() => expect(screen.getByText("Ebonized Oak")).toBeInTheDocument());
+    expect(screen.getByRole("img", { name: "Ebonized Oak" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Show Ebonized Oak product photo" })).not.toBeInTheDocument();
+    screen.getByRole("button", { name: "Show Bleached Oak product photo" }).click();
+    expect(onSelectImage).toHaveBeenCalledWith(0);
+  });
+
   it("shows only the finishes mapped to the current image, not unrelated finishes", async () => {
     const { rerender } = render(<PicturedFinishesStrip pickId="not-bieke" activeIndex={0} />);
     await waitFor(() => expect(screen.getByText("Smoked Oak")).toBeInTheDocument());
