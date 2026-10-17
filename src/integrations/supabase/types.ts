@@ -8353,6 +8353,27 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_delivery_checks: {
+        Row: {
+          available: boolean
+          checked_at: string
+          id: number
+          missing_live_events: number
+        }
+        Insert: {
+          available: boolean
+          checked_at?: string
+          id?: never
+          missing_live_events?: number
+        }
+        Update: {
+          available?: boolean
+          checked_at?: string
+          id?: never
+          missing_live_events?: number
+        }
+        Relationships: []
+      }
       studio_aesthetic_dna: {
         Row: {
           aesthetic_label: string | null
@@ -12015,6 +12036,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      admin_stripe_metrics: { Args: { _days?: number }; Returns: Json }
       apply_available_credit_to_quote: {
         Args: { _quote_id: string }
         Returns: number
