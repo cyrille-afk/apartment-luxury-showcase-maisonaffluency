@@ -46,6 +46,7 @@ const commerceGroup: AdminCard[] = [
 ];
 
 const analyticsGroup: AdminCard[] = [
+  { title: "Stripe Monitoring", description: "Live delivery health, signature errors, and processing delays", url: "/trade/admin/stripe-metrics", icon: BarChart3 },
   { title: "Insights", description: "Portal engagement, traffic, and usage analytics", url: "/trade/insights", icon: BarChart3 },
   { title: "Downloads by Country", description: "Track catalogue and spec sheet downloads per country", url: "/trade/downloads-by-country", icon: Globe },
   // Magazine Funnel card removed — AD free-download flow discontinued.

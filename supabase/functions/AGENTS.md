@@ -10,3 +10,4 @@
 - Concierge email failure alerts are event-driven (email_send_log insert trigger → monitor-concierge-email), not cron; rules.ts and the SQL trigger match lists must stay in sync.
 
 - Stripe rejection telemetry stores only unverified failure metadata; the watchdog reconciles live Stripe failures with local receipts and throttles only dispatched alerts — preserves fast acknowledgements.
+- Save provider availability and missing-live-event counts on each existing watchdog run, including healthy runs; delivery history must not depend on alert dispatch.
