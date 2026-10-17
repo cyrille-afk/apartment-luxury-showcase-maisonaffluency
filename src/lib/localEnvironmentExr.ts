@@ -42,3 +42,14 @@ export async function clearLocalExr(): Promise<void> {
   await run("readwrite", (s) => s.delete(KEY));
   window.dispatchEvent(new Event(LOCAL_EXR_EVENT));
 }
+
+// One-time reset: return to the generated industrial room without an uploaded EXR.
+if (typeof window !== "undefined" && typeof indexedDB !== "undefined") {
+  const FLAG = "ma-visualiser-exr-reset-v1";
+  try {
+    if (!localStorage.getItem(FLAG)) {
+      localStorage.setItem(FLAG, "1");
+      clearLocalExr().catch(() => undefined);
+    }
+  } catch { /* storage unavailable */ }
+}
