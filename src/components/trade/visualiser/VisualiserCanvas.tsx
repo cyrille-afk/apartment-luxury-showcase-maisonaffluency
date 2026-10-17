@@ -130,16 +130,19 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
     if (map) onReady?.();
   }, [map, environmentIntensity, pathTrace, invalidate, onReady]);
   if (map) return (
-    <Environment
-      key={map.uuid}
-      map={map}
-      background={presentation.background}
-      environmentIntensity={environmentIntensity}
-      backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
-      backgroundBlurriness={presentation.blur}
-      environmentRotation={rotation}
-      backgroundRotation={rotation}
-    />
+    <>
+      <Environment
+        key={map.uuid}
+        map={map}
+        background={presentation.background}
+        environmentIntensity={environmentIntensity}
+        backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
+        backgroundBlurriness={presentation.blur}
+        environmentRotation={rotation}
+        backgroundRotation={rotation}
+      />
+      {uploadedActive && <UploadedEnvironmentBackdrop map={map} />}
+    </>
   );
   return (
     <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={environmentIntensity} backgroundIntensity={pathTrace ? environmentIntensity : 1} environmentRotation={rotation} backgroundRotation={rotation}>
@@ -384,6 +387,8 @@ const VisualiserCanvas = ({
   const showUploadedEnvironment = uploadedEnvironment && environmentSource === "empty-room-exr";
   const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment;
   const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
+  // Uploaded interiors share the room-photo stage: fixed grounded camera, no pan.
+  const photoStage = showLuxuryBackdrop || showUploadedEnvironment;
   const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
