@@ -409,7 +409,7 @@ const VisualiserCanvas = ({
     {focusRef && <FloorFocusReporter focusRef={focusRef} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} />
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (showLuxuryBackdrop) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}

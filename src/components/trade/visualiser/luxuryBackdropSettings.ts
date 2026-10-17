@@ -1,8 +1,8 @@
 export const LUXURY_BACKDROP = {
   path: '/assets/luxury-surrounding.jpg',
   distance: 50,
-  cameraPosition: [0, 5.8, 14] as [number, number, number],
-  cameraTarget: [0, 2.6, 0] as [number, number, number],
+  cameraPosition: [0, 4.2, 9] as [number, number, number],
+  cameraTarget: [0, 1.8, 0] as [number, number, number],
   minPolarAngle: Math.PI / 3,
   maxPolarAngle: Math.PI / 2.1,
   minAzimuthAngle: -Math.PI / 6,
