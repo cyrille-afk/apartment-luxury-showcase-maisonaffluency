@@ -1543,7 +1543,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         body: { quoteId },
       }).catch((err) => console.error("Quote notification email failed:", err));
 
-      toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
+      toast({ title: "Quote submitted", description: "Our team will review and respond within 1 business day." });
       onStatusChange();
     } finally {
       setSubmittingQuote(false);

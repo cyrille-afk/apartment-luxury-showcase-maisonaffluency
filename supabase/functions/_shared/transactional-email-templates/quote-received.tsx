@@ -41,7 +41,7 @@ const QuoteReceivedEmail = ({ name, quoteNumber, items }: Props) => {
             availability, lead times and delivery to your address.
           </Text>
           <Text style={text}>
-            You will receive your detailed quote within 1–2 business days.
+            You will receive your detailed quote within 1 business day.
           </Text>
 
           {list.length > 0 ? (
