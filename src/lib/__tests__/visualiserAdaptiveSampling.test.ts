@@ -8,6 +8,8 @@ import {
   createAdaptiveState,
   recordSampleDuration,
   resetAdaptiveState,
+  emptySampleTiming,
+  measureSampleDuration,
 } from "@/lib/visualiserAdaptiveSampling";
 import { photorealPreset } from "@/lib/visualiserPathTracing";
 
@@ -24,6 +26,24 @@ const feed = (ms: number, count: number, start = 0) => {
 };
 
 describe("visualiserAdaptiveSampling", () => {
+  it("excludes tab suspension at 2500 SPP from GPU timing", () => {
+    const timing = emptySampleTiming();
+    measureSampleDuration(timing, 2500, 100, true);
+    expect(measureSampleDuration(timing, 2501, 60100, true)).toBeNull();
+    expect(measureSampleDuration(timing, 2502, 60200, true)).toBe(100);
+  });
+  it("measures whole samples across partial tile frames", () => {
+    const timing = emptySampleTiming();
+    measureSampleDuration(timing, 2500, 100, true);
+    expect(measureSampleDuration(timing, 2500, 200, true)).toBeNull();
+    expect(measureSampleDuration(timing, 2500, 300, true)).toBeNull();
+    expect(measureSampleDuration(timing, 2501, 400, true)).toBe(300);
+  });
+  it("excludes hidden frames from GPU timing", () => {
+    const timing = emptySampleTiming();
+    measureSampleDuration(timing, 2500, 100, true);
+    expect(measureSampleDuration(timing, 2500, 30100, false)).toBeNull();
+  });
   it("does not adjust before enough samples are measured", () => {
     const state = createAdaptiveState(ceiling);
     for (let i = 0; i < ADAPTIVE_MIN_MEASURED - 1; i++) {
