@@ -15,8 +15,8 @@ export default function InitialRoomReveal({ ready, modelCount, onReady }: { read
   useFrame(({ scene, invalidate }) => {
     if (revealed.current) return;
     let loadedModels = 0;
-    scene.traverse((node) => { if (node.userData.visualiserInitialReady === true) loadedModels += 1; });
-    if (!ready || loadedModels < modelCount) { frames.current = 0; invalidate(); return; }
+    scene.traverse((node) => { if (node.userData.visualiserInitialReady === true && node.parent?.userData !== node.userData) loadedModels += 1; });
+    if (!ready || loadedModels < modelCount) { frames.current = 0; return; }
     if (++frames.current < 2) { invalidate(); return; }
     revealed.current = true;
     pending.current = requestAnimationFrame(onReady);

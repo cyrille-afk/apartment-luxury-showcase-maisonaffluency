@@ -22,6 +22,13 @@ it("waits for all initial assets, finish maps and two full-resolution frames, th
   act(() => harness.frame?.(state));
   expect(queued).toHaveLength(0);
   model.userData.visualiserInitialReady = true;
+  const inner = new THREE.Group();
+  inner.userData = model.userData;
+  model.add(inner);
+  view.rerender(<InitialRoomReveal ready modelCount={2} onReady={onReady} />);
+  act(() => { harness.frame?.(state); harness.frame?.(state); });
+  expect(queued).toHaveLength(0);
+  view.rerender(<InitialRoomReveal ready modelCount={1} onReady={onReady} />);
   act(() => harness.frame?.(state));
   expect(queued).toHaveLength(0);
   act(() => harness.frame?.(state));
