@@ -7,6 +7,9 @@ import {
 import type { TemplateEntry } from './registry.tsx'
 
 interface Props {
+  deliveryAlert?: boolean
+  missingLiveEvents?: number
+  signatureRejections?: number
   headline?: string
   reasons?: string[]
   bootOk?: boolean
@@ -26,6 +29,9 @@ const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
 )
 
 const WebhookWorkerUnhealthyEmail = ({
+  deliveryAlert = false,
+  missingLiveEvents = 0,
+  signatureRejections = 0,
   headline = 'Webhook worker is unhealthy',
   reasons = [],
   bootOk = true,
@@ -46,11 +52,14 @@ const WebhookWorkerUnhealthyEmail = ({
       <Container style={container}>
         <Heading style={h1}>⚠️ {headline}</Heading>
         <Text style={text}>
-          The asynchronous payment queue worker failed its scheduled health check. Paid orders may
-          be sitting unprocessed (no confirmations, no supplier purchase orders).
+          {deliveryAlert ? 'Live Stripe notifications may not be reaching Maison Affluency, or signed requests are being rejected unusually often. Payment updates may be delayed; review the reasons below.' : 'The asynchronous payment queue worker failed its scheduled health check. Paid orders may be sitting unprocessed.'}
         </Text>
 
         <Section style={card}>
+          {deliveryAlert ? <>
+            <Row label="Missing live events" value={missingLiveEvents} />
+            <Row label="Signature rejections (15 min)" value={signatureRejections} />
+          </> : null}
           <Row label="Startup check" value={bootOk ? 'OK' : 'FAILED'} />
           <Row label="Database" value={databaseOk ? 'OK' : 'FAILED'} />
           <Row label="Pending events" value={pending} />
@@ -77,6 +86,7 @@ const WebhookWorkerUnhealthyEmail = ({
 
         <Button style={button} href={adminUrl}>Open the queue control centre</Button>
 
+        <Text style={muted}>{adminUrl}</Text>
         <Hr style={divider} />
         <Text style={muted}>Sent automatically by monitor-webhook-worker.</Text>
       </Container>
@@ -86,7 +96,7 @@ const WebhookWorkerUnhealthyEmail = ({
 
 export const template = {
   component: WebhookWorkerUnhealthyEmail,
-  subject: (data) => `⚠️ QUEUE WORKER UNHEALTHY — ${data.headline ?? 'health check failed'}`,
+  subject: (data) => `⚠️ ${data.deliveryAlert ? 'LIVE STRIPE WEBHOOK ALERT' : 'QUEUE WORKER UNHEALTHY'} — ${data.headline ?? 'health check failed'}`,
   displayName: 'Webhook Worker Unhealthy (ops alert)',
   to: 'cyrille@maisonaffluency.com',
   previewData: {

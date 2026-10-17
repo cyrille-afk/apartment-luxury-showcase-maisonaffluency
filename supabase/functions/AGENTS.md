@@ -8,3 +8,5 @@
 - Felix brief gate (trade-concierge) only locks card tools and injects a BRIEF STATUS note; it must never short-circuit with a canned reply — that made Felix repeat one line whatever the designer typed.
 - Spec-sheet trade cover pages are compiled only by `spec-sheet-compose` (tier/RRP re-derived server-side); `mode:"client"` (viewer `?view=client`, used by Share) must always return the supplier sheet without the cover.
 - Concierge email failure alerts are event-driven (email_send_log insert trigger → monitor-concierge-email), not cron; rules.ts and the SQL trigger match lists must stay in sync.
+
+- Stripe rejection telemetry stores only unverified failure metadata; the watchdog reconciles live Stripe failures with local receipts and throttles only dispatched alerts — preserves fast acknowledgements.
