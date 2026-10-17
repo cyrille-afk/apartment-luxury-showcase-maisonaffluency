@@ -1184,14 +1184,14 @@ const TradeProductPage: React.FC = () => {
         }
         setAdded(true);
         setDrawerRefreshKey((k) => k + 1);
-        setDrawerOpen(true);
+        setDrawerOpen(!felixSelection);
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
           window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: felixSelection }));
         }
         toast({
           title: "Added to quote",
-          description: `${product.title} added to QU-${quoteId!.slice(0, 6).toUpperCase()}`,
+          description: `${product.title} added to QU-${quoteId.slice(0, 6).toUpperCase()}`,
         });
         setTimeout(() => setAdded(false), 2500);
       }
