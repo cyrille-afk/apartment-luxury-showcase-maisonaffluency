@@ -86,6 +86,10 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   // Single-axis split (variants encode "size — material" in one label).
   const [singleSplitMatIdx, setSingleSplitMatIdx] = useState<number | null>(null);
   const [singleSplitSizeIdx, setSingleSplitSizeIdx] = useState<number | null>(null);
+  const [swatchImageIdx, setSwatchImageIdx] = useState<number | null>(null);
+  useEffect(() => {
+    setSwatchImageIdx(null);
+  }, [baseIdx, topIdx, sizeIdx, singleSplitMatIdx, singleSplitSizeIdx]);
   const prefersReducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(true);
   const requestClose = () => setVisible(false);
@@ -113,6 +117,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
     setSizeIdx(null);
     setSingleSplitMatIdx(null);
     setSingleSplitSizeIdx(null);
+    setSwatchImageIdx(null);
   }, [product?.id]);
 
   // Get merged trade products at top level (hooks can't be inside useMemo)
@@ -257,8 +262,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
         requireCompletePair: axes.isDualAxis,
       })
     : undefined;
+  const activeImageIdx = swatchImageIdx ?? variantImageIdx;
   const activeImageUrl =
-    (variantImageIdx !== undefined ? galleryImages[variantImageIdx] : null) || product.image_url;
+    (activeImageIdx !== undefined ? galleryImages[activeImageIdx] : null) || product.image_url;
 
 
 
@@ -319,7 +325,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           <div
             className="relative w-full flex-1 md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-8"
             onMouseEnter={() => {
-              if (canShowHoverImage) setShowHoverImage(true);
+              if (canShowHoverImage && swatchImageIdx === null) setShowHoverImage(true);
             }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -380,7 +386,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
 
             {/* Image caption */}
             {(() => {
-              const idx = variantImageIdx ?? 0;
+              const idx = activeImageIdx ?? 0;
               const cap = product.gallery_captions?.[String(idx)];
               return cap ? (
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
@@ -466,7 +472,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </div>
 
           <div className="px-2 pb-2 md:px-8 md:pb-8">
-            <PicturedFinishesStrip pickId={product.id} activeIndex={showHoverImage && hoverImageLoaded && canShowHoverImage ? galleryImages.indexOf(product.hover_image_url || "") : variantImageIdx ?? galleryImages.indexOf(activeImageUrl || "")} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designerDisplay.toLowerCase() === "bieke casteleyn"} />
+            <PicturedFinishesStrip pickId={product.id} activeIndex={showHoverImage && hoverImageLoaded && canShowHoverImage ? galleryImages.indexOf(product.hover_image_url || "") : activeImageIdx ?? galleryImages.indexOf(activeImageUrl || "")} imageCount={galleryImages.length} onSelectImage={(index) => { setShowHoverImage(false); setSwatchImageIdx(index); }} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designerDisplay.toLowerCase() === "bieke casteleyn"} />
           </div>
           </div>
           {/* Details */}
