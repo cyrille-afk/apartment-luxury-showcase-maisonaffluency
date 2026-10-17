@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 
 type Swatch = { fabric_id: string; name: string; image_url: string | null; image_indices: number[]; category: string | null };
 
@@ -43,12 +44,8 @@ export default function PicturedFinishesStrip({
     };
   }, [pickId]);
 
-  const oneBased = (activeIndex ?? 0) + 1;
-  const shown = swatches.filter((s) => s.image_indices.includes(oneBased));
-  // A photo mapped to every finish is usually a brand logo/closing frame, so
-  // hide the strip on long finish lists — but with 2 or fewer finishes the
-  // mapping is real (e.g. both finishes photographed together), so show it.
-  if (!shown.length || (!biekeLayout && swatches.length > 2 && shown.length === swatches.length)) return null;
+  const shown = picturedFinishesForImage(swatches, activeIndex, biekeLayout);
+  if (!shown.length) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));

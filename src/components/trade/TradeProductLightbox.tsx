@@ -22,6 +22,7 @@ import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { FadeInImage } from "@/components/ui/FadeInImage";
+import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -314,8 +315,9 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </button>
 
           {/* Image */}
+          <div className="w-full min-w-0 md:w-1/2 flex flex-col">
           <div
-            className="relative w-full md:w-1/2 flex-1 md:flex-none md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-8"
+            className="relative w-full flex-1 md:min-h-[400px] md:h-auto bg-muted/30 flex items-center justify-center shrink-0 p-2 md:p-8"
             onMouseEnter={() => {
               if (canShowHoverImage) setShowHoverImage(true);
             }}
@@ -463,6 +465,10 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             </div>
           </div>
 
+          <div className="px-2 pb-2 md:px-8 md:pb-8">
+            <PicturedFinishesStrip pickId={product.id} activeIndex={showHoverImage && hoverImageLoaded && canShowHoverImage ? galleryImages.indexOf(product.hover_image_url || "") : variantImageIdx ?? galleryImages.indexOf(activeImageUrl || "")} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designerDisplay.toLowerCase() === "bieke casteleyn"} />
+          </div>
+          </div>
           {/* Details */}
           <div className="flex-1 p-5 md:p-8 flex flex-col gap-3 md:gap-4 overflow-y-auto">
             <div>
