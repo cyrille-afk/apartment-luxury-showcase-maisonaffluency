@@ -2694,7 +2694,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     </div>
 
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
-                      {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                       <div className="group inline-flex max-w-full flex-col items-start">
                         <Link
                           to={`/designers/${designer.slug}`}
@@ -2705,7 +2704,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                         </Link>
                         <div className="mt-1 w-8 md:w-10 h-px bg-foreground/20 transition-all duration-500 ease-out group-hover:w-full md:group-hover:w-full motion-reduce:transition-none" aria-hidden="true" />
                       </div>
-                      <div className="flex items-baseline justify-between gap-4 mt-2">
+                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 mt-2">
                         <h1 className="font-display font-normal text-[28px] leading-[1.15] tracking-[-0.01em]">
                           {product.title}
                           {formatProductSubtitleLine(product.title, product.subtitle) && (
@@ -2714,6 +2713,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                             </span>
                           )}
                         </h1>
+                        {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                       </div>
 
                       {isTradeVerifiedView && (
@@ -2792,7 +2792,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                 <>
                   {/* Desktop: restored classic layout. */}
                   <div className="min-w-0">
-                    {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="inline-block mb-3 rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                     <div className="group inline-flex max-w-full flex-col items-start">
                       <Link
                         to={`/designers/${designer.slug}`}
@@ -2803,7 +2802,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       </Link>
                       <div className="mt-1 w-10 md:w-12 h-px bg-foreground/20 transition-all duration-500 ease-out group-hover:w-full md:group-hover:w-full motion-reduce:transition-none" aria-hidden="true" />
                     </div>
-                    <div className="flex items-baseline justify-between gap-4 mt-3">
+                    <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 mt-3">
                       <h1 className="font-display font-normal text-[28px] leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {formatProductSubtitleLine(product.title, product.subtitle) && (
@@ -2812,6 +2811,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                           </span>
                         )}
                       </h1>
+                      {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                     </div>
 
                     {isTradeVerifiedView && (
