@@ -15,6 +15,7 @@ import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
 import LuxuryBackdrop from "./LuxuryBackdrop";
+import UploadedEnvironmentBackdrop from "./UploadedEnvironmentBackdrop";
 import { LUXURY_BACKDROP, windowLightPosition } from "./luxuryBackdropSettings";
 import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
