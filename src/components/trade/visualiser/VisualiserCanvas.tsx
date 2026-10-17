@@ -136,11 +136,14 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
 };
 
 /** Exposes a getter for the floor point at the centre of the camera view (raycast onto Y = 0). */
-const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number, number] | null) | null } }) => {
+const FloorFocusReporter = ({ focusRef, photoStage = false }: { focusRef: { current: (() => [number, number] | null) | null }; photoStage?: boolean }) => {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
   useEffect(() => {
     focusRef.current = () => {
+      // The picture centre depicts windows, not the floor. Spawn at the calibrated
+      // floor stage instead of projecting that centre ray far behind the room.
+      if (photoStage) return [0, 0];
       const dir = new THREE.Vector3();
       camera.getWorldDirection(dir);
       const hit = floorFocusPoint([camera.position.x, camera.position.y, camera.position.z], [dir.x, dir.y, dir.z]);
@@ -148,7 +151,7 @@ const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number,
       return controls?.target ? [controls.target.x, controls.target.z] : null;
     };
     return () => { focusRef.current = null; };
-  }, [camera, controls, focusRef]);
+  }, [camera, controls, focusRef, photoStage]);
   return null;
 };
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -406,10 +409,10 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
-    {focusRef && <FloorFocusReporter focusRef={focusRef} />}
+    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={showLuxuryBackdrop} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} />
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (showLuxuryBackdrop) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
@@ -418,11 +421,11 @@ const VisualiserCanvas = ({
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
       maxPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
       minAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
       maxAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
-      target={SHOWROOM.cameraTarget}
+      target={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
@@ -506,7 +509,7 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {(hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!showLuxuryBackdrop && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
     </mesh>}
