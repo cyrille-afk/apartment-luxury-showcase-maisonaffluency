@@ -12113,6 +12113,19 @@ export type Database = {
         Args: { _board_id: string; _email: string; _role: string }
         Returns: Json
       }
+      create_visualiser_client_board: {
+        Args: {
+          _client_id: string
+          _hide_maison_branding: boolean
+          _items: Json
+          _project_id: string
+          _studio_id: string
+          _studio_logo_url: string
+          _studio_name: string
+          _title: string
+        }
+        Returns: string
+      }
       currency_for_country: { Args: { p_country: string }; Returns: string }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {

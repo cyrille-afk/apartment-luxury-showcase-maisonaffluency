@@ -1240,6 +1240,20 @@
       "when": 1792190508797,
       "tag": "0176_manual_freight_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 177,
+      "version": "7",
+      "when": 1792209157356,
+      "tag": "0177_visualiser_client_selection_board",
+      "breakpoints": true
+    },
+    {
+      "idx": 178,
+      "version": "7",
+      "when": 1792209466289,
+      "tag": "0178_visualiser_board_existing_source",
+      "breakpoints": true
     }
   ]
 }

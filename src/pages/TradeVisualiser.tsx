@@ -3,6 +3,7 @@ import { adaptiveSummary, type AdaptiveSamplingState } from "@/lib/visualiserAda
 import { loadPhotorealGhostPreference, PHOTOREAL_GHOST_KEY, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { VISUALISER_ENVIRONMENTS, clampAdvancedRendering, environmentSourcePref, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import RugLayoutControls from "@/components/trade/visualiser/RugLayoutControls";
+import VisualiserClientShare from "@/components/trade/visualiser/VisualiserClientShare";
 import { clampRugRotation } from "@/lib/visualiserRugRotation";
 import FeatureWallControls from "@/components/trade/visualiser/FeatureWallControls";
 import { featureWallFinish as toFeatureWallFinish, type FeatureWallFinish } from "@/lib/visualiserFeatureWall";
@@ -948,7 +949,7 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <p className={cn(microLabel, "hidden text-muted-foreground lg:block")}>Drag to orbit // Scroll to zoom</p>
+        <div className="pointer-events-auto"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} /></div>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
