@@ -38,7 +38,7 @@ import { Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { captureCanvasPng, downloadDataUrl, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
+import { captureCanvasPng, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 
@@ -838,20 +838,24 @@ const TradeVisualiser = () => {
     const canvas = canvasWrapRef.current?.querySelector("canvas");
     if (!canvas || exporting) return;
     setExporting(true);
-    const hadGrid = showGrid;
+    // Photoreal: capture the accumulated frame as-is — changing selection would
+    // move the depth-of-field focus and restart sampling.
+    const prep = mockupCapturePrep(pathTrace, showGrid, selectedId);
     const hadSelection = selectedId;
-    if (hadGrid) setShowGrid(false);
-    if (hadSelection) setSelectedId(null); // keep the transform gizmo out of client mockups
-    await nextPaintedFrame();
-    await nextPaintedFrame();
+    if (prep.hideGrid) setShowGrid(false);
+    if (prep.clearSelection) setSelectedId(null); // keep the transform gizmo out of live mockups
+    if (prep.hideGrid || prep.clearSelection) {
+      await nextPaintedFrame();
+      await nextPaintedFrame();
+    }
     try {
       downloadDataUrl(captureCanvasPng(canvas), mockupFilename());
       toast.success("Mockup exported.");
     } catch {
       toast.error("Could not export the mockup.");
     }
-    if (hadGrid) setShowGrid(true);
-    if (hadSelection) setSelectedId(hadSelection);
+    if (prep.hideGrid) setShowGrid(true);
+    if (prep.clearSelection) setSelectedId(hadSelection);
     setExporting(false);
   };
 
