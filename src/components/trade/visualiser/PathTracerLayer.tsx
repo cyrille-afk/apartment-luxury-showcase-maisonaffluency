@@ -8,7 +8,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
 import { adaptiveQuality, createAdaptiveState, emptySampleTiming, measureSampleDuration, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
-import { captureAccumulation, CHECKPOINT_INTERVAL_MS, loadRenderCheckpoint, renderFingerprint, restoreAccumulation, saveRenderCheckpoint, type RenderCheckpoint } from "@/lib/visualiserRenderCheckpoint";
+import { captureAccumulation, checkpointRendererCompiling, CHECKPOINT_INTERVAL_MS, loadRenderCheckpoint, renderFingerprint, restoreAccumulation, saveRenderCheckpoint, type RenderCheckpoint } from "@/lib/visualiserRenderCheckpoint";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -255,8 +255,8 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
       }
       // Wait for async models, material maps and HDR to settle; validate content,
       // not the reload-specific UUIDs used for cheap live invalidation.
-      if (checkpointKey && !saved.fingerprint && now - saved.changedAt >= 1000 && !pt.isCompiling) {
-        saved.fingerprint = renderFingerprint(scene, camera, signature, [renderCamera.bokehSize, renderCamera.focusDistance]);
+      if (checkpointKey && !saved.fingerprint && now - saved.changedAt >= 1000 && !checkpointRendererCompiling(pt)) {
+        saved.fingerprint = renderFingerprint(scene, camera, signature, [renderCamera.bokehSize, renderCamera.focusDistance, quality.renderScale]);
       }
       if (saved.candidate && saved.fingerprint) {
         const candidate = saved.candidate;

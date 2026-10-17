@@ -20,6 +20,7 @@ export interface RenderCheckpoint {
 }
 // Audited adapter for three-gpu-pathtracer 0.0.27. Never assign the read-only wrapper samples.
 interface CheckpointTracer extends WebGLPathTracer {
+  isCompiling: boolean;
   _queueReset: boolean;
   _pathTracer: {
     samples: number; alpha: boolean; _task: unknown; _currentTile: number;
@@ -35,6 +36,7 @@ function internalTracer(pt: WebGLPathTracer): CheckpointTracer {
   }
   return internal;
 }
+export const checkpointRendererCompiling = (pt: WebGLPathTracer) => Boolean((pt as CheckpointTracer).isCompiling);
 
 export function captureAccumulation(pt: WebGLPathTracer, gl: THREE.WebGLRenderer) {
   const internal = internalTracer(pt);
@@ -51,7 +53,7 @@ export function captureAccumulation(pt: WebGLPathTracer, gl: THREE.WebGLRenderer
 export function restoreAccumulation(pt: WebGLPathTracer, gl: THREE.WebGLRenderer, checkpoint: RenderCheckpoint): boolean {
   const internal = internalTracer(pt);
   const engine = internal._pathTracer;
-  if (internal._queueReset || pt.isCompiling || !validCheckpoint(checkpoint) ||
+  if (internal._queueReset || checkpointRendererCompiling(pt) || !validCheckpoint(checkpoint) ||
     pt.target.width !== checkpoint.width || pt.target.height !== checkpoint.height || engine.alpha !== checkpoint.alpha) return false;
   const texture = new THREE.DataTexture(checkpoint.pixels, checkpoint.width, checkpoint.height, THREE.RGBAFormat, THREE.FloatType);
   texture.needsUpdate = true;
@@ -83,10 +85,10 @@ export function restoreAccumulation(pt: WebGLPathTracer, gl: THREE.WebGLRenderer
 export function validCheckpoint(value: RenderCheckpoint): boolean {
   return value?.version === 1 && isCompletePhotorealSample(value.samples) &&
     Number.isInteger(value.width) && value.width > 0 && Number.isInteger(value.height) && value.height > 0 &&
-    value.pixels instanceof Float32Array && value.pixels.length === value.width * value.height * 4 &&
+    Object.prototype.toString.call(value.pixels) === "[object Float32Array]" && value.pixels.length === value.width * value.height * 4 &&
     value.pixels.every(Number.isFinite) && Number.isFinite(value.seed) &&
     value.renderScale > 0 && value.renderScale <= 2 &&
-    value.camera?.position.length === 3 && value.camera.quaternion.length === 4 && value.camera.target.length === 3 &&
+    value.camera?.position?.length === 3 && value.camera.quaternion?.length === 4 && value.camera.target?.length === 3 &&
     [...value.camera.position, ...value.camera.quaternion, ...value.camera.target].every(Number.isFinite);
 }
 
@@ -101,15 +103,15 @@ export function renderFingerprint(scene: THREE.Scene, camera: THREE.Camera, sign
   const texture = (t: THREE.Texture | null) => {
     if (!t) { add(null); return; }
     add(t.mapping); add(t.colorSpace); add(t.wrapS); add(t.wrapT); array(t.matrix.elements);
-    const image = t.image;
+    const image = t.image as { currentSrc?: string; src?: string; width?: number; height?: number; data?: ArrayLike<number> } | undefined;
     add(image?.currentSrc || image?.src || ""); add(image?.width); add(image?.height);
     if (image?.data) array(image.data);
   };
   add("checkpoint-v1:three-gpu-pathtracer-0.0.27:bounces-5:transmissive-6"); add(signature);
   array(camera.matrixWorld.elements); array(camera.projectionMatrix.elements); array(lens);
-  texture(scene.environment); add(scene.environmentIntensity); array(scene.environmentRotation.toArray().slice(0, 3));
+  texture(scene.environment); add(scene.environmentIntensity); array([scene.environmentRotation.x, scene.environmentRotation.y, scene.environmentRotation.z]);
   if (scene.background instanceof THREE.Color) add(scene.background.getHexString()); else texture(scene.background);
-  add(scene.backgroundIntensity); add(scene.backgroundBlurriness); array(scene.backgroundRotation.toArray().slice(0, 3));
+  add(scene.backgroundIntensity); add(scene.backgroundBlurriness); array([scene.backgroundRotation.x, scene.backgroundRotation.y, scene.backgroundRotation.z]);
   scene.traverseVisible(object => {
     if ((object as THREE.Light).isLight) {
       const light = object as THREE.Light; add(light.type); add(light.intensity); add(light.color.getHexString()); array(light.matrixWorld.elements);
