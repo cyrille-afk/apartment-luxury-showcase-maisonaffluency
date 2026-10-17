@@ -26,6 +26,21 @@ export const ADAPTIVE_COOLDOWN_MS = 2000;
 /** Sample-cap floor when scaling the cap down; adaptation never goes below it. */
 export const ADAPTIVE_MIN_SAMPLES = 128;
 
+export interface SampleTiming { samples: number; at: number; frameAt: number }
+export const emptySampleTiming = (): SampleTiming => ({ samples: -1, at: 0, frameAt: 0 });
+/** Ignore suspended frames and measure complete samples, not individual tiles. */
+export function measureSampleDuration(timing: SampleTiming, samples: number, now: number, visible: boolean): number | null {
+  const interrupted = !visible || timing.frameAt > 0 && now - timing.frameAt > 1000;
+  timing.frameAt = now;
+  if (interrupted || timing.samples < 0 || samples < timing.samples) {
+    timing.samples = samples; timing.at = now; return null;
+  }
+  if (samples <= timing.samples) return null;
+  const duration = (now - timing.at) / (samples - timing.samples);
+  timing.samples = samples; timing.at = now;
+  return duration > 0 ? duration : null;
+}
+
 export interface AdaptiveSamplingState {
   /** The user's chosen quality — the ceiling adaptation can never exceed. */
   ceiling: PathTraceQuality;

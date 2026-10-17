@@ -7,7 +7,7 @@ import { DEFAULT_PT_QUALITY, isTraceableMesh, PATH_TRACING, type PathTraceQualit
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
-import { adaptiveQuality, createAdaptiveState, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
+import { adaptiveQuality, createAdaptiveState, emptySampleTiming, measureSampleDuration, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -94,10 +94,23 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
   adaptiveReport.current = onAdaptiveChange;
   const adaptiveOn = useRef(adaptive);
   adaptiveOn.current = adaptive;
-  const timing = useRef({ samples: -1, at: 0 });
+  const timing = useRef(emptySampleTiming());
+  useEffect(() => {
+    const resume = () => {
+      timing.current = emptySampleTiming();
+      adaptiveState.current.durations = [];
+      if (!document.hidden) invalidate();
+    };
+    document.addEventListener("visibilitychange", resume);
+    window.addEventListener("focus", resume);
+    return () => {
+      document.removeEventListener("visibilitychange", resume);
+      window.removeEventListener("focus", resume);
+    };
+  }, [invalidate]);
   useEffect(() => {
     adaptiveState.current = resetAdaptiveState(adaptiveState.current, quality);
-    timing.current = { samples: -1, at: 0 };
+    timing.current = emptySampleTiming();
     const pt = tracer.current;
     if (!pt) return;
     pt.lowResScale = quality.previewScale;
@@ -122,6 +135,10 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       return;
     }
     const now = performance.now();
+    if (document.hidden) {
+      timing.current = emptySampleTiming();
+      return; // Pause without discarding GPU accumulation.
+    }
     try {
       // Detect real camera motion with a tolerance: float jitter from controls/resize
       // must not reset accumulation every frame (that froze the image at sample 1).
@@ -187,20 +204,23 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       // Measure the real per-sample cost while settled and accumulating; on a
       // slow GPU step resolution/preview/cap down, on a fast one back up.
       if (adaptiveOn.current && current.ready && !capped && now - current.movedAt >= PATH_TRACING.settleMs) {
-        const last = timing.current;
-        if (last.samples >= 0 && samples > last.samples && last.at > 0) {
-          const adjusted = recordSampleDuration(adaptiveState.current, (now - last.at) / (samples - last.samples), now);
+        const duration = measureSampleDuration(timing.current, samples, now, !document.hidden);
+        if (duration !== null) {
+          const adjusted = recordSampleDuration(adaptiveState.current, duration, now);
           if (adjusted) {
             const effective = adaptiveQuality(adaptiveState.current);
             pt.lowResScale = effective.previewScale;
-            pt.renderScale = tracedRenderScale(effective.renderScale, gl.getPixelRatio());
-            current.dirty = true; // resolution change requires a fresh accumulation
+            const nextScale = tracedRenderScale(effective.renderScale, gl.getPixelRatio());
+            if (pt.renderScale !== nextScale) {
+              retainFrame();
+              pt.renderScale = nextScale;
+              current.dirty = true; // Only actual resolution changes reset samples.
+            }
             adaptiveReport.current?.(adaptiveState.current);
           }
         }
-        timing.current = { samples, at: now };
-      } else if (!adaptiveOn.current) {
-        timing.current = { samples: -1, at: 0 };
+      } else {
+        timing.current = emptySampleTiming();
       }
       if (samples !== current.samples && (samples === 0 || now - current.reportedAt >= 250)) {
         current.samples = samples;
