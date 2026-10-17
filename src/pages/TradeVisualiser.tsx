@@ -925,7 +925,6 @@ const TradeVisualiser = () => {
             selectedId={selectedId}
             orbitEnabled={orbitEnabled}
             hasBackdrop={Boolean(backdropSrc)}
-            defaultLuxuryBackdrop
             featureWallFinish={featureWallFinishKey}
             onSelect={setSelectedId}
             onTransform={transformObject}
