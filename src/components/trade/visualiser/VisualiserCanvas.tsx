@@ -385,8 +385,19 @@ const VisualiserCanvas = ({
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
   const [uploadedEnvironment, setUploadedEnvironment] = useState(false);
+  // A stored uploaded interior must suppress the default room photo even before
+  // the EXR finishes decoding — otherwise LuxuryBackdrop mounts first and a
+  // photo load failure crashes the canvas before the upload ever shows.
+  const [localExrState, setLocalExrState] = useState<"checking" | "present" | "absent">("checking");
+  useEffect(() => {
+    let live = true;
+    const check = () => getLocalExr().then((r) => { if (live) setLocalExrState(r ? "present" : "absent"); }).catch(() => { if (live) setLocalExrState("absent"); });
+    check();
+    window.addEventListener(LOCAL_EXR_EVENT, check);
+    return () => { live = false; window.removeEventListener(LOCAL_EXR_EVENT, check); };
+  }, []);
   const showUploadedEnvironment = uploadedEnvironment && environmentSource === "empty-room-exr";
-  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment;
+  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment && localExrState === "absent";
   const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
   // Uploaded interiors share the room-photo stage: fixed grounded camera, no pan.
   const photoStage = showLuxuryBackdrop || showUploadedEnvironment;
