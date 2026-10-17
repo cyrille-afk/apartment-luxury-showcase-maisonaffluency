@@ -260,16 +260,16 @@ serve(async (req) => {
   // ---- 5. Email fallback (always) ----------------------------------------
   let email: "sent" | "failed" = "sent";
   try {
-    const idempotencyKey = `worker-unhealthy-${now.toISOString().slice(0, 13)}-${
-      evaluation.signature.slice(0, 40)
-    }`;
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(evaluation.signature));
+    const conditionKey = Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 24);
+    const idempotencyKey = `worker-unhealthy-${now.toISOString().slice(0, 13)}-${conditionKey}`;
     const results = await Promise.all(
       OPS_RECIPIENTS.map((recipient) =>
         supabase.functions.invoke("send-transactional-email", {
           body: {
             templateName: "webhook-worker-unhealthy",
             recipientEmail: recipient,
-            idempotencyKey,
+            idempotencyKey: `${idempotencyKey}-${recipient}`,
             templateData: {
               headline,
               deliveryAlert: delivery.reasons.length > 0,

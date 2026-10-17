@@ -98,7 +98,6 @@ export const template = {
   component: WebhookWorkerUnhealthyEmail,
   subject: (data) => `⚠️ ${data.deliveryAlert ? 'LIVE STRIPE WEBHOOK ALERT' : 'QUEUE WORKER UNHEALTHY'} — ${data.headline ?? 'health check failed'}`,
   displayName: 'Webhook Worker Unhealthy (ops alert)',
-  to: 'cyrille@maisonaffluency.com',
   previewData: {
     headline: 'Worker startup check failed',
     reasons: ['Startup check failed: Stripe startup check failed: no usable secret key'],
