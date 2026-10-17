@@ -90,10 +90,10 @@ const StudioGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const allProducts = useMemo(() => (
-    search.trim() || selectedCategory !== "all" || selectedSubcategory !== "all"
+    search.trim() || selectedBrand !== "all" || selectedCategory !== "all" || selectedSubcategory !== "all"
       ? [...tradeProducts, ...publicTradeHiddenProducts]
       : tradeProducts
-  ), [tradeProducts, publicTradeHiddenProducts, search, selectedCategory, selectedSubcategory]);
+  ), [tradeProducts, publicTradeHiddenProducts, search, selectedBrand, selectedCategory, selectedSubcategory]);
   const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const [savedViews, setSavedViews] = useState<TradeSavedView[]>(() => readSavedViews());
