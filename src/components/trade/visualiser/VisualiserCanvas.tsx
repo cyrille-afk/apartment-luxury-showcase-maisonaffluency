@@ -215,7 +215,7 @@ interface VisualiserCanvasProps {
   /** Progressive GPU path tracing (offline-quality GI) while the camera is still. */
   pathTrace?: boolean;
   renderCheckpointKey?: string;
-  onRenderCheckpoint?: (result: "restored" | "unavailable") => void;
+  onRenderCheckpoint?: (event: import("@/lib/visualiserRenderCheckpoint").CheckpointEvent) => void;
   frameCaptureRef?: PhotorealFrameCaptureRef;
   onPathTraceSamples?: (n: number) => void;
   pathTraceQuality?: import("@/lib/visualiserPathTracing").PathTraceQuality;
