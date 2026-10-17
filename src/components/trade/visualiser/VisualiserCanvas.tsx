@@ -431,31 +431,31 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
-    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={showLuxuryBackdrop} />}
+    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={photoStage} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (showLuxuryBackdrop) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
-      enablePan={!showLuxuryBackdrop}
+      enablePan={!photoStage}
       screenSpacePanning
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
-      maxPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
-      minAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
-      maxAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
-      target={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
+      minPolarAngle={photoStage ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
+      maxPolarAngle={photoStage ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minAzimuthAngle={photoStage ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
+      maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
+      target={photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
     {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
-    {showLuxuryBackdrop && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
+    {photoStage && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
-      position={showLuxuryBackdrop ? windowLightPosition(center) : [-6, 9, 6]}
+      position={photoStage ? windowLightPosition(center) : [-6, 9, 6]}
       intensity={lighting.directionalIntensity}
       color={SHOWROOM.key}
       castShadow
