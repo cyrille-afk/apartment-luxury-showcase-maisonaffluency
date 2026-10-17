@@ -8,7 +8,7 @@ describe("Photoreal checkpoints", () => {
     await saveRenderCheckpoint("account:sandbox", value());
     const saved = await loadRenderCheckpoint("account:sandbox");
     expect(saved?.samples).toBe(2500);
-    expect(saved?.pixels).toEqual(new Float32Array([2.5, 3, 4, 1]));
+    expect(Array.from(saved?.pixels ?? [])).toEqual([2.5, 3, 4, 1]);
     expect(await loadRenderCheckpoint("other-account:sandbox")).toBeNull();
   });
   it("never checkpoints fractional tile progress", () => {
