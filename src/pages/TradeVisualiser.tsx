@@ -38,6 +38,7 @@ import { Box, Ghost, ImageUp, Loader2, Lock, Plus, RotateCcw, Search, Unlock, X 
 
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { checkpointStatusText, type CheckpointEvent } from "@/lib/visualiserRenderCheckpoint";
 import { captureCanvasPng, downloadDataUrl, mockupCapturePrep, mockupFilename, nextPaintedFrame } from "@/lib/visualiserExport";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
@@ -263,6 +264,9 @@ const TradeVisualiser = () => {
     setPathTrace((value) => !value);
   };
   const [ptSamples, setPtSamples] = useState(0);
+  const [checkpointStatus, setCheckpointStatus] = useState<CheckpointEvent | null>(null);
+  const [restoredInfo, setRestoredInfo] = useState<{ samples: number; savedAt: number } | null>(null);
+  useEffect(() => { if (checkpointStatus?.kind === "restored") setRestoredInfo({ samples: checkpointStatus.samples, savedAt: checkpointStatus.savedAt }); }, [checkpointStatus]);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const [gpuTier] = useState<GpuTier>(() => detectGpuTier());
   // Adaptive sampling (default on): measures real per-sample cost and steps
@@ -889,6 +893,12 @@ const TradeVisualiser = () => {
       {showPhotorealGhost && photorealGhost && (
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
       )}
+      {pathTrace && checkpointStatus && (
+        <div role="status" aria-live="polite" data-checkpoint-status className="pointer-events-none absolute bottom-3 left-3 z-30 rounded-sm border border-border bg-background/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-normal text-foreground/80 backdrop-blur-sm">
+          {restoredInfo && <div>Restored after refresh · {restoredInfo.samples} SPP · from checkpoint {new Date(restoredInfo.savedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</div>}
+          {checkpointStatus.kind !== "restored" && <div className={restoredInfo ? "text-muted-foreground" : undefined}>{checkpointStatusText(checkpointStatus)}</div>}
+        </div>
+      )}
       <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
         {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
@@ -913,7 +923,11 @@ const TradeVisualiser = () => {
             depthOfField={depthOfField}
             pathTrace={pathTrace}
             renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
-            onRenderCheckpoint={(result) => result === "restored" ? toast.success("Photoreal progress restored") : toast.warning("Render checkpoints unavailable. Keep this page open to retain progress.")}
+            onRenderCheckpoint={(event) => {
+              setCheckpointStatus((previous) => event.kind === "saved" && previous?.kind === "restored" ? { ...previous, savedAt: event.savedAt, samples: event.samples, kind: "saved" } : event);
+              if (event.kind === "restored") toast.success(`Photoreal progress restored · ${event.samples} SPP`);
+              else if (event.kind === "unavailable") toast.warning("Render checkpoints unavailable. Keep this page open to retain progress.");
+            }}
             frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}

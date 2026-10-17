@@ -164,3 +164,18 @@ export async function saveRenderCheckpoint(key: string, checkpoint: RenderCheckp
     });
   } finally { db.close(); }
 }
+/** Checkpoint lifecycle reported to the page for the visible recovery status. */
+export type CheckpointEvent =
+  | { kind: "restored"; samples: number; savedAt: number }
+  | { kind: "saved"; samples: number; savedAt: number }
+  | { kind: "unavailable" };
+
+/** Plain-language recovery status line; savedAt is a wall-clock epoch ms. */
+export function checkpointStatusText(event: CheckpointEvent | null, locale?: string): string | null {
+  if (!event) return null;
+  if (event.kind === "unavailable") return "Checkpoints unavailable — keep this page open to retain progress";
+  const time = new Date(event.savedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return event.kind === "restored"
+    ? `Restored ${event.samples} SPP · checkpoint saved ${time}`
+    : `Checkpoint saved ${time} · ${event.samples} SPP`;
+}

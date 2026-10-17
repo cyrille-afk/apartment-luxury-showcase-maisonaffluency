@@ -8,7 +8,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
 import { adaptiveQuality, createAdaptiveState, emptySampleTiming, measureSampleDuration, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
-import { captureAccumulation, checkpointRendererCompiling, CHECKPOINT_INTERVAL_MS, loadRenderCheckpoint, renderFingerprint, restoreAccumulation, saveRenderCheckpoint, type RenderCheckpoint } from "@/lib/visualiserRenderCheckpoint";
+import { captureAccumulation, checkpointRendererCompiling, CHECKPOINT_INTERVAL_MS, loadRenderCheckpoint, renderFingerprint, restoreAccumulation, saveRenderCheckpoint, type CheckpointEvent, type RenderCheckpoint } from "@/lib/visualiserRenderCheckpoint";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -16,7 +16,7 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: native-quality tracing preview and progressive GI at rest. */
-const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; checkpointKey?: string; onCheckpoint?: (result: "restored" | "unavailable") => void; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
+const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; checkpointKey?: string; onCheckpoint?: (event: CheckpointEvent) => void; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
   const { gl, scene, camera, controls, invalidate } = useThree();
   const checkpoint = useRef({ loading: false, candidate: null as RenderCheckpoint | null, cameraApplied: false, changedAt: 0, fingerprint: "", savedAt: 0, savedSamples: 0, writing: false, warned: false });
   const checkpointReport = useRef(onCheckpoint);
@@ -30,7 +30,7 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
       if (!alive) return;
       checkpoint.current.candidate = value;
     }).catch(() => {
-      if (alive) checkpointReport.current?.("unavailable");
+      if (alive) checkpointReport.current?.({ kind: "unavailable" });
     }).finally(() => {
       if (alive) { checkpoint.current.loading = false; invalidate(); }
     });
@@ -167,11 +167,12 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
       saved.writing = true;
       void saveRenderCheckpoint(checkpointKey, value).then(() => {
         saved.savedAt = performance.now(); saved.savedSamples = accumulation.samples;
+        checkpointReport.current?.({ kind: "saved", samples: accumulation.samples, savedAt: value.savedAt });
       }).catch(() => {
-        if (!saved.warned) { saved.warned = true; checkpointReport.current?.("unavailable"); }
+        if (!saved.warned) { saved.warned = true; checkpointReport.current?.({ kind: "unavailable" }); }
       }).finally(() => { saved.writing = false; });
     } catch {
-      if (!saved.warned) { saved.warned = true; checkpointReport.current?.("unavailable"); }
+      if (!saved.warned) { saved.warned = true; checkpointReport.current?.({ kind: "unavailable" }); }
     }
   };
 
@@ -264,7 +265,7 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
         const candidate = saved.candidate;
         if (candidate.fingerprint === saved.fingerprint && restoreAccumulation(pt, gl, candidate)) {
           saved.savedSamples = candidate.samples; saved.savedAt = now;
-          report.current?.(candidate.samples); checkpointReport.current?.("restored");
+          report.current?.(candidate.samples); checkpointReport.current?.({ kind: "restored", samples: candidate.samples, savedAt: candidate.savedAt });
           saved.candidate = null;
         }
         // Late HDR/model commits can take longer than a second. Keep the candidate
