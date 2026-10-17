@@ -2169,7 +2169,7 @@ export function AIConcierge({
         setTimeline((prev) => (detail?.replaceTimeline ? [welcomeMessage] : [...prev, welcomeMessage]));
       }
       if (detail?.stage && (detail.stage === "Discover" || onboardingGateRef.current.completed)) setStageOverride(detail.stage);
-      if (detail?.openPanel) { clearDismissed(); setOpen(true); }
+      if (detail?.openPanel) { clearDismissed(); setMinimized(false); setOpen(true); }
       if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
 
       // Prefill support — used by per-SKU "Swap" buttons on the concierge
