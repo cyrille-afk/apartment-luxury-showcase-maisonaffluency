@@ -18,3 +18,4 @@
 - Fetch the two approved MicMac pins and side photos via scoped public RPC; never widen trade-only designer access.
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Room menu previews use room-specific percent pins and alternatives.
+- Shared all-photo slides still pre-select a dropdown header when exactly one finish is mapped within that dropdown (Yoma: one wood, one stone, one metal); ambiguous groups stay unselected. Regression test: src/components/FinishSelector.shared-slide.test.tsx.
