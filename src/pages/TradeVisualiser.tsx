@@ -18,7 +18,7 @@ import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
@@ -949,7 +949,7 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <div className="pointer-events-auto"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
+        <div className="pointer-events-auto flex flex-wrap justify-end gap-2"><Button variant="outline" size="sm" asChild><Link to="/trade/visualiser/shared-rooms"><Box className="h-3.5 w-3.5" />Shared rooms</Link></Button><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}

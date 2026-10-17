@@ -184,6 +184,7 @@ const TradeFfeTool = lazy(() => import("./pages/TradeFfeTool"));
 const TradeSpatialFit = lazy(() => import("./pages/TradeSpatialFit"));
 const TradeSpatialFitAudit = lazy(() => import("./pages/TradeSpatialFitAudit"));
 const TradeBoards = lazy(() => import("./pages/TradeBoards"));
+const TradeSharedRooms = lazy(() => import("./pages/TradeSharedRooms"));
 const TradeBoardBuilder = lazy(() => import("./pages/TradeBoardBuilder"));
 const TradeProjects = lazy(() => import("./pages/TradeProjects"));
 const TradeProjectDetail = lazy(() => import("./pages/TradeProjectDetail"));
@@ -959,6 +960,7 @@ const App = () => {
                     <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
                     <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
+                    <Route path="visualiser/shared-rooms" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSharedRooms /></Suspense>} />
                     <Route path="ai-layout" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAILayoutStudio /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
                     <Route path="journal" element={<TradeJournal />} />
