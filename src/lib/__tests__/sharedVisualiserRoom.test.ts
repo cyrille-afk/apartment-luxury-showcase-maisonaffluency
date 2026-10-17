@@ -15,4 +15,13 @@ describe("Complete room sharing", () => {
     expect(()=>sharedVisualiserRoom({objects:[{...piece,glb_url:"blob:local"}]})).toThrow();
     expect(()=>sharedVisualiserRoom({objects:[{...piece,position:[Infinity,0,0]}]})).toThrow();
   });
+  it("preserves model orientation and explicitly cleared part finishes",()=>{
+    const room=sharedVisualiserRoom({objects:[{...piece,modelOrientation:[0,0,0,1],partMaterials:{frame:null,legacy:{}}}]});
+    expect(room.objects[0].modelOrientation).toEqual([0,0,0,1]);
+    expect(room.objects[0].partMaterials).toEqual({frame:null,legacy:null});
+  });
+  it("rejects unknown versions and duplicate instances",()=>{
+    expect(()=>sharedVisualiserRoom({version:2,objects:[piece]})).toThrow();
+    expect(()=>sharedVisualiserRoom({objects:[piece,piece]})).toThrow();
+  });
 });
