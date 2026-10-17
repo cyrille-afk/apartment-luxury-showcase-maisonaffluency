@@ -14,6 +14,7 @@ import SceneObject, { type PlacedObject } from "@/components/trade/visualiser/Sc
 import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
+import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { Bloom, EffectComposer, DepthOfField, SSAO, ToneMapping } from "@react-three/postprocessing";
 import { BlendFunction, ToneMappingMode, type DepthOfFieldEffect } from "postprocessing";
@@ -551,26 +552,3 @@ const VisualiserCanvas = ({
 };
 
 export default VisualiserCanvas;
-
-function InitialAssetsCommitted({ onReady }: { onReady: (ready: boolean) => void }) {
-  useEffect(() => { onReady(true); return () => onReady(false); }, [onReady]);
-  return null;
-}
-
-/** Reveal once, after the complete full-DPR room has actually drawn. Later edits never mask it. */
-function InitialRoomReveal({ ready, modelCount, onReady }: { ready: boolean; modelCount: number; onReady: () => void }) {
-  const revealed = useRef(false);
-  const frames = useRef(0);
-  const pending = useRef<number | null>(null);
-  useEffect(() => () => { if (pending.current !== null) cancelAnimationFrame(pending.current); }, []);
-  useFrame(({ scene, invalidate }) => {
-    if (revealed.current) return;
-    let loadedModels = 0;
-    scene.traverse((node) => { if (node.userData.visualiserInitialReady === true) loadedModels += 1; });
-    if (!ready || loadedModels < modelCount) { frames.current = 0; invalidate(); return; }
-    if (++frames.current < 2) { invalidate(); return; }
-    revealed.current = true;
-    pending.current = requestAnimationFrame(onReady);
-  });
-  return null;
-}
