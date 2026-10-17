@@ -2679,6 +2679,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div id="finish-selectors" className="flex flex-col gap-3 md:gap-5 order-2 scroll-mt-28">
+                      <PicturedFinishesStrip available pickId={product.id} activeIndex={galleryActiveIndex} imageCount={images.length} onSelectImage={(index) => { setSwatchImageIndices(null); setGalleryActiveIndex(index); setGalleryJumpNonce((n) => n + 1); }} />
                       <VariantFinishSelectors section="primary" />
                     </div>
 
@@ -2883,6 +2884,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     <MaterialsDescriptionBlock />
 
                     <div id="finish-selectors" className="flex flex-col gap-5 scroll-mt-28">
+                      <PicturedFinishesStrip available pickId={product.id} activeIndex={galleryActiveIndex} imageCount={images.length} onSelectImage={(index) => { setSwatchImageIndices(null); setGalleryActiveIndex(index); setGalleryJumpNonce((n) => n + 1); }} />
                       <VariantFinishSelectors renderMaterialsDescription={false} />
                       {finishesMissingImages.length > 0 && (
                         <p className="font-body text-[11px] text-muted-foreground italic mt-1">
