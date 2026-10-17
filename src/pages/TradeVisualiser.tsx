@@ -925,6 +925,7 @@ const TradeVisualiser = () => {
             selectedId={selectedId}
             orbitEnabled={orbitEnabled}
             hasBackdrop={Boolean(backdropSrc)}
+            defaultLuxuryBackdrop
             featureWallFinish={featureWallFinishKey}
             onSelect={setSelectedId}
             onTransform={transformObject}
@@ -1157,7 +1158,7 @@ const TradeVisualiser = () => {
           </div>
           <span className="h-5 w-px bg-border" />
           <Button variant="ghost" className={toolbarButton} onClick={() => fileRef.current?.click()}>
-            [ &#8593; {backdropSrc ? "Change Backdrop" : "Upload Backdrop"} ]
+            [ &#8593; {backdropSrc ? "Change Backdrop" : "Import backdrop prop"} ]
           </Button>
           <span className="h-5 w-px bg-border" />
           <Button variant="ghost"
