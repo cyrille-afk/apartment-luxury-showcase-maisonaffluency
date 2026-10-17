@@ -8,6 +8,7 @@ import { SHOWROOM } from "@/lib/showroomRendering";
 import { canRetainPhotorealFrame, type PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
 import { configureProgressivePresentation } from "@/lib/visualiserProgressivePresentation";
 import { adaptiveQuality, createAdaptiveState, emptySampleTiming, measureSampleDuration, recordSampleDuration, resetAdaptiveState, type AdaptiveSamplingState } from "@/lib/visualiserAdaptiveSampling";
+import { captureAccumulation, CHECKPOINT_INTERVAL_MS, loadRenderCheckpoint, renderFingerprint, restoreAccumulation, saveRenderCheckpoint, type RenderCheckpoint } from "@/lib/visualiserRenderCheckpoint";
 
 const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
   for (let i = 0; i < 16; i++) if (Math.abs(a.elements[i] - b.elements[i]) > eps) return false;
@@ -15,8 +16,30 @@ const matricesClose = (a: THREE.Matrix4, b: THREE.Matrix4, eps = 1e-5) => {
 };
 
 /** Owns the demand loop: native-quality tracing preview and progressive GI at rest. */
-const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
-  const { gl, scene, camera, invalidate } = useThree();
+const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, quality = DEFAULT_PT_QUALITY, depthOfField = false, focusTarget, dofStrength = 3, frameCaptureRef, adaptive = false, onAdaptiveChange }: { signature: string; checkpointKey?: string; onCheckpoint?: (result: "restored" | "unavailable") => void; onSamples?: (n: number) => void; quality?: PathTraceQuality; depthOfField?: boolean; focusTarget: THREE.Vector3; dofStrength?: number; frameCaptureRef?: PhotorealFrameCaptureRef; adaptive?: boolean; onAdaptiveChange?: (state: AdaptiveSamplingState) => void }) => {
+  const { gl, scene, camera, controls, invalidate } = useThree();
+  const checkpoint = useRef({ loading: false, candidate: null as RenderCheckpoint | null, cameraApplied: false, changedAt: 0, fingerprint: "", savedAt: 0, savedSamples: 0, writing: false, warned: false });
+  const checkpointReport = useRef(onCheckpoint);
+  checkpointReport.current = onCheckpoint;
+  const saveNow = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!checkpointKey) return;
+    let alive = true;
+    Object.assign(checkpoint.current, { loading: true, candidate: null, cameraApplied: false, fingerprint: "", savedAt: 0, savedSamples: 0 });
+    loadRenderCheckpoint(checkpointKey).then(value => {
+      if (!alive) return;
+      checkpoint.current.candidate = value;
+    }).catch(() => {
+      if (alive) checkpointReport.current?.("unavailable");
+    }).finally(() => {
+      if (alive) { checkpoint.current.loading = false; invalidate(); }
+    });
+    const flush = () => saveNow.current();
+    const hide = () => { if (document.hidden) flush(); };
+    document.addEventListener("visibilitychange", hide);
+    window.addEventListener("pagehide", flush);
+    return () => { alive = false; flush(); document.removeEventListener("visibilitychange", hide); window.removeEventListener("pagehide", flush); };
+  }, [checkpointKey, invalidate]);
   const tracer = useRef<WebGLPathTracer | null>(null);
   const physicalCamera = useRef(new PhysicalCamera());
   const lastFocus = useRef({ distance: -1, bokeh: -1 });
@@ -127,6 +150,29 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
     invalidate();
   }, [signature, invalidate]);
 
+  saveNow.current = () => {
+    const saved = checkpoint.current;
+    const pt = tracer.current;
+    if (!checkpointKey || !pt || !saved.fingerprint || saved.loading || saved.candidate || saved.writing ||
+      state.current.dirty || state.current.failed || pt.samples <= saved.savedSamples) return;
+    try {
+      const accumulation = captureAccumulation(pt, gl);
+      if (!accumulation) return;
+      const orbit = controls as unknown as { target?: THREE.Vector3 } | null;
+      const value: RenderCheckpoint = { ...accumulation, version: 1, signature, fingerprint: saved.fingerprint,
+        savedAt: Date.now(), renderScale: pt.renderScale,
+        camera: { position: camera.position.toArray(), quaternion: camera.quaternion.toArray(), target: (orbit?.target ?? focusTarget).toArray() } };
+      saved.writing = true;
+      void saveRenderCheckpoint(checkpointKey, value).then(() => {
+        saved.savedAt = performance.now(); saved.savedSamples = accumulation.samples;
+      }).catch(() => {
+        if (!saved.warned) { saved.warned = true; checkpointReport.current?.("unavailable"); }
+      }).finally(() => { saved.writing = false; });
+    } catch {
+      if (!saved.warned) { saved.warned = true; checkpointReport.current?.("unavailable"); }
+    }
+  };
+
   useFrame(() => {
     const pt = tracer.current;
     const current = state.current;
@@ -135,6 +181,18 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       return;
     }
     const now = performance.now();
+    const saved = checkpoint.current;
+    if (saved.loading) { gl.render(scene, camera); invalidate(); return; }
+    if (saved.candidate && !saved.cameraApplied) {
+      saved.cameraApplied = true;
+      if (saved.candidate.signature === signature) {
+        camera.position.fromArray(saved.candidate.camera.position);
+        camera.quaternion.fromArray(saved.candidate.camera.quaternion);
+        const orbit = controls as unknown as { target?: THREE.Vector3; update?: () => void } | null;
+        orbit?.target?.fromArray(saved.candidate.camera.target); orbit?.update?.();
+        pt.renderScale = saved.candidate.renderScale;
+      } else saved.candidate = null;
+    }
     if (document.hidden) {
       timing.current = emptySampleTiming();
       return; // Pause without discarding GPU accumulation.
@@ -151,6 +209,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       const focusChanged = Math.abs(lastFocus.current.bokeh - renderCamera.bokehSize) > 0.001 ||
         (depthOfField && Math.abs(lastFocus.current.distance - renderCamera.focusDistance) > 0.001);
       if (focusChanged || !matricesClose(current.world, camera.matrixWorld) || !matricesClose(current.projection, camera.projectionMatrix)) {
+        saved.fingerprint = ""; saved.changedAt = now; saved.savedSamples = 0;
         retainFrame();
         lastFocus.current = { distance: renderCamera.focusDistance, bokeh: renderCamera.bokehSize };
         current.world.copy(camera.matrixWorld);
@@ -166,6 +225,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         scene.updateMatrixWorld(true);
         const revision = tracedSceneRevision(scene);
         if (current.dirty || revision !== current.revision) {
+          saved.fingerprint = ""; saved.changedAt = now; saved.savedSamples = 0;
           retainFrame();
           const hidden: THREE.Object3D[] = [];
           scene.traverse((object) => {
@@ -188,9 +248,24 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
         }
       }
       if (current.ready && environment !== current.environment) {
+        saved.fingerprint = ""; saved.changedAt = now; saved.savedSamples = 0;
         retainFrame();
         pt.updateEnvironment(); // rebind lighting/background and reset old samples
         current.environment = environment;
+      }
+      // Wait for async models, material maps and HDR to settle; validate content,
+      // not the reload-specific UUIDs used for cheap live invalidation.
+      if (checkpointKey && !saved.fingerprint && now - saved.changedAt >= 1000 && !pt.isCompiling) {
+        saved.fingerprint = renderFingerprint(scene, camera, signature, [renderCamera.bokehSize, renderCamera.focusDistance]);
+      }
+      if (saved.candidate && saved.fingerprint) {
+        const candidate = saved.candidate;
+        if (candidate.fingerprint === saved.fingerprint && restoreAccumulation(pt, gl, candidate)) {
+          saved.savedSamples = candidate.samples; saved.savedAt = now;
+          report.current?.(candidate.samples); checkpointReport.current?.("restored");
+        }
+        // A subsequent late asset changes the live revision and resets normally.
+        saved.candidate = null;
       }
       // A full-resolution traced preview remains active through geometry resets;
       // accumulation resumes once motion settles without reducing canvas DPR.
@@ -200,6 +275,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
       // The engine advances stratified pixel jitter once per complete sample.
       // Keep one tile per tick; only publish once all four tiles share that sample.
       pt.renderSample();
+      if (checkpointKey && now - saved.savedAt >= CHECKPOINT_INTERVAL_MS) saveNow.current();
       const samples = Math.floor(pt.samples);
       // Measure the real per-sample cost while settled and accumulating; on a
       // slow GPU step resolution/preview/cap down, on a fast one back up.
@@ -215,6 +291,7 @@ const PathTracerLayer = ({ signature, onSamples, quality = DEFAULT_PT_QUALITY, d
               retainFrame();
               pt.renderScale = nextScale;
               current.dirty = true; // Only actual resolution changes reset samples.
+              saved.fingerprint = ""; saved.changedAt = now; saved.savedSamples = 0;
             }
             adaptiveReport.current?.(adaptiveState.current);
           }

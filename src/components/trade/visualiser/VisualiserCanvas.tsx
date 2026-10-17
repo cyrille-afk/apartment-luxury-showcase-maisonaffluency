@@ -214,6 +214,8 @@ interface VisualiserCanvasProps {
   depthOfField?: boolean;
   /** Progressive GPU path tracing (offline-quality GI) while the camera is still. */
   pathTrace?: boolean;
+  renderCheckpointKey?: string;
+  onRenderCheckpoint?: (result: "restored" | "unavailable") => void;
   frameCaptureRef?: PhotorealFrameCaptureRef;
   onPathTraceSamples?: (n: number) => void;
   pathTraceQuality?: import("@/lib/visualiserPathTracing").PathTraceQuality;
@@ -319,6 +321,8 @@ const VisualiserCanvas = ({
   focusRef,
   depthOfField = true,
   pathTrace = false,
+  renderCheckpointKey,
+  onRenderCheckpoint,
   frameCaptureRef,
   onPathTraceSamples,
   pathTraceQuality,
@@ -509,6 +513,8 @@ const VisualiserCanvas = ({
     </Suspense>
     {pathTrace && (
       <PathTracerLayer
+        checkpointKey={renderCheckpointKey}
+        onCheckpoint={onRenderCheckpoint}
         frameCaptureRef={frameCaptureRef}
         onSamples={onPathTraceSamples}
         quality={pathTraceQuality}
@@ -517,7 +523,7 @@ const VisualiserCanvas = ({
         depthOfField={depthOfField}
         focusTarget={dofTarget.current}
         dofStrength={dofStrength}
-        signature={`${JSON.stringify(advancedRendering)}|light:${lighting.lightScale}|${environmentSource}|${hasBackdrop}|${floorFinish}|${featureWallFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
+        signature={`${depthOfField}|${dofStrength}|${dofFocusSelected}|${dofFocusSelected ? selectedId : ""}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${wallColor}|${wallCustomHex}|${wallFinish}|${wallFinishIntensity}|${JSON.stringify(advancedRendering)}|light:${lighting.lightScale}|${environmentSource}|${hasBackdrop}|${floorFinish}|${featureWallFinish}|${floorGlare}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug}|${backdropColor ?? ""}|${backdropBrightness}|${objects
           .map((o) => `${o.instanceId}:${o.glb_url}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}:${o.material?.id ?? ""}:${o.topMaterial?.id ?? ""}:${o.baseMaterial?.id ?? ""}:${o.upholsteryMaterial?.id ?? ""}:${JSON.stringify(o.partMaterials ?? {})}:${JSON.stringify(o.marbleSurface ?? {})}`)
           .join("|")}`}
       />

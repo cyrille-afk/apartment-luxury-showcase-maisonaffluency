@@ -68,6 +68,7 @@ const PieceAngleControls = lazy(
 );
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
+import { useAuth } from "@/hooks/useAuth";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import {
   BOND_STREET_BASE_FINISH,
@@ -213,6 +214,7 @@ const CanvasLoader = () => (
 );
 
 const TradeVisualiser = () => {
+  const { user } = useAuth();
   const initial = useMemo(readSandbox, []);
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
@@ -903,6 +905,8 @@ const TradeVisualiser = () => {
             showLabels={showLabels}
             depthOfField={depthOfField}
             pathTrace={pathTrace}
+            renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
+            onRenderCheckpoint={(result) => result === "restored" ? toast.success("Photoreal progress restored") : toast.warning("Render checkpoints unavailable. Keep this page open to retain progress.")}
             frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}
