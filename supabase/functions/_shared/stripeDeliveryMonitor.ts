@@ -5,6 +5,7 @@ export async function checkStripeDeliveries(db: ReturnType<typeof createClient>,
   const reasons: string[] = [];
   const missing: DeliveryEvent[] = [];
   let rejected = 0;
+  let available = true;
   try {
     const { count, error } = await db.from('security_audit_events').select('id', { count: 'exact', head: true })
       .eq('source', 'stripe-webhook').eq('event_type', 'stripe_signature_rejected')
@@ -29,12 +30,13 @@ export async function checkStripeDeliveries(db: ReturnType<typeof createClient>,
       missing.push(...missingLiveDeliveries(events.data, new Set((data ?? []).map(row => row.event_id)), types, Math.floor(now.getTime() / 1000)));
       if (!events.has_more) break;
       cursor = ids.at(-1);
-      if (page === 9) reasons.push('Live Stripe reconciliation exceeded 1000 undelivered events; coverage is incomplete');
+      if (page === 9) { available = false; reasons.push('Live Stripe reconciliation exceeded 1000 undelivered events; coverage is incomplete'); }
     }
   } catch (error) {
+    available = false;
     console.error('[STRIPE-DELIVERY-MONITOR] provider check failed', error instanceof Error ? error.name : 'unknown');
     reasons.push('Live Stripe delivery check unavailable; verify Stripe access and that the live endpoint is enabled');
   }
   reasons.push(...deliveryReasons(missing, rejected));
-  return { reasons, missingLiveEventIds: missing.map(e => e.id), signatureRejections: rejected };
+  return { reasons, missingLiveEventIds: missing.map(e => e.id), signatureRejections: rejected, available };
 }

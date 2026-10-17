@@ -152,6 +152,10 @@ serve(async (req) => {
   });
 
   const delivery = await checkStripeDeliveries(supabase, now);
+  const { error: snapshotError } = await supabase.from('stripe_delivery_checks').insert({
+    checked_at: now.toISOString(), available: delivery.available, missing_live_events: delivery.missingLiveEventIds.length,
+  });
+  if (snapshotError) console.error('[WORKER-MONITOR] Delivery history could not be saved');
   evaluation.reasons.push(...delivery.reasons);
   evaluation.healthy = evaluation.reasons.length === 0;
   evaluation.signature = evaluation.reasons.map(r => r.replace(/evt_[A-Za-z0-9]+/g, 'evt_*').replace(/\d+/g, '#').split('IDs:')[0].trim()).sort().join(' | ');

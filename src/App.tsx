@@ -93,6 +93,7 @@ const TradeAdminCnBriefs = lazy(() => import("./pages/TradeAdminCnBriefs"));
 const PortalCN = lazy(() => import("./pages/PortalCN"));
 const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradeAdminQueue = lazy(() => import("./pages/TradeAdminQueue"));
+const TradeAdminStripeMetrics = lazy(() => import("./pages/TradeAdminStripeMetrics"));
 const TradeAdminPrivacyRequests = lazy(() => import("./pages/TradeAdminPrivacyRequests"));
 const TradeAdminSubProcessors = lazy(() => import("./pages/TradeAdminSubProcessors"));
 const TradeAdminOutbound = lazy(() => import("./pages/TradeAdminOutbound"));
@@ -936,6 +937,7 @@ const App = () => {
 
                     <Route path="admin/mcp-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminMcpUsage /></Suspense>} />
                     <Route path="admin/queue" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminQueue /></Suspense>} />
+                    <Route path="admin/stripe-metrics" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminStripeMetrics /></Suspense>} />
                     <Route path="admin/privacy-requests" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPrivacyRequests /></Suspense>} />
                     <Route path="admin/compliance/sub-processors" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminSubProcessors /></Suspense>} />
                     <Route path="admin/outbound" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminOutbound /></Suspense>} />
