@@ -19,6 +19,8 @@ export default function PicturedFinishesStrip({
   biekeLayout = false,
   onSelectImage,
   imageCount = 0,
+  available = false,
+  fallbackNames = [],
 }: {
   pickId: string;
   activeIndex: number | undefined;
@@ -27,6 +29,8 @@ export default function PicturedFinishesStrip({
   biekeLayout?: boolean;
   onSelectImage?: (index: number) => void;
   imageCount?: number;
+  available?: boolean;
+  fallbackNames?: string[];
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
@@ -50,10 +54,10 @@ export default function PicturedFinishesStrip({
     };
   }, [pickId]);
 
-  const shown = onSelectImage
-    ? swatches.filter((s) => finishPhotoIndex(s, swatches, imageCount) !== undefined)
+  const shown = available
+    ? swatches
     : picturedFinishesForImage(swatches, activeIndex, biekeLayout);
-  if (!shown.length) return null;
+  if (!shown.length && !(available && fallbackNames.length)) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
@@ -63,7 +67,7 @@ export default function PicturedFinishesStrip({
   const firstMatch = (items: Swatch[]) => items.length
     ? [items.reduce((best, item) => item.image_indices.length < best.image_indices.length ? item : best)]
     : [];
-  const groups = biekeLayout && !onSelectImage
+  const groups = biekeLayout && !available
     ? topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
       ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
       : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }]
@@ -79,11 +83,11 @@ export default function PicturedFinishesStrip({
     const content = (
     <span className="inline-flex items-center gap-1.5">
       {s.image_url ? (
-        <img src={s.image_url} alt={s.name} className="h-3.5 w-3.5 rounded-full border border-border object-cover" loading="lazy" />
+        <img src={s.image_url} alt={s.name} className={available ? "h-9 w-9 shrink-0 rounded-none border border-border object-cover" : "h-3.5 w-3.5 shrink-0 rounded-full border border-border object-cover"} loading="lazy" />
       ) : (
         <span className="h-3.5 w-3.5 rounded-full bg-muted" />
       )}
-      <span className="font-light text-muted-foreground">{label}:</span>
+      {!available && <span className="font-light text-muted-foreground">{label}:</span>}
       <span className="font-medium text-foreground">{s.name}</span>
     </span>
     );
@@ -107,10 +111,11 @@ export default function PicturedFinishesStrip({
   return (
     <div
       aria-live="polite"
-      className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border border-border/50 bg-muted/30 px-4 py-3 font-body text-[11px]"
+      className={available ? "mt-4 flex flex-col items-start gap-2 font-body text-[11px]" : "mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border border-border/50 bg-muted/30 px-4 py-3 font-body text-[11px]"}
     >
-      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{onSelectImage ? "Finishes" : "Pictured Finishes"}</span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{available ? "Finishes available" : "Pictured Finishes"}</span>
       {groups.flatMap((group) => group.items.map((s) => <Item key={s.fabric_id} label={group.label} s={s} />))}
+      {available && !shown.length && fallbackNames.map((name) => <span key={name} className="text-foreground">{name}</span>)}
     </div>
   );
 }

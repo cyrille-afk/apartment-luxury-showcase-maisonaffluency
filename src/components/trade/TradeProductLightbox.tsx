@@ -472,7 +472,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </div>
 
           <div className="px-2 pb-2 md:px-8 md:pb-8">
-            <PicturedFinishesStrip pickId={product.id} activeIndex={showHoverImage && hoverImageLoaded && canShowHoverImage ? galleryImages.indexOf(product.hover_image_url || "") : activeImageIdx ?? galleryImages.indexOf(activeImageUrl || "")} imageCount={galleryImages.length} onSelectImage={(index) => { setShowHoverImage(false); setSwatchImageIdx(index); }} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designerDisplay.toLowerCase() === "bieke casteleyn"} />
+            <PicturedFinishesStrip pickId={product.id} activeIndex={showHoverImage && hoverImageLoaded && canShowHoverImage ? galleryImages.indexOf(product.hover_image_url || "") : activeImageIdx ?? galleryImages.indexOf(activeImageUrl || "")} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designerDisplay.toLowerCase() === "bieke casteleyn"} />
           </div>
           </div>
           {/* Details */}
@@ -640,6 +640,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   emphasized
                 />
               )}
+              <PicturedFinishesStrip available pickId={product.id} activeIndex={activeImageIdx ?? 0} imageCount={galleryImages.length} onSelectImage={(index) => { setShowHoverImage(false); setSwatchImageIdx(index); }} fallbackNames={axes.singleMaterialOptions} />
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;

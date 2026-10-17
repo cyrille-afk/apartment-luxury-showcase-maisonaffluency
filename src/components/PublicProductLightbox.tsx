@@ -870,7 +870,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              <PicturedFinishesStrip pickId={product.id} activeIndex={activeImageIdx} imageCount={galleryImages.length} onSelectImage={setSwatchImageIdx} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={productPageDesignerSlug === "bieke-casteleyn"} />
+              <PicturedFinishesStrip pickId={product.id} activeIndex={activeImageIdx} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={productPageDesignerSlug === "bieke-casteleyn"} />
               </div>
               {/* RIGHT COLUMN — specs card + CTAs */}
                <div className="flex w-full flex-col md:border-l md:border-border/40 md:pl-8">
@@ -1023,16 +1023,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   })()}
-                  {hasSingleAxisSplit && singleSplitMaterials.length > 0 && (
-                    <div className="mt-4">
-                      <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
-                        Finishes available
-                      </p>
-                      <p className="font-body text-xs leading-relaxed text-foreground">
-                        {singleSplitMaterials.join(" · ")}
-                      </p>
-                    </div>
-                  )}
+                  <PicturedFinishesStrip available pickId={product.id} activeIndex={activeImageIdx} imageCount={galleryImages.length} onSelectImage={setSwatchImageIdx} fallbackNames={singleSplitMaterials} />
 
                 </div>
               </div>
