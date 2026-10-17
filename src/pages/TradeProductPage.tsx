@@ -2266,7 +2266,6 @@ const TradeProductPage: React.FC = () => {
             {/* Finish selection — mobile: directly under the photography */}
 
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
-              <PicturedFinishesStrip available pickId={product.id} activeIndex={galleryActiveIndex ?? 0} imageCount={images.length} onSelectImage={(index) => { setGalleryActiveIndex(index); setGalleryJumpNonce((n) => n + 1); }} />
               <FinishSelector
                   pickId={product.id}
                   photoLedFinishes
