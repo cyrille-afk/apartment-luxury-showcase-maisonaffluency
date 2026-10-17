@@ -279,7 +279,7 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
       // The engine advances stratified pixel jitter once per complete sample.
       // Keep one tile per tick; only publish once all four tiles share that sample.
       pt.renderSample();
-      if (checkpointKey && now - saved.savedAt >= CHECKPOINT_INTERVAL_MS) saveNow.current();
+      if (checkpointKey && (capped || now - saved.savedAt >= CHECKPOINT_INTERVAL_MS)) saveNow.current();
       const samples = Math.floor(pt.samples);
       // Measure the real per-sample cost while settled and accumulating; on a
       // slow GPU step resolution/preview/cap down, on a fast one back up.
