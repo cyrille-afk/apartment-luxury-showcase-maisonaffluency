@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { picturedFinishesForImage } from "@/lib/picturedFinishes";
+import { finishPhotoIndex, picturedFinishesForImage } from "@/lib/picturedFinishes";
+import { Button } from "@/components/ui/button";
 
 type Swatch = { fabric_id: string; name: string; image_url: string | null; image_indices: number[]; category: string | null };
 
@@ -16,17 +17,22 @@ export default function PicturedFinishesStrip({
   baseLabel = "Frame",
   topLabel = "Drawer",
   biekeLayout = false,
+  onSelectImage,
+  imageCount = 0,
 }: {
   pickId: string;
   activeIndex: number | undefined;
   baseLabel?: string | null;
   topLabel?: string | null;
   biekeLayout?: boolean;
+  onSelectImage?: (index: number) => void;
+  imageCount?: number;
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
   useEffect(() => {
     let cancelled = false;
+    setSwatches([]);
     (async () => {
       const { data, error } = await (supabase as any)
         .from("product_fabric_swatches_public")
@@ -44,7 +50,9 @@ export default function PicturedFinishesStrip({
     };
   }, [pickId]);
 
-  const shown = picturedFinishesForImage(swatches, activeIndex, biekeLayout);
+  const shown = onSelectImage
+    ? swatches.filter((s) => finishPhotoIndex(s, swatches, imageCount) !== undefined)
+    : picturedFinishesForImage(swatches, activeIndex, biekeLayout);
   if (!shown.length) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
@@ -55,7 +63,7 @@ export default function PicturedFinishesStrip({
   const firstMatch = (items: Swatch[]) => items.length
     ? [items.reduce((best, item) => item.image_indices.length < best.image_indices.length ? item : best)]
     : [];
-  const groups = biekeLayout
+  const groups = biekeLayout && !onSelectImage
     ? topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
       ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
       : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }]
@@ -67,7 +75,8 @@ export default function PicturedFinishesStrip({
         items: [s],
       }));
 
-  const Item = ({ label, s }: { label: string; s: Swatch }) => (
+  const Item = ({ label, s }: { label: string; s: Swatch }) => {
+    const content = (
     <span className="inline-flex items-center gap-1.5">
       {s.image_url ? (
         <img src={s.image_url} alt={s.name} className="h-3.5 w-3.5 rounded-full border border-border object-cover" loading="lazy" />
@@ -77,14 +86,30 @@ export default function PicturedFinishesStrip({
       <span className="font-light text-muted-foreground">{label}:</span>
       <span className="font-medium text-foreground">{s.name}</span>
     </span>
-  );
+    );
+    const index = finishPhotoIndex(s, swatches, imageCount);
+    if (!onSelectImage || index === undefined) return content;
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        aria-label={`Show ${s.name} product photo`}
+        aria-pressed={s.image_indices.includes((activeIndex ?? 0) + 1)}
+        title={`Show ${s.name} product photo`}
+        className="h-auto whitespace-normal rounded-none px-1 py-1 text-left text-[11px]"
+        onClick={() => onSelectImage(index)}
+      >
+        {content}
+      </Button>
+    );
+  };
 
   return (
     <div
       aria-live="polite"
       className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border border-border/50 bg-muted/30 px-4 py-3 font-body text-[11px]"
     >
-      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Pictured Finishes</span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{onSelectImage ? "Finishes" : "Pictured Finishes"}</span>
       {groups.flatMap((group) => group.items.map((s) => <Item key={s.fabric_id} label={group.label} s={s} />))}
     </div>
   );

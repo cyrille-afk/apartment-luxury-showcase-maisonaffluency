@@ -395,6 +395,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // chosen size without leaving for the full product page.
   const [selectedSizeLabel, setSelectedSizeLabel] = useState<string | null>(null);
   const [selectedStaticDimIdx, setSelectedStaticDimIdx] = useState<number | null>(null);
+  const [swatchImageIdx, setSwatchImageIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSwatchImageIdx(null);
+  }, [selectedBaseIdx, selectedTopIdx, selectedMaterialIdx, selectedSingleSizeIdx, selectedSingleMaterialIdx, selectedSizeLabel]);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -406,6 +411,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     setSelectedSingleMaterialIdx(null);
     setSelectedSizeLabel(null);
     setSelectedStaticDimIdx(null);
+    setSwatchImageIdx(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
@@ -622,7 +628,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // Default to the first gallery image (matches the product page hero) rather
   // than the curator-pick thumbnail, which is often a padded/portrait crop.
   const defaultImageUrl = galleryImages[0] || product.image_url;
-  const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : defaultImageUrl;
+  const activeImageIdx = swatchImageIdx ?? finishImageIdx ?? 0;
+  const currentImageUrl = galleryImages[activeImageIdx] || defaultImageUrl;
   
   const isUpholsteredProduct = isProductUpholstered({
     category: product.category,
@@ -807,7 +814,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
                 {/* Image caption */}
                 {(() => {
-                  const idx = finishImageIdx ?? 0;
+                  const idx = activeImageIdx;
                   const cap = product.gallery_captions?.[String(idx)];
                   return cap ? (
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 max-w-[85%]">
@@ -863,7 +870,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               </div>
 
-              <PicturedFinishesStrip pickId={product.id} activeIndex={finishImageIdx ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={productPageDesignerSlug === "bieke-casteleyn"} />
+              <PicturedFinishesStrip pickId={product.id} activeIndex={activeImageIdx} imageCount={galleryImages.length} onSelectImage={setSwatchImageIdx} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={productPageDesignerSlug === "bieke-casteleyn"} />
               </div>
               {/* RIGHT COLUMN — specs card + CTAs */}
                <div className="flex w-full flex-col md:border-l md:border-border/40 md:pl-8">
