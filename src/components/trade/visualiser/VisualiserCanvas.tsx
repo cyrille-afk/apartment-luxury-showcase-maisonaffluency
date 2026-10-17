@@ -136,11 +136,14 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
 };
 
 /** Exposes a getter for the floor point at the centre of the camera view (raycast onto Y = 0). */
-const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number, number] | null) | null } }) => {
+const FloorFocusReporter = ({ focusRef, photoStage = false }: { focusRef: { current: (() => [number, number] | null) | null }; photoStage?: boolean }) => {
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as unknown as { target?: THREE.Vector3 } | null;
   useEffect(() => {
     focusRef.current = () => {
+      // The picture centre depicts windows, not the floor. Spawn at the calibrated
+      // floor stage instead of projecting that centre ray far behind the room.
+      if (photoStage) return [0, 0];
       const dir = new THREE.Vector3();
       camera.getWorldDirection(dir);
       const hit = floorFocusPoint([camera.position.x, camera.position.y, camera.position.z], [dir.x, dir.y, dir.z]);
@@ -148,7 +151,7 @@ const FloorFocusReporter = ({ focusRef }: { focusRef: { current: (() => [number,
       return controls?.target ? [controls.target.x, controls.target.z] : null;
     };
     return () => { focusRef.current = null; };
-  }, [camera, controls, focusRef]);
+  }, [camera, controls, focusRef, photoStage]);
   return null;
 };
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -406,7 +409,7 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
-    {focusRef && <FloorFocusReporter focusRef={focusRef} />}
+    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={showLuxuryBackdrop} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
     <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (showLuxuryBackdrop) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
