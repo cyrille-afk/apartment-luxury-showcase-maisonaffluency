@@ -17,10 +17,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { requireCronOrAdmin } from "../_shared/auth.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2.108.2/cors";
+import { checkStripeDeliveries } from "../_shared/stripeDeliveryMonitor.ts";
 
 const OPS_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
 const ADMIN_URL = "https://www.maisonaffluency.com/trade/admin/queue";
@@ -153,6 +151,10 @@ serve(async (req) => {
     now,
   });
 
+  const delivery = await checkStripeDeliveries(supabase, now);
+  evaluation.reasons.push(...delivery.reasons);
+  evaluation.healthy = evaluation.reasons.length === 0;
+  evaluation.signature = evaluation.reasons.map(r => r.replace(/evt_[A-Za-z0-9]+/g, 'evt_*').replace(/\d+/g, '#').split('IDs:')[0].trim()).sort().join(' | ');
   const summary = {
     healthy: evaluation.healthy,
     reasons: evaluation.reasons,
@@ -161,6 +163,7 @@ serve(async (req) => {
     last_success_at: health?.last_success_at ?? null,
     consecutive_failures: health?.consecutive_failures ?? 0,
     checked_at: now.toISOString(),
+    stripe_delivery: delivery,
   };
 
   if (evaluation.healthy) {
@@ -179,6 +182,7 @@ serve(async (req) => {
     .from("admin_alert_log")
     .select("id, payload, created_at")
     .eq("event", "webhook_worker_unhealthy")
+    .eq("status", "sent")
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(10);
@@ -195,7 +199,7 @@ serve(async (req) => {
     });
   }
 
-  const headline = !probe || probeError
+  const headline = delivery.reasons.length ? "Live Stripe webhook delivery alert" : !probe || probeError
     ? "Queue worker health probe failed"
     : !probe.boot.stripe
     ? "Queue worker startup check failed"
@@ -256,18 +260,21 @@ serve(async (req) => {
   // ---- 5. Email fallback (always) ----------------------------------------
   let email: "sent" | "failed" = "sent";
   try {
-    const idempotencyKey = `worker-unhealthy-${now.toISOString().slice(0, 13)}-${
-      evaluation.signature.slice(0, 40)
-    }`;
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(evaluation.signature));
+    const conditionKey = Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, 24);
+    const idempotencyKey = `worker-unhealthy-${now.toISOString().slice(0, 13)}-${conditionKey}`;
     const results = await Promise.all(
       OPS_RECIPIENTS.map((recipient) =>
         supabase.functions.invoke("send-transactional-email", {
           body: {
             templateName: "webhook-worker-unhealthy",
             recipientEmail: recipient,
-            idempotencyKey,
+            idempotencyKey: `${idempotencyKey}-${recipient}`,
             templateData: {
               headline,
+              deliveryAlert: delivery.reasons.length > 0,
+              missingLiveEvents: delivery.missingLiveEventIds.length,
+              signatureRejections: delivery.signatureRejections,
               reasons: evaluation.reasons,
               bootOk: probe?.boot?.stripe !== false,
               databaseOk: probe?.database?.ok !== false,
@@ -285,7 +292,7 @@ serve(async (req) => {
       ),
     );
     // deno-lint-ignore no-explicit-any
-    if (results.find((r: any) => r?.error)) email = "failed";
+    if (results.find((r: any) => r?.error || r?.data?.error || r?.data?.success === false)) email = "failed";
   } catch (e) {
     email = "failed";
     console.error("[WORKER-MONITOR] ops email failed:", e);

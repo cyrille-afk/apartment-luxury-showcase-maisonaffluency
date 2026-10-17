@@ -14,6 +14,7 @@
 - Visualiser ceiling settings use a lightweight shared contract for page, presets and lazy-loaded geometry; emitters follow the opening and frame height so saved settings render consistently.
 - Product pages and lightboxes reuse PicturedFinishesStrip with the displayed photo index; multi-material mappings stay visible when pictured together — prevents missing photo legends.
 - Sandbox default photo is a presentation-only canvas layer replaced by custom backdrop state, not furniture changes — preserves compositions and imports.
+- Stripe delivery monitoring extends the existing watchdog and reconciles provider failures with local receipts; unverified bodies never establish mode — catches pre-handler failures without duplicate schedules.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
