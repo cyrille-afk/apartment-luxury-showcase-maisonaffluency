@@ -27,7 +27,7 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
-import { getLocalExr } from "@/lib/localEnvironmentExr";
+import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
