@@ -32,6 +32,9 @@ describe("Photoreal checkpoints", () => {
     expect(uploaded).toEqual([value().pixels, value().pixels]);
     expect(engine.samples).toBe(2500); expect(engine.material.seed).toBe(2500); expect(engine._task).toBeNull();
     expect((2500 * uploaded[0][0] + 5) / 2501).toBeCloseTo(2.5009996);
+    pt.target.width = 2;
+    expect(restoreAccumulation(pt as any, gl as any, value())).toBe(false);
+    pt.target.width = 1;
     pt._queueReset = true;
     expect(restoreAccumulation(pt as any, gl as any, value())).toBe(false);
   });
@@ -44,6 +47,9 @@ describe("Photoreal checkpoints", () => {
     expect(renderFingerprint(b, camera, "room", [1, 5])).not.toBe(before);
     const c = scene(); ((c.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).roughness = 0.2;
     expect(renderFingerprint(c, camera, "room", [1, 5])).not.toBe(before);
+    const d = scene(); (d.children[0] as THREE.Mesh).geometry = new THREE.BoxGeometry(2, 1, 1);
+    expect(renderFingerprint(d, camera, "room", [1, 5])).not.toBe(before);
+    expect(renderFingerprint(a, camera, "room", [1, 6])).not.toBe(before);
     camera.position.z = 3; camera.updateMatrixWorld();
     expect(renderFingerprint(a, camera, "room", [1, 5])).not.toBe(before);
   });
