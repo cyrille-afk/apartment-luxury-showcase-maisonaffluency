@@ -249,7 +249,7 @@ const TradeVisualiser = () => {
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
   const [showGrid, setShowGrid] = useState<boolean>(initial.showGrid ?? true);
   const [showLabels, setShowLabels] = useState<boolean>(initial.showLabels ?? true);
-  const [pathTrace, setPathTrace] = useState(true);
+  const [pathTrace, setPathTrace] = useState(false);
   const [keepPhotorealGhost, setKeepPhotorealGhost] = useState(loadPhotorealGhostPreference);
   const [photorealGhost, setPhotorealGhost] = useState<string | null>(null);
   const frameCaptureRef = useRef<PhotorealFrameCaptureRef["current"]>(null);
@@ -894,6 +894,13 @@ const TradeVisualiser = () => {
 
       {showPhotorealGhost && photorealGhost && (
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
+      )}
+      {!pathTrace && !sceneFailed && (
+        <div className="absolute bottom-3 left-3 z-30">
+          <Button variant="outline" size="sm" onClick={togglePhotoreal} className="gap-2 bg-background/90 text-xs backdrop-blur-sm">
+            <span aria-hidden="true">✦</span> Start Photoreal Render
+          </Button>
+        </div>
       )}
       {pathTrace && checkpointStatus && (
         <div role="status" aria-live="polite" data-checkpoint-status className="pointer-events-none absolute bottom-3 left-3 z-30 rounded-sm border border-border bg-background/85 px-3 py-1.5 font-mono text-[10px] uppercase tracking-normal text-foreground/80 backdrop-blur-sm">
