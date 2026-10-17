@@ -14,6 +14,8 @@ import { toast } from "@/hooks/use-toast";
 import { formatMoneyIn } from "@/lib/displayMoney";
 import FinishesDrawer, { resolveFinishFrom, type FinishSelection, type PreloadedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
+import SharedVisualiserScene from "@/components/trade/visualiser/SharedVisualiserScene";
+import { sharedVisualiserRoom, type SharedVisualiserRoom } from "@/lib/sharedVisualiserRoom";
 
 type Item = {
   id: string; product_id: string; product_name: string; image_url: string | null; msrp_cents: number | null; currency: string;
@@ -48,6 +50,23 @@ export default function SharedProcurementBoard() {
   const [catalog, setCatalog] = useState<Record<string, PreloadedFinishes> | null>(null);
   const [picks, setPicks] = useState<Record<string, FinishSelection>>({});
   const [drawerFor, setDrawerFor] = useState<string | null>(null);
+  const [room, setRoom] = useState<SharedVisualiserRoom | null>(null);
+  useEffect(() => {
+    let active = true;
+    setRoom(null);
+    if (!token) return;
+    supabase.rpc("get_shared_board_scene", { _token: token }).then(({ data: snapshot }) => {
+      if (!active || !snapshot) return;
+      try { setRoom(sharedVisualiserRoom(snapshot)); } catch { /* Invalid room never reaches WebGL. */ }
+    });
+    return () => { active = false; };
+  }, [token]);
+  const approveRoom = async () => {
+    const { error } = await supabase.rpc("approve_shared_room", { _token: token });
+    if (error) { toast({ title: "Could not approve the room", description: "Review any proposed finishes individually, then try again.", variant: "destructive" }); return; }
+    toast({ title: "Room selection approved" });
+    await load();
+  };
 
   const load = useCallback(async () => {
     if (!token) { setData(undefined); return; }
@@ -213,6 +232,10 @@ export default function SharedProcurementBoard() {
           <ContractorAdd token={token} onAdded={load} />
         )}
       </header>
+
+      {room && <SharedVisualiserScene room={room} onSelectPiece={setDrawerFor} onApprove={approveRoom}
+        approved={data.items.length > 0 && data.items.every(i => i.my_reaction === "heart")}
+        approvalDisabled={data.role !== "client" || data.items.some(i => Boolean(i.my_finish))} />}
 
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-16 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
         {data.items.map((item, i) => {
