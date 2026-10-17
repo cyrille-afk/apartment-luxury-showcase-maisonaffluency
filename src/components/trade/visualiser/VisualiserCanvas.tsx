@@ -26,6 +26,8 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
+import { getLocalExr } from "@/lib/localEnvironmentExr";
+import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
 import ArchitecturalDownlights from "./ArchitecturalDownlights";
@@ -47,8 +49,9 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady, onUploadedActive }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void; onUploadedActive?: (active: boolean) => void }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
+  const [uploadedActive, setUploadedActive] = useState(false);
   const invalidate = useThree((s) => s.invalidate);
   const [localVersion, setLocalVersion] = useState(0);
   useEffect(() => {
@@ -60,11 +63,13 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
     let cancelled = false;
     let owned: THREE.DataTexture | null = null;
     setMap(null);
-    const accept = (source: VisualiserEnvironmentSource, exr?: "missing" | "unreadable") => (texture: THREE.DataTexture) => {
+    const accept = (source: VisualiserEnvironmentSource, exr?: "missing" | "unreadable", uploaded = false) => (texture: THREE.DataTexture) => {
       if (cancelled) { texture.dispose(); return; }
       texture.mapping = THREE.EquirectangularReflectionMapping;
       owned = texture;
       setMap(texture);
+      setUploadedActive(uploaded);
+      onUploadedActive?.(uploaded);
       reportEnvironmentStatus({ source, exr });
       invalidate();
     };
@@ -74,6 +79,8 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
         /* Keep local studio reflections if both HDRI sources are unavailable. */
         if (cancelled) return;
         reportEnvironmentStatus({ source: "local", exr });
+        setUploadedActive(false);
+        onUploadedActive?.(false);
         onReady?.();
       });
     };
@@ -84,7 +91,14 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
         if (!cancelled) accept(source)(createExrEnvironmentTexture(buffer));
       }).catch(() => fallbackToStudioHdr("unreadable"));
     };
-    const loadEmptyRoom = () => {
+    const loadEmptyRoom = async () => {
+      const local = await getLocalExr();
+      if (cancelled) return;
+      if (local) {
+        try { accept("empty-room-exr", undefined, true)(createExrEnvironmentTexture(local.buffer.slice(0))); }
+        catch { fallbackToStudioHdr("unreadable"); }
+        return;
+      }
       // The studio's own empty-room EXR — validated (present + readable) before parsing.
       validateEmptyRoomExr().then((result) => {
         if (cancelled) return;
@@ -101,11 +115,12 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
     else if (preferred === "window-interior-exr") loadHostedExr(preferred, windowAsset.url);
     else fallbackToStudioHdr();
     return () => { cancelled = true; owned?.dispose(); };
-  }, [invalidate, preferred, localVersion]);
+  }, [invalidate, preferred, localVersion, onUploadedActive]);
   // Raster: HDRI is reflections only. Photoreal: HDRI is bound to scene.environment at physical
   // intensity AND to scene.background (heavily blurred so its curtains/wallpaper never read as a backdrop),
   // so escaping rays gather real light instead of a grey void.
   const rotation: [number, number, number] = [0, Math.PI / 4, 0];
+  const presentation = uploadedEnvironmentPresentation(uploadedActive, pathTrace);
   const environmentIntensity = lightIntensity * (pathTrace ? SHOWROOM.photorealEnvironmentScale : SHOWROOM.environmentIntensity);
   // Environment binds the map in its layout effect. Wake the demand loop AFTER
   // that commit, not only when the download completes, so PMREM and the tracer
@@ -118,10 +133,10 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
     <Environment
       key={map.uuid}
       map={map}
-      background={pathTrace}
+      background={presentation.background}
       environmentIntensity={environmentIntensity}
-      backgroundIntensity={pathTrace ? environmentIntensity : 1}
-      backgroundBlurriness={pathTrace ? 0.85 : 0}
+      backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
+      backgroundBlurriness={presentation.blur}
       environmentRotation={rotation}
       backgroundRotation={rotation}
     />
@@ -365,8 +380,10 @@ const VisualiserCanvas = ({
   backdropColor = null,
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
-  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop;
-  const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop;
+  const [uploadedEnvironment, setUploadedEnvironment] = useState(false);
+  const showUploadedEnvironment = uploadedEnvironment && environmentSource === "empty-room-exr";
+  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment;
+  const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
   const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
@@ -456,7 +473,7 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
     {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && !hasBackdrop} lightIntensity={lighting.lightScale} onReady={environmentLoaded} />
+    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && (!hasBackdrop || showUploadedEnvironment)} lightIntensity={lighting.lightScale} onReady={environmentLoaded} onUploadedActive={setUploadedEnvironment} />
 
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
@@ -492,8 +509,8 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
-    {!pathTrace && showLuxuryBackdrop && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
-    {showGrid && !showLuxuryBackdrop && (
+    {!pathTrace && (showLuxuryBackdrop || showUploadedEnvironment) && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
+    {showGrid && !showLuxuryBackdrop && !showUploadedEnvironment && (
       <Grid
         position={[0, 0.001, 0]}
         infiniteGrid
@@ -509,7 +526,7 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {!showLuxuryBackdrop && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
     </mesh>}

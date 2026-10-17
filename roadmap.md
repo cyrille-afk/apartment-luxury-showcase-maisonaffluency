@@ -1,3 +1,4 @@
+- [ ] Make uploaded EXR interiors replace the default photo, remain sharp in both renderers and restore from the saved browser file; verify upload and refresh.
 - [x] Correct default photo close-up and floating furniture: full native-aspect photograph, elevated floor-aligned camera, calibrated photo-mode spawn origin and no interfering shadow catcher. Signed-in 1938×1181 DPR-2 check shows Frenchmen/GUM chairs and IBO table on the pictured floor, Photoreal off, and no page errors; existing furniture transforms unchanged.
 - [x] Add one-time full-resolution opening reveal after furniture, finishes, surfaces and lighting settle; readiness/no-repeat regressions pass and build clean.
 - [x] Verify complete furnished live view at the user's 1938×1181 DPR-2 viewport: signed-in catalogue placement reveals three real models with Photoreal off and no page errors. High-sample Photoreal restoration remains separately hardware-blocked below.
