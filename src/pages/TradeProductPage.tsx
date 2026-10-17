@@ -81,6 +81,8 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
+import { configuredProductPrice } from "@/lib/configuredProductPrice";
+import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
@@ -845,8 +847,11 @@ const TradeProductPage: React.FC = () => {
   })();
 
 
+  const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
+
   const handleAddToQuote = useCallback(async () => {
     if (!user || !data) return;
+    const felixSelection = felixSelectionRef.current;
     setAdding(true);
     try {
       const { product, designer } = data;
@@ -1180,6 +1185,10 @@ const TradeProductPage: React.FC = () => {
         setAdded(true);
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(true);
+        if (felixSelection) {
+          window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
+          window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: felixSelection }));
+        }
         toast({
           title: "Added to quote",
           description: `${product.title} added to QU-${quoteId!.slice(0, 6).toUpperCase()}`,
@@ -1349,83 +1358,6 @@ const TradeProductPage: React.FC = () => {
     defaultVariantAppliedFor.current = pid;
     setSelectedVariantIdx(match.index);
   }, [data]);
-
-  // Proactive tearsheet nudge — fires after the architect has stopped
-  // changing finishes for 3s. Sends a lightweight "lock this in" spec card
-  // into the concierge chat stream. Skips firing until at least one finish
-  // axis is actually selected, and dedupes by (product + selection key) so
-  // the same combo isn't re-nudged.
-  const lastNudgeKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    const productId = data?.product?.id as string | undefined;
-    if (!productId) return;
-    const fabricLabel = selectedFabric?.name ?? null;
-    const baseLabel = selectedWoodPrice?.name ?? selectedBase ?? null;
-    const topLabel = selectedTopSwatch?.name ?? selectedTop ?? null;
-    // Nothing to lock in yet.
-    if (!fabricLabel && !baseLabel && !topLabel) return;
-
-    const selectionKey = `${productId}::${fabricLabel ?? ""}::${baseLabel ?? ""}::${topLabel ?? ""}`;
-    if (lastNudgeKeyRef.current === selectionKey) return;
-
-    const t = window.setTimeout(() => {
-      // Format trade price using whichever cents we can trust.
-      const pricing = data?.pricing;
-      const product = data?.product as any;
-      const rawCents =
-        (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0
-          ? selectedWoodPrice.price_cents
-          : null) ??
-        pricing?.trade_price_cents ??
-        product?.trade_price_cents ??
-        null;
-      const rawCcy = (selectedWoodPrice?.currency || pricing?.currency || product?.currency || "EUR") as DisplayCurrency;
-      let tradePriceLabel: string | null = null;
-      if (rawCents && rawCents > 0) {
-        try {
-          tradePriceLabel = formatPriceConverted(rawCents, rawCcy, displayCurrency, fxRates);
-        } catch {
-          tradePriceLabel = null;
-        }
-      }
-
-      const leadTimeLabel = ((pricing as any)?.lead_time || product?.lead_time || null) as string | null;
-
-      const detail = {
-        productId,
-        productName: (product?.title || product?.product_name || "This piece") as string,
-        brandName: (product?.brand_name || product?.subtitle || null) as string | null,
-        sku: null,
-        imageUrl: (product?.image_url || (product?.gallery_images?.[0] ?? null)) as string | null,
-        fabricLabel,
-        baseLabel,
-        topLabel,
-        tradePriceLabel,
-        leadTimeLabel,
-      };
-
-      lastNudgeKeyRef.current = selectionKey;
-      window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail }));
-    }, 3000);
-
-    return () => window.clearTimeout(t);
-  }, [
-    data?.product?.id,
-    selectedFabric?.name,
-    selectedWoodPrice?.name,
-    selectedWoodPrice?.price_cents,
-    selectedWoodPrice?.currency,
-    selectedTopSwatch?.name,
-    selectedBase,
-    selectedTop,
-    displayCurrency,
-    fxRates,
-    data?.pricing,
-  ]);
-
-
-
-
 
   if (isLoading) {
     return <div className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
@@ -1926,8 +1858,7 @@ const TradeProductPage: React.FC = () => {
         ? fabricUpchargeCentsRaw
         : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
     }
-    const retailCents = rrp + upcharge;
-    const netCents = Math.round(rrp * (1 - TRADE_DISCOUNT)) + upcharge;
+    const { retailCents, netCents } = configuredProductPrice(rrp, upcharge, TRADE_DISCOUNT);
     // Once the user has made a concrete fabric or wood-frame selection, the
     // price is fully resolved — never show "From".
     const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant || !!picturedVariant;
@@ -1945,6 +1876,19 @@ const TradeProductPage: React.FC = () => {
       retailLabel: formatPriceConverted(retailCents, pricing.currency, displayCurrency, fxRates, unit),
     };
   })();
+
+  // Same render snapshot as the headline; captured before the asynchronous add.
+  felixSelectionRef.current = {
+    productId: product.id,
+    productName: product.title,
+    brandName: designerDisplay,
+    imageUrl: product.gallery_images?.[galleryActiveIndex] ?? product.image_url,
+    fabricLabel: selectedFabric?.name ?? null,
+    baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
+    topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
+    tradePriceLabel: priceLabels?.netLabel ?? null,
+    leadTimeLabel: product.lead_time,
+  };
 
   const renderPrice = () => {
     if (!priceLabels) return null;
