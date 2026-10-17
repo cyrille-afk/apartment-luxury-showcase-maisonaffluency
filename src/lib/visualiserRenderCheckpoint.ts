@@ -7,6 +7,7 @@ export const CHECKPOINT_INTERVAL_MS = 15000;
 export interface RenderCheckpoint {
   version: 1;
   fingerprint: string;
+  signature: string;
   savedAt: number;
   samples: number;
   width: number;
