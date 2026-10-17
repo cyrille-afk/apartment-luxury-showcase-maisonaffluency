@@ -10,12 +10,6 @@ export default function ArchitecturalMezzanine({ layout, width, rearZ }: { layou
   const glassY = layout.balconyY + ARCHITECTURE.slabThickness / 2 + ARCHITECTURE.railingHeight / 2;
   return (
     <group name="architectural-room-structure">
-      {layout.columns.map(([x, z], index) => (
-        <mesh key={index} name={`architectural-white-column-${index + 1}`} position={[x, layout.height / 2, z]} castShadow receiveShadow>
-          <boxGeometry args={[ARCHITECTURE.columnSize, layout.height, ARCHITECTURE.columnSize]} />
-          <meshStandardMaterial color={FEATURE_WALL.stone} roughness={0.68} metalness={0} />
-        </mesh>
-      ))}
       <mesh name="mezzanine-balcony-slab" position={[0, layout.balconyY, balconyCenterZ]} castShadow receiveShadow>
         <boxGeometry args={[balconyWidth, ARCHITECTURE.slabThickness, ARCHITECTURE.balconyDepth]} />
         <meshStandardMaterial color={FEATURE_WALL.stone} roughness={0.72} metalness={0} />
