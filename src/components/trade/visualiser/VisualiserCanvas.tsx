@@ -15,6 +15,7 @@ import { footprintRadius, floorFocusPoint } from "@/lib/visualiserPlacement";
 import * as THREE from "three";
 import PathTracerLayer from "./PathTracerLayer";
 import LuxuryBackdrop from "./LuxuryBackdrop";
+import UploadedEnvironmentBackdrop from "./UploadedEnvironmentBackdrop";
 import { LUXURY_BACKDROP, windowLightPosition } from "./luxuryBackdropSettings";
 import InitialRoomReveal, { InitialAssetsCommitted } from "./InitialRoomReveal";
 import type { PhotorealFrameCaptureRef } from "@/lib/visualiserPhotorealGhost";
@@ -26,7 +27,7 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import studioAsset from "@/assets/showroom-studio.hdr.asset.json";
 import { SHOWROOM } from "@/lib/showroomRendering";
 import { validateEmptyRoomExr } from "@/lib/emptyRoomExr";
-import { getLocalExr } from "@/lib/localEnvironmentExr";
+import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
@@ -130,16 +131,19 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
     if (map) onReady?.();
   }, [map, environmentIntensity, pathTrace, invalidate, onReady]);
   if (map) return (
-    <Environment
-      key={map.uuid}
-      map={map}
-      background={presentation.background}
-      environmentIntensity={environmentIntensity}
-      backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
-      backgroundBlurriness={presentation.blur}
-      environmentRotation={rotation}
-      backgroundRotation={rotation}
-    />
+    <>
+      <Environment
+        key={map.uuid}
+        map={map}
+        background={presentation.background}
+        environmentIntensity={environmentIntensity}
+        backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
+        backgroundBlurriness={presentation.blur}
+        environmentRotation={rotation}
+        backgroundRotation={rotation}
+      />
+      {uploadedActive && <UploadedEnvironmentBackdrop map={map} />}
+    </>
   );
   return (
     <Environment resolution={256} background={pathTrace} backgroundBlurriness={pathTrace ? 0.85 : 0} environmentIntensity={environmentIntensity} backgroundIntensity={pathTrace ? environmentIntensity : 1} environmentRotation={rotation} backgroundRotation={rotation}>
@@ -381,9 +385,22 @@ const VisualiserCanvas = ({
   backdropBrightness = 50,
 }: VisualiserCanvasProps) => {
   const [uploadedEnvironment, setUploadedEnvironment] = useState(false);
+  // A stored uploaded interior must suppress the default room photo even before
+  // the EXR finishes decoding — otherwise LuxuryBackdrop mounts first and a
+  // photo load failure crashes the canvas before the upload ever shows.
+  const [localExrState, setLocalExrState] = useState<"checking" | "present" | "absent">("checking");
+  useEffect(() => {
+    let live = true;
+    const check = () => getLocalExr().then((r) => { if (live) setLocalExrState(r ? "present" : "absent"); }).catch(() => { if (live) setLocalExrState("absent"); });
+    check();
+    window.addEventListener(LOCAL_EXR_EVENT, check);
+    return () => { live = false; window.removeEventListener(LOCAL_EXR_EVENT, check); };
+  }, []);
   const showUploadedEnvironment = uploadedEnvironment && environmentSource === "empty-room-exr";
-  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment;
+  const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment && localExrState === "absent";
   const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
+  // Uploaded interiors share the room-photo stage: fixed grounded camera, no pan.
+  const photoStage = showLuxuryBackdrop || showUploadedEnvironment;
   const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
@@ -426,31 +443,31 @@ const VisualiserCanvas = ({
         )
         .join("|")}`}
     />
-    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={showLuxuryBackdrop} />}
+    {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={photoStage} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (showLuxuryBackdrop) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
+    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
-      enablePan={!showLuxuryBackdrop}
+      enablePan={!photoStage}
       screenSpacePanning
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
-      maxPolarAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
-      minAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
-      maxAzimuthAngle={showLuxuryBackdrop ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
-      target={showLuxuryBackdrop ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
+      minPolarAngle={photoStage ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
+      maxPolarAngle={photoStage ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minAzimuthAngle={photoStage ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
+      maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
+      target={photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
     />
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
     {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
-    {showLuxuryBackdrop && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
+    {photoStage && <ambientLight intensity={SHOWROOM.ambient * lighting.lightScale} />}
     {/* Key: soft window light, front-left, casts the shadows. */}
     <directionalLight
-      position={showLuxuryBackdrop ? windowLightPosition(center) : [-6, 9, 6]}
+      position={photoStage ? windowLightPosition(center) : [-6, 9, 6]}
       intensity={lighting.directionalIntensity}
       color={SHOWROOM.key}
       castShadow
