@@ -16,6 +16,7 @@ import { parseDimensionString } from "@/lib/productDimensions";
 import { SceneErrorBoundary } from "@/components/trade/visualiser/SceneErrorBoundary";
 import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice } from "@/lib/visualiserSceneRecovery";
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
+import { clearLocalExr } from "@/lib/localEnvironmentExr";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
@@ -837,6 +838,17 @@ const TradeVisualiser = () => {
     toast.success("Sandbox reset.");
   };
 
+  // Clears any saved lighting file / room photo and returns to the generated
+  // industrial room; furniture layout is kept, every piece is rebuilt fresh.
+  const resetIndustrialRoom = async () => {
+    try { await clearLocalExr(); } catch { /* nothing stored */ }
+    setEnvironmentSource("studio-hdr");
+    setBackdrop(null);
+    setBackdropDataUrl(null);
+    setObjects((current) => current.map((object) => ({ ...object, restoreKey: Date.now() })));
+    toast.success("Industrial room restored.");
+  };
+
   const backdropSrc = backdrop ?? backdropDataUrl;
 
   // Export a clean PNG mockup: hide the floor grid, let one frame render,
@@ -1456,6 +1468,7 @@ const TradeVisualiser = () => {
             </Button>
             <AdvancedRenderingOptions className={toolbarButton} settings={advancedRendering} onChange={setAdvancedRendering} environment={environmentSource} onEnvironmentChange={setEnvironmentSource} pathTrace={pathTrace} depthOfField={depthOfField} onDepthOfFieldChange={(enabled) => { if (enabled) setDofFocusSelected(true); setDepthOfField(enabled); }} dofStrength={dofStrength} onDofStrengthChange={setDofStrength} />
             <LocalExrButton className={toolbarButton} onLoaded={() => setEnvironmentSource("empty-room-exr")} />
+            <Button variant="ghost" className={toolbarButton} onClick={resetIndustrialRoom} title="Clear any saved lighting file or room photo and restore the industrial room">[ Reset Industrial Room ]</Button>
             <Button variant="ghost"
               className={cn(toolbarButton, pathTrace ? "border-primary text-primary" : "opacity-60")}
               onClick={togglePhotoreal}
