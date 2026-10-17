@@ -19,6 +19,8 @@ export interface TradeProduct {
   sort_order?: number | null;
   created_at?: string | null;
   trade_product_id?: string | null;
+  hidden_in_trade?: boolean;
+  public_product_slug?: string;
   brand_name: string;
   product_name: string;
   subtitle?: string;
