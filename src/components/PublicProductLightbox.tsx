@@ -197,12 +197,13 @@ const DimensionsButtonGrid = ({
         {parsed.map((d, i) => {
           const selected = selectedIndex === i;
           return (
-            <button
+            <Button
               key={i}
               type="button"
+              variant="ghost"
               onClick={() => onSelect?.(i)}
               className={cn(
-                "text-left px-3 py-2.5 border transition-colors",
+                "h-auto block rounded-none whitespace-normal text-left px-3 py-2.5 border transition-colors",
                 selected
                   ? "border-foreground/60 bg-background"
                   : "border-border/60 bg-transparent hover:border-foreground/40"
@@ -221,7 +222,7 @@ const DimensionsButtonGrid = ({
                   {d.qual}
                 </p>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -951,7 +952,9 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
 
                     let sizeLabels: string[] = [];
-                    if (sv.length > 0) {
+                    if (hasSingleAxisSplit) {
+                      sizeLabels = singleSplitSizes;
+                    } else if (sv.length > 0) {
                       sizeLabels = Array.from(
                         new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
                       );
@@ -963,12 +966,21 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     const showSizePicker = sizeLabels.length >= 2 && dimCount >= 2 && dimCount >= Math.ceil(sizeLabels.length / 2);
 
                     if (showSizePicker) {
-                      const selectedIdx = selectedSizeLabel != null ? Math.max(0, sizeLabels.indexOf(selectedSizeLabel)) : null;
+                      const selectedIdx = hasSingleAxisSplit
+                        ? selectedSingleSizeIdx
+                        : selectedSizeLabel != null ? sizeLabels.indexOf(selectedSizeLabel) : null;
                       return (
                         <DimensionsButtonGrid
                           text={withImperialPerLine(sizeLabels.join("\n"))}
                           selectedIndex={selectedIdx}
-                          onSelect={(idx) => setSelectedSizeLabel(sizeLabels[idx] ?? null)}
+                          onSelect={(idx) => {
+                            if (hasSingleAxisSplit) {
+                              setSelectedSingleSizeIdx(idx);
+                              setSelectedSizeLabel(null);
+                            } else {
+                              setSelectedSizeLabel(sizeLabels[idx] ?? null);
+                            }
+                          }}
                         />
                       );
                     }
@@ -1000,6 +1012,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   })()}
+                  {hasSingleAxisSplit && singleSplitMaterials.length > 0 && (
+                    <div className="mt-4">
+                      <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
+                        Finishes available
+                      </p>
+                      <p className="font-body text-xs leading-relaxed text-foreground">
+                        {singleSplitMaterials.join(" · ")}
+                      </p>
+                    </div>
+                  )}
 
                 </div>
               </div>
