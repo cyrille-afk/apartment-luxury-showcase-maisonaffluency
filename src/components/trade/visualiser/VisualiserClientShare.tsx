@@ -12,8 +12,10 @@ import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker
 import InviteCollaboratorDialog from "@/components/trade/procurement/InviteCollaboratorDialog";
 import { visualiserClientSelection } from "@/lib/visualiserClientSelection";
 import type { PlacedObject } from "./SceneObject";
+import type { ScenePresetData } from "@/lib/visualiserScenePresets";
+import { sharedVisualiserRoom } from "@/lib/sharedVisualiserRoom";
 
-export default function VisualiserClientShare({ objects, projectId, projectName }: { objects: PlacedObject[]; projectId: string | null; projectName: string | null }) {
+export default function VisualiserClientShare({ objects, projectId, projectName, room }: { objects: PlacedObject[]; projectId: string | null; projectName: string | null; room: () => ScenePresetData }) {
   const { currentStudio } = useStudio();
   const [open, setOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -37,10 +39,12 @@ export default function VisualiserClientShare({ objects, projectId, projectName 
     if (logoUrl && !/^https:\/\//i.test(logoUrl.trim())) { setError("Use a secure image address for your logo."); return; }
     setBusy(true); setError(null);
     try {
-      const { data, error: err } = await supabase.rpc("create_visualiser_client_board" as any, {
+      const snapshot = sharedVisualiserRoom(room());
+      const { data, error: err } = await supabase.rpc("create_visualiser_room_board" as any, {
         _title: title.trim(), _client_id: client?.id ?? null, _project_id: projectId,
         _studio_id: currentStudio?.id ?? null, _studio_name: studioName.trim(), _studio_logo_url: logoUrl.trim(),
         _hide_maison_branding: hideMaison, _items: visualiserClientSelection(objects),
+        _scene: snapshot,
       });
       if (err || typeof data !== "string") throw new Error("Could not save your selection. Please try again.");
       setBoardId(data);
@@ -54,7 +58,7 @@ export default function VisualiserClientShare({ objects, projectId, projectName 
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader><DialogTitle className="font-display font-normal">Private Client Selection</DialogTitle></DialogHeader>
         {boardId ? <div className="space-y-4">
-          <p className="font-body text-sm text-muted-foreground">{objects.length} pieces saved with their selected finishes.</p>
+          <p className="font-body text-sm text-muted-foreground">Complete room saved with {objects.length} pieces and their selected finishes.</p>
           <Button className="w-full" onClick={() => { setOpen(false); setInviteOpen(true); }}><Share2 className="h-4 w-4" />Invite client</Button>
           <Button variant="outline" className="w-full" asChild><Link to={`/trade/boards/${boardId}`}><ExternalLink className="h-4 w-4" />Open selection & approvals</Link></Button>
         </div> : <div className="space-y-5">

@@ -949,7 +949,7 @@ const TradeVisualiser = () => {
             {loadingProject ? " // Loading specification…" : ""}
           </p>
         </div>
-        <div className="pointer-events-auto"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} /></div>
+        <div className="pointer-events-auto"><VisualiserClientShare objects={objects} projectId={projectId} projectName={projectName} room={() => ({ objects, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl: backdropSrc, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })} /></div>
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
