@@ -74,7 +74,7 @@ const StudioGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const { allProducts: tradeProducts, publicTradeHiddenProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
   const publishedMakerNames = usePublishedMakerNames();
   // Drive the dropdown from the live published-profile list so it always
   // matches the maker count; fall back to product-derived brands while loading.
@@ -89,6 +89,11 @@ const StudioGallery = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
+  const allProducts = useMemo(() => (
+    search.trim() || selectedCategory !== "all" || selectedSubcategory !== "all"
+      ? [...tradeProducts, ...publicTradeHiddenProducts]
+      : tradeProducts
+  ), [tradeProducts, publicTradeHiddenProducts, search, selectedCategory, selectedSubcategory]);
   const [selectedEdition, setSelectedEdition] = useState("all");
   const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
   const [savedViews, setSavedViews] = useState<TradeSavedView[]>(() => readSavedViews());
@@ -129,6 +134,12 @@ const StudioGallery = () => {
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
+    if (product.hidden_in_trade) {
+      if (product.public_product_slug) navigate(`/designers/collection-particuliere/${product.public_product_slug}`, {
+        state: { from: location.pathname + location.search },
+      });
+      return;
+    }
     if (product.trade_product_id) {
       navigate(`/trade/products/${product.trade_product_id}`, {
         state: { from: location.pathname + location.search },
@@ -224,7 +235,7 @@ const StudioGallery = () => {
   }, [user]);
 
   const handleCreateQuoteAndAdd = async (product: TradeProduct) => {
-    if (!user) return;
+    if (!user || product.hidden_in_trade) return;
     setAddingProductId(product.id);
     const { data, error } = await createActiveDraftQuote(user.id);
     if (error || !data) {
@@ -240,7 +251,7 @@ const StudioGallery = () => {
 
 
   const addProductToQuote = async (product: TradeProduct, quoteId: string) => {
-    if (!user) return;
+    if (!user || product.hidden_in_trade) return;
     setAddingProductId(product.id);
     const { error } = await supabase.rpc("add_gallery_product_to_quote", {
       _user_id: user.id,
@@ -273,8 +284,8 @@ const StudioGallery = () => {
   };
 
   const subcategories = useMemo(
-    () => (selectedCategory !== "all" ? getSubcategories(allProducts, selectedCategory) : []),
-    [allProducts, selectedCategory]
+    () => (selectedCategory !== "all" ? getSubcategories([...tradeProducts, ...publicTradeHiddenProducts], selectedCategory) : []),
+    [tradeProducts, publicTradeHiddenProducts, selectedCategory]
   );
 
   /**
@@ -286,6 +297,7 @@ const StudioGallery = () => {
    * truth: no exact match → no price shown.
    */
   const getProductPrice = (product: TradeProduct): { cents: number; currency: string; price_unit?: string; price_prefix?: string | null } | null => {
+    if (product.hidden_in_trade) return null;
     const nameKey = product.product_name.trim().toLowerCase();
     if (priceLookup.has(nameKey)) return priceLookup.get(nameKey)!;
     if (product.subtitle) {
@@ -860,12 +872,12 @@ const StudioGallery = () => {
                    </button>
                   {/* Overlay actions */}
                   <div className="absolute inset-x-0 bottom-0 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button
+                    <Button variant="outline" size="sm"
                       onClick={() => handleAddToQuote(product)}
-                      disabled={isAdding}
+                      disabled={isAdding || product.hidden_in_trade}
                       className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors ${
                         isAdded
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-foreground text-background hover:bg-foreground/90"
                       } disabled:opacity-60`}
                     >
@@ -876,8 +888,8 @@ const StudioGallery = () => {
                       ) : (
                         <ShoppingCart className="h-3 w-3" />
                       )}
-                      {isAdded ? "Added" : "Add to Quote"}
-                    </button>
+                      {product.hidden_in_trade ? "Hidden in Trade" : isAdded ? "Added" : "Add to Quote"}
+                    </Button>
                     {product.pdf_url && (
                       <a
                         href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)}
@@ -903,10 +915,11 @@ const StudioGallery = () => {
                    <h3 className="mt-1.5 min-h-[2.5rem] font-display text-[14px] leading-snug text-foreground sm:text-[15px] line-clamp-2">
                      {product.product_name}
                    </h3>
+                   {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {creditsDesigner(product, "Emma Donnersberg") && (
                      <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
                    )}
-                   {isAdmin && (
+                   {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
                        <InlinePriceEditor
                          productName={product.product_name}
@@ -945,11 +958,12 @@ const StudioGallery = () => {
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProductSheet(product)}>
                    <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
+                   {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
                    {creditsDesigner(product, "Emma Donnersberg") && (
                      <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
                    )}
                 </div>
-                {isAdmin ? (
+                {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
                     {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.brand_name)}
                     <InlinePriceEditor
@@ -966,12 +980,12 @@ const StudioGallery = () => {
                 ) : (
                   renderPriceDisplay(price, "font-display text-sm shrink-0 inline-flex items-center gap-1.5 flex-wrap", product.brand_name)
                 )}
-                <button
+                <Button variant="outline" size="sm"
                   onClick={() => handleAddToQuote(product)}
-                  disabled={isAdding}
+                  disabled={isAdding || product.hidden_in_trade}
                   className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md font-body text-[10px] uppercase tracking-wider transition-colors shrink-0 ${
                     isAdded
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "border border-foreground text-foreground hover:bg-foreground hover:text-background"
                   } disabled:opacity-60`}
                 >
@@ -982,8 +996,8 @@ const StudioGallery = () => {
                   ) : (
                     <ShoppingCart className="h-3 w-3" />
                   )}
-                  {isAdded ? "Added" : "Add"}
-                </button>
+                  {product.hidden_in_trade ? "Hidden in Trade" : isAdded ? "Added" : "Add"}
+                </Button>
                 {product.pdf_url && (
                   <a href={buildSpecSheetUrl(product.pdf_url, product.brand_name, product.product_name)} target="_blank" rel="noopener noreferrer"
                     className="p-2 text-[hsl(var(--pdf-red))] hover:text-[hsl(var(--pdf-red))]/80 transition-colors" title="Spec sheet">

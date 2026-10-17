@@ -21,6 +21,7 @@ import {
 } from "@/lib/productTaxonomy";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
+import { isPublicTradeDiscoveryEligible } from "@/lib/publicTradeDiscovery";
 import { useHiddenTradeProductIds, getTradeProductHideKey as getHideKey, isTradeProductMarkedHidden } from "@/hooks/useHiddenTradeProductIds";
 
 type LiveTradeProduct = TradeProduct & {
@@ -46,7 +47,7 @@ const brandVariants = (rawBrand: string) => {
  * Used to suppress the matching hardcoded static cards, which otherwise
  * re-introduce hidden products into the Trade Gallery and brand dropdown.
  */
-async function fetchHiddenProductKeys(): Promise<Set<string>> {
+async function fetchHiddenProductKeys(): Promise<{ keys: Set<string>; tradeKeys: Set<string> }> {
   const [{ data: picks }, { data: trade }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
@@ -58,6 +59,7 @@ async function fetchHiddenProductKeys(): Promise<Set<string>> {
       .eq("is_hidden", true),
   ]);
   const keys = new Set<string>();
+  const tradeKeys = new Set<string>();
   for (const p of (picks ?? []) as Array<Record<string, any>>) {
     const d = Array.isArray(p.designers) ? p.designers[0] : p.designers;
     if (!d?.name || !p.title) continue;
@@ -67,14 +69,15 @@ async function fetchHiddenProductKeys(): Promise<Set<string>> {
     if (!t.brand_name || !t.product_name) continue;
     for (const b of brandVariants(t.brand_name)) {
       keys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
+      tradeKeys.add(`${normalizeHiddenPart(b)}::${normalizeHiddenPart(t.product_name)}`);
       keys.add(`brand::${normalizeHiddenPart(b)}`);
     }
   }
-  return keys;
+  return { keys, tradeKeys };
 }
 
 async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hiddenKeys: Set<string> }> {
-  const [{ data, error }, { data: tradeRows, error: tradeError }, hiddenKeys] = await Promise.all([
+  const [{ data, error }, { data: tradeRows, error: tradeError }, hidden] = await Promise.all([
     supabase
       .from("designer_curator_picks")
       .select(`
@@ -82,6 +85,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
         sort_order,
         created_at,
         title,
+        slug,
         subtitle,
         image_url,
         hover_image_url,
@@ -102,7 +106,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
         trade_price_cents,
         currency,
         price_prefix,
-        designers(name, founder)
+        designers(name, founder, slug, is_published, trade_only)
       `)
       .eq("is_hidden", false)
       .order("sort_order", { ascending: true }),
@@ -116,6 +120,7 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
 
   if (error) throw error;
   if (tradeError) throw tradeError;
+  const hiddenKeys = hidden.keys;
 
   const normalizeKeyPart = (value: string | null | undefined) =>
     (value || "").trim().toLowerCase();
@@ -160,6 +165,8 @@ async function fetchLiveProducts(): Promise<{ products: LiveTradeProduct[]; hidd
         sort_order: pick.sort_order,
         created_at: pick.created_at,
         trade_product_id: tradeProduct?.id ?? null,
+        hidden_in_trade: isPublicTradeDiscoveryEligible(designer, hidden.tradeKeys.has(`${normalizeHiddenPart(childName)}::${normalizeHiddenPart(pick.title)}`)),
+        public_product_slug: pick.slug ?? undefined,
         brand_name: brandName,
         product_name: pick.title,
         subtitle: pick.subtitle ?? undefined,
@@ -353,7 +360,12 @@ export function useTradeProducts() {
     [liveProducts, dbHiddenKeys, hiddenIds],
   );
 
-  return { allProducts, liveProducts: visibleLiveProducts, brands, categories, getSubcategories, duplicateGroups, isLoading: liveLoading, isFetching: liveFetching };
+  // Separate discovery rows never enter quote/project/visualiser catalogue consumers.
+  const publicTradeHiddenProducts = useMemo(() => liveProducts.filter(p =>
+    p.hidden_in_trade && !isTradeProductMarkedHidden(p, hiddenIds)
+  ), [liveProducts, hiddenIds]);
+
+  return { allProducts, publicTradeHiddenProducts, liveProducts: visibleLiveProducts, brands, categories, getSubcategories, duplicateGroups, isLoading: liveLoading, isFetching: liveFetching };
 }
 
 export interface DuplicateGroup {
