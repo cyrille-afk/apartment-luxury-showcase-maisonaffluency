@@ -68,6 +68,7 @@ const PieceAngleControls = lazy(
 );
 import { toast } from "sonner";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
+import { useAuth } from "@/hooks/useAuth";
 import { useVisualiserMaterial, type VisualiserMaterial } from "@/contexts/VisualiserMaterialContext";
 import {
   BOND_STREET_BASE_FINISH,
@@ -97,6 +98,7 @@ type PersistedSandbox = CeilingSettings & {
   backdrop: string | null;
   objects: PlacedObject[];
   projectId?: string | null;
+  selectedId?: string | null;
   spacing?: number;
   snapToGrid?: boolean;
   showGrid?: boolean;
@@ -156,6 +158,7 @@ const readSandbox = (): PersistedSandbox => {
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects.map((object) => ({ ...object, positionLocked: object.positionLocked ?? object.finishesLocked ?? false, finishesLocked: false })) : [],
       projectId: parsed.projectId ?? null,
+      selectedId: parsed.selectedId ?? null,
       spacing: typeof parsed.spacing === "number" && Number.isFinite(parsed.spacing) ? parsed.spacing : undefined,
       snapToGrid: parsed.snapToGrid === true,
       showGrid: parsed.showGrid !== false,
@@ -213,6 +216,7 @@ const CanvasLoader = () => (
 );
 
 const TradeVisualiser = () => {
+  const { user } = useAuth();
   const initial = useMemo(readSandbox, []);
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
@@ -235,7 +239,7 @@ const TradeVisualiser = () => {
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [objects, setObjects] = useState<PlacedObject[]>(initial.objects);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initial.selectedId ?? null);
   const [trayOpen, setTrayOpen] = useState(false);
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
@@ -429,6 +433,7 @@ const TradeVisualiser = () => {
         backdropDataUrl,
         objects,
         projectId,
+        selectedId,
         spacing,
         snapToGrid,
         showGrid,
@@ -472,7 +477,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [sceneFailed, backdrop, backdropDataUrl, objects, projectId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
+  }, [sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -903,6 +908,8 @@ const TradeVisualiser = () => {
             showLabels={showLabels}
             depthOfField={depthOfField}
             pathTrace={pathTrace}
+            renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
+            onRenderCheckpoint={(result) => result === "restored" ? toast.success("Photoreal progress restored") : toast.warning("Render checkpoints unavailable. Keep this page open to retain progress.")}
             frameCaptureRef={keepPhotorealGhost ? frameCaptureRef : undefined}
             onPathTraceSamples={setPtSamples}
             pathTraceQuality={ptQuality}
