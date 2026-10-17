@@ -1347,9 +1347,16 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // Mini bar: the dropdowns always mirror the photo on screen, from first load.
     if (!galleryInteractedRef.current && !photoLedFinishes && !isOolMinibar) return;
     const oneBased = currentGalleryIndex + 1;
-    if (isSharedSlide(oneBased) && !isOolMinibar) return;
-    const hit = (list: Fabric[]) =>
-      list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
+    const shared = isSharedSlide(oneBased);
+    if (shared && !isOolMinibar && !photoLedFinishes) return;
+    const hit = (list: Fabric[]) => {
+      const matches = list.filter((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased));
+      // On a shared all-photo slide a finish may still drive its dropdown
+      // header when it is the ONLY mapped finish in that dropdown (e.g. Yoma's
+      // one wood, one stone, one metal). Ambiguous groups stay unselected.
+      if (shared) return matches.length === 1 ? matches[0] : null;
+      return matches[0] || null;
+    };
 
     const picked = userPickedAxesRef.current;
     // Mini bar: the Frame dropdown follows the photographed frame finish too.
