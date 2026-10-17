@@ -17,7 +17,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { requireCronOrAdmin } from "../_shared/auth.ts";
 
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders } from "npm:@supabase/supabase-js@2.108.2/cors";
 import { checkStripeDeliveries } from "../_shared/stripeDeliveryMonitor.ts";
 
 const OPS_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
