@@ -2713,7 +2713,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                             </span>
                           )}
                         </h1>
-                        {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
+                        {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                       </div>
 
                       {isTradeVerifiedView && (
@@ -2811,7 +2811,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                           </span>
                         )}
                       </h1>
-                      {(() => { const badge = productEditionBadge(product, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
+                      {(() => { const badge = productEditionBadge(product as { edition?: string | null; edition_number?: string | null; edition_signing?: string | null }, isEcartProduct); return badge ? <span className="rounded-[1px] bg-muted px-2.5 py-1 font-body text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{badge}</span> : null; })()}
                     </div>
 
                     {isTradeVerifiedView && (
