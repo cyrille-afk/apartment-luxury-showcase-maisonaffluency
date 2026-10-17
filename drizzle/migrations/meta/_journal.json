@@ -1254,6 +1254,13 @@
       "when": 1792209466289,
       "tag": "0178_visualiser_board_existing_source",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1792209905200,
+      "tag": "0179_private_board_room_snapshots",
+      "breakpoints": true
     }
   ]
 }

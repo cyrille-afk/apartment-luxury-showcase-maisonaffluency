@@ -1200,6 +1200,32 @@ export type Database = {
           },
         ]
       }
+      board_visualiser_scenes: {
+        Row: {
+          board_id: string
+          created_at: string
+          scene: Json
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          scene: Json
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          scene?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_visualiser_scenes_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: true
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_lead_times: {
         Row: {
           brand_name: string
@@ -11936,6 +11962,10 @@ export type Database = {
       _internal_job_token: { Args: never; Returns: string }
       _norm_board_path: { Args: { _p: string }; Returns: string }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
+      _room_json_fields: {
+        Args: { _keys: string[]; _value: Json }
+        Returns: Json
+      }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       acquire_ingestion_lease: {
         Args: { _minutes?: number; _owner: string }
@@ -11989,6 +12019,7 @@ export type Database = {
         Args: { _quote_id: string }
         Returns: number
       }
+      approve_shared_room: { Args: { _token: string }; Returns: undefined }
       board_access_request: {
         Args: { _email: string; _slug: string }
         Returns: Json
@@ -12119,6 +12150,20 @@ export type Database = {
           _hide_maison_branding: boolean
           _items: Json
           _project_id: string
+          _studio_id: string
+          _studio_logo_url: string
+          _studio_name: string
+          _title: string
+        }
+        Returns: string
+      }
+      create_visualiser_room_board: {
+        Args: {
+          _client_id: string
+          _hide_maison_branding: boolean
+          _items: Json
+          _project_id: string
+          _scene: Json
           _studio_id: string
           _studio_logo_url: string
           _studio_name: string
@@ -12316,6 +12361,7 @@ export type Database = {
       }
       get_shared_board: { Args: { _token: string }; Returns: Json }
       get_shared_board_finishes: { Args: { _token: string }; Returns: Json }
+      get_shared_board_scene: { Args: { _token: string }; Returns: Json }
       get_shared_shortlist: {
         Args: { p_token: string }
         Returns: {

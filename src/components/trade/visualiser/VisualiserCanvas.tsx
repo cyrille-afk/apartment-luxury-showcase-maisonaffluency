@@ -191,6 +191,7 @@ const SceneLoader = () => (
 );
 
 interface VisualiserCanvasProps {
+  isEditable?: boolean;
   objects: PlacedObject[];
   selectedId: string | null;
   orbitEnabled: boolean;
@@ -302,6 +303,7 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
  * Visualiser route actually mounts.
  */
 const VisualiserCanvas = ({
+  isEditable = true,
   objects,
   selectedId,
   orbitEnabled,
@@ -487,6 +489,7 @@ const VisualiserCanvas = ({
         <SceneObject
           key={`${object.instanceId}:${object.restoreKey ?? 0}`}
           object={object}
+          isEditable={isEditable}
           selected={object.instanceId === selectedId}
           onSelect={onSelect}
           onTransform={onTransform}
