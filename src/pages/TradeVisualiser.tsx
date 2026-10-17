@@ -266,6 +266,8 @@ const TradeVisualiser = () => {
   const [ptSamples, setPtSamples] = useState(0);
   const [checkpointStatus, setCheckpointStatus] = useState<CheckpointEvent | null>(null);
   const [restoredInfo, setRestoredInfo] = useState<{ samples: number; savedAt: number } | null>(null);
+  // A fresh accumulation (scene/camera change) makes the restored line stale.
+  useEffect(() => { if (ptSamples === 0) setRestoredInfo(null); }, [ptSamples]);
   useEffect(() => { if (checkpointStatus?.kind === "restored") setRestoredInfo({ samples: checkpointStatus.samples, savedAt: checkpointStatus.savedAt }); }, [checkpointStatus]);
   const [ptQuality, setPtQualityState] = useState<PathTraceQuality>(() => loadPtQuality());
   const [gpuTier] = useState<GpuTier>(() => detectGpuTier());
@@ -924,7 +926,7 @@ const TradeVisualiser = () => {
             pathTrace={pathTrace}
             renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
             onRenderCheckpoint={(event) => {
-              setCheckpointStatus((previous) => event.kind === "saved" && previous?.kind === "restored" ? { ...previous, savedAt: event.savedAt, samples: event.samples, kind: "saved" } : event);
+              setCheckpointStatus(event);
               if (event.kind === "restored") toast.success(`Photoreal progress restored · ${event.samples} SPP`);
               else if (event.kind === "unavailable") toast.warning("Render checkpoints unavailable. Keep this page open to retain progress.");
             }}
