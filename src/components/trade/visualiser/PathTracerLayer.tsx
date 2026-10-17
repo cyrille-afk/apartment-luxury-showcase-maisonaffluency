@@ -155,6 +155,8 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
     const pt = tracer.current;
     if (!checkpointKey || !pt || !saved.fingerprint || saved.loading || saved.candidate || saved.writing ||
       state.current.dirty || state.current.failed || pt.samples <= saved.savedSamples) return;
+    camera.updateMatrixWorld();
+    if (!matricesClose(state.current.world, camera.matrixWorld) || !matricesClose(state.current.projection, camera.projectionMatrix)) return;
     try {
       const accumulation = captureAccumulation(pt, gl);
       if (!accumulation) return;
@@ -263,9 +265,11 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
         if (candidate.fingerprint === saved.fingerprint && restoreAccumulation(pt, gl, candidate)) {
           saved.savedSamples = candidate.samples; saved.savedAt = now;
           report.current?.(candidate.samples); checkpointReport.current?.("restored");
+          saved.candidate = null;
         }
-        // A subsequent late asset changes the live revision and resets normally.
-        saved.candidate = null;
+        // Late HDR/model commits can take longer than a second. Keep the candidate
+        // while they load; never overwrite it with an incomplete startup render.
+        if (now - saved.changedAt > 30000) saved.candidate = null;
       }
       // A full-resolution traced preview remains active through geometry resets;
       // accumulation resumes once motion settles without reducing canvas DPR.
