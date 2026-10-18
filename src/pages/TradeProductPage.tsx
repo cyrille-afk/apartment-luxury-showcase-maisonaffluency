@@ -1359,6 +1359,15 @@ const TradeProductPage: React.FC = () => {
     setSelectedVariantIdx(match.index);
   }, [data]);
 
+  // Runs after render, when the headline and its selection snapshot agree.
+  // Update-only: the listener never creates a card or opens Felix.
+  useEffect(() => {
+    if (!data || isLoading) return;
+    const selection = felixSelectionRef.current;
+    if (selection?.productId !== data.product.id) return;
+    window.dispatchEvent(new CustomEvent("concierge:update_product_selection", { detail: selection }));
+  });
+
   if (isLoading) {
     return <div className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
   }
