@@ -5,7 +5,7 @@ import type { ProjectSnapshot, ProjectSnapshotData } from './projectLayoutSnapsh
 import type { PlacedObject } from '@/components/trade/visualiser/SceneObject';
 
 export type ComparisonSide = { snapshot: ProjectSnapshot; data: ProjectSnapshotData };
-const JADE: [number, number, number] = [12, 49, 47] as const, INK = [40, 40, 40] as const, MUTED = [115, 115, 115] as const, RULE = [210, 215, 213] as const;
+const JADE = [12, 49, 47] as const, INK = [40, 40, 40] as const, MUTED = [115, 115, 115] as const, RULE = [210, 215, 213] as const;
 
 /** Allowlisted client content only; never serialize a scene or its pricing into a PDF. */
 export function comparisonPieceText(object?: PlacedObject) {
@@ -45,7 +45,7 @@ async function swatch(url: string): Promise<string | null> {
 
 /** Client-facing annotations typed by the studio; plain text only, never prices. */
 export type ComparisonAnnotations = { summary?: string; notes?: Record<string, string>; highlightChanges?: boolean };
-const ACCENT: [number, number, number] = [176, 112, 58];
+const ACCENT = [176, 112, 58] as const;
 const clean = (value: unknown, max: number) => String(value ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, max);
 export function comparisonAnnotationText(annotations: ComparisonAnnotations | undefined, id: string) { return clean(annotations?.notes?.[id], 600); }
 
