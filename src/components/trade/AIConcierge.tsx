@@ -1,4 +1,5 @@
 import { toDiscountFraction } from "@/lib/tradePricing";
+import { updateFelixProductSelection } from "@/lib/updateFelixProductSelection";
 import { GuestContactCapture } from "./GuestContactCapture";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -2213,9 +2214,7 @@ export function AIConcierge({
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
-  // Proactive tearsheet nudge — dispatched by product pages after a short
-  // idle following finish changes. Opens the panel and drops a lightweight
-  // spec card into the transcript. See ProactiveTearsheetCard.
+  // Explicit Co-pilot addition opens Felix with the selected product card.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<ProactiveTearsheetData>).detail;
@@ -2236,6 +2235,16 @@ export function AIConcierge({
     };
     window.addEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
     return () => window.removeEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const selection = (event as CustomEvent<ProactiveTearsheetData>).detail;
+      if (!selection?.productId) return;
+      setTimeline((previous) => updateFelixProductSelection(previous, selection));
+    };
+    window.addEventListener("concierge:update_product_selection", handler);
+    return () => window.removeEventListener("concierge:update_product_selection", handler);
   }, []);
 
   // Bespoke specifications submitted by a verified trade member are queued in
