@@ -203,7 +203,9 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
       return metadata.flatMap(line => doc.setFont('Inter').setFontSize(9).splitTextToSize(line, column - 4));
     });
     const count = Math.max(...columns.map(c => c.length));
-    if (y + 17 > 192) nextPage();
+    // Keep the piece heading, its details and first finish row on one page.
+    const hasFinish = objects.some(o => o && snapshotFinishes(o).length);
+    if (y + 11 + count * 5 + (hasFinish ? 19 : 0) > 192) nextPage();
     doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).setTextColor(...((highlight && changedIds.has(change.id) ? ACCENT : JADE) as readonly [number, number, number])).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
     for (let row = 0; row < count; row++) {
       if (y + 5 > 192) nextPage();
