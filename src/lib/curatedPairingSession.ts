@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 const DISMISSED_KEY = "ma_curated_pairings_dismissed_v1";
 const listeners = new Set<() => void>();
@@ -29,7 +29,19 @@ function dismiss() {
 }
 
 /** Tab-scoped shopping session; refreshes retain dismissal, new sessions do not. */
-export function useCuratedPairingSession() {
+export function useCuratedPairingSession(isOpen = true) {
   const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
-  return { dismissed, dismiss };
+  const [manuallyOpened, setManuallyOpened] = useState(false);
+  useEffect(() => {
+    if (!isOpen) setManuallyOpened(false);
+  }, [isOpen]);
+  return {
+    dismissed,
+    visible: isOpen && (!dismissed || manuallyOpened),
+    reopen: () => setManuallyOpened(true),
+    dismiss: () => {
+      setManuallyOpened(false);
+      dismiss();
+    },
+  };
 }

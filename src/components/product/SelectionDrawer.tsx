@@ -19,6 +19,7 @@ import { privatePairingsEnabled } from "@/lib/curatedPairings";
 import { useCuratedPairingSession } from "@/lib/curatedPairingSession";
 import CuratedPairings from "./CuratedPairings";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -107,7 +108,7 @@ export default function SelectionDrawer({
 }: SelectionDrawerProps) {
   const { buyerProfile } = useCheckoutForm();
   const { isTradeUser, isAdmin, rolesLoaded, user } = useAuth();
-  const { dismissed: pairingsDismissed, dismiss: dismissPairings } = useCuratedPairingSession();
+  const { dismissed: pairingsDismissed, visible: pairingsVisible, reopen: reopenPairings, dismiss: dismissPairings } = useCuratedPairingSession(isOpen);
   const pairingsEnabled = allowPairings && privatePairingsEnabled(buyerProfile) && !isTradeUser && !isAdmin && (!user || rolesLoaded);
 
   const [method, setMethod] = useState<PaymentMethod>("online");
@@ -188,12 +189,12 @@ export default function SelectionDrawer({
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (pairingsEnabled && !pairingsDismissed) dismissPairings();
+      if (pairingsEnabled && pairingsVisible) dismissPairings();
       else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose, pairingsEnabled, pairingsDismissed, dismissPairings]);
+  }, [isOpen, onClose, pairingsEnabled, pairingsVisible, dismissPairings]);
 
   // Portal to document.body so the drawer escapes any ancestor stacking
   // context (transforms, blurs) — its z-[10000] must always beat the
@@ -216,7 +217,7 @@ export default function SelectionDrawer({
       />
 
       {pairingsEnabled && <CuratedPairings
-        open={isOpen && !pairingsDismissed}
+        open={pairingsVisible}
         title={title || lines?.[lines.length - 1]?.title || ""}
         brand={brand || lines?.[lines.length - 1]?.brand || ""}
         excludedIds={(lines || []).map((line) => line.key.split("::")[0])}
@@ -538,6 +539,16 @@ export default function SelectionDrawer({
 
         {/* ── 6 · Sticky footer actions ──────────────────────────────────── */}
         <footer className="shrink-0 border-t border-border/60 px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          {pairingsEnabled && pairingsDismissed && !pairingsVisible && (
+            <Button
+              type="button"
+              variant="link"
+              onClick={reopenPairings}
+              className="mb-3 h-auto w-full rounded-none py-1 font-body text-[11px] text-muted-foreground decoration-gold underline-offset-4 hover:text-foreground"
+            >
+              Curated Pairings
+            </Button>
+          )}
           <button
             type="button"
             onClick={() => onCheckout?.(method)}
