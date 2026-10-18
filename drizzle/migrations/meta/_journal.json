@@ -1289,6 +1289,13 @@
       "when": 1792300145783,
       "tag": "0183_editable_curated_pairings",
       "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1792301918217,
+      "tag": "0184_curated_pairing_finish_pricing",
+      "breakpoints": true
     }
   ]
 }
