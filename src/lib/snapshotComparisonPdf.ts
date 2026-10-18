@@ -183,7 +183,9 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     if (note) {
       const lines = doc.setFont('Inter').setFontSize(8.5).splitTextToSize(note, 255) as string[];
       const h = lines.length * 4.3 + 9;
-      if (y + h > 192) nextPage();
+      // Keep a note and its reference photos together on one page.
+      const photoBlock = annotationPhotos(annotations, change.id).length ? PHOTO_H + 4 : 0;
+      if (y + h + photoBlock > 192) nextPage();
       doc.setFillColor(250, 244, 238).rect(M, y, 265, h, 'F').setDrawColor(...ACCENT).setLineWidth(0.8).line(M, y, M, y + h).setLineWidth(0.3);
       doc.setFontSize(6.5).setTextColor(...ACCENT).text(`NOTE ${numbers.get(change.id)}`, M + 4, y + 4);
       doc.setFontSize(8.5).setTextColor(...INK).text(lines, M + 4, y + 8);
