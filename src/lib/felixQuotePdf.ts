@@ -4,6 +4,7 @@ import { felixLineCents, felixQuantity, felixQuoteTotals } from "@/lib/felixQuot
 import { formatPdfDate, formatPdfMoney } from "@/lib/pdfFormatting";
 import type { FelixQuoteDetails } from "./felixQuoteDetails";
 import { displayNameForContact } from "./quoteContact";
+import { felixQuoteFinishes } from "./felixQuoteFinishes";
 
 const JADE = [12, 49, 47] as const;
 const INK = [40, 40, 40] as const;
@@ -50,6 +51,7 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
   doc.addFileToVFS("Inter.ttf", fonts[0]); doc.addFont("Inter.ttf", "Inter", "normal");
   doc.addFileToVFS("Cormorant.ttf", fonts[1]); doc.addFont("Cormorant.ttf", "Cormorant", "normal");
   const photos = await Promise.all(cards.map((card) => photo(card.imageUrl)));
+  const swatchPhotos = await Promise.all(cards.map((card) => Promise.all(felixQuoteFinishes(card).map((finish) => photo(finish.imageUrl)))));
   const lines = felixPdfLines(cards);
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 44;
   let y = 156;
@@ -85,8 +87,10 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
     doc.setFont("Cormorant", "normal").setFontSize(17);
     const name = doc.splitTextToSize(line.productName, W - M * 2 - 118);
     doc.setFont("Inter", "normal").setFontSize(9);
-    const meta = [line.brandName, line.fabricLabel && `Fabric: ${line.fabricLabel}`, line.baseLabel && `Base / finish: ${line.baseLabel}`, line.topLabel && `Top / finish: ${line.topLabel}`, line.leadTimeLabel && `Lead time: ${line.leadTimeLabel}`].filter(Boolean).flatMap((value) => doc.splitTextToSize(String(value), W - M * 2 - 118));
-    const rowH = Math.max(155, name.length * 20 + meta.length * 13 + 67);
+    const meta = [line.brandName, line.leadTimeLabel && `Lead time: ${line.leadTimeLabel}`].filter(Boolean).flatMap((value) => doc.splitTextToSize(String(value), W - M * 2 - 118));
+    const finishes = felixQuoteFinishes(line).map((finish, finishIndex) => ({ ...finish, image: swatchPhotos[index]?.[finishIndex], text: doc.splitTextToSize(`${finish.label}: ${finish.name}`, W - M * 2 - 148) }));
+    const finishHeight = finishes.reduce((height, finish) => height + Math.max(30, finish.text.length * 13 + 6), 0);
+    const rowH = Math.max(155, name.length * 20 + meta.length * 13 + finishHeight + 67);
     if (y + rowH > H - 78) nextPage();
     const image = photos[index];
     if (image) {
@@ -98,6 +102,23 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
     let detailsY = y + 16 + name.length * 20;
     doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...MUTED);
     for (const text of meta) { doc.text(text, x, detailsY); detailsY += 13; }
+    for (const finish of finishes) {
+      if (finish.image) {
+        const { data, width, height } = finish.image;
+        const side = Math.min(width, height);
+        // Crop the actual swatch to a square, as the product selector does.
+        const canvas = document.createElement("canvas"); canvas.width = 96; canvas.height = 96;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const img = new Image(); img.src = data;
+          // Image was already decoded by photo(); JPEG data can be embedded directly
+          // with square dimensions for the small finish thumbnail.
+          doc.addImage(data, "JPEG", x, detailsY - 9, 23, 23);
+        }
+      }
+      doc.text(finish.text, x + 30, detailsY);
+      detailsY += Math.max(30, finish.text.length * 13 + 6);
+    }
     const priceY = y + rowH - 30;
     doc.setTextColor(...INK).setFontSize(9);
     const currency = line.priceCurrency || "EUR";
