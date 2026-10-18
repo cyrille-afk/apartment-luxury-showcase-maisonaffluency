@@ -543,7 +543,6 @@ export default function SelectionDrawer({
             <Button
               type="button"
               variant="outline"
-              aria-label="Show curated pairings for your selection"
               onClick={reopenPairings}
               className="mb-3 h-12 w-full touch-manipulation rounded-none border-gold/50 bg-transparent px-4 font-body text-xs font-medium uppercase tracking-widest text-foreground transition-colors hover:bg-gold/10 active:bg-gold/15 sm:h-11"
             >
