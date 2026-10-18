@@ -6807,6 +6807,39 @@ export type Database = {
           },
         ]
       }
+      project_layout_snapshots: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          name: string
+          piece_count: number
+          project_key: string
+          thumbnail: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id?: string
+          name: string
+          piece_count: number
+          project_key: string
+          thumbnail?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          name?: string
+          piece_count?: number
+          project_key?: string
+          thumbnail?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           ceiling_currency: string | null
