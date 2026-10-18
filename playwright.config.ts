@@ -62,7 +62,7 @@ export default defineConfig({
       // Lives in ./tests, runs serially: it writes real queue/quote rows.
       name: "integration",
       testDir: "./tests",
-      testMatch: /checkout-flow\.spec\.ts/,
+      testMatch: /(?:checkout-flow|curated-pairing-checkout)\.spec\.ts/,
       fullyParallel: false,
       workers: 1,
       timeout: 180_000,
