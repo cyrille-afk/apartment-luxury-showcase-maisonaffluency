@@ -9,6 +9,7 @@
  * a caller can never choose their own price.
  */
 import { convertCents } from "./fxConvert.ts";
+import { loadPairingRules, resolvePairingFinish, type PairingReference } from "./pairingFinishPricing.ts";
 
 export interface ClaimedLine {
   pickId?: unknown;
@@ -18,6 +19,7 @@ export interface ClaimedLine {
   variant?: { base?: unknown; top?: unknown; size?: unknown } | null;
   unitCents?: unknown;
   quantity?: unknown;
+  pairing?: PairingReference | null;
 }
 
 export interface VerifiedLine {
@@ -83,10 +85,22 @@ export async function verifyCatalogLines(
   }
 
   const lines: VerifiedLine[] = [];
+  const pairingRules = await loadPairingRules(admin, claimed.map((l) => l.pairing).filter((p): p is PairingReference => !!p));
   for (const l of claimed) {
     const pickId = str(l.pickId, 64);
     const title = str(l.title, 200) || "Collectible piece";
     const row = byPick.get(pickId);
+    if (l.pairing) {
+      const resolved = resolvePairingFinish(pairingRules.get(l.pairing.ruleId), l.pairing, pickId);
+      if (!resolved || norm(l.finishLabel) !== norm(resolved.option.name)) return { ok: false, status: 409, error: `${title}'s pairing finish is no longer available. Please reselect it.` };
+      const canonical = resolved.currency.toLowerCase() === target ? Number(resolved.option.price_cents) : await convertCents(Number(resolved.option.price_cents), resolved.currency.toLowerCase(), target);
+      const claimedUnit = Math.round(Number(l.unitCents));
+      const tolerance = resolved.currency.toLowerCase() === target ? 0 : TOLERANCE;
+      if (!Number.isFinite(claimedUnit) || claimedUnit <= 0 || Math.abs(claimedUnit - canonical) > canonical * tolerance) return { ok: false, status: 409, error: `The price for ${title} has changed. Please refresh your basket and try again.` };
+      const quantity = Math.min(maxQty, Math.max(1, Math.round(Number(l.quantity) || 1)));
+      lines.push({ pick_id: pickId, title, designer_name: str(l.designer, 160) || null, finish_label: resolved.option.name, quantity, unit_price_cents: claimedUnit, line_total_cents: claimedUnit * quantity });
+      continue;
+    }
     if (!row) return { ok: false, status: 409, error: `${title} is not available for direct purchase — please send an enquiry.` };
 
     const src = String(row.currency || "usd").toLowerCase();

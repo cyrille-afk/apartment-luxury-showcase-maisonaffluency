@@ -91,6 +91,7 @@ export default function CartNavButton({
               : null,
           quantity: i.quantity,
           pickId: i.pickId ?? null,
+          pairing: i.pairing ?? null,
         })),
       },
     });

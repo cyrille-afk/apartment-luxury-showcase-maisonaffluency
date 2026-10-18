@@ -9,6 +9,7 @@ import { useShippingDestination } from "@/lib/shippingDestination";
 import { selectCuratedPairings } from "@/lib/curatedPairings";
 import { useCuratedPairingRules } from "@/hooks/useCuratedPairingRules";
 import CuratedPairingOptions from "./CuratedPairingOptions";
+import CustomPairingOptions from "./CustomPairingOptions";
 
 interface Props {
   open: boolean;
@@ -57,11 +58,14 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
           </Link>
           <p className="mt-5 font-body text-[10px] uppercase tracking-widest text-muted-foreground">{piece.brand}</p>
           <h3 className="mt-2 font-display text-lg leading-snug">{piece.title}</h3>
-          <p className="mt-3 font-body text-xs text-muted-foreground">{formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
+          <p className="mt-3 font-body text-xs text-muted-foreground">{piece.finishOptions?.length ? (() => {
+            const amounts = piece.finishOptions.map((o) => o.price_cents).filter((p): p is number => p !== null);
+            return amounts.length ? formatPublicRrpForDestination({ rrp_price_cents: Math.min(...amounts), currency: piece.finishCurrency || "USD", price_unit: null, price_prefix: "From" }, destination.currency) : "Price upon Request";
+          })() : formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
           <Button variant="link" aria-expanded={expanded.includes(piece.id)} onClick={() => setExpanded((current) => current.includes(piece.id) ? current.filter((id) => id !== piece.id) : [...current, piece.id])} className="mt-4 h-auto justify-start self-start whitespace-normal rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
             {expanded.includes(piece.id) ? "Close Options" : "Choose Finishes & Quantity"} <ArrowUpRight className="shrink-0" strokeWidth={1.25} />
           </Button>
-          {expanded.includes(piece.id) && <CuratedPairingOptions piece={piece} onExplore={onExplore} />}
+          {expanded.includes(piece.id) && (piece.finishOptions?.length ? <CustomPairingOptions piece={piece} onExplore={onExplore} /> : <CuratedPairingOptions piece={piece} onExplore={onExplore} />)}
         </article>)}
       </div>
       <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
+import type { PairingReference } from "@/lib/pairingFinishPricing";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
 import { useBrandDiscountCaps, effectiveDiscountForBrand } from "@/lib/brandDiscountCap";
 import { useAuth } from "@/hooks/useAuth";
@@ -86,6 +87,7 @@ const CONCIERGE_WHATSAPP = "https://wa.me/6591393850";
 export type ConfirmedShipping = { cents: number; label: string };
 
 export type CheckoutLine = {
+  pairing?: PairingReference | null;
   title: string;
   designer?: string | null;
   finishLabel?: string | null;
@@ -1259,6 +1261,7 @@ function PurchaseOrderForm({
           lines: lines.map((line) => ({
             pickId: line.pickId ?? null,
             title: line.title,
+            pairing: line.pairing ?? null,
             designer: line.designer,
             finishLabel: line.finishLabel,
             unitCents: line.unitCents,
@@ -1777,6 +1780,7 @@ function WireForm({
             title: l.title,
             designer: l.designer || "",
             finish: l.finishLabel || "",
+            pairing: l.pairing ?? null,
             unitCents: l.unitCents,
             quantity: lineQty(l),
             lineCents: lineSubtotal(l),
@@ -1851,6 +1855,7 @@ function WireForm({
             title: l.title,
             designer: l.designer || "",
             finishLabel: l.finishLabel || "",
+            pairing: l.pairing ?? null,
             quantity: lineQty(l),
             unitCents: l.unitCents,
           }))}
@@ -2389,6 +2394,7 @@ export default function Checkout() {
           : null,
         quantity: item.quantity,
         pickId: item.pickId ?? null,
+        pairing: item.pairing ?? null,
         origin: item.origin ?? null,
         pickupCountry: item.pickupCountry ?? null,
       })).filter(valid);
@@ -2470,6 +2476,7 @@ export default function Checkout() {
             title: l.title,
             designer: l.designer || "",
             selectedFinish: l.finishLabel || "",
+            pairing: l.pairing ?? null,
             price: l.unitCents / 100,
             quantity: lineQty(l),
           })),

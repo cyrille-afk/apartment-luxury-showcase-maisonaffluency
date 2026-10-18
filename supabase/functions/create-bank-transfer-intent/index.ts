@@ -110,6 +110,7 @@ serve(async (req) => {
           designer: items[idx].designer,
           finishLabel: items[idx].finish,
           variant: raw?.variant ?? null,
+          pairing: raw?.pairing ?? null,
           unitCents: items[idx].unitAmount,
           quantity: items[idx].quantity,
         })),

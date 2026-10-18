@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
 import { overwriteSecureBasket } from "@/lib/checkout/secureBasket";
+import type { PairingReference } from "./pairingFinishPricing";
 
 export interface CartItem {
   /** Stable line key — pick id + finish label. */
@@ -13,6 +14,7 @@ export interface CartItem {
   finishLabel: string | null;
   /** Structured variant axes (base × top × size) used to re-price server-side. */
   variant?: { base: string | null; top: string | null; size: string | null } | null;
+  pairing?: PairingReference | null;
   imageUrl: string | null;
   leadTime: string | null;
   unitPriceCents: number;
@@ -208,6 +210,7 @@ function toCheckoutLines(list: CartItem[]) {
     quantity: i.quantity,
     pickId: i.pickId,
     variant: i.variant ?? null,
+    pairing: i.pairing ?? null,
     origin: i.origin ?? null,
     pickupCountry: i.pickupCountry ?? null,
   }));
@@ -368,7 +371,7 @@ export function getCart() {
 }
 
 export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?: number }) {
-  const key = lineKey(item.pickId, item.finishLabel ?? null);
+  const key = lineKey(item.pickId, item.finishLabel ?? null) + (item.pairing ? `::pairing:${item.pairing.ruleId}:${item.pairing.optionId}` : "");
   const qty = Math.max(1, item.quantity ?? 1);
   setUserEmptied(false);
   const existing = items.find((i) => i.key === key);
