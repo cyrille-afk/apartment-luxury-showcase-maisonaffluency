@@ -1,5 +1,6 @@
 import type { BuyerProfile } from "@/contexts/CheckoutFormContext";
 import { parsePairingFinishOptions, type PairingFinishOption } from "./pairingFinishPricing";
+import { parsePairingMedia, type PairingMedia } from './pairingMedia';
 
 export type PairingCategory = "ceiling" | "wall" | "table-light" | "seating" | "tables" | "decor" | "storage";
 export interface PairingProduct {
@@ -16,6 +17,7 @@ export interface PairingProduct {
   pairingRuleId?: string;
   finishOptions?: PairingFinishOption[];
   finishCurrency?: string;
+  finishMedia?: PairingMedia[];
 }
 
 export const PAIRING_CATEGORIES: Record<PairingCategory, string> = {
@@ -31,6 +33,7 @@ export interface PairingRule {
   enabled: boolean;
   finish_options?: unknown;
   finish_currency?: string;
+  finish_media?: unknown;
 }
 
 export function privatePairingsEnabled(profile: BuyerProfile): boolean {
@@ -60,7 +63,7 @@ export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "titl
     const sameBrand = matches.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
     const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? matches[0];
     if (pick) excluded.add(pick.id);
-    return pick ? [{ ...pick, ...(pick.id === rule.preferred_pick_id && parsePairingFinishOptions(rule.finish_options).length ? {
+    return pick ? [{ ...pick, ...(pick.id === rule.preferred_pick_id ? { finishMedia: parsePairingMedia(rule.finish_media) } : {}), ...(pick.id === rule.preferred_pick_id && parsePairingFinishOptions(rule.finish_options).length ? {
       pairingRuleId: rule.id, finishOptions: parsePairingFinishOptions(rule.finish_options), finishCurrency: rule.finish_currency || "USD",
     } : {}) }] : [];
   }).slice(0, 3);

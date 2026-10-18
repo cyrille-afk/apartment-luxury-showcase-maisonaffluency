@@ -19,6 +19,8 @@ import { parsePairingFinishOptions, pairingFinishError } from "@/lib/pairingFini
 import PairingFinishEditor from "@/components/product/PairingFinishEditor";
 import PairingCsvTools from "@/components/product/PairingCsvTools";
 import PairingChangeHistory from "@/components/product/PairingChangeHistory";
+import PairingMediaEditor from '@/components/product/PairingMediaEditor';
+import { parsePairingMedia, pairingMediaError } from '@/lib/pairingMedia';
 
 const label = (category: string) => PAIRING_CATEGORIES[category as PairingCategory] || category;
 function Catalog() {
@@ -31,6 +33,7 @@ function Catalog() {
   const [remove, setRemove] = useState<PairingRule | null>(null);
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const products = useMemo(() => catalog.flatMap(({ pick, designerName }) => pick.id ? [{ id: pick.id, title: pick.title, brand: designerName, image: pick.image, category: pairingCategory(pick) }] : []), [catalog]);
   const visible = rules.filter((r) => r.source_category === source);
   const selected = products.find((p) => p.id === draft?.preferred_pick_id);
@@ -39,7 +42,9 @@ function Catalog() {
     await Promise.all([qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] }), qc.invalidateQueries({ queryKey: ["curated-pairing-history"] })]);
   }
   async function save() {
-    if (!draft || busy) return;
+    if (!draft || busy || uploading) return;
+    const mediaError = pairingMediaError(parsePairingMedia(draft.finish_media));
+    if (mediaError) { toast({ title: mediaError, variant: 'destructive' }); return; }
     const finishOptions = parsePairingFinishOptions(draft.finish_options);
     const finishError = pairingFinishError((draft.finish_options || []) as typeof finishOptions, draft.preferred_pick_id);
     if (finishError) { toast({ title: finishError, variant: "destructive" }); return; }
@@ -77,12 +82,13 @@ function Catalog() {
         return <tr key={row.id} className="border-b border-border/60"><td className="py-5">{row.sort_order}</td><td>{label(row.target_category)}</td><td><div className="flex items-center gap-3">{piece?.image && <img src={piece.image} alt={piece.title} className="h-14 w-14 object-contain" />}<div>{row.preferred_pick_id ? piece?.title || "Unavailable piece" : "Automatic selection"}{piece && <div className="text-xs text-muted-foreground">{piece.brand}</div>}</div></div></td><td>{row.enabled ? "Active" : "Paused"}</td><td><div className="flex justify-end gap-1"><Button size="icon" variant="ghost" aria-label={`Edit ${label(row.target_category)} pairing`} title="Edit pairing" onClick={() => { setSearch(""); setDraft({ ...row }); }}><Pencil className="h-4 w-4" /></Button><Button size="icon" variant="ghost" aria-label={`Delete ${label(row.target_category)} pairing`} title="Delete pairing" onClick={() => setRemove(row)}><Trash2 className="h-4 w-4" /></Button></div></td></tr>;
       })}</tbody></table>{!visible.length && <p className="py-8 text-muted-foreground">No pairings for {label(source).toLowerCase()}.</p>}</div>}
     </div>
-    <Dialog open={!!draft} onOpenChange={(open) => { if (!open && !busy) setDraft(null); }}><DialogContent className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>{draft?.id ? "Edit pairing" : "New pairing"}</DialogTitle></DialogHeader>{draft && <div className="space-y-4">
+    <Dialog open={!!draft} onOpenChange={(open) => { if (!open && !busy && !uploading) setDraft(null); }}><DialogContent className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>{draft?.id ? "Edit pairing" : "New pairing"}</DialogTitle></DialogHeader>{draft && <div className="space-y-4">
       <div className="space-y-2"><Label>Primary category</Label><Select value={draft.source_category} onValueChange={(value) => setDraft({ ...draft, source_category: value, ...(value === draft.target_category ? { target_category: value === "decor" ? "tables" : "decor", preferred_pick_id: null, finish_options: [] } : {}) })}><SelectTrigger aria-label="Primary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
       <div className="space-y-2"><Label>Complementary category</Label><Select value={draft.target_category} onValueChange={(value) => { setSearch(""); setDraft({ ...draft, target_category: value, preferred_pick_id: null, finish_options: [] }); }}><SelectTrigger aria-label="Complementary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).filter(([value]) => value !== draft.source_category).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
       <div className="space-y-2"><Label htmlFor="piece-search">Find a preferred piece</Label><Input id="piece-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or designer" /><Select value={draft.preferred_pick_id || "automatic"} onValueChange={(value) => setDraft({ ...draft, preferred_pick_id: value === "automatic" ? null : value, finish_options: [] })}><SelectTrigger aria-label="Preferred piece"><SelectValue placeholder="Automatic selection" /></SelectTrigger><SelectContent><SelectItem value="automatic">Automatic selection</SelectItem>{draft.preferred_pick_id && !selected && <SelectItem value={draft.preferred_pick_id}>Unavailable piece</SelectItem>}{candidates.map((p) => <SelectItem key={p.id} value={p.id}>{p.brand} — {p.title}</SelectItem>)}</SelectContent></Select>{productsLoading && <p className="text-sm text-muted-foreground">Loading pieces…</p>}{productsError && <p role="alert" className="text-sm text-destructive">Published pieces could not be loaded.</p>}</div>
       {selected?.image && <div className="flex items-center gap-4"><img src={selected.image} alt={selected.title} className="h-24 w-24 object-contain" /><span className="font-display">{selected.title}</span></div>}
       <PairingFinishEditor options={(draft.finish_options || []) as ReturnType<typeof parsePairingFinishOptions>} currency={draft.finish_currency || "USD"} disabled={!selected} onChange={(finish_options) => setDraft({ ...draft, finish_options })} onCurrencyChange={(finish_currency) => setDraft({ ...draft, finish_currency })} />
+      {selected && draft.preferred_pick_id && <PairingMediaEditor key={draft.preferred_pick_id} pickId={draft.preferred_pick_id} hero={selected.image || ''} options={parsePairingFinishOptions(draft.finish_options)} entries={parsePairingMedia(draft.finish_media)} onBusy={setUploading} onChange={finish_media => setDraft(current => current ? { ...current, finish_media } : current)} />}
       <div className="space-y-2"><Label htmlFor="pairing-priority">Priority</Label><Input id="pairing-priority" type="number" min={0} max={999} step={1} value={draft.sort_order} onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })} /></div>
       <div className="flex items-center justify-between"><Label htmlFor="pairing-active">Active</Label><Switch id="pairing-active" checked={draft.enabled} onCheckedChange={(enabled) => setDraft({ ...draft, enabled })} /></div>
     </div>}<DialogFooter><Button variant="outline" disabled={busy} onClick={() => setDraft(null)}>Cancel</Button><Button disabled={busy || productsLoading} onClick={save}><Save className="h-4 w-4" />{busy ? "Saving…" : "Save pairing"}</Button></DialogFooter></DialogContent></Dialog>
