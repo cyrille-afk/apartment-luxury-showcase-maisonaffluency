@@ -26,7 +26,7 @@ async function base64File(url: string) {
   });
 }
 
-async function photo(url?: string | null): Promise<{ data: string; width: number; height: number } | null> {
+async function photo(url?: string | null, cropped = false): Promise<{ data: string; width: number; height: number } | null> {
   if (!url) return null;
   try {
     const img = new Image();
@@ -36,10 +36,14 @@ async function photo(url?: string | null): Promise<{ data: string; width: number
     await Promise.race([loaded, new Promise((_, reject) => setTimeout(() => reject(new Error("Image timeout")), 8000))]);
     const canvas = document.createElement("canvas");
     const scale = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight));
-    canvas.width = Math.round(img.naturalWidth * scale); canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.width = cropped ? 96 : Math.round(img.naturalWidth * scale); canvas.height = cropped ? 96 : Math.round(img.naturalHeight * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (cropped) {
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 96, 96);
+    } else ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     return { data: canvas.toDataURL("image/jpeg", 0.9), width: canvas.width, height: canvas.height };
   } catch { return null; }
 }
@@ -51,7 +55,7 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
   doc.addFileToVFS("Inter.ttf", fonts[0]); doc.addFont("Inter.ttf", "Inter", "normal");
   doc.addFileToVFS("Cormorant.ttf", fonts[1]); doc.addFont("Cormorant.ttf", "Cormorant", "normal");
   const photos = await Promise.all(cards.map((card) => photo(card.imageUrl)));
-  const swatchPhotos = await Promise.all(cards.map((card) => Promise.all(felixQuoteFinishes(card).map((finish) => photo(finish.imageUrl)))));
+  const swatchPhotos = await Promise.all(cards.map((card) => Promise.all(felixQuoteFinishes(card).map((finish) => photo(finish.imageUrl, true)))));
   const lines = felixPdfLines(cards);
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 44;
   let y = 156;
@@ -103,19 +107,7 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
     doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...MUTED);
     for (const text of meta) { doc.text(text, x, detailsY); detailsY += 13; }
     for (const finish of finishes) {
-      if (finish.image) {
-        const { data, width, height } = finish.image;
-        const side = Math.min(width, height);
-        // Crop the actual swatch to a square, as the product selector does.
-        const canvas = document.createElement("canvas"); canvas.width = 96; canvas.height = 96;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          const img = new Image(); img.src = data;
-          // Image was already decoded by photo(); JPEG data can be embedded directly
-          // with square dimensions for the small finish thumbnail.
-          doc.addImage(data, "JPEG", x, detailsY - 9, 23, 23);
-        }
-      }
+      if (finish.image) doc.addImage(finish.image.data, "JPEG", x, detailsY - 9, 23, 23);
       doc.text(finish.text, x + 30, detailsY);
       detailsY += Math.max(30, finish.text.length * 13 + 6);
     }
