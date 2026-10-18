@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Columns2, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import type { ComparisonCover } from "@/lib/snapshotComparisonPdf";
 import { loadProjectSnapshot } from "@/lib/projectLayoutSnapshots";
 import { loadComparisonAnnotations } from "@/lib/snapshotComparisonAnnotations";
 import { Button } from "@/components/ui/button";
@@ -8,11 +10,21 @@ import { Input } from "@/components/ui/input";
 import { browseComparisons, type SavedComparison } from "@/lib/snapshotComparisonAnnotations";
 import type { ProjectSnapshot } from "@/lib/projectLayoutSnapshots";
 
+/** Apartment/project details for the PDF cover; falls back to a neutral title (sandbox or lookup failure). */
+export async function loadComparisonCover(projectKey: string): Promise<ComparisonCover> {
+  const fallback = { apartmentName: "Private Residence" };
+  if (!/^[0-9a-f-]{36}$/i.test(projectKey)) return fallback;
+  const { data } = await supabase.from("projects").select("name,client_name,location,location_neighborhood,location_city,style").eq("id", projectKey).maybeSingle();
+  if (!data) return fallback;
+  const location = data.location || [data.location_neighborhood, data.location_city].filter(Boolean).join(", ");
+  return { apartmentName: data.name || fallback.apartmentName, clientName: data.client_name, location, style: Array.isArray(data.style) ? data.style.join(", ") : (data.style as string | null) };
+}
+
 export async function exportSavedComparison(projectKey: string, c: SavedComparison, snapshots: ProjectSnapshot[]) {
   const left = snapshots.find(s => s.id === c.leftId), right = snapshots.find(s => s.id === c.rightId);
   if (!left || !right) throw new Error("missing snapshot");
   const [l, r, notes, pdf] = await Promise.all([loadProjectSnapshot(projectKey, left.id), loadProjectSnapshot(projectKey, right.id), loadComparisonAnnotations(projectKey, left.id, right.id), import("@/lib/snapshotComparisonPdf")]);
-  const blob = await pdf.buildSnapshotComparisonPdf({ snapshot: left, data: l }, { snapshot: right, data: r }, notes ?? {}, { comparedAt: c.updatedAt });
+  const blob = await pdf.buildSnapshotComparisonPdf({ snapshot: left, data: l }, { snapshot: right, data: r }, notes ?? {}, { comparedAt: c.updatedAt, cover: await loadComparisonCover(projectKey) });
   await pdf.downloadSnapshotComparison(blob);
 }
 
