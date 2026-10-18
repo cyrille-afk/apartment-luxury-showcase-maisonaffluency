@@ -15,6 +15,8 @@ import { formatMoneyIn } from "@/lib/displayMoney";
 import FinishesDrawer, { resolveFinishFrom, type FinishSelection, type PreloadedFinishes } from "@/components/trade/procurement/FinishesDrawer";
 import { FinishChips } from "@/components/trade/procurement/ProcurementBoardPanel";
 import SharedVisualiserScene from "@/components/trade/visualiser/SharedVisualiserScene";
+import WorkspacePresentation from "@/components/trade/visualiser/WorkspacePresentation";
+import { parseWorkspacePresentation, type WorkspacePresentation as Presentation } from "@/lib/workspacePresentation";
 import { sharedVisualiserRoom, type SharedVisualiserRoom } from "@/lib/sharedVisualiserRoom";
 
 type Item = {
@@ -51,6 +53,19 @@ export default function SharedProcurementBoard() {
   const [picks, setPicks] = useState<Record<string, FinishSelection>>({});
   const [drawerFor, setDrawerFor] = useState<string | null>(null);
   const [room, setRoom] = useState<SharedVisualiserRoom | null>(null);
+  const [presentation, setPresentation] = useState<Presentation | null>(null);
+  const [presentationLoading, setPresentationLoading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    setPresentation(null); setPresentationLoading(true);
+    if (!token) return;
+    supabase.rpc("get_shared_workspace", { _token: token }).then(({ data: result }) => {
+      if (!active) return;
+      if (result) { try { setPresentation(parseWorkspacePresentation(result)); } catch { setLoadError(true); } }
+      setPresentationLoading(false);
+    });
+    return () => { active = false; };
+  }, [token]);
   useEffect(() => {
     let active = true;
     setRoom(null);
@@ -191,6 +206,8 @@ export default function SharedProcurementBoard() {
   const contractorLocked = data?.role === "contractor" && !(user && data.claimed);
 
   if (!token) return <AccessGate slug={param} onVerified={(t) => { writeSession(param, t); setToken(t); }} />;
+  if (presentationLoading) return <div className="min-h-screen bg-background" />;
+  if (presentation) return <WorkspacePresentation data={presentation} />;
   if (data === undefined) return <div className="min-h-screen bg-background" />;
   if (data === null) {
     return (
