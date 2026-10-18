@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { snapshotChanges, snapshotFinishes, snapshotFootprint } from './projectSnapshotComparison';
 import type { PlacedObject } from '@/components/trade/visualiser/SceneObject';
 import type { ProjectSnapshotData } from './projectLayoutSnapshots';
-const chair = { instanceId: 'chair', product_name: 'Chair', position: [1, 0, 2], rotation: [0, 0, 0], scale: 1, width_mm: 800, depth_mm: 900, material: { id: 'oak', name: 'Oak', image_url: 'https://example.com/oak.jpg' }, partMaterials: { frame: { id: 'brass', name: 'Brass', image_url: null } } } as PlacedObject;
+const chair = { instanceId: 'chair', product_name: 'Chair', position: [1, 0, 2], rotation: [0, 0, 0], scale: 1, width_mm: 800, depth_mm: 900, material: { id: 'oak', name: 'Oak', image_url: 'https://example.com/oak.jpg' }, partMaterials: { frame: { id: 'brass', name: 'Brass', image_url: null } } } as unknown as PlacedObject;
 const data = (objects: PlacedObject[]): ProjectSnapshotData => ({ version: 1, scene: { objects }, bounds: { width: 12, depth: 8, height: 3 }, floorPlanUrl: null });
 describe('snapshot comparison', () => {
   it('matches repeated product instances by instance id and identifies additions/removals', () => {
