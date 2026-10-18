@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -28,6 +28,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   const [state, setState] = useState<"idle" | "building" | "error">("idle");
   const [zoom, setZoom] = useState(1);
   const [page, setPage] = useState(1);
+  const [full, setFull] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const canvases = useRef<(HTMLCanvasElement | null)[]>([]);
   const zoomRef = useRef(zoom); zoomRef.current = zoom;
