@@ -274,6 +274,12 @@ export default function StripeBankTransferPanel({
     if (prev.taxCents === totals.taxCents && prev.taxLabel === totals.taxLabel && prev.discountCents === totals.discountCents && prev.totalCents === totals.totalCents) return;
     savedRef.current = { ...prev, taxCents: totals.taxCents, taxLabel: totals.taxLabel, discountCents: totals.discountCents, totalCents: totals.totalCents, issuedAt: prev.issuedAt };
     saveTransferConfirmation(savedRef.current);
+    // Keep the order record and the amount Stripe expects in step too.
+    if (prev.paymentIntentId && prev.taxCents !== totals.taxCents) {
+      void supabase.functions.invoke("update-instant-transfer-tax", {
+        body: { orderRef: prev.reference, intentId: prev.paymentIntentId, taxCents: totals.taxCents, taxLabel: totals.taxLabel ?? null, buyerTaxId: totals.buyerTaxId ?? null },
+      }).then(({ error }) => { if (error) console.warn("instant transfer tax sync failed", error); });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalsKey]);
   useEffect(() => { if (failure) recoveryRef.current?.scrollIntoView({ block: "center" }); }, [failure]);
