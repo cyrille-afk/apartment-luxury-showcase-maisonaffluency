@@ -10,6 +10,8 @@ import { deleteProjectSnapshot, listProjectSnapshots, loadProjectSnapshot, saveP
 import { makePresetThumbnail, type ScenePresetData } from "@/lib/visualiserScenePresets";
 import ScenePresets from "./ScenePresets";
 import SnapshotComparison from "./SnapshotComparison";
+import SavedComparisons from "./SavedComparisons";
+import { listSavedComparisons, type SavedComparison } from "@/lib/snapshotComparisonAnnotations";
 import { toast } from "sonner";
 
 export default function ProjectSnapshots({ className, current, onLoad }: { className: string; current: () => ScenePresetData; onLoad: (data: ScenePresetData) => void }) {
@@ -20,11 +22,12 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
   const [list, setList] = useState<ProjectSnapshot[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const [comparing, setComparing] = useState(false);
+  const [comparing, setComparing] = useState<false | true | [string, string]>(false);
+  const [saved, setSaved] = useState<SavedComparison[]>([]);
   const [action, setAction] = useState<{ snapshot: ProjectSnapshot; kind: "restore" | "delete" } | null>(null);
   const refresh = async () => {
     setBusy(true); setError(false); setList([]);
-    try { setList(await listProjectSnapshots(key)); } catch { setError(true); } finally { setBusy(false); }
+    try { setList(await listProjectSnapshots(key)); setSaved(await listSavedComparisons(key).catch(() => [])); } catch { setError(true); } finally { setBusy(false); }
   };
   const save = async () => {
     setBusy(true);
@@ -60,6 +63,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
           <Button size="sm" type="submit" disabled={busy || !name.trim()}>Save</Button>
         </form>
         {list.length >= 2 && <Button variant="outline" size="sm" className="mt-3 w-full" disabled={busy} onClick={() => { setOpen(false); setComparing(true); }}><Columns2 className="h-4 w-4" />Compare snapshots</Button>}
+        <SavedComparisons saved={saved} snapshots={list} onOpen={ids => { setOpen(false); setComparing(ids); }} />
         <div className="mt-3 max-h-80 space-y-3 overflow-y-auto">
           {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Loading snapshots" />}
           {error && <div className="text-xs text-muted-foreground">Snapshots couldn't load.<Button variant="link" size="sm" disabled={busy} onClick={() => void refresh()}>Retry</Button></div>}
@@ -76,7 +80,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
       </PopoverContent>
     </Popover>
     <ScenePresets className={className} current={current} onLoad={onLoad} />
-    {comparing && <SnapshotComparison key={key} projectKey={key} snapshots={list} onClose={() => setComparing(false)} onRestore={snapshot => { setComparing(false); setAction({ snapshot, kind: "restore" }); }} />}
+    {comparing && <SnapshotComparison key={`${key}:${String(comparing)}`} projectKey={key} initialIds={Array.isArray(comparing) ? comparing : undefined} snapshots={list} onClose={() => setComparing(false)} onRestore={snapshot => { setComparing(false); setAction({ snapshot, kind: "restore" }); }} />}
     <AlertDialog open={Boolean(action)} onOpenChange={value => { if (!value && !busy) setAction(null); }}>
       <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{action?.kind === "restore" ? "Restore snapshot?" : "Delete snapshot?"}</AlertDialogTitle><AlertDialogDescription>{action?.kind === "restore" ? `“${action.snapshot.name}” will replace this project's current furniture, finishes and room settings. Save your current layout first if you want to keep it.` : `“${action?.snapshot.name}” will be permanently deleted. Your current room will not change.`}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel><AlertDialogAction disabled={busy} onClick={event => { event.preventDefault(); void confirm(); }}>{busy ? "Please wait…" : action?.kind === "restore" ? "Restore" : "Delete"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
     </AlertDialog>

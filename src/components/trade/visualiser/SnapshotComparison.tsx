@@ -64,8 +64,8 @@ function Layout({ data, name, selected, onSelect }: { data: ProjectSnapshotData;
   </svg>;
 }
 
-export default function SnapshotComparison({ projectKey, snapshots, onClose, onRestore }: { projectKey: string; snapshots: ProjectSnapshot[]; onClose: () => void; onRestore: (snapshot: ProjectSnapshot) => void }) {
-  const [ids, setIds] = useState<[string, string]>([snapshots[0]?.id ?? '', snapshots[1]?.id ?? '']);
+export default function SnapshotComparison({ projectKey, snapshots, onClose, onRestore, initialIds }: { projectKey: string; snapshots: ProjectSnapshot[]; onClose: () => void; onRestore: (snapshot: ProjectSnapshot) => void; initialIds?: [string, string] }) {
+  const [ids, setIds] = useState<[string, string]>(initialIds ?? [snapshots[0]?.id ?? '', snapshots[1]?.id ?? '']);
   const [data, setData] = useState<[ProjectSnapshotData, ProjectSnapshotData] | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
