@@ -1,7 +1,7 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getCart, shouldUseFullPageCart, useCart } from "@/lib/cart";
+import { getCart, shouldUseFullPageCart, useCart, formatMoney, cartSubtotalCents, setQuantity as setCartQuantity, removeFromCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
 import BespokeConfigurationDialog from "@/components/product/BespokeConfigurationDialog";
@@ -262,7 +262,7 @@ export default function ProductCommerceCta({
       return;
     }
     setQuoteOnlySelection(false);
-    if (shouldUseFullPageCart(getCart())) {
+    if (checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(getCart())) {
       setMiniCartOpen(false);
       navigate("/cart");
       return;
@@ -474,11 +474,11 @@ export default function ProductCommerceCta({
   // that landed after the click, or another tab), hand off to the full page.
   useEffect(() => {
     if (!miniCartOpen) return;
-    if (shouldUseFullPageCart(cartItems)) {
+    if (checkoutForm.buyerProfile !== "private" && shouldUseFullPageCart(cartItems)) {
       setMiniCartOpen(false);
       navigate("/cart");
     }
-  }, [miniCartOpen, cartItems, navigate]);
+  }, [miniCartOpen, cartItems, navigate, checkoutForm.buyerProfile]);
 
 
   // Drawer quantity stepper: quantity alone never changes the layout — only a
@@ -490,6 +490,15 @@ export default function ProductCommerceCta({
 
   const goToCheckout = () => {
     setMiniCartOpen(false);
+    if (cartItems.length > 1) {
+      navigate("/checkout", { state: { lines: cartItems.map((item) => ({
+        title: item.title, designer: item.designerName, finishLabel: item.finishLabel,
+        imageUrl: item.imageUrl, unitCents: item.unitPriceCents, currency: item.currency,
+        leadTime: item.leadTime, productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
+        quantity: item.quantity, pickId: item.pickId,
+      })) } });
+      return;
+    }
     onPlaceOrder(quantity);
   };
 
@@ -648,6 +657,12 @@ export default function ProductCommerceCta({
         <SelectionDrawer
           isOpen={miniCartOpen}
           onClose={() => setMiniCartOpen(false)}
+          allowPairings={!tradeApproved}
+          lines={cartItems.length > 1 ? cartItems.map((item) => ({ key: item.key, brand: item.designerName, title: item.title, configuration: item.finishLabel, imageUrl: item.imageUrl, quantity: item.quantity, priceLabel: item.unitPriceCents > 0 ? formatMoney(item.unitPriceCents * item.quantity, item.currency) : "Price upon Request", leadTime: item.leadTime })) : undefined}
+          onLineQuantityChange={setCartQuantity}
+          onRemoveLine={removeFromCart}
+          subtotalLabel={cartItems.length > 1 ? formatMoney(cartSubtotalCents(cartItems), cartItems[0]?.currency) : undefined}
+          onViewCart={cartItems.length > 1 ? () => { setMiniCartOpen(false); navigate("/cart"); } : undefined}
           brand={designerName}
           title={productTitle}
           configuration={orderFinishLabel || (selectedFinishes.length ? selectedFinishes.join(" / ") : null)}
