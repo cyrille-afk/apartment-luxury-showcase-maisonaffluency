@@ -2350,6 +2350,7 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<CheckoutRecovery | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
+  const [chosenCents, setChosenCents] = useState<number | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
   const clientSecretRef = useRef<string>("");
@@ -2463,6 +2464,7 @@ export default function Checkout() {
       const first = grossLines[0];
       setError(null);
       setRecovery(null);
+      setChosenCents(null);
       setSyncing(true);
       try {
         const piBody: Record<string, unknown> = {
@@ -2616,13 +2618,14 @@ export default function Checkout() {
 
   const acceptNewPrice = useCallback(() => {
     if (!recovery || !rawLines) return;
-    const next = acceptRecoveredPrice(rawLines, recovery);
+    const next = acceptRecoveredPrice(rawLines, recovery, chosenCents ?? undefined);
     if (!next) return;
+    const idx = findRecoveryLine(rawLines, recovery);
     writeSecureBasket(next);
     setLines(next);
-    repriceCartLine(recovery.pickId, recovery.pairing ?? null, recovery.currentUnitCents!);
+    repriceCartLine(recovery.pickId, recovery.pairing ?? null, next[idx].unitCents);
     setRetryNonce((n) => n + 1);
-  }, [recovery, rawLines]);
+  }, [recovery, rawLines, chosenCents]);
 
   // The destination country changes the GST due, so the PaymentIntent must be
   // re-priced whenever it changes after the first sync.
@@ -2895,19 +2898,35 @@ export default function Checkout() {
             }
             if (error) {
               const affected = recovery && rawLines ? rawLines[findRecoveryLine(rawLines, recovery)] : undefined;
-              const canAccept = recovery?.reason === "price_changed" && !!recovery.currentUnitCents && !!affected;
+              const options = recovery?.reason === "price_changed" && affected ? recovery.priceOptions ?? [] : [];
+              const canAccept = recovery?.reason === "price_changed" && !!affected && (options.length ? chosenCents !== null : !!recovery.currentUnitCents);
+              const cur = String(affected?.currency || "USD").toUpperCase();
               return (
                 <div role="alert" className="py-12 text-center space-y-4" data-testid="checkout-recovery">
                   <p className="text-sm text-muted-foreground">{error}</p>
                   {affected && (
                     <p className="text-xs text-muted-foreground">
                       Your basket and selections{affected.finishLabel ? ` — including ${affected.finishLabel}` : ""} are saved.
-                      {canAccept && ` Current price: ${formatMoney(recovery!.currentUnitCents!, String(affected.currency || "USD").toUpperCase())} each.`}
+                      {!options.length && recovery?.currentUnitCents && ` Current price: ${formatMoney(recovery.currentUnitCents, cur)} each.`}
+                      {options.length > 0 && " Several prices apply to this piece — choose the one matching your selection. Nothing changes until you confirm."}
                     </p>
                   )}
+                  {options.length > 0 && (
+                    <fieldset className="mx-auto max-w-md space-y-2 text-left" aria-label="Choose the current price">
+                      {options.map((o) => (
+                        <label key={o.unitCents} className={cn("flex cursor-pointer items-center justify-between gap-3 border px-3 py-2 text-sm", chosenCents === o.unitCents ? "border-primary bg-primary/5" : "border-border")}>
+                          <span className="flex items-center gap-2">
+                            <input type="radio" name="recovery-price" checked={chosenCents === o.unitCents} onChange={() => setChosenCents(o.unitCents)} />
+                            {o.label}
+                          </span>
+                          <span>{formatMoney(o.unitCents, cur)}</span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
                   <div className="flex flex-wrap justify-center gap-3">
-                    {canAccept && (
-                      <Button size="sm" onClick={acceptNewPrice} disabled={syncing}>Accept updated price and retry</Button>
+                    {(canAccept || options.length > 0) && (
+                      <Button size="sm" onClick={acceptNewPrice} aria-disabled={!canAccept} disabled={syncing || !canAccept}>{options.length ? "Confirm selected price and retry" : "Accept updated price and retry"}</Button>
                     )}
                     {recovery && recovery.reason !== "price_changed" && affected?.productPath && (
                       <Button size="sm" variant="outline" onClick={() => navigate(affected.productPath!)}>Reselect on product page</Button>
