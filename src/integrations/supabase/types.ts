@@ -2979,6 +2979,7 @@ export type Database = {
         Row: {
           enabled: boolean
           finish_currency: string
+          finish_media: Json
           finish_options: Json
           id: string
           preferred_pick_id: string | null
@@ -2989,6 +2990,7 @@ export type Database = {
         Insert: {
           enabled?: boolean
           finish_currency?: string
+          finish_media?: Json
           finish_options?: Json
           id?: string
           preferred_pick_id?: string | null
@@ -2999,6 +3001,7 @@ export type Database = {
         Update: {
           enabled?: boolean
           finish_currency?: string
+          finish_media?: Json
           finish_options?: Json
           id?: string
           preferred_pick_id?: string | null

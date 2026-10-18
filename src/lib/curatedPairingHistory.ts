@@ -1,4 +1,5 @@
 import { parsePairingFinishOptions } from "./pairingFinishPricing";
+import { parsePairingMedia } from './pairingMedia';
 
 export function pairingHistoryChanges(before: Record<string, unknown> | null, after: Record<string, unknown> | null) {
   const changes: { field: string; before: string; after: string }[] = [];
@@ -14,6 +15,12 @@ export function pairingHistoryChanges(before: Record<string, unknown> | null, af
     const newOption = newOptions.find((option) => option.id === id);
     if (oldOption?.name !== newOption?.name) changes.push({ field: "Finish", before: oldOption?.name || "—", after: newOption?.name || "Removed" });
     if (oldOption?.price_cents !== newOption?.price_cents || (oldOption && newOption && before?.finish_currency !== after?.finish_currency)) changes.push({ field: `${newOption?.name || oldOption?.name} · retail price`, before: oldOption ? price(oldOption.price_cents, before?.finish_currency) : "—", after: newOption ? price(newOption.price_cents, after?.finish_currency) : "Removed" });
+  }
+  const oldMedia = parsePairingMedia(before?.finish_media);
+  const newMedia = parsePairingMedia(after?.finish_media);
+  for (const key of new Set([...oldMedia, ...newMedia].map(e => e.key))) {
+    const oldEntry = oldMedia.find(e => e.key === key); const newEntry = newMedia.find(e => e.key === key);
+    for (const field of ['product_image_url', 'macro_image_url'] as const) if (oldEntry?.[field] !== newEntry?.[field]) changes.push({ field: `${newEntry?.label || oldEntry?.label} · ${field === 'product_image_url' ? 'product photo' : 'macro texture'}`, before: oldEntry?.[field] || 'Catalogue fallback', after: newEntry?.[field] || 'Catalogue fallback' });
   }
   return changes;
 }
