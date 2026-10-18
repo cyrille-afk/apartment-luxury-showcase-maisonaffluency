@@ -18,6 +18,9 @@ import { LAST_GOOD_KEY, STABLE_AFTER_MS, preserveSceneBackup, takeRecoveryNotice
 import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { clearLocalExr } from "@/lib/localEnvironmentExr";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useActiveProject } from "@/contexts/ActiveProjectContext";
+import { layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
+import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
@@ -219,6 +222,8 @@ const CanvasLoader = () => (
 
 const TradeVisualiser = () => {
   const { user } = useAuth();
+  const activeProject = useActiveProject();
+  const workspaceCamera = useMemo(() => activeProject && activeProject.view !== "plan" ? layoutCamera(activeProject.state.bounds, activeProject.view) : undefined, [activeProject?.view, activeProject?.state.bounds]);
   const initial = useMemo(readSandbox, []);
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
@@ -240,7 +245,9 @@ const TradeVisualiser = () => {
 
   const [products, setProducts] = useState<CatalogueProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [objects, setObjects] = useState<PlacedObject[]>(initial.objects);
+  const [localObjects, setLocalObjects] = useState<PlacedObject[]>(initial.objects);
+  const objects = activeProject?.objects ?? localObjects;
+  const setObjects = activeProject?.setObjects ?? setLocalObjects;
   const [selectedId, setSelectedId] = useState<string | null>(initial.selectedId ?? null);
   const [trayOpen, setTrayOpen] = useState(false);
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
@@ -520,7 +527,7 @@ const TradeVisualiser = () => {
     const incoming = searchParams.get("project");
     if (!incoming || intakeRef.current === incoming) return;
     intakeRef.current = incoming;
-    const alreadyComposed = initial.projectId === incoming && initial.objects.length > 0;
+    const alreadyComposed = (activeProject?.state.projectId === incoming && activeProject.objects.length > 0) || (initial.projectId === incoming && initial.objects.length > 0);
     setProjectId(incoming);
 
     void (async () => {
@@ -896,6 +903,7 @@ const TradeVisualiser = () => {
       </Helmet>
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
+      <ProjectLayoutOverview />
       {backdropSrc && (
         <img
           src={backdropSrc}
@@ -930,6 +938,8 @@ const TradeVisualiser = () => {
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
+            workspaceCamera={workspaceCamera}
+            roomBounds={activeProject?.state.bounds}
             onInitialReady={revealInitialRoom}
             focusRef={focusRef}
             objects={objects}
@@ -945,7 +955,7 @@ const TradeVisualiser = () => {
             showGrid={showGrid}
             showLabels={showLabels}
             depthOfField={depthOfField}
-            pathTrace={pathTrace}
+            pathTrace={pathTrace && (!activeProject || activeProject.view === "sandbox")}
             renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
             onRenderCheckpoint={(event) => {
               setCheckpointStatus(event);
@@ -992,7 +1002,7 @@ const TradeVisualiser = () => {
       {/* Header */}
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-start justify-between px-4 pt-4 sm:px-8 sm:pt-6">
         <div>
-          <h1 className="font-serif text-2xl text-foreground">Visualiser Sandbox</h1>
+          <h1 className="font-serif text-2xl text-foreground">{activeProject?.view === "axonometric" ? "Axonometric Studio" : "Visualiser Sandbox"}</h1>
           <p className={cn(microLabel, "mt-2 text-muted-foreground")}>
             {projectName ? `${projectName} // ` : ""}3D Spatial Composition // {objects.length} / {MAX_OBJECTS} Objects
             {loadingProject ? " // Loading specification…" : ""}
@@ -1004,6 +1014,7 @@ const TradeVisualiser = () => {
       {/* Inspector sidebar — reads the shared selection context */}
       <VisualiserInspector onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject}>
         {selected && (<>
+          {activeProject?.view === "axonometric" && <div className="mt-3 grid grid-cols-2 gap-2">{(["x", "y", "rotation"] as const).map(axis => <label key={axis} className="text-xs text-muted-foreground">{axis === "rotation" ? "Rotation (°)" : `${axis === "x" ? "X" : "Y"} (m)`}<input aria-label={`Layout ${axis}`} type="number" step={axis === "rotation" ? 5 : 0.1} disabled={selected.positionLocked} value={axis === "rotation" ? Math.round(selected.rotation[1] * 180 / Math.PI) : selected.position[axis === "x" ? 0 : 2]} className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-1 text-foreground" onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value)) setObjects(current => patchLayoutItem(current, selected.instanceId, { [axis]: axis === "rotation" ? value * Math.PI / 180 : value })); }} /></label>)}</div>}
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
             {selected.positionLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
             {selected.positionLocked ? "Position locked" : "Lock position"}

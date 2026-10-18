@@ -16,6 +16,8 @@ function WorkspacePanels() {
   const project = useActiveProject();
   const [visited, setVisited] = useState(false);
   const [imageStudio, setImageStudio] = useState(false);
+  const [imageVisited, setImageVisited] = useState(false);
+  useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); }, [project?.view]);
   if (!project) return null;
   const { view, setView, state } = project;
@@ -32,7 +34,7 @@ function WorkspacePanels() {
     <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan"} className={cn("flex min-h-0 flex-1 flex-col", view === "plan" && "hidden")}>
       {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span><div className="flex gap-2"><Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button><Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
       <div className={cn("min-h-0 flex-1", imageStudio && view === "axonometric" && "hidden")}><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
-      <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageStudio && <Axonometric />}</Suspense></div>
+      <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageVisited && <Axonometric />}</Suspense></div>
     </div>
   </div>;
 }

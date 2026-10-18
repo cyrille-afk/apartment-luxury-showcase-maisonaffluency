@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo, useEffect, lazy, Suspense } from "react";
+import { useActiveProject } from "@/contexts/ActiveProjectContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
@@ -222,13 +223,15 @@ const CategoryFilterBar = ({
 };
 
 const TradeAxonometric = () => {
+  const activeProject = useActiveProject();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const savedDraftRef = useRef<any>(readSavedDraft());
 
-  const [sourceImage, setSourceImage] = useState<string | null>(savedDraftRef.current?.sourceImage || null);
+  const [sourceImage, setSourceImage] = useState<string | null>(activeProject?.state.floorPlanUrl || savedDraftRef.current?.sourceImage || null);
+  useEffect(() => { if (activeProject?.state.floorPlanUrl) setSourceImage(activeProject.state.floorPlanUrl); }, [activeProject?.state.floorPlanUrl]);
   const [mode, setMode] = useState<Mode>(savedDraftRef.current?.mode || "elevation_to_axo");
   const [style, setStyle] = useState(savedDraftRef.current?.style || STYLE_PRESETS[0].value);
   const [overlayImages, setOverlayImages] = useState<string[]>(Array.isArray(savedDraftRef.current?.overlayImages) ? savedDraftRef.current.overlayImages : []);
@@ -1242,7 +1245,7 @@ const TradeAxonometric = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <SourceUpload onSourceReady={(url) => resetWithFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl)} />
+                  <SourceUpload onSourceReady={(url) => { activeProject?.setFloorPlanUrl(url); resetWithFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl); }} />
 
         {/* Submit 3D Model Panel */}
         {show3dSubmit && (
