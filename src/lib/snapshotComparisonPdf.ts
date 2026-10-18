@@ -13,6 +13,7 @@ export function comparisonPieceText(object?: PlacedObject) {
   const finishes = snapshotFinishes(object);
   return [object.product_name || 'Furniture', object.brand_name,
     `X ${object.position[0].toFixed(2)} m / Z ${object.position[2].toFixed(2)} m / Rotation ${(object.rotation[1] * 180 / Math.PI).toFixed(0)}°`,
+    ...(object.marbleSurface ? [`Marble surface: reflectivity ${(object.marbleSurface.reflectivity * 100).toFixed(0)}% / roughness ${(object.marbleSurface.roughness * 100).toFixed(0)}%`] : []),
     ...(finishes.length ? finishes.map(f => `${f.label}: ${f.name}`) : ['Original product finishes'])].filter(Boolean);
 }
 
@@ -106,7 +107,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     const objects = [change.before, change.after];
     const columns = objects.map(o => {
       const text = comparisonPieceText(o);
-      const metadata = o && snapshotFinishes(o).length ? text.slice(0, 3) : text;
+      const metadata = o && snapshotFinishes(o).length ? text.slice(0, o.marbleSurface ? 4 : 3) : text;
       return metadata.flatMap(line => doc.setFont('Inter').setFontSize(9).splitTextToSize(line, column - 4));
     });
     const count = Math.max(...columns.map(c => c.length));
