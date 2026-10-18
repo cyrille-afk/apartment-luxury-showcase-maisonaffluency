@@ -102,6 +102,19 @@ serve(async (req) => {
       if (mailErr) console.error("[update-instant-transfer-tax] email failed", mailErr);
       emailed = !mailErr;
     }
+    if (changed) {
+      const claims = claimsData?.claims as Record<string, unknown> | undefined;
+      const { error: auditErr } = await supabase.from("shop_order_tax_audit").insert({
+        order_id: order.id, actor_id: userId ?? null,
+        actor_email: typeof claims?.email === "string" ? claims.email : null,
+        actor_kind: isAdmin ? "team" : "buyer",
+        before_tax_cents: order.tax_cents, after_tax_cents: taxCents,
+        before_tax_label: order.tax_label ?? null, after_tax_label: taxLabel,
+        before_buyer_tax_id: order.buyer_tax_id ?? null, after_buyer_tax_id: buyerTaxId,
+        before_total_cents: order.total_cents, after_total_cents: totalCents, buyer_emailed: emailed,
+      });
+      if (auditErr) console.error("[update-instant-transfer-tax] audit failed", auditErr);
+    }
     return json({ ok: true, taxCents, totalCents, emailed });
   } catch (err) {
     console.error("[update-instant-transfer-tax]", err);
