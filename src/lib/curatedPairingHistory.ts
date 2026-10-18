@@ -2,7 +2,7 @@ import { parsePairingFinishOptions } from "./pairingFinishPricing";
 import { parsePairingMedia } from './pairingMedia';
 
 export function pairingHistoryChanges(before: Record<string, unknown> | null, after: Record<string, unknown> | null) {
-  const changes: { field: string; before: string; after: string }[] = [];
+  const changes: { field: string; before: string; after: string; action?: string }[] = [];
   const fields = { source_category: "Primary category", target_category: "Complementary category", preferred_pick_id: "Preferred piece", sort_order: "Priority", enabled: "Active", finish_currency: "Price currency" };
   for (const [key, field] of Object.entries(fields)) {
     if (JSON.stringify(before?.[key]) !== JSON.stringify(after?.[key])) changes.push({ field, before: before?.[key] == null ? "—" : String(before[key]), after: after?.[key] == null ? "—" : String(after[key]) });
@@ -20,7 +20,14 @@ export function pairingHistoryChanges(before: Record<string, unknown> | null, af
   const newMedia = parsePairingMedia(after?.finish_media);
   for (const key of new Set([...oldMedia, ...newMedia].map(e => e.key))) {
     const oldEntry = oldMedia.find(e => e.key === key); const newEntry = newMedia.find(e => e.key === key);
-    for (const field of ['product_image_url', 'macro_image_url'] as const) if (oldEntry?.[field] !== newEntry?.[field]) changes.push({ field: `${newEntry?.label || oldEntry?.label} · ${field === 'product_image_url' ? 'product photo' : 'macro texture'}`, before: oldEntry?.[field] || 'Catalogue fallback', after: newEntry?.[field] || 'Catalogue fallback' });
+    for (const field of ['product_image_url', 'macro_image_url'] as const) {
+      const previous = oldEntry?.[field] || null;
+      const next = newEntry?.[field] || null;
+      if (previous === next) continue;
+      const uploaded = next ? new URL(next).pathname.includes('/storage/v1/object/public/assets/curated-pairings/') : false;
+      const action = !next ? 'Removed' : previous ? (uploaded ? 'Replaced · upload' : 'Replaced · catalogue') : uploaded ? 'Uploaded' : 'Assigned · catalogue';
+      changes.push({ field: `${newEntry?.label || oldEntry?.label} · ${field === 'product_image_url' ? 'product photo' : 'macro texture'}`, action, before: previous || 'Catalogue fallback', after: next || 'Catalogue fallback' });
+    }
   }
   return changes;
 }

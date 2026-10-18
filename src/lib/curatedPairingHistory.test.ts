@@ -22,6 +22,29 @@ describe("catalog finish and price history", () => {
     expect(pairingHistoryChanges(before, before)).toEqual([]);
   });
   it('records product and macro image assignments in history', () => {
-    expect(pairingHistoryChanges({}, { finish_media: [{ key: 'custom:oak', label: 'Oak', product_image_url: 'https://assets.example/oak.jpg', macro_image_url: 'https://assets.example/tile.jpg' }] })).toContainEqual({ field: 'Oak · macro texture', before: 'Catalogue fallback', after: 'https://assets.example/tile.jpg' });
+    expect(pairingHistoryChanges({}, { finish_media: [{ key: 'custom:oak', label: 'Oak', product_image_url: 'https://assets.example/oak.jpg', macro_image_url: 'https://assets.example/tile.jpg' }] })).toContainEqual({ field: 'Oak · macro texture', action: 'Assigned · catalogue', before: 'Catalogue fallback', after: 'https://assets.example/tile.jpg' });
+  });
+  const uploaded = 'https://assets.example/storage/v1/object/public/assets/curated-pairings/pick/new.jpg';
+  const original = 'https://assets.example/original.jpg';
+  const snapshot = (field: string, url: string | null) => ({ finish_media: [{ key: 'custom:oak', label: 'Oak', [field]: url }] });
+  for (const field of ['product_image_url', 'macro_image_url']) {
+    it(`records ${field} uploads with the exact saved asset`, () => {
+      expect(pairingHistoryChanges({}, snapshot(field, uploaded))).toEqual([{ field: `Oak · ${field === 'product_image_url' ? 'product photo' : 'macro texture'}`, action: 'Uploaded', before: 'Catalogue fallback', after: uploaded }]);
+    });
+    it(`preserves the old and new ${field} on replacement`, () => {
+      expect(pairingHistoryChanges(snapshot(field, original), snapshot(field, uploaded))[0]).toMatchObject({ action: 'Replaced · upload', before: original, after: uploaded });
+    });
+    it(`records explicit ${field} removal and fallback`, () => {
+      expect(pairingHistoryChanges(snapshot(field, original), snapshot(field, null))[0]).toMatchObject({ action: 'Removed', before: original, after: 'Catalogue fallback' });
+    });
+    it(`retains ${field} history when the finish entry is deleted`, () => {
+      expect(pairingHistoryChanges(snapshot(field, original), { finish_media: [] })[0]).toMatchObject({ action: 'Removed', before: original, after: 'Catalogue fallback' });
+    });
+    it(`ignores unchanged ${field} assignments`, () => {
+      expect(pairingHistoryChanges(snapshot(field, original), snapshot(field, original))).toEqual([]);
+    });
+  }
+  it('does not invent removal events for empty assignments', () => {
+    expect(pairingHistoryChanges({}, snapshot('product_image_url', null))).toEqual([]);
   });
 });
