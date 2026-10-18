@@ -7,6 +7,7 @@ import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { selectCuratedPairings } from "@/lib/curatedPairings";
+import { useCuratedPairingRules } from "@/hooks/useCuratedPairingRules";
 
 interface Props {
   open: boolean;
@@ -19,6 +20,7 @@ interface Props {
 
 export default function CuratedPairings({ open, title, brand, excludedIds, onDismiss, onExplore }: Props) {
   const { data: catalogue = [] } = useDbCuratorPicks({ enabled: open });
+  const { data: rules = [] } = useCuratedPairingRules(open);
   const reducedMotion = useReducedMotion();
   const destination = useShippingDestination();
   const pieces = useMemo(() => {
@@ -27,8 +29,8 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
       image: pick.image, path: `/designers/${designerId}/${pick.slug}`,
     }] : []);
     const primary = products.find((p) => p.title.toLowerCase() === title.toLowerCase() && p.brand.toLowerCase() === brand.toLowerCase());
-    return selectCuratedPairings(primary ?? { id: "", title, brand }, products, excludedIds);
-  }, [catalogue, title, brand, excludedIds]);
+    return selectCuratedPairings(primary ?? { id: "", title, brand }, products, excludedIds, rules);
+  }, [catalogue, title, brand, excludedIds, rules]);
   const { data: prices = {} } = usePublicRrpMap(open ? pieces.map((p) => p.id) : []);
 
   return <AnimatePresence>

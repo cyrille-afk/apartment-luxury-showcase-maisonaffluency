@@ -11,16 +11,18 @@ export interface PairingProduct {
   path: string;
 }
 
-/** Editable editorial mock: complementary departments, not similar products. */
-export const CURATED_PAIRING_RULES: Record<PairingCategory, PairingCategory[]> = {
-  ceiling: ["wall", "tables", "decor"],
-  wall: ["seating", "tables", "decor"],
-  "table-light": ["tables", "seating", "decor"],
-  seating: ["tables", "table-light", "decor"],
-  tables: ["seating", "table-light", "decor"],
-  decor: ["tables", "seating", "table-light"],
-  storage: ["table-light", "seating", "decor"],
+export const PAIRING_CATEGORIES: Record<PairingCategory, string> = {
+  ceiling: "Ceiling lighting", wall: "Wall lighting", "table-light": "Table lighting",
+  seating: "Seating", tables: "Tables & consoles", decor: "Decor", storage: "Storage",
 };
+export interface PairingRule {
+  id: string;
+  source_category: string;
+  target_category: string;
+  preferred_pick_id: string | null;
+  sort_order: number;
+  enabled: boolean;
+}
 
 export function privatePairingsEnabled(profile: BuyerProfile): boolean {
   return profile === "private";
@@ -38,15 +40,17 @@ export function pairingCategory(product: Pick<PairingProduct, "title" | "categor
   return null;
 }
 
-export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "title" | "brand" | "category" | "subcategory">, products: PairingProduct[], excludedIds: string[] = []): PairingProduct[] {
+export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "title" | "brand" | "category" | "subcategory">, products: PairingProduct[], excludedIds: string[] = [], rules: PairingRule[] = []): PairingProduct[] {
   const source = pairingCategory(primary);
   if (!source) return [];
   const excluded = new Set([primary.id, ...excludedIds]);
   const pool = products.filter((p) => p.image && !excluded.has(p.id) && p.title.toLowerCase() !== primary.title.toLowerCase());
-  return CURATED_PAIRING_RULES[source].flatMap((category) => {
-    const matches = pool.filter((p) => pairingCategory(p) === category);
+  return rules.filter((r) => r.enabled && r.source_category === source && r.target_category !== source)
+    .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)).flatMap((rule) => {
+    const matches = pool.filter((p) => pairingCategory(p) === rule.target_category && !excluded.has(p.id));
     const sameBrand = matches.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
-    const pick = sameBrand ?? matches[0];
+    const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? matches[0];
+    if (pick) excluded.add(pick.id);
     return pick ? [pick] : [];
   }).slice(0, 3);
 }
