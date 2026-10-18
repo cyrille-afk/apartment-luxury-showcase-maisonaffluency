@@ -6840,6 +6840,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_snapshot_comparison_annotations: {
+        Row: {
+          annotations: Json
+          id: string
+          left_snapshot_id: string
+          project_key: string
+          right_snapshot_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annotations?: Json
+          id?: string
+          left_snapshot_id: string
+          project_key: string
+          right_snapshot_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          annotations?: Json
+          id?: string
+          left_snapshot_id?: string
+          project_key?: string
+          right_snapshot_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_snapshot_comparison_annotations_left_snapshot_id_fkey"
+            columns: ["left_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "project_layout_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_snapshot_comparison_annotations_right_snapshot_id_fkey"
+            columns: ["right_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "project_layout_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_workspace_shares: {
         Row: {
           board_id: string

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Download, Loader2, RotateCcw } from 'lucide-react';
+import { Download, Loader2, RotateCcw, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import type { ComparisonAnnotations } from '@/lib/snapshotComparisonPdf';
 import { ImagePlus, X } from 'lucide-react';
+import { loadComparisonAnnotations, saveComparisonAnnotations, validateComparisonAnnotations } from '@/lib/snapshotComparisonAnnotations';
 
 const SUMMARY_KEY = '__summary';
 /** Downscales a photo locally to a ≤1200px JPEG so the PDF stays small and EXIF/location data is dropped. */
@@ -13,7 +14,9 @@ async function downscalePhoto(file: File): Promise<string> {
   const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const context = canvas.getContext('2d');
+  if (!context) { bitmap.close(); throw new Error('Photo unavailable'); }
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
   return canvas.toDataURL('image/jpeg', 0.82);
 }
@@ -22,7 +25,7 @@ function PhotoPicker({ label, photos, onChange }: { label: string; photos: strin
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   return <div className="mt-2 flex flex-wrap items-center gap-2">
-    {photos.map((url, i) => <div key={i} className="relative"><img src={url} alt={`${label} reference photo ${i + 1}`} className="h-14 w-14 object-cover" /><button type="button" aria-label={`Remove ${label} reference photo ${i + 1}`} onClick={() => onChange(photos.filter((_, j) => j !== i))} className="absolute -right-1.5 -top-1.5 rounded-full bg-background p-0.5 shadow"><X className="h-3 w-3" /></button></div>)}
+    {photos.map((url, i) => <div key={i} className="relative"><img src={url} alt={`${label} reference photo ${i + 1}`} className="h-14 w-14 object-cover" /><Button variant="ghost" size="icon" type="button" aria-label={`Remove ${label} reference photo ${i + 1}`} onClick={() => onChange(photos.filter((_, j) => j !== i))} className="absolute -right-1.5 -top-1.5 h-5 w-5 rounded-full bg-background p-0.5 shadow"><X className="h-3 w-3" /></Button></div>)}
     {photos.length < 3 && <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}Add reference photo
       <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" aria-label={`Add ${label} reference photo`} onChange={async e => {
@@ -70,20 +73,43 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
   const [pdf, setPdf] = useState<Blob | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [pdfError, setPdfError] = useState(false);
-  // Annotations are a draft per snapshot pair, kept in this browser session only.
+  // Cloud records are authoritative; session drafts survive failed/unconfirmed saves.
   const noteKey = `ma-snapshot-compare-notes:${projectKey}:${ids[0]}:${ids[1]}`;
   const [annotations, setAnnotations] = useState<ComparisonAnnotations>({});
   const [debounced, setDebounced] = useState<ComparisonAnnotations>({});
+  const [loadedKey, setLoadedKey] = useState('');
+  const [savedValue, setSavedValue] = useState('{}');
+  const [saving, setSaving] = useState(false);
+  const [annotationError, setAnnotationError] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   useEffect(() => {
-    let saved: ComparisonAnnotations = {};
-    try { saved = JSON.parse(sessionStorage.getItem(noteKey) || '{}'); } catch { /* ignore */ }
-    setAnnotations(saved); setDebounced(saved);
-  }, [noteKey]);
+    let active = true;
+    setLoadedKey(''); setAnnotationError(false); setLoadFailed(false);
+    loadComparisonAnnotations(projectKey, ids[0], ids[1]).then(saved => {
+      if (!active) return;
+      let draft = saved ?? {};
+      try { const local = sessionStorage.getItem(noteKey); if (local) draft = validateComparisonAnnotations(JSON.parse(local)); } catch { /* Invalid drafts never overwrite the cloud. */ }
+      setSavedValue(JSON.stringify(saved ?? {})); setAnnotations(draft); setDebounced(draft); setLoadedKey(noteKey);
+    }).catch(() => { if (active) { setLoadFailed(true); setAnnotationError(true); } });
+    return () => { active = false; };
+  }, [noteKey, projectKey, ids, retry]);
   useEffect(() => {
-    try { sessionStorage.setItem(noteKey, JSON.stringify(annotations)); } catch { /* quota or private mode: keep text, drop photos from the draft copy */ try { sessionStorage.setItem(noteKey, JSON.stringify({ ...annotations, photos: undefined })); } catch { /* ignore */ } }
+    if (loadedKey !== noteKey) return;
+    try {
+      if (JSON.stringify(annotations) === savedValue) sessionStorage.removeItem(noteKey);
+      else sessionStorage.setItem(noteKey, JSON.stringify(annotations));
+    } catch { /* quota or private mode: keep text, drop photos from the draft copy */ try { sessionStorage.setItem(noteKey, JSON.stringify({ ...annotations, photos: undefined })); } catch { /* ignore */ } }
     const t = window.setTimeout(() => setDebounced(annotations), 500);
     return () => window.clearTimeout(t);
-  }, [annotations, noteKey]);
+  }, [annotations, noteKey, loadedKey, savedValue]);
+  const saveAnnotations = async () => {
+    setSaving(true); setAnnotationError(false);
+    try {
+      await saveComparisonAnnotations(projectKey, ids[0], ids[1], annotations);
+      setSavedValue(JSON.stringify(annotations));
+      try { sessionStorage.removeItem(noteKey); } catch { /* Cloud save succeeded. */ }
+    } catch { setAnnotationError(true); } finally { setSaving(false); }
+  };
   const setPhotos = (id: string, next: string[]) => setAnnotations(a => ({ ...a, photos: { ...a.photos, [id]: next } }));
   const setNote = (id: string, value: string) => setAnnotations(a => ({ ...a, notes: { ...a.notes, [id]: value.slice(0, 600) } }));
   useEffect(() => {
@@ -95,17 +121,19 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
     let active = true;
     setPdf(null); setPdfError(false); setPreparing(false);
     const left = snapshots.find(s => s.id === ids[0]), right = snapshots.find(s => s.id === ids[1]);
-    if (!data || !left || !right) return;
+    if (!data || !left || !right || loadedKey !== noteKey) return;
     setPreparing(true);
     import('@/lib/snapshotComparisonPdf').then(module => module.buildSnapshotComparisonPdf({ snapshot: left, data: data[0] }, { snapshot: right, data: data[1] }, debounced))
       .then(blob => { if (active) setPdf(blob); })
       .catch(() => { if (active) setPdfError(true); })
       .finally(() => { if (active) setPreparing(false); });
     return () => { active = false; };
-  }, [data, ids, snapshots, projectKey, retry, debounced]);
+  }, [data, ids, snapshots, projectKey, retry, debounced, loadedKey, noteKey]);
   const changes = data ? snapshotChanges(data[0], data[1]) : [];
   return <Dialog open onOpenChange={value => { if (!value) onClose(); }}><DialogContent className="max-h-[92dvh] w-[calc(100vw-2rem)] max-w-6xl overflow-y-auto p-5 sm:p-6">
     <DialogHeader><DialogTitle>Compare Project Snapshots</DialogTitle><DialogDescription className="sr-only">Read-only layout and finish comparison</DialogDescription></DialogHeader>
+    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" size="sm" disabled={loadedKey !== noteKey || saving || JSON.stringify(annotations) === savedValue} onClick={() => void saveAnnotations()}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Save annotations to project</Button><span role="status" className="text-xs text-muted-foreground">{saving ? 'Saving…' : loadedKey !== noteKey ? (loadFailed ? 'Annotations unavailable' : 'Loading annotations…') : JSON.stringify(annotations) === savedValue ? 'Saved to project' : 'Unsaved changes'}</span>{annotationError && <span role="alert" className="text-xs text-destructive">{loadFailed ? "Annotations couldn't load." : "Couldn't save. Your notes and photos are still here."}<Button variant="link" size="sm" onClick={() => loadFailed ? setRetry(n => n + 1) : void saveAnnotations()}>Retry annotations</Button></span>}</div>
+    <fieldset disabled={loadedKey !== noteKey || saving} className="contents">
     <div className="flex flex-wrap items-center gap-3"><Button variant="outline" size="sm" disabled={!pdf || !data || preparing} onClick={() => { if (pdf) void downloadSnapshotComparison(pdf).catch(() => setPdfError(true)); }}>{preparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download client PDF</Button>{pdfError && <div role="alert" className="text-xs text-destructive">PDF couldn't be prepared.<Button variant="link" size="sm" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}<label className="flex items-center gap-2 text-xs"><Switch checked={annotations.highlightChanges !== false} onCheckedChange={v => setAnnotations(a => ({ ...a, highlightChanges: v }))} aria-label="Highlight changes in PDF" />Highlight changes in PDF</label></div>
     {data && <Textarea aria-label="Studio note for client" placeholder="Studio note for your client (appears at the top of the differences page)" maxLength={1200} value={annotations.summary ?? ''} onChange={e => setAnnotations(a => ({ ...a, summary: e.target.value }))} className="min-h-16 text-sm" />}
     {data && <PhotoPicker label="studio note" photos={annotations.photos?.[SUMMARY_KEY] ?? []} onChange={next => setPhotos(SUMMARY_KEY, next)} />}
@@ -118,5 +146,6 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
     {!data && !error && <div role="status" className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin" /><span className="sr-only">Loading comparison</span></div>}
     {error && <div role="alert" className="py-6 text-sm">Snapshots couldn't load.<Button variant="link" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}
     {data && <div><h3 className="mb-3 text-sm font-medium">Furniture &amp; Finishes · {changes.filter(c => c.status !== 'Unchanged').length} changed pieces</h3>{changes.length === 0 && <p className="text-sm text-muted-foreground">Both snapshots have no furniture.</p>}{changes.map(change => <div key={change.id} className="border-t border-border py-4" onMouseEnter={() => setSelected(change.id)} onMouseLeave={() => setSelected(null)}><p className="mb-3 text-xs font-medium">{change.status}{change.layoutChanged ? ' · Layout' : ''}{change.finishesChanged ? ' · Finishes' : ''}</p><div className="grid grid-cols-2 gap-3 sm:gap-6"><Piece object={change.before} /><Piece object={change.after} /></div>{change.status !== 'Unchanged' && <Textarea aria-label={`Client note for ${(change.after ?? change.before)?.product_name ?? 'piece'}`} placeholder="Add a note on this difference for the client PDF" maxLength={600} value={annotations.notes?.[change.id] ?? ''} onChange={e => setNote(change.id, e.target.value)} className="mt-3 min-h-12 text-xs" />}{change.status !== 'Unchanged' && <PhotoPicker label={(change.after ?? change.before)?.product_name ?? 'piece'} photos={annotations.photos?.[change.id] ?? []} onChange={next => setPhotos(change.id, next)} />}</div>)}</div>}
+    </fieldset>
   </DialogContent></Dialog>;
 }
