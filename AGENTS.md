@@ -18,6 +18,7 @@
 - Named project snapshots are immutable owner-private cloud records with full scene, floor plan and bounds; validated, confirmed restores preserve historical finishes and project isolation.
 - Snapshot comparison loads two project-scoped immutable records without changing the live scene; footprints use saved dimensions/transforms and finish differences use per-instance materials, with restore delegated to the existing confirmation.
 - Snapshot comparison PDFs use the same footprints/differences with allowlisted client content and a shared diagram scale; prepare a blob before download so no scene writes, trade prices or Safari activation loss occur.
+- Comparison annotations and downscaled JPEG references save atomically in owner-private project/ordered-snapshot-pair records; hydrate before editing, preserve failed saves, and cascade on snapshot deletion — prevents orphaned photos and cross-comparison overwrites.
 - Workspace presentations freeze allowlisted owner snapshots behind verified board guest sessions; server write guards keep client views read-only and exclude pricing.
 - Product selection checkout hand-offs preserve pairing rule/option references and provenance alongside finish prices — server validation must resolve custom pairing prices against their rule.
 - Checkout 409s carry a structured `recovery` hint; retries only reprice the matched line (pairing included) after explicit buyer acceptance — never silently.
