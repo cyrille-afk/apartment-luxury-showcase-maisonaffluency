@@ -19,8 +19,6 @@ export default function PicturedFinishesStrip({
   biekeLayout = false,
   onSelectImage,
   imageCount = 0,
-  available = false,
-  fallbackNames = [],
 }: {
   pickId: string;
   activeIndex: number | undefined;
@@ -29,8 +27,6 @@ export default function PicturedFinishesStrip({
   biekeLayout?: boolean;
   onSelectImage?: (index: number) => void;
   imageCount?: number;
-  available?: boolean;
-  fallbackNames?: string[];
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
@@ -45,19 +41,17 @@ export default function PicturedFinishesStrip({
       if (cancelled || error) return;
       setSwatches(
         (data || []).filter(
-          (r: any) => r && r.is_active !== false && (available || (Array.isArray(r.image_indices) && r.image_indices.length)),
+          (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
         ),
       );
     })();
     return () => {
       cancelled = true;
     };
-  }, [pickId, available]);
+  }, [pickId]);
 
-  const shown = available
-    ? swatches
-    : picturedFinishesForImage(swatches, activeIndex, biekeLayout);
-  if (!shown.length && !(available && fallbackNames.length)) return null;
+  const shown = picturedFinishesForImage(swatches, activeIndex, biekeLayout);
+  if (!shown.length) return null;
   const base = shown.filter((s) => FRAME_RE.test(s.name) || (
     (s.category || "").toLowerCase() === "wood" && !/drawer|wood pillars?/i.test(topLabel || "")
   ));
@@ -67,7 +61,7 @@ export default function PicturedFinishesStrip({
   const firstMatch = (items: Swatch[]) => items.length
     ? [items.reduce((best, item) => item.image_indices.length < best.image_indices.length ? item : best)]
     : [];
-  const groups = biekeLayout && !available
+  const groups = biekeLayout
     ? topLabel && baseLabel && baseLabel.toLowerCase() !== "size"
       ? [{ label: /^(shelf finish)$/i.test(baseLabel) ? "Frame" : baseLabel, items: firstMatch(base) }, { label: topLabel, items: firstMatch(top) }]
       : [{ label: topLabel && topLabel.toLowerCase() !== "size" ? topLabel : "Finish", items: shown }]
@@ -83,11 +77,11 @@ export default function PicturedFinishesStrip({
     const content = (
     <span className="inline-flex items-center gap-1.5">
       {s.image_url ? (
-        <img src={s.image_url} alt={s.name} className={available ? "h-9 w-9 shrink-0 rounded-none border border-border object-cover" : "h-3.5 w-3.5 shrink-0 rounded-full border border-border object-cover"} loading="lazy" />
+        <img src={s.image_url} alt={s.name} className="h-3.5 w-3.5 shrink-0 rounded-full border border-border object-cover" loading="lazy" />
       ) : (
         <span className="h-3.5 w-3.5 rounded-full bg-muted" />
       )}
-      {!available && <span className="font-light text-muted-foreground">{label}:</span>}
+      <span className="font-light text-muted-foreground">{label}:</span>
       <span className="font-medium text-foreground">{s.name}</span>
     </span>
     );
@@ -107,31 +101,6 @@ export default function PicturedFinishesStrip({
       </Button>
     );
   };
-
-  if (available) {
-    const sections = new Map<string, Swatch[]>();
-    for (const s of shown) {
-      const c = s.category || "";
-      const label = (s.category || "").toLowerCase() === "wood" ? "Frame"
-        : /fabric|leather|upholstery/i.test(c) ? "Upholstery"
-        : c && !/^other$/i.test(c) ? c : "Finish";
-      sections.set(label, [...(sections.get(label) || []), s]);
-    }
-    return (
-      <div className="mt-4 space-y-5 font-body text-[11px]">
-        <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Finishes available</span>
-        {[...sections].map(([label, items]) => (
-          <div key={label} className="space-y-2">
-            {sections.size > 1 && <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{label}</p>}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-              {items.map((s) => <Item key={s.fabric_id} label={label} s={s} />)}
-            </div>
-          </div>
-        ))}
-        {!shown.length && fallbackNames.map((name) => <span key={name} className="block text-foreground">{name}</span>)}
-      </div>
-    );
-  }
 
   return (
     <div
