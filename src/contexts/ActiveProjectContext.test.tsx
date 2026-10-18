@@ -21,4 +21,13 @@ describe("active project state", () => {
     render(<ActiveProjectProvider accountId="owner" projectId="project-a" initialView="axonometric"><Consumer /></ActiveProjectProvider>);
     expect(JSON.parse(screen.getByRole("status").textContent || "{}")).toMatchObject({ floorPlanUrl: null });
   });
+  it("recognizes a saved empty room rather than repopulating its furniture", () => {
+    sessionStorage.setItem("ma-active-layout-v1:owner:project-a", JSON.stringify({ objects: [] }));
+    function Status() {
+      const project = useActiveProject();
+      return <output>{JSON.stringify({ saved: project?.hasSavedLayout, storageKey: project?.sandboxStorageKey })}</output>;
+    }
+    render(<ActiveProjectProvider accountId="owner" projectId="project-a" initialView="sandbox"><Status /></ActiveProjectProvider>);
+    expect(JSON.parse(screen.getByRole("status").textContent || "{}")).toEqual({ saved: true, storageKey: "trade-visualiser-sandbox-v3:owner:project-a" });
+  });
 });

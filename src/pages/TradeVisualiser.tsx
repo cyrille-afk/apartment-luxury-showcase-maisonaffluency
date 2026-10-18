@@ -153,9 +153,13 @@ const CUTOUT_TRANSFORMS = "f_png,q_100,w_1200,dpr_auto,c_limit,e_make_transparen
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
 
-const readSandbox = (): PersistedSandbox => {
+const readSandbox = (storageKey = STORAGE_KEY, projectId?: string): PersistedSandbox => {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    let raw = sessionStorage.getItem(storageKey);
+    if (!raw && storageKey !== STORAGE_KEY) {
+      const legacy = sessionStorage.getItem(STORAGE_KEY);
+      if (legacy && (JSON.parse(legacy).projectId || "sandbox") === projectId) raw = legacy;
+    }
     if (!raw) return { backdrop: null, backdropDataUrl: null, objects: [] };
     const parsed = JSON.parse(raw) as PersistedSandbox;
     return {
@@ -224,7 +228,8 @@ const TradeVisualiser = () => {
   const { user } = useAuth();
   const activeProject = useActiveProject();
   const workspaceCamera = useMemo(() => activeProject && activeProject.view !== "plan" ? layoutCamera(activeProject.state.bounds, activeProject.view) : undefined, [activeProject?.view, activeProject?.state.bounds]);
-  const initial = useMemo(readSandbox, []);
+  const sandboxStorageKey = activeProject?.sandboxStorageKey ?? STORAGE_KEY;
+  const initial = useMemo(() => readSandbox(sandboxStorageKey, activeProject?.state.projectId), [sandboxStorageKey]);
   const [sceneFailed, setSceneFailed] = useState(false);
   const [canvasEpoch, setCanvasEpoch] = useState(0);
   const handleSceneCrash = useCallback(() => {
@@ -442,6 +447,7 @@ const TradeVisualiser = () => {
   }, []);
 
   useEffect(() => {
+    if (sceneFailed) return;
     let sandboxJson: string | null = null;
     try {
       sandboxJson = JSON.stringify({
@@ -483,6 +489,7 @@ const TradeVisualiser = () => {
         backdropBrightness,
       });
       sessionStorage.setItem(STORAGE_KEY, sandboxJson);
+      sessionStorage.setItem(sandboxStorageKey, sandboxJson);
     } catch {
       /* quota exceeded — composition stays in memory */
     }
@@ -527,7 +534,7 @@ const TradeVisualiser = () => {
     const incoming = searchParams.get("project");
     if (!incoming || intakeRef.current === incoming) return;
     intakeRef.current = incoming;
-    const alreadyComposed = (activeProject?.state.projectId === incoming && activeProject.objects.length > 0) || (initial.projectId === incoming && initial.objects.length > 0);
+    const alreadyComposed = (activeProject?.state.projectId === incoming && (activeProject.hasSavedLayout || activeProject.objects.length > 0)) || (initial.projectId === incoming && initial.objects.length > 0);
     setProjectId(incoming);
 
     void (async () => {
