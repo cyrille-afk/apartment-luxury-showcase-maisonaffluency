@@ -542,9 +542,9 @@ export default function SelectionDrawer({
           {pairingsEnabled && pairingsDismissed && !pairingsVisible && (
             <Button
               type="button"
-              variant="link"
+              variant="outline"
               onClick={reopenPairings}
-              className="mb-3 h-auto w-full rounded-none py-1 font-body text-[11px] text-muted-foreground decoration-gold underline-offset-4 hover:text-foreground"
+              className="mb-3 h-12 w-full touch-manipulation rounded-none border-gold/50 bg-transparent px-4 font-body text-xs font-medium uppercase tracking-widest text-foreground transition-colors hover:bg-gold/10 active:bg-gold/15 sm:h-11"
             >
               Curated Pairings
             </Button>
