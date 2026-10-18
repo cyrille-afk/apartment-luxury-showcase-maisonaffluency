@@ -44,7 +44,18 @@ async function swatch(url: string): Promise<string | null> {
 }
 
 /** Client-facing annotations typed by the studio; plain text only, never prices. */
-export type ComparisonAnnotations = { summary?: string; notes?: Record<string, string>; highlightChanges?: boolean };
+export type ComparisonAnnotations = { summary?: string; notes?: Record<string, string>; highlightChanges?: boolean; photos?: Record<string, string[]> };
+/** Key for photos attached to the overall studio note. */
+export const SUMMARY_PHOTOS = '__summary';
+/** Only locally-downscaled JPEG data URLs are embedded; at most 3 per note. */
+export function annotationPhotos(annotations: ComparisonAnnotations | undefined, id: string) {
+  return (annotations?.photos?.[id] ?? []).filter(u => typeof u === 'string' && u.startsWith('data:image/jpeg;base64,')).slice(0, 3);
+}
+const PHOTO_H = 38;
+function photoSize(doc: jsPDF, url: string) {
+  const p = doc.getImageProperties(url);
+  return { w: Math.min(80, PHOTO_H * (p.width / p.height)), h: Math.min(PHOTO_H, 80 * (p.height / p.width)) };
+}
 const ACCENT = [176, 112, 58] as const;
 const clean = (value: unknown, max: number) => String(value ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, max);
 export function comparisonAnnotationText(annotations: ComparisonAnnotations | undefined, id: string) { return clean(annotations?.notes?.[id], 600); }
@@ -126,6 +137,14 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.setFontSize(9).setTextColor(...INK).text(lines, M + 5, y + 8.5);
     y += h + 6;
   }
+  const drawPhotos = (urls: string[]) => {
+    if (!urls.length) return;
+    if (y + PHOTO_H + 4 > 192) nextPage();
+    let x = M + 4;
+    for (const url of urls) { const { w, h } = photoSize(doc, url); doc.addImage(url, 'JPEG', x, y, w, h); x += w + 4; }
+    y += PHOTO_H + 4;
+  };
+  drawPhotos(annotationPhotos(annotations, SUMMARY_PHOTOS));
   if (!changes.length) doc.setFont('Inter').setFontSize(10).text('Both snapshots have no furniture.', M, y + 8);
   for (const change of changes) {
     const objects = [change.before, change.after];
@@ -170,6 +189,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
       doc.setFontSize(8.5).setTextColor(...INK).text(lines, M + 4, y + 8);
       y += h + 2;
     }
+    drawPhotos(annotationPhotos(annotations, change.id));
     doc.setDrawColor(...RULE).line(M, y + 1, 281, y + 1); y += 8;
   }
   const pages = doc.getNumberOfPages();
