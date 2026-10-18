@@ -1,3 +1,4 @@
+- [ ] Add named owner-private project snapshots and verify save/restore/reload with finishes.
 - [x] Connect 2D floor plan, live top-down layout and eye-level Sandbox with account/project-scoped furniture and room settings, camera bridge and overview. Signed-in real Frenchmen chair placement X=1 survives view round-trip and refresh; room-wide framing and mini-map visually verified, no page errors, 9 workspace tests pass and build clean. Image Studio remains bitmap-only; GitHub sync needed.
 - [x] Add product, admin, inclusive date-range and finish-photo/macro-texture filters to catalog history, with counts, clear filters and filtering before pagination; 33 focused tests pass.
 - [ ] Verify history filters against live admin records. Blocked: fresh requesting-user session redirects to /trade; requires admin-authorized access. GitHub sync needed.
