@@ -1275,6 +1275,13 @@
       "when": 1792283379530,
       "tag": "0181_save_felix_configured_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1792283546505,
+      "tag": "0182_validate_felix_quote_snapshots",
+      "breakpoints": true
     }
   ]
 }
