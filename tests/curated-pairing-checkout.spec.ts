@@ -64,7 +64,9 @@ test('custom-finish Curated Pairing survives the product drawer and passes serve
   await page.getByRole('button', { name: 'No, thank you', exact: true }).click();
   const response = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-payment-intent') && r.request().method() === 'POST');
   await page.getByRole('button', { name: '[ Proceed to Secure Checkout ]', exact: true }).filter({ visible: true }).click();
-  await response;
+  const boundary = await response;
+  expect(boundary.status()).toBe(503);
+  expect(await boundary.json()).toEqual({ error: 'E2E: prices verified; payment provider intentionally blocked' });
   await expect(page).toHaveURL(/\/checkout$/);
   const handoff = await page.evaluate(() => history.state?.usr?.lines);
   expect(handoff).toHaveLength(2);
@@ -81,6 +83,7 @@ test('custom-finish Curated Pairing survives the product drawer and passes serve
   expect(verified.reads).toContain('curated_pairing_rules');
   expect(verified.withoutReference).toMatchObject({ ok: false, status: 409 });
   expect(verified.tampered).toMatchObject({ ok: false, status: 409 });
-  await expect(page.getByText('E2E: prices verified; payment provider intentionally blocked', { exact: true })).toBeVisible();
-  await page.screenshot({ path: '/tmp/browser/pairing-regression/verified.png' });
+  // This high-value ensemble naturally defaults to the bank-wire checkout.
+  await expect(page.getByRole('heading', { name: 'Bank wire — contact & delivery', exact: true })).toBeVisible();
+  await expect(page.getByText('Ivory Lacquer / Aged Brass', { exact: true }).first()).toBeVisible();
 });

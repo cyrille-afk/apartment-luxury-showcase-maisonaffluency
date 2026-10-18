@@ -8,6 +8,27 @@ bun run test:e2e:checkout                      # builds + previews the app
 PW_BASE_URL=http://localhost:8080 bun run test:e2e:checkout   # reuse a running dev server
 ```
 
+## Custom-finish pairing regression
+
+```bash
+PW_BASE_URL=http://localhost:8080 bun run test:e2e:checkout tests/curated-pairing-checkout.spec.ts
+```
+
+Uses the real anonymous Private Client product-page flow, configuration sheet,
+cart, drawer navigation and checkout request. An isolated rule supplies an
+Ivory Lacquer / Aged Brass finish at USD 8,700, quantity two. The outgoing
+request is evaluated by production `verifyCatalogLines` in Deno against
+fixture catalogue reads, not a copied verifier or canned success response.
+The ordinary console price differs from the custom price, so dropping the
+pairing reference fails with 409; changing the custom price by one cent also
+fails. The selected finish and quantity remain visible at bank-wire checkout.
+
+Requires Deno and the published Tassel/Segment product fixtures. It does not
+require login/admin credentials, change the live catalogue or create orders.
+Payment requests are intercepted before the live endpoint; after successful
+verification the provider boundary deliberately returns 503. This verifies
+the production pricing logic, **not** a deployed endpoint or Stripe readiness.
+
 ## Determinism
 
 No test contacts a real external provider.
