@@ -1,3 +1,4 @@
+import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
@@ -47,6 +48,19 @@ const ROLE_DESC: Record<StudioRole, string> = {
   viewer: "Read-only access",
 };
 
+function CoverPreview({ theme, typeface, logoUrl, studioName }: { theme: CoverTheme; typeface: string; logoUrl: string; studioName: string }) {
+  const heading = typeface === "modern" ? "font-body" : typeface === "classic" ? "font-serif" : "font-display";
+  // Inline styles carry the studio's own chosen colours — this previews the PDF, not app theming.
+  return <div aria-label="Cover preview" className="relative aspect-[297/210] w-full max-w-md overflow-hidden rounded-sm" style={{ background: theme.background }}>
+    <div className="absolute inset-[3.5%] border" style={{ borderColor: theme.accent }} />
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-8 text-center">
+      {logoUrl ? <img src={logoUrl} alt="" className="h-6 max-w-[40%] object-contain" /> : <span className="text-[8px] uppercase tracking-[0.3em]" style={{ color: theme.accent }}>{studioName || "Your studio"}</span>}
+      <span className={`${heading} text-xl`} style={{ color: theme.text }}>Apartment name</span>
+      <span className="text-[7px] uppercase tracking-[0.3em]" style={{ color: theme.accent }}>Project snapshot comparison</span>
+    </div>
+  </div>;
+}
+
 export default function TradeStudioSettings() {
   const { user } = useAuth();
   const { currentStudio, refresh: refreshStudios, isAdmin, isOwner } = useStudio();
@@ -72,6 +86,19 @@ export default function TradeStudioSettings() {
   const [markup, setMarkup] = useState("0");
   const [pdfLocale, setPdfLocale] = useState<PdfLocalePreset>("en-GB");
   const [savingBrand, setSavingBrand] = useState(false);
+  const [coverTheme, setCoverTheme] = useState<CoverTheme>(DEFAULT_COVER_THEME);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const uploadLogo = async (file: File) => {
+    if (!currentStudio) return;
+    if (!/^image\/(png|jpeg)$/.test(file.type) || file.size > 2 * 1024 * 1024) { toast({ title: "Use a PNG or JPEG logo under 2 MB", variant: "destructive" }); return; }
+    setUploadingLogo(true);
+    const path = `studio-logos/${currentStudio.id}/${Date.now()}.${file.type === "image/png" ? "png" : "jpg"}`;
+    const { error } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type, upsert: false });
+    setUploadingLogo(false);
+    if (error) { toast({ title: "Logo could not be uploaded", description: error.message, variant: "destructive" }); return; }
+    setLogoUrl(supabase.storage.from("assets").getPublicUrl(path).data.publicUrl);
+    toast({ title: "Logo uploaded — save branding to apply it" });
+  };
 
   useEffect(() => {
     if (currentStudio) {
@@ -81,6 +108,7 @@ export default function TradeStudioSettings() {
       setBrandFont(currentStudio.primary_brand_font || "editorial");
       setMarkup(String(currentStudio.default_project_markup_percentage ?? 0));
       setPdfLocale(normalizePdfLocale(currentStudio.pdf_locale));
+      setCoverTheme(normalizeCoverTheme((currentStudio as { pdf_cover_theme?: unknown }).pdf_cover_theme));
     }
   }, [currentStudio?.id]);
 
@@ -208,6 +236,7 @@ export default function TradeStudioSettings() {
       primary_brand_font: brandFont,
       default_project_markup_percentage: value,
       pdf_locale: pdfLocale,
+      pdf_cover_theme: coverTheme,
     }).eq("id", currentStudio.id);
     setSavingBrand(false);
     if (error) { toast({ title: "Branding could not be saved", description: error.message, variant: "destructive" }); return; }
@@ -300,7 +329,14 @@ export default function TradeStudioSettings() {
           <div className="border-b border-border pb-4"><StudioBrand studio={{ name: studioName, display_name: displayName, logo_url: logoUrl, primary_brand_font: brandFont }} /></div>
           <div><Label htmlFor="display-name">Display name</Label><Input id="display-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={studioName} disabled={!isAdmin} /></div>
           <div><Label htmlFor="brand-logo">Logo URL</Label><Input id="brand-logo" type="url" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://…" disabled={!isAdmin} /></div>
+          <div className="flex flex-wrap items-center gap-3"><Label htmlFor="brand-logo-file" className="cursor-pointer"><span className="inline-flex h-9 items-center rounded-md border border-input px-3 text-sm">{uploadingLogo ? "Uploading…" : "Upload logo (PNG or JPEG)"}</span></Label><input id="brand-logo-file" type="file" accept="image/png,image/jpeg" className="sr-only" disabled={!isAdmin || uploadingLogo} onChange={e => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void uploadLogo(f); }} />{logoUrl && isAdmin && <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl("")}>Remove logo</Button>}</div>
           <div><Label htmlFor="brand-font">Brand typeface</Label><Select value={brandFont} onValueChange={setBrandFont} disabled={!isAdmin}><SelectTrigger id="brand-font"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="editorial">Editorial</SelectItem><SelectItem value="modern">Modern</SelectItem><SelectItem value="classic">Classic</SelectItem></SelectContent></Select></div>
+          <fieldset className="space-y-3 border-t border-border pt-4">
+            <legend className="text-sm font-medium">Client PDF cover</legend>
+            <div className="flex flex-wrap gap-4">{([["background", "Background"], ["accent", "Accent"], ["text", "Title text"]] as const).map(([k, label]) => <div key={k} className="space-y-1"><Label htmlFor={`cover-${k}`}>{label}</Label><div className="flex items-center gap-2"><input id={`cover-${k}`} type="color" value={coverTheme[k]} disabled={!isAdmin} onChange={e => setCoverTheme(t => ({ ...t, [k]: e.target.value.toUpperCase() }))} className="h-9 w-12 cursor-pointer rounded border border-input bg-background" /><span className="font-mono text-xs text-muted-foreground">{coverTheme[k]}</span></div></div>)}<Button type="button" variant="ghost" size="sm" className="self-end" disabled={!isAdmin} onClick={() => setCoverTheme(DEFAULT_COVER_THEME)}>Reset</Button></div>
+            {contrastRatio(coverTheme.background, coverTheme.text) < 4.5 && <p role="alert" className="text-xs text-destructive">Title text may be hard to read on this background.</p>}
+            <CoverPreview theme={coverTheme} typeface={brandFont} logoUrl={logoUrl} studioName={displayName || studioName} />
+          </fieldset>
           <div><Label htmlFor="default-markup">Default project markup (%)</Label><Input id="default-markup" type="number" min="0" max="1000" step="0.01" value={markup} onChange={(e) => setMarkup(e.target.value)} disabled={!isAdmin} /></div>
           <div>
             <Label htmlFor="pdf-locale">Proforma date &amp; number locale</Label>

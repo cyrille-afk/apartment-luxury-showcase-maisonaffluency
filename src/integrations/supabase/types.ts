@@ -9144,6 +9144,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          pdf_cover_theme: Json
           pdf_locale: string
           primary_brand_font: string
           slug: string | null
@@ -9158,6 +9159,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          pdf_cover_theme?: Json
           pdf_locale?: string
           primary_brand_font?: string
           slug?: string | null
@@ -9172,6 +9174,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          pdf_cover_theme?: Json
           pdf_locale?: string
           primary_brand_font?: string
           slug?: string | null
