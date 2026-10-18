@@ -82,6 +82,7 @@ import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/l
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
 import { configuredProductPrice } from "@/lib/configuredProductPrice";
+import { felixFinishLabel } from "@/lib/felixQuoteFinishes";
 import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
@@ -1887,6 +1888,11 @@ const TradeProductPage: React.FC = () => {
   })();
 
   // Same render snapshot as the headline; captured before the asynchronous add.
+  const felixSectionLabels = resolveFinishSectionLabels({
+    baseAxisLabel: product.base_axis_label, topAxisLabel: product.top_axis_label,
+    baseAxisIsDimension: baseAxisIsDim, isUpholstered: isProductUpholstered(product as any),
+    woodLabelOverride: product.wood_label_override,
+  });
   felixSelectionRef.current = {
     productId: product.id,
     productName: product.title,
@@ -1895,6 +1901,11 @@ const TradeProductPage: React.FC = () => {
     fabricLabel: selectedFabric?.name ?? null,
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
+    finishes: [
+      selectedFabric && { label: felixFinishLabel(felixSectionLabels.upholsteryLabel, "Upholstery Fabric"), name: selectedFabric.name, imageUrl: selectedFabric.image_url },
+      (selectedWoodPrice?.name || selectedBase) && { label: felixFinishLabel(selectedWoodPrice ? felixSectionLabels.woodLabel : getBasePlaceholder(product), "Frame Finish"), name: selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || "", imageUrl: selectedWoodPrice?.image_url },
+      !selectedFabric && (selectedTopSwatch?.name || selectedTop) && { label: felixFinishLabel(getTopPlaceholder(product), "Top Finish"), name: selectedTopSwatch?.name || selectedTopDisplay || selectedTop || "", imageUrl: selectedTopSwatch?.image_url },
+    ].filter((finish): finish is { label: string; name: string; imageUrl: string | null | undefined } => !!finish),
     tradePriceLabel: priceLabels?.netLabel ?? null,
     unitPriceCents: priceLabels ? convertCents(priceLabels.netCents, priceLabels.currency, displayCurrency, fxRates) : null,
     priceCurrency: displayCurrency === "original" ? priceLabels?.currency ?? pricing?.currency ?? "EUR" : displayCurrency,
