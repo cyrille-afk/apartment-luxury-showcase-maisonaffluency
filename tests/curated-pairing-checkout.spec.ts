@@ -118,7 +118,6 @@ test('price-change rejection offers a safe retry that keeps the configured pairi
     localStorage.setItem('trade.displayCurrency', 'USD');
     localStorage.setItem('trade.shippingDestination.manual', '1');
     // A small basket so the card checkout (not bank wire) is used.
-    sessionStorage.setItem('ma_secure_basket_seed', '1');
     localStorage.setItem('ma_cart_v1', JSON.stringify([{ key: `${p}::ivory lacquer / aged brass::pairing:${r}:ivory-brass`, pickId: p, title: 'Segment Console Table', designerName: 'Apparatus Studio', finishLabel: 'Ivory Lacquer / Aged Brass', imageUrl: '', unitPriceCents: 870000, currency: 'USD', quantity: 1, pairing: { ruleId: r, optionId: 'ivory-brass' } }]));
   }, [rule.id, pickId]);
   const first = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-payment-intent') && r.request().method() === 'POST');
@@ -135,6 +134,6 @@ test('price-change rejection offers a safe retry that keeps the configured pairi
   const retried = calls.at(-1).body.items[0];
   expect(retried).toMatchObject({ pickId, pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, selectedFinish: 'Ivory Lacquer / Aged Brass', price: 9100, quantity: 1 });
   expect(calls.at(-1).out.accepted.ok).toBe(true);
-  const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ma_cart_v1') || '[]'));
+  const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ma_cart_v1') || '{}').lines);
   expect(cart[0]).toMatchObject({ unitPriceCents: 910000, pairing: { optionId: 'ivory-brass' }, finishLabel: 'Ivory Lacquer / Aged Brass' });
 });
