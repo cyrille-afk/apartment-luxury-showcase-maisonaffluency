@@ -93,7 +93,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED);
     const b = side.data.bounds;
     doc.text(`${b.width.toFixed(2)} × ${b.depth.toFixed(2)} m (${(b.width * 3.28084).toFixed(1)} × ${(b.depth * 3.28084).toFixed(1)} ft) / ${side.data.scene.objects.length} pieces`, xs[i], top + 96);
-    doc.text(`Saved ${formatPdfDate(side.snapshot.created_at, 'en-GB')}`, xs[i], top + 102);
+    doc.text(`Saved ${formatPdfDate(new Date(side.snapshot.created_at), 'en-GB')}`, xs[i], top + 102);
     const surfaces = `Floor: ${side.data.scene.floorFinish ?? 'Default'} / Wall: ${side.data.scene.featureWallFinish ?? side.data.scene.wallFinish ?? 'Default'}`;
     doc.text(doc.splitTextToSize(surfaces, column), xs[i], top + 109);
   });
@@ -116,14 +116,20 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     const finishes = objects.map(o => o ? snapshotFinishes(o) : []);
     const finishCount = Math.max(...finishes.map(f => f.length));
     for (let row = 0; row < finishCount; row++) {
-      if (y + 19 > 192) nextPage();
+      doc.setFont('Inter').setFontSize(8);
+      const texts = finishes.map(list => {
+        const f = list[row];
+        return f ? doc.splitTextToSize(`${f.label}: ${f.name}${f.image && !images.get(f.image) ? ' (image unavailable)' : ''}`, column - 20) as string[] : [];
+      });
+      const rowHeight = Math.max(19, ...texts.map(t => t.length * 4 + 5));
+      if (y + rowHeight > 192) nextPage();
       finishes.forEach((list, i) => {
         const f = list[row]; if (!f) return;
         const image = f.image ? images.get(f.image) : null;
         if (image) doc.addImage(image, 'PNG', xs[i], y, 14, 14);
-        doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text(doc.splitTextToSize(`${f.label}: ${f.name}${f.image && !image ? ' (image unavailable)' : ''}`, column - 20), xs[i] + 19, y + 4);
+        doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text(texts[i], xs[i] + 19, y + 4);
       });
-      y += 19;
+      y += rowHeight;
     }
     doc.setDrawColor(...RULE).line(M, y + 1, 281, y + 1); y += 8;
   }
