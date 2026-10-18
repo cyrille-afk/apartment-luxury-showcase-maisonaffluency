@@ -1,3 +1,4 @@
+- [ ] Add admin-only curated pairing change history for CSV imports and finish/price edits, with server-recorded author and before/after values.
 - [x] Add CSV import/export for curated pairing finishes and retail prices, with review, validation, defaults restoration and a single batch save. 51 tests pass, build clean; signed-in access check confirms current account is trade_user only, no page errors. GitHub sync needed.
 - [ ] Verify CSV export → edited import → confirmed save → reload through live admin UI. Blocked: current account lacks admin authorization; confirmation, persistence and failure recovery pass isolated tests without altering live catalog data.
 - [x] Add discreet Private Client manual reopening without clearing session dismissal. Browser confirms reopening, Escape dismissal, refresh suppression, unchanged cart and designer exclusion; 18 tests pass.
