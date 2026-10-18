@@ -16,6 +16,7 @@
 - Sandbox default photo is a presentation-only canvas layer replaced by custom backdrop state, not furniture changes — preserves compositions and imports.
 - Stripe delivery monitoring extends the existing watchdog and reconciles provider failures with local receipts; unverified bodies never establish mode — catches pre-handler failures without duplicate schedules.
 - Named project snapshots are immutable owner-private cloud records with full scene, floor plan and bounds; validated, confirmed restores preserve historical finishes and project isolation.
+- Snapshot comparison loads two project-scoped immutable records without changing the live scene; footprints use saved dimensions/transforms and finish differences use per-instance materials, with restore delegated to the existing confirmation.
 - Workspace presentations freeze allowlisted owner snapshots behind verified board guest sessions; server write guards keep client views read-only and exclude pricing.
 - Product selection checkout hand-offs preserve pairing rule/option references and provenance alongside finish prices — server validation must resolve custom pairing prices against their rule.
 <!-- LOVABLE:END -->

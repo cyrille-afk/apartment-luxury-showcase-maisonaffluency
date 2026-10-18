@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Camera, RotateCcw, Trash2, Loader2 } from "lucide-react";
+import { Camera, RotateCcw, Trash2, Loader2, Columns2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,6 +9,7 @@ import { DEFAULT_LAYOUT_BOUNDS } from "@/lib/activeProjectLayout";
 import { deleteProjectSnapshot, listProjectSnapshots, loadProjectSnapshot, saveProjectSnapshot, snapshotData, type ProjectSnapshot } from "@/lib/projectLayoutSnapshots";
 import { makePresetThumbnail, type ScenePresetData } from "@/lib/visualiserScenePresets";
 import ScenePresets from "./ScenePresets";
+import SnapshotComparison from "./SnapshotComparison";
 import { toast } from "sonner";
 
 export default function ProjectSnapshots({ className, current, onLoad }: { className: string; current: () => ScenePresetData; onLoad: (data: ScenePresetData) => void }) {
@@ -19,6 +20,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
   const [list, setList] = useState<ProjectSnapshot[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [comparing, setComparing] = useState(false);
   const [action, setAction] = useState<{ snapshot: ProjectSnapshot; kind: "restore" | "delete" } | null>(null);
   const refresh = async () => {
     setBusy(true); setError(false); setList([]);
@@ -57,6 +59,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
           <Input aria-label="Snapshot name" placeholder="Snapshot name" maxLength={120} value={name} onChange={event => setName(event.target.value)} disabled={busy} className="h-9 min-w-0 text-xs" />
           <Button size="sm" type="submit" disabled={busy || !name.trim()}>Save</Button>
         </form>
+        {list.length >= 2 && <Button variant="outline" size="sm" className="mt-3 w-full" disabled={busy} onClick={() => { setOpen(false); setComparing(true); }}><Columns2 className="h-4 w-4" />Compare snapshots</Button>}
         <div className="mt-3 max-h-80 space-y-3 overflow-y-auto">
           {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Loading snapshots" />}
           {error && <div className="text-xs text-muted-foreground">Snapshots couldn't load.<Button variant="link" size="sm" disabled={busy} onClick={() => void refresh()}>Retry</Button></div>}
@@ -73,6 +76,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
       </PopoverContent>
     </Popover>
     <ScenePresets className={className} current={current} onLoad={onLoad} />
+    {comparing && <SnapshotComparison key={key} projectKey={key} snapshots={list} onClose={() => setComparing(false)} onRestore={snapshot => { setComparing(false); setAction({ snapshot, kind: "restore" }); }} />}
     <AlertDialog open={Boolean(action)} onOpenChange={value => { if (!value && !busy) setAction(null); }}>
       <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{action?.kind === "restore" ? "Restore snapshot?" : "Delete snapshot?"}</AlertDialogTitle><AlertDialogDescription>{action?.kind === "restore" ? `“${action.snapshot.name}” will replace this project's current furniture, finishes and room settings. Save your current layout first if you want to keep it.` : `“${action?.snapshot.name}” will be permanently deleted. Your current room will not change.`}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel><AlertDialogAction disabled={busy} onClick={event => { event.preventDefault(); void confirm(); }}>{busy ? "Please wait…" : action?.kind === "restore" ? "Restore" : "Delete"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
     </AlertDialog>
