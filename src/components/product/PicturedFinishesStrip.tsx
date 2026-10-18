@@ -45,14 +45,14 @@ export default function PicturedFinishesStrip({
       if (cancelled || error) return;
       setSwatches(
         (data || []).filter(
-          (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
+          (r: any) => r && r.is_active !== false && (available || (Array.isArray(r.image_indices) && r.image_indices.length)),
         ),
       );
     })();
     return () => {
       cancelled = true;
     };
-  }, [pickId]);
+  }, [pickId, available]);
 
   const shown = available
     ? swatches
@@ -108,14 +108,38 @@ export default function PicturedFinishesStrip({
     );
   };
 
+  if (available) {
+    const sections = new Map<string, Swatch[]>();
+    for (const s of shown) {
+      const c = s.category || "";
+      const label = (s.category || "").toLowerCase() === "wood" ? "Frame"
+        : /fabric|leather|upholstery/i.test(c) ? "Upholstery"
+        : c && !/^other$/i.test(c) ? c : "Finish";
+      sections.set(label, [...(sections.get(label) || []), s]);
+    }
+    return (
+      <div className="mt-4 space-y-5 font-body text-[11px]">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Finishes available</span>
+        {[...sections].map(([label, items]) => (
+          <div key={label} className="space-y-2">
+            {sections.size > 1 && <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">{label}</p>}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+              {items.map((s) => <Item key={s.fabric_id} label={label} s={s} />)}
+            </div>
+          </div>
+        ))}
+        {!shown.length && fallbackNames.map((name) => <span key={name} className="block text-foreground">{name}</span>)}
+      </div>
+    );
+  }
+
   return (
     <div
       aria-live="polite"
-      className={available ? "mt-4 flex flex-col items-start gap-2 font-body text-[11px]" : "mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border border-border/50 bg-muted/30 px-4 py-3 font-body text-[11px]"}
+      className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border border-border/50 bg-muted/30 px-4 py-3 font-body text-[11px]"
     >
-      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{available ? "Finishes available" : "Pictured Finishes"}</span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Pictured Finishes</span>
       {groups.flatMap((group) => group.items.map((s) => <Item key={s.fabric_id} label={group.label} s={s} />))}
-      {available && !shown.length && fallbackNames.map((name) => <span key={name} className="text-foreground">{name}</span>)}
     </div>
   );
 }
