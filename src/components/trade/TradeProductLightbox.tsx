@@ -640,7 +640,6 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   emphasized
                 />
               )}
-              <PicturedFinishesStrip available pickId={product.id} activeIndex={activeImageIdx ?? 0} imageCount={galleryImages.length} onSelectImage={(index) => { setShowHoverImage(false); setSwatchImageIdx(index); }} fallbackNames={axes.singleMaterialOptions} />
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;

@@ -1024,7 +1024,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   })()}
-                  <PicturedFinishesStrip available pickId={product.id} activeIndex={activeImageIdx} imageCount={galleryImages.length} onSelectImage={setSwatchImageIdx} fallbackNames={singleSplitMaterials} />
 
                 </div>
               </div>
