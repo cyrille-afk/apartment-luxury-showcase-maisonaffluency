@@ -399,6 +399,7 @@ import { ProjectBoardDrawer } from "@/components/trade/ProjectBoardDrawer";
 
 import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { felixQuantity, felixQuoteTotals, formatFelixMoney } from "@/lib/felixQuoteQuantity";
+import { FelixQuoteDownload } from "@/components/trade/concierge/FelixQuoteDownload";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
@@ -5711,6 +5712,7 @@ export function AIConcierge({
                       {(totals.some((total) => total.incomplete) || quoteCards.some((entry) => entry.kind === "proactive_tearsheet" && !entry.data.priceCurrency)) && <p className="text-muted-foreground text-[10px]">Additional pieces: Price upon Request</p>}
                     </div>
                   )}
+                  {isLastQuoteCard && <FelixQuoteDownload cards={quoteCards.flatMap((entry) => entry.kind === "proactive_tearsheet" ? [entry.data] : [])} studioName={currentStudio?.display_name || currentStudio?.name} locale={currentStudio?.pdf_locale} />}
                   </div>
                 );
               }
