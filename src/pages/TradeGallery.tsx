@@ -472,10 +472,11 @@ const StudioGallery = () => {
   // Direct navigation (or a saved view) can leave a collection selected that
   // doesn't belong to the active designer — clear it.
   useEffect(() => {
+    if (productsLoading || !publishedMakerNames) return;
     if (selectedEdition !== "all" && !editions.some((ed) => ed.toLowerCase() === selectedEdition.toLowerCase())) {
       setSelectedEdition("all");
     }
-  }, [editions, selectedEdition]);
+  }, [editions, selectedEdition, productsLoading, publishedMakerNames]);
   // Pieces per collection beside each entry in the collection dropdown. The
   // collection filter itself is excluded so the number is what picking it
   // would show, given the designer / category / search already applied.
