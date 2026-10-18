@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, X } from "lucide-react";
@@ -8,6 +8,7 @@ import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { selectCuratedPairings } from "@/lib/curatedPairings";
 import { useCuratedPairingRules } from "@/hooks/useCuratedPairingRules";
+import CuratedPairingOptions from "./CuratedPairingOptions";
 
 interface Props {
   open: boolean;
@@ -23,10 +24,12 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
   const { data: rules = [] } = useCuratedPairingRules(open);
   const reducedMotion = useReducedMotion();
   const destination = useShippingDestination();
+  const [expanded, setExpanded] = useState<string[]>([]);
   const pieces = useMemo(() => {
     const products = catalogue.flatMap(({ pick, designerName, designerId }) => pick.id && pick.slug && pick.image ? [{
       id: pick.id, title: pick.title || "", brand: designerName, category: pick.category, subcategory: pick.subcategory,
       image: pick.image, path: `/designers/${designerId}/${pick.slug}`,
+      materials: pick.materials, leadTime: pick.lead_time, origin: pick.origin,
     }] : []);
     const primary = products.find((p) => p.title.toLowerCase() === title.toLowerCase() && p.brand.toLowerCase() === brand.toLowerCase());
     return selectCuratedPairings(primary ?? { id: "", title, brand }, products, excludedIds, rules);
@@ -55,9 +58,10 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
           <p className="mt-5 font-body text-[10px] uppercase tracking-widest text-muted-foreground">{piece.brand}</p>
           <h3 className="mt-2 font-display text-lg leading-snug">{piece.title}</h3>
           <p className="mt-3 font-body text-xs text-muted-foreground">{formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
-          <Button asChild variant="link" className="mt-4 h-auto justify-start self-start rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
-            <Link to={piece.path} state={{ curatedPairing: true }} data-nav-state='{"curatedPairing":true}' onClick={onExplore}>{prices[piece.id]?.rrp_price_cents ? "Choose & Add" : "Discover Piece"} <ArrowUpRight strokeWidth={1.25} /></Link>
+          <Button variant="link" aria-expanded={expanded.includes(piece.id)} onClick={() => setExpanded((current) => current.includes(piece.id) ? current.filter((id) => id !== piece.id) : [...current, piece.id])} className="mt-4 h-auto justify-start self-start whitespace-normal rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
+            {expanded.includes(piece.id) ? "Close Options" : "Choose Finishes & Quantity"} <ArrowUpRight className="shrink-0" strokeWidth={1.25} />
           </Button>
+          {expanded.includes(piece.id) && <CuratedPairingOptions piece={piece} onExplore={onExplore} />}
         </article>)}
       </div>
       <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>
