@@ -498,6 +498,8 @@ export default function ProductCommerceCta({
         imageUrl: item.imageUrl, unitCents: item.unitPriceCents, currency: item.currency,
         leadTime: item.leadTime, productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
         quantity: item.quantity, pickId: item.pickId, variant: item.variant,
+        pairing: item.pairing ?? null,
+        origin: item.origin ?? null, pickupCountry: item.pickupCountry ?? null,
       })) } });
       return;
     }
