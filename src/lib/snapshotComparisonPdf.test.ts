@@ -18,3 +18,12 @@ describe('comparison annotations', () => {
     expect(comparisonAnnotationText({}, 'a')).toBe('');
   });
 });
+
+describe('annotation photos', () => {
+  it('embeds at most three local JPEG photos per note and ignores remote URLs', async () => {
+    const { annotationPhotos } = await import('./snapshotComparisonPdf');
+    const jpg = 'data:image/jpeg;base64,AAAA';
+    expect(annotationPhotos({ photos: { a: [jpg, 'https://evil.example/x.jpg', jpg, jpg, jpg] } }, 'a')).toEqual([jpg, jpg, jpg]);
+    expect(annotationPhotos({}, 'a')).toEqual([]);
+  });
+});
