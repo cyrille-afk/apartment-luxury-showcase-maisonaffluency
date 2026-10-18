@@ -95,10 +95,13 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
   }, [noteKey, projectKey, ids, retry]);
   useEffect(() => {
     if (loadedKey !== noteKey) return;
-    try { sessionStorage.setItem(noteKey, JSON.stringify(annotations)); } catch { /* quota or private mode: keep text, drop photos from the draft copy */ try { sessionStorage.setItem(noteKey, JSON.stringify({ ...annotations, photos: undefined })); } catch { /* ignore */ } }
+    try {
+      if (JSON.stringify(annotations) === savedValue) sessionStorage.removeItem(noteKey);
+      else sessionStorage.setItem(noteKey, JSON.stringify(annotations));
+    } catch { /* quota or private mode: keep text, drop photos from the draft copy */ try { sessionStorage.setItem(noteKey, JSON.stringify({ ...annotations, photos: undefined })); } catch { /* ignore */ } }
     const t = window.setTimeout(() => setDebounced(annotations), 500);
     return () => window.clearTimeout(t);
-  }, [annotations, noteKey, loadedKey]);
+  }, [annotations, noteKey, loadedKey, savedValue]);
   const saveAnnotations = async () => {
     setSaving(true); setAnnotationError(false);
     try {
