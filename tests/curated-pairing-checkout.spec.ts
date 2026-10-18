@@ -85,5 +85,5 @@ test('custom-finish Curated Pairing survives the product drawer and passes serve
   expect(verified.tampered).toMatchObject({ ok: false, status: 409 });
   // This high-value ensemble naturally defaults to the bank-wire checkout.
   await expect(page.getByRole('heading', { name: 'Bank wire — contact & delivery', exact: true })).toBeVisible();
-  await expect(page.getByText('Ivory Lacquer / Aged Brass', { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('complementary').getByText('Ivory Lacquer / Aged Brass', { exact: true })).toBeVisible();
 });
