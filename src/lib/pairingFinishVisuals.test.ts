@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pairingFinishImage, pairingSwatchFor } from "./pairingFinishVisuals";
+import { pairingFinishImage, pairingSwatchFor, pairingVisualOptions } from "./pairingFinishVisuals";
 
 describe("pairing finish visual linking", () => {
   const rows = [{ base: "Lacquer", top: "Aged Brass" }, { base: "Lacquer", top: "Tarnished Silver" }];
@@ -22,5 +22,9 @@ describe("pairing finish visual linking", () => {
   it("resolves authentic swatches accent-insensitively and avoids ambiguous suffixes", () => {
     expect(pairingSwatchFor("Ecru", [{ name: "Écru", image_url: "ecru.jpg" }])?.image_url).toBe("ecru.jpg");
     expect(pairingSwatchFor("Brass", [{ name: "Aged Brass", image_url: "aged.jpg" }, { name: "Weathered Brass", image_url: "weathered.jpg" }])).toBeUndefined();
+  });
+  it("resolves bracketed material treatments without changing the priced axis", () => {
+    expect(pairingSwatchFor("Aged Brass", [{ name: "Aged Brass [Waxed]", image_url: "brass.jpg" }])?.image_url).toBe("brass.jpg");
+    expect(pairingVisualOptions(["Lacquer"], [{ name: "Lacquer - Ivory", image_url: "ivory.jpg" }, { name: "Lacquer - Gray", image_url: "gray.jpg" }])).toEqual([{ value: "Lacquer", name: "Lacquer - Ivory" }, { value: "Lacquer", name: "Lacquer - Gray" }]);
   });
 });

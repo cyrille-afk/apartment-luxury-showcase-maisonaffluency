@@ -10,7 +10,7 @@ import { usePublicRrp, usePublicRrpDisplay, formatPublicRrpCents } from "@/hooks
 import { supabase } from "@/integrations/supabase/client";
 import { addToCart } from "@/lib/cart";
 import { pairingAxes, pairingAxisOptions, pairingOptionAvailable, pairingSelectionComplete, pairingSelectionPrice, type PairingSelection, type PairingVariant } from "@/lib/curatedPairingConfiguration";
-import { pairingFinishImage, pairingSwatchFor, type PairingSwatch } from "@/lib/pairingFinishVisuals";
+import { pairingFinishImage, pairingSwatchFor, pairingVisualOptions, type PairingSwatch } from "@/lib/pairingFinishVisuals";
 import type { PairingProduct } from "@/lib/curatedPairings";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const custom = piece.finishOptions || [];
   const [customId, setCustomId] = useState(custom.length === 1 ? custom[0].id : "");
   const [material, setMaterial] = useState("");
+  const [visualChoices, setVisualChoices] = useState<Partial<Record<keyof PairingSelection, string>>>({});
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const rows: PairingVariant[] = detail?.size_variants || price?.rrp_size_variants || [];
   const selection = useMemo(() => Object.fromEntries(pairingAxes.map((axis) => {
@@ -47,7 +48,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const finishImage = pairingFinishImage(detail?.variant_image_map, images, rows, selection, customOption?.name);
   const dedicated = finishImage && finishImage !== failedImage ? finishImage : undefined;
   const image = dedicated || piece.image;
-  const selectedNames = custom.length ? customOption ? [customOption.name] : [] : rows.length ? pairingAxes.map((axis) => selection[axis]).filter((name): name is string => !!name) : material ? [material] : [];
+  const selectedNames = custom.length ? customOption ? [customOption.name] : [] : rows.length ? pairingAxes.map((axis) => visualChoices[axis] || selection[axis]).filter((name): name is string => !!name) : material ? [material] : [];
   const macros = selectedNames.flatMap((name) => {
     const swatch = pairingSwatchFor(name, swatches);
     return swatch?.image_url ? [{ name, image: swatch.image_url }] : [];
@@ -89,7 +90,14 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
             const options = pairingAxisOptions(rows, axis);
             if (!options.length) return null;
             const label = axis === "base" ? detail?.base_axis_label || "Finish" : axis === "top" ? detail?.top_axis_label || "Material" : options.every((option) => /\d|small|medium|large/i.test(option)) ? "Size" : detail?.variant_placeholder?.replace(/^select (your |the )?/i, "") || "Finish";
-            return <div key={axis}>{swatchGrid(label, options, selection[axis], (name) => setChosen({ ...selection, [axis]: name }), (name) => pairingOptionAvailable(rows, selection, axis, name))}</div>;
+            const visualOptions = pairingVisualOptions(options, swatches);
+            const active = visualChoices[axis] || (selection[axis] ? pairingSwatchFor(selection[axis] || "", swatches)?.name || selection[axis] : null);
+            return <div key={axis}>{swatchGrid(label, visualOptions.map((option) => option.name), active, (name) => {
+              const option = visualOptions.find((option) => option.name === name);
+              if (!option) return;
+              setChosen({ ...selection, [axis]: option.value });
+              setVisualChoices({ ...visualChoices, [axis]: name });
+            }, (name) => pairingOptionAvailable(rows, selection, axis, visualOptions.find((option) => option.name === name)?.value || name))}</div>;
           }) : swatches.length ? swatchGrid("Material", swatches.map((swatch) => swatch.name), material, setMaterial) : null}
           {!dedicated && !!macros.length && <div className="space-y-4 border-t border-border/60 pt-6">{macros.map((macro) => <figure key={macro.name} className="flex items-center gap-4"><img src={macro.image} alt={`${macro.name} material close-up`} className="h-24 w-24 shrink-0 object-cover sm:h-28 sm:w-28" /><figcaption className="min-w-0 font-body text-sm leading-relaxed"><span className="block text-[10px] uppercase tracking-widest text-muted-foreground">Material detail</span><span className="mt-2 block">{macro.name}</span></figcaption></figure>)}</div>}
           <div className="flex items-center justify-between gap-4 border-t border-border/60 pt-6"><span className="font-body text-xs uppercase tracking-widest text-muted-foreground">Quantity</span><div className="flex h-11 items-center border border-border"><Button variant="ghost" size="icon" aria-label={`Decrease ${piece.title} quantity`} disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} className="h-10 w-10 rounded-none"><Minus className="h-4 w-4" /></Button><span aria-live="polite" className="w-10 text-center text-sm tabular-nums">{quantity}</span><Button variant="ghost" size="icon" aria-label={`Increase ${piece.title} quantity`} disabled={quantity >= 99} onClick={() => setQuantity(quantity + 1)} className="h-10 w-10 rounded-none"><Plus className="h-4 w-4" /></Button></div></div>
