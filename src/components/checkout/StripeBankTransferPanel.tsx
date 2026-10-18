@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { cn } from "@/lib/utils";
+import { saveTransferConfirmation } from "@/lib/checkout/transferConfirmations";
 import { CheckoutRecoveryPanel, type RecoveryLine } from "./CheckoutRecoveryPanel";
 import { readFunctionFailure, type CheckoutFailure, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 
@@ -306,6 +307,18 @@ export default function StripeBankTransferPanel({
           setActiveRail(0);
           setReference((data as any)?.reference ?? null);
           setHostedUrl((data as any)?.hostedInstructionsUrl ?? null);
+          const ref = orderReference || (data as any)?.reference;
+          if (ref) {
+            const lineCents = items.map(i => Math.round(i.price * 100));
+            const goods = lineCents.reduce((t, c, n) => t + c * items[n].quantity, 0);
+            saveTransferConfirmation({
+              reference: ref, issuedAt: new Date().toISOString(), method: "instant", currency,
+              lines: items.map((i, n) => ({ title: i.title, designer: i.designer, finishLabel: i.selectedFinish, quantity: i.quantity, unitCents: lineCents[n] })),
+              deliveryCents: shippingCents ?? 0, taxCents: 0, totalCents: goods + (shippingCents ?? 0),
+              rails: list.map(a => ({ label: RAIL_LABEL[a.type] || a.type, rows: addressRows(a).map(r => ({ label: r.label, value: r.value })) })),
+              hostedUrl: (data as any)?.hostedInstructionsUrl ?? null,
+            });
+          }
         }
       } catch {
         if (!cancelled) {
@@ -404,6 +417,8 @@ export default function StripeBankTransferPanel({
         automatically. Our concierge will also email these fully-insured wiring
         instructions within one business hour.
       </p>
+
+      {(orderReference || reference) && <a href={`/order-confirmation?ref=${encodeURIComponent((orderReference || reference)!)}&status=bank_transfer`} className="block text-[10px] font-light uppercase tracking-[0.24em] underline underline-offset-4">Saved on this device · view anytime</a>}
 
       {hostedUrl && (
         <a
