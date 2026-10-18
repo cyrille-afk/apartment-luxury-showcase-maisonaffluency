@@ -19,7 +19,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
   const { currentStudio, canEdit } = useStudio();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState<Array<{ id: string; quote_number: string | null; felix_snapshot: unknown }>>([]);
+  const [saved, setSaved] = useState<Array<{ id: string; felix_snapshot: unknown }>>([]);
   const pending = useRef<ProactiveTearsheetData[] | null>(null);
   if (!user) return null;
   const save = async () => {
@@ -42,7 +42,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
   };
   const load = async () => {
     setBusy(true);
-    const { data, error } = await supabase.from("trade_quotes").select("id,quote_number,felix_snapshot").eq("user_id", user.id).eq("status", "draft").not("felix_snapshot", "is", null).order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("trade_quotes").select("id,felix_snapshot").eq("user_id", user.id).eq("status", "draft").not("felix_snapshot", "is", null).order("created_at", { ascending: false });
     setBusy(false);
     if (error) { toast.error("Could not load saved quotes."); return; }
     setSaved(data || []); setOpen(true);
@@ -56,7 +56,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
       {saved.map(quote => {
         const lines = Array.isArray(quote.felix_snapshot) ? quote.felix_snapshot as ProactiveTearsheetData[] : [];
         return <Button key={quote.id} variant="ghost" className="w-full h-auto py-4 justify-start border-b border-border rounded-none text-left whitespace-normal" onClick={() => { pending.current = null; onRestore?.(lines); setOpen(false); }}>
-          <span className="min-w-0"><span className="block">{quote.quote_number || "Felix Quote"}</span><span className="block text-muted-foreground text-xs">{lines.map(c => c.productName).join(" · ")}</span>{felixQuoteTotals(lines).map(t => <span key={t.currency} className="block text-xs mt-1">{formatFelixMoney(t.cents, t.currency)}{t.incomplete ? " + Price upon Request" : ""}</span>)}</span>
+          <span className="min-w-0"><span className="block">QU-{quote.id.slice(0, 6).toUpperCase()}</span><span className="block text-muted-foreground text-xs">{lines.map(c => c.productName).join(" · ")}</span>{felixQuoteTotals(lines).map(t => <span key={t.currency} className="block text-xs mt-1">{formatFelixMoney(t.cents, t.currency)}{t.incomplete ? " + Price upon Request" : ""}</span>)}</span>
         </Button>;
       })}
     </SheetContent></Sheet>
