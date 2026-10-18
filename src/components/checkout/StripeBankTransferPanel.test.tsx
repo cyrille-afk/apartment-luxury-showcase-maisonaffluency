@@ -48,3 +48,18 @@ describe('instant transfer price recovery', () => {
     expect(saved?.totalCents).toBe(2088000);
   });
 });
+describe('saved instant transfer tax updates', () => {
+  it('updates the saved order when a VAT number zero-rates tax after issue, without re-issuing', async () => {
+    localStorage.clear();
+    mocks.invoke.mockResolvedValue({ data: { financialAddresses: [{ type: 'sort_code', sort_code: { sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'ref' }, error: null });
+    const ref = 'TRADE-ORDER-#10002';
+    const view = render(<StripeBankTransferPanel {...props} orderReference={ref} totals={{ taxCents: 348000, taxLabel: 'UK VAT 20%', discountCents: 0, totalCents: 2088000 }} />);
+    await screen.findByText('TEST-ONLY');
+    view.rerender(<StripeBankTransferPanel {...props} orderReference={ref} totals={{ taxCents: 0, taxLabel: 'Reverse charge', discountCents: 0, totalCents: 1740000 }} />);
+    const { getTransferConfirmation } = await import('@/lib/checkout/transferConfirmations');
+    await vi.waitFor(() => expect(getTransferConfirmation(ref)?.totalCents).toBe(1740000));
+    expect(getTransferConfirmation(ref)?.taxCents).toBe(0);
+    expect(getTransferConfirmation(ref)?.taxLabel).toBe('Reverse charge');
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+  });
+});

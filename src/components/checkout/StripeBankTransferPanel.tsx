@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { cn } from "@/lib/utils";
-import { saveTransferConfirmation } from "@/lib/checkout/transferConfirmations";
+import { saveTransferConfirmation, type TransferConfirmation } from "@/lib/checkout/transferConfirmations";
 import { CheckoutRecoveryPanel, type RecoveryLine } from "./CheckoutRecoveryPanel";
 import { readFunctionFailure, type CheckoutFailure, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 
@@ -264,6 +264,18 @@ export default function StripeBankTransferPanel({
   const [failure, setFailure] = useState<CheckoutFailure | null>(null);
   const [retry, setRetry] = useState(0);
   const recoveryRef = useRef<HTMLDivElement>(null);
+  const savedRef = useRef<TransferConfirmation | null>(null);
+  // VAT number / tax treatment can change after instructions are issued:
+  // keep the saved order's tax, discount and total in step with checkout.
+  const totalsKey = totals ? `${totals.taxCents}:${totals.taxLabel ?? ""}:${totals.discountCents}:${totals.totalCents}` : "";
+  useEffect(() => {
+    const prev = savedRef.current;
+    if (!prev || !totals) return;
+    if (prev.taxCents === totals.taxCents && prev.taxLabel === totals.taxLabel && prev.discountCents === totals.discountCents && prev.totalCents === totals.totalCents) return;
+    savedRef.current = { ...prev, taxCents: totals.taxCents, taxLabel: totals.taxLabel, discountCents: totals.discountCents, totalCents: totals.totalCents, issuedAt: prev.issuedAt };
+    saveTransferConfirmation(savedRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalsKey]);
   useEffect(() => { if (failure) recoveryRef.current?.scrollIntoView({ block: "center" }); }, [failure]);
 
   const hasEmail = email.includes("@");
@@ -278,7 +290,7 @@ export default function StripeBankTransferPanel({
     setFailed(false);
     setReason(null);
     setFailure(null);
-    setAddresses([]); setReference(null); setHostedUrl(null);
+    setAddresses([]); setReference(null); setHostedUrl(null); savedRef.current = null;
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("create-bank-transfer-intent", {
@@ -314,14 +326,15 @@ export default function StripeBankTransferPanel({
           if (ref) {
             const lineCents = items.map(i => Math.round(i.price * 100));
             const goods = lineCents.reduce((t, c, n) => t + c * items[n].quantity, 0);
-            saveTransferConfirmation({
+            savedRef.current = {
               reference: ref, issuedAt: new Date().toISOString(), method: "instant", currency,
               lines: items.map((i, n) => ({ title: i.title, designer: i.designer, finishLabel: i.selectedFinish, quantity: i.quantity, unitCents: lineCents[n] })),
               deliveryCents: shippingCents ?? 0, taxCents: totals?.taxCents ?? 0, taxLabel: totals?.taxLabel, discountCents: totals?.discountCents ?? 0,
               totalCents: totals ? totals.totalCents : goods + (shippingCents ?? 0),
               rails: list.map(a => ({ label: RAIL_LABEL[a.type] || a.type, rows: addressRows(a).map(r => ({ label: r.label, value: r.value })) })),
               hostedUrl: (data as any)?.hostedInstructionsUrl ?? null,
-            });
+            };
+            saveTransferConfirmation(savedRef.current);
           }
         }
       } catch {
