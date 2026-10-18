@@ -383,6 +383,15 @@ export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?
   return key;
 }
 
+/** Re-prices one line after the buyer accepts a server-confirmed price; finish, pairing and quantity are kept. */
+export function repriceCartLine(pickId: string, pairing: { ruleId: string; optionId: string } | null, unitPriceCents: number) {
+  const match = (i: CartItem) =>
+    i.pickId === pickId &&
+    ((!i.pairing && !pairing) || (!!i.pairing && !!pairing && i.pairing.ruleId === pairing.ruleId && i.pairing.optionId === pairing.optionId));
+  if (!items.some(match)) return;
+  commitExplicit(items.map((i) => (match(i) ? { ...i, unitPriceCents } : i)));
+}
+
 export function setQuantity(key: string, quantity: number) {
   if (quantity <= 0) return removeFromCart(key);
   commitExplicit(items.map((i) => (i.key === key ? { ...i, quantity } : i)));
