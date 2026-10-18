@@ -10,6 +10,8 @@ import { hasConsent } from "@/lib/consent/consentStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
+import { readFunctionFailure, acceptRecoveredPrice, findRecoveryLine, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
+import { repriceCartLine } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import type { PairingReference } from "@/lib/pairingFinishPricing";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
@@ -2347,6 +2349,8 @@ export default function Checkout() {
     grossLines?.length,
   ]);
   const [error, setError] = useState<string | null>(null);
+  const [recovery, setRecovery] = useState<CheckoutRecovery | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
   const clientSecretRef = useRef<string>("");
@@ -2459,6 +2463,7 @@ export default function Checkout() {
       if (!grossLines?.length) return;
       const first = grossLines[0];
       setError(null);
+      setRecovery(null);
       setSyncing(true);
       try {
         const piBody: Record<string, unknown> = {
@@ -2532,7 +2537,9 @@ export default function Checkout() {
         }
         const pi = (piRes as any)?.data;
         if ((piRes as any)?.error || pi?.error) {
-          throw new Error(pi?.error || "Unable to start checkout.");
+          const failure = await readFunctionFailure((piRes as any)?.error, pi, "Unable to start checkout.");
+          setRecovery(failure.recovery);
+          throw new Error(failure.message);
         }
 
         // Guardrail: the amount Stripe will charge must equal the cart-derived
@@ -2597,6 +2604,26 @@ export default function Checkout() {
     void syncIntent(null, method === "paynow" ? "paynow" : "card");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fxReady, grossLines, syncIntent]);
+
+  // Safe retry: runs once per explicit request, after any accepted price has
+  // flowed into grossLines, so the configured pairing is re-sent unchanged.
+  const handledRetry = useRef(0);
+  useEffect(() => {
+    if (!retryNonce || handledRetry.current === retryNonce || !grossLines?.length) return;
+    handledRetry.current = retryNonce;
+    void syncIntent(shipping, method === "paynow" ? "paynow" : "card");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retryNonce, grossLines, syncIntent]);
+
+  const acceptNewPrice = useCallback(() => {
+    if (!recovery || !rawLines) return;
+    const next = acceptRecoveredPrice(rawLines, recovery);
+    if (!next) return;
+    writeSecureBasket(next);
+    setLines(next);
+    repriceCartLine(recovery.pickId, recovery.pairing ?? null, recovery.currentUnitCents!);
+    setRetryNonce((n) => n + 1);
+  }, [recovery, rawLines]);
 
   // The destination country changes the GST due, so the PaymentIntent must be
   // re-priced whenever it changes after the first sync.
@@ -2868,7 +2895,28 @@ export default function Checkout() {
               );
             }
             if (error) {
-              return <div className="py-16 text-center text-sm text-muted-foreground">{error}</div>;
+              const affected = recovery && rawLines ? rawLines[findRecoveryLine(rawLines, recovery)] : undefined;
+              const canAccept = recovery?.reason === "price_changed" && !!recovery.currentUnitCents && !!affected;
+              return (
+                <div role="alert" className="py-12 text-center space-y-4" data-testid="checkout-recovery">
+                  <p className="text-sm text-muted-foreground">{error}</p>
+                  {affected && (
+                    <p className="text-xs text-muted-foreground">
+                      Your basket and selections{affected.finishLabel ? ` — including ${affected.finishLabel}` : ""} are saved.
+                      {canAccept && ` Current price: ${formatMoney(recovery!.currentUnitCents!, String(affected.currency || "USD").toUpperCase())} each.`}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {canAccept && (
+                      <Button size="sm" onClick={acceptNewPrice} disabled={syncing}>Accept updated price and retry</Button>
+                    )}
+                    {recovery && recovery.reason !== "price_changed" && affected?.productPath && (
+                      <Button size="sm" variant="outline" onClick={() => navigate(affected.productPath!)}>Reselect on product page</Button>
+                    )}
+                    <Button size="sm" variant="outline" disabled={syncing} onClick={() => setRetryNonce((n) => n + 1)}>Try again</Button>
+                  </div>
+                </div>
+              );
             }
             if (stripePromise && clientSecret) {
               return (
