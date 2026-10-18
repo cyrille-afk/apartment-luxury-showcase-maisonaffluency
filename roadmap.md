@@ -1,3 +1,4 @@
+- [ ] Add CSV import/export for curated pairing finishes and retail prices, with validation and confirmation; verify round-trip and preservation of unaffected pairings.
 - [x] Add discreet Private Client manual reopening without clearing session dismissal. Browser confirms reopening, Escape dismissal, refresh suppression, unchanged cart and designer exclusion; 18 tests pass.
 - [x] Add rule-bound editable finish choices and retail prices, preserving catalogue defaults. Real Private Client Silver / Marble ×3 stores USD 8700, keeps the original item and survives refresh/checkout; 39 frontend + 6 server tests pass, all six deployed checkout functions respond. Temporary choices restored; GitHub sync needed.
 - [ ] Verify admin finish editing via UI: current requesting-user test session has trade_user only, so the admin page correctly denies access; requires an admin-authorized test session.
