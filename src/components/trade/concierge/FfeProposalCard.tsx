@@ -8,6 +8,8 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
+import { useFelixCatalogueFinishes } from "@/hooks/useFelixCatalogueFinishes";
+import { FelixFinishRows } from "./FelixFinishRows";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -38,6 +40,7 @@ export function FfeProposalCard({ proposal, onResolved }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState(proposal.preview);
+  const resolveFinishes = useFelixCatalogueFinishes(rows.map(row => row.pick_id));
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<{ quoteId: string; url: string; added: number; rooms: number } | null>(null);
 
@@ -220,6 +223,7 @@ export function FfeProposalCard({ proposal, onResolved }: Props) {
                         {[r.designer_name, r.variant].filter(Boolean).join(" · ") || "—"}
                       </div>
                       <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
+                        <FelixFinishRows finishes={resolveFinishes(r.pick_id, r.variant)} />
                         {formatPrice(r.unit_price_cents, r.currency)}
                         {lineTotal != null && r.qty > 1 && (
                           <span className="ml-1 text-foreground/70">

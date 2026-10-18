@@ -12,6 +12,8 @@ import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker
 import { useProjects, type Project } from "@/hooks/useProjects";
 import { useFxRates, convertCents, getFxRatesFetchedAt } from "@/components/trade/CurrencyToggle";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
+import { useFelixCatalogueFinishes } from "@/hooks/useFelixCatalogueFinishes";
+import { FelixFinishRows } from "./FelixFinishRows";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -81,6 +83,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [error, setError] = useState<string | null>(null);
   const [lines, setLines] = useState(proposal.preview);
+  const resolveFinishes = useFelixCatalogueFinishes(lines.map(line => line.pick_id));
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<{ quoteId: string; url: string; added: number } | null>(null);
 
@@ -496,6 +499,7 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                     ))}
                   </select>
                 )}
+                <FelixFinishRows finishes={resolveFinishes(l.pick_id, l.variant)} />
                 <div className="mt-0.5 font-body text-[10px] text-muted-foreground">
                   {formatPrice(displayedUnitPrice, displayCurrency)}
                   {lineTotal != null && l.qty > 1 && (
