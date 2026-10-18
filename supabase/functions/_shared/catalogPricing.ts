@@ -95,10 +95,9 @@ export async function verifyCatalogLines(
       if (!resolved || norm(l.finishLabel) !== norm(resolved.option.name)) return { ok: false, status: 409, error: `${title}'s pairing finish is no longer available. Please reselect it.` };
       const canonical = resolved.currency.toLowerCase() === target ? Number(resolved.option.price_cents) : await convertCents(Number(resolved.option.price_cents), resolved.currency.toLowerCase(), target);
       const claimedUnit = Math.round(Number(l.unitCents));
-      const tolerance = resolved.currency.toLowerCase() === target ? 0 : TOLERANCE;
-      if (!Number.isFinite(claimedUnit) || claimedUnit <= 0 || Math.abs(claimedUnit - canonical) > canonical * tolerance) return { ok: false, status: 409, error: `The price for ${title} has changed. Please refresh your basket and try again.` };
+      if (!Number.isFinite(claimedUnit) || claimedUnit <= 0 || claimedUnit !== canonical) return { ok: false, status: 409, error: `The price for ${title} has changed. Please refresh your basket and try again.` };
       const quantity = Math.min(maxQty, Math.max(1, Math.round(Number(l.quantity) || 1)));
-      lines.push({ pick_id: pickId, title, designer_name: str(l.designer, 160) || null, finish_label: resolved.option.name, quantity, unit_price_cents: claimedUnit, line_total_cents: claimedUnit * quantity });
+      lines.push({ pick_id: pickId, title, designer_name: str(l.designer, 160) || null, finish_label: resolved.option.name, quantity, unit_price_cents: canonical, line_total_cents: canonical * quantity });
       continue;
     }
     if (!row) return { ok: false, status: 409, error: `${title} is not available for direct purchase — please send an enquiry.` };
