@@ -16,6 +16,7 @@ import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 import { supabase } from "@/integrations/supabase/client";
 import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
 import { privatePairingsEnabled } from "@/lib/curatedPairings";
+import { useCuratedPairingSession } from "@/lib/curatedPairingSession";
 import CuratedPairings from "./CuratedPairings";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -106,9 +107,8 @@ export default function SelectionDrawer({
 }: SelectionDrawerProps) {
   const { buyerProfile } = useCheckoutForm();
   const { isTradeUser, isAdmin, rolesLoaded, user } = useAuth();
-  const [pairingsDismissed, setPairingsDismissed] = useState(false);
+  const { dismissed: pairingsDismissed, dismiss: dismissPairings } = useCuratedPairingSession();
   const pairingsEnabled = allowPairings && privatePairingsEnabled(buyerProfile) && !isTradeUser && !isAdmin && (!user || rolesLoaded);
-  useEffect(() => { if (isOpen) setPairingsDismissed(false); }, [isOpen]);
 
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
@@ -188,12 +188,12 @@ export default function SelectionDrawer({
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (pairingsEnabled && !pairingsDismissed) setPairingsDismissed(true);
+      if (pairingsEnabled && !pairingsDismissed) dismissPairings();
       else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose, pairingsEnabled, pairingsDismissed]);
+  }, [isOpen, onClose, pairingsEnabled, pairingsDismissed, dismissPairings]);
 
   // Portal to document.body so the drawer escapes any ancestor stacking
   // context (transforms, blurs) — its z-[10000] must always beat the
@@ -220,7 +220,7 @@ export default function SelectionDrawer({
         title={title || lines?.[lines.length - 1]?.title || ""}
         brand={brand || lines?.[lines.length - 1]?.brand || ""}
         excludedIds={(lines || []).map((line) => line.key.split("::")[0])}
-        onDismiss={() => setPairingsDismissed(true)}
+        onDismiss={dismissPairings}
         onExplore={onClose}
       />}
 
