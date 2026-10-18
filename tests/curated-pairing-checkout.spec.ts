@@ -273,7 +273,7 @@ for (const scenario of ['pairing-price', 'multiple-prices'] as const) {
         { id: pickId, source_pick_id: pickId, is_active: true, public_rrp_visible: true, currency: 'GBP', rrp_price_cents: 999 },
         { id: pendant, source_pick_id: pendant, is_active: true, public_rrp_visible: true, currency: 'GBP', rrp_price_cents: scenario === 'multiple-prices' ? 0 : 5700000 },
       ];
-      const picks = scenario === 'multiple-prices' ? [{ id: pendant, size_variants: [{ label: 'Small', price_cents: 5800000 }, { label: 'Large', price_cents: 6200000 }] }] : [];
+      const picks = scenario === 'multiple-prices' ? [{ id: pendant, size_variants: [{ label: 'Small', price_cents: 6000000 }, { label: 'Large', price_cents: 6500000 }] }] : [];
       const out = JSON.parse(execFileSync('deno', ['run', '--allow-read', '--config', 'tests/harness/deno.json', 'tests/harness/pairing-checkout.harness.ts'], {
         input: JSON.stringify({ body, products, picks, rule: verifiedRule }), encoding: 'utf8', timeout: 30_000,
       }).trim().split('\n').pop() || '{}');
@@ -294,11 +294,11 @@ for (const scenario of ['pairing-price', 'multiple-prices'] as const) {
         { key: `${p}::ivory lacquer / aged brass::pairing:${r}:ivory-brass`, pickId: p, title: 'Segment Console Table', designerName: 'Apparatus Studio', finishLabel: 'Ivory Lacquer / Aged Brass', imageUrl: '', unitPriceCents: 870000, currency: 'GBP', quantity: 2, pairing: { ruleId: r, optionId: 'ivory-brass' } },
       ]));
     }, [rule.id, pickId, pendant]);
+    const first = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-bank-transfer-intent') && r.request().method() === 'POST');
     await page.goto('/checkout');
     await expect(page.getByRole('heading', { name: 'Bank wire — contact & delivery', exact: true })).toBeVisible();
     const reject = page.getByRole('button', { name: 'Reject all', exact: true });
     if (await reject.isVisible()) await reject.click();
-    const first = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-bank-transfer-intent') && r.request().method() === 'POST');
     await page.getByPlaceholder('Email address').fill('client@example.com');
     expect((await first).status()).toBe(409);
     const panel = page.getByTestId('checkout-recovery');
@@ -319,7 +319,7 @@ for (const scenario of ['pairing-price', 'multiple-prices'] as const) {
     expect(calls.length).toBe(before + 1);
     expect(calls.at(-1).out.accepted.ok).toBe(true);
     expect(calls.at(-1).body.items.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, selectedFinish: 'Ivory Lacquer / Aged Brass', quantity: 2, price: scenario === 'pairing-price' ? 9100 : 8700 });
-    expect(calls.at(-1).body.items.find((l: any) => l.pickId === pendant).price).toBe(scenario === 'multiple-prices' ? 62000 : 57000);
+    expect(calls.at(-1).body.items.find((l: any) => l.pickId === pendant).price).toBe(scenario === 'multiple-prices' ? 65000 : 57000);
     const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ma_cart_v1') || '{}').lines);
     expect(cart.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, quantity: 2, finishLabel: 'Ivory Lacquer / Aged Brass' });
   });
