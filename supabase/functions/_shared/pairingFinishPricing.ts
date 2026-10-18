@@ -1,5 +1,6 @@
 export interface PairingFinishOption { id: string; name: string; price_cents: number | null }
 export interface PairingReference { ruleId: string; optionId: string }
+interface StoredPairingRule { id: string; enabled: boolean; preferred_pick_id: string | null; finish_options: unknown; finish_currency: string }
 export const PAIRING_FINISH_CURRENCIES = ["USD", "EUR", "GBP", "SGD", "HKD", "CHF", "AED", "AUD", "CAD", "JPY"];
 
 export function parsePairingFinishOptions(value: unknown): PairingFinishOption[] {
@@ -24,4 +25,25 @@ export function resolvePairingFinish(rule: { id: string; enabled: boolean; prefe
   const option = parsePairingFinishOptions(rule.finish_options).find((o) => o.id === ref.optionId);
   if (!option?.price_cents) return null;
   return { option, currency: rule.finish_currency };
+}
+
+/** Service-side publication checks prevent stale overrides buying unpublished pieces. */
+export async function loadPairingRules(admin: any, refs: PairingReference[]): Promise<Map<string, StoredPairingRule>> {
+  const ids = Array.from(new Set(refs.map((r) => r.ruleId).filter((id) => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id))));
+  const result = new Map<string, StoredPairingRule>();
+  if (!ids.length) return result;
+  const { data: rules, error } = await admin.from("curated_pairing_rules").select("id, enabled, preferred_pick_id, finish_options, finish_currency").in("id", ids).eq("enabled", true);
+  if (error) throw new Error("Pairing prices could not be verified.");
+  const picks = Array.from(new Set((rules || []).map((r: StoredPairingRule) => r.preferred_pick_id).filter(Boolean)));
+  if (!picks.length) return result;
+  const { data: published, error: pickError } = await admin.from("designer_curator_picks_public").select("id, designer_id").in("id", picks);
+  if (pickError) throw new Error("Pairing pieces could not be verified.");
+  const designerIds = Array.from(new Set((published || []).map((p: any) => p.designer_id)));
+  if (!designerIds.length) return result;
+  const { data: designers, error: designerError } = await admin.from("designers").select("id").in("id", designerIds).eq("is_published", true).eq("trade_only", false);
+  if (designerError) throw new Error("Pairing designers could not be verified.");
+  const allowedDesigners = new Set((designers || []).map((d: any) => d.id));
+  const allowedPicks = new Set((published || []).filter((p: any) => allowedDesigners.has(p.designer_id)).map((p: any) => p.id));
+  for (const rule of rules || []) if (allowedPicks.has(rule.preferred_pick_id)) result.set(rule.id, rule);
+  return result;
 }
