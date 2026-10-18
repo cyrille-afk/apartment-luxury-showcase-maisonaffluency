@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, PanelLeft, ZoomIn, ZoomOut } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, PanelLeft, Search, X, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { findPdfMatches, type PdfTextItem } from "@/lib/pdfTextSearch";
 import { pageSections, type PdfSection, type PageImage } from "@/lib/pdfPageSections";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -37,12 +38,18 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   const thumbList = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const canvases = useRef<(HTMLCanvasElement | null)[]>([]);
+  const pageEls = useRef<(HTMLDivElement | null)[]>([]);
+  const [texts, setTexts] = useState<{ items: PdfTextItem[]; height: number }[]>([]);
+  const [scales, setScales] = useState<number[]>([]);
+  const [query, setQuery] = useState("");
+  const [hit, setHit] = useState(0);
+  const matches = useMemo(() => findPdfMatches(texts, query), [texts, query]);
   const zoomRef = useRef(zoom); zoomRef.current = zoom;
 
   useEffect(() => {
     if (!open) return;
     let off = false; let made: string | null = null; let loaded: PdfDoc | null = null;
-    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1); setFull(false);
+    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1); setFull(false); setTexts([]); setQuery("");
     build().then(async blob => {
       if (off) return;
       made = URL.createObjectURL(blob);
@@ -61,10 +68,12 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     const fitWidth = Math.max(320, scroller.current.clientWidth - 32);
     const dpr = window.devicePixelRatio || 1;
     (async () => {
+      const used: number[] = [];
       for (let n = 1; n <= doc.numPages && !off; n++) {
         const p = await doc.getPage(n);
         const base = p.getViewport({ scale: 1 });
         const scale = (fitWidth / base.width) * zoom;
+        used[n - 1] = scale; if (!off) setScales([...used]);
         const vp = p.getViewport({ scale: scale * dpr });
         const c = canvases.current[n - 1]; if (!c || off) continue;
         c.width = vp.width; c.height = vp.height;
@@ -80,7 +89,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     if (!doc) return;
     let off = false; setLabels([]); setSections([]);
     (async () => {
-      const found: string[] = []; const tags: PdfSection[][] = [];
+      const found: string[] = []; const tags: PdfSection[][] = []; const runs: { items: PdfTextItem[]; height: number }[] = [];
       const pdfjs = await import("pdfjs-dist");
       for (let n = 1; n <= doc.numPages && !off; n++) {
         const p = await doc.getPage(n);
@@ -90,6 +99,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
         if (c && !off) { c.width = vp.width; c.height = vp.height; c.style.width = "112px"; c.style.height = `${(vp.height / vp.width) * 112}px`; await p.render({ canvasContext: c.getContext("2d")!, viewport: vp }).promise; }
         try {
           const text = await p.getTextContent();
+          runs[n - 1] = { height: base.height, items: text.items.map((t: any) => ({ str: t.str ?? "", x: t.transform[4], y: t.transform[5], w: t.width, h: t.height || Math.abs(t.transform[3]) })) };
           const all = text.items.map((t: { str?: string }) => t.str ?? "").join(" ").replace(/\s+/g, " ").trim();
           found[n - 1] = all.slice(0, 48);
           const ops = await p.getOperatorList();
@@ -100,7 +110,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           });
           tags[n - 1] = pageSections(all, images);
         } catch { found[n - 1] = ""; tags[n - 1] = []; }
-        if (!off) { setLabels([...found]); setSections([...tags]); }
+        if (!off) { setLabels([...found]); setSections([...tags]); setTexts([...runs]); }
       }
     })();
     return () => { off = true; };
@@ -116,17 +126,27 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     const el = scroller.current; if (!el) return;
     const mid = el.scrollTop + el.clientHeight / 3;
     let current = 1;
-    canvases.current.forEach((c, i) => { if (c && c.offsetTop <= mid) current = i + 1; });
+    pageEls.current.forEach((c, i) => { if (c && c.offsetTop <= mid) current = i + 1; });
     setPage(current);
   }, []);
 
   const goTo = (n: number) => {
     if (!doc) return;
     const target = Math.min(doc.numPages, Math.max(1, n));
-    const c = canvases.current[target - 1];
+    const c = pageEls.current[target - 1];
     if (c && scroller.current) scroller.current.scrollTo({ top: c.offsetTop - 16, behavior: "smooth" });
     setPage(target);
   };
+
+  // Scroll the active search result into view.
+  const showHit = (i: number) => {
+    if (!matches.length) return;
+    const k = (i + matches.length) % matches.length; setHit(k);
+    const m = matches[k], el = pageEls.current[m.page - 1], sc = scales[m.page - 1] ?? 1;
+    if (el && scroller.current) scroller.current.scrollTo({ top: el.offsetTop + m.top * sc - scroller.current.clientHeight / 3, behavior: "smooth" });
+    setPage(m.page);
+  };
+  useEffect(() => { setHit(0); if (matches.length) showHit(0); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [matches]);
 
   // Ctrl/⌘ + wheel or trackpad pinch zooms the document, not the page.
   useEffect(() => {
@@ -164,6 +184,16 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
             of {pages}</label>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Next page" disabled={page >= pages} onClick={() => goTo(page + 1)}><ChevronRight className="h-4 w-4" /></Button>
         </div>
+        <div className="flex items-center gap-1" role="search">
+          <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+          <input aria-label="Search in PDF" placeholder="Search notes, finishes…" value={query} onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); showHit(hit + (e.shiftKey ? -1 : 1)); } else if (e.key === "Escape" && query) { e.stopPropagation(); setQuery(""); } }}
+            className="h-7 w-44 rounded border border-input bg-background px-2 text-xs text-foreground" />
+          <span className="min-w-14 text-xs tabular-nums text-muted-foreground" aria-live="polite">{query.trim().length >= 2 ? (matches.length ? `${hit + 1} of ${matches.length}` : "No results") : ""}</span>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Previous result" disabled={!matches.length} onClick={() => showHit(hit - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Next result" disabled={!matches.length} onClick={() => showHit(hit + 1)}><ChevronRight className="h-4 w-4" /></Button>
+          {query && <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Clear search" onClick={() => setQuery("")}><X className="h-4 w-4" /></Button>}
+        </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Zoom out" disabled={zoom <= MIN_ZOOM} onClick={() => setZoom(z => clampZoom(z - 0.25))}><ZoomOut className="h-4 w-4" /></Button>
           <span className="w-12 text-center text-xs tabular-nums" aria-live="polite">{Math.round(zoom * 100)}%</span>
@@ -186,7 +216,11 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
         {state === "building" && <div className="flex h-full items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Preparing preview…</div>}
         {state === "error" && <p role="alert" className="p-6 text-sm text-destructive">The preview couldn't be prepared. Close and try again.</p>}
         {doc && <div className="flex w-max min-w-full flex-col items-center gap-4">
-          {Array.from({ length: pages }, (_, i) => <canvas key={i} ref={el => { canvases.current[i] = el; }} aria-label={`Page ${i + 1}`} className="bg-background shadow-sm" />)}
+          {Array.from({ length: pages }, (_, i) => <div key={i} ref={el => { pageEls.current[i] = el; }} className="relative">
+            <canvas ref={el => { canvases.current[i] = el; }} aria-label={`Page ${i + 1}`} className="block bg-background shadow-sm" />
+            {matches.map((m, k) => m.page === i + 1 && <span key={k} data-search-hit={k === hit ? "active" : "match"} aria-hidden className={`pointer-events-none absolute rounded-sm ${k === hit ? "bg-primary/45 ring-2 ring-primary" : "bg-accent/50"}`}
+              style={{ left: m.left * (scales[i] ?? 1) - 1, top: m.top * (scales[i] ?? 1) - 1, width: m.width * (scales[i] ?? 1) + 2, height: m.height * (scales[i] ?? 1) + 2 }} />)}
+          </div>)}
         </div>}
       </div>
       </div>
