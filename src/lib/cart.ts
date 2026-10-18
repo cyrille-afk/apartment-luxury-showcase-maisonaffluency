@@ -206,6 +206,8 @@ function toCheckoutLines(list: CartItem[]) {
     productPath:
       i.designerSlug && i.productSlug ? `/designers/${i.designerSlug}/${i.productSlug}` : null,
     quantity: i.quantity,
+    pickId: i.pickId,
+    variant: i.variant ?? null,
     origin: i.origin ?? null,
     pickupCountry: i.pickupCountry ?? null,
   }));
@@ -371,9 +373,9 @@ export function addToCart(item: Omit<CartItem, "key" | "quantity"> & { quantity?
   setUserEmptied(false);
   const existing = items.find((i) => i.key === key);
   if (existing) {
-    commit(items.map((i) => (i.key === key ? { ...i, quantity: i.quantity + qty } : i)));
+    commitExplicit(items.map((i) => (i.key === key ? { ...i, quantity: i.quantity + qty } : i)));
   } else {
-    commit([...items, { ...item, finishLabel: item.finishLabel ?? null, key, quantity: qty }]);
+    commitExplicit([...items, { ...item, finishLabel: item.finishLabel ?? null, key, quantity: qty }]);
   }
   return key;
 }

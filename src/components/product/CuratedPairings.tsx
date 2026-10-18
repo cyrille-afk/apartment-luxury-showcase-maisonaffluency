@@ -49,18 +49,18 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
       <h2 className="mx-auto mt-3 max-w-xl text-center font-display text-2xl leading-snug md:text-3xl">Curated to Accompany Your Selection</h2>
       <div className="mt-8 grid grid-cols-2 gap-5 md:gap-8 lg:grid-cols-3">
         {pieces.map((piece) => <article key={piece.id} className="flex min-w-0 flex-col border-b border-border/60 pb-5">
-          <Link to={piece.path} onClick={onExplore} aria-label={`Explore ${piece.title}`} className="block aspect-square overflow-hidden bg-muted/20">
+          <Link to={piece.path} state={{ curatedPairing: true }} data-nav-state='{"curatedPairing":true}' onClick={onExplore} aria-label={`Explore ${piece.title}`} className="block aspect-square overflow-hidden bg-muted/20">
             <img src={piece.image} alt={piece.title} className="h-full w-full object-contain" />
           </Link>
           <p className="mt-5 font-body text-[10px] uppercase tracking-widest text-muted-foreground">{piece.brand}</p>
           <h3 className="mt-2 font-display text-lg leading-snug">{piece.title}</h3>
           <p className="mt-3 font-body text-xs text-muted-foreground">{formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
           <Button asChild variant="link" className="mt-4 h-auto justify-start self-start rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
-            <Link to={piece.path} onClick={onExplore}>Discover Piece <ArrowUpRight strokeWidth={1.25} /></Link>
+            <Link to={piece.path} state={{ curatedPairing: true }} data-nav-state='{"curatedPairing":true}' onClick={onExplore}>{prices[piece.id]?.rrp_price_cents ? "Choose & Add" : "Discover Piece"} <ArrowUpRight strokeWidth={1.25} /></Link>
           </Button>
         </article>)}
       </div>
-      <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">Continue with My Selection</Button></div>
+      <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>
     </motion.section>}
   </AnimatePresence>;
 }
