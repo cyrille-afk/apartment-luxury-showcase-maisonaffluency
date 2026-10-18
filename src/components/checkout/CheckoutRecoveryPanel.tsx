@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/cart";
 import { findRecoveryLine, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 
-type Line = { pickId?: string | null; pairing?: { ruleId: string; optionId: string } | null; unitCents: number; finishLabel?: string | null; currency?: string | null; productPath?: string | null };
+export type RecoveryLine = { pickId?: string | null; pairing?: { ruleId: string; optionId: string } | null; unitCents: number; finishLabel?: string | null; currency?: string | null; productPath?: string | null };
 
 /**
  * Shared recovery step for card and bank-wire checkout. Nothing is repriced
@@ -14,7 +14,7 @@ type Line = { pickId?: string | null; pairing?: { ruleId: string; optionId: stri
 export function CheckoutRecoveryPanel({ message, recovery, lines, busy, onConfirm, onRetry, onReselect, className }: {
   message: string;
   recovery: CheckoutRecovery | null;
-  lines: Line[] | null;
+  lines: RecoveryLine[] | null;
   busy: boolean;
   onConfirm: (chosenCents?: number) => void;
   onRetry: () => void;
@@ -56,7 +56,7 @@ export function CheckoutRecoveryPanel({ message, recovery, lines, busy, onConfir
           </Button>
         )}
         {recovery && recovery.reason !== "price_changed" && affected?.productPath && (
-          <Button type="button" size="sm" variant="outline" onClick={() => onReselect(affected.productPath!)}>Reselect on product page</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => { if (affected.productPath) onReselect(affected.productPath); }}>Reselect on product page</Button>
         )}
         <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRetry}>Try again</Button>
       </div>

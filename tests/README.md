@@ -29,6 +29,15 @@ Payment requests are intercepted before the live endpoint; after successful
 verification the provider boundary deliberately returns 503. This verifies
 the production pricing logic, **not** a deployed endpoint or Stripe readiness.
 
+The same suite covers confirmed price recovery for card, wire-request and
+instant bank-transfer checkout. Instant-transfer fixtures exercise a changed
+pairing price and multiple valid catalogue prices: the basket stays unchanged
+until confirmation, the retry retains the pairing reference, and successful
+verification returns unmistakably non-payable test-only bank details. The
+initial response listener starts before checkout navigation because a restored
+email can trigger account generation immediately. Multi-price fixtures sit
+outside the verifier's FX-drift tolerance to guarantee a real rejection.
+
 ## Determinism
 
 No test contacts a real external provider.
