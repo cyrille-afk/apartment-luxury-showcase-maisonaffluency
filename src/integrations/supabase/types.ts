@@ -12575,6 +12575,21 @@ export type Database = {
           slug: string
         }[]
       }
+      get_instant_transfer_totals: {
+        Args: { _intent: string; _ref: string }
+        Returns: {
+          buyer_tax_id: string
+          currency: string
+          discount_cents: number
+          shipping_cents: number
+          status: string
+          subtotal_cents: number
+          tax_cents: number
+          tax_label: string
+          total_cents: number
+          updated_at: string
+        }[]
+      }
       get_my_board_share_token: { Args: { _board_id: string }; Returns: string }
       get_my_pending_invites: {
         Args: never
