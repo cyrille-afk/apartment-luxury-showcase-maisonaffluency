@@ -39,7 +39,7 @@
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry/card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
 - `product_fabric_swatches_public` refreshes only affected picks (transition-table triggers); never TRUNCATE-rebuild — its lock timed out admin saves.
-- Visualiser rules: src/components/trade/visualiser/AGENTS.md; read before editing its components/page. Per-piece material controls persist with scene objects to keep presets consistent.
+- Read src/components/trade/visualiser/AGENTS.md before visualiser edits. Per-piece materials persist with scene objects for consistent presets.
 - Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
-- Product slug guard rules: src/lib/AGENTS.md.
+- Read subdirectory AGENTS.md rules before editing, including src/lib/AGENTS.md for slug guards.
