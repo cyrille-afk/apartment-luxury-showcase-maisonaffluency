@@ -9,9 +9,8 @@ import { hasConsent } from "@/lib/consent/consentStore";
 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { getCart, clearCart, rehydrateCart, useCart } from "@/lib/cart";
+import { getCart, clearCart, rehydrateCart, useCart, repriceCartLine, formatMoney } from "@/lib/cart";
 import { readFunctionFailure, acceptRecoveredPrice, findRecoveryLine, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
-import { repriceCartLine } from "@/lib/cart";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import type { PairingReference } from "@/lib/pairingFinishPricing";
 import { useAccountDiscount } from "@/hooks/useAccountDiscount";
