@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
+import { useParams, Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
+import { designerBrowsePath } from "@/lib/tradeBrowsing";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import EditorialBiographyColumns from "@/components/EditorialBiographyColumns";
@@ -24,6 +25,8 @@ export default function PublicDesignerBiography() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const insideTrade = useLocation().pathname.startsWith("/trade/");
+  const profileHref = designerBrowsePath(slug || "", insideTrade);
   const isTradeUser = !!user;
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
@@ -54,12 +57,12 @@ export default function PublicDesignerBiography() {
         />
       </Helmet>
 
-      <Navigation />
+      {!insideTrade && <Navigation />}
 
       {/* Permanent understated sticky close control */}
       <button
         type="button"
-        onClick={() => navigate(`/designers/${designer.slug}`)}
+        onClick={() => navigate(profileHref)}
         className="fixed top-[86px] right-4 md:top-[90px] md:right-6 z-50 inline-flex items-center gap-2 font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-foreground/55 hover:text-foreground transition-colors duration-300"
         aria-label="Close portrait"
       >
@@ -71,7 +74,7 @@ export default function PublicDesignerBiography() {
         {/* Editorial masthead */}
         <header className="mx-auto w-full max-w-6xl px-6 pt-5 pb-2 md:pt-6 md:pb-3">
           <Link
-            to={`/designers/${designer.slug}`}
+            to={profileHref}
             className="group inline-flex items-center gap-3 font-body text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-foreground/60 hover:text-foreground transition-colors duration-300"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-1" strokeWidth={1.25} />
@@ -93,10 +96,10 @@ export default function PublicDesignerBiography() {
             biography={biography}
             biographyImages={designer.biography_images || []}
             designerName={designer.name}
-            collectionCtaHref={`/designers/${designer.slug}?section=picks`}
+            collectionCtaHref={`${profileHref}?section=picks`}
             collectionCtaLabel="Discover the Collection"
             closePortraitLabel="Close Portrait"
-            onClosePortrait={() => navigate(`/designers/${designer.slug}`)}
+            onClosePortrait={() => navigate(profileHref)}
             footer={
               <div className="h-auto">
                 {designer.hero_photo_credit && (
@@ -126,7 +129,7 @@ export default function PublicDesignerBiography() {
       </main>
 
       {/* Trade program CTA */}
-      <section className="bg-background py-16 md:py-24 border-t border-border">
+      {!insideTrade && <section className="bg-background py-16 md:py-24 border-t border-border">
         <div className="mx-auto max-w-6xl px-6 text-center">
           <p className="font-display text-xl md:text-2xl text-foreground/80">
             Interested in pieces from this collection?
@@ -139,9 +142,9 @@ export default function PublicDesignerBiography() {
           </Link>
 
         </div>
-      </section>
+      </section>}
 
-      <Footer />
+      {!insideTrade && <Footer />}
     </div>
   );
 }

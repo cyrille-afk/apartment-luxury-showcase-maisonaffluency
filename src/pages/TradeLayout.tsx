@@ -18,6 +18,7 @@ import { NotificationBell } from "@/components/trade/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+import { isTradeDesignerBrowse } from "@/lib/tradeBrowsing";
 import ProductDisplayToggle from "@/components/trade/ProductDisplayToggle";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -353,7 +354,7 @@ const TradeLayout = () => {
   const { clientSafe } = useClientSafeMode();
   const productRoute = /^\/trade\/products\//.test(location.pathname);
   const collectionRoute = location.pathname.replace(/\/+$/, "") === "/trade/the-collection";
-  const designerRoute = /^\/trade\/gallery\/[^/]+\/?$/.test(location.pathname);
+  const designerRoute = isTradeDesignerBrowse(location.pathname);
   const presentation = (productRoute || collectionRoute || designerRoute) && clientSafe;
 
   // Strip a bare trailing "#" left in the URL by in-page anchor scrolls.
@@ -525,9 +526,10 @@ const TradeLayout = () => {
          </AnimatePresence>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header h-14 md:h-16 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header ${designerRoute ? "min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0" : "h-14 md:h-16"} flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
+              {designerRoute && <Link to="/trade/the-collection?tab=designers" className="relative z-10 font-body text-[10px] uppercase text-muted-foreground hover:text-foreground">Back to Trade</Link>}
                <div data-trade-sensitive><TradeMobileMenu
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
@@ -538,7 +540,7 @@ const TradeLayout = () => {
               {/* Desktop: Trade Portal branding */}
                {presentation ? (
                  /* Presentation masthead mirrors the public site's centred wordmark. */
-                 <div className="pointer-events-none absolute inset-x-0 top-0 flex h-full items-center justify-center pt-[env(safe-area-inset-top)]">
+                 <div className={`pointer-events-none absolute inset-x-0 top-0 ${designerRoute ? "hidden md:flex" : "flex"} h-full items-center justify-center pt-[env(safe-area-inset-top)]`}>
                    <StudioBrand studio={currentStudio} className="font-display text-lg md:text-[26px] font-normal tracking-[0.22em]" />
                  </div>
                ) : (
@@ -549,7 +551,7 @@ const TradeLayout = () => {
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
-            <div className="ml-auto flex min-w-0 items-center gap-2 md:gap-4" data-felix-target="account-panel">
+            <div className={`ml-auto flex min-w-0 ${designerRoute ? "max-w-full flex-wrap justify-end md:flex-nowrap" : ""} items-center gap-2 md:gap-4`} data-felix-target="account-panel">
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
               {/* The display-mode toggle only affects product, collection and

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
@@ -77,6 +77,8 @@ interface NewInSpotlightProps {
 
 const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", profileOnly = false, picksOverride, brandLabelOverride, pickDesignerSlugOverride, relatedPicksOverride, pageDesignerName }: NewInSpotlightProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const portraitHref = `${location.pathname.startsWith("/trade/") ? "/trade/gallery" : "/designers"}/${designer.slug}/biography`;
   const hasOverride = Array.isArray(picksOverride);
   const isParentBrand = !hasOverride && isParentBrandDesigner(designer);
   const { data: founderIsBrand = false } = useFounderIsBrand(
@@ -363,7 +365,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                       {/* Designer / brand — top, prominent */}
                        {brandSlug ? (
                           <Link
-                            to={`/designers/${brandSlug}`}
+                            to={`${location.pathname.startsWith("/trade/") ? "/trade/gallery" : "/designers"}/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
                             className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70"
                           >
@@ -445,7 +447,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                   onClick={() => {
                     if (ctaPressed) return;
                     setCtaPressed(true);
-                    window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                    window.setTimeout(() => navigate(`${portraitHref}?from=new-in`), 380);
                   }}
                 />
               </div>
@@ -560,7 +562,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                 onClick={() => {
                   if (ctaPressed) return;
                   setCtaPressed(true);
-                  window.setTimeout(() => navigate(`/designers/${designer.slug}/biography?from=new-in`), 380);
+                  window.setTimeout(() => navigate(`${portraitHref}?from=new-in`), 380);
                 }}
                 className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
               >

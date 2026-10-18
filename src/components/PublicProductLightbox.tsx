@@ -34,6 +34,7 @@ import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyTog
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
+import { designerBrowsePath, productBrowsePath } from "@/lib/tradeBrowsing";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
@@ -649,7 +650,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     ? "clam-chair"
     : (product.slug || slugifyProduct(product.title + (product.subtitle ? `-${product.subtitle}` : "")));
   const productPageHref = product.is_catalog_item !== false && productPageDesignerSlug
-    ? `/designers/${productPageDesignerSlug}/${productPageSlug}`
+    ? productBrowsePath(productPageDesignerSlug, productPageSlug, location.pathname.startsWith("/trade/"))
     : null;
 
   const compareItem: CompareItem = {
@@ -887,7 +888,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       if (!linkedDesigner?.slug) return;
                       rememberProductBackRef(linkedDesigner.slug, location.pathname + location.search);
                       onClose();
-                      navigate(`/designers/${linkedDesigner.slug}`);
+                      navigate(designerBrowsePath(linkedDesigner.slug, location.pathname.startsWith("/trade/")));
                     }}
                     disabled={!linkedDesigner?.slug}
                     className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"

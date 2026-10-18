@@ -2489,7 +2489,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
         <main className="w-full pt-[var(--header-h)] pb-0 md:pb-20 max-w-7xl mx-auto px-4 md:px-5 lg:px-8">
           <button
             type="button"
-            onClick={() => navigate(fromPath || fallbackGridPath)}
+            onClick={() => navigate(fromPath || (presentation ? `/trade/gallery/${designer.slug}` : fallbackGridPath))}
             className="mb-4 hidden md:inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back
@@ -2696,7 +2696,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
                       <div className="group inline-flex max-w-full flex-col items-start">
                         <Link
-                          to={`/designers/${designer.slug}`}
+                          to={`${presentation ? "/trade/gallery" : "/designers"}/${designer.slug}`}
                           onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                           className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                         >
@@ -2794,7 +2794,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                   <div className="min-w-0">
                     <div className="group inline-flex max-w-full flex-col items-start">
                       <Link
-                        to={`/designers/${designer.slug}`}
+                        to={`${presentation ? "/trade/gallery" : "/designers"}/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                       >
@@ -3129,7 +3129,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                   </p>
                   <h2 className="flex flex-col items-start">
                     <Link
-                      to={`/designers/${designer.slug}`}
+                      to={`${presentation ? "/trade/gallery" : "/designers"}/${designer.slug}`}
                       onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                       className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                     >
@@ -3181,7 +3181,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       {relatedPicks.map((rp) => (
                         <Link
                           key={rp.id}
-                          to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                          to={`${presentation ? "/trade/products" : "/designers"}/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                           state={{ from: location.pathname + location.search }}
                           className="group block shrink-0 basis-[70%] snap-start"
                           onTouchStart={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
@@ -3220,7 +3220,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     {visibleRelated.map((rp) => (
                       <Link
                         key={rp.id}
-                        to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        to={`${presentation ? "/trade/products" : "/designers"}/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                         onMouseEnter={() => prefetchPublicProductPage(queryClient, designer.slug, rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : "")))}
@@ -3313,7 +3313,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                     </p>
                     <h2 className="flex flex-col items-start mb-5">
                       <Link
-                        to={`/designers/${designer.slug}`}
+                        to={`${presentation ? "/trade/gallery" : "/designers"}/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
                         className="font-display text-[14px] uppercase tracking-[0.1em] text-foreground hover:text-foreground/80 transition-colors"
                       >
