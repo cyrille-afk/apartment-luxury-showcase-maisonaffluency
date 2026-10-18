@@ -252,3 +252,75 @@ test('bank wire: price-change rejection offers the chooser and retries with the 
   expect(calls.at(-1).out.accepted.ok).toBe(true);
   expect(calls.at(-1).body.amountCents).toBeGreaterThan(calls[0].body.amountCents);
 });
+
+for (const scenario of ['pairing-price', 'multiple-prices'] as const) {
+  test(`instant bank transfer: ${scenario} confirms a price and preserves the configured pairing`, async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 1280, height: 1800 });
+    const pendant = 'f0000000-0000-4000-8000-000000000003';
+    const gbpRule = { ...rule, finish_currency: 'GBP' };
+    const verifiedRule = scenario === 'pairing-price' ? { ...gbpRule, finish_options: gbpRule.finish_options.map(o => o.id === 'ivory-brass' ? { ...o, price_cents: 910000 } : o) } : gbpRule;
+    await page.route('**/functions/v1/stripe-config', route => route.fulfill({ json: {} }));
+    await page.route('**/functions/v1/create-payment-intent', route => route.fulfill({ status: 503, json: { error: 'E2E: card requests blocked' } }));
+    await page.route('**/functions/v1/request-wire-transfer', route => route.abort());
+    await page.route('**/functions/v1/create-proforma-order', route => route.abort());
+    await page.route('https://api.stripe.com/**', route => route.abort());
+    const calls: any[] = [];
+    await page.route('**/functions/v1/create-bank-transfer-intent', async route => {
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200 });
+      const body = route.request().postDataJSON();
+      const products = [
+        { id: pickId, source_pick_id: pickId, is_active: true, public_rrp_visible: true, currency: 'GBP', rrp_price_cents: 999 },
+        { id: pendant, source_pick_id: pendant, is_active: true, public_rrp_visible: true, currency: 'GBP', rrp_price_cents: scenario === 'multiple-prices' ? 0 : 5700000 },
+      ];
+      const picks = scenario === 'multiple-prices' ? [{ id: pendant, size_variants: [{ label: 'Small', price_cents: 5800000 }, { label: 'Large', price_cents: 6200000 }] }] : [];
+      const out = JSON.parse(execFileSync('deno', ['run', '--allow-read', '--config', 'tests/harness/deno.json', 'tests/harness/pairing-checkout.harness.ts'], {
+        input: JSON.stringify({ body, products, picks, rule: verifiedRule }), encoding: 'utf8', timeout: 30_000,
+      }).trim().split('\n').pop() || '{}');
+      calls.push({ body, out });
+      if (!out.accepted.ok) return route.fulfill({ status: out.accepted.status, json: { error: out.accepted.error, recovery: out.accepted.recovery ?? null } });
+      // Routing is fixture-only: never create a payment or disclose real bank coordinates.
+      return route.fulfill({ json: { financialAddresses: [{ type: 'sort_code', sort_code: { account_holder_name: 'E2E ONLY — NOT PAYABLE', sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'E2E-NOT-PAYABLE' } });
+    });
+    await page.goto('/');
+    await page.evaluate(([r, p, pend]) => {
+      sessionStorage.setItem('ma_intake_done', '1');
+      sessionStorage.setItem('ma_checkout_form', JSON.stringify({ buyerProfile: 'private', projectCity: 'London', email: 'client@example.com' }));
+      localStorage.setItem('trade.detectedCountry', 'GB');
+      localStorage.setItem('trade.displayCurrency', 'GBP');
+      localStorage.setItem('trade.shippingDestination.manual', '1');
+      localStorage.setItem('ma_cart_v1', JSON.stringify([
+        { key: `${pend}::`, pickId: pend, title: 'Fixture Chandelier', designerName: 'Fixture Studio', finishLabel: null, imageUrl: '', unitPriceCents: 5700000, currency: 'GBP', quantity: 1 },
+        { key: `${p}::ivory lacquer / aged brass::pairing:${r}:ivory-brass`, pickId: p, title: 'Segment Console Table', designerName: 'Apparatus Studio', finishLabel: 'Ivory Lacquer / Aged Brass', imageUrl: '', unitPriceCents: 870000, currency: 'GBP', quantity: 2, pairing: { ruleId: r, optionId: 'ivory-brass' } },
+      ]));
+    }, [rule.id, pickId, pendant]);
+    await page.goto('/checkout');
+    await expect(page.getByRole('heading', { name: 'Bank wire — contact & delivery', exact: true })).toBeVisible();
+    const reject = page.getByRole('button', { name: 'Reject all', exact: true });
+    if (await reject.isVisible()) await reject.click();
+    const first = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-bank-transfer-intent') && r.request().method() === 'POST');
+    await page.getByPlaceholder('Email address').fill('client@example.com');
+    expect((await first).status()).toBe(409);
+    const panel = page.getByTestId('checkout-recovery');
+    await expect(panel).toBeInViewport();
+    const before = calls.length;
+    const basketBefore = await page.evaluate(() => localStorage.getItem('ma_cart_v1'));
+    if (scenario === 'multiple-prices') {
+      await expect(panel.getByRole('button', { name: 'Confirm selected price and retry' })).toBeDisabled();
+      await panel.getByText('Large', { exact: true }).click();
+      expect(calls.length).toBe(before);
+      expect(await page.evaluate(() => localStorage.getItem('ma_cart_v1'))).toBe(basketBefore);
+    } else await expect(panel).toContainText('£9,100');
+    await page.screenshot({ path: `/tmp/browser/instant-${scenario}.png` });
+    const second = page.waitForResponse(r => r.url().endsWith('/functions/v1/create-bank-transfer-intent') && r.request().method() === 'POST');
+    await panel.getByRole('button', { name: scenario === 'multiple-prices' ? 'Confirm selected price and retry' : 'Accept updated price and retry' }).click();
+    expect((await second).status()).toBe(200);
+    await expect(page.getByText('TEST-ONLY', { exact: true })).toBeVisible();
+    expect(calls.length).toBe(before + 1);
+    expect(calls.at(-1).out.accepted.ok).toBe(true);
+    expect(calls.at(-1).body.items.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, selectedFinish: 'Ivory Lacquer / Aged Brass', quantity: 2, price: scenario === 'pairing-price' ? 9100 : 8700 });
+    expect(calls.at(-1).body.items.find((l: any) => l.pickId === pendant).price).toBe(scenario === 'multiple-prices' ? 62000 : 57000);
+    const cart = await page.evaluate(() => JSON.parse(localStorage.getItem('ma_cart_v1') || '{}').lines);
+    expect(cart.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, quantity: 2, finishLabel: 'Ivory Lacquer / Aged Brass' });
+  });
+}
