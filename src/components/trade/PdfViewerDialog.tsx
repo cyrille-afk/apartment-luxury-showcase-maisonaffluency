@@ -96,7 +96,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           const images: PageImage[] = []; let m = [1, 0, 0, 1];
           ops.fnArray.forEach((fn: number, i: number) => {
             if (fn === pdfjs.OPS.transform) m = ops.argsArray[i];
-            else if (fn === pdfjs.OPS.paintImageXObject || fn === pdfjs.OPS.paintJpegXObject) images.push({ width: Math.hypot(m[0], m[1]), height: Math.hypot(m[2], m[3]) });
+            else if (fn === pdfjs.OPS.paintImageXObject) images.push({ width: Math.hypot(m[0], m[1]), height: Math.hypot(m[2], m[3]) });
           });
           tags[n - 1] = pageSections(all, images);
         } catch { found[n - 1] = ""; tags[n - 1] = []; }
