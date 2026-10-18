@@ -1303,6 +1303,13 @@
       "when": 1792312796121,
       "tag": "0185_curated_pairing_change_history",
       "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1792312949223,
+      "tag": "0186_lock_pairing_history_writes",
+      "breakpoints": true
     }
   ]
 }
