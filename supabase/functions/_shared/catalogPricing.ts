@@ -34,7 +34,15 @@ export interface VerifiedLine {
 
 export type VerifyResult =
   | { ok: true; lines: VerifiedLine[]; subtotalCents: number }
-  | { ok: false; status: number; error: string };
+  | { ok: false; status: number; error: string; recovery?: CheckoutRecovery };
+
+/** Structured hint so the browser can offer a safe retry without losing the configured line. */
+export interface CheckoutRecovery {
+  pickId: string;
+  reason: "price_changed" | "finish_unavailable" | "unavailable";
+  currentUnitCents?: number;
+  pairing?: PairingReference | null;
+}
 
 /** Max accepted shortfall versus the converted catalogue price (FX drift). */
 const TOLERANCE = 0.03;
@@ -92,15 +100,15 @@ export async function verifyCatalogLines(
     const row = byPick.get(pickId);
     if (l.pairing) {
       const resolved = resolvePairingFinish(pairingRules.get(l.pairing.ruleId), l.pairing, pickId);
-      if (!resolved || norm(l.finishLabel) !== norm(resolved.option.name)) return { ok: false, status: 409, error: `${title}'s pairing finish is no longer available. Please reselect it.` };
+      if (!resolved || norm(l.finishLabel) !== norm(resolved.option.name)) return { ok: false, status: 409, error: `${title}'s pairing finish is no longer available. Please reselect it.`, recovery: { pickId, reason: "finish_unavailable", pairing: l.pairing } };
       const canonical = resolved.currency.toLowerCase() === target ? Number(resolved.option.price_cents) : await convertCents(Number(resolved.option.price_cents), resolved.currency.toLowerCase(), target);
       const claimedUnit = Math.round(Number(l.unitCents));
-      if (!Number.isFinite(claimedUnit) || claimedUnit <= 0 || claimedUnit !== canonical) return { ok: false, status: 409, error: `The price for ${title} has changed. Please refresh your basket and try again.` };
+      if (!Number.isFinite(claimedUnit) || claimedUnit <= 0 || claimedUnit !== canonical) return { ok: false, status: 409, error: `The price for ${title} has changed. Please refresh your basket and try again.`, recovery: { pickId, reason: "price_changed", currentUnitCents: canonical, pairing: l.pairing } };
       const quantity = Math.min(maxQty, Math.max(1, Math.round(Number(l.quantity) || 1)));
       lines.push({ pick_id: pickId, title, designer_name: str(l.designer, 160) || null, finish_label: resolved.option.name, quantity, unit_price_cents: canonical, line_total_cents: canonical * quantity });
       continue;
     }
-    if (!row) return { ok: false, status: 409, error: `${title} is not available for direct purchase — please send an enquiry.` };
+    if (!row) return { ok: false, status: 409, error: `${title} is not available for direct purchase — please send an enquiry.`, recovery: { pickId, reason: "unavailable" } };
 
     const src = String(row.currency || "usd").toLowerCase();
     const variants = variantsByPick.get(row.source_pick_id) || [];
@@ -126,7 +134,7 @@ export async function verifyCatalogLines(
       ...variants.map((v) => Number(v?.price_cents)),
     ]).filter((c) => Number.isFinite(c) && c > 0);
     if (!rawCandidates.length) {
-      return { ok: false, status: 409, error: `${title} is price upon request — please send an enquiry.` };
+      return { ok: false, status: 409, error: `${title} is price upon request — please send an enquiry.`, recovery: { pickId, reason: "unavailable" } };
     }
     const candidates = src === target
       ? rawCandidates
@@ -141,6 +149,8 @@ export async function verifyCatalogLines(
         ok: false,
         status: 409,
         error: `The price for ${title} has changed. Please refresh your basket and try again.`,
+        // Only offer a one-tap update when a single unambiguous price applies.
+        recovery: { pickId, reason: "price_changed", ...(new Set(candidates).size === 1 ? { currentUnitCents: Math.round(candidates[0]) } : {}) },
       };
     }
     const quantity = Math.min(maxQty, Math.max(1, Math.round(Number(l.quantity) || 1)));
