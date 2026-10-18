@@ -402,16 +402,6 @@ const TradeAxonometric = () => {
     return () => window.removeEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
   }, [toast]);
 
-  useEffect(() => {
-    const handler = (event: BeforeUnloadEvent) => {
-      if (!generating && !sourceImage && !result && !activeRequestId) return;
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [activeRequestId, generating, result, sourceImage]);
-
   // Admin gate: log unauthorized attempts + show message then redirect non-admins
   useEffect(() => {
     if (!isAdmin) {

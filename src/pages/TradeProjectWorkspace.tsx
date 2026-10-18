@@ -13,6 +13,7 @@ const Sandbox = lazy(() => import("./TradeVisualiser"));
 const Axonometric = lazy(() => import("./TradeAxonometric"));
 
 function WorkspacePanels() {
+  const { isAdmin } = useAuth();
   const project = useActiveProject();
   const [visited, setVisited] = useState(false);
   const [imageStudio, setImageStudio] = useState(false);
@@ -32,7 +33,7 @@ function WorkspacePanels() {
       {state.floorPlanUrl ? <img src={state.floorPlanUrl} alt="Active project floor plan" className="max-h-[65dvh] w-full object-contain" /> : <div className="flex min-h-64 items-center justify-center border border-dashed border-border text-muted-foreground"><Upload className="h-6 w-6" /></div>}
     </section>
     <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan"} className={cn("flex min-h-0 flex-1 flex-col", view === "plan" && "hidden")}>
-      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span><div className="flex gap-2"><Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button><Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
+      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span><div className="flex gap-2">{isAdmin && <Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button>}<Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
       <div className={cn("min-h-0 flex-1", imageStudio && view === "axonometric" && "hidden")}><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
       <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageVisited && <Axonometric />}</Suspense></div>
     </div>
