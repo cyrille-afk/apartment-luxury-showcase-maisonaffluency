@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Loader2, RotateCcw } from 'lucide-react';
+import { Download, Loader2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { loadProjectSnapshot, type ProjectSnapshot, type ProjectSnapshotData } from '@/lib/projectLayoutSnapshots';
 import { snapshotChanges, snapshotFinishes, snapshotFootprint } from '@/lib/projectSnapshotComparison';
 import type { PlacedObject } from './SceneObject';
+import { downloadSnapshotComparison } from '@/lib/snapshotComparisonPdf';
 
 function Piece({ object }: { object?: PlacedObject }) {
   if (!object) return <p className="text-xs text-muted-foreground">Not in this snapshot</p>;
@@ -32,14 +33,30 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
+  const [pdf, setPdf] = useState<Blob | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
   useEffect(() => {
     let active = true; setData(null); setError(false); setSelected(null);
     Promise.all(ids.map(id => loadProjectSnapshot(projectKey, id))).then(([left, right]) => { if (active) setData([left, right]); }).catch(() => { if (active) setError(true); });
     return () => { active = false; };
   }, [projectKey, ids, retry]);
+  useEffect(() => {
+    let active = true;
+    setPdf(null); setPdfError(false); setPreparing(false);
+    const left = snapshots.find(s => s.id === ids[0]), right = snapshots.find(s => s.id === ids[1]);
+    if (!data || !left || !right) return;
+    setPreparing(true);
+    import('@/lib/snapshotComparisonPdf').then(module => module.buildSnapshotComparisonPdf({ snapshot: left, data: data[0] }, { snapshot: right, data: data[1] }))
+      .then(blob => { if (active) setPdf(blob); })
+      .catch(() => { if (active) setPdfError(true); })
+      .finally(() => { if (active) setPreparing(false); });
+    return () => { active = false; };
+  }, [data, ids, snapshots, projectKey, retry]);
   const changes = data ? snapshotChanges(data[0], data[1]) : [];
   return <Dialog open onOpenChange={value => { if (!value) onClose(); }}><DialogContent className="max-h-[92dvh] w-[calc(100vw-2rem)] max-w-6xl overflow-y-auto p-5 sm:p-6">
     <DialogHeader><DialogTitle>Compare Project Snapshots</DialogTitle><DialogDescription className="sr-only">Read-only layout and finish comparison</DialogDescription></DialogHeader>
+    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" size="sm" disabled={!pdf || !data || preparing} onClick={() => { if (pdf) void downloadSnapshotComparison(pdf).catch(() => setPdfError(true)); }}>{preparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download client PDF</Button>{pdfError && <div role="alert" className="text-xs text-destructive">PDF couldn't be prepared.<Button variant="link" size="sm" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}</div>
     <div className="grid grid-cols-2 gap-3 sm:gap-6">{ids.map((id, side) => { const snapshot = snapshots.find(s => s.id === id); return <section key={side} className="min-w-0 space-y-3">
       <Select value={id} onValueChange={value => setIds(previous => side === 0 ? [value, previous[1]] : [previous[0], value])}><SelectTrigger aria-label={side === 0 ? 'Left snapshot' : 'Right snapshot'} className="min-w-0"><SelectValue /></SelectTrigger><SelectContent>{snapshots.map(s => <SelectItem key={s.id} value={s.id} disabled={s.id === ids[1 - side]}>{s.name}</SelectItem>)}</SelectContent></Select>
       {snapshot && <p className="text-xs text-muted-foreground">{new Date(snapshot.created_at).toLocaleString()}</p>}
