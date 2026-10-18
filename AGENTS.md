@@ -20,6 +20,7 @@
 - Snapshot comparison PDFs use the same footprints/differences with allowlisted client content and a shared diagram scale; prepare a blob before download so no scene writes, trade prices or Safari activation loss occur.
 - Workspace presentations freeze allowlisted owner snapshots behind verified board guest sessions; server write guards keep client views read-only and exclude pricing.
 - Product selection checkout hand-offs preserve pairing rule/option references and provenance alongside finish prices — server validation must resolve custom pairing prices against their rule.
+- Checkout 409s carry a structured `recovery` hint; retries only reprice the matched line (pairing included) after explicit buyer acceptance — never silently.
 - Pairing browser regressions run production catalogPricing in an isolated Deno harness at the intercepted payment boundary; never mutate live rules or create payment intents for CI.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
