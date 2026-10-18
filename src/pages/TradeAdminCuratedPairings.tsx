@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PAIRING_CATEGORIES, pairingCategory, type PairingCategory, type PairingRule } from "@/lib/curatedPairings";
 import { parsePairingFinishOptions, pairingFinishError } from "@/lib/pairingFinishPricing";
 import PairingFinishEditor from "@/components/product/PairingFinishEditor";
+import PairingCsvTools from "@/components/product/PairingCsvTools";
 
 const label = (category: string) => PAIRING_CATEGORIES[category as PairingCategory] || category;
 function Catalog() {
@@ -65,7 +66,7 @@ function Catalog() {
   return <>
     <Helmet><title>Curated Pairings — Maison Affluency</title><meta name="robots" content="noindex, nofollow" /></Helmet>
     <div className="max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-3xl text-foreground">Curated Pairings</h1><Button onClick={() => { setSearch(""); setDraft({ id: "", source_category: source, target_category: source === "decor" ? "tables" : "decor", preferred_pick_id: null, sort_order: visible.length, enabled: true }); }}><Plus className="h-4 w-4" />Add pairing</Button></header>
+      <header className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-3xl text-foreground">Curated Pairings</h1><div className="flex flex-wrap gap-2"><PairingCsvTools rules={rules} products={products} disabled={busy || isLoading || productsLoading || !!error || !!productsError} onSaved={() => qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] })} /><Button onClick={() => { setSearch(""); setDraft({ id: "", source_category: source, target_category: source === "decor" ? "tables" : "decor", preferred_pick_id: null, sort_order: visible.length, enabled: true }); }}><Plus className="h-4 w-4" />Add pairing</Button></div></header>
       <div className="max-w-xs space-y-2"><Label>Primary selection</Label><Select value={source} onValueChange={setSource}><SelectTrigger aria-label="Primary selection"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
       {error ? <div role="alert" className="text-destructive">Pairings could not be loaded. <Button variant="link" onClick={() => refetch()}>Retry</Button></div> : isLoading ? <p className="text-muted-foreground">Loading pairings…</p> : <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left font-body text-sm"><thead className="border-b border-border text-xs text-muted-foreground"><tr><th className="py-3">Priority</th><th>Complementary category</th><th>Preferred piece</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{visible.map((row) => {
         const piece = products.find((p) => p.id === row.preferred_pick_id);
