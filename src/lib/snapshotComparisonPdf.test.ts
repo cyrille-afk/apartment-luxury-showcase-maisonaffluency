@@ -10,3 +10,11 @@ describe('client comparison export', () => {
     expect(text).not.toContain('123456'); expect(text).not.toContain('private-client-id'); expect(text).not.toContain('private-finish-id');
   });
 });
+describe('comparison annotations', () => {
+  it('caps a piece note at 600 characters and strips control characters', async () => {
+    const { comparisonAnnotationText } = await import('./snapshotComparisonPdf');
+    expect(comparisonAnnotationText({ notes: { a: `Hello\u0007 ${'x'.repeat(700)}` } }, 'a')).toHaveLength(600);
+    expect(comparisonAnnotationText({ notes: { a: 'Hi\u0007' } }, 'a')).toBe('Hi');
+    expect(comparisonAnnotationText({}, 'a')).toBe('');
+  });
+});

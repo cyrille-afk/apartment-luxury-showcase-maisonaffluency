@@ -16,7 +16,7 @@ describe('read-only snapshot review', () => {
     const button = await screen.findByRole('button', { name: 'Download client PDF' });
     await vi.waitFor(() => expect(button).toBeEnabled());
     fireEvent.click(button);
-    expect(mocks.build).toHaveBeenCalledWith({ snapshot: snapshots[0], data: room }, { snapshot: snapshots[1], data: room });
+    expect(mocks.build).toHaveBeenCalledWith({ snapshot: snapshots[0], data: room }, { snapshot: snapshots[1], data: room }, {});
     expect(mocks.download).toHaveBeenCalledWith(blob);
     expect(restore).not.toHaveBeenCalled(); expect(JSON.stringify(room)).toBe(previous);
   });
