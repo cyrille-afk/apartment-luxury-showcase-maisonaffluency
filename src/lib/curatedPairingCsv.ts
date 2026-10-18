@@ -41,6 +41,7 @@ export function parsePairingCsv(text: string, rules: PairingRule[], products: { 
     const name = row.finish_name.replace(/^'(?=[=+\-@\t\r])/, "").trim();
     const price = row.retail_price.trim();
     const id = row.finish_id.trim();
+    if (id.length > 80) { fail("Finish references must be no longer than 80 characters."); return; }
     if (!name && !price && !id) {
       if (previous) fail("A catalogue-default row cannot be mixed with other finish rows.");
       group.defaults = true; return;

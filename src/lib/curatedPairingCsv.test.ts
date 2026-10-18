@@ -52,6 +52,9 @@ describe("curated pairing finish CSV", () => {
   it("rejects duplicate finish references", () => {
     expect(parsePairingCsv(editCsv((rows) => { rows[1].finish_id = rows[0].finish_id; }), [rule], products).errors.length).toBeGreaterThan(0);
   });
+  it("rejects finish references exceeding the saved catalog limit", () => {
+    expect(parsePairingCsv(editCsv((rows) => { rows[0].finish_id = "x".repeat(81); }), [rule], products).updates).toEqual([]);
+  });
   it("rejects duplicate finish names", () => {
     expect(parsePairingCsv(editCsv((rows) => { rows[1].finish_name = rows[0].finish_name; }), [rule], products).errors.length).toBeGreaterThan(0);
   });
