@@ -193,3 +193,62 @@ test('several valid prices: buyer chooses one, the pairing line is kept untouche
   expect(items.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, selectedFinish: 'Ivory Lacquer / Aged Brass', price: 8700 });
   expect(calls.at(-1).out.accepted.ok).toBe(true);
 });
+
+test('bank wire: price-change rejection offers the chooser and retries with the pairing intact', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1280, height: 1800 });
+  const pendant = 'f0000000-0000-4000-8000-000000000002';
+  const raised = { ...rule, finish_options: rule.finish_options.map(o => o.id === 'ivory-brass' ? { ...o, price_cents: 910000 } : o) };
+  await page.route('**/rest/v1/curated_pairing_rules?*', route => route.fulfill({ json: [rule] }));
+  await page.route('**/functions/v1/stripe-config', route => route.fulfill({ json: {} }));
+  await page.route('**/functions/v1/create-payment-intent', route => route.fulfill({ status: 503, json: { error: 'E2E: card path not under test' } }));
+  await page.route('https://api.stripe.com/**', route => route.abort());
+  const calls: any[] = [];
+  await page.route('**/functions/v1/request-wire-transfer', async route => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200 });
+    const body = route.request().postDataJSON();
+    const harnessBody = { currency: body.currency, items: body.items.map((i: any) => ({ pickId: i.pickId, title: i.title, designer: i.designer, selectedFinish: i.finish, pairing: i.pairing, price: i.unitCents / 100, quantity: i.quantity })) };
+    const products = [
+      { id: pickId, source_pick_id: pickId, is_active: true, public_rrp_visible: true, currency: 'USD', rrp_price_cents: 999 },
+      { id: pendant, source_pick_id: pendant, is_active: true, public_rrp_visible: true, currency: 'USD', rrp_price_cents: 5700000 },
+    ];
+    const out = JSON.parse(execFileSync('deno', ['run', '--allow-read', '--config', 'tests/harness/deno.json', 'tests/harness/pairing-checkout.harness.ts'], {
+      input: JSON.stringify({ body: harnessBody, products, rule: raised }), encoding: 'utf8', timeout: 30_000,
+    }).trim().split('\n').pop() || '{}');
+    calls.push({ body, out });
+    if (!out.accepted.ok) return route.fulfill({ status: out.accepted.status, json: { error: out.accepted.error, recovery: out.accepted.recovery ?? null } });
+    await route.fulfill({ status: 503, json: { error: 'E2E: prices verified; wire request intentionally not recorded' } });
+  });
+  await page.goto('/');
+  await page.evaluate(([r, p, pend]) => {
+    sessionStorage.setItem('ma_intake_done', '1');
+    sessionStorage.setItem('ma_checkout_form', JSON.stringify({ buyerProfile: 'private', projectCity: 'New York', email: 'client@example.com' }));
+    localStorage.setItem('trade.detectedCountry', 'US');
+    localStorage.setItem('trade.displayCurrency', 'USD');
+    localStorage.setItem('trade.shippingDestination.manual', '1');
+    localStorage.setItem('ma_cart_v1', JSON.stringify([
+      { key: `${pend}::`, pickId: pend, title: 'Fixture Chandelier', designerName: 'Fixture Studio', finishLabel: null, imageUrl: '', unitPriceCents: 5700000, currency: 'USD', quantity: 1 },
+      { key: `${p}::ivory lacquer / aged brass::pairing:${r}:ivory-brass`, pickId: p, title: 'Segment Console Table', designerName: 'Apparatus Studio', finishLabel: 'Ivory Lacquer / Aged Brass', imageUrl: '', unitPriceCents: 870000, currency: 'USD', quantity: 2, pairing: { ruleId: r, optionId: 'ivory-brass' } },
+    ]));
+  }, [rule.id, pickId, pendant]);
+  await page.goto('/checkout');
+  await expect(page.getByRole('heading', { name: 'Bank wire — contact & delivery', exact: true })).toBeVisible();
+  const reject = page.getByRole('button', { name: 'Reject all', exact: true });
+  if (await reject.isVisible()) await reject.click();
+  await page.getByPlaceholder('Full name').fill('E2E Client');
+  await page.getByPlaceholder('Email address').fill('client@example.com');
+  const first = page.waitForResponse(r => r.url().endsWith('/functions/v1/request-wire-transfer') && r.request().method() === 'POST');
+  await page.getByRole('button', { name: /Request wire instructions/ }).click();
+  expect((await first).status()).toBe(409);
+  const panel = page.getByTestId('checkout-recovery');
+  await expect(panel).toContainText('$9,100');
+  await expect(panel).toBeInViewport(); await page.screenshot({ path: '/tmp/browser/wire-recovery.png' });
+  const second = page.waitForResponse(r => r.url().endsWith('/functions/v1/request-wire-transfer') && r.request().method() === 'POST');
+  await panel.getByRole('button', { name: 'Accept updated price and retry' }).click();
+  expect((await second).status()).toBe(503);
+  const items = calls.at(-1).body.items;
+  expect(items.find((l: any) => l.pickId === pickId)).toMatchObject({ pairing: { ruleId: rule.id, optionId: 'ivory-brass' }, finish: 'Ivory Lacquer / Aged Brass', unitCents: 910000, quantity: 2 });
+  expect(items.find((l: any) => l.pickId === pendant)).toMatchObject({ unitCents: 5700000 });
+  expect(calls.at(-1).out.accepted.ok).toBe(true);
+  expect(calls.at(-1).body.amountCents).toBeGreaterThan(calls[0].body.amountCents);
+});

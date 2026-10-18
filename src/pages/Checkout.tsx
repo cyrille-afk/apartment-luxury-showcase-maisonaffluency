@@ -10,6 +10,7 @@ import { hasConsent } from "@/lib/consent/consentStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getCart, clearCart, rehydrateCart, useCart, repriceCartLine, formatMoney } from "@/lib/cart";
+import { CheckoutRecoveryPanel } from "@/components/checkout/CheckoutRecoveryPanel";
 import { readFunctionFailure, acceptRecoveredPrice, findRecoveryLine, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 import { readSecureBasket, writeSecureBasket, clearSecureBasket, subscribeSecureBasketStorage } from "@/lib/checkout/secureBasket";
 import type { PairingReference } from "@/lib/pairingFinishPricing";
@@ -1714,6 +1715,8 @@ function WireForm({
   setBuyerType,
   buyerGstNumber,
   setBuyerGstNumber,
+  onRecover,
+  recoveryLines,
 }: {
   lines: CheckoutLine[];
   summary: CheckoutSummary;
@@ -1726,6 +1729,8 @@ function WireForm({
   setBuyerType: (v: BuyerType) => void;
   buyerGstNumber: string;
   setBuyerGstNumber: (v: string) => void;
+  onRecover: (recovery: CheckoutRecovery | null, chosenCents?: number) => boolean;
+  recoveryLines: CheckoutLine[] | null;
 }) {
   // Show the registration field wherever a destination rule can change the
   // treatment (SG zero-rating, UK reverse charge, …).
@@ -1738,6 +1743,14 @@ function WireForm({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<{ message: string; recovery: CheckoutRecovery | null } | null>(null);
+  // Resubmits once after a confirmed reprice has flowed into `lines`.
+  const [pendingRetry, setPendingRetry] = useState(false);
+  const recoveryRef = useRef<HTMLDivElement>(null);
+  // The buyer pressed submit at the bottom of the form; bring the recovery step into view.
+  useEffect(() => {
+    if (failure) recoveryRef.current?.scrollIntoView({ block: "center" });
+  }, [failure]);
   const { chargeTotalCents: total, currency } = summary;
 
   /* Region drives the settlement channel: the signed-in trade profile wins,
@@ -1764,6 +1777,7 @@ function WireForm({
       return;
     }
     setBusy(true);
+    setFailure(null);
     try {
       const first = lines[0];
       const { data, error } = await supabase.functions.invoke("request-wire-transfer", {
@@ -1795,8 +1809,12 @@ function WireForm({
           buyerTaxId: normaliseBuyerTaxId(buyerGstNumber),
         },
       });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      if (error || (data as any)?.error) {
+        const f = await readFunctionFailure(error, data, "Unable to submit your request.");
+        // Price/availability rejections get the recovery step; anything else stays a toast.
+        if (f.recovery) { setFailure(f); return; }
+        throw new Error(f.message);
+      }
       onDone((data as any)?.reference || "");
     } catch (err: any) {
       toast.error(err?.message || "Unable to submit your request.");
@@ -1804,6 +1822,13 @@ function WireForm({
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    if (!pendingRetry) return;
+    setPendingRetry(false);
+    void submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines]);
 
   const field = "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
 
@@ -1813,6 +1838,7 @@ function WireForm({
         <h2 className="text-[11px] font-light uppercase tracking-[0.26em] text-muted-foreground">
           Bank wire — contact & delivery
         </h2>
+
         {account ? (
           <AccountBlock email={account.email} role={account.role} company={account.company} />
         ) : (
@@ -1866,6 +1892,19 @@ function WireForm({
           shippingCents={summary.shippingCents}
           shippingLabel={summary.shippingLabel}
         />
+        {failure && (
+          <div ref={recoveryRef}><CheckoutRecoveryPanel
+            key={`${failure.message}:${JSON.stringify(failure.recovery)}`}
+            className="border border-border py-6"
+            message={failure.message}
+            recovery={failure.recovery}
+            lines={recoveryLines}
+            busy={busy}
+            onConfirm={(chosen) => { if (onRecover(failure.recovery, chosen)) { setFailure(null); setPendingRetry(true); } }}
+            onRetry={() => void submit()}
+            onReselect={(path) => { window.location.assign(path); }}
+          /></div>
+        )}
       </section>
 
       <StickyTotals
@@ -2350,7 +2389,6 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<CheckoutRecovery | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
-  const [chosenCents, setChosenCents] = useState<number | null>(null);
   const initialised = useRef(false);
   const intentIdRef = useRef<string>("");
   const clientSecretRef = useRef<string>("");
@@ -2464,7 +2502,6 @@ export default function Checkout() {
       const first = grossLines[0];
       setError(null);
       setRecovery(null);
-      setChosenCents(null);
       setSyncing(true);
       try {
         const piBody: Record<string, unknown> = {
@@ -2616,16 +2653,18 @@ export default function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retryNonce, grossLines, syncIntent]);
 
-  const acceptNewPrice = useCallback(() => {
-    if (!recovery || !rawLines) return;
-    const next = acceptRecoveredPrice(rawLines, recovery, chosenCents ?? undefined);
-    if (!next) return;
-    const idx = findRecoveryLine(rawLines, recovery);
+  // Applies an explicitly confirmed price to the rejected line only — shared by
+  // card and bank-wire checkout so pairings, finishes and quantities persist.
+  const applyRecovery = useCallback((rec: CheckoutRecovery | null, chosen?: number) => {
+    if (!rec || !rawLines) return false;
+    const next = acceptRecoveredPrice(rawLines, rec, chosen);
+    if (!next) return false;
+    const idx = findRecoveryLine(rawLines, rec);
     writeSecureBasket(next);
     setLines(next);
-    repriceCartLine(recovery.pickId, recovery.pairing ?? null, next[idx].unitCents);
-    setRetryNonce((n) => n + 1);
-  }, [recovery, rawLines, chosenCents]);
+    repriceCartLine(rec.pickId, rec.pairing ?? null, next[idx].unitCents);
+    return true;
+  }, [rawLines]);
 
   // The destination country changes the GST due, so the PaymentIntent must be
   // re-priced whenever it changes after the first sync.
@@ -2878,6 +2917,8 @@ export default function Checkout() {
                   setBuyerType={setBuyerType}
                   buyerGstNumber={buyerGstNumber}
                   setBuyerGstNumber={setBuyerGstNumber}
+                  onRecover={applyRecovery}
+                  recoveryLines={rawLines}
                 />
               );
             }
@@ -2897,43 +2938,17 @@ export default function Checkout() {
               );
             }
             if (error) {
-              const affected = recovery && rawLines ? rawLines[findRecoveryLine(rawLines, recovery)] : undefined;
-              const options = recovery?.reason === "price_changed" && affected ? recovery.priceOptions ?? [] : [];
-              const canAccept = recovery?.reason === "price_changed" && !!affected && (options.length ? chosenCents !== null : !!recovery.currentUnitCents);
-              const cur = String(affected?.currency || "USD").toUpperCase();
               return (
-                <div role="alert" className="py-12 text-center space-y-4" data-testid="checkout-recovery">
-                  <p className="text-sm text-muted-foreground">{error}</p>
-                  {affected && (
-                    <p className="text-xs text-muted-foreground">
-                      Your basket and selections{affected.finishLabel ? ` — including ${affected.finishLabel}` : ""} are saved.
-                      {!options.length && recovery?.currentUnitCents && ` Current price: ${formatMoney(recovery.currentUnitCents, cur)} each.`}
-                      {options.length > 0 && " Several prices apply to this piece — choose the one matching your selection. Nothing changes until you confirm."}
-                    </p>
-                  )}
-                  {options.length > 0 && (
-                    <fieldset className="mx-auto max-w-md space-y-2 text-left" aria-label="Choose the current price">
-                      {options.map((o) => (
-                        <label key={o.unitCents} className={cn("flex cursor-pointer items-center justify-between gap-3 border px-3 py-2 text-sm", chosenCents === o.unitCents ? "border-primary bg-primary/5" : "border-border")}>
-                          <span className="flex items-center gap-2">
-                            <input type="radio" name="recovery-price" checked={chosenCents === o.unitCents} onChange={() => setChosenCents(o.unitCents)} />
-                            {o.label}
-                          </span>
-                          <span>{formatMoney(o.unitCents, cur)}</span>
-                        </label>
-                      ))}
-                    </fieldset>
-                  )}
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {(canAccept || options.length > 0) && (
-                      <Button size="sm" onClick={acceptNewPrice} aria-disabled={!canAccept} disabled={syncing || !canAccept}>{options.length ? "Confirm selected price and retry" : "Accept updated price and retry"}</Button>
-                    )}
-                    {recovery && recovery.reason !== "price_changed" && affected?.productPath && (
-                      <Button size="sm" variant="outline" onClick={() => navigate(affected.productPath!)}>Reselect on product page</Button>
-                    )}
-                    <Button size="sm" variant="outline" disabled={syncing} onClick={() => setRetryNonce((n) => n + 1)}>Try again</Button>
-                  </div>
-                </div>
+                <CheckoutRecoveryPanel
+                  key={`${error}:${JSON.stringify(recovery)}`}
+                  message={error}
+                  recovery={recovery}
+                  lines={rawLines}
+                  busy={syncing}
+                  onConfirm={(chosen) => { if (applyRecovery(recovery, chosen)) setRetryNonce((n) => n + 1); }}
+                  onRetry={() => setRetryNonce((n) => n + 1)}
+                  onReselect={(path) => navigate(path)}
+                />
               );
             }
             if (stripePromise && clientSecret) {
