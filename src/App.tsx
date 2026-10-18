@@ -953,6 +953,8 @@ const App = () => {
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
                     <Route path="gallery" element={<TradeGallery />} />
                     <Route path="gallery/:slug" element={<TradeGallery />} />
+                    <Route path="gallery/:slug/biography" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerBiography /></Suspense>} />
+                    <Route path="gallery/:slug/profile" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile presentation /></Suspense>} />
                     <Route path="quotes" element={<TradeQuotes />} />
                     <Route path="quotes/:quoteId/review" element={<TradeQuoteReview />} />
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />

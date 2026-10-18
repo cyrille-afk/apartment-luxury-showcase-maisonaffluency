@@ -7,7 +7,7 @@
 <!-- LOVABLE:BEGIN -->
 - Inquiry-created quotes copy contact fields; funnel and resumed drafts fall back to the linked inquiry without replacing explicit quote contacts. Email names are display-only unverified suggestions — avoids contact loss and false identity claims.
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
-- Product modes reuse the Client View store and editorial layout in the trade shell; a display-only currency policy keeps account preferences unchanged and presentation retail-only.
+- Product modes reuse the Client View store; Trade-origin portraits, picks and product links stay inside the trade shell to retain mode/return controls without changing public routes, retail-only presentation or account currency.
 - Spec-sheet workspace renders all composed PDF pages with bundled PDF.js on every device — avoids native-viewer dependencies and missing mobile covers.
 - Expanded biographies interleave mobile media between narrative paragraphs independently of desktop staggered rows — prevents trailing photos and video/photo stacks on phones.
 - Product technical legends use the shared `technicalSpecs` length policy after size controls — keeps disclosure and ordering consistent across modes.
