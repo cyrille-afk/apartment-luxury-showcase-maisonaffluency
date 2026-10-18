@@ -1268,6 +1268,13 @@
       "when": 1792269457993,
       "tag": "0180_stripe_webhook_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1792283379530,
+      "tag": "0181_save_felix_configured_quotes",
+      "breakpoints": true
     }
   ]
 }
