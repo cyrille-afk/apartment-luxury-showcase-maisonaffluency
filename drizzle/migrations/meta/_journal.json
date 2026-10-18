@@ -1296,6 +1296,13 @@
       "when": 1792301918217,
       "tag": "0184_curated_pairing_finish_pricing",
       "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1792312796121,
+      "tag": "0185_curated_pairing_change_history",
+      "breakpoints": true
     }
   ]
 }
