@@ -327,6 +327,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
           email={buyer.email}
           items={lines.map((l) => ({
             pickId: l.pickId ?? null,
+            pairing: l.pairing ?? null,
             title: l.title,
             designer: l.designer || undefined,
             selectedFinish: l.finishLabel || undefined,

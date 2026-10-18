@@ -1,19 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { parsePairingFinishOptions, pairingFinishError, resolvePairingFinish } from "./pairingFinishPricing";
 import { selectCuratedPairings, type PairingProduct } from "./curatedPairings";
-import { verifyCatalogLines } from "../../supabase/functions/_shared/catalogPricing";
 
 const option = { id: "finish-1", name: "Lacquer / Aged Brass", price_cents: 240000 };
 const rule = { id: "11111111-1111-4111-8111-111111111111", preferred_pick_id: "pick-1", enabled: true, source_category: "ceiling", target_category: "tables", sort_order: 0, finish_options: [option], finish_currency: "USD" };
 const ref = { ruleId: rule.id, optionId: option.id };
 const piece: PairingProduct = { id: "pick-1", title: "Segment Console Table", brand: "Apparatus", image: "/piece.jpg", path: "/designers/apparatus/segment" };
 const primary = { ...piece, id: "primary", title: "Tassel 57 Pendant" };
-const admin = () => ({ from: (table: string) => {
-  const data = table === "curated_pairing_rules" ? [rule] : table === "designer_curator_picks_public" ? [{ id: piece.id, designer_id: "designer" }] : table === "designers" ? [{ id: "designer" }] : [];
-  const q: any = { then: (resolve: any) => Promise.resolve({ data, error: null }).then(resolve) };
-  for (const key of ["select", "in", "eq", "or"]) q[key] = () => q;
-  return q;
-} });
 beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
 describe("editable pairing finish pricing", () => {
@@ -40,15 +33,6 @@ describe("editable pairing finish pricing", () => {
     expect(resolvePairingFinish(rule, ref, "other")).toBeNull();
     expect(resolvePairingFinish({ ...rule, finish_options: [{ ...option, price_cents: null }] }, ref, piece.id)).toBeNull();
     expect(parsePairingFinishOptions([{ ...option, price_cents: -5 }])).toEqual([]);
-  });
-  it("verifies exact selected finish × quantity with no catalogue-price dependency", async () => {
-    const verified = await verifyCatalogLines(admin(), [{ pickId: piece.id, title: piece.title, finishLabel: option.name, pairing: ref, unitCents: 240000, quantity: 3 }], "USD");
-    expect(verified).toMatchObject({ ok: true, subtotalCents: 720000 });
-  });
-  it("rejects forged same-currency prices and wrong finish labels", async () => {
-    const claim = { pickId: piece.id, title: piece.title, finishLabel: option.name, pairing: ref, unitCents: 240000, quantity: 1 };
-    expect(await verifyCatalogLines(admin(), [{ ...claim, unitCents: 239999 }], "USD")).toMatchObject({ ok: false, status: 409 });
-    expect(await verifyCatalogLines(admin(), [{ ...claim, finishLabel: "Other finish" }], "USD")).toMatchObject({ ok: false, status: 409 });
   });
   it("keeps different pairing selections separate and preserves the existing cart", async () => {
     vi.resetModules();

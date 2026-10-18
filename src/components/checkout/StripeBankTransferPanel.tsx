@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 /* ------------------------------------------------------------------ */
 
 export type WireItem = {
+  pairing?: import("@/lib/pairingFinishPricing").PairingReference | null;
   title: string;
   designer?: string;
   selectedFinish?: string;
