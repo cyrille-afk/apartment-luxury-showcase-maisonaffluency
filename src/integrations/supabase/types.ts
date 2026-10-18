@@ -2927,6 +2927,54 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_pairing_history: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_name: string
+          after_values: Json | null
+          batch_id: string | null
+          before_values: Json | null
+          created_at: string
+          file_name: string | null
+          id: string
+          imported_count: number | null
+          rule_id: string | null
+          source: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name: string
+          after_values?: Json | null
+          batch_id?: string | null
+          before_values?: Json | null
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          imported_count?: number | null
+          rule_id?: string | null
+          source: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_name?: string
+          after_values?: Json | null
+          batch_id?: string | null
+          before_values?: Json | null
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          imported_count?: number | null
+          rule_id?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       curated_pairing_rules: {
         Row: {
           enabled: boolean
@@ -12509,6 +12557,10 @@ export type Database = {
         Returns: boolean
       }
       has_verified_access: { Args: { _user_id: string }; Returns: boolean }
+      import_curated_pairing_finishes: {
+        Args: { file_name?: string; updates: Json }
+        Returns: Json
+      }
       invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
       is_approved_trade_user: { Args: { _user_id?: string }; Returns: boolean }
       is_client_trade_approved: {

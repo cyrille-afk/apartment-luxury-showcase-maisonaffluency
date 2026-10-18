@@ -18,6 +18,7 @@ import { PAIRING_CATEGORIES, pairingCategory, type PairingCategory, type Pairing
 import { parsePairingFinishOptions, pairingFinishError } from "@/lib/pairingFinishPricing";
 import PairingFinishEditor from "@/components/product/PairingFinishEditor";
 import PairingCsvTools from "@/components/product/PairingCsvTools";
+import PairingChangeHistory from "@/components/product/PairingChangeHistory";
 
 const label = (category: string) => PAIRING_CATEGORIES[category as PairingCategory] || category;
 function Catalog() {
@@ -34,6 +35,9 @@ function Catalog() {
   const visible = rules.filter((r) => r.source_category === source);
   const selected = products.find((p) => p.id === draft?.preferred_pick_id);
   const candidates = products.filter((p) => p.category === draft?.target_category && (`${p.brand} ${p.title}`.toLowerCase().includes(search.toLowerCase()) || p.id === draft?.preferred_pick_id));
+  async function refreshCatalog() {
+    await Promise.all([qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] }), qc.invalidateQueries({ queryKey: ["curated-pairing-history"] })]);
+  }
   async function save() {
     if (!draft || busy) return;
     const finishOptions = parsePairingFinishOptions(draft.finish_options);
@@ -51,7 +55,7 @@ function Catalog() {
     const result = id ? await supabase.from("curated_pairing_rules").update(values).eq("id", id).select().single() : await supabase.from("curated_pairing_rules").insert(values).select().single();
     setBusy(false);
     if (result.error) { toast({ title: "Pairing could not be saved", description: result.error.message, variant: "destructive" }); return; }
-    await qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] });
+    await refreshCatalog();
     setDraft(null); toast({ title: "Pairing saved" });
   }
   async function deleteRule() {
@@ -60,13 +64,13 @@ function Catalog() {
     const { error: deleteError } = await supabase.from("curated_pairing_rules").delete().eq("id", remove.id).select().single();
     setBusy(false);
     if (deleteError) { toast({ title: "Pairing could not be removed", description: deleteError.message, variant: "destructive" }); return; }
-    await qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] });
+    await refreshCatalog();
     setRemove(null); toast({ title: "Pairing removed" });
   }
   return <>
     <Helmet><title>Curated Pairings — Maison Affluency</title><meta name="robots" content="noindex, nofollow" /></Helmet>
     <div className="max-w-6xl space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-3xl text-foreground">Curated Pairings</h1><div className="flex flex-wrap gap-2"><PairingCsvTools rules={rules} products={products} disabled={busy || isLoading || productsLoading || !!error || !!productsError} onSaved={() => qc.invalidateQueries({ queryKey: ["curated-pairing-rules"] })} /><Button onClick={() => { setSearch(""); setDraft({ id: "", source_category: source, target_category: source === "decor" ? "tables" : "decor", preferred_pick_id: null, sort_order: visible.length, enabled: true }); }}><Plus className="h-4 w-4" />Add pairing</Button></div></header>
+      <header className="flex flex-wrap items-center justify-between gap-4"><h1 className="font-display text-3xl text-foreground">Curated Pairings</h1><div className="flex flex-wrap gap-2"><PairingChangeHistory products={products} /><PairingCsvTools rules={rules} products={products} disabled={busy || isLoading || productsLoading || !!error || !!productsError} onSaved={refreshCatalog} /><Button onClick={() => { setSearch(""); setDraft({ id: "", source_category: source, target_category: source === "decor" ? "tables" : "decor", preferred_pick_id: null, sort_order: visible.length, enabled: true }); }}><Plus className="h-4 w-4" />Add pairing</Button></div></header>
       <div className="max-w-xs space-y-2"><Label>Primary selection</Label><Select value={source} onValueChange={setSource}><SelectTrigger aria-label="Primary selection"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
       {error ? <div role="alert" className="text-destructive">Pairings could not be loaded. <Button variant="link" onClick={() => refetch()}>Retry</Button></div> : isLoading ? <p className="text-muted-foreground">Loading pairings…</p> : <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left font-body text-sm"><thead className="border-b border-border text-xs text-muted-foreground"><tr><th className="py-3">Priority</th><th>Complementary category</th><th>Preferred piece</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{visible.map((row) => {
         const piece = products.find((p) => p.id === row.preferred_pick_id);
