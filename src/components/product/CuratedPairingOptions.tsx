@@ -23,7 +23,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
   const { displayRow, toDisplayCents } = usePublicRrpDisplay(price);
   const [chosen, setChosen] = useState<PairingSelection>({ base: null, top: null, label: null });
   const [quantity, setQuantity] = useState(1);
-  const { data: swatches = [] } = useQuery({
+  const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
     queryKey: ["pairing-public-swatches", piece.id],
     queryFn: async (): Promise<Swatch[]> => {
       const { data, error } = await supabase.from("product_fabric_swatches_public").select("name, image_url").eq("pick_id", piece.id);
@@ -62,11 +62,11 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
       const selectedSwatch = selection[axis] ? swatchFor(selection[axis] || "") : undefined;
       return <div key={axis}>
         <p className="mb-1.5 font-body text-[10px] uppercase text-muted-foreground">{label}</p>
-        <Select value={selection[axis] || ""} onValueChange={(value) => setChosen({ ...selection, [axis]: value })}>
+        <Select value={selection[axis] || ""} onValueChange={(value) => setChosen({ ...selection, [axis]: value === "__clear__" ? null : value })}>
           <SelectTrigger aria-label={`${piece.title} ${label}`} className="h-auto min-h-10 rounded-none text-xs">
             <span className="flex min-w-0 items-center gap-2">{selectedSwatch?.image_url && <img src={selectedSwatch.image_url} alt="" className="h-6 w-6 shrink-0 object-cover" />}<SelectValue placeholder={`Select ${label}`} /></span>
           </SelectTrigger>
-          <SelectContent className="z-[10020]">{options.map((option) => {
+          <SelectContent className="z-[10020]">{options.length > 1 && <SelectItem value="__clear__">Clear selection</SelectItem>}{options.map((option) => {
             const swatch = swatchFor(option);
             return <SelectItem key={option} value={option} disabled={!pairingOptionAvailable(rows, selection, axis, option)}><span className="flex items-center gap-2">{swatch?.image_url && <img src={swatch.image_url} alt="" className="h-7 w-7 object-cover" />}{option}</span></SelectItem>;
           })}</SelectContent>
@@ -82,6 +82,6 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
       </div>
     </div>
     <p aria-live="polite" className="font-body text-xs text-muted-foreground">{unit ? formatPublicRrpCents(toDisplayCents(unit * quantity), { ...displayRow, rrp_price_cents: unit * quantity, currency: displayRow?.currency || "USD", price_unit: null, price_prefix: "" }, "") : complete ? "Price upon Request" : "Select finishes"}</p>
-    {unit && !isError && (rows.length > 0 || !swatches.length) ? <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal rounded-none px-3 text-xs" onClick={add}>Add to Selection</Button> : <Button asChild variant="link" className="h-auto whitespace-normal px-0 text-xs"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>{isError || !complete ? "View Piece" : "Request Quote & Customisation"}</Link></Button>}
+    {unit && !isError && (rows.length > 0 || (!swatchesPending && !swatchesError && !swatches.length)) ? <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal rounded-none px-3 text-xs" onClick={add}>Add to Selection</Button> : <Button asChild variant="link" className="h-auto whitespace-normal px-0 text-xs"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>{isError || !complete ? "View Piece" : "Request Quote & Customisation"}</Link></Button>}
   </div>;
 }
