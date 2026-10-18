@@ -22,3 +22,11 @@ describe("curated cart pairing rules", () => {
   it("deduplicates repeated target matches and caps results at three", () => expect(select(primary, pool, [], [...rules, { ...rules[2], id: "extra", preferred_pick_id: "decor2", sort_order: 3 }]).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
   it("honors an empty editable catalog without hardcoded fallback", () => expect(select(primary, pool, [], [])).toEqual([]));
 });
+describe("pairings vary by first purchase", () => {
+  it("different pendants of the same category don't all receive the same companions", () => {
+    const other = (id: string, title: string): PairingProduct => ({ ...product(id, title), brand: "Other House" });
+    const decor = Array.from({ length: 12 }, (_, i) => other(`vase${i}`, `Glass Vase ${i}`));
+    const picks = new Set(Array.from({ length: 8 }, (_, i) => select(product(`p${i}`, `Pendant Light ${i}`), decor, [], [rules[2]])[0]?.id));
+    expect(picks.size).toBeGreaterThan(1);
+  });
+});
