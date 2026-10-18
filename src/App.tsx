@@ -126,7 +126,7 @@ const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
 const TradeDeliveryTracker = lazy(() => import("./pages/TradeDeliveryTracker"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
-const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
+const TradeProjectWorkspace = lazy(() => import("./pages/TradeProjectWorkspace"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
 const TradeAnnotations = lazy(() => import("./pages/TradeAnnotations"));
 const TradeShippingTracker = lazy(() => import("./pages/TradeShippingTracker"));
@@ -164,7 +164,6 @@ const SharedShortlist = lazy(() => import("./pages/SharedShortlist"));
 const TradeTools = lazy(() => import("./pages/TradeTools"));
 
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
-const TradeVisualiser = lazy(() => import("./pages/TradeVisualiser"));
 const TradeAILayoutStudio = lazy(() => import("./pages/TradeAILayoutStudio"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
 const TradeJournal = lazy(() => import("./pages/TradeJournal"));
@@ -967,7 +966,7 @@ const App = () => {
                     <Route path="collection" element={<ShowroomLegacyRedirect />} />
                     <Route path="archive" element={<ShowroomLegacyRedirect />} />
                     <Route path="showroom" element={<ShowroomLegacyRedirect />} />
-                    <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
+                    <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeProjectWorkspace /></Suspense>} />
                     <Route path="visualiser/shared-rooms" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSharedRooms /></Suspense>} />
                     <Route path="ai-layout" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAILayoutStudio /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
@@ -976,7 +975,7 @@ const App = () => {
                     <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
                     <Route path="media" element={<TradeMediaLibrary />} />
                     <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
-                    <Route path="axonometric" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAxonometric /></Suspense>} />
+                    <Route path="axonometric" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeProjectWorkspace /></Suspense>} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
                     

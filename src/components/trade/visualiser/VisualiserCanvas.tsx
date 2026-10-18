@@ -34,6 +34,7 @@ import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
 import ArchitecturalDownlights from "./ArchitecturalDownlights";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
+import type { RoomBounds, layoutCamera } from "@/lib/activeProjectLayout";
 
 export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -218,6 +219,8 @@ const SceneLoader = () => (
 );
 
 interface VisualiserCanvasProps {
+  workspaceCamera?: ReturnType<typeof layoutCamera>;
+  roomBounds?: RoomBounds;
   onInitialReady?: () => void;
   isEditable?: boolean;
   objects: PlacedObject[];
@@ -334,6 +337,8 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
  * Visualiser route actually mounts.
  */
 const VisualiserCanvas = ({
+  workspaceCamera,
+  roomBounds,
   onInitialReady,
   isEditable = true,
   objects,
@@ -446,7 +451,7 @@ const VisualiserCanvas = ({
     {focusRef && <FloorFocusReporter focusRef={focusRef} photoStage={photoStage} />}
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
-    <PerspectiveCamera makeDefault fov={SHOWROOM.cameraFov} position={photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
+    <PerspectiveCamera makeDefault fov={workspaceCamera?.fov ?? SHOWROOM.cameraFov} position={workspaceCamera?.position ?? (photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition)} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (workspaceCamera) camera.lookAt(...workspaceCamera.target); else if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
     <OrbitControls
       makeDefault
       enabled={orbitEnabled}
@@ -455,12 +460,18 @@ const VisualiserCanvas = ({
       enableDamping={false}
       minDistance={1.5}
       maxDistance={24}
-      minPolarAngle={photoStage ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle}
-      maxPolarAngle={photoStage ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle}
+      minPolarAngle={workspaceCamera?.polar ?? (photoStage ? LUXURY_BACKDROP.minPolarAngle : SHOWROOM.cameraPolarAngle)}
+      maxPolarAngle={workspaceCamera?.polar ?? (photoStage ? LUXURY_BACKDROP.maxPolarAngle : SHOWROOM.cameraPolarAngle)}
       minAzimuthAngle={photoStage ? LUXURY_BACKDROP.minAzimuthAngle : -Infinity}
       maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
-      target={photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget}
+      target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
+    {roomBounds && <group name="Active project bounds">{[
+      { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
+      { position: [0, 0.01, roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
+      { position: [-roomBounds.width / 2, 0.01, 0], size: [0.025, 0.01, roomBounds.depth] },
+      { position: [roomBounds.width / 2, 0.01, 0], size: [0.025, 0.01, roomBounds.depth] },
+    ].map((edge, index) => <mesh key={index} position={edge.position as [number, number, number]}><boxGeometry args={edge.size as [number, number, number]} /><meshStandardMaterial color={SHOWROOM.key} /></mesh>)}</group>}
 
     {/* Ambient comes from the architectural interior HDR (StudioEnvironment), not a flat global light. */}
     {!hasBackdrop && <ArchitecturalDownlights lightScale={lighting.lightScale} />}
