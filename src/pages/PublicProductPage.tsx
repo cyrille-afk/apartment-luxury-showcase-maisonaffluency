@@ -2154,7 +2154,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     };
   };
 
-  const addConfiguredToCart = (qty = 1) => {
+  const addConfiguredToCart = (qty = 1, mode: "add" | "update" = "add") => {
     const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
     if (!unit) return false;
     const key = addToCart({
@@ -2170,8 +2170,9 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
       unitPriceCents: unit,
       currency: (publicRrpRow?.currency || "USD").toUpperCase(),
       origin: product.origin,
+      quantity: mode === "update" ? 1 : Math.max(1, qty),
     });
-    setCartQuantity(key, Math.max(1, qty));
+    if (mode === "update") setCartQuantity(key, Math.max(1, qty));
     return true;
   };
 

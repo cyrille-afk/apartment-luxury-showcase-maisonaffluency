@@ -149,4 +149,32 @@ describe("cart persistence", () => {
     const { getCart } = await importFresh();
     expect(getCart()).toHaveLength(1);
   });
+
+  it("adds a recommendation without losing existing finishes or quantities in any basket", async () => {
+    const { addToCart, getCart } = await importFresh();
+    addToCart({ ...sampleLine, quantity: 3 });
+    const original = { ...getCart()[0] };
+    addToCart({ ...sampleLine, pickId: "paired-wall-light", title: "Paired Wall Light", productSlug: "paired-wall-light", finishLabel: "Aged Brass", variant: { base: "Aged Brass", top: null, size: null }, quantity: 2 });
+    expect(getCart()).toHaveLength(2);
+    expect(getCart()[0]).toEqual(original);
+    expect(getCart()[1].quantity).toBe(2);
+    for (const key of [STORAGE_KEY, BACKUP_KEY, "ma_secure_basket"]) {
+      const persisted = JSON.parse(localStorage.getItem(key) || "{}");
+      expect(persisted.lines).toHaveLength(2);
+      expect(persisted.lines[0].quantity).toBe(3);
+      expect(persisted.lines[0].finishLabel).toBe("Tarnished Silver");
+      expect(persisted.lines[1].quantity).toBe(2);
+      expect(persisted.lines[1].pickId).toBe("paired-wall-light");
+      expect(persisted.lines[1].variant).toEqual({ base: "Aged Brass", top: null, size: null });
+    }
+  });
+
+  it("adds repeated purchases to the same configured line rather than replacing its quantity", async () => {
+    const { addToCart, getCart } = await importFresh();
+    addToCart({ ...sampleLine, quantity: 3 });
+    addToCart({ ...sampleLine, quantity: 2 });
+    expect(getCart()).toHaveLength(1);
+    expect(getCart()[0].quantity).toBe(5);
+    expect(JSON.parse(localStorage.getItem("ma_secure_basket") || "{}").lines[0].quantity).toBe(5);
+  });
 });

@@ -673,7 +673,7 @@ export default function ProductCommerceCta({
             quoteOnlySelection ? "Price upon Request" : retailLabel || rrpLabel || null
           }
           imageUrl={imageUrl}
-          quantity={quantity}
+          quantity={cartItems.length === 1 ? cartItems[0].quantity : quantity}
           onQuantityChange={quoteOnlySelection ? setQuantity : handleDrawerQuantity}
           quoteOnly={quoteOnlySelection}
           onCheckout={
