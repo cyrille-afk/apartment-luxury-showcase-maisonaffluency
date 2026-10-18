@@ -117,7 +117,7 @@ serve(async (req) => {
         currency,
         { maxQty: 20 },
       );
-      if (!verified.ok) return json({ error: verified.error }, verified.status);
+      if (!verified.ok) return json({ error: verified.error, recovery: verified.recovery ?? null }, verified.status);
       verified.lines.forEach((l, idx) => {
         items[idx].unitAmount = l.unit_price_cents;
         items[idx].quantity = l.quantity;

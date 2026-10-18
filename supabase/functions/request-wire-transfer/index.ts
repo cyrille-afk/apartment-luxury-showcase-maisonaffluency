@@ -80,7 +80,7 @@ serve(async (req) => {
       rawItems.map((i: any) => ({ ...i, finishLabel: i?.finishLabel ?? i?.finish })),
       orderCurrency,
     );
-    if (!verified.ok) return json({ error: verified.error }, verified.status);
+    if (!verified.ok) return json({ error: verified.error, recovery: verified.recovery ?? null }, verified.status);
     // Floor: verified goods less the account tier and 1.5% concierge discount.
     // Shipping/tax may only add on top; an understated total is rejected.
     const { pct } = await resolveAccountDiscount(supabaseVerify, userId);
