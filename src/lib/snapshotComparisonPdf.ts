@@ -100,7 +100,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
       if (flagged) doc.setDrawColor(...ACCENT).setFillColor(246, 230, 214); else doc.setDrawColor(...JADE).setFillColor(228, 236, 233);
       doc.lines(points.slice(1).map((p, j) => [p[0] - points[j][0], p[1] - points[j][1]]), points[0][0], points[0][1], [1, 1], 'FD', true);
       doc.setLineWidth(0.3);
-      doc.setFont('Inter').setFontSize(8).setTextColor(...(flagged ? ACCENT : JADE)).text(String(numbers.get(o.instanceId)), cx + o.position[0] * scale, cy + o.position[2] * scale + 1, { align: 'center' });
+      doc.setFont('Inter').setFontSize(8).setTextColor(...((flagged ? ACCENT : JADE) as readonly [number, number, number])).text(String(numbers.get(o.instanceId)), cx + o.position[0] * scale, cy + o.position[2] * scale + 1, { align: 'center' });
     });
     doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED);
     const b = side.data.bounds;
@@ -136,7 +136,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     });
     const count = Math.max(...columns.map(c => c.length));
     if (y + 17 > 192) nextPage();
-    doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).setTextColor(...(highlight && changedIds.has(change.id) ? ACCENT : JADE)).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
+    doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).setTextColor(...((highlight && changedIds.has(change.id) ? ACCENT : JADE) as readonly [number, number, number])).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
     for (let row = 0; row < count; row++) {
       if (y + 5 > 192) nextPage();
       columns.forEach((lines, i) => { if (lines[row]) doc.setFont('Inter').setFontSize(9).setTextColor(...INK).text(lines[row], xs[i], y); });
