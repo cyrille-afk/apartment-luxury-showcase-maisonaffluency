@@ -1,5 +1,6 @@
 import AdminOnly from "@/components/trade/AdminOnly";
 import { isCollectionLanding, shouldResetRouteScroll } from "@/lib/collectionScrollPolicy";
+import { isTradeGalleryListing, readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LegacyRouteRedirect from "@/components/LegacyRouteRedirect";
 import { GlobalCanonical } from "@/components/GlobalCanonical";
@@ -375,6 +376,7 @@ function ScrollToTopOnNavigate() {
     // directory instead of jumping back to the route hero.
     if (!shouldResetRouteScroll(prevPath, location.pathname)) return;
     if (navType === "POP") return;
+    if (isTradeGalleryListing(location.pathname) && (readTradeGalleryState(location.pathname).scrollY ?? 0) > 0) return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
     if (state?.preserveScroll) return;
