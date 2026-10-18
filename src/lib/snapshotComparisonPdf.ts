@@ -75,18 +75,24 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
   const M = 16, column = 127, xs = [M, 154];
   const cover = options.cover;
   if (cover) {
+    // jsPDF centring ignores character spacing, so tracked caps are centred manually.
+    const tracked = (text: string, x: number, y: number, space: number) => {
+      doc.setCharSpace(space);
+      const w = doc.getTextWidth(text) + space * (text.length - 1);
+      doc.text(text, x - w / 2, y); doc.setCharSpace(0);
+    };
     doc.setFillColor(...JADE).rect(0, 0, 297, 210, 'F');
     doc.setDrawColor(...GOLD).setLineWidth(0.3).rect(10, 10, 277, 190);
     doc.setLineWidth(0.15).rect(12.5, 12.5, 272, 185);
-    doc.setFont('Inter').setFontSize(8).setTextColor(...GOLD).setCharSpace(2.4).text('MAISON AFFLUENCY', 148.5, 34, { align: 'center' });
-    doc.setCharSpace(0).setLineWidth(0.3).line(138.5, 40, 158.5, 40);
+    doc.setFont('Inter').setFontSize(8).setTextColor(...GOLD); tracked('MAISON AFFLUENCY', 148.5, 34, 2.4);
+    doc.setLineWidth(0.3).line(138.5, 40, 158.5, 40);
     doc.setFont('Cormorant').setFontSize(40).setTextColor(...IVORY);
     const title = doc.splitTextToSize(cover.apartmentName || 'Private Residence', 230).slice(0, 2);
     const titleY = title.length > 1 ? 82 : 92;
     doc.text(title, 148.5, titleY, { align: 'center', lineHeightFactor: 1.1 });
     const afterTitle = titleY + (title.length - 1) * 15.5 + 14;
-    doc.setFont('Inter').setFontSize(8.5).setTextColor(...GOLD).setCharSpace(2).text('PROJECT SNAPSHOT COMPARISON', 148.5, afterTitle, { align: 'center' });
-    doc.setCharSpace(0).setFont('Cormorant').setFontSize(16).setTextColor(...IVORY);
+    doc.setFont('Inter').setFontSize(8.5).setTextColor(...GOLD); tracked('PROJECT SNAPSHOT COMPARISON', 148.5, afterTitle, 2);
+    doc.setFont('Cormorant').setFontSize(16).setTextColor(...IVORY);
     doc.text(doc.splitTextToSize(`${left.snapshot.name}  ·  ${right.snapshot.name}`, 220).slice(0, 2), 148.5, afterTitle + 13, { align: 'center' });
     const b = right.data.bounds;
     const details: [string, string][] = ([
@@ -98,11 +104,10 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.setDrawColor(...GOLD).setLineWidth(0.15).line(33.5, top - 8, 263.5, top - 8);
     details.forEach(([k, v], i) => {
       const x = 33.5 + colW * i + colW / 2;
-      doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD).setCharSpace(1.6).text(k.toUpperCase(), x, top, { align: 'center' });
-      doc.setCharSpace(0).setFont('Cormorant').setFontSize(12).setTextColor(...IVORY).text(doc.splitTextToSize(v, colW - 6).slice(0, 2), x, top + 7, { align: 'center' });
+      doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD); tracked(k.toUpperCase(), x, top, 1.6);
+      doc.setFont('Cormorant').setFontSize(12).setTextColor(...IVORY).text(doc.splitTextToSize(v, colW - 6).slice(0, 2), x, top + 7, { align: 'center' });
     });
-    doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD).setCharSpace(1.6).text('PREPARED EXCLUSIVELY FOR CLIENT REVIEW', 148.5, 188, { align: 'center' });
-    doc.setCharSpace(0);
+    doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD); tracked('PREPARED EXCLUSIVELY FOR CLIENT REVIEW', 148.5, 188, 1.6);
     doc.addPage();
   }
   const header = (title: string) => {
