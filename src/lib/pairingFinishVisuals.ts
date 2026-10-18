@@ -20,8 +20,8 @@ export function pairingVisualOptions(options: string[], swatches: PairingSwatch[
   });
 }
 
-export function pairingFinishImage(rawMap: unknown, images: string[], rows: PairingVariant[], selection: PairingSelection, customFinish?: string) {
+export function pairingFinishImage(rawMap: unknown, images: string[], rows: PairingVariant[], selection: PairingSelection, customFinish?: string, visualSelection = selection) {
   if (!customFinish && (!rows.length || !pairingSelectionComplete(rows, selection))) return undefined;
-  const index = resolveVariantImageIndex(buildProductFinishMap(rawMap), customFinish ? { label: customFinish, variants: [], imageCount: images.length, requireCompletePair: false } : { ...selection, size: selection.label, variants: rows, imageCount: images.length });
+  const index = resolveVariantImageIndex(buildProductFinishMap(rawMap), customFinish ? { label: customFinish, variants: [], imageCount: images.length, requireCompletePair: false } : { ...visualSelection, size: visualSelection.label, variants: rows, imageCount: images.length });
   return index === undefined ? undefined : images[index];
 }

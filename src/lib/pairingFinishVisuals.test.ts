@@ -19,6 +19,12 @@ describe("pairing finish visual linking", () => {
   it("rejects out-of-bounds imagery", () => {
     expect(pairingFinishImage({ "lacquer|aged brass": 7 }, images, rows, { base: "Lacquer", top: "Aged Brass", label: null })).toBeUndefined();
   });
+  it("requires the exact selected colour photo rather than a generic family photo", () => {
+    const selection = { base: "Lacquer", top: "Aged Brass", label: null };
+    const visual = { ...selection, base: "Lacquer - Ivory" };
+    expect(pairingFinishImage({ "lacquer - ivory|aged brass": 1 }, images, rows, selection, undefined, visual)).toBe("brass.jpg");
+    expect(pairingFinishImage({ "lacquer|aged brass": 1 }, images, rows, selection, undefined, visual)).toBeUndefined();
+  });
   it("resolves authentic swatches accent-insensitively and avoids ambiguous suffixes", () => {
     expect(pairingSwatchFor("Ecru", [{ name: "Écru", image_url: "ecru.jpg" }])?.image_url).toBe("ecru.jpg");
     expect(pairingSwatchFor("Brass", [{ name: "Aged Brass", image_url: "aged.jpg" }, { name: "Weathered Brass", image_url: "weathered.jpg" }])).toBeUndefined();

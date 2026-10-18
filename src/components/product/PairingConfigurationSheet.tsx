@@ -46,7 +46,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const { displayRow, toDisplayCents } = usePublicRrpDisplay({ rrp_price_cents: unit || null, currency, price_unit: null, price_prefix: "" });
   const images: string[] = detail?.gallery_images?.length ? detail.gallery_images : [piece.image];
   const imageSelection = { ...selection, ...visualChoices };
-  const finishImage = pairingFinishImage(detail?.variant_image_map, images, rows, imageSelection, customOption?.name);
+  const finishImage = pairingFinishImage(detail?.variant_image_map, images, rows, selection, customOption?.name, imageSelection);
   const dedicated = finishImage && finishImage !== failedImage ? finishImage : undefined;
   const image = dedicated || piece.image;
   const selectedNames = custom.length ? customOption ? [customOption.name] : [] : rows.length ? pairingAxes.map((axis) => visualChoices[axis] || selection[axis]).filter((name): name is string => !!name) : material ? [material] : [];
