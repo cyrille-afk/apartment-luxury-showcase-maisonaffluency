@@ -21,6 +21,7 @@ import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { AccountPricingBadge } from "@/components/product/AccountPricingBadge";
 import StripeBankTransferPanel from "@/components/checkout/StripeBankTransferPanel";
+import { saveTransferConfirmation } from "@/lib/checkout/transferConfirmations";
 import { OrderSummarySkeleton } from "@/components/checkout/OrderSummarySkeleton";
 import { VisaMark, MastercardMark, BankTransferMark } from "@/components/checkout/PaymentMarks";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
@@ -2327,6 +2328,12 @@ export default function Checkout() {
   const usdSgdForTelemetry = useUsdToSgdRate();
   const { tierLabel: telemetryTierLabel } = useTradeDiscount();
   const completeOrder = useCallback((reference: string) => {
+    if (wire && summary && grossLines?.length) saveTransferConfirmation({
+      reference, issuedAt: new Date().toISOString(), method: "wire", currency: summary.currency,
+      lines: grossLines.map(l => ({ title: l.title, designer: l.designer || undefined, finishLabel: l.finishLabel || undefined, quantity: lineQty(l), unitCents: l.unitCents })),
+      deliveryCents: summary.deliveryCents, taxLabel: summary.taxLabel || undefined, taxCents: summary.taxCents, totalCents: summary.totalCents,
+      rails: [{ label: "International wire · SWIFT", rows: BANK_DETAILS.map(({ label, value }) => ({ label, value })) }],
+    });
     clearCart();
     clearSecureBasket("order");
     setConfirmed(reference);
@@ -2386,7 +2393,8 @@ export default function Checkout() {
     pageDestination.iso,
     pageDestination.name,
     method,
-    grossLines?.length,
+    grossLines,
+    wire,
   ]);
   const [error, setError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<CheckoutRecovery | null>(null);
@@ -2831,6 +2839,7 @@ export default function Checkout() {
             {summary.taxRegistrationLine ? ` · ${summary.taxRegistrationLine}` : ""}
           </p>
         )}
+        {wire && <a href={`/order-confirmation?ref=${encodeURIComponent(confirmed)}&status=bank_transfer`} className="mt-8 inline-block text-[11px] uppercase tracking-[0.2em] underline underline-offset-4">View transfer instructions &amp; order summary</a>}
         <button
           onClick={() => navigate(homePath)}
           className="mt-8 h-12 w-full max-w-xs rounded-none border border-foreground text-[11px] uppercase tracking-[0.2em]"
