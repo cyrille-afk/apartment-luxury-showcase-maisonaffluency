@@ -29,4 +29,18 @@ export async function saveComparisonAnnotations(projectKey: string, left: string
     annotations: annotations as Json, updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id,project_key,left_snapshot_id,right_snapshot_id' });
   if (error) throw error;
+}export type SavedComparison = { leftId: string; rightId: string; updatedAt: string; summary: string; noteCount: number };
+export async function listSavedComparisons(projectKey: string): Promise<SavedComparison[]> {
+  const { data, error } = await supabase.from('project_snapshot_comparison_annotations').select('left_snapshot_id,right_snapshot_id,updated_at,annotations').eq('project_key', projectKey).order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(row => {
+    const a = (row.annotations ?? {}) as { summary?: string; notes?: Record<string, string> };
+    return { leftId: row.left_snapshot_id, rightId: row.right_snapshot_id, updatedAt: row.updated_at, summary: typeof a.summary === 'string' ? a.summary : '', noteCount: Object.values(a.notes ?? {}).filter(n => typeof n === 'string' && n.trim()).length };
+  });
+}
+/** Sorts saved comparisons by latest update or by "Left vs Right" title (A–Z); filters by title or summary text. */
+export function browseComparisons<T extends SavedComparison & { title: string }>(items: T[], sort: 'date' | 'title', query: string): T[] {
+  const q = query.trim().toLowerCase();
+  const filtered = q ? items.filter(i => i.title.toLowerCase().includes(q) || i.summary.toLowerCase().includes(q)) : items;
+  return [...filtered].sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title) : b.updatedAt.localeCompare(a.updatedAt));
 }
