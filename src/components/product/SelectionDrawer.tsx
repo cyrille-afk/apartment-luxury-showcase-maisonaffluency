@@ -187,11 +187,13 @@ export default function SelectionDrawer({
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (pairingsEnabled && !pairingsDismissed) setPairingsDismissed(true);
+      else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, pairingsEnabled, pairingsDismissed]);
 
   // Portal to document.body so the drawer escapes any ancestor stacking
   // context (transforms, blurs) — its z-[10000] must always beat the

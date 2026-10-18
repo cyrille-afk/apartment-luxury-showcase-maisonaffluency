@@ -1,6 +1,6 @@
 import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getCart, shouldUseFullPageCart, useCart, formatMoney, cartSubtotalCents, setQuantity as setCartQuantity, removeFromCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";
@@ -50,7 +50,7 @@ export interface ProductCommerceCtaProps {
   /** Direct Stripe checkout — receives the chosen quantity */
   onPlaceOrder: (quantity?: number) => void;
   /** Persists the configured piece into the shared cart state (no navigation) */
-  onAddToCart?: (quantity: number) => boolean | void;
+  onAddToCart?: (quantity: number, mode?: "add" | "update") => boolean | void;
   placingOrder?: boolean;
   /** Trade: finish selection carried to the workspace */
   selectedFinishes?: string[];
@@ -184,6 +184,8 @@ export default function ProductCommerceCta({
   utilityLinks,
 }: ProductCommerceCtaProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPairing = location.state?.curatedPairing === true;
   // Quantity lives in the container engine so both layout variants share it;
   // falls back to local state when rendered outside ProductPageContainer.
   const productConfig = useProductConfigOptional();
@@ -234,7 +236,7 @@ export default function ProductCommerceCta({
     : "";
   const workspaceHref = `/trade/products/${productId}${finishQuery}`;
 
-  const primaryLabel = tradeApproved ? "Proceed to Order" : "Place Order";
+  const primaryLabel = tradeApproved ? "Proceed to Order" : fromPairing ? "Add to Selection" : "Place Order";
 
   // Public mobile dock: pieces without a displayed RRP move from a direct
   // order CTA to a quote & customization request, while keeping the same
@@ -485,7 +487,7 @@ export default function ProductCommerceCta({
   // 2nd unique line routes to the full-page cart. Keep the line in sync.
   const handleDrawerQuantity = (q: number) => {
     setQuantity(q);
-    onAddToCart?.(q);
+    onAddToCart?.(q, "update");
   };
 
   const goToCheckout = () => {
@@ -495,7 +497,7 @@ export default function ProductCommerceCta({
         title: item.title, designer: item.designerName, finishLabel: item.finishLabel,
         imageUrl: item.imageUrl, unitCents: item.unitPriceCents, currency: item.currency,
         leadTime: item.leadTime, productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
-        quantity: item.quantity, pickId: item.pickId,
+        quantity: item.quantity, pickId: item.pickId, variant: item.variant,
       })) } });
       return;
     }

@@ -56,11 +56,11 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
           <h3 className="mt-2 font-display text-lg leading-snug">{piece.title}</h3>
           <p className="mt-3 font-body text-xs text-muted-foreground">{formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
           <Button asChild variant="link" className="mt-4 h-auto justify-start self-start rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
-            <Link to={piece.path} onClick={onExplore}>Discover Piece <ArrowUpRight strokeWidth={1.25} /></Link>
+            <Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>Choose &amp; Add <ArrowUpRight strokeWidth={1.25} /></Link>
           </Button>
         </article>)}
       </div>
-      <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">Continue with My Selection</Button></div>
+      <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>
     </motion.section>}
   </AnimatePresence>;
 }
