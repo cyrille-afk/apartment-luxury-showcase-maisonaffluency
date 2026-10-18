@@ -9,6 +9,9 @@ export interface PairingProduct {
   subcategory?: string | null;
   image: string;
   path: string;
+  materials?: string | null;
+  leadTime?: string | null;
+  origin?: string | null;
 }
 
 export const PAIRING_CATEGORIES: Record<PairingCategory, string> = {
