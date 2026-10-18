@@ -242,7 +242,7 @@ export default function StripeBankTransferPanel({
   totals,
 }: {
   /** Checkout's authoritative tax/discount/total for the saved confirmation. */
-  totals?: { taxCents: number; taxLabel?: string; discountCents: number; totalCents: number };
+  totals?: { taxCents: number; taxLabel?: string; discountCents: number; totalCents: number; buyerTaxId?: string | null; taxTreatment?: string; taxRate?: number };
   items: WireItem[];
   currency: string;
   email: string;
@@ -301,6 +301,12 @@ export default function StripeBankTransferPanel({
             shippingConfirmed: !!shippingConfirmed,
             shippingCents: shippingCents ?? 0,
             shippingQuoteRef: shippingQuoteRef ?? "",
+            orderReference: orderReference ?? null,
+            taxCents: totals?.taxCents ?? 0,
+            taxLabel: totals?.taxLabel ?? null,
+            buyerTaxId: totals?.buyerTaxId ?? null,
+            taxTreatment: totals?.taxTreatment ?? null,
+            taxRate: totals?.taxRate ?? null,
           },
         });
         if (cancelled) return;
@@ -333,6 +339,7 @@ export default function StripeBankTransferPanel({
               totalCents: totals ? totals.totalCents : goods + (shippingCents ?? 0),
               rails: list.map(a => ({ label: RAIL_LABEL[a.type] || a.type, rows: addressRows(a).map(r => ({ label: r.label, value: r.value })) })),
               hostedUrl: (data as any)?.hostedInstructionsUrl ?? null,
+              paymentIntentId: (data as any)?.paymentIntentId ?? null,
             };
             saveTransferConfirmation(savedRef.current);
           }

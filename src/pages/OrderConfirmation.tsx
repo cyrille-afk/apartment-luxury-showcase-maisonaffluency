@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import { clearCart } from "@/lib/cart";
 import { clearSecureBasket } from "@/lib/checkout/secureBasket";
-import { getTransferConfirmation, listTransferConfirmations, type TransferConfirmation } from "@/lib/checkout/transferConfirmations";
+import { applyServerTotals, getTransferConfirmation, listTransferConfirmations, saveTransferConfirmation, type TransferConfirmation } from "@/lib/checkout/transferConfirmations";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 
 const money = (cents: number, currency: string) =>
@@ -37,6 +38,7 @@ function SavedTransfer({ c }: { c: TransferConfirmation }) {
         {(c.discountCents ?? 0) > 0 && <div className="flex justify-between text-muted-foreground"><dt>Discount</dt><dd className="tabular-nums">−{money(c.discountCents!, c.currency)}</dd></div>}
         {c.deliveryCents > 0 && <div className="flex justify-between text-muted-foreground"><dt>Delivery</dt><dd className="tabular-nums">{money(c.deliveryCents, c.currency)}</dd></div>}
         {c.taxCents > 0 && <div className="flex justify-between text-muted-foreground"><dt>{c.taxLabel || "Tax"}</dt><dd className="tabular-nums">{money(c.taxCents, c.currency)}</dd></div>}
+        {c.taxUpdatedAt && <p className="pt-1 text-xs text-muted-foreground">Tax updated by our team on {new Date(c.taxUpdatedAt).toLocaleDateString()} — please transfer the total below.</p>}
         <div className="flex justify-between font-medium"><dt>Total to transfer</dt><dd className="tabular-nums">{money(c.totalCents, c.currency)}</dd></div>
       </dl>
     </section>
@@ -47,7 +49,22 @@ export default function OrderConfirmation() {
   const [params] = useSearchParams();
   const ref = params.get("ref");
   const status = params.get("status");
-  const saved = useMemo(() => (ref ? getTransferConfirmation(ref) : null), [ref]);
+  const initial = useMemo(() => (ref ? getTransferConfirmation(ref) : null), [ref]);
+  const [saved, setSaved] = useState<TransferConfirmation | null>(initial);
+  useEffect(() => { setSaved(initial); }, [initial]);
+  // Instant transfers: pick up tax/VAT corrections the team made after issue.
+  useEffect(() => {
+    if (!initial || initial.method !== "instant" || !initial.paymentIntentId) return;
+    let off = false;
+    supabase.rpc("get_instant_transfer_totals", { _ref: initial.reference, _intent: initial.paymentIntentId })
+      .then(({ data }) => {
+        const next = applyServerTotals(initial, Array.isArray(data) ? data[0] : null);
+        if (off || !next) return;
+        saveTransferConfirmation(next);
+        setSaved(next);
+      });
+    return () => { off = true; };
+  }, [initial]);
   const others = useMemo(() => (ref ? [] : listTransferConfirmations()), [ref]);
   const bank = status === "bank_transfer" || !!saved;
 
