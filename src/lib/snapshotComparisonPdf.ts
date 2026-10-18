@@ -60,7 +60,9 @@ const ACCENT = [176, 112, 58] as const;
 const clean = (value: unknown, max: number) => String(value ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, max);
 export function comparisonAnnotationText(annotations: ComparisonAnnotations | undefined, id: string) { return clean(annotations?.notes?.[id], 600); }
 
-export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide, annotations: ComparisonAnnotations = {}, options: { comparedAt?: string } = {}): Promise<Blob> {
+export type ComparisonCover = { apartmentName: string; clientName?: string | null; location?: string | null; style?: string | null };
+const GOLD = [176, 141, 87] as const, IVORY = [246, 242, 234] as const;
+export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide, annotations: ComparisonAnnotations = {}, options: { comparedAt?: string; cover?: ComparisonCover } = {}): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const [bodyFont, headingFont] = await Promise.all([fontFile('/fonts/pdf/Inter-Light.ttf'), fontFile('/fonts/pdf/CormorantGaramond-Regular.ttf')]);
   doc.addFileToVFS('Inter.ttf', bodyFont); doc.addFont('Inter.ttf', 'Inter', 'normal');
@@ -71,6 +73,38 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
   const urls = Array.from(new Set(sides.flatMap(side => side.data.scene.objects.flatMap(o => snapshotFinishes(o).flatMap(f => f.image ? [f.image] : [])))));
   const images = new Map(await Promise.all(urls.map(async url => [url, await swatch(url)] as const)));
   const M = 16, column = 127, xs = [M, 154];
+  const cover = options.cover;
+  if (cover) {
+    doc.setFillColor(...JADE).rect(0, 0, 297, 210, 'F');
+    doc.setDrawColor(...GOLD).setLineWidth(0.3).rect(10, 10, 277, 190);
+    doc.setLineWidth(0.15).rect(12.5, 12.5, 272, 185);
+    doc.setFont('Inter').setFontSize(8).setTextColor(...GOLD).setCharSpace(2.4).text('MAISON AFFLUENCY', 148.5, 34, { align: 'center' });
+    doc.setCharSpace(0).setLineWidth(0.3).line(138.5, 40, 158.5, 40);
+    doc.setFont('Cormorant').setFontSize(40).setTextColor(...IVORY);
+    const title = doc.splitTextToSize(cover.apartmentName || 'Private Residence', 230).slice(0, 2);
+    const titleY = title.length > 1 ? 82 : 92;
+    doc.text(title, 148.5, titleY, { align: 'center', lineHeightFactor: 1.1 });
+    const afterTitle = titleY + (title.length - 1) * 15.5 + 14;
+    doc.setFont('Inter').setFontSize(8.5).setTextColor(...GOLD).setCharSpace(2).text('PROJECT SNAPSHOT COMPARISON', 148.5, afterTitle, { align: 'center' });
+    doc.setCharSpace(0).setFont('Cormorant').setFontSize(16).setTextColor(...IVORY);
+    doc.text(doc.splitTextToSize(`${left.snapshot.name}  ·  ${right.snapshot.name}`, 220).slice(0, 2), 148.5, afterTitle + 13, { align: 'center' });
+    const b = right.data.bounds;
+    const details: [string, string][] = ([
+      ['Client', cover.clientName || ''], ['Location', cover.location || ''], ['Style', cover.style || ''],
+      ['Room', `${b.width.toFixed(2)} × ${b.depth.toFixed(2)} m`],
+      ['Comparison', formatPdfDate(new Date(options.comparedAt || Date.now()), 'en-GB')],
+    ] as [string, string][]).filter(([, v]) => v.trim());
+    const colW = 230 / details.length, top = 156;
+    doc.setDrawColor(...GOLD).setLineWidth(0.15).line(33.5, top - 8, 263.5, top - 8);
+    details.forEach(([k, v], i) => {
+      const x = 33.5 + colW * i + colW / 2;
+      doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD).setCharSpace(1.6).text(k.toUpperCase(), x, top, { align: 'center' });
+      doc.setCharSpace(0).setFont('Cormorant').setFontSize(12).setTextColor(...IVORY).text(doc.splitTextToSize(v, colW - 6).slice(0, 2), x, top + 7, { align: 'center' });
+    });
+    doc.setFont('Inter').setFontSize(6.5).setTextColor(...GOLD).setCharSpace(1.6).text('PREPARED EXCLUSIVELY FOR CLIENT REVIEW', 148.5, 188, { align: 'center' });
+    doc.setCharSpace(0);
+    doc.addPage();
+  }
   const header = (title: string) => {
     doc.setFont('Cormorant').setFontSize(25).setTextColor(...JADE).text('Maison Affluency', M, 19);
     doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text('PROJECT SNAPSHOT COMPARISON', M, 26);
@@ -196,10 +230,11 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.setDrawColor(...RULE).line(M, y + 1, 281, y + 1); y += 8;
   }
   const pages = doc.getNumberOfPages();
-  for (let p = 1; p <= pages; p++) {
+  const first = cover ? 2 : 1;
+  for (let p = first; p <= pages; p++) {
     doc.setPage(p); doc.setFont('Inter').setFontSize(7).setTextColor(...MUTED);
     doc.text('Furniture footprints / Indicative layout, not a construction drawing', M, 202);
-    doc.text(`maisonaffluency.com / ${p} of ${pages}`, 281, 202, { align: 'right' });
+    doc.text(`maisonaffluency.com / ${p - first + 1} of ${pages - first + 1}`, 281, 202, { align: 'right' });
   }
   return doc.output('blob');
 }
