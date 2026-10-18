@@ -19,7 +19,6 @@ async function base64File(url: string) {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
     reader.onerror = reject;
-    reader.readAsDataURL(new Blob([response.arrayBuffer ? new Uint8Array() : ""]));
     response.blob().then((blob) => reader.readAsDataURL(blob), reject);
   });
 }
