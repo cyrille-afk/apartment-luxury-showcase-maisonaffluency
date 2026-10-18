@@ -34,3 +34,11 @@ describe("pairing finish visual linking", () => {
     expect(pairingVisualOptions(["Lacquer"], [{ name: "Lacquer - Ivory", image_url: "ivory.jpg" }, { name: "Lacquer - Gray", image_url: "gray.jpg" }])).toEqual([{ value: "Lacquer", name: "Lacquer - Ivory" }, { value: "Lacquer", name: "Lacquer - Gray" }]);
   });
 });
+describe("category families", () => {
+  it("expands fabric/leather categories into their swatches, tolerating a one-letter spelling slip", async () => {
+    const { pairingVisualOptions } = await import("./pairingFinishVisuals");
+    const sw = ["Safire-2 0006", "Safire-2 0007", "Opera Calla", "Cervo 2150 Black"].map((name) => ({ name, image_url: "x" }));
+    expect(pairingVisualOptions(["Fabric Cat. Safire 2"], sw).map((o) => o.name)).toEqual(["Safire-2 0006", "Safire-2 0007"]);
+    expect(pairingVisualOptions(["Leather Cat. Servo"], sw).map((o) => o.name)).toEqual(["Cervo 2150 Black"]);
+  });
+});
