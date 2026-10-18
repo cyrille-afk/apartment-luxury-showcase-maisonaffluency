@@ -14,6 +14,10 @@ import { cn } from "@/lib/utils";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useCheckoutForm } from "@/contexts/CheckoutFormContext";
+import { privatePairingsEnabled } from "@/lib/curatedPairings";
+import CuratedPairings from "./CuratedPairings";
+import { useAuth } from "@/hooks/useAuth";
 
 /** Mobile / WhatsApp number: digits, +, spaces, dashes, parentheses — 7–20 chars. */
 const PHONE_RE = /^[+0-9][0-9 ()-]{6,19}$/;
@@ -75,6 +79,8 @@ export interface SelectionDrawerProps {
   /** Piece has no public price: hide payment methods, request a quotation. */
   quoteOnly?: boolean;
   placing?: boolean;
+  /** Explicit off switch for approved trade checkout. */
+  allowPairings?: boolean;
 }
 
 export default function SelectionDrawer({
@@ -96,7 +102,13 @@ export default function SelectionDrawer({
   onCheckout,
   quoteOnly = false,
   placing = false,
+  allowPairings = true,
 }: SelectionDrawerProps) {
+  const { buyerProfile } = useCheckoutForm();
+  const { isTradeUser, isAdmin, rolesLoaded, user } = useAuth();
+  const [pairingsDismissed, setPairingsDismissed] = useState(false);
+  const pairingsEnabled = allowPairings && privatePairingsEnabled(buyerProfile) && !isTradeUser && !isAdmin && (!user || rolesLoaded);
+  useEffect(() => { if (isOpen) setPairingsDismissed(false); }, [isOpen]);
 
   const [method, setMethod] = useState<PaymentMethod>("online");
   const [localQty, setLocalQty] = useState(1);
@@ -201,6 +213,15 @@ export default function SelectionDrawer({
         )}
       />
 
+      {pairingsEnabled && <CuratedPairings
+        open={isOpen && !pairingsDismissed}
+        title={title || lines?.[lines.length - 1]?.title || ""}
+        brand={brand || lines?.[lines.length - 1]?.brand || ""}
+        excludedIds={(lines || []).map((line) => line.key.split("::")[0])}
+        onDismiss={() => setPairingsDismissed(true)}
+        onExplore={onClose}
+      />}
+
       {/* Panel — slides right-to-left */}
       <aside
         role="dialog"
@@ -234,7 +255,7 @@ export default function SelectionDrawer({
           {multiLine ? (
             /* 2 · Every line in the selection */
             <div className="flex flex-col divide-y divide-border/50">
-              {lines!.map((l) => (
+              {lines?.map((l) => (
                 <div key={l.key} className="flex gap-4 py-5 first:pt-0">
                   {l.imageUrl && (
                     <img
