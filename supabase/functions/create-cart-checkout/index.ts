@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
+import { loadPairingRules, resolvePairingFinish, type PairingReference } from "../_shared/pairingFinishPricing.ts";
 import { convertCents, SETTLEMENT_CURRENCIES } from "./fxConvert.ts";
 import { formatCurrency } from "../_shared/transactional-email-templates/currency.ts";
 import { resolveTaxTreatment, normaliseBuyerTaxId } from "../_shared/taxRules.ts";
@@ -25,6 +26,7 @@ const json = (body: unknown, status = 200) =>
 
 
 interface IncomingItem {
+  pairing?: PairingReference | null;
   pickId: string;
   productSlug?: string;
   designerSlug?: string;
@@ -141,8 +143,16 @@ serve(async (req) => {
     //  3. If a finish was configured and neither path matches, the line is
     //     rejected rather than charged at the cheapest base price.
     const mismatched: string[] = [];
+    const pairingRules = await loadPairingRules(supabaseAdmin, rawItems.map((i) => i.pairing).filter((p): p is PairingReference => !!p));
 
     const rawLines = rawItems.map((item) => {
+      if (item.pairing) {
+        const resolved = resolvePairingFinish(pairingRules.get(item.pairing.ruleId), item.pairing, item.pickId);
+        if (!resolved || norm(item.finishLabel) !== norm(resolved.option.name) || Number(item.expectedUnitPriceCents) !== resolved.option.price_cents) { mismatched.push((item.title || "A piece").slice(0, 120)); return null; }
+        const qty = Math.min(50, Math.max(1, Math.round(Number(item.quantity) || 1)));
+        const unit = Number(resolved.option.price_cents);
+        return { pick_id: item.pickId, product_slug: item.productSlug || null, designer_slug: item.designerSlug || null, title: (item.title || "Collectible piece").slice(0, 200), designer_name: item.designerName || null, finish_label: resolved.option.name, image_url: item.imageUrl || null, lead_time: item.leadTime || null, quantity: qty, unit_price_cents: unit, line_total_cents: unit * qty, source_currency: resolved.currency.toLowerCase(), currency: CHECKOUT_CURRENCY };
+      }
       const row = byPick.get(String(item.pickId));
       if (!row) return null;
       const qty = Math.min(50, Math.max(1, Math.round(Number(item.quantity) || 1)));

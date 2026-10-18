@@ -15,6 +15,8 @@ import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PAIRING_CATEGORIES, pairingCategory, type PairingCategory, type PairingRule } from "@/lib/curatedPairings";
+import { parsePairingFinishOptions, pairingFinishError } from "@/lib/pairingFinishPricing";
+import PairingFinishEditor from "@/components/product/PairingFinishEditor";
 
 const label = (category: string) => PAIRING_CATEGORIES[category as PairingCategory] || category;
 function Catalog() {
@@ -33,6 +35,9 @@ function Catalog() {
   const candidates = products.filter((p) => p.category === draft?.target_category && (`${p.brand} ${p.title}`.toLowerCase().includes(search.toLowerCase()) || p.id === draft?.preferred_pick_id));
   async function save() {
     if (!draft || busy) return;
+    const finishOptions = parsePairingFinishOptions(draft.finish_options);
+    const finishError = pairingFinishError((draft.finish_options || []) as typeof finishOptions, draft.preferred_pick_id);
+    if (finishError) { toast({ title: finishError, variant: "destructive" }); return; }
     if (draft.source_category === draft.target_category || !Number.isInteger(draft.sort_order) || draft.sort_order < 0 || draft.sort_order > 999) {
       toast({ title: "Choose a different category and a priority from 0 to 999", variant: "destructive" }); return;
     }
@@ -40,7 +45,8 @@ function Catalog() {
       toast({ title: "Choose a published piece from the selected category", variant: "destructive" }); return;
     }
     setBusy(true);
-    const { id, ...values } = draft;
+    const { id, ...rest } = draft;
+    const values = { ...rest, finish_options: finishOptions.map((o) => ({ ...o, name: o.name.trim() })), finish_currency: draft.finish_currency || "USD" };
     const result = id ? await supabase.from("curated_pairing_rules").update(values).eq("id", id).select().single() : await supabase.from("curated_pairing_rules").insert(values).select().single();
     setBusy(false);
     if (result.error) { toast({ title: "Pairing could not be saved", description: result.error.message, variant: "destructive" }); return; }
@@ -67,10 +73,11 @@ function Catalog() {
       })}</tbody></table>{!visible.length && <p className="py-8 text-muted-foreground">No pairings for {label(source).toLowerCase()}.</p>}</div>}
     </div>
     <Dialog open={!!draft} onOpenChange={(open) => { if (!open && !busy) setDraft(null); }}><DialogContent className="max-h-[90dvh] overflow-y-auto"><DialogHeader><DialogTitle>{draft?.id ? "Edit pairing" : "New pairing"}</DialogTitle></DialogHeader>{draft && <div className="space-y-4">
-      <div className="space-y-2"><Label>Primary category</Label><Select value={draft.source_category} onValueChange={(value) => setDraft({ ...draft, source_category: value, ...(value === draft.target_category ? { target_category: value === "decor" ? "tables" : "decor", preferred_pick_id: null } : {}) })}><SelectTrigger aria-label="Primary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
-      <div className="space-y-2"><Label>Complementary category</Label><Select value={draft.target_category} onValueChange={(value) => { setSearch(""); setDraft({ ...draft, target_category: value, preferred_pick_id: null }); }}><SelectTrigger aria-label="Complementary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).filter(([value]) => value !== draft.source_category).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
-      <div className="space-y-2"><Label htmlFor="piece-search">Find a preferred piece</Label><Input id="piece-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or designer" /><Select value={draft.preferred_pick_id || "automatic"} onValueChange={(value) => setDraft({ ...draft, preferred_pick_id: value === "automatic" ? null : value })}><SelectTrigger aria-label="Preferred piece"><SelectValue placeholder="Automatic selection" /></SelectTrigger><SelectContent><SelectItem value="automatic">Automatic selection</SelectItem>{draft.preferred_pick_id && !selected && <SelectItem value={draft.preferred_pick_id}>Unavailable piece</SelectItem>}{candidates.map((p) => <SelectItem key={p.id} value={p.id}>{p.brand} — {p.title}</SelectItem>)}</SelectContent></Select>{productsLoading && <p className="text-sm text-muted-foreground">Loading pieces…</p>}{productsError && <p role="alert" className="text-sm text-destructive">Published pieces could not be loaded.</p>}</div>
+      <div className="space-y-2"><Label>Primary category</Label><Select value={draft.source_category} onValueChange={(value) => setDraft({ ...draft, source_category: value, ...(value === draft.target_category ? { target_category: value === "decor" ? "tables" : "decor", preferred_pick_id: null, finish_options: [] } : {}) })}><SelectTrigger aria-label="Primary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
+      <div className="space-y-2"><Label>Complementary category</Label><Select value={draft.target_category} onValueChange={(value) => { setSearch(""); setDraft({ ...draft, target_category: value, preferred_pick_id: null, finish_options: [] }); }}><SelectTrigger aria-label="Complementary category"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(PAIRING_CATEGORIES).filter(([value]) => value !== draft.source_category).map(([value, name]) => <SelectItem key={value} value={value}>{name}</SelectItem>)}</SelectContent></Select></div>
+      <div className="space-y-2"><Label htmlFor="piece-search">Find a preferred piece</Label><Input id="piece-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or designer" /><Select value={draft.preferred_pick_id || "automatic"} onValueChange={(value) => setDraft({ ...draft, preferred_pick_id: value === "automatic" ? null : value, finish_options: [] })}><SelectTrigger aria-label="Preferred piece"><SelectValue placeholder="Automatic selection" /></SelectTrigger><SelectContent><SelectItem value="automatic">Automatic selection</SelectItem>{draft.preferred_pick_id && !selected && <SelectItem value={draft.preferred_pick_id}>Unavailable piece</SelectItem>}{candidates.map((p) => <SelectItem key={p.id} value={p.id}>{p.brand} — {p.title}</SelectItem>)}</SelectContent></Select>{productsLoading && <p className="text-sm text-muted-foreground">Loading pieces…</p>}{productsError && <p role="alert" className="text-sm text-destructive">Published pieces could not be loaded.</p>}</div>
       {selected?.image && <div className="flex items-center gap-4"><img src={selected.image} alt={selected.title} className="h-24 w-24 object-contain" /><span className="font-display">{selected.title}</span></div>}
+      <PairingFinishEditor options={(draft.finish_options || []) as ReturnType<typeof parsePairingFinishOptions>} currency={draft.finish_currency || "USD"} disabled={!selected} onChange={(finish_options) => setDraft({ ...draft, finish_options })} onCurrencyChange={(finish_currency) => setDraft({ ...draft, finish_currency })} />
       <div className="space-y-2"><Label htmlFor="pairing-priority">Priority</Label><Input id="pairing-priority" type="number" min={0} max={999} step={1} value={draft.sort_order} onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })} /></div>
       <div className="flex items-center justify-between"><Label htmlFor="pairing-active">Active</Label><Switch id="pairing-active" checked={draft.enabled} onCheckedChange={(enabled) => setDraft({ ...draft, enabled })} /></div>
     </div>}<DialogFooter><Button variant="outline" disabled={busy} onClick={() => setDraft(null)}>Cancel</Button><Button disabled={busy || productsLoading} onClick={save}><Save className="h-4 w-4" />{busy ? "Saving…" : "Save pairing"}</Button></DialogFooter></DialogContent></Dialog>

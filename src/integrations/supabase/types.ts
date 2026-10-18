@@ -2930,6 +2930,8 @@ export type Database = {
       curated_pairing_rules: {
         Row: {
           enabled: boolean
+          finish_currency: string
+          finish_options: Json
           id: string
           preferred_pick_id: string | null
           sort_order: number
@@ -2938,6 +2940,8 @@ export type Database = {
         }
         Insert: {
           enabled?: boolean
+          finish_currency?: string
+          finish_options?: Json
           id?: string
           preferred_pick_id?: string | null
           sort_order?: number
@@ -2946,6 +2950,8 @@ export type Database = {
         }
         Update: {
           enabled?: boolean
+          finish_currency?: string
+          finish_options?: Json
           id?: string
           preferred_pick_id?: string | null
           sort_order?: number
@@ -12911,6 +12917,10 @@ export type Database = {
           p_studio_id: string
         }
         Returns: string
+      }
+      valid_pairing_finish_options: {
+        Args: { options: Json }
+        Returns: boolean
       }
       validate_portal_session: { Args: { _token: string }; Returns: Json }
       webhook_events_has_work: { Args: never; Returns: boolean }

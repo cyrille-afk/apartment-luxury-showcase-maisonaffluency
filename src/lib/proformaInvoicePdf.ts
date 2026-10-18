@@ -23,6 +23,7 @@ const MUTED = [110, 110, 110] as const;
 const RULE = [214, 212, 206] as const;
 
 export interface ProformaLine {
+  pairing?: import("./pairingFinishPricing").PairingReference | null;
   /** Catalogue pick id — required for server-side price verification. */
   pickId?: string | null;
   title: string;
