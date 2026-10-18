@@ -6,7 +6,7 @@ import type { WorkspacePresentation as Presentation } from "@/lib/workspacePrese
 import SharedVisualiserScene from "./SharedVisualiserScene";
 const noop = () => {};
 export default function WorkspacePresentation({ data }: { data: Presentation }) {
-  const [active, setActive] = useState("plan");
+  const [active, setActive] = useState(data.floorPlanUrl ? "plan" : data.views[0]?.id || "plan");
   const view = data.views.find(v => v.id === active);
   const [failedPlan, setFailedPlan] = useState<string | null>(null);
   const plan = active === "plan" ? data.floorPlanUrl : view?.floorPlanUrl;

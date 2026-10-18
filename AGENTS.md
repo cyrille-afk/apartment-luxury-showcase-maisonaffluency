@@ -16,6 +16,7 @@
 - Sandbox default photo is a presentation-only canvas layer replaced by custom backdrop state, not furniture changes — preserves compositions and imports.
 - Stripe delivery monitoring extends the existing watchdog and reconciles provider failures with local receipts; unverified bodies never establish mode — catches pre-handler failures without duplicate schedules.
 - Named project snapshots are immutable owner-private cloud records with full scene, floor plan and bounds; validated, confirmed restores preserve historical finishes and project isolation.
+- Workspace presentations freeze allowlisted owner snapshots behind verified board guest sessions; server write guards keep client views read-only and exclude pricing.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
