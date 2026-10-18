@@ -1,5 +1,6 @@
 import { toDiscountFraction } from "@/lib/tradePricing";
 import { updateFelixProductSelection } from "@/lib/updateFelixProductSelection";
+import { FelixQuoteSave } from "./concierge/FelixQuoteSave";
 import { GuestContactCapture } from "./GuestContactCapture";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
@@ -5713,6 +5714,7 @@ export function AIConcierge({
                     </div>
                   )}
                   {isLastQuoteCard && <FelixQuoteDownload cards={quoteCards.flatMap((entry) => entry.kind === "proactive_tearsheet" ? [entry.data] : [])} studioName={currentStudio?.display_name || currentStudio?.name} locale={currentStudio?.pdf_locale} />}
+                  {isLastQuoteCard && <FelixQuoteSave cards={quoteCards.flatMap((entry) => entry.kind === "proactive_tearsheet" ? [entry.data] : [])} projectId={projectId} onSaved={(saved) => setTimeline(previous => previous.map(entry => entry.kind === "proactive_tearsheet" && !entry.resolved ? { ...entry, data: { ...entry.data, savedQuoteId: saved.find(c => c.productId === entry.data.productId)?.savedQuoteId, savedLineId: saved.find(c => c.productId === entry.data.productId)?.savedLineId } } : entry))} />}
                   </div>
                 );
               }
@@ -6638,6 +6640,7 @@ export function AIConcierge({
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">
+            <FelixQuoteSave onRestore={(cards) => { setTimeline(previous => [...previous.filter(entry => !(entry.kind === "proactive_tearsheet" && !entry.resolved)), ...cards.map(data => ({ kind: "proactive_tearsheet" as const, data }))]); setThreadsOpen(false); setOpen(true); setMinimized(false); }} />
             {threads.length === 0 && (
               <div className="p-4 font-body text-xs text-muted-foreground">
                 No past conversations yet.

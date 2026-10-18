@@ -10866,6 +10866,7 @@ export type Database = {
           exchange_rate_at_creation: number | null
           exchange_rate_base_currency: string | null
           exchange_rate_locked_at: string | null
+          felix_snapshot: Json | null
           id: string
           incoterm: string | null
           insurance_enabled: boolean
@@ -10928,6 +10929,7 @@ export type Database = {
           exchange_rate_at_creation?: number | null
           exchange_rate_base_currency?: string | null
           exchange_rate_locked_at?: string | null
+          felix_snapshot?: Json | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -10990,6 +10992,7 @@ export type Database = {
           exchange_rate_at_creation?: number | null
           exchange_rate_base_currency?: string | null
           exchange_rate_locked_at?: string | null
+          felix_snapshot?: Json | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -12779,6 +12782,15 @@ export type Database = {
       }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
+      save_felix_quote: {
+        Args: {
+          p_cards: Json
+          p_id: string
+          p_project_id: string
+          p_studio_id: string
+        }
+        Returns: string
+      }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
       slugify_text: { Args: { input: string }; Returns: string }
       strip_public_variant_prices: { Args: { _variants: Json }; Returns: Json }
