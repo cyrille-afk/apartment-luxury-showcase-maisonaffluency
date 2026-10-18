@@ -327,6 +327,7 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
 
       {channel.id === "gb_faster_payments" ? (
         <StripeBankTransferPanel
+          totals={{ taxCents, taxLabel: tax.label, discountCents, totalCents }}
           onRecover={props.onRecover}
           recoveryLines={props.recoveryLines}
           currency="gbp"

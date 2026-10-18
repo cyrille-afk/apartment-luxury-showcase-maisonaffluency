@@ -12,6 +12,7 @@ export type TransferConfirmation = {
   currency: string;
   lines: { title: string; designer?: string; finishLabel?: string; quantity: number; unitCents: number }[];
   deliveryCents: number;
+  discountCents?: number;
   taxLabel?: string;
   taxCents: number;
   totalCents: number;

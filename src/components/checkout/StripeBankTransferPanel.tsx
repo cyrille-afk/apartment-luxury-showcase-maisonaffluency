@@ -239,7 +239,10 @@ export default function StripeBankTransferPanel({
   fallback,
   onRecover,
   recoveryLines,
+  totals,
 }: {
+  /** Checkout's authoritative tax/discount/total for the saved confirmation. */
+  totals?: { taxCents: number; taxLabel?: string; discountCents: number; totalCents: number };
   items: WireItem[];
   currency: string;
   email: string;
@@ -314,7 +317,8 @@ export default function StripeBankTransferPanel({
             saveTransferConfirmation({
               reference: ref, issuedAt: new Date().toISOString(), method: "instant", currency,
               lines: items.map((i, n) => ({ title: i.title, designer: i.designer, finishLabel: i.selectedFinish, quantity: i.quantity, unitCents: lineCents[n] })),
-              deliveryCents: shippingCents ?? 0, taxCents: 0, totalCents: goods + (shippingCents ?? 0),
+              deliveryCents: shippingCents ?? 0, taxCents: totals?.taxCents ?? 0, taxLabel: totals?.taxLabel, discountCents: totals?.discountCents ?? 0,
+              totalCents: totals ? totals.totalCents : goods + (shippingCents ?? 0),
               rails: list.map(a => ({ label: RAIL_LABEL[a.type] || a.type, rows: addressRows(a).map(r => ({ label: r.label, value: r.value })) })),
               hostedUrl: (data as any)?.hostedInstructionsUrl ?? null,
             });
