@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { ArrowUpRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
@@ -8,8 +7,8 @@ import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { selectCuratedPairings } from "@/lib/curatedPairings";
 import { useCuratedPairingRules } from "@/hooks/useCuratedPairingRules";
-import CuratedPairingOptions from "./CuratedPairingOptions";
-import CustomPairingOptions from "./CustomPairingOptions";
+import PairingConfigurationSheet from "./PairingConfigurationSheet";
+import type { PairingProduct } from "@/lib/curatedPairings";
 
 interface Props {
   open: boolean;
@@ -25,7 +24,7 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
   const { data: rules = [] } = useCuratedPairingRules(open);
   const reducedMotion = useReducedMotion();
   const destination = useShippingDestination();
-  const [expanded, setExpanded] = useState<string[]>([]);
+  const [configuring, setConfiguring] = useState<PairingProduct | null>(null);
   const pieces = useMemo(() => {
     const products = catalogue.flatMap(({ pick, designerName, designerId }) => pick.id && pick.slug && pick.image ? [{
       id: pick.id, title: pick.title || "", brand: designerName, category: pick.category, subcategory: pick.subcategory,
@@ -37,7 +36,7 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
   }, [catalogue, title, brand, excludedIds, rules]);
   const { data: prices = {} } = usePublicRrpMap(open ? pieces.map((p) => p.id) : []);
 
-  return <AnimatePresence>
+  return <><AnimatePresence>
     {open && pieces.length >= 2 && <motion.section
       key={title}
       role="region"
@@ -53,22 +52,21 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
       <h2 className="mx-auto mt-3 max-w-xl text-center font-display text-2xl leading-snug md:text-3xl">Curated to Accompany Your Selection</h2>
       <div className="mt-8 grid grid-cols-2 gap-5 md:gap-8 lg:grid-cols-3">
         {pieces.map((piece) => <article key={piece.id} className="flex min-w-0 flex-col border-b border-border/60 pb-5">
-          <Link to={piece.path} state={{ curatedPairing: true }} data-nav-state='{"curatedPairing":true}' onClick={onExplore} aria-label={`Explore ${piece.title}`} className="block aspect-square overflow-hidden bg-muted/20">
+          <Button variant="ghost" onClick={() => setConfiguring(piece)} aria-label={`Configure ${piece.title}`} className="block aspect-square h-auto w-full overflow-hidden rounded-none bg-muted/20 p-0">
             <img src={piece.image} alt={piece.title} className="h-full w-full object-contain" />
-          </Link>
+          </Button>
           <p className="mt-5 font-body text-[10px] uppercase tracking-widest text-muted-foreground">{piece.brand}</p>
           <h3 className="mt-2 font-display text-lg leading-snug">{piece.title}</h3>
           <p className="mt-3 font-body text-xs text-muted-foreground">{piece.finishOptions?.length ? (() => {
             const amounts = piece.finishOptions.map((o) => o.price_cents).filter((p): p is number => p !== null);
             return amounts.length ? formatPublicRrpForDestination({ rrp_price_cents: Math.min(...amounts), currency: piece.finishCurrency || "USD", price_unit: null, price_prefix: "From" }, destination.currency) : "Price upon Request";
           })() : formatPublicRrpForDestination(prices[piece.id], destination.currency) || "Price upon Request"}</p>
-          <Button variant="link" aria-expanded={expanded.includes(piece.id)} onClick={() => setExpanded((current) => current.includes(piece.id) ? current.filter((id) => id !== piece.id) : [...current, piece.id])} className="mt-4 h-auto justify-start self-start whitespace-normal rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
-            {expanded.includes(piece.id) ? "Close Options" : "Choose Finishes & Quantity"} <ArrowUpRight className="shrink-0" strokeWidth={1.25} />
+          <Button variant="link" onClick={() => setConfiguring(piece)} className="mt-4 h-auto justify-start self-start whitespace-normal rounded-none px-0 py-0 font-body text-xs text-foreground decoration-gold underline-offset-4">
+            Choose Finishes &amp; Quantity <ArrowUpRight className="shrink-0" strokeWidth={1.25} />
           </Button>
-          {expanded.includes(piece.id) && (piece.finishOptions?.length ? <CustomPairingOptions piece={piece} onExplore={onExplore} /> : <CuratedPairingOptions piece={piece} onExplore={onExplore} />)}
         </article>)}
       </div>
       <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>
     </motion.section>}
-  </AnimatePresence>;
+  </AnimatePresence>{open && configuring && <PairingConfigurationSheet key={configuring.id} piece={configuring} onClose={() => setConfiguring(null)} onExplore={onExplore} />}</>;
 }

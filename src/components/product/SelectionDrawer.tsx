@@ -188,7 +188,7 @@ export default function SelectionDrawer({
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || e.defaultPrevented) return;
       if (pairingsEnabled && pairingsVisible) dismissPairings();
       else onClose();
     };
