@@ -2,6 +2,7 @@ import { FileDown, LayoutGrid, X, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { felixLineCents, felixQuantity, formatFelixMoney } from "@/lib/felixQuoteQuantity";
+import { felixQuoteFinishes, type FelixQuoteFinish } from "@/lib/felixQuoteFinishes";
 
 /**
  * Proactive nudge shown inline in the concierge chat stream after the user
@@ -23,6 +24,7 @@ export interface ProactiveTearsheetData {
   fabricLabel?: string | null;
   baseLabel?: string | null;
   topLabel?: string | null;
+  finishes?: FelixQuoteFinish[];
   /** Preformatted trade price, e.g. "$4,250" or "€2,600". Empty = hide row. */
   tradePriceLabel?: string | null;
   unitPriceCents?: number | null;
@@ -42,11 +44,9 @@ interface Props {
 }
 
 export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoard, onDismiss, onQuantityChange }: Props) {
-  const specRows: { label: string; value: string }[] = [];
+  const specRows: { label: string; value: string; imageUrl?: string | null }[] = [];
   if (data.sku) specRows.push({ label: "SKU", value: data.sku });
-  if (data.fabricLabel) specRows.push({ label: "Material", value: data.fabricLabel });
-  if (data.baseLabel) specRows.push({ label: "Base", value: data.baseLabel });
-  if (data.topLabel) specRows.push({ label: "Top", value: data.topLabel });
+  for (const finish of felixQuoteFinishes(data)) specRows.push({ label: finish.label, value: finish.name, imageUrl: finish.imageUrl });
   if (data.tradePriceLabel) specRows.push({ label: "Trade price", value: `${data.tradePriceLabel} (Member benefit)` });
   if (data.leadTimeLabel) specRows.push({ label: "Lead time", value: data.leadTimeLabel });
 
@@ -92,11 +92,12 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
       {/* Spec rows */}
       {specRows.length > 0 && (
         <div className="px-3 py-2 space-y-0.5">
-          {specRows.map((row) => (
-            <div key={row.label} className="flex items-baseline gap-2 text-[11px]">
-              <span className="font-body uppercase tracking-[0.1em] text-[9px] text-muted-foreground w-20 shrink-0">
+          {specRows.map((row, index) => (
+            <div key={`${row.label}-${index}`} className="flex items-center gap-2 text-[11px]">
+              <span className="font-body uppercase tracking-[0.1em] text-[9px] text-muted-foreground w-24 shrink-0 break-words">
                 {row.label}
               </span>
+              {row.imageUrl && <img src={row.imageUrl} alt={`${row.value} swatch`} className="h-7 w-7 shrink-0 object-cover border border-border" />}
               <span className="text-foreground/90 font-body">{row.value}</span>
             </div>
           ))}
