@@ -146,7 +146,15 @@ serve(async (req) => {
     });
     if (!shipRes.ok) return json({ error: shipRes.error }, 400);
     const shippingCents = shipRes.cents;
-    const amount = goodsAmount + shippingCents;
+    // Tax is computed by checkout; it is bounded here and the team can correct it
+    // later from the Order Ledger (update-instant-transfer-tax), which also
+    // re-amounts this PaymentIntent.
+    const rawTax = Math.round(Number(body?.taxCents) || 0);
+    const taxCents = Math.max(0, Math.min(rawTax, Math.round((goodsAmount + shippingCents) * 0.3)));
+    const taxLabel = typeof body?.taxLabel === "string" ? body.taxLabel.trim().slice(0, 80) : null;
+    const orderRef = typeof body?.orderReference === "string" && /^[A-Za-z0-9-]{4,40}$/.test(body.orderReference)
+      ? body.orderReference : null;
+    const amount = goodsAmount + shippingCents + taxCents;
     if (amount < 100) return json({ error: "Price out of range." }, 400);
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -185,6 +193,8 @@ serve(async (req) => {
           discount_pct: String(discountPct),
           discount_label: discountLabel ?? "",
           shipping_cents: String(shippingCents),
+          tax_cents: String(taxCents),
+          order_ref: orderRef ?? "",
         },
       });
     } catch (err) {
@@ -196,6 +206,27 @@ serve(async (req) => {
     const next = intent.next_action as any;
     const instructions = next?.display_bank_transfer_instructions;
     if (!instructions) return json({ error: "bank_transfer_unavailable" }, 200);
+
+    if (orderRef) {
+      const row = {
+        order_ref: orderRef, user_id: userId, email, payment_method: "instant_bank_transfer",
+        status: "awaiting_payment", currency, subtotal_cents: goodsAmount, discount_cents: 0,
+        discount_pct: Math.round(discountPct * 100), discount_label: discountLabel ?? null,
+        shipping_cents: shippingCents, tax_cents: taxCents, tax_label: taxLabel,
+        buyer_tax_id: typeof body?.buyerTaxId === "string" ? body.buyerTaxId.trim().slice(0, 40) || null : null,
+        tax_treatment: typeof body?.taxTreatment === "string" ? body.taxTreatment.slice(0, 40) : null,
+        tax_rate: Number.isFinite(Number(body?.taxRate)) ? Number(body.taxRate) : null,
+        total_cents: amount, stripe_session_id: intent.id,
+      };
+      const { data: existing } = await supabaseAdmin.from("shop_orders")
+        .select("id, payment_method, status").eq("order_ref", orderRef).maybeSingle();
+      const { error: recErr } = !existing
+        ? await supabaseAdmin.from("shop_orders").insert(row)
+        : existing.payment_method === "instant_bank_transfer" && existing.status !== "paid"
+          ? await supabaseAdmin.from("shop_orders").update(row).eq("id", existing.id)
+          : { error: null };
+      if (recErr) console.error("[create-bank-transfer-intent] order record failed", recErr);
+    }
 
     return json({
       paymentIntentId: intent.id,

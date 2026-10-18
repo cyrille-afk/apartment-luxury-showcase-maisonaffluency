@@ -1352,6 +1352,13 @@
       "when": 1792355525105,
       "tag": "0192_studio_pdf_cover_theme",
       "breakpoints": true
+    },
+    {
+      "idx": 193,
+      "version": "7",
+      "when": 1792355887615,
+      "tag": "0193_instant_transfer_totals_lookup",
+      "breakpoints": true
     }
   ]
 }

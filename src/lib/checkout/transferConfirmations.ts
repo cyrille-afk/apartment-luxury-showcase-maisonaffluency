@@ -18,7 +18,25 @@ export type TransferConfirmation = {
   totalCents: number;
   rails: { label: string; rows: TransferRow[] }[];
   hostedUrl?: string | null;
+  /** Instant transfers: lets the device fetch team tax corrections for this order. */
+  paymentIntentId?: string | null;
+  taxUpdatedAt?: string | null;
 };
+
+export type ServerTransferTotals = {
+  discount_cents: number; tax_cents: number; tax_label: string | null; total_cents: number; updated_at: string;
+};
+
+/** Applies the server's current tax/total to a saved instant transfer; null when nothing changed. */
+export function applyServerTotals(c: TransferConfirmation, t: ServerTransferTotals | null | undefined): TransferConfirmation | null {
+  if (!t || c.method !== "instant" || !Number.isFinite(t.total_cents)) return null;
+  const next: TransferConfirmation = {
+    ...c, taxCents: t.tax_cents, taxLabel: t.tax_label ?? undefined,
+    discountCents: t.discount_cents ? t.discount_cents : c.discountCents, totalCents: t.total_cents,
+  };
+  if (next.taxCents === c.taxCents && next.taxLabel === c.taxLabel && next.totalCents === c.totalCents) return null;
+  return { ...next, taxUpdatedAt: t.updated_at };
+}
 
 export const TRANSFER_CONFIRMATIONS_KEY = "ma_transfer_confirmations_v1";
 export const MAX_CONFIRMATIONS = 10;

@@ -27,6 +27,40 @@ interface OrderRow {
   proforma_invoice_path: string | null;
   paid_at: string | null;
   created_at: string;
+  tax_cents: number;
+  tax_label: string | null;
+  buyer_tax_id: string | null;
+}
+
+/** Team correction of VAT number / tax on an issued instant bank transfer. */
+function InstantTaxEditor({ order, onSaved }: { order: OrderRow; onSaved: () => void }) {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [vat, setVat] = useState(order.buyer_tax_id ?? "");
+  const [label, setLabel] = useState(order.tax_label ?? "");
+  const [amount, setAmount] = useState((order.tax_cents / 100).toFixed(2));
+  const [saving, setSaving] = useState(false);
+  if (!open) return <Button variant="outline" size="sm" className="font-body text-xs" onClick={() => setOpen(true)}>Edit VAT / tax</Button>;
+  const save = async () => {
+    const taxCents = Math.round(Number(amount) * 100);
+    if (!Number.isFinite(taxCents) || taxCents < 0) { toast({ title: "Enter a valid tax amount", variant: "destructive" }); return; }
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke("update-instant-transfer-tax", {
+      body: { orderId: order.id, taxCents, taxLabel: label, buyerTaxId: vat },
+    });
+    setSaving(false);
+    const msg = (data as { error?: string })?.error;
+    if (error || msg) { toast({ title: "Tax not updated", description: msg || error?.message, variant: "destructive" }); return; }
+    toast({ title: `${order.order_ref} updated`, description: `Amount due is now ${money((data as { totalCents: number }).totalCents, order.currency)}.` });
+    setOpen(false); onSaved();
+  };
+  return <div className="flex w-full flex-wrap items-end gap-2 border-t border-border pt-3">
+    <label className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">VAT number<input aria-label="VAT number" value={vat} onChange={e => setVat(e.target.value)} className="mt-1 block w-40 border border-border bg-background px-2 py-1 text-xs normal-case tracking-normal text-foreground" /></label>
+    <label className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Tax label<input aria-label="Tax label" value={label} onChange={e => setLabel(e.target.value)} className="mt-1 block w-40 border border-border bg-background px-2 py-1 text-xs normal-case tracking-normal text-foreground" /></label>
+    <label className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Tax amount<input aria-label="Tax amount" inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} className="mt-1 block w-28 border border-border bg-background px-2 py-1 text-xs tabular-nums text-foreground" /></label>
+    <Button size="sm" className="font-body text-xs" disabled={saving} onClick={save}>{saving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}Save & update amount due</Button>
+    <Button variant="ghost" size="sm" className="font-body text-xs" onClick={() => setOpen(false)}>Cancel</Button>
+  </div>;
 }
 
 const CHANNEL_LABEL: Record<string, string> = {
@@ -60,7 +94,7 @@ export default function OrderLedger() {
     const { data, error } = await supabase
       .from("shop_orders")
       .select(
-        "id, order_ref, email, full_name, status, currency, total_cents, region_tier, payment_channel, payment_method, payment_receipt_path, proforma_invoice_path, paid_at, created_at",
+        "id, order_ref, email, full_name, status, currency, total_cents, region_tier, payment_channel, payment_method, payment_receipt_path, proforma_invoice_path, paid_at, created_at, tax_cents, tax_label, buyer_tax_id",
       )
       .order("created_at", { ascending: false })
       .limit(200);
@@ -206,6 +240,9 @@ export default function OrderLedger() {
                 <span className="font-body text-xs text-muted-foreground">No receipt attached</span>
               )}
 
+              {order.payment_method === "instant_bank_transfer" && order.status !== "paid" && (
+                <InstantTaxEditor order={order} onSaved={fetchRows} />
+              )}
               {order.status !== "paid" && (
                 <Button
                   size="sm"
