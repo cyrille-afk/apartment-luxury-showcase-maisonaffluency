@@ -1,2 +1,3 @@
 - Felix tour sets Client View on each step entry (on for margin-protection, member choice kept on board presentation steps, off elsewhere) — later steps target trade-only navigation that Client View hides.
 - TradeSidebar caches last-known nav access per user and shows "Reconnecting…" while role lookups fail — outages must not hide links; presentation only, pages/RLS enforce access.
+- Felix saves configured net snapshots and stable line IDs atomically through an invoker RPC; quote RLS controls access, retries update rather than append, and the quote editor must not discount configured amounts again.

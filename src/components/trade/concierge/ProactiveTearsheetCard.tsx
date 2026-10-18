@@ -13,6 +13,8 @@ import { felixLineCents, felixQuantity, formatFelixMoney } from "@/lib/felixQuot
  * real work back to the concierge's existing tools.
  */
 export interface ProactiveTearsheetData {
+  savedQuoteId?: string;
+  savedLineId?: string;
   productId: string;
   productName: string;
   brandName?: string | null;

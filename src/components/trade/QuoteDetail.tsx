@@ -992,6 +992,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       if ((quoteRes.data as any)?.admin_notes) setAdminNotes((quoteRes.data as any).admin_notes);
       if ((quoteRes.data as any)?.project_id !== undefined) setProjectId((quoteRes.data as any).project_id);
       const q = quoteRes.data as any;
+      if (q?.felix_snapshot) setTradeDiscount(false);
       setCeilingMode(q?.ceiling_ledger_mode === "itemized" || q?.ceiling_ledger_mode === "target_ceiling" ? q.ceiling_ledger_mode : "inherit");
       setQuoteCeilingCents(q?.target_ceiling_cents == null ? null : Number(q.target_ceiling_cents));
       setQuoteMarkupPct(q?.client_markup_pct == null ? null : Number(q.client_markup_pct));
