@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -28,6 +28,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   const [state, setState] = useState<"idle" | "building" | "error">("idle");
   const [zoom, setZoom] = useState(1);
   const [page, setPage] = useState(1);
+  const [full, setFull] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const canvases = useRef<(HTMLCanvasElement | null)[]>([]);
   const zoomRef = useRef(zoom); zoomRef.current = zoom;
@@ -35,7 +36,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   useEffect(() => {
     if (!open) return;
     let off = false; let made: string | null = null; let loaded: PdfDoc | null = null;
-    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1);
+    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1); setFull(false);
     build().then(async blob => {
       if (off) return;
       made = URL.createObjectURL(blob);
@@ -66,7 +67,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
       }
     })();
     return () => { off = true; };
-  }, [doc, zoom]);
+  }, [doc, zoom, full]);
 
   // Track the page in view while scrolling.
   const onScroll = useCallback(() => {
@@ -99,15 +100,17 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   }, [doc]);
 
   const onKey = (e: React.KeyboardEvent) => {
+    if ((e.target as HTMLElement).tagName === "INPUT") return;
     if (e.key === "PageDown" || (e.key === "ArrowRight" && !e.shiftKey)) { e.preventDefault(); goTo(page + 1); }
     else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); goTo(page - 1); }
     else if (e.key === "+" || e.key === "=") setZoom(z => clampZoom(z + 0.25));
     else if (e.key === "-") setZoom(z => clampZoom(z - 0.25));
+    else if (e.key === "f" || e.key === "F") setFull(f => !f);
   };
 
   const pages = doc?.numPages ?? 0;
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="flex h-[92vh] max-w-6xl flex-col" onKeyDown={onKey}>
+    <DialogContent className={`flex flex-col ${full ? "h-screen w-screen max-w-none rounded-none border-none" : "h-[92vh] max-w-6xl"}`} onKeyDown={onKey}>
       <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
       {doc && <div className="flex flex-wrap items-center justify-between gap-2 border-y border-border py-2" role="toolbar" aria-label="PDF controls">
@@ -123,6 +126,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           <span className="w-12 text-center text-xs tabular-nums" aria-live="polite">{Math.round(zoom * 100)}%</span>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Zoom in" disabled={zoom >= MAX_ZOOM} onClick={() => setZoom(z => clampZoom(z + 0.25))}><ZoomIn className="h-4 w-4" /></Button>
           <Button variant="ghost" size="sm" className="h-8 text-xs" aria-label="Fit to width" onClick={() => setZoom(1)}><Maximize2 className="mr-1 h-3.5 w-3.5" />Fit</Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={full ? "Exit fullscreen" : "Fullscreen"} aria-pressed={full} title={full ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={() => setFull(f => !f)}>{full ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</Button>
         </div>
       </div>}
       <div ref={scroller} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-auto bg-muted/40 p-4">
