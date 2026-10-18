@@ -713,9 +713,9 @@ const TradeProductPage: React.FC = () => {
     queryFn: async () => {
       const id = data?.product.id;
       if (!id) return [];
-      const { data: rows, error } = await supabase.from("product_fabrics").select("fabric:fabrics(name,image_url)").eq("pick_id", id);
+      const { data: rows, error } = await supabase.from("product_fabrics").select("image_indices,fabric:fabrics(name,image_url)").eq("pick_id", id);
       if (error) throw error;
-      return (rows ?? []).flatMap((row) => row.fabric ? [row.fabric] : []);
+      return (rows ?? []).flatMap((row) => row.fabric ? [{ ...row.fabric, image_indices: row.image_indices }] : []);
     },
   });
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
@@ -1905,7 +1905,9 @@ const TradeProductPage: React.FC = () => {
     woodLabelOverride: product.wood_label_override,
   });
   const felixBaseSwatch = findQuoteFinishSwatch([selectedWoodPrice?.name, selectedBaseDisplay, displayedFinishes.base, selectedBase], felixLinkedSwatches);
-  const felixTopSwatch = findQuoteFinishSwatch([selectedFabric?.name, selectedTopSwatch?.name, selectedTopDisplay, displayedFinishes.top, selectedTop], felixLinkedSwatches);
+  const felixPicturedSwatches = felixLinkedSwatches.filter((swatch) => swatch.image_indices?.includes((galleryActiveIndex ?? 0) + 1));
+  const felixTopSwatch = findQuoteFinishSwatch([selectedFabric?.name, selectedTopSwatch?.name, selectedTopDisplay, displayedFinishes.top, selectedTop, selectedSwatchGalleryName], felixLinkedSwatches)
+    ?? felixPicturedSwatches.find((swatch) => selectedTop && swatch.name.toLowerCase().startsWith(selectedTop.replace(/\s+range$/i, "").toLowerCase() + " -"));
   felixSelectionRef.current = {
     productId: product.id,
     productName: product.title,
@@ -1915,9 +1917,9 @@ const TradeProductPage: React.FC = () => {
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
     finishes: [
-      selectedFabric && { label: felixFinishLabel(felixSectionLabels.upholsteryLabel, "Upholstery Fabric"), name: selectedFabric.name, imageUrl: selectedFabric.image_url },
+      selectedFabric && { label: felixFinishLabel(felixSectionLabels.upholsteryLabel, "Upholstery Fabric"), name: selectedFabric.name, imageUrl: selectedFabric.image_url || felixTopSwatch?.image_url },
       (selectedWoodPrice?.name || selectedBase) && { label: felixFinishLabel(selectedWoodPrice ? felixSectionLabels.woodLabel : getBasePlaceholder(product), "Frame Finish"), name: selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || "", imageUrl: selectedWoodPrice?.image_url || felixBaseSwatch?.image_url },
-      !selectedFabric && (selectedTopSwatch?.name || selectedTop) && { label: felixFinishLabel(getTopPlaceholder(product), "Top Finish"), name: selectedTopSwatch?.name || selectedTopDisplay || selectedTop || "", imageUrl: selectedTopSwatch?.image_url || felixTopSwatch?.image_url },
+      !selectedFabric && (selectedTopSwatch?.name || selectedTop) && { label: felixFinishLabel(getTopPlaceholder(product), "Top Finish"), name: selectedTopSwatch?.name || selectedTopDisplay || felixTopSwatch?.name || selectedTop || "", imageUrl: selectedTopSwatch?.image_url || felixTopSwatch?.image_url },
     ].filter((finish): finish is { label: string; name: string; imageUrl: string | null | undefined } => !!finish),
     tradePriceLabel: priceLabels?.netLabel ?? null,
     unitPriceCents: priceLabels ? convertCents(priceLabels.netCents, priceLabels.currency, displayCurrency, fxRates) : null,
