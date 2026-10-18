@@ -13,8 +13,10 @@ const presentationSchema = z.object({
 });
 export function parseWorkspacePresentation(value: unknown): WorkspacePresentation {
   const data = presentationSchema.parse(value);
-  return { ...data, views: data.views.map(view => {
+  return { title: data.title, studioName: data.studioName, studioLogo: data.studioLogo, floorPlanUrl: data.floorPlanUrl,
+    views: data.views.map(view => {
     const empty = z.object({ objects: z.array(z.unknown()).length(0) }).safeParse(view.scene).success;
-    return { ...view, scene: empty ? null : sharedVisualiserRoom(view.scene) };
+    return { id: view.id, name: view.name, created_at: view.created_at, floorPlanUrl: view.floorPlanUrl,
+      bounds: { width: view.bounds.width, depth: view.bounds.depth, height: view.bounds.height }, scene: empty ? null : sharedVisualiserRoom(view.scene) };
   }) };
 }
