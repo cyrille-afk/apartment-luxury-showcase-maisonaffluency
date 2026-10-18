@@ -77,8 +77,9 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
   if (cover) {
     // jsPDF centring ignores character spacing, so tracked caps are centred manually.
     const tracked = (text: string, x: number, y: number, space: number) => {
-      doc.setCharSpace(space);
+      doc.setCharSpace(0);
       const w = doc.getTextWidth(text) + space * (text.length - 1);
+      doc.setCharSpace(space);
       doc.text(text, x - w / 2, y); doc.setCharSpace(0);
     };
     doc.setFillColor(...JADE).rect(0, 0, 297, 210, 'F');
