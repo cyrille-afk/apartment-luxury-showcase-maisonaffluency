@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Upload, Trash2, Plus } from 'lucide-react';
+import { Eye, Upload, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,8 +9,10 @@ import { pairingAxes, pairingAxisOptions, pairingSelectionComplete, type Pairing
 import { pairingFinishImage, pairingSwatchFor, pairingVisualOptions } from '@/lib/pairingFinishVisuals';
 import { pairingMediaKey, pairingMediaPreview, pairingUploadError, type PairingMedia } from '@/lib/pairingMedia';
 import type { PairingFinishOption } from '@/lib/pairingFinishPricing';
+import PairingConfigurationSheet from './PairingConfigurationSheet';
+import type { PairingProduct } from '@/lib/curatedPairings';
 
-export default function PairingMediaEditor({ pickId, hero, options, entries, onChange, onBusy }: { pickId: string; hero: string; options: PairingFinishOption[]; entries: PairingMedia[]; onChange: (entries: PairingMedia[]) => void; onBusy: (busy: boolean) => void }) {
+export default function PairingMediaEditor({ pickId, hero, options, entries, onChange, onBusy, previewPiece }: { pickId: string; hero: string; options: PairingFinishOption[]; entries: PairingMedia[]; onChange: (entries: PairingMedia[]) => void; onBusy: (busy: boolean) => void; previewPiece?: PairingProduct }) {
   const { data: detail, isPending, isError } = useCuratorPickDetail(pickId);
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({ queryKey: ['pairing-public-swatches', pickId], queryFn: async () => {
     const { data, error } = await supabase.from('product_fabric_swatches_public').select('name,image_url').eq('pick_id', pickId);
@@ -22,6 +24,7 @@ export default function PairingMediaEditor({ pickId, hero, options, entries, onC
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [failed, setFailed] = useState<string[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const rows = detail?.size_variants || [];
   const gallery: string[] = Array.isArray(detail?.gallery_images) ? detail.gallery_images.filter((url: unknown): url is string => typeof url === 'string') : [];
   const selection = Object.fromEntries(pairingAxes.map(axis => { const values = pairingAxisOptions(rows, axis); return [axis, chosen[axis] || (values.length === 1 ? values[0] : null)]; })) as PairingSelection;
@@ -54,7 +57,8 @@ export default function PairingMediaEditor({ pickId, hero, options, entries, onC
     } catch (e) { setError(e instanceof Error ? e.message : 'Upload failed. Your saved assignments are unchanged.'); }
     finally { setBusy(false); onBusy(false); }
   }
-  return <section className="space-y-4 border-t border-border pt-4"><h3 className="font-display text-lg">Finish imagery</h3>
+  return <section className="space-y-4 border-t border-border pt-4"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-display text-lg">Finish imagery</h3>{previewPiece && <Button variant="outline" size="sm" disabled={busy || isPending || isError || swatchesPending || swatchesError} onClick={() => setPreviewOpen(true)}><Eye className="h-4 w-4" />Customer preview</Button>}</div>
+    {previewOpen && previewPiece && <PairingConfigurationSheet preview piece={{ ...previewPiece, finishOptions: options, finishMedia: entries }} initial={{ selection, visual, customId, material: rows.length ? '' : imageSelection.label || '' }} onClose={() => setPreviewOpen(false)} onExplore={() => setPreviewOpen(false)} />}
     {isPending || swatchesPending ? <p role="status">Loading finishes…</p> : isError || swatchesError ? <p role="alert" className="text-destructive">Finish choices could not be loaded.</p> : options.length ? <Select disabled={busy} value={customId} onValueChange={setCustomId}><SelectTrigger aria-label="Image finish"><SelectValue placeholder="Choose finish" /></SelectTrigger><SelectContent>{options.filter(o => o.name).map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent></Select> : rows.length ? pairingAxes.map(axis => {
       const choices = pairingVisualOptions(pairingAxisOptions(rows, axis), swatches); if (!choices.length) return null;
       return <Select key={axis} disabled={busy} value={imageSelection[axis] || ''} onValueChange={name => { setChosen({ ...selection, [axis]: choices.find(c => c.name === name)?.value || name }); setVisual({ ...visual, [axis]: name }); }}><SelectTrigger aria-label={`Image ${axis} finish`}><SelectValue placeholder={axis === 'label' ? 'Choose size' : `Choose ${axis} finish`} /></SelectTrigger><SelectContent>{choices.map(c => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent></Select>;

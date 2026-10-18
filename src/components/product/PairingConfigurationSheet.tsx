@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { pairingMediaKey } from '@/lib/pairingMedia';
 
-export default function PairingConfigurationSheet({ piece, onClose, onExplore }: { piece: PairingProduct; onClose: () => void; onExplore: () => void }) {
+export interface PairingConfigurationStart { selection: PairingSelection; visual: Partial<PairingSelection>; customId: string; material: string }
+export default function PairingConfigurationSheet({ piece, onClose, onExplore, preview = false, initial }: { piece: PairingProduct; onClose: () => void; onExplore: () => void; preview?: boolean; initial?: PairingConfigurationStart }) {
   const { data: detail, isPending: detailPending, isError } = useCuratorPickDetail(piece.id);
   const { data: price, isPending: pricePending } = usePublicRrp(piece.id);
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
@@ -28,12 +29,12 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
     },
   });
   const reduced = useReducedMotion();
-  const [chosen, setChosen] = useState<PairingSelection>({ base: null, top: null, label: null });
+  const [chosen, setChosen] = useState<PairingSelection>(initial?.selection || { base: null, top: null, label: null });
   const [quantity, setQuantity] = useState(1);
   const custom = piece.finishOptions || [];
-  const [customId, setCustomId] = useState(custom.length === 1 ? custom[0].id : "");
-  const [material, setMaterial] = useState("");
-  const [visualChoices, setVisualChoices] = useState<Partial<Record<keyof PairingSelection, string>>>({});
+  const [customId, setCustomId] = useState(initial?.customId || (custom.length === 1 ? custom[0].id : ""));
+  const [material, setMaterial] = useState(initial?.material || "");
+  const [visualChoices, setVisualChoices] = useState<Partial<Record<keyof PairingSelection, string>>>(initial?.visual || {});
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const rows: PairingVariant[] = detail?.size_variants || price?.rrp_size_variants || [];
   const selection = useMemo(() => Object.fromEntries(pairingAxes.map((axis) => {
@@ -59,7 +60,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const loading = detailPending || (!custom.length && pricePending);
   const canAdd = !!unit && complete && !loading && !isError && (custom.length ? !!piece.pairingRuleId : rows.length > 0 || (!swatchesPending && !swatchesError && !swatches.length));
   function add() {
-    if (!canAdd || !unit) return;
+    if (preview || !canAdd || !unit) return;
     const parts = piece.path.split("/");
     addToCart({ pickId: piece.id, designerSlug: parts[2], productSlug: parts[3], title: piece.title, designerName: piece.brand,
       finishLabel: selectedNames.join(" / ") || piece.materials || null,
@@ -110,6 +111,6 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
         </div>
       </div>
     </div>
-    <footer className="shrink-0 border-t border-border bg-background px-6 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-10"><div className="flex flex-wrap items-center justify-between gap-4"><p aria-live="polite" className="font-body text-base">{unit ? formatPublicRrpCents(toDisplayCents(unit * quantity), displayRow, "") : complete ? "Price upon Request" : "Select finishes"}</p><Button disabled={!canAdd} onClick={add} className="h-12 w-full whitespace-normal rounded-none px-6 font-body text-xs uppercase tracking-widest sm:w-auto">Add selection to ensemble</Button></div>{!canAdd && !loading && (complete || isError || !rows.length) && <Button asChild variant="link" className="mt-2 h-auto px-0 text-xs text-muted-foreground"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>Request Quote &amp; Customisation</Link></Button>}</footer>
+    <footer className="shrink-0 border-t border-border bg-background px-6 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:px-10">{preview && <p role="status" className="mb-3 text-xs text-muted-foreground">Customer preview · Unsaved changes</p>}<div className="flex flex-wrap items-center justify-between gap-4"><p aria-live="polite" className="font-body text-base">{unit ? formatPublicRrpCents(toDisplayCents(unit * quantity), displayRow, "") : complete ? "Price upon Request" : "Select finishes"}</p><Button disabled={preview || !canAdd} onClick={add} className="h-12 w-full whitespace-normal rounded-none px-6 font-body text-xs uppercase tracking-widest sm:w-auto">Add selection to ensemble</Button></div>{!preview && !canAdd && !loading && (complete || isError || !rows.length) && <Button asChild variant="link" className="mt-2 h-auto px-0 text-xs text-muted-foreground"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>Request Quote &amp; Customisation</Link></Button>}</footer>
   </SheetContent></Sheet>;
 }
