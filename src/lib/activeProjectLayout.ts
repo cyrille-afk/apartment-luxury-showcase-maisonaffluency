@@ -22,5 +22,5 @@ export function patchLayoutItem(objects: PlacedObject[], id: string, patch: { x?
 }
 export function layoutCamera(bounds: RoomBounds, view: WorkspaceView): { position: [number, number, number]; target: [number, number, number]; polar: number; fov: number } {
   if (view === "axonometric") return { position: [bounds.width * 0.65, Math.max(bounds.width, bounds.depth) * 1.25, bounds.depth * 0.9], target: [0, 0, 0], polar: Math.PI / 5, fov: 45 };
-  return { position: [0, 1.6, bounds.depth / 2 - 0.5], target: [0, 1.6, -bounds.depth / 2 + 0.5], polar: Math.PI / 2, fov: 60 };
+  return { position: [0, 1.6, Math.max(bounds.width, bounds.depth) * 1.2], target: [0, 1.6, 0], polar: Math.PI / 2, fov: 60 };
 }
