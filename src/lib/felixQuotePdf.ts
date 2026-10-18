@@ -2,6 +2,8 @@ import { jsPDF } from "jspdf";
 import type { ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { felixLineCents, felixQuantity, felixQuoteTotals } from "@/lib/felixQuoteQuantity";
 import { formatPdfDate, formatPdfMoney } from "@/lib/pdfFormatting";
+import type { FelixQuoteDetails } from "./felixQuoteDetails";
+import { displayNameForContact } from "./quoteContact";
 
 const JADE = [12, 49, 47] as const;
 const INK = [40, 40, 40] as const;
@@ -41,7 +43,7 @@ async function photo(url?: string | null): Promise<{ data: string; width: number
   } catch { return null; }
 }
 
-export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studioName?: string | null, locale?: string | null): Promise<Blob> {
+export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studioName?: string | null, locale?: string | null, details: FelixQuoteDetails = {}): Promise<Blob> {
   if (!cards.length) throw new Error("No current quote selections");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const fonts = await Promise.all([base64File("/fonts/pdf/Inter-Light.ttf"), base64File("/fonts/pdf/CormorantGaramond-Regular.ttf")]);
@@ -51,16 +53,34 @@ export async function buildFelixQuotePdf(cards: ProactiveTearsheetData[], studio
   const lines = felixPdfLines(cards);
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 44;
   let y = 156;
-  const header = () => {
+  const header = (first = false) => {
     doc.setTextColor(...JADE).setFont("Cormorant", "normal").setFontSize(27).text("Maison Affluency", M, 51);
     doc.setFont("Inter", "normal").setFontSize(8).setTextColor(...MUTED).text("FELIX / CURRENT QUOTE", M, 70);
     doc.text(formatPdfDate(new Date(), locale), W - M, 51, { align: "right" });
     doc.setDrawColor(...RULE).line(M, 85, W - M, 85);
     doc.setFont("Cormorant", "normal").setFontSize(23).setTextColor(...JADE).text("Selected pieces", M, 118);
     doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...MUTED).text(doc.splitTextToSize(studioName || "Studio selection", W - M * 2), M, 137);
+    y = 156;
+    if (first) {
+      const fields = [
+        ["Client", displayNameForContact(details.clientName, details.email)],
+        ["Contact", displayNameForContact(details.contactName)],
+        ["Email", details.email], ["Phone", details.phone],
+        ["Project", details.projectName], ["Location", details.projectAddress],
+        ["Reference", details.reference], ["Note", details.note],
+      ];
+      for (const [label, value] of fields) {
+        if (!value?.trim()) continue;
+        const text = doc.splitTextToSize(`${label}: ${value.trim().slice(0, label === "Note" ? 600 : 200)}`, W - M * 2);
+        if (y + text.length * 12 > H - 95) { doc.addPage(); header(); }
+        doc.setFont("Inter", "normal").setFontSize(9).setTextColor(...INK).text(text, M, y);
+        y += text.length * 12 + 5;
+      }
+      if (y > 156) { doc.setDrawColor(...RULE).line(M, y + 2, W - M, y + 2); y += 18; }
+    }
   };
-  const nextPage = () => { doc.addPage(); header(); y = 156; };
-  header();
+  const nextPage = () => { doc.addPage(); header(); };
+  header(true);
   lines.forEach((line, index) => {
     doc.setFont("Cormorant", "normal").setFontSize(17);
     const name = doc.splitTextToSize(line.productName, W - M * 2 - 118);
