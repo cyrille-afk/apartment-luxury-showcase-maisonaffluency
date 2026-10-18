@@ -1,3 +1,5 @@
+- [x] Add product, admin, inclusive date-range and finish-photo/macro-texture filters to catalog history, with counts, clear filters and filtering before pagination; 33 focused tests pass.
+- [ ] Verify history filters against live admin records. Blocked: fresh requesting-user session redirects to /trade; requires admin-authorized access. GitHub sync needed.
 - [x] Add customer configuration-sheet preview from unsaved admin imagery and the selected finish. 22 tests verify exact images, macro fallbacks and no cart/catalog writes; build clean.
 - [ ] Verify opening and closing customer preview through the live admin editor. Blocked: requesting user's live session has trade_user only and redirects to /trade. Requires an admin-authorized session. GitHub sync needed.
 - [x] Identify saved finish photo/macro uploads, replacements and removals in catalog history with exact before/after URLs; existing database trigger records the acting admin and timestamp. 26 focused tests pass; build clean. Live admin save/readback remains blocked by requesting account's trade_user-only access.
