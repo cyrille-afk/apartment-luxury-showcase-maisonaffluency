@@ -13,9 +13,23 @@ export function pairingSwatchFor(name: string, swatches: PairingSwatch[]) {
   return suffix.length === 1 ? suffix[0] : undefined;
 }
 
+const familyKey = (value: string) => normalize(value.replace(/^\s*(fabric|leather|textile|velvet)\s*(cat(egory)?\.?|collection)\s*/i, ""));
+// One-letter supplier spelling slips ("Servo" vs "Cervo") still identify the same family.
+const nearlyEqual = (a: string, b: string) => {
+  if (a.length !== b.length || a.length < 5) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i] && ++diff > 1) return false;
+  return true;
+};
+
 export function pairingVisualOptions(options: string[], swatches: PairingSwatch[]) {
   return options.flatMap((value) => {
-    const family = swatches.filter((swatch) => normalize(swatch.name.split(/\s+-\s+/)[0]) === normalize(value));
+    const key = familyKey(value);
+    let family = swatches.filter((swatch) => normalize(swatch.name.split(/\s+-\s+/)[0]) === normalize(value));
+    if (!family.length && key && key !== normalize(value)) {
+      family = swatches.filter((swatch) => normalize(swatch.name).startsWith(key));
+      if (!family.length) family = swatches.filter((swatch) => nearlyEqual(normalize(swatch.name.split(/\s+/)[0]), key));
+    }
     return family.length ? family.map((swatch) => ({ value, name: swatch.name })) : [{ value, name: pairingSwatchFor(value, swatches)?.name || value }];
   });
 }
