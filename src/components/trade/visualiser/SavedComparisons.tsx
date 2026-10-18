@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Columns2, Download, Loader2 } from "lucide-react";
+import { Columns2, Download, Eye, Loader2 } from "lucide-react";
+import { PdfViewerDialog } from "@/components/trade/PdfViewerDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeCoverTheme } from "@/lib/pdfCoverTheme";
