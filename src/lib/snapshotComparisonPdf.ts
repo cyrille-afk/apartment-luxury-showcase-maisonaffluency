@@ -60,7 +60,7 @@ const ACCENT = [176, 112, 58] as const;
 const clean = (value: unknown, max: number) => String(value ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, max);
 export function comparisonAnnotationText(annotations: ComparisonAnnotations | undefined, id: string) { return clean(annotations?.notes?.[id], 600); }
 
-export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide, annotations: ComparisonAnnotations = {}): Promise<Blob> {
+export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide, annotations: ComparisonAnnotations = {}, options: { comparedAt?: string } = {}): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const [bodyFont, headingFont] = await Promise.all([fontFile('/fonts/pdf/Inter-Light.ttf'), fontFile('/fonts/pdf/CormorantGaramond-Regular.ttf')]);
   doc.addFileToVFS('Inter.ttf', bodyFont); doc.addFont('Inter.ttf', 'Inter', 'normal');
@@ -75,6 +75,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.setFont('Cormorant').setFontSize(25).setTextColor(...JADE).text('Maison Affluency', M, 19);
     doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text('PROJECT SNAPSHOT COMPARISON', M, 26);
     doc.text(formatPdfDate(new Date(), 'en-GB'), 281, 19, { align: 'right' });
+    if (options.comparedAt) doc.text(`COMPARISON SAVED ${formatPdfDate(new Date(options.comparedAt), 'en-GB')}`, 281, 26, { align: 'right' });
     doc.setDrawColor(...RULE).line(M, 32, 281, 32);
     doc.setFont('Cormorant').setFontSize(20).setTextColor(...JADE).text(title, M, 43);
   };

@@ -63,7 +63,7 @@ export default function ProjectSnapshots({ className, current, onLoad }: { class
           <Button size="sm" type="submit" disabled={busy || !name.trim()}>Save</Button>
         </form>
         {list.length >= 2 && <Button variant="outline" size="sm" className="mt-3 w-full" disabled={busy} onClick={() => { setOpen(false); setComparing(true); }}><Columns2 className="h-4 w-4" />Compare snapshots</Button>}
-        <SavedComparisons saved={saved} snapshots={list} onOpen={ids => { setOpen(false); setComparing(ids); }} />
+        <SavedComparisons projectKey={key} saved={saved} snapshots={list} onOpen={ids => { setOpen(false); setComparing(ids); }} />
         <div className="mt-3 max-h-80 space-y-3 overflow-y-auto">
           {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label="Loading snapshots" />}
           {error && <div className="text-xs text-muted-foreground">Snapshots couldn't load.<Button variant="link" size="sm" disabled={busy} onClick={() => void refresh()}>Retry</Button></div>}
