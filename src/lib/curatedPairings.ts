@@ -52,6 +52,12 @@ export function pairingCategory(product: Pick<PairingProduct, "title" | "categor
   return null;
 }
 
+function pairingSeed(value: string) {
+  let h = 2166136261;
+  for (let i = 0; i < value.length; i++) h = Math.imul(h ^ value.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
 export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "title" | "brand" | "category" | "subcategory">, products: PairingProduct[], excludedIds: string[] = [], rules: PairingRule[] = []): PairingProduct[] {
   const source = pairingCategory(primary);
   if (!source) return [];
@@ -61,7 +67,9 @@ export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "titl
     .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)).flatMap((rule) => {
     const matches = pool.filter((p) => pairingCategory(p) === rule.target_category && !excluded.has(p.id));
     const sameBrand = matches.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
-    const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? matches[0];
+    // Rotate deterministically per purchased piece so each first choice gets its own companions.
+    const ranked = [...matches].sort((a, b) => pairingSeed(primary.id + a.id) - pairingSeed(primary.id + b.id) || a.id.localeCompare(b.id));
+    const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? ranked[0];
     if (pick) excluded.add(pick.id);
     return pick ? [{ ...pick, ...(pick.id === rule.preferred_pick_id ? { finishMedia: parsePairingMedia(rule.finish_media) } : {}), ...(pick.id === rule.preferred_pick_id && parsePairingFinishOptions(rule.finish_options).length ? {
       pairingRuleId: rule.id, finishOptions: parsePairingFinishOptions(rule.finish_options), finishCurrency: rule.finish_currency || "USD",
