@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ChevronRight, ZoomIn, X, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { felixFinishLabel, type FelixQuoteFinish } from "@/lib/felixQuoteFinishes";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -211,6 +212,8 @@ interface FinishSelectorProps {
     base: string | null;
     top: string | null;
   }) => void;
+  /** Exact selected finish groups for quote snapshots; never includes ambiguous photo alternatives. */
+  onQuoteFinishesChange?: (finishes: FelixQuoteFinish[]) => void;
 
   /**
    * Fires alongside onTopFinishChange with the swatch's image_url so callers
@@ -362,7 +365,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, photoLedFinishes = false, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, secondaryUpholsteryLabel, onSecondaryUpholsteryTierChange, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, sharedBaseTopSwatches = false, disabledBaseNames, disabledTopNames, selectedBasePairing, selectedTopPairing, topLabel, onTopFinishChange, onFrameFinishChange, frameOptions, baseAxisOptions, topAxisOptions, disabledBaseOptions, disabledTopOptions, axisBaseLabel, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, photoLedFinishes = false, preselectFabricName, onFinishGroupingResolved, onDisplayedFinishesChange, onQuoteFinishesChange }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -1537,6 +1540,31 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (/\btable\b/.test(title)) return "Select Your Table Top Finish";
     return "Select Your Top Finish";
   })();
+  const quoteFinishes: FelixQuoteFinish[] = [];
+  const addQuoteFinish = (label: string, item: { name: string; image_url?: string | null } | null | undefined) => {
+    if (item) quoteFinishes.push({ label: felixFinishLabel(label, "Finish"), name: item.name, imageUrl: item.image_url });
+  };
+  if (isOolMinibar) addQuoteFinish("Select Your Frame Finish", selectedFrameItem);
+  if (isRugProduct) {
+    for (const [component] of rugComponentGroups) addQuoteFinish(component, fabrics.find(f => f.id === selectedRugComponentIds[component]));
+  } else if (!axisModeActive && (showUpholsterySection || fabrics.some(isFabricCategory))) {
+    addQuoteFinish(upholsteryLabel?.trim() || "Select Your Fabric / Leather", selectedFabricItem);
+    if (showUpholsterySection && secondaryUpholsteryLabel?.trim()) {
+      addQuoteFinish(secondaryUpholsteryLabel, selectedSecondaryFabricId === "__com__" ? { name: "COM — Customer's Own Material" } : selectedSecondaryFabricId === "__col__" ? { name: "COL — Customer's Own Leather" } : fabrics.find(f => f.id === selectedSecondaryFabricId));
+    }
+  }
+  if (showWoodSection) {
+    if (visibleWoodTiles.length) addQuoteFinish(baseAxisLabel, selectedWoodItem);
+    if (visibleTopTiles.length) addQuoteFinish(topAxisLabel, selectedTopItem);
+    for (const group of extraCategoryGroups) addQuoteFinish(group.label, fabrics.find(f => f.id === extraSplitIds[group.key]));
+  }
+  if (visibleCoverTiles.length) addQuoteFinish("Select the Finish of the Cover", selectedCoverItem);
+  const quoteFinishKey = JSON.stringify(quoteFinishes);
+  const quoteFinishCallback = useRef(onQuoteFinishesChange);
+  quoteFinishCallback.current = onQuoteFinishesChange;
+  useEffect(() => {
+    quoteFinishCallback.current?.(JSON.parse(quoteFinishKey) as FelixQuoteFinish[]);
+  }, [quoteFinishKey, pickId]);
   const showMobileBaseTopGrid = !isOolMinibar && (isMobile || isPwa) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0);
 
   const renderInlineAxisCarousel = (
