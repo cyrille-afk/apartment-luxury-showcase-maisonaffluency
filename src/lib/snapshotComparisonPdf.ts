@@ -104,7 +104,11 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
   if (!changes.length) doc.setFont('Inter').setFontSize(10).text('Both snapshots have no furniture.', M, y + 8);
   for (const change of changes) {
     const objects = [change.before, change.after];
-    const columns = objects.map(o => comparisonPieceText(o).flatMap(text => doc.setFont('Inter').setFontSize(9).splitTextToSize(text, column - 4)));
+    const columns = objects.map(o => {
+      const text = comparisonPieceText(o);
+      const metadata = o && snapshotFinishes(o).length ? text.slice(0, 3) : text;
+      return metadata.flatMap(line => doc.setFont('Inter').setFontSize(9).splitTextToSize(line, column - 4));
+    });
     const count = Math.max(...columns.map(c => c.length));
     if (y + 17 > 192) nextPage();
     doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
@@ -127,7 +131,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
         const f = list[row]; if (!f) return;
         const image = f.image ? images.get(f.image) : null;
         if (image) doc.addImage(image, 'PNG', xs[i], y, 14, 14);
-        doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text(texts[i], xs[i] + 19, y + 4);
+        doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text(texts[i], xs[i] + (image ? 19 : 0), y + 4);
       });
       y += rowHeight;
     }
