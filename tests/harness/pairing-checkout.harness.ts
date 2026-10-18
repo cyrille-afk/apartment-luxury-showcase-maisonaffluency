@@ -8,7 +8,7 @@ const input = JSON.parse(await new Response(Deno.stdin.readable).text());
 globalThis.fetch = () => Promise.reject(new Error('Network forbidden in pairing checkout harness'));
 const tables: Record<string, unknown[]> = {
   trade_products: input.products,
-  designer_curator_picks: [],
+  designer_curator_picks: input.picks ?? [],
   curated_pairing_rules: [input.rule],
   designer_curator_picks_public: [{ id: input.rule.preferred_pick_id, designer_id: 'fixture-designer' }],
   designers: [{ id: 'fixture-designer' }],
