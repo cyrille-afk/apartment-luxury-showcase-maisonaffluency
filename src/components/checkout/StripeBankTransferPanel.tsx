@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TransferReferenceNote } from "@/components/checkout/TransferReferenceNote";
 import { cn } from "@/lib/utils";
+import { CheckoutRecoveryPanel, type RecoveryLine } from "./CheckoutRecoveryPanel";
+import { readFunctionFailure, type CheckoutFailure, type CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 
 /* ------------------------------------------------------------------ */
 /* Stripe virtual bank transfer — localized routing per currency.      */
@@ -234,6 +236,8 @@ export default function StripeBankTransferPanel({
   shippingQuoteRef,
   orderReference,
   fallback,
+  onRecover,
+  recoveryLines,
 }: {
   items: WireItem[];
   currency: string;
@@ -243,6 +247,8 @@ export default function StripeBankTransferPanel({
   shippingQuoteRef?: string | null;
   orderReference?: string;
   fallback: React.ReactNode;
+  onRecover?: (recovery: CheckoutRecovery | null, chosenCents?: number) => boolean;
+  recoveryLines?: RecoveryLine[] | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -251,9 +257,15 @@ export default function StripeBankTransferPanel({
   const [reference, setReference] = useState<string | null>(null);
   const [hostedUrl, setHostedUrl] = useState<string | null>(null);
   const [activeRail, setActiveRail] = useState(0);
+  const [failure, setFailure] = useState<CheckoutFailure | null>(null);
+  const [retry, setRetry] = useState(0);
+  const recoveryRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (failure) recoveryRef.current?.scrollIntoView({ block: "center" }); }, [failure]);
 
   const hasEmail = email.includes("@");
-  const key = JSON.stringify({ currency, email: hasEmail ? email : "", n: items.length, shippingCents });
+  // Include every configured line and freight field: a confirmed reprice must
+  // regenerate routing with the new amount, not reuse an old account response.
+  const key = JSON.stringify({ currency, email: hasEmail ? email : "", items, shippingConfirmed, shippingCents, shippingQuoteRef });
 
   useEffect(() => {
     if (!hasEmail || !items.length) return;
@@ -261,6 +273,8 @@ export default function StripeBankTransferPanel({
     setLoading(true);
     setFailed(false);
     setReason(null);
+    setFailure(null);
+    setAddresses([]); setReference(null); setHostedUrl(null);
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("create-bank-transfer-intent", {
@@ -276,6 +290,9 @@ export default function StripeBankTransferPanel({
         if (cancelled) return;
         const list = (data as any)?.financialAddresses as FinancialAddress[] | undefined;
         if (error || (data as any)?.error || !list?.length) {
+          const rejected = await readFunctionFailure(error, data, "We couldn't generate your dedicated account. Please try again.");
+          if (cancelled) return;
+          if (rejected.recovery) { setFailure(rejected); setFailed(true); return; }
           setFailed(true);
           setReason(
             classifyFailure(
@@ -303,7 +320,7 @@ export default function StripeBankTransferPanel({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, retry]);
 
   if (!hasEmail) {
     return (
@@ -323,6 +340,20 @@ export default function StripeBankTransferPanel({
         Generating your dedicated {currency.toUpperCase()} account…
       </div>
     );
+  }
+
+  if (failure) {
+    return <div ref={recoveryRef}><CheckoutRecoveryPanel
+      key={`${failure.message}:${JSON.stringify(failure.recovery)}`}
+      className="border border-border py-6"
+      message={failure.message}
+      recovery={failure.recovery}
+      lines={recoveryLines ?? items.map(item => ({ ...item, unitCents: Math.round(item.price * 100), finishLabel: item.selectedFinish, currency }))}
+      busy={loading}
+      onConfirm={chosen => { if (onRecover?.(failure.recovery, chosen)) setFailure(null); }}
+      onRetry={() => setRetry(n => n + 1)}
+      onReselect={path => window.location.assign(path)}
+    /></div>;
   }
 
   if (failed || !addresses.length) {

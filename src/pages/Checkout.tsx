@@ -1864,6 +1864,8 @@ function WireForm({
 
       <section className="space-y-5 pt-8">
         <RegionalPaymentPanel
+          onRecover={onRecover}
+          recoveryLines={recoveryLines}
           orderRef={orderRef}
           regionTier={regionTier}
           country={destinationCountry}

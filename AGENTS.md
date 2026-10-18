@@ -21,7 +21,7 @@
 - Comparison annotations and downscaled JPEG references save atomically in owner-private project/ordered-snapshot-pair records; hydrate before editing, preserve failed saves, and cascade on snapshot deletion — prevents orphaned photos and cross-comparison overwrites.
 - Workspace presentations freeze allowlisted owner snapshots behind verified board guest sessions; server write guards keep client views read-only and exclude pricing.
 - Product selection checkout hand-offs preserve pairing rule/option references and provenance alongside finish prices — server validation must resolve custom pairing prices against their rule.
-- Checkout 409s carry a structured `recovery` hint; retries only reprice the matched line (pairing included) after explicit buyer acceptance — never silently.
+- Checkout 409s carry a structured `recovery` hint; card, wire and instant-transfer retries only reprice the matched line (pairing included) after explicit buyer acceptance. Instant routing keys include configured lines/freight and clear stale account details — prevents reuse of an unconfirmed amount.
 - Pairing browser regressions run production catalogPricing in an isolated Deno harness at the intercepted payment boundary; never mutate live rules or create payment intents for CI.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.

@@ -27,6 +27,8 @@ import type { ProformaLine } from "@/lib/proformaInvoicePdf";
 import { resolveTaxTreatment, type BuyerType } from "@/config/taxRules";
 import { useStudio } from "@/hooks/useStudio";
 import { normalizePdfLocale } from "@/lib/pdfFormatting";
+import type { RecoveryLine } from "./CheckoutRecoveryPanel";
+import type { CheckoutRecovery } from "@/lib/checkout/checkoutRecovery";
 
 export interface RegionalPaymentPanelProps {
   orderRef: string;
@@ -48,6 +50,8 @@ export interface RegionalPaymentPanelProps {
   shippingLabel?: string | null;
   /** Called once the pro-forma order has been recorded. */
   onRecorded?: (orderId: string) => void;
+  onRecover?: (recovery: CheckoutRecovery | null, chosenCents?: number) => boolean;
+  recoveryLines?: RecoveryLine[] | null;
 }
 
 const money = (cents: number, currency: string) =>
@@ -323,6 +327,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
 
       {channel.id === "gb_faster_payments" ? (
         <StripeBankTransferPanel
+          onRecover={props.onRecover}
+          recoveryLines={props.recoveryLines}
           currency="gbp"
           email={buyer.email}
           items={lines.map((l) => ({
