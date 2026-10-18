@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import PayoutAccountsSection from "@/components/trade/settings/PayoutAccountsSection";
 import ResaleCertificatesSection from "@/components/trade/settings/ResaleCertificatesSection";
 import { StudioBrand } from "@/components/trade/StudioBrand";
+import { BrandedPdfPreview } from "@/components/trade/settings/BrandedPdfPreview";
 import { PDF_LOCALE_LABELS, PDF_LOCALE_PRESETS, normalizePdfLocale, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
 interface Member {
@@ -336,6 +337,7 @@ export default function TradeStudioSettings() {
             <div className="flex flex-wrap gap-4">{([["background", "Background"], ["accent", "Accent"], ["text", "Title text"]] as const).map(([k, label]) => <div key={k} className="space-y-1"><Label htmlFor={`cover-${k}`}>{label}</Label><div className="flex items-center gap-2"><input id={`cover-${k}`} type="color" value={coverTheme[k]} disabled={!isAdmin} onChange={e => setCoverTheme(t => ({ ...t, [k]: e.target.value.toUpperCase() }))} className="h-9 w-12 cursor-pointer rounded border border-input bg-background" /><span className="font-mono text-xs text-muted-foreground">{coverTheme[k]}</span></div></div>)}<Button type="button" variant="ghost" size="sm" className="self-end" disabled={!isAdmin} onClick={() => setCoverTheme(DEFAULT_COVER_THEME)}>Reset</Button></div>
             {contrastRatio(coverTheme.background, coverTheme.text) < 4.5 && <p role="alert" className="text-xs text-destructive">Title text may be hard to read on this background.</p>}
             <CoverPreview theme={coverTheme} typeface={brandFont} logoUrl={logoUrl} studioName={displayName || studioName} />
+            <BrandedPdfPreview theme={coverTheme} typeface={brandFont} logoUrl={logoUrl} studioName={displayName || studioName} />
           </fieldset>
           <div><Label htmlFor="default-markup">Default project markup (%)</Label><Input id="default-markup" type="number" min="0" max="1000" step="0.01" value={markup} onChange={(e) => setMarkup(e.target.value)} disabled={!isAdmin} /></div>
           <div>

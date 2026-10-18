@@ -13,7 +13,7 @@ import { browseComparisons, type SavedComparison } from "@/lib/snapshotCompariso
 import type { ProjectSnapshot } from "@/lib/projectLayoutSnapshots";
 
 /** Loads an HTTPS logo into a PNG data URL with its pixel size; null when it can't be read (CORS, 404). */
-async function logoForPdf(url: string | null | undefined) {
+export async function logoForPdf(url: string | null | undefined) {
   if (!url || !/^https:\/\//i.test(url)) return null;
   try {
     const img = new Image(); img.crossOrigin = "anonymous"; img.src = url; await img.decode();
