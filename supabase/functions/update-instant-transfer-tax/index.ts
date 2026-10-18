@@ -49,7 +49,7 @@ serve(async (req) => {
     const buyerTaxId = typeof body?.buyerTaxId === "string" ? body.buyerTaxId.trim().slice(0, 40) || null : null;
 
     const { data: order, error: readErr } = await supabase.from("shop_orders")
-      .select("id, payment_method, status, subtotal_cents, discount_cents, shipping_cents, stripe_session_id")
+      .select("id, order_ref, email, full_name, currency, total_cents, tax_cents, tax_label, buyer_tax_id, payment_method, status, subtotal_cents, discount_cents, shipping_cents, stripe_session_id")
       .eq("id", orderId).maybeSingle();
     if (readErr || !order) return json({ error: "Order not found." }, 404);
     if (order.payment_method !== "instant_bank_transfer") return json({ error: "Only instant bank transfer orders can be updated here." }, 400);
@@ -75,7 +75,34 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }).eq("id", order.id);
     if (upErr) return json({ error: "Payment updated but the order could not be saved — retry." }, 500);
-    return json({ ok: true, taxCents, totalCents });
+
+    // Team corrections notify the buyer once per distinct change.
+    let emailed = false;
+    const changed = order.tax_cents !== taxCents || (order.tax_label ?? null) !== taxLabel || (order.buyer_tax_id ?? null) !== buyerTaxId;
+    if (isAdmin && changed && order.email) {
+      const fmt = (c: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: (order.currency || "usd").toUpperCase() }).format(c / 100);
+      const due = Math.max(0, totalCents - received);
+      const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "instant-transfer-tax-updated",
+          recipientEmail: order.email,
+          idempotencyKey: `instant-tax-${order.id}-${taxCents}-${totalCents}-${taxLabel ?? ""}-${buyerTaxId ?? ""}`,
+          templateData: {
+            recipientName: order.full_name ?? "",
+            orderRef: order.order_ref,
+            previousTotalFormatted: order.total_cents !== totalCents ? fmt(order.total_cents) : null,
+            taxLabel, taxFormatted: taxCents > 0 ? fmt(taxCents) : null, buyerTaxId,
+            totalFormatted: fmt(totalCents),
+            receivedFormatted: received > 0 ? fmt(received) : null,
+            amountDueFormatted: fmt(due),
+            viewUrl: `https://www.maisonaffluency.com/order-confirmation?ref=${encodeURIComponent(order.order_ref)}&status=bank_transfer`,
+          },
+        },
+      });
+      if (mailErr) console.error("[update-instant-transfer-tax] email failed", mailErr);
+      emailed = !mailErr;
+    }
+    return json({ ok: true, taxCents, totalCents, emailed });
   } catch (err) {
     console.error("[update-instant-transfer-tax]", err);
     return json({ error: err instanceof Error ? err.message : "Update failed." }, 500);

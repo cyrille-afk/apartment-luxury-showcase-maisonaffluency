@@ -51,7 +51,7 @@ function InstantTaxEditor({ order, onSaved }: { order: OrderRow; onSaved: () => 
     setSaving(false);
     const msg = (data as { error?: string })?.error;
     if (error || msg) { toast({ title: "Tax not updated", description: msg || error?.message, variant: "destructive" }); return; }
-    toast({ title: `${order.order_ref} updated`, description: `Amount due is now ${money((data as { totalCents: number }).totalCents, order.currency)}.` });
+    toast({ title: `${order.order_ref} updated`, description: `Amount due is now ${money((data as { totalCents: number }).totalCents, order.currency)}.${(data as { emailed?: boolean }).emailed ? " The buyer has been emailed." : ""}` });
     setOpen(false); onSaved();
   };
   return <div className="flex w-full flex-wrap items-end gap-2 border-t border-border pt-3">
