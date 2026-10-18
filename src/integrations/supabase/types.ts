@@ -2927,6 +2927,48 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_pairing_rules: {
+        Row: {
+          enabled: boolean
+          id: string
+          preferred_pick_id: string | null
+          sort_order: number
+          source_category: string
+          target_category: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          preferred_pick_id?: string | null
+          sort_order?: number
+          source_category: string
+          target_category: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          preferred_pick_id?: string | null
+          sort_order?: number
+          source_category?: string
+          target_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curated_pairing_rules_preferred_pick_id_fkey"
+            columns: ["preferred_pick_id"]
+            isOneToOne: false
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curated_pairing_rules_preferred_pick_id_fkey"
+            columns: ["preferred_pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       curation_messages: {
         Row: {
           content: string
