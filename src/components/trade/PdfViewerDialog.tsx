@@ -104,11 +104,12 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); goTo(page - 1); }
     else if (e.key === "+" || e.key === "=") setZoom(z => clampZoom(z + 0.25));
     else if (e.key === "-") setZoom(z => clampZoom(z - 0.25));
+    else if (e.key === "f" || e.key === "F") setFull(f => !f);
   };
 
   const pages = doc?.numPages ?? 0;
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="flex h-[92vh] max-w-6xl flex-col" onKeyDown={onKey}>
+    <DialogContent className={`flex flex-col ${full ? "h-screen w-screen max-w-none rounded-none border-none" : "h-[92vh] max-w-6xl"}`} onKeyDown={onKey}>
       <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
       {doc && <div className="flex flex-wrap items-center justify-between gap-2 border-y border-border py-2" role="toolbar" aria-label="PDF controls">
