@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, PanelLeft, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { pageSections, type PdfSection, type PageImage } from "@/lib/pdfPageSections";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Props = {
@@ -31,6 +32,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   const [full, setFull] = useState(false);
   const [thumbsOpen, setThumbsOpen] = useState(true);
   const [labels, setLabels] = useState<string[]>([]);
+  const [sections, setSections] = useState<PdfSection[][]>([]);
   const thumbs = useRef<(HTMLCanvasElement | null)[]>([]);
   const thumbList = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -76,9 +78,10 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   // Small page thumbnails (rendered once per document) with a short label from each page's first line of text.
   useEffect(() => {
     if (!doc) return;
-    let off = false; setLabels([]);
+    let off = false; setLabels([]); setSections([]);
     (async () => {
-      const found: string[] = [];
+      const found: string[] = []; const tags: PdfSection[][] = [];
+      const pdfjs = await import("pdfjs-dist");
       for (let n = 1; n <= doc.numPages && !off; n++) {
         const p = await doc.getPage(n);
         const base = p.getViewport({ scale: 1 });
@@ -87,9 +90,17 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
         if (c && !off) { c.width = vp.width; c.height = vp.height; c.style.width = "112px"; c.style.height = `${(vp.height / vp.width) * 112}px`; await p.render({ canvasContext: c.getContext("2d")!, viewport: vp }).promise; }
         try {
           const text = await p.getTextContent();
-          found[n - 1] = text.items.map((t: { str?: string }) => t.str ?? "").join(" ").replace(/\s+/g, " ").trim().slice(0, 48);
-        } catch { found[n - 1] = ""; }
-        if (!off) setLabels([...found]);
+          const all = text.items.map((t: { str?: string }) => t.str ?? "").join(" ").replace(/\s+/g, " ").trim();
+          found[n - 1] = all.slice(0, 48);
+          const ops = await p.getOperatorList();
+          const images: PageImage[] = []; let m = [1, 0, 0, 1];
+          ops.fnArray.forEach((fn: number, i: number) => {
+            if (fn === pdfjs.OPS.transform) m = ops.argsArray[i];
+            else if (fn === pdfjs.OPS.paintImageXObject) images.push({ width: Math.hypot(m[0], m[1]), height: Math.hypot(m[2], m[3]) });
+          });
+          tags[n - 1] = pageSections(all, images);
+        } catch { found[n - 1] = ""; tags[n - 1] = []; }
+        if (!off) { setLabels([...found]); setSections([...tags]); }
       }
     })();
     return () => { off = true; };
@@ -167,6 +178,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           className={`mb-3 flex w-full flex-col items-center gap-1 rounded p-1.5 text-left transition-colors hover:bg-muted ${page === i + 1 ? "bg-muted ring-1 ring-primary" : ""}`}>
           <canvas ref={el => { thumbs.current[i] = el; }} className="bg-background shadow-sm" />
           <span className="w-full text-[10px] font-medium tabular-nums">{i + 1}</span>
+          {!!sections[i]?.length && <span className="flex w-full flex-wrap gap-1">{sections[i].map(tag => <span key={tag} className="rounded-sm bg-primary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary-foreground">{tag}</span>)}</span>}
           {labels[i] && <span className="line-clamp-2 w-full text-[10px] leading-tight text-muted-foreground">{labels[i]}</span>}
         </button>)}
       </nav>}
