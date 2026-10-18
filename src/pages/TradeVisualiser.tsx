@@ -55,7 +55,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { VisualiserSelectionProvider } from "@/components/trade/visualiser/VisualiserSelectionContext";
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
-import ScenePresets from "@/components/trade/visualiser/ScenePresets";
+import ProjectSnapshots from "@/components/trade/visualiser/ProjectSnapshots";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
 import "@/components/trade/visualiser/visualiserToolbar.css";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
@@ -1198,7 +1198,7 @@ const TradeVisualiser = () => {
             [ &#128248; {exporting ? "Exporting…" : "Export Mockup"} ]
           </Button>
           <span className="h-5 w-px bg-border" />
-          <ScenePresets
+          <ProjectSnapshots
             className={toolbarButton}
             current={() => ({ objects, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, backdropDataUrl, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, featureWallFinish: featureWallFinishKey, rugColor: rugColorKey, rugBorderColor: rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeave: rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, backdropColor, backdropBrightness })}
             onLoad={(data) => {
