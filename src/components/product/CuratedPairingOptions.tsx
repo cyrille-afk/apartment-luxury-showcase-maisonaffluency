@@ -5,8 +5,8 @@ import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCuratorPickDetail } from "@/hooks/useCuratorPickDetail";
-import { usePublicRrp, formatPublicRrpForDestination } from "@/hooks/usePublicRrp";
-import { useShippingDestination } from "@/lib/shippingDestination";
+import { usePublicRrp, usePublicRrpDisplay, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import FinishSelector from "@/components/FinishSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { addToCart } from "@/lib/cart";
 import { pairingAxes, pairingAxisOptions, pairingOptionAvailable, pairingSelectionComplete, pairingSelectionPrice, type PairingSelection, type PairingVariant } from "@/lib/curatedPairingConfiguration";
@@ -20,7 +20,7 @@ const normalize = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036
 export default function CuratedPairingOptions({ piece, onExplore }: { piece: PairingProduct; onExplore: () => void }) {
   const { data: detail, isPending: detailPending, isError } = useCuratorPickDetail(piece.id);
   const { data: price, isPending: pricePending } = usePublicRrp(piece.id);
-  const destination = useShippingDestination();
+  const { displayRow, toDisplayCents } = usePublicRrpDisplay(price);
   const [chosen, setChosen] = useState<PairingSelection>({ base: null, top: null, label: null });
   const [quantity, setQuantity] = useState(1);
   const { data: swatches = [] } = useQuery({
@@ -38,7 +38,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
   })) as PairingSelection, [rows, chosen]);
   const complete = pairingSelectionComplete(rows, selection);
   const unit = complete ? pairingSelectionPrice(price, selection) : null;
-  const imageList: string[] = [piece.image, ...(detail?.gallery_images || [])].filter(Boolean);
+  const imageList: string[] = detail?.gallery_images?.length ? detail.gallery_images : [piece.image];
   const selectedImage = resolveVariantImageIndex(buildProductFinishMap(detail?.variant_image_map), { ...selection, size: selection.label, variants: rows, imageCount: imageList.length });
   const swatchFor = (option: string) => swatches.find((swatch) => normalize(swatch.name) === normalize(option) || normalize(swatch.name).endsWith(normalize(option)));
 
@@ -54,6 +54,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
 
   if (detailPending || pricePending) return <p role="status" className="mt-4 font-body text-xs text-muted-foreground">Loading finishes…</p>;
   return <div className="mt-4 space-y-3">
+    {!isError && !rows.length && <FinishSelector pickId={piece.id} productTitle={piece.title} includePricing={false} />}
     {!isError && pairingAxes.map((axis) => {
       const options = pairingAxisOptions(rows, axis);
       if (!options.length) return null;
@@ -80,7 +81,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none" aria-label={`Increase ${piece.title} quantity`} disabled={quantity >= 99} onClick={() => setQuantity(quantity + 1)}><Plus className="h-3 w-3" /></Button>
       </div>
     </div>
-    <p aria-live="polite" className="font-body text-xs text-muted-foreground">{unit ? formatPublicRrpForDestination({ currency: price?.currency || "USD", price_unit: null, price_prefix: "", rrp_price_cents: unit * quantity }, destination.currency) : complete ? "Price upon Request" : "Select finishes"}</p>
-    {unit && !isError ? <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal rounded-none px-3 text-xs" onClick={add}>Add to Selection</Button> : <Button asChild variant="link" className="h-auto whitespace-normal px-0 text-xs"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>{isError || !complete ? "View Piece" : "Request Quote & Customisation"}</Link></Button>}
+    <p aria-live="polite" className="font-body text-xs text-muted-foreground">{unit ? formatPublicRrpCents(toDisplayCents(unit * quantity), { ...displayRow, rrp_price_cents: unit * quantity, currency: displayRow?.currency || "USD", price_unit: null, price_prefix: "" }, "") : complete ? "Price upon Request" : "Select finishes"}</p>
+    {unit && !isError && (rows.length > 0 || !swatches.length) ? <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal rounded-none px-3 text-xs" onClick={add}>Add to Selection</Button> : <Button asChild variant="link" className="h-auto whitespace-normal px-0 text-xs"><Link to={piece.path} state={{ curatedPairing: true }} onClick={onExplore}>{isError || !complete ? "View Piece" : "Request Quote & Customisation"}</Link></Button>}
   </div>;
 }
