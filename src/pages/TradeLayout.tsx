@@ -19,7 +19,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 import { isTradeDesignerBrowse } from "@/lib/tradeBrowsing";
-import { tradeGalleryReturnPath } from "@/lib/tradeGalleryState";
 import ProductDisplayToggle from "@/components/trade/ProductDisplayToggle";
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
@@ -530,7 +529,6 @@ const TradeLayout = () => {
           <header className={`trade-editorial-header ${designerRoute ? "min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0" : "h-14 md:h-16"} flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
-              {designerRoute && <Link to={tradeGalleryReturnPath()} className="relative z-10 font-body text-[10px] uppercase text-muted-foreground hover:text-foreground">Back to Trade</Link>}
                <div data-trade-sensitive><TradeMobileMenu
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
