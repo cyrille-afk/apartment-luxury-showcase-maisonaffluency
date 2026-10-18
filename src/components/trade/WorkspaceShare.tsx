@@ -28,7 +28,7 @@ export default function WorkspaceShare() {
     if (!project) return;
     setBusy(true); setError("");
     try {
-      const { data, error: err } = await supabase.rpc("create_workspace_share", { _project_key: project.state.projectId, _title: title.trim(), _floor_plan: project.state.floorPlanUrl ?? undefined, _snapshot_ids: selected, _studio_name: currentStudio?.display_name || currentStudio?.name || "", _studio_logo: currentStudio?.logo_url || "" });
+      const { data, error: err } = await supabase.rpc("create_workspace_share", { _project_key: project.state.projectId, _title: title.trim(), _floor_plan: project.state.floorPlanUrl, _snapshot_ids: selected, _studio_name: currentStudio?.display_name || currentStudio?.name || "", _studio_logo: currentStudio?.logo_url || "" });
       if (err || !data) throw err;
       setBoard(data);
       const { data: slug, error: slugError } = await supabase.rpc("board_share_slug", { _board_id: data });
