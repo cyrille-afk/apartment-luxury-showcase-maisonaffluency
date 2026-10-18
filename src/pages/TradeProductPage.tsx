@@ -1896,6 +1896,9 @@ const TradeProductPage: React.FC = () => {
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
     tradePriceLabel: priceLabels?.netLabel ?? null,
+    unitPriceCents: priceLabels ? convertCents(priceLabels.netCents, priceLabels.currency, displayCurrency, fxRates) : null,
+    priceCurrency: displayCurrency === "original" ? priceLabels?.currency ?? pricing?.currency ?? "EUR" : displayCurrency,
+    quantity,
     leadTimeLabel: product.lead_time,
   };
 

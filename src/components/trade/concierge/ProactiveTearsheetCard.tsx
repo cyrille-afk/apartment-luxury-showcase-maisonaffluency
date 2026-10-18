@@ -1,4 +1,7 @@
-import { FileDown, LayoutGrid, X } from "lucide-react";
+import { FileDown, LayoutGrid, X, Minus, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { felixLineCents, felixQuantity, formatFelixMoney } from "@/lib/felixQuoteQuantity";
 
 /**
  * Proactive nudge shown inline in the concierge chat stream after the user
@@ -20,6 +23,9 @@ export interface ProactiveTearsheetData {
   topLabel?: string | null;
   /** Preformatted trade price, e.g. "$4,250" or "€2,600". Empty = hide row. */
   tradePriceLabel?: string | null;
+  unitPriceCents?: number | null;
+  priceCurrency?: string | null;
+  quantity?: number;
   /** Preformatted lead time, e.g. "6 weeks". Empty = hide row. */
   leadTimeLabel?: string | null;
 }
@@ -30,9 +36,10 @@ interface Props {
   onGenerate: () => void;
   onAddToBoard: () => void;
   onDismiss: () => void;
+  onQuantityChange: (quantity: number) => void;
 }
 
-export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoard, onDismiss }: Props) {
+export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoard, onDismiss, onQuantityChange }: Props) {
   const specRows: { label: string; value: string }[] = [];
   if (data.sku) specRows.push({ label: "SKU", value: data.sku });
   if (data.fabricLabel) specRows.push({ label: "Material", value: data.fabricLabel });
@@ -42,6 +49,8 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
   if (data.leadTimeLabel) specRows.push({ label: "Lead time", value: data.leadTimeLabel });
 
   const isResolved = !!resolved;
+  const quantity = felixQuantity(data.quantity);
+  const lineCents = felixLineCents(data);
 
   return (
     <div className="w-full rounded-lg border border-border bg-background/80 overflow-hidden">
@@ -91,6 +100,21 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
           ))}
         </div>
       )}
+
+      <div className="px-3 py-2 border-t border-border/60 space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-body text-[10px] uppercase text-muted-foreground">Quantity</span>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon-sm" aria-label={`Decrease quantity for ${data.productName}`} title="Decrease quantity" disabled={isResolved || quantity <= 1} onClick={() => onQuantityChange(quantity - 1)}><Minus /></Button>
+            <Input type="number" min={1} step={1} aria-label={`Quantity for ${data.productName}`} value={quantity} disabled={isResolved} onChange={(event) => onQuantityChange(felixQuantity(event.currentTarget.valueAsNumber))} className="h-8 w-16 px-1 text-center tabular-nums" />
+            <Button variant="ghost" size="icon-sm" aria-label={`Increase quantity for ${data.productName}`} title="Increase quantity" disabled={isResolved} onClick={() => onQuantityChange(quantity + 1)}><Plus /></Button>
+          </div>
+        </div>
+        <div data-trade-sensitive className="flex items-baseline justify-between gap-3 font-body text-[11px]">
+          <span className="text-muted-foreground">Line total</span>
+          <span className="text-foreground tabular-nums" aria-label={`Line total for ${data.productName}`}>{lineCents !== null && data.priceCurrency ? formatFelixMoney(lineCents, data.priceCurrency) : "Price upon Request"}</span>
+        </div>
+      </div>
 
       {/* Framing copy */}
       {!isResolved && (

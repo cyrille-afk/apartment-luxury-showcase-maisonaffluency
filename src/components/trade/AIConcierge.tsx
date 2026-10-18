@@ -398,6 +398,7 @@ import { CuratedInventoryGrid } from "@/components/trade/CuratedInventoryGrid";
 import { ProjectBoardDrawer } from "@/components/trade/ProjectBoardDrawer";
 
 import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
+import { felixQuantity, felixQuoteTotals, formatFelixMoney } from "@/lib/felixQuoteQuantity";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
@@ -5634,6 +5635,9 @@ export function AIConcierge({
               }
               if (item.kind === "proactive_tearsheet") {
                 const data = item.data;
+                const quoteCards = timeline.filter((entry) => entry.kind === "proactive_tearsheet" && !entry.resolved);
+                const isLastQuoteCard = !item.resolved && !timeline.slice(i + 1).some((entry) => entry.kind === "proactive_tearsheet" && !entry.resolved);
+                const totals = felixQuoteTotals(quoteCards.flatMap((entry) => entry.kind === "proactive_tearsheet" ? [entry.data] : []));
                 const finishSummary = [data.fabricLabel, data.baseLabel, data.topLabel]
                   .filter(Boolean)
                   .join(" · ");
@@ -5646,10 +5650,12 @@ export function AIConcierge({
                   });
                 };
                 return (
+                  <div key={i} className="space-y-2">
                   <ProactiveTearsheetCard
                     key={i}
                     data={data}
                     resolved={item.resolved}
+                    onQuantityChange={(quantity) => setTimeline((previous) => previous.map((entry, index) => index === i && entry.kind === "proactive_tearsheet" && !entry.resolved ? { ...entry, data: { ...entry.data, quantity: felixQuantity(quantity) } } : entry))}
                     onGenerate={async () => {
                       resolveAt("generated");
                       // Direct edge-function call so the exact finish selection is
@@ -5694,11 +5700,18 @@ export function AIConcierge({
                     }}
                     onAddToBoard={() => {
                       resolveAt("boarded");
-                      const prompt = `Add ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""} to my project board.`;
+                      const prompt = `Add ${felixQuantity(data.quantity)} × ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""} to my project board.`;
                       void sendRef.current?.(prompt, { displayText: "Add current selection to project board" });
                     }}
                     onDismiss={() => resolveAt("dismissed")}
                   />
+                  {isLastQuoteCard && totals.length > 0 && (
+                    <div data-trade-sensitive className="border-t border-border px-3 py-2 font-body text-xs space-y-1" aria-label="Felix quote total" aria-live="polite">
+                      {totals.map((total) => <div key={total.currency} className="flex justify-between gap-3"><span className="text-muted-foreground">{total.incomplete ? "Priced subtotal" : "Quote total"}{totals.length > 1 ? ` (${total.currency})` : ""}</span><span className="text-foreground tabular-nums">{formatFelixMoney(total.cents, total.currency)}</span></div>)}
+                      {(totals.some((total) => total.incomplete) || quoteCards.some((entry) => entry.kind === "proactive_tearsheet" && !entry.data.priceCurrency)) && <p className="text-muted-foreground text-[10px]">Additional pieces: Price upon Request</p>}
+                    </div>
+                  )}
+                  </div>
                 );
               }
               if (item.kind === "quote_summary") {
