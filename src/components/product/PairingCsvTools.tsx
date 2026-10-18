@@ -14,6 +14,7 @@ export default function PairingCsvTools({ rules, products, disabled, onSaved }: 
   const fileInput = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<PairingCsvPreview | null>(null);
   const [saving, setSaving] = useState(false);
+  const [fileName, setFileName] = useState("");
   const { toast } = useToast();
   const names = new Map(products.map((p) => [p.id, `${p.brand} — ${p.title}`]));
   function download() {
@@ -22,6 +23,7 @@ export default function PairingCsvTools({ rules, products, disabled, onSaved }: 
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   async function readFile(file: File) {
+    setFileName(file.name);
     try {
       setPreview(file.size > 2_000_000 ? { updates: [], errors: ["Use a CSV file smaller than 2 MB."] } : parsePairingCsv(await file.text(), rules, products));
     } catch { setPreview({ updates: [], errors: ["This CSV file could not be read."] }); }
@@ -35,11 +37,11 @@ export default function PairingCsvTools({ rules, products, disabled, onSaved }: 
       const values = preview.updates.map((update) => {
         const row = current?.find((r) => r.id === update.rule.id);
         if (!row || pairingCsvSnapshot(row) !== pairingCsvSnapshot(update.rule)) throw new Error("A pairing changed after this file was reviewed. Export and review the current catalog again.");
-        return { ...row, finish_options: update.options.map((o) => ({ ...o })), finish_currency: update.currency };
+        return { id: row.id, before: { ...row }, finish_options: update.options.map((o) => ({ ...o })), finish_currency: update.currency };
       });
-      const result = await supabase.from("curated_pairing_rules").upsert(values, { onConflict: "id" }).select("id");
+      const result = await supabase.rpc("import_curated_pairing_finishes", { updates: values, file_name: fileName });
       if (result.error) throw result.error;
-      if (result.data?.length !== values.length) throw new Error("The saved pairings could not be confirmed. Reload the catalog before retrying.");
+      if (!result.data || typeof result.data !== "object" || Array.isArray(result.data) || result.data.updated_count !== values.length) throw new Error("The saved pairings could not be confirmed. Reload the catalog before retrying.");
       await onSaved();
       setPreview(null); toast({ title: `${values.length} pairing${values.length === 1 ? "" : "s"} updated` });
     } catch (error) { toast({ title: "Import could not be saved", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" }); }
