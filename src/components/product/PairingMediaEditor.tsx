@@ -32,7 +32,9 @@ export default function PairingMediaEditor({ pickId, hero, options, entries, onC
   const current = entries.find(e => e.key === key);
   const catalogPhoto = pairingFinishImage(detail?.variant_image_map, detail?.gallery_images || [], rows, selection, custom?.name, imageSelection);
   const catalogMacro = pairingAxes.map(a => pairingSwatchFor(imageSelection[a] || '', swatches)?.image_url).find(Boolean) || pairingSwatchFor(custom?.name || '', swatches)?.image_url;
-  const preview = pairingMediaPreview(hero, current?.product_image_url || catalogPhoto, current?.macro_image_url || catalogMacro, failed);
+  const availablePhoto = [current?.product_image_url, catalogPhoto].find(url => !!url && !failed.includes(url));
+  const availableMacro = [current?.macro_image_url, catalogMacro].find(url => !!url && !failed.includes(url));
+  const preview = pairingMediaPreview(hero, availablePhoto, availableMacro, failed);
   const patch = (field: 'product_image_url' | 'macro_image_url', url: string | null) => onChange([...entries.filter(e => e.key !== key), { ...current, key, label, [field]: url }]);
   async function upload(file: File, field: 'product_image_url' | 'macro_image_url') {
     const invalid = pairingUploadError(file); if (invalid) { setError(invalid); return; }

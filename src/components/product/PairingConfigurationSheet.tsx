@@ -34,7 +34,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const [customId, setCustomId] = useState(custom.length === 1 ? custom[0].id : "");
   const [material, setMaterial] = useState("");
   const [visualChoices, setVisualChoices] = useState<Partial<Record<keyof PairingSelection, string>>>({});
-  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
   const rows: PairingVariant[] = detail?.size_variants || price?.rrp_size_variants || [];
   const selection = useMemo(() => Object.fromEntries(pairingAxes.map((axis) => {
     const options = pairingAxisOptions(rows, axis);
@@ -49,13 +49,12 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   const imageSelection = { ...selection, ...visualChoices };
   const assigned = piece.finishMedia?.find(entry => entry.key === pairingMediaKey(rows.length ? imageSelection : { ...imageSelection, label: material }, customOption?.id));
   const catalogImage = pairingFinishImage(detail?.variant_image_map, images, rows, selection, customOption?.name, imageSelection);
-  const finishImage = assigned?.product_image_url || catalogImage;
-  const dedicated = finishImage && finishImage !== failedImage ? finishImage : undefined;
+  const dedicated = [assigned?.product_image_url, catalogImage].find(url => !!url && !failedImages.includes(url));
   const image = dedicated || piece.image;
   const selectedNames = custom.length ? customOption ? [customOption.name] : [] : rows.length ? pairingAxes.map((axis) => visualChoices[axis] || selection[axis]).filter((name): name is string => !!name) : material ? [material] : [];
-  const macros = assigned?.macro_image_url ? [{ name: assigned.label, image: assigned.macro_image_url }] : selectedNames.flatMap((name) => {
+  const macros = assigned?.macro_image_url && !failedImages.includes(assigned.macro_image_url) ? [{ name: assigned.label, image: assigned.macro_image_url }] : selectedNames.flatMap((name) => {
     const swatch = pairingSwatchFor(name, swatches);
-    return swatch?.image_url ? [{ name, image: swatch.image_url }] : [];
+    return swatch?.image_url && !failedImages.includes(swatch.image_url) ? [{ name, image: swatch.image_url }] : [];
   });
   const loading = detailPending || (!custom.length && pricePending);
   const canAdd = !!unit && complete && !loading && !isError && (custom.length ? !!piece.pairingRuleId : rows.length > 0 || (!swatchesPending && !swatchesError && !swatches.length));
@@ -89,7 +88,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
   return <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}><SheetContent aria-describedby="pairing-config-description" onEscapeKeyDown={(event) => { event.preventDefault(); onClose(); }} overlayClassName="!z-[10030] !bg-foreground/30 backdrop-blur-md motion-reduce:animate-none" className="!z-[10031] flex h-dvh w-full flex-col gap-0 !p-0 sm:!max-w-[1100px] motion-reduce:animate-none">
     <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto overscroll-contain md:grid-cols-2 md:overflow-hidden">
       <div className="relative flex min-h-64 items-center justify-center border-b border-border/50 bg-muted/10 p-6 md:min-h-0 md:border-b-0 md:border-r md:p-10">
-        <AnimatePresence mode="wait"><motion.img key={image} src={image} alt={`${piece.title}${dedicated ? ` — ${selectedNames.join(" / ")}` : ""}`} onError={() => setFailedImage(image)} initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduced ? 1 : 0 }} transition={{ duration: reduced ? 0 : 0.25 }} className="max-h-[32dvh] w-full object-contain md:max-h-[80dvh]" /></AnimatePresence>
+        <AnimatePresence mode="wait"><motion.img key={image} src={image} alt={`${piece.title}${dedicated ? ` — ${selectedNames.join(" / ")}` : ""}`} onError={() => setFailedImages(f => [...f, image])} initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduced ? 1 : 0 }} transition={{ duration: reduced ? 0 : 0.25 }} className="max-h-[32dvh] w-full object-contain md:max-h-[80dvh]" /></AnimatePresence>
       </div>
       <div className="flex min-h-0 flex-col md:overflow-y-auto"><header className="px-6 pb-6 pt-12 md:px-10 md:pt-14"><p className="font-body text-[10px] uppercase tracking-widest text-gold">{piece.brand}</p><SheetTitle className="mt-3 font-display text-3xl font-normal leading-snug">{piece.title}</SheetTitle><SheetDescription id="pairing-config-description" className="mt-3 font-body text-sm leading-relaxed">{piece.materials || piece.brand}</SheetDescription></header>
         <div className="space-y-8 px-6 pb-8 md:px-10">
@@ -106,7 +105,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore }:
               setVisualChoices({ ...visualChoices, [axis]: name });
             }, (name) => pairingOptionAvailable(rows, selection, axis, visualOptions.find((option) => option.name === name)?.value || name))}</div>;
           }) : swatches.length ? swatchGrid("Material", swatches.map((swatch) => swatch.name), material, setMaterial) : null}
-          {!dedicated && !!macros.length && <div className="space-y-4 border-t border-border/60 pt-6">{macros.map((macro) => <figure key={macro.name} className="flex items-center gap-4"><img src={macro.image} alt={`${macro.name} material close-up`} className="h-24 w-24 shrink-0 object-cover sm:h-28 sm:w-28" /><figcaption className="min-w-0 font-body text-sm leading-relaxed"><span className="block text-[10px] uppercase tracking-widest text-muted-foreground">Material detail</span><span className="mt-2 block">{macro.name}</span></figcaption></figure>)}</div>}
+          {!dedicated && !!macros.length && <div className="space-y-4 border-t border-border/60 pt-6">{macros.map((macro) => <figure key={macro.name} className="flex items-center gap-4"><img src={macro.image} alt={`${macro.name} material close-up`} onError={() => setFailedImages(f => [...f, macro.image])} className="h-24 w-24 shrink-0 object-cover sm:h-28 sm:w-28" /><figcaption className="min-w-0 font-body text-sm leading-relaxed"><span className="block text-[10px] uppercase tracking-widest text-muted-foreground">Material detail</span><span className="mt-2 block">{macro.name}</span></figcaption></figure>)}</div>}
           <div className="flex items-center justify-between gap-4 border-t border-border/60 pt-6"><span className="font-body text-xs uppercase tracking-widest text-muted-foreground">Quantity</span><div className="flex h-11 items-center border border-border"><Button variant="ghost" size="icon" aria-label={`Decrease ${piece.title} quantity`} disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} className="h-10 w-10 rounded-none"><Minus className="h-4 w-4" /></Button><span aria-live="polite" className="w-10 text-center text-sm tabular-nums">{quantity}</span><Button variant="ghost" size="icon" aria-label={`Increase ${piece.title} quantity`} disabled={quantity >= 99} onClick={() => setQuantity(quantity + 1)} className="h-10 w-10 rounded-none"><Plus className="h-4 w-4" /></Button></div></div>
         </div>
       </div>
