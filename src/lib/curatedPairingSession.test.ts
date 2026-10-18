@@ -11,6 +11,28 @@ afterEach(() => {
 });
 
 describe("Curated Pairings shopping-session dismissal", () => {
+  it("reopens only on request without clearing session dismissal or opening other drawers", async () => {
+    const { useCuratedPairingSession } = await import("./curatedPairingSession");
+    const drawer = renderHook(({ open }) => useCuratedPairingSession(open), { initialProps: { open: true } });
+    act(() => drawer.result.current.dismiss());
+    expect(drawer.result.current.visible).toBe(false);
+    act(() => drawer.result.current.reopen());
+    expect(drawer.result.current.visible).toBe(true);
+    expect(drawer.result.current.dismissed).toBe(true);
+    const other = renderHook(useCuratedPairingSession);
+    expect(other.result.current.visible).toBe(false);
+    drawer.rerender({ open: false });
+    drawer.rerender({ open: true });
+    expect(drawer.result.current.visible).toBe(false);
+    act(() => drawer.result.current.reopen());
+    act(() => drawer.result.current.dismiss());
+    expect(drawer.result.current.visible).toBe(false);
+    drawer.unmount();
+    vi.resetModules();
+    const refreshed = await import("./curatedPairingSession");
+    expect(renderHook(refreshed.useCuratedPairingSession).result.current.visible).toBe(false);
+  });
+
   it("stays dismissed for other drawers and after navigation remounts", async () => {
     const { useCuratedPairingSession } = await import("./curatedPairingSession");
     const first = renderHook(useCuratedPairingSession);
