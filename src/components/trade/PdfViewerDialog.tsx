@@ -100,6 +100,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   }, [doc]);
 
   const onKey = (e: React.KeyboardEvent) => {
+    if ((e.target as HTMLElement).tagName === "INPUT") return;
     if (e.key === "PageDown" || (e.key === "ArrowRight" && !e.shiftKey)) { e.preventDefault(); goTo(page + 1); }
     else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); goTo(page - 1); }
     else if (e.key === "+" || e.key === "=") setZoom(z => clampZoom(z + 0.25));
