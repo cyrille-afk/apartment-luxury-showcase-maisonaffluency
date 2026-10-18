@@ -20,17 +20,29 @@ serve(async (req) => {
   try {
     const url = Deno.env.get("SUPABASE_URL") ?? "";
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader) return json({ error: "Unauthorized" }, 401);
     const anon = createClient(url, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
-    const { data: claimsData } = await anon.auth.getClaims(authHeader.replace("Bearer ", ""));
+    const { data: claimsData } = authHeader
+      ? await anon.auth.getClaims(authHeader.replace("Bearer ", ""))
+      : { data: null };
     const userId = (claimsData?.claims as Record<string, unknown> | undefined)?.sub;
-    if (!userId) return json({ error: "Unauthorized" }, 401);
     const supabase = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-    if (!isAdmin) return json({ error: "Forbidden" }, 403);
+    const { data: isAdmin } = userId
+      ? await supabase.rpc("has_role", { _user_id: userId, _role: "admin" })
+      : { data: false };
 
     const body = await req.json().catch(() => ({}));
-    const orderId = typeof body?.orderId === "string" ? body.orderId : "";
+    // Buyers still on checkout may update their own order by presenting the
+    // issued reference + PaymentIntent id (same secret that created it).
+    const intentId = typeof body?.intentId === "string" ? body.intentId : "";
+    const orderRef = typeof body?.orderRef === "string" ? body.orderRef : "";
+    let orderId = isAdmin && typeof body?.orderId === "string" ? body.orderId : "";
+    if (!orderId) {
+      if (!intentId || !orderRef) return json({ error: "Forbidden" }, 403);
+      const { data: own } = await supabase.from("shop_orders").select("id")
+        .eq("order_ref", orderRef).eq("stripe_session_id", intentId).maybeSingle();
+      if (!own) return json({ error: "Forbidden" }, 403);
+      orderId = own.id;
+    }
     const taxCents = Math.round(Number(body?.taxCents));
     if (!orderId || !Number.isFinite(taxCents) || taxCents < 0) return json({ error: "orderId and a tax amount are required." }, 400);
     const taxLabel = typeof body?.taxLabel === "string" ? body.taxLabel.trim().slice(0, 80) || null : null;
@@ -44,6 +56,9 @@ serve(async (req) => {
     if (order.status === "paid") return json({ error: "This order is already paid." }, 409);
     const totalCents = order.subtotal_cents - (order.discount_cents ?? 0) + order.shipping_cents + taxCents;
     if (totalCents < 100) return json({ error: "Total out of range." }, 400);
+    if (!isAdmin && taxCents > Math.round((order.subtotal_cents + order.shipping_cents) * 0.3)) {
+      return json({ error: "Tax out of range." }, 400);
+    }
 
     if (!order.stripe_session_id) return json({ error: "No payment linked to this order." }, 409);
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", { apiVersion: "2025-08-27.basil" });
