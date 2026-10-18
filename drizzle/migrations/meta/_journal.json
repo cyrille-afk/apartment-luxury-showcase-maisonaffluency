@@ -1310,6 +1310,13 @@
       "when": 1792312949223,
       "tag": "0186_lock_pairing_history_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1792313680353,
+      "tag": "0187_curated_pairing_finish_media",
+      "breakpoints": true
     }
   ]
 }
