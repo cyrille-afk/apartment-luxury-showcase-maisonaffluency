@@ -13,6 +13,8 @@ export interface CheckoutRecovery {
   reason: RecoveryReason;
   /** Current server price in the order currency, when one unambiguous price exists. */
   currentUnitCents?: number;
+  /** Several valid current prices; the buyer must choose one explicitly. */
+  priceOptions?: { label: string; unitCents: number }[];
   pairing?: { ruleId: string; optionId: string } | null;
 }
 
@@ -34,6 +36,9 @@ export function parseRecovery(raw: unknown): CheckoutRecovery | null {
     pickId: r.pickId,
     reason: r.reason as RecoveryReason,
     currentUnitCents: Number.isInteger(cents) && cents > 0 ? cents : undefined,
+    priceOptions: Array.isArray(r.priceOptions)
+      ? (r.priceOptions as any[]).filter((o) => o && typeof o.label === "string" && Number.isInteger(o.unitCents) && o.unitCents > 0).slice(0, 12).map((o) => ({ label: o.label.slice(0, 120), unitCents: o.unitCents }))
+      : undefined,
     pairing: p && typeof p.ruleId === "string" && typeof p.optionId === "string" ? { ruleId: p.ruleId, optionId: p.optionId } : null,
   };
 }
@@ -61,10 +66,17 @@ export function findRecoveryLine<T extends Line>(lines: T[], recovery: CheckoutR
   return lines.findIndex((l) => l.pickId === recovery.pickId && samePairing(l.pairing ?? null, recovery.pairing ?? null));
 }
 
-/** Applies an accepted price to the rejected line only; every other field is preserved. */
-export function acceptRecoveredPrice<T extends Line>(lines: T[], recovery: CheckoutRecovery): T[] | null {
-  if (recovery.reason !== "price_changed" || !recovery.currentUnitCents) return null;
+/**
+ * Applies an accepted price to the rejected line only; every other field is preserved.
+ * With several valid prices, `chosenCents` must be one of the offered options.
+ */
+export function acceptRecoveredPrice<T extends Line>(lines: T[], recovery: CheckoutRecovery, chosenCents?: number): T[] | null {
+  if (recovery.reason !== "price_changed") return null;
+  const price = recovery.priceOptions?.length
+    ? recovery.priceOptions.find((o) => o.unitCents === chosenCents)?.unitCents
+    : recovery.currentUnitCents;
+  if (!price) return null;
   const idx = findRecoveryLine(lines, recovery);
   if (idx < 0) return null;
-  return lines.map((l, i) => (i === idx ? { ...l, unitCents: recovery.currentUnitCents! } : l));
+  return lines.map((l, i) => (i === idx ? { ...l, unitCents: price } : l));
 }

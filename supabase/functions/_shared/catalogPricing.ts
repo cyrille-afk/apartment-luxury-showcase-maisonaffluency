@@ -41,6 +41,7 @@ export interface CheckoutRecovery {
   pickId: string;
   reason: "price_changed" | "finish_unavailable" | "unavailable";
   currentUnitCents?: number;
+  priceOptions?: { label: string; unitCents: number }[];
   pairing?: PairingReference | null;
 }
 
@@ -129,10 +130,12 @@ export async function verifyCatalogLines(
         return toks.length > 0 && toks.every((t) => finish.includes(t));
       });
     }
-    const rawCandidates = (matched.length ? matched.map((v) => Number(v?.price_cents)) : [
-      base,
-      ...variants.map((v) => Number(v?.price_cents)),
-    ]).filter((c) => Number.isFinite(c) && c > 0);
+    const variantLabel = (v: any) => [v?.label, v?.base, v?.top].filter(Boolean).map(String).join(" / ") || "Variant";
+    const labelled = (matched.length
+      ? matched.map((v) => ({ label: variantLabel(v), cents: Number(v?.price_cents) }))
+      : [{ label: "Standard", cents: base }, ...variants.map((v) => ({ label: variantLabel(v), cents: Number(v?.price_cents) }))]
+    ).filter((c) => Number.isFinite(c.cents) && c.cents > 0);
+    const rawCandidates = labelled.map((c) => c.cents);
     if (!rawCandidates.length) {
       return { ok: false, status: 409, error: `${title} is price upon request — please send an enquiry.`, recovery: { pickId, reason: "unavailable" } };
     }
@@ -150,7 +153,10 @@ export async function verifyCatalogLines(
         status: 409,
         error: `The price for ${title} has changed. Please refresh your basket and try again.`,
         // Only offer a one-tap update when a single unambiguous price applies.
-        recovery: { pickId, reason: "price_changed", ...(new Set(candidates).size === 1 ? { currentUnitCents: Math.round(candidates[0]) } : {}) },
+        // Several valid prices: offer each (deduplicated) for the buyer to choose.
+        recovery: { pickId, reason: "price_changed", ...(new Set(candidates).size === 1
+          ? { currentUnitCents: Math.round(candidates[0]) }
+          : { priceOptions: Array.from(new Map(labelled.map((c, i) => [Math.round(candidates[i]), { label: str(c.label, 120), unitCents: Math.round(candidates[i]) }])).values()).slice(0, 12) }) },
       };
     }
     const quantity = Math.min(maxQty, Math.max(1, Math.round(Number(l.quantity) || 1)));

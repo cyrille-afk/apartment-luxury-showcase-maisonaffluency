@@ -22,3 +22,16 @@ describe("checkout recovery", () => {
     expect(acceptRecoveredPrice(lines, parseRecovery({ pickId: "console", reason: "price_changed", currentUnitCents: 910000, pairing: { ruleId: "r1", optionId: "other" } })!)).toBeNull();
   });
 });
+
+describe("choosing among several valid prices", () => {
+  const rec = parseRecovery({ pickId: "console", reason: "price_changed", pairing: { ruleId: "r1", optionId: "ivory-brass" }, priceOptions: [{ label: "Small", unitCents: 800000 }, { label: "Large", unitCents: 950000 }] })!;
+  it("leaves the line untouched until a price is chosen", () => {
+    expect(acceptRecoveredPrice(lines, rec)).toBeNull();
+  });
+  it("rejects a price that was not offered", () => {
+    expect(acceptRecoveredPrice(lines, rec, 123)).toBeNull();
+  });
+  it("applies the chosen offered price and keeps the pairing", () => {
+    expect(acceptRecoveredPrice(lines, rec, 950000)![1]).toEqual({ ...lines[1], unitCents: 950000 });
+  });
+});
