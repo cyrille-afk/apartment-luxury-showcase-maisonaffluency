@@ -24,7 +24,12 @@ export function resolveFelixCatalogueFinishes(product: VariantPlaceholderInput &
   if (!variant?.trim()) return [];
   const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const selected = normalize(variant);
-  const hit = product.size_variants?.find(v => [v.label, [v.base, v.top, v.label].filter(Boolean).join(" — "), [v.base, v.top].filter(Boolean).join(" / ")].some(value => value && normalize(value) === selected));
+  const variants = product.size_variants ?? [];
+  const combinations = variants.filter(v => [[v.base, v.top, v.label].filter(Boolean).join(" — "), [v.base, v.top].filter(Boolean).join(" / ")].some(value => value && normalize(value) === selected));
+  const labels = variants.filter(v => v.label && normalize(v.label) === selected);
+  const matches = combinations.length ? combinations : labels;
+  if (matches.length > 1) return [];
+  const hit = matches[0];
   const result: FelixQuoteFinish[] = [];
   const add = (label: string, name: string | null | undefined) => {
     if (!name?.trim()) return;

@@ -1549,11 +1549,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     for (const [component] of rugComponentGroups) addQuoteFinish(component, fabrics.find(f => f.id === selectedRugComponentIds[component]));
   } else if (!axisModeActive && (showUpholsterySection || fabrics.some(isFabricCategory))) {
     addQuoteFinish(upholsteryLabel?.trim() || "Select Your Fabric / Leather", selectedFabricItem);
-    if (showUpholsterySection && secondaryUpholsteryLabel?.trim()) {
-      addQuoteFinish(secondaryUpholsteryLabel, selectedSecondaryFabricId === "__com__" ? { name: "COM — Customer's Own Material" } : selectedSecondaryFabricId === "__col__" ? { name: "COL — Customer's Own Leather" } : fabrics.find(f => f.id === selectedSecondaryFabricId));
-    }
   }
-  if (showWoodSection) {
+  if (!axisModeActive && showUpholsterySection && secondaryUpholsteryLabel?.trim()) {
+    addQuoteFinish(secondaryUpholsteryLabel, selectedSecondaryFabricId === "__com__" ? { name: "COM — Customer's Own Material" } : selectedSecondaryFabricId === "__col__" ? { name: "COL — Customer's Own Leather" } : fabrics.find(f => f.id === selectedSecondaryFabricId));
+  }
+  if (isOolMinibar) addQuoteFinish("Shelf Finish", selectedWoodItem);
+  if (showWoodSection || ((!isOolMinibar && (isMobile || isPwa)) && (visibleWoodTiles.length > 0 || visibleTopTiles.length > 0))) {
     if (visibleWoodTiles.length) addQuoteFinish(baseAxisLabel, selectedWoodItem);
     if (visibleTopTiles.length) addQuoteFinish(topAxisLabel, selectedTopItem);
     for (const group of extraCategoryGroups) addQuoteFinish(group.label, fabrics.find(f => f.id === extraSplitIds[group.key]));

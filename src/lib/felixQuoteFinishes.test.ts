@@ -4,6 +4,9 @@ import { updateFelixProductSelection } from "./updateFelixProductSelection";
 import { prepareFelixQuote } from "./felixQuoteSave";
 
 describe("Felix selected finish snapshot", () => {
+  it("does not choose arbitrary finishes from repeated dimension labels", () => {
+    expect(resolveFelixCatalogueFinishes({ size_variants: [{ label: "Large", base: "Oak", top: "Onyx" }, { label: "Large", base: "Ash", top: "Marble" }] }, "Large", [])).toEqual([]);
+  });
   it("resolves rod and diffuser labels independently rather than Base and Top", () => {
     expect(resolveFelixCatalogueFinishes({ base_axis_label: "Rod", top_axis_label: "Diffuser", size_variants: [{ base: "Patinated Bronze", top: "Alabaster", label: "Large" }] }, "Patinated Bronze — Alabaster — Large", [
       { name: "Patinated Bronze", image_url: "https://example.com/bronze.jpg" }, { name: "Alabaster", image_url: "https://example.com/alabaster.jpg" },
