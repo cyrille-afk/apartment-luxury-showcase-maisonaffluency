@@ -1917,7 +1917,7 @@ const TradeProductPage: React.FC = () => {
     fabricLabel: selectedFabric?.name ?? null,
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
-    finishes: selectorQuoteFinishes?.pickId === product.id ? selectorQuoteFinishes.finishes : [
+    finishes: selectorQuoteFinishes?.pickId === product.id && (selectorQuoteFinishes.finishes.length > 0 || felixLinkedSwatches.length > 0) ? selectorQuoteFinishes.finishes : [
       selectedFabric && { label: felixFinishLabel(felixSectionLabels.upholsteryLabel, "Upholstery Fabric"), name: selectedFabric.name, imageUrl: selectedFabric.image_url || felixTopSwatch?.image_url },
       (selectedWoodPrice?.name || selectedBase) && { label: felixFinishLabel(selectedWoodPrice ? felixSectionLabels.woodLabel : getBasePlaceholder(product), "Frame Finish"), name: selectedWoodPrice?.name || selectedBaseDisplay || selectedBase || "", imageUrl: selectedWoodPrice?.image_url || felixBaseSwatch?.image_url },
       !selectedFabric && (selectedTopSwatch?.name || selectedTop) && { label: felixFinishLabel(getTopPlaceholder(product), "Top Finish"), name: selectedTopSwatch?.name || selectedTopDisplay || felixTopSwatch?.name || selectedTop || "", imageUrl: selectedTopSwatch?.image_url || felixTopSwatch?.image_url },
