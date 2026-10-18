@@ -36,7 +36,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   useEffect(() => {
     if (!open) return;
     let off = false; let made: string | null = null; let loaded: PdfDoc | null = null;
-    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1);
+    setState("building"); setUrl(null); setDoc(null); setZoom(1); setPage(1); setFull(false);
     build().then(async blob => {
       if (off) return;
       made = URL.createObjectURL(blob);
@@ -67,7 +67,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
       }
     })();
     return () => { off = true; };
-  }, [doc, zoom]);
+  }, [doc, zoom, full]);
 
   // Track the page in view while scrolling.
   const onScroll = useCallback(() => {
