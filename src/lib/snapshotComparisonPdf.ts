@@ -43,7 +43,13 @@ async function swatch(url: string): Promise<string | null> {
   } catch { return null; }
 }
 
-export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide): Promise<Blob> {
+/** Client-facing annotations typed by the studio; plain text only, never prices. */
+export type ComparisonAnnotations = { summary?: string; notes?: Record<string, string>; highlightChanges?: boolean };
+const ACCENT: [number, number, number] = [176, 112, 58];
+const clean = (value: unknown, max: number) => String(value ?? '').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim().slice(0, max);
+export function comparisonAnnotationText(annotations: ComparisonAnnotations | undefined, id: string) { return clean(annotations?.notes?.[id], 600); }
+
+export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: ComparisonSide, annotations: ComparisonAnnotations = {}): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const [bodyFont, headingFont] = await Promise.all([fontFile('/fonts/pdf/Inter-Light.ttf'), fontFile('/fonts/pdf/CormorantGaramond-Regular.ttf')]);
   doc.addFileToVFS('Inter.ttf', bodyFont); doc.addFont('Inter.ttf', 'Inter', 'normal');
@@ -81,15 +87,20 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
   const depth = Math.max(...sides.map(s => s.data.bounds.depth), ...extents.map(e => e.z * 2));
   const scale = Math.min((column - 8) / width, 83 / depth);
   const numbers = new Map(changes.map((c, i) => [c.id, i + 1]));
+  const highlight = annotations.highlightChanges !== false;
+  const changedIds = new Set(changes.filter(c => c.status !== 'Unchanged').map(c => c.id));
   sides.forEach((side, i) => {
     const cx = xs[i] + column / 2, cy = top + 46;
     doc.setDrawColor(...RULE).setLineWidth(0.3).rect(cx - side.data.bounds.width * scale / 2, cy - side.data.bounds.depth * scale / 2, side.data.bounds.width * scale, side.data.bounds.depth * scale);
     side.data.scene.objects.forEach(o => {
       const f = snapshotFootprint(o), angle = -o.rotation[1], cos = Math.cos(angle), sin = Math.sin(angle);
       const points = [[-f.width / 2, -f.depth / 2], [f.width / 2, -f.depth / 2], [f.width / 2, f.depth / 2], [-f.width / 2, f.depth / 2]].map(([x, z]) => [cx + (o.position[0] + x * cos - z * sin) * scale, cy + (o.position[2] + x * sin + z * cos) * scale]);
-      doc.setDrawColor(...JADE).setFillColor(228, 236, 233);
+      const flagged = highlight && changedIds.has(o.instanceId);
+      doc.setLineWidth(flagged ? 0.7 : 0.3);
+      if (flagged) doc.setDrawColor(...ACCENT).setFillColor(246, 230, 214); else doc.setDrawColor(...JADE).setFillColor(228, 236, 233);
       doc.lines(points.slice(1).map((p, j) => [p[0] - points[j][0], p[1] - points[j][1]]), points[0][0], points[0][1], [1, 1], 'FD', true);
-      doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).text(String(numbers.get(o.instanceId)), cx + o.position[0] * scale, cy + o.position[2] * scale + 1, { align: 'center' });
+      doc.setLineWidth(0.3);
+      doc.setFont('Inter').setFontSize(8).setTextColor(...(flagged ? ACCENT : JADE)).text(String(numbers.get(o.instanceId)), cx + o.position[0] * scale, cy + o.position[2] * scale + 1, { align: 'center' });
     });
     doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED);
     const b = side.data.bounds;
@@ -99,9 +110,22 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     doc.text(doc.splitTextToSize(surfaces, column), xs[i], top + 109);
   });
   doc.setFont('Inter').setFontSize(9).setTextColor(...INK).text(`${changes.filter(c => c.status !== 'Unchanged').length} changed pieces / ${changes.filter(c => c.status === 'Added').length} added / ${changes.filter(c => c.status === 'Removed').length} removed`, M, 186);
+  if (highlight && changedIds.size) {
+    doc.setDrawColor(...ACCENT).setFillColor(246, 230, 214).setLineWidth(0.7).rect(190, 183, 4, 4, 'FD').setLineWidth(0.3);
+    doc.setFontSize(8).setTextColor(...ACCENT).text('Highlighted: changed, added or removed pieces', 197, 186);
+  }
   let y = 0;
   const nextPage = () => { doc.addPage(); header('Furniture & finish differences'); y = names(); };
   nextPage();
+  const summary = clean(annotations.summary, 1200);
+  if (summary) {
+    const lines = doc.setFont('Inter').setFontSize(9).splitTextToSize(summary, 257) as string[];
+    const h = lines.length * 4.6 + 12;
+    doc.setFillColor(250, 244, 238).setDrawColor(...ACCENT).rect(M, y - 2, 265, h, 'F').setLineWidth(0.8).line(M, y - 2, M, y - 2 + h).setLineWidth(0.3);
+    doc.setFontSize(7).setTextColor(...ACCENT).text('STUDIO NOTE', M + 5, y + 3);
+    doc.setFontSize(9).setTextColor(...INK).text(lines, M + 5, y + 8.5);
+    y += h + 6;
+  }
   if (!changes.length) doc.setFont('Inter').setFontSize(10).text('Both snapshots have no furniture.', M, y + 8);
   for (const change of changes) {
     const objects = [change.before, change.after];
@@ -112,7 +136,7 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
     });
     const count = Math.max(...columns.map(c => c.length));
     if (y + 17 > 192) nextPage();
-    doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
+    doc.setFont('Inter').setFontSize(8).setTextColor(...JADE).setTextColor(...(highlight && changedIds.has(change.id) ? ACCENT : JADE)).text(`${numbers.get(change.id)} / ${change.status}${change.layoutChanged ? ' / Layout' : ''}${change.finishesChanged ? ' / Finishes' : ''}`, M, y + 4); y += 11;
     for (let row = 0; row < count; row++) {
       if (y + 5 > 192) nextPage();
       columns.forEach((lines, i) => { if (lines[row]) doc.setFont('Inter').setFontSize(9).setTextColor(...INK).text(lines[row], xs[i], y); });
@@ -135,6 +159,16 @@ export async function buildSnapshotComparisonPdf(left: ComparisonSide, right: Co
         doc.setFont('Inter').setFontSize(8).setTextColor(...MUTED).text(texts[i], xs[i] + (image ? 19 : 0), y + 4);
       });
       y += rowHeight;
+    }
+    const note = comparisonAnnotationText(annotations, change.id);
+    if (note) {
+      const lines = doc.setFont('Inter').setFontSize(8.5).splitTextToSize(note, 255) as string[];
+      const h = lines.length * 4.3 + 9;
+      if (y + h > 192) nextPage();
+      doc.setFillColor(250, 244, 238).rect(M, y, 265, h, 'F').setDrawColor(...ACCENT).setLineWidth(0.8).line(M, y, M, y + h).setLineWidth(0.3);
+      doc.setFontSize(6.5).setTextColor(...ACCENT).text(`NOTE ${numbers.get(change.id)}`, M + 4, y + 4);
+      doc.setFontSize(8.5).setTextColor(...INK).text(lines, M + 4, y + 8);
+      y += h + 2;
     }
     doc.setDrawColor(...RULE).line(M, y + 1, 281, y + 1); y += 8;
   }

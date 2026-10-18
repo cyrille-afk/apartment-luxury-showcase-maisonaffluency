@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Download, Loader2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import type { ComparisonAnnotations } from '@/lib/snapshotComparisonPdf';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { loadProjectSnapshot, type ProjectSnapshot, type ProjectSnapshotData } from '@/lib/projectLayoutSnapshots';
@@ -36,6 +39,21 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
   const [pdf, setPdf] = useState<Blob | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [pdfError, setPdfError] = useState(false);
+  // Annotations are a draft per snapshot pair, kept in this browser session only.
+  const noteKey = `ma-snapshot-compare-notes:${projectKey}:${ids[0]}:${ids[1]}`;
+  const [annotations, setAnnotations] = useState<ComparisonAnnotations>({});
+  const [debounced, setDebounced] = useState<ComparisonAnnotations>({});
+  useEffect(() => {
+    let saved: ComparisonAnnotations = {};
+    try { saved = JSON.parse(sessionStorage.getItem(noteKey) || '{}'); } catch { /* ignore */ }
+    setAnnotations(saved); setDebounced(saved);
+  }, [noteKey]);
+  useEffect(() => {
+    try { sessionStorage.setItem(noteKey, JSON.stringify(annotations)); } catch { /* private mode */ }
+    const t = window.setTimeout(() => setDebounced(annotations), 500);
+    return () => window.clearTimeout(t);
+  }, [annotations, noteKey]);
+  const setNote = (id: string, value: string) => setAnnotations(a => ({ ...a, notes: { ...a.notes, [id]: value.slice(0, 600) } }));
   useEffect(() => {
     let active = true; setData(null); setError(false); setSelected(null);
     Promise.all(ids.map(id => loadProjectSnapshot(projectKey, id))).then(([left, right]) => { if (active) setData([left, right]); }).catch(() => { if (active) setError(true); });
@@ -47,16 +65,17 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
     const left = snapshots.find(s => s.id === ids[0]), right = snapshots.find(s => s.id === ids[1]);
     if (!data || !left || !right) return;
     setPreparing(true);
-    import('@/lib/snapshotComparisonPdf').then(module => module.buildSnapshotComparisonPdf({ snapshot: left, data: data[0] }, { snapshot: right, data: data[1] }))
+    import('@/lib/snapshotComparisonPdf').then(module => module.buildSnapshotComparisonPdf({ snapshot: left, data: data[0] }, { snapshot: right, data: data[1] }, debounced))
       .then(blob => { if (active) setPdf(blob); })
       .catch(() => { if (active) setPdfError(true); })
       .finally(() => { if (active) setPreparing(false); });
     return () => { active = false; };
-  }, [data, ids, snapshots, projectKey, retry]);
+  }, [data, ids, snapshots, projectKey, retry, debounced]);
   const changes = data ? snapshotChanges(data[0], data[1]) : [];
   return <Dialog open onOpenChange={value => { if (!value) onClose(); }}><DialogContent className="max-h-[92dvh] w-[calc(100vw-2rem)] max-w-6xl overflow-y-auto p-5 sm:p-6">
     <DialogHeader><DialogTitle>Compare Project Snapshots</DialogTitle><DialogDescription className="sr-only">Read-only layout and finish comparison</DialogDescription></DialogHeader>
-    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" size="sm" disabled={!pdf || !data || preparing} onClick={() => { if (pdf) void downloadSnapshotComparison(pdf).catch(() => setPdfError(true)); }}>{preparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download client PDF</Button>{pdfError && <div role="alert" className="text-xs text-destructive">PDF couldn't be prepared.<Button variant="link" size="sm" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}</div>
+    <div className="flex flex-wrap items-center gap-3"><Button variant="outline" size="sm" disabled={!pdf || !data || preparing} onClick={() => { if (pdf) void downloadSnapshotComparison(pdf).catch(() => setPdfError(true)); }}>{preparing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download client PDF</Button>{pdfError && <div role="alert" className="text-xs text-destructive">PDF couldn't be prepared.<Button variant="link" size="sm" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}<label className="flex items-center gap-2 text-xs"><Switch checked={annotations.highlightChanges !== false} onCheckedChange={v => setAnnotations(a => ({ ...a, highlightChanges: v }))} aria-label="Highlight changes in PDF" />Highlight changes in PDF</label></div>
+    {data && <Textarea aria-label="Studio note for client" placeholder="Studio note for your client (appears at the top of the differences page)" maxLength={1200} value={annotations.summary ?? ''} onChange={e => setAnnotations(a => ({ ...a, summary: e.target.value }))} className="min-h-16 text-sm" />}
     <div className="grid grid-cols-2 gap-3 sm:gap-6">{ids.map((id, side) => { const snapshot = snapshots.find(s => s.id === id); return <section key={side} className="min-w-0 space-y-3">
       <Select value={id} onValueChange={value => setIds(previous => side === 0 ? [value, previous[1]] : [previous[0], value])}><SelectTrigger aria-label={side === 0 ? 'Left snapshot' : 'Right snapshot'} className="min-w-0"><SelectValue /></SelectTrigger><SelectContent>{snapshots.map(s => <SelectItem key={s.id} value={s.id} disabled={s.id === ids[1 - side]}>{s.name}</SelectItem>)}</SelectContent></Select>
       {snapshot && <p className="text-xs text-muted-foreground">{new Date(snapshot.created_at).toLocaleString()}</p>}
@@ -65,6 +84,6 @@ export default function SnapshotComparison({ projectKey, snapshots, onClose, onR
     </section>; })}</div>
     {!data && !error && <div role="status" className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin" /><span className="sr-only">Loading comparison</span></div>}
     {error && <div role="alert" className="py-6 text-sm">Snapshots couldn't load.<Button variant="link" onClick={() => setRetry(n => n + 1)}>Retry</Button></div>}
-    {data && <div><h3 className="mb-3 text-sm font-medium">Furniture &amp; Finishes · {changes.filter(c => c.status !== 'Unchanged').length} changed pieces</h3>{changes.length === 0 && <p className="text-sm text-muted-foreground">Both snapshots have no furniture.</p>}{changes.map(change => <div key={change.id} className="border-t border-border py-4" onMouseEnter={() => setSelected(change.id)} onMouseLeave={() => setSelected(null)}><p className="mb-3 text-xs font-medium">{change.status}{change.layoutChanged ? ' · Layout' : ''}{change.finishesChanged ? ' · Finishes' : ''}</p><div className="grid grid-cols-2 gap-3 sm:gap-6"><Piece object={change.before} /><Piece object={change.after} /></div></div>)}</div>}
+    {data && <div><h3 className="mb-3 text-sm font-medium">Furniture &amp; Finishes · {changes.filter(c => c.status !== 'Unchanged').length} changed pieces</h3>{changes.length === 0 && <p className="text-sm text-muted-foreground">Both snapshots have no furniture.</p>}{changes.map(change => <div key={change.id} className="border-t border-border py-4" onMouseEnter={() => setSelected(change.id)} onMouseLeave={() => setSelected(null)}><p className="mb-3 text-xs font-medium">{change.status}{change.layoutChanged ? ' · Layout' : ''}{change.finishesChanged ? ' · Finishes' : ''}</p><div className="grid grid-cols-2 gap-3 sm:gap-6"><Piece object={change.before} /><Piece object={change.after} /></div>{change.status !== 'Unchanged' && <Textarea aria-label={`Client note for ${(change.after ?? change.before)?.product_name ?? 'piece'}`} placeholder="Add a note on this difference for the client PDF" maxLength={600} value={annotations.notes?.[change.id] ?? ''} onChange={e => setNote(change.id, e.target.value)} className="mt-3 min-h-12 text-xs" />}</div>)}</div>}
   </DialogContent></Dialog>;
 }
