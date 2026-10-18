@@ -34,6 +34,7 @@ function SavedTransfer({ c }: { c: TransferConfirmation }) {
         </li>)}
       </ul>
       <dl className="mt-3 space-y-1 text-sm">
+        {(c.discountCents ?? 0) > 0 && <div className="flex justify-between text-muted-foreground"><dt>Discount</dt><dd className="tabular-nums">−{money(c.discountCents!, c.currency)}</dd></div>}
         {c.deliveryCents > 0 && <div className="flex justify-between text-muted-foreground"><dt>Delivery</dt><dd className="tabular-nums">{money(c.deliveryCents, c.currency)}</dd></div>}
         {c.taxCents > 0 && <div className="flex justify-between text-muted-foreground"><dt>{c.taxLabel || "Tax"}</dt><dd className="tabular-nums">{money(c.taxCents, c.currency)}</dd></div>}
         <div className="flex justify-between font-medium"><dt>Total to transfer</dt><dd className="tabular-nums">{money(c.totalCents, c.currency)}</dd></div>
