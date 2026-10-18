@@ -365,7 +365,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                       {/* Designer / brand — top, prominent */}
                        {brandSlug ? (
                           <Link
-                            to={`/designers/${brandSlug}`}
+                            to={`${location.pathname.startsWith("/trade/") ? "/trade/gallery" : "/designers"}/${brandSlug}`}
                             onClick={(e) => e.stopPropagation()}
                             className="group/designer block w-full cursor-pointer truncate whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-wider text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70"
                           >
