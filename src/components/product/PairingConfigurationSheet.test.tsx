@@ -20,9 +20,9 @@ describe('customer configuration preview', () => {
   it('starts on the admin selected finish and uses its unsaved exact photo', () => {
     open(); expect(screen.getByRole('img', { name: 'Console — Oak' }).getAttribute('src')).toBe(photo);
   });
-  it('switches to hero and macro when a finish has no product photo', () => {
+  it('switches to hero and macro when a finish has no product photo', async () => {
     open(); fireEvent.click(screen.getByRole('button', { name: 'Finish: Brass' }));
-    expect(screen.getByRole('img', { name: 'Console' }).getAttribute('src')).toBe(hero);
+    expect((await screen.findByRole('img', { name: 'Console' })).getAttribute('src')).toBe(hero);
     expect(screen.getByRole('img', { name: 'Brass material close-up' }).getAttribute('src')).toBe(macro);
   });
   it('shows the same texture fallback when a product image fails', () => {
