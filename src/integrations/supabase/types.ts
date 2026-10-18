@@ -6840,6 +6840,41 @@ export type Database = {
         }
         Relationships: []
       }
+      project_workspace_shares: {
+        Row: {
+          board_id: string
+          created_at: string
+          presentation: Json
+          project_key: string
+          revoked: boolean
+          user_id: string
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          presentation: Json
+          project_key: string
+          revoked?: boolean
+          user_id?: string
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          presentation?: Json
+          project_key?: string
+          revoked?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_workspace_shares_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: true
+            referencedRelation: "client_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           ceiling_currency: string | null
@@ -12328,6 +12363,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_workspace_share: {
+        Args: {
+          _floor_plan: string
+          _project_key: string
+          _snapshot_ids: string[]
+          _studio_logo: string
+          _studio_name: string
+          _title: string
+        }
+        Returns: string
+      }
       currency_for_country: { Args: { p_country: string }; Returns: string }
       current_trade_discount_pct: { Args: never; Returns: number }
       delete_email: {
@@ -12527,6 +12573,7 @@ export type Database = {
           name: string
         }[]
       }
+      get_shared_workspace: { Args: { _token: string }; Returns: Json }
       get_studio_contact_email: {
         Args: { _studio_id: string }
         Returns: string
@@ -12916,6 +12963,10 @@ export type Database = {
         Args: { _audit_id: string }
         Returns: string
       }
+      revoke_workspace_share: {
+        Args: { _board_id: string }
+        Returns: undefined
+      }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       save_felix_quote: {
@@ -13015,6 +13066,7 @@ export type Database = {
       webhook_queue_dispatch: { Args: never; Returns: undefined }
       webhook_queue_status: { Args: never; Returns: Json }
       webhook_worker_watchdog_dispatch: { Args: never; Returns: undefined }
+      workspace_safe_scene: { Args: { s: Json }; Returns: Json }
     }
     Enums: {
       app_role:

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import SourceUpload from "@/components/trade/SourceUpload";
+import WorkspaceShare from "@/components/trade/WorkspaceShare";
 import { ActiveProjectProvider, useActiveProject } from "@/contexts/ActiveProjectContext";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ function WorkspacePanels() {
   return <div className="flex h-full min-h-0 flex-col bg-background">
     <div role="tablist" aria-label="Project workspace views" className="flex shrink-0 gap-1 overflow-x-auto border-b border-border px-3 py-2 sm:px-6">
       {tabs.map(tab => <Button key={tab.value} id={`workspace-${tab.value}`} role="tab" aria-selected={view === tab.value} aria-controls={`panel-${tab.value}`} variant="ghost" className={cn("shrink-0 rounded-none border-b-2 text-xs sm:text-sm", view === tab.value ? "border-primary text-foreground" : "border-transparent text-muted-foreground")} onClick={() => setView(tab.value)}><tab.icon className="h-4 w-4" />{tab.label}</Button>)}
+      <div className="ml-auto flex items-center"><WorkspaceShare /></div>
     </div>
     <section id="panel-plan" role="tabpanel" aria-labelledby="workspace-plan" hidden={view !== "plan"} className={cn("min-h-0 flex-1 overflow-y-auto p-4 sm:p-6", view !== "plan" && "hidden")}>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4"><h1 className="font-display text-2xl">2D Layout Plan</h1><SourceUpload folder="axonometric-sources" label="Upload floor plan" onSourceReady={project.setFloorPlanUrl} /></div>

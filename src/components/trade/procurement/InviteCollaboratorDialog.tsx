@@ -23,11 +23,12 @@ function maskLink(url: string) {
 }
 
 
-export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited }: {
+export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, onInvited, readOnly = false }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   boardId: string;
   onInvited: () => void;
+  readOnly?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"client" | "contractor">("client");
@@ -42,7 +43,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
     setSending(true);
     setError(null);
-    const { data, error: err } = await supabase.rpc("create_board_invite" as any, { _board_id: boardId, _email: parsed.data, _role: role });
+    const { data, error: err } = await supabase.rpc("create_board_invite" as any, { _board_id: boardId, _email: parsed.data, _role: readOnly ? "client" : role });
     if (err || !data) {
       setSending(false);
       setError("Could not create the invite.");
@@ -64,7 +65,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
       <DialogContent className="rounded-none sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl font-normal">Invite Collaborator</DialogTitle>
+          <DialogTitle className="font-display text-xl font-normal">{readOnly ? "Invite Client" : "Invite Collaborator"}</DialogTitle>
           <DialogDescription className="font-body text-xs">They receive a private link to this board, valid for 30 days.</DialogDescription>
         </DialogHeader>
         {!link ? (
@@ -73,13 +74,13 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
               <Label htmlFor="invite-email" className="font-body text-[10px] uppercase tracking-[0.18em]">Email</Label>
               <Input id="invite-email" type="email" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value)} className="rounded-none" placeholder="name@example.com" />
             </div>
-            <div className="space-y-1.5">
+            {!readOnly && <div className="space-y-1.5">
               <Label htmlFor="invite-role" className="font-body text-[10px] uppercase tracking-[0.18em]">Role</Label>
               <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value as any)} className="h-10 w-full rounded-none border border-input bg-background px-3 font-body text-sm">
                 <option value="client">Client (Read-Only + Comment/Approve)</option>
                 <option value="contractor">External Contractor (Can edit/add items)</option>
               </select>
-            </div>
+            </div>}
             {error && <p className="font-body text-xs text-destructive">{error}</p>}
             <Button onClick={send} disabled={sending} className="w-full rounded-none">{sending ? "Sending…" : "Send Invite"}</Button>
           </div>

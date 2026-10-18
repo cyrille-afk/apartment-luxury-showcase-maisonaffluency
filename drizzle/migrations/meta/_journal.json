@@ -1324,6 +1324,20 @@
       "when": 1792317096000,
       "tag": "0188_named_project_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1792324378301,
+      "tag": "0189_read_only_workspace_shares",
+      "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1792324497377,
+      "tag": "0190_workspace_verified_read_only_guards",
+      "breakpoints": true
     }
   ]
 }
