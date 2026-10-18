@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { tradeGalleryReturnPath } from "@/lib/tradeGalleryState";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1354,7 +1355,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
         )}>
           <div className={cn("flex items-center justify-between")}>
             {presentation ? (
-              <Link to="/trade/the-collection?tab=designers" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-body text-[11px] uppercase"><ArrowLeft className="h-3.5 w-3.5" />The Collection</Link>
+              <Link to={tradeGalleryReturnPath()} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-body text-[11px] uppercase"><ArrowLeft className="h-3.5 w-3.5" />Back to Trade</Link>
             ) : fromProduct ? (
               <Link
                 to={fromProduct}

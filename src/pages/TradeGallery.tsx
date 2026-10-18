@@ -49,6 +49,8 @@ import { Input } from "@/components/ui/input";
 import GalleryFilterSelect from "@/components/trade/GalleryFilterSelect";
 import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
+import { readTradeGalleryState } from "@/lib/tradeGalleryState";
+import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
 
 
 const slugifyForUrl = (s: string) =>
@@ -60,13 +62,14 @@ interface DraftQuote {
 }
 
 const TradeGallery = () => {
+  const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
   return slug && clientSafe ? (
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery />;
+  ) : <StudioGallery key={location.pathname} />;
 };
 
 const StudioGallery = () => {
@@ -84,25 +87,26 @@ const StudioGallery = () => {
   }, [brands, publishedMakerNames]);
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
+  const savedGallery = useRef(readTradeGalleryState(window.location.pathname)).current;
 
-  const [search, setSearch] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
-  const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
+  const [search, setSearch] = useState(savedGallery.search ?? "");
+  const [selectedBrand, setSelectedBrand] = useState(savedGallery.brand ?? "all");
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || savedGallery.category || "all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || savedGallery.subcategory || "all");
   const allProducts = useMemo(() => (
     search.trim() || selectedBrand !== "all" || selectedCategory !== "all" || selectedSubcategory !== "all"
       ? [...tradeProducts, ...publicTradeHiddenProducts]
       : tradeProducts
   ), [tradeProducts, publicTradeHiddenProducts, search, selectedBrand, selectedCategory, selectedSubcategory]);
-  const [selectedEdition, setSelectedEdition] = useState("all");
-  const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">("curated");
+  const [selectedEdition, setSelectedEdition] = useState(savedGallery.edition ?? "all");
+  const [sortBy, setSortBy] = useState<"curated" | "designer" | "title" | "recent">(savedGallery.sortBy ?? "curated");
   const [savedViews, setSavedViews] = useState<TradeSavedView[]>(() => readSavedViews());
   useEffect(() => {
     let alive = true;
     syncSavedViews().then((v) => { if (alive && v) setSavedViews(v); }).catch((err) => console.warn("Saved views sync failed", err));
     return () => { alive = false; };
   }, []);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(savedGallery.viewMode ?? "grid");
   const [density, setDensity] = useState<"comfortable" | "compact">(() => {
     if (typeof window === "undefined") return "comfortable";
     // Default to 4-column (compact); new storage key resets the legacy 3-column default
@@ -132,6 +136,7 @@ const StudioGallery = () => {
   const { slug: routeBrandSlug } = useParams<{ slug: string }>();
   const { data: galleryDesigner, isLoading: designerLoading } = useDesigner(routeBrandSlug, { includeTradeOnly: true });
   const { picks: galleryPicks, isLoading: galleryPicksLoading } = useDesignerGalleryPicks(galleryDesigner);
+  useTradeGalleryScroll(location.pathname, location.search, { search, brand: selectedBrand, category: selectedCategory, subcategory: selectedSubcategory, edition: selectedEdition, sortBy, viewMode }, productsLoading || designerLoading || galleryPicksLoading);
 
   const openProductSheet = useCallback((product: TradeProduct) => {
     if (product.hidden_in_trade) {
@@ -420,11 +425,6 @@ const StudioGallery = () => {
   }, [routeBrandName, routeBrandSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    setSelectedCategory(searchParams.get("category") || "all");
-    setSelectedSubcategory(searchParams.get("subcategory") || "all");
-  }, [searchParams]);
-
-  useEffect(() => {
     const next = new URLSearchParams(searchParams);
     if (selectedCategory === "all") next.delete("category"); else next.set("category", selectedCategory);
     if (selectedSubcategory === "all") next.delete("subcategory"); else next.set("subcategory", selectedSubcategory);
@@ -472,10 +472,11 @@ const StudioGallery = () => {
   // Direct navigation (or a saved view) can leave a collection selected that
   // doesn't belong to the active designer — clear it.
   useEffect(() => {
+    if (productsLoading || !publishedMakerNames) return;
     if (selectedEdition !== "all" && !editions.some((ed) => ed.toLowerCase() === selectedEdition.toLowerCase())) {
       setSelectedEdition("all");
     }
-  }, [editions, selectedEdition]);
+  }, [editions, selectedEdition, productsLoading, publishedMakerNames]);
   // Pieces per collection beside each entry in the collection dropdown. The
   // collection filter itself is excluded so the number is what picking it
   // would show, given the designer / category / search already applied.
