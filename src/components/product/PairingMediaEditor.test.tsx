@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PairingMediaEditor from './PairingMediaEditor';
 const mocks = vi.hoisted(() => ({ upload: vi.fn(), change: vi.fn(), busy: vi.fn() }));
+vi.mock('./PairingConfigurationSheet', () => ({ default: ({ piece, initial, onClose }: { piece: { finishMedia: unknown }; initial: { customId: string }; onClose: () => void }) => <div role="dialog" aria-label="Customer preview"><span>{JSON.stringify({ media: piece.finishMedia, finish: initial.customId })}</span><button onClick={onClose}>Close preview</button></div> }));
 vi.mock('@/hooks/useCuratorPickDetail', () => ({ useCuratorPickDetail: () => ({ data: { size_variants: [], gallery_images: [] }, isPending: false, isError: false }) }));
 vi.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: [], isPending: false, isError: false }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { storage: { from: () => ({ upload: mocks.upload, getPublicUrl: () => ({ data: { publicUrl: 'https://assets.example/finish.jpg' } }) }) } } }));
@@ -17,6 +18,15 @@ async function open() {
   fireEvent.click(await screen.findByRole('option', { name: 'Oak' }));
 }
 describe('admin finish image upload', () => {
+  it('previews draft assignments without saving or changing them', async () => {
+    render(<PairingMediaEditor pickId="pick" hero="https://assets.example/hero.jpg" options={[{ id: 'oak', name: 'Oak', price_cents: 100 }]} entries={[{ key: 'custom:oak', label: 'Oak', macro_image_url: 'https://assets.example/draft.jpg' }]} previewPiece={{ id: 'pick', title: 'Console', brand: 'Atelier', image: 'https://assets.example/hero.jpg', path: '/designers/atelier/console' }} onChange={mocks.change} onBusy={mocks.busy} />);
+    fireEvent.click(screen.getByRole('combobox')); fireEvent.click(await screen.findByRole('option', { name: 'Oak' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Customer preview' }));
+    expect(screen.getByRole('dialog', { name: 'Customer preview' })).toHaveTextContent('"finish":"oak"');
+    expect(screen.getByRole('dialog', { name: 'Customer preview' })).toHaveTextContent('https://assets.example/draft.jpg');
+    fireEvent.click(screen.getByRole('button', { name: 'Close preview' }));
+    expect(mocks.change).not.toHaveBeenCalled(); expect(mocks.upload).not.toHaveBeenCalled();
+  });
   it('uploads and assigns a validated product photo to the selected finish', async () => {
     await open(); fireEvent.change(screen.getByLabelText('Upload product photo'), { target: { files: [new File(['image'], 'oak.jpg', { type: 'image/jpeg' })] } });
     await waitFor(() => expect(mocks.change).toHaveBeenCalledWith([{ key: 'custom:oak', label: 'Oak', product_image_url: 'https://assets.example/finish.jpg' }]));
