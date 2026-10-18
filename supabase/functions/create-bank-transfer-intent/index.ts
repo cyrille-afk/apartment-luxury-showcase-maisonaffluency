@@ -193,6 +193,8 @@ serve(async (req) => {
           discount_pct: String(discountPct),
           discount_label: discountLabel ?? "",
           shipping_cents: String(shippingCents),
+          tax_cents: String(taxCents),
+          order_ref: orderRef ?? "",
         },
       });
     } catch (err) {
