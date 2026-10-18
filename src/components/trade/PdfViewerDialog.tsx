@@ -125,6 +125,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           <span className="w-12 text-center text-xs tabular-nums" aria-live="polite">{Math.round(zoom * 100)}%</span>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Zoom in" disabled={zoom >= MAX_ZOOM} onClick={() => setZoom(z => clampZoom(z + 0.25))}><ZoomIn className="h-4 w-4" /></Button>
           <Button variant="ghost" size="sm" className="h-8 text-xs" aria-label="Fit to width" onClick={() => setZoom(1)}><Maximize2 className="mr-1 h-3.5 w-3.5" />Fit</Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={full ? "Exit fullscreen" : "Fullscreen"} aria-pressed={full} title={full ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={() => setFull(f => !f)}>{full ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</Button>
         </div>
       </div>}
       <div ref={scroller} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-auto bg-muted/40 p-4">
