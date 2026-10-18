@@ -72,7 +72,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
   }
   function swatchGrid(label: string, options: string[], active: string | null, select: (name: string) => void, available = (_name: string) => true) {
     if (label === "Size") return <fieldset className="space-y-4"><legend className="font-body text-xs uppercase tracking-widest text-muted-foreground">{label}</legend><div className="flex flex-wrap gap-3">{options.map((name) => <Button key={name} variant="outline" aria-label={`${label}: ${name}`} aria-pressed={active === name} disabled={!available(name)} onClick={() => select(name)} className={cn("h-auto min-h-11 whitespace-normal rounded-none px-4 py-3 text-xs leading-relaxed", active === name && "border-gold")}>{name}</Button>)}</div></fieldset>;
-    return <fieldset className="space-y-4"><legend className="font-body text-xs uppercase tracking-widest text-muted-foreground">{label}</legend><div className="grid grid-cols-3 gap-x-4 gap-y-5 sm:grid-cols-4 lg:grid-cols-3">
+    return <fieldset className="space-y-4"><legend className="font-body text-xs uppercase tracking-widest text-muted-foreground">{label}</legend><div className="grid grid-cols-3 gap-x-4 gap-y-5 sm:grid-cols-4 lg:grid-cols-4">
       {options.map((name) => {
         const swatch = pairingSwatchFor(name, swatches);
         const customMacro = custom.find(option => option.name === name);
