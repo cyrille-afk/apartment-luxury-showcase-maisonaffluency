@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, Minimize2, PanelLeft, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -29,6 +29,10 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
   const [zoom, setZoom] = useState(1);
   const [page, setPage] = useState(1);
   const [full, setFull] = useState(false);
+  const [thumbsOpen, setThumbsOpen] = useState(true);
+  const [labels, setLabels] = useState<string[]>([]);
+  const thumbs = useRef<(HTMLCanvasElement | null)[]>([]);
+  const thumbList = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const canvases = useRef<(HTMLCanvasElement | null)[]>([]);
   const zoomRef = useRef(zoom); zoomRef.current = zoom;
@@ -68,6 +72,33 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
     })();
     return () => { off = true; };
   }, [doc, zoom, full]);
+
+  // Small page thumbnails (rendered once per document) with a short label from each page's first line of text.
+  useEffect(() => {
+    if (!doc) return;
+    let off = false; setLabels([]);
+    (async () => {
+      const found: string[] = [];
+      for (let n = 1; n <= doc.numPages && !off; n++) {
+        const p = await doc.getPage(n);
+        const base = p.getViewport({ scale: 1 });
+        const vp = p.getViewport({ scale: (112 / base.width) * (window.devicePixelRatio || 1) });
+        const c = thumbs.current[n - 1];
+        if (c && !off) { c.width = vp.width; c.height = vp.height; c.style.width = "112px"; c.style.height = `${(vp.height / vp.width) * 112}px`; await p.render({ canvasContext: c.getContext("2d")!, viewport: vp }).promise; }
+        try {
+          const text = await p.getTextContent();
+          found[n - 1] = text.items.map((t: { str?: string }) => t.str ?? "").join(" ").replace(/\s+/g, " ").trim().slice(0, 48);
+        } catch { found[n - 1] = ""; }
+        if (!off) setLabels([...found]);
+      }
+    })();
+    return () => { off = true; };
+  }, [doc, thumbsOpen]);
+
+  // Keep the active thumbnail in view.
+  useEffect(() => {
+    thumbList.current?.querySelector<HTMLElement>(`[data-thumb="${page}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [page]);
 
   // Track the page in view while scrolling.
   const onScroll = useCallback(() => {
@@ -115,6 +146,7 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
       {doc && <div className="flex flex-wrap items-center justify-between gap-2 border-y border-border py-2" role="toolbar" aria-label="PDF controls">
         <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={thumbsOpen ? "Hide page thumbnails" : "Show page thumbnails"} aria-pressed={thumbsOpen} onClick={() => setThumbsOpen(o => !o)}><PanelLeft className="h-4 w-4" /></Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Previous page" disabled={page <= 1} onClick={() => goTo(page - 1)}><ChevronLeft className="h-4 w-4" /></Button>
           <label className="flex items-center gap-1 text-xs text-muted-foreground">Page
             <input aria-label="Page number" type="number" min={1} max={pages} value={page} onChange={e => goTo(Number(e.target.value) || 1)} className="h-7 w-12 rounded border border-input bg-background px-1 text-center text-xs tabular-nums text-foreground" />
@@ -129,12 +161,22 @@ export function PdfViewerDialog({ open, onOpenChange, title, description, build,
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={full ? "Exit fullscreen" : "Fullscreen"} aria-pressed={full} title={full ? "Exit fullscreen (F)" : "Fullscreen (F)"} onClick={() => setFull(f => !f)}>{full ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</Button>
         </div>
       </div>}
+      <div className="flex min-h-0 flex-1 gap-3">
+      {doc && thumbsOpen && <nav ref={thumbList} aria-label="Page thumbnails" className="hidden w-40 shrink-0 overflow-y-auto border-r border-border pr-2 sm:block">
+        {Array.from({ length: pages }, (_, i) => <button key={i} type="button" data-thumb={i + 1} aria-label={`Go to page ${i + 1}`} aria-current={page === i + 1 ? "page" : undefined} onClick={() => goTo(i + 1)}
+          className={`mb-3 flex w-full flex-col items-center gap-1 rounded p-1.5 text-left transition-colors hover:bg-muted ${page === i + 1 ? "bg-muted ring-1 ring-primary" : ""}`}>
+          <canvas ref={el => { thumbs.current[i] = el; }} className="bg-background shadow-sm" />
+          <span className="w-full text-[10px] font-medium tabular-nums">{i + 1}</span>
+          {labels[i] && <span className="line-clamp-2 w-full text-[10px] leading-tight text-muted-foreground">{labels[i]}</span>}
+        </button>)}
+      </nav>}
       <div ref={scroller} onScroll={onScroll} className="relative min-h-0 flex-1 overflow-auto bg-muted/40 p-4">
         {state === "building" && <div className="flex h-full items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Preparing preview…</div>}
         {state === "error" && <p role="alert" className="p-6 text-sm text-destructive">The preview couldn't be prepared. Close and try again.</p>}
         {doc && <div className="flex w-max min-w-full flex-col items-center gap-4">
           {Array.from({ length: pages }, (_, i) => <canvas key={i} ref={el => { canvases.current[i] = el; }} aria-label={`Page ${i + 1}`} className="bg-background shadow-sm" />)}
         </div>}
+      </div>
       </div>
       {url && <div className="flex justify-end"><Button asChild size="sm"><a href={url} download={fileName}><Download className="mr-2 h-4 w-4" />Download this PDF</a></Button></div>}
     </DialogContent>
