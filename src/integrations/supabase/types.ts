@@ -8331,6 +8331,68 @@ export type Database = {
           },
         ]
       }
+      shop_order_tax_audit: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          actor_kind: string
+          after_buyer_tax_id: string | null
+          after_tax_cents: number
+          after_tax_label: string | null
+          after_total_cents: number
+          before_buyer_tax_id: string | null
+          before_tax_cents: number | null
+          before_tax_label: string | null
+          before_total_cents: number | null
+          buyer_emailed: boolean
+          changed_at: string
+          id: string
+          order_id: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_kind?: string
+          after_buyer_tax_id?: string | null
+          after_tax_cents: number
+          after_tax_label?: string | null
+          after_total_cents: number
+          before_buyer_tax_id?: string | null
+          before_tax_cents?: number | null
+          before_tax_label?: string | null
+          before_total_cents?: number | null
+          buyer_emailed?: boolean
+          changed_at?: string
+          id?: string
+          order_id: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_kind?: string
+          after_buyer_tax_id?: string | null
+          after_tax_cents?: number
+          after_tax_label?: string | null
+          after_total_cents?: number
+          before_buyer_tax_id?: string | null
+          before_tax_cents?: number | null
+          before_tax_label?: string | null
+          before_total_cents?: number | null
+          buyer_emailed?: boolean
+          changed_at?: string
+          id?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_order_tax_audit_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "shop_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_orders: {
         Row: {
           budget_approved_at: string | null

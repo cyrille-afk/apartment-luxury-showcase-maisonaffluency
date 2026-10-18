@@ -32,6 +32,39 @@ interface OrderRow {
   buyer_tax_id: string | null;
 }
 
+type TaxAuditRow = { id: string; changed_at: string; actor_email: string | null; actor_kind: string; before_tax_cents: number | null; after_tax_cents: number; before_tax_label: string | null; after_tax_label: string | null; before_buyer_tax_id: string | null; after_buyer_tax_id: string | null; before_total_cents: number | null; after_total_cents: number; buyer_emailed: boolean };
+
+/** Every VAT/tax change on an order: what changed, who made it and when. */
+function TaxHistory({ order }: { order: OrderRow }) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<TaxAuditRow[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    setFailed(false);
+    supabase.from("shop_order_tax_audit").select("*").eq("order_id", order.id).order("changed_at", { ascending: false })
+      .then(({ data, error }) => { if (error) setFailed(true); else setRows((data as TaxAuditRow[]) ?? []); });
+  }, [open, order.id]);
+  const diff = (label: string, a: string | null, b: string | null) => a === b ? null : <li>{label}: <span className="line-through text-muted-foreground">{a || "—"}</span> → {b || "—"}</li>;
+  return <div className="w-full">
+    <Button variant="ghost" size="sm" className="font-body text-xs" aria-expanded={open} onClick={() => setOpen(o => !o)}>{open ? "Hide tax history" : "Tax history"}</Button>
+    {open && <div className="mt-2 border-t border-border pt-3">
+      {failed && <p role="alert" className="font-body text-xs text-destructive">Couldn't load the history.</p>}
+      {!failed && !rows && <p className="font-body text-xs text-muted-foreground">Loading…</p>}
+      {rows && !rows.length && <p className="font-body text-xs text-muted-foreground">No VAT or tax changes yet.</p>}
+      {rows && rows.length > 0 && <ol className="space-y-3">{rows.map(r => <li key={r.id} className="font-body text-xs">
+        <p className="text-muted-foreground">{new Date(r.changed_at).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} · {r.actor_kind === "buyer" ? "Buyer at checkout" : r.actor_email || "Team member"}{r.buyer_emailed ? " · buyer emailed" : ""}</p>
+        <ul className="mt-1 space-y-0.5 tabular-nums">
+          {diff("VAT number", r.before_buyer_tax_id, r.after_buyer_tax_id)}
+          {diff("Tax label", r.before_tax_label, r.after_tax_label)}
+          {diff("Tax", r.before_tax_cents == null ? null : money(r.before_tax_cents, order.currency), money(r.after_tax_cents, order.currency))}
+          {diff("Total", r.before_total_cents == null ? null : money(r.before_total_cents, order.currency), money(r.after_total_cents, order.currency))}
+        </ul>
+      </li>)}</ol>}
+    </div>}
+  </div>;
+}
+
 /** Team correction of VAT number / tax on an issued instant bank transfer. */
 function InstantTaxEditor({ order, onSaved }: { order: OrderRow; onSaved: () => void }) {
   const { toast } = useToast();
@@ -243,6 +276,7 @@ export default function OrderLedger() {
               {order.payment_method === "instant_bank_transfer" && order.status !== "paid" && (
                 <InstantTaxEditor order={order} onSaved={fetchRows} />
               )}
+              {order.payment_method === "instant_bank_transfer" && <TaxHistory key={`${order.id}:${order.total_cents}:${order.tax_cents}`} order={order} />}
               {order.status !== "paid" && (
                 <Button
                   size="sm"
