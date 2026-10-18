@@ -1331,6 +1331,13 @@
       "when": 1792324378301,
       "tag": "0189_read_only_workspace_shares",
       "breakpoints": true
+    },
+    {
+      "idx": 190,
+      "version": "7",
+      "when": 1792324497377,
+      "tag": "0190_workspace_verified_read_only_guards",
+      "breakpoints": true
     }
   ]
 }
