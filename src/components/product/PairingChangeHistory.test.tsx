@@ -18,7 +18,7 @@ async function open() {
 }
 async function select(label: string, option: string) {
   fireEvent.click(screen.getByLabelText(label));
-  fireEvent.click(await screen.findByRole("option", { name: option, exact: true }));
+  fireEvent.click(await screen.findByRole("option", { name: option }));
 }
 describe("catalog history filter interactions", () => {
   it("combines product and media selections and clears back to all records", async () => {
