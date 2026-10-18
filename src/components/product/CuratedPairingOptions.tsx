@@ -65,7 +65,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
           <SelectTrigger aria-label={`${piece.title} ${label}`} className="h-auto min-h-10 rounded-none text-xs">
             <span className="flex min-w-0 items-center gap-2">{selectedSwatch?.image_url && <img src={selectedSwatch.image_url} alt="" className="h-6 w-6 shrink-0 object-cover" />}<SelectValue placeholder={`Select ${label}`} /></span>
           </SelectTrigger>
-          <SelectContent>{options.map((option) => {
+          <SelectContent className="z-[10020]">{options.map((option) => {
             const swatch = swatchFor(option);
             return <SelectItem key={option} value={option} disabled={!pairingOptionAvailable(rows, selection, axis, option)}><span className="flex items-center gap-2">{swatch?.image_url && <img src={swatch.image_url} alt="" className="h-7 w-7 object-cover" />}{option}</span></SelectItem>;
           })}</SelectContent>
