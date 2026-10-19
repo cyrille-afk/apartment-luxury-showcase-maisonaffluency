@@ -3370,11 +3370,12 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
         </div>
 
       {/* One authoritative mobile dock, isolated from the scrolling product copy. */}
-      {showPublicCommerce && (
+      {!showMockTradeCommerce && (
         <ProductCommerceCta
           productId={product.id}
           rrpLabel={displayRrpLabel}
           dockOnly
+          fixedDock={presentation}
           productTitle={product.title}
           designerName={designerDisplay}
           imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}

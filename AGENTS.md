@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Every mobile product layout mounts one shared ProductCommerceCta dock and always opens the existing three-step intake, including returning and approved users; Studio/Presentation docks portal outside the trade shell while public docks remain viewport-shell siblings — preserves ordering across modes without changing price authorization or desktop checkout.
 - Quote freight audit displays consume selected estimator rate metadata and one shared address-resolution/formatting helper for screen and PDF; audit presentation never recomputes charges — keeps provenance and figures aligned without changing pricing.
 - Quote payment displays reuse the main quote's total and deposit amounts and itemize insurance, crating and converted extras using cumulative GST/allocation rounding with balance as the remainder; display fixes never change payment processing — prevents missing charges and penny drift.
 - Quote payment panels fail closed until fresh PDF arguments, individual charges and integer-cent GST/total/deposit/balance reconcile; monetary input changes invalidate prior passes and actions recheck before proceeding — prevents stale or mismatched customer payments without changing processing rules.

@@ -167,6 +167,7 @@ export default function OrderIntakeSheet({
 
   useEffect(() => {
     if (isOpen) {
+      setStep(0);
       // Clear any confirmation retained by the legacy header-notice flow.
       dismiss();
       setMounted(true);
