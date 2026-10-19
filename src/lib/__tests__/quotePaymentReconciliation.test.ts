@@ -11,17 +11,36 @@ const fixture = () => ({
 });
 describe("payment reconciliation gate", () => {
   it("allows the exact verified quote including insurance and GST", () => {
-    expect(reconcileQuotePayment(fixture())).toEqual({ ok: true, issues: [] });
+    expect(reconcileQuotePayment(fixture())).toEqual({ ok: true, issues: [], mismatches: [] });
   });
   for (const key of Object.keys(amounts) as (keyof typeof amounts)[]) {
     it(`blocks even a one-cent ${key} mismatch`, () => {
       const input = fixture(); input.displayed[key] += 1;
       expect(reconcileQuotePayment(input).ok).toBe(false);
+      expect(reconcileQuotePayment(input).mismatches).toContainEqual({
+        label: { chargesCents: "Charges", gstCents: "GST / tax", totalCents: "Order total", depositCents: "Deposit", balanceCents: "Balance" }[key],
+        expectedCents: amounts[key], displayedCents: amounts[key] + 1,
+      });
     });
   }
   it("blocks missing insurance even when displayed totals look correct", () => {
     const input = fixture(); input.charges.shift();
     expect(reconcileQuotePayment(input).issues).toContain("Itemized charges does not match the quote.");
+  });
+  it("identifies the individual freight amount differing by one cent", () => {
+    const input = fixture();
+    const quotedCharges = input.charges.map((charge) => ({ ...charge }));
+    quotedCharges[1].amountCents = 120_001;
+    expect(reconcileQuotePayment({ ...input, quotedCharges }).mismatches).toContainEqual({
+      label: "Freight", expectedCents: 120_001, displayedCents: 120_000,
+    });
+  });
+  it("does not present missing or invalid amounts as zero", () => {
+    const input = fixture(); input.displayed.gstCents = NaN;
+    const result = reconcileQuotePayment({ ...input, quotedCharges: [...input.charges, { label: "Delivery", amountCents: 500 }] });
+    expect(result.mismatches).toContainEqual({ label: "GST / tax", expectedCents: 131_290, displayedCents: null });
+    expect(result.mismatches).toContainEqual({ label: "Charge 4: Delivery → Not displayed", expectedCents: 500, displayedCents: null });
+    expect(result.ok).toBe(false);
   });
   it("blocks incorrect GST allocation", () => {
     const input = fixture(); input.taxRate = 8;
