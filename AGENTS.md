@@ -5,7 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
-- Both profile grids use profileEditionLine to suppress generic stored house credits on child pages, preserving real editions and maker attribution — prevents metadata bypassing badge rules.
+- Both profile grids use profileEditionLine and getHouseEditionLabel together for page-scoped attribution, preserving genuine editions and maker credits — prevents stored metadata or generated fallbacks bypassing badge rules.
 - Mobile pairing and quick-view overlays share a downward touch-dismiss hook; content gestures require scroll-top, handles bypass that check, and controls/multitouch/cancel never dismiss — preserves finish selection and native scrolling.
 - Room shortlists reuse owner-private comparator_shortlists with room_slug and the existing public token reader; account/room-scoped local drafts and allowlisted product snapshots exclude all pricing, while shared links never grant editing — keeps Public and Trade selections interoperable without duplicating sharing infrastructure.
 - Shortlist PDF personalization, including closing-page contacts, uses account/room/saved-shortlist-scoped device-local metadata separate from shared product snapshots — preserves client-specific exports without exposing private copy through sharing.

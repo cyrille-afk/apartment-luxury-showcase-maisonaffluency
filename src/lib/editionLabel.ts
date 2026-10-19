@@ -50,7 +50,7 @@ const normalizeHouseName = (value?: string | null) =>
     .trim()
     .toLowerCase();
 
-/** Suppress stored house attribution masquerading as an edition on child profiles. */
+/** Suppress redundant house attribution, preserving genuine edition details. */
 export function profileEditionLine(input: Parameters<typeof formatCuratorialEditionLine>[0] & {
   founder?: string | null;
   pageDesignerName?: string | null;
@@ -58,7 +58,8 @@ export function profileEditionLine(input: Parameters<typeof formatCuratorialEdit
   const line = formatCuratorialEditionLine(input);
   const house = normalizeHouseName(input.founder);
   const page = normalizeHouseName(input.pageDesignerName);
-  if (!line || !house || !page || page === house || input.edition_number?.trim() || input.edition_signing?.trim()) return line;
+  if (!line || !house || !page || input.edition_number?.trim() || input.edition_signing?.trim()) return line;
+  if (page === house && house !== "man of parts") return line;
   const label = normalizeHouseName(line);
   const genericHouseLabels = [house, `${house} edition`, `${house} editions`, `${house} reedition`, `${house} re-edition`];
   return genericHouseLabels.includes(label) ? null : line;
@@ -116,6 +117,9 @@ export function getHouseEditionLabel(input: {
   }
   const house = (input.founder || input.parentBrand || input.reeditionBy || "").trim();
   if (!house) return null;
+  // The Man of Parts profile already establishes the house; never regenerate
+  // its generic badge after suppressing a stored attribution above.
+  if (normalizeHouseName(house) === "man of parts" && normalizeHouseName(input.pageDesignerName) === "man of parts") return null;
   if (normalizeHouseName(house) === normalizeHouseName(input.designerName)) return null;
   // On a child designer's own page the card already credits the house, so no
   // chip. Independent designers (e.g. Dan Yeffet for Veronese) stand alone —
