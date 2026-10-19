@@ -51,6 +51,8 @@ import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import { readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
+import { roomShoppingProducts } from '@/lib/shopByRoom';
+import type { RoomSlug } from '@/lib/roomCategories';
 
 
 const slugifyForUrl = (s: string) =>

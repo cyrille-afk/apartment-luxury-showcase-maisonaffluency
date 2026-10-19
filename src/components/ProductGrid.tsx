@@ -224,7 +224,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll, tradeContext = false }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean; tradeContext?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
@@ -266,8 +266,7 @@ const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, co
     },
   } : undefined, [roomSlug]);
   const openItem = (item: ProductItem) => {
-    if (tradeContext) navigate(`/trade/products/${item.designerId}/${item.pick.slug || designerSlugify(item.pick.title)}`);
-    else if (roomSlug) setRoomLightbox(toRoomLightboxItem(item));
+    if (roomSlug) setRoomLightbox(toRoomLightboxItem(item));
     else navigate(productHref(item.pick));
   };
 
@@ -643,7 +642,7 @@ function singularizeSub(s: string): string {
                <div className={`flex w-full justify-between px-1 ${roomSlug ? "mt-3 items-baseline gap-1.5 md:gap-4" : "mt-3 h-12 items-start gap-4"}`}>
                 <div className="flex min-w-0 flex-1 flex-col text-left">
                   <Link
-                    to={`/${tradeContext ? 'trade/gallery' : 'designers'}/${designerSlugify(item.designerId || item.designerName)}`}
+                    to={`/designers/${designerSlugify(item.designerId || item.designerName)}`}
                     onClick={(e) => e.stopPropagation()}
                      className={`group/designer block w-full font-body font-semibold uppercase text-foreground antialiased transition-colors duration-300 ease-in-out hover:text-foreground/70 ${roomSlug ? "break-words text-[9px] leading-tight tracking-normal md:text-[10px] md:tracking-wider" : "truncate whitespace-nowrap text-[10px] tracking-wider"}`}
                    >

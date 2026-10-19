@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import RoomShopping from '@/components/product/RoomShopping';
+import TradeGallery from './TradeGallery';
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
@@ -166,9 +167,10 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
 export default function RoomSearch() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const trade = useLocation().pathname.startsWith('/trade/');
+  const pathname = useLocation().pathname;
+  const trade = pathname.startsWith('/trade/');
   const roomParam = searchParams.get("room");
-  const room = resolveRoomSlug(roomParam) || (!roomParam ? 'living-room' : null);
+  const room = resolveRoomSlug(roomParam) || (!roomParam && pathname.includes('shop-by-room') ? 'living-room' : null);
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
 
@@ -277,7 +279,7 @@ export default function RoomSearch() {
           <>
             <RoomShopping key={room} room={room} trade={trade} onRoomChange={next => navigate(`${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
             {!trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <ProductGrid key={room} tradeContext={trade} roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
+            {trade ? <TradeGallery key={room} roomSlug={room} /> : <ProductGrid key={room} roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
           </>
         ) : roomParam ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
