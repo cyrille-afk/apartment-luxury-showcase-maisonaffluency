@@ -1429,6 +1429,13 @@
       "when": 1792383045827,
       "tag": "0203_studio_invite_accept_notification_link",
       "breakpoints": true
+    },
+    {
+      "idx": 204,
+      "version": "7",
+      "when": 1792383221552,
+      "tag": "0204_studio_invite_events",
+      "breakpoints": true
     }
   ]
 }

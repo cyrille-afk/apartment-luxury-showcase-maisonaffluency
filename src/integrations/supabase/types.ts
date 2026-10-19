@@ -8818,6 +8818,39 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_invite_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          email: string
+          event: string
+          id: string
+          invite_id: string
+          role: Database["public"]["Enums"]["studio_role"] | null
+          studio_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          email: string
+          event: string
+          id?: string
+          invite_id: string
+          role?: Database["public"]["Enums"]["studio_role"] | null
+          studio_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          email?: string
+          event?: string
+          id?: string
+          invite_id?: string
+          role?: Database["public"]["Enums"]["studio_role"] | null
+          studio_id?: string
+        }
+        Relationships: []
+      }
       studio_invites: {
         Row: {
           accepted_at: string | null
@@ -12338,6 +12371,17 @@ export type Database = {
       admin_studio_directory: {
         Args: { _offset?: number; _search?: string }
         Returns: Json
+      }
+      admin_studio_invite_history: {
+        Args: { _studio_id: string }
+        Returns: {
+          actor_name: string
+          email: string
+          event: string
+          invite_id: string
+          occurred_at: string
+          role: Database["public"]["Enums"]["studio_role"]
+        }[]
       }
       apply_available_credit_to_quote: {
         Args: { _quote_id: string }
