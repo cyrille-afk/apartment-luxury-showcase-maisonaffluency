@@ -849,36 +849,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                 <AnimatePresence mode="wait">
-                   {portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady && (
-                     <motion.aside
-                       key={selectedHotspot.id}
-                       aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                       initial={{ opacity: 0, y: 24 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       exit={{ opacity: 0, y: 24 }}
-                       transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:static md:mx-0 md:flex md:w-[28%] md:max-w-none md:shrink-0 md:flex-col md:self-stretch md:rounded-none md:border-y-0 md:border-r-0 md:bg-muted/50 md:p-8 md:shadow-none md:backdrop-blur-none"
-                     >
-                       <div className="mb-2 flex items-start justify-between gap-3 md:mb-4 md:border-b md:border-border/60 md:pb-4">
-                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
-                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
-                       </div>
-                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-evenly md:gap-4 md:divide-y md:divide-border/60">
-                         {dockAlternatives.map((pick) => (
-                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:justify-start md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
-                             <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-28 md:bg-background md:p-2 xl:size-32" loading="lazy" />
-                             <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-sm">
-                               <span className="line-clamp-2 block">{pick.title}</span>
-                               <span className="mt-1 hidden truncate font-body text-[9px] uppercase text-muted-foreground sm:block md:mt-1.5 md:text-[10px] md:tracking-wider">{pick.brand_name}</span>
-                               <span className="mt-3 hidden font-body text-[10px] uppercase tracking-widest text-muted-foreground underline-offset-4 md:block">View details</span>
-                             </span>
-                           </Button>
-                          ))}
-                       </div>
-                     </motion.aside>
-                   )}
-                 </AnimatePresence>
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
