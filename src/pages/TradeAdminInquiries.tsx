@@ -49,7 +49,6 @@ const SOURCE_OPTIONS = [
   { key: "public_product", label: "Price upon Request" },
   { key: "concierge_lead", label: "Concierge chat" },
   { key: "contact_form", label: "Contact form" },
-  { key: "room_consultation", label: "Design consultation" },
 ];
 
 const whatsappHref = (phone: string | null) => {
