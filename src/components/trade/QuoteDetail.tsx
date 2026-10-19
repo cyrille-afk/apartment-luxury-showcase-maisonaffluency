@@ -4960,7 +4960,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isPriced && (() => {
           const afterDiscount = goodsAfterDiscountCents;
-          const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
+          const taxable = afterDiscount + extrasTotalCents;
+          const withGst = gstEnabled && taxable > 0 ? taxable + Math.round(taxable * gstRate / 100) : taxable;
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
@@ -5027,6 +5028,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {cratingTotalCents > 0 && (
                         <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
                       )}
+                      {extrasTotalCents > 0 && (
+                        <Row label="Additional charges (incl. freight)" value={`+ ${fmt(extrasTotalCents)} ${currency}`} muted />
+                      )}
                       {shippingQuoteCents > 0 && (
                         <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
                       )}
@@ -5054,9 +5058,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = goodsAfterDiscountCents;
-          const withGst = gstEnabled && afterDiscount > 0
-            ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
-            : afterDiscount;
+          const taxable = afterDiscount + extrasTotalCents;
+          const withGst = gstEnabled && taxable > 0
+            ? taxable + Math.round(taxable * gstRate / 100)
+            : taxable;
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
             : 0;
