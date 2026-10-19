@@ -1415,6 +1415,20 @@
       "when": 1792382781591,
       "tag": "0201_studio_invite_link_status",
       "breakpoints": true
+    },
+    {
+      "idx": 202,
+      "version": "7",
+      "when": 1792383018543,
+      "tag": "0202_notify_inviter_on_studio_invite_accept",
+      "breakpoints": true
+    },
+    {
+      "idx": 203,
+      "version": "7",
+      "when": 1792383045827,
+      "tag": "0203_studio_invite_accept_notification_link",
+      "breakpoints": true
     }
   ]
 }
