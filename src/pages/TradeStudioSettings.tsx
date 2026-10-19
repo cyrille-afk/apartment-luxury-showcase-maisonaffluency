@@ -44,6 +44,9 @@ interface Invite {
   accepted_at: string | null;
 }
 
+const inviteExpired = (inv: Invite) => new Date(inv.expires_at).getTime() <= Date.now();
+const inviteDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
 const ROLE_DESC: Record<StudioRole, string> = {
   owner: "Full control including billing & deletion",
   admin: "Manage members and all studio content",
@@ -488,8 +491,16 @@ export default function TradeStudioSettings() {
                     <div key={inv.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <div className="text-sm truncate">{inv.email}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {inv.role} • {new Date(inv.expires_at).getTime() <= Date.now() ? "expired" : "expires"} {new Date(inv.expires_at).toLocaleDateString()}
+                        <div className="text-xs text-muted-foreground">{inv.role}</div>
+                        <div className="mt-0.5 flex items-center gap-1.5">
+                          <Badge variant={inviteExpired(inv) ? "destructive" : "secondary"} className="text-[10px] uppercase tracking-wide">
+                            {inviteExpired(inv) ? "Expired" : "Valid"}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {inviteExpired(inv)
+                              ? `since ${inviteDate(inv.expires_at)} — link no longer works`
+                              : `until ${inviteDate(inv.expires_at)} — link still works`}
+                          </span>
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center gap-1">
