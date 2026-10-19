@@ -1373,6 +1373,13 @@
       "when": 1792372534025,
       "tag": "0195_room_collection_shortlists",
       "breakpoints": true
+    },
+    {
+      "idx": 196,
+      "version": "7",
+      "when": 1792378278008,
+      "tag": "0196_admin_studio_directory",
+      "breakpoints": true
     }
   ]
 }
