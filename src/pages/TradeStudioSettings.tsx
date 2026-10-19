@@ -498,8 +498,8 @@ export default function TradeStudioSettings() {
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {inviteExpired(inv)
-                              ? `since ${new Date(inv.expires_at).toLocaleDateString()} — link no longer works`
-                              : `until ${new Date(inv.expires_at).toLocaleDateString()} — link still works`}
+                              ? `since ${inviteDate(inv.expires_at)} — link no longer works`
+                              : `until ${inviteDate(inv.expires_at)} — link still works`}
                           </span>
                         </div>
                       </div>
