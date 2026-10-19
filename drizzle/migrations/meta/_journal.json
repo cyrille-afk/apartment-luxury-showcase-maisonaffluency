@@ -1464,6 +1464,13 @@
       "when": 1792403378539,
       "tag": "0208_private_client_recognition_optin",
       "breakpoints": true
+    },
+    {
+      "idx": 209,
+      "version": "7",
+      "when": 1792403467595,
+      "tag": "0209_fix_private_client_optin_digest",
+      "breakpoints": true
     }
   ]
 }
