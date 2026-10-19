@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import { formatPdfDate, formatPdfMoney } from "./pdfFormatting";
-import { paymentSummaryRows, type PaymentSummaryInput } from "./paymentSummary";
+import { paymentSummaryRows, paymentSummaryDueDate, type PaymentSummaryInput } from "./paymentSummary";
 
 const PALETTE = { jade: [12, 49, 47], ink: [40, 40, 40], muted: [115, 115, 115], rule: [200, 198, 192] } as const;
 
@@ -32,7 +32,8 @@ export async function buildPaymentSummaryPdf(input: PaymentSummaryInput): Promis
     doc.setFont("Cormorant").setFontSize(24).setTextColor(...PALETTE.jade).text("Payment summary", M, 116);
     doc.setFont("Inter").setFontSize(9).setTextColor(...PALETTE.muted);
     y = 137;
-    for (const text of [input.clientName, input.projectName].filter(Boolean)) {
+    for (const text of [`Quote number: ${input.quoteNumber}`, `Customer: ${input.clientName || "Not specified"}`, input.projectName,
+      `Payment due date (${input.paymentType}): ${paymentSummaryDueDate(input)}`].filter(Boolean)) {
       const lines = doc.splitTextToSize(String(text), W - M * 2);
       doc.text(lines, M, y); y += lines.length * 12 + 3;
     }
