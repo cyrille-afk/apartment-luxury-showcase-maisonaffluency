@@ -771,9 +771,61 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
-                            {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
+                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
                               <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
+                            {portraitDock && pageScene.id === activeScene?.id && (
+                              <AnimatePresence mode="wait">
+                                {selectedHotspot && dockAlternatives.length > 0 && sceneReady && (
+                                  <motion.div
+                                    key={selectedHotspot.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.25, ease: "easeOut" }}
+                                    className="absolute inset-0 z-30"
+                                  >
+                                    <button
+                                      type="button"
+                                      aria-label="Close curated alternatives"
+                                      onClick={() => { setDockDismissed(true); setActivePin(null); }}
+                                      className="absolute inset-0 cursor-default bg-foreground/45"
+                                    />
+                                    <motion.aside
+                                      aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
+                                      initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      transition={{ duration: 0.3, ease: "easeOut" }}
+                                      className={`absolute z-10 flex flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md max-md:inset-x-3 max-md:bottom-3 max-md:top-auto max-md:max-h-[72%] md:inset-y-4 md:w-[300px] md:p-4 ${overlaySide === "left" ? "md:left-4" : "md:right-4"}`}
+                                    >
+                                      <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
+                                        <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
+                                        <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                                      </div>
+                                      <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-col md:gap-3">
+                                        {dockAlternatives.map((pick) => (
+                                          <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="h-auto min-w-0 w-full flex-col items-stretch rounded-sm bg-[hsl(var(--product-canvas))] p-2 text-left hover:bg-[hsl(var(--product-canvas))] hover:brightness-[0.97] md:p-3">
+                                            <span className="flex aspect-square w-full items-center justify-center overflow-hidden">
+                                              <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
+                                            </span>
+                                            <span className="mt-2 flex items-start justify-between gap-2 px-0.5">
+                                              <span className="min-w-0">
+                                                <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-foreground">{pick.brand_name}</span>
+                                                <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-muted-foreground">{pick.title}</span>
+                                              </span>
+                                              <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-foreground">
+                                                {formatPublicRrpForDestination(dockRrpMap[pick.id], dockDestination.currency) || "Price upon Request"}
+                                              </span>
+                                            </span>
+                                          </Button>
+                                        ))}
+                                      </div>
+                                    </motion.aside>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            )}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
                               <Button type="button" size="icon" variant="ghost" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="relative isolate h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]">
