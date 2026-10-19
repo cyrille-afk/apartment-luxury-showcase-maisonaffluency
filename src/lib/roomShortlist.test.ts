@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { roomShortlistDraftKey, shortlistItems, toggleShortlistItem, shortlistCover, shortlistCoverKey } from './roomShortlist';
+import { roomShortlistDraftKey, shortlistItems, toggleShortlistItem, shortlistCover, shortlistCoverKey, SHORTLIST_CONTACT_DEFAULTS, shortlistContact } from './roomShortlist';
 const item = { id: 'chair', product_name: 'Chair', brand_name: 'Maker', image_url: null };
 describe('room collection shortlists', () => {
   it('keeps each room selection independent', () => {
@@ -18,10 +18,32 @@ describe('room collection shortlists', () => {
   });
   it('rejects damaged stored selections', () => { expect(shortlistItems([{ id: 'broken' }])).toEqual([]); });
   it('retains all optional cover fields as plain text without private extras', () => {
-    expect(shortlistCover({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.', net: 9000 })).toEqual({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.' });
+    expect(shortlistCover({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.', net: 9000 })).toEqual({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.', ...SHORTLIST_CONTACT_DEFAULTS });
   });
   it('defaults missing cover details without sharing another shortlist draft', () => {
-    expect(shortlistCover(null)).toEqual({ clientName: '', projectTitle: '', introduction: '', closingMessage: '' });
+    expect(shortlistCover(null)).toEqual({ clientName: '', projectTitle: '', introduction: '', closingMessage: '', ...SHORTLIST_CONTACT_DEFAULTS });
     expect(new Set(['draft', 'a', 'b'].map(id => shortlistCoverKey('owner:living', id))).size).toBe(3);
+  });
+  it('retains a client-specific concierge email and mail link', () => {
+    expect(shortlistContact(shortlistCover({ conciergeEmail: 'private@example.com' })).emailUrl).toBe('mailto:private@example.com');
+  });
+  it('retains a client-specific website and normalizes its link', () => {
+    const contact = shortlistContact(shortlistCover({ website: 'example.com/private-viewing' }));
+    expect(contact.website).toBe('example.com/private-viewing');
+    expect(contact.websiteUrl).toBe('https://example.com/private-viewing');
+  });
+  it('retains personal availability including line breaks', () => {
+    expect(shortlistContact(shortlistCover({ availability: 'Monday–Friday\nPrivate appointments in Singapore' })).availability).toBe('Monday–Friday\nPrivate appointments in Singapore');
+  });
+  it('uses existing contact defaults for older or empty drafts', () => {
+    const contact = shortlistContact(shortlistCover({ conciergeEmail: '', website: ' ', availability: '' }));
+    expect(contact.conciergeEmail).toBe('concierge@maisonaffluency.com');
+    expect(contact.website).toBe('maisonaffluency.com');
+    expect(contact.availability).toBe('By appointment, worldwide');
+  });
+  it('never creates unsafe website or malformed email links', () => {
+    const contact = shortlistContact(shortlistCover({ website: 'javascript:alert(1)', conciergeEmail: 'bad\nemail' }));
+    expect(contact.websiteUrl).toBeUndefined();
+    expect(contact.emailUrl).toBeUndefined();
   });
 });

@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { shortlistCover, type RoomShortlistItem, type RoomShortlistCover } from './roomShortlist';
+import { shortlistCover, shortlistContact, type RoomShortlistItem, type RoomShortlistCover } from './roomShortlist';
 import { formatPdfDate } from './pdfFormatting';
 
 const JADE: [number, number, number] = [22, 58, 52];
@@ -118,34 +118,48 @@ export async function buildRoomShortlistPdf(opts: { title: string; roomLabel: st
   });
 
   // Branded closing page: personal call to action plus concierge contact details.
+  const itemPages = doc.getNumberOfPages() - coverPages;
+  const contact = shortlistContact(cover);
   doc.addPage();
-  doc.setFillColor(...JADE); doc.rect(0, 0, W, H, 'F');
-  doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.rect(10, 10, W - 20, H - 20);
-  doc.setTextColor(...GOLD); doc.setFont('Cormorant', 'normal'); doc.setFontSize(11);
-  doc.text('MAISON AFFLUENCY', W / 2, 40, { align: 'center', charSpace: 2 });
+  const closingPage = () => {
+    doc.setFillColor(...JADE); doc.rect(0, 0, W, H, 'F');
+    doc.setDrawColor(...GOLD); doc.setLineWidth(0.4); doc.rect(10, 10, W - 20, H - 20);
+    doc.setTextColor(...GOLD); doc.setFont('Cormorant', 'normal'); doc.setFontSize(11);
+    doc.text('MAISON AFFLUENCY', W / 2, 40, { align: 'center', charSpace: 2 });
+  };
+  closingPage();
   let closeY = 116;
+  const closingText = (text: string, size: number, color: [number, number, number], url?: string) => {
+    doc.setFont('Inter', 'normal'); doc.setFontSize(size);
+    const lines: string[] = doc.splitTextToSize(text, W - 64);
+    const lineH = size * 0.3528 * 1.4;
+    for (const line of lines) {
+      if (closeY + lineH > H - 28) { doc.addPage(); closingPage(); closeY = 70; }
+      doc.setFont('Inter', 'normal'); doc.setFontSize(size); doc.setTextColor(...color);
+      if (url) doc.textWithLink(line, W / 2, closeY, { align: 'center', url });
+      else doc.text(line, W / 2, closeY, { align: 'center' });
+      closeY += lineH;
+    }
+  };
   doc.setTextColor(245, 245, 245); doc.setFont('Cormorant', 'normal'); doc.setFontSize(22);
   doc.text('A Personal Note', W / 2, closeY, { align: 'center' });
   closeY += 20;
   const closingMessage = cover.closingMessage.trim() || 'Should any of these pieces capture your imagination, our concierge will be delighted to arrange a private viewing, share further details, or discuss them with you at your convenience.';
-  doc.setFont('Inter', 'normal'); doc.setFontSize(10.5); doc.setTextColor(228, 228, 228);
-  const closingLines: string[] = doc.splitTextToSize(closingMessage, W - 64);
-  doc.text(closingLines, W / 2, closeY, { align: 'center' });
-  closeY += closingLines.length * 5.2 + 12;
+  closingText(closingMessage, 10.5, [228, 228, 228]);
+  closeY += 12;
+  if (closeY + 58 > H - 28) { doc.addPage(); closingPage(); closeY = 70; }
   doc.setDrawColor(...GOLD); doc.setLineWidth(0.3); doc.line(W / 2 - 14, closeY, W / 2 + 14, closeY);
   closeY += 18;
   doc.setFont('Inter', 'normal'); doc.setFontSize(7); doc.setTextColor(...GOLD);
   doc.text('CONCIERGE SERVICE', W / 2, closeY, { align: 'center', charSpace: 1.5 });
   closeY += 10;
-  doc.setFont('Inter', 'normal'); doc.setFontSize(10); doc.setTextColor(245, 245, 245);
-  doc.textWithLink('concierge@maisonaffluency.com', W / 2, closeY, { align: 'center', url: 'mailto:concierge@maisonaffluency.com' });
-  closeY += 8;
-  doc.text('maisonaffluency.com', W / 2, closeY, { align: 'center' });
-  doc.setFont('Inter', 'normal'); doc.setFontSize(8.5); doc.setTextColor(190, 190, 190);
-  doc.text('By appointment, worldwide', W / 2, closeY + 10, { align: 'center' });
+  closingText(contact.conciergeEmail, 10, [245, 245, 245], contact.emailUrl);
+  closeY += 3;
+  closingText(contact.website, 10, [245, 245, 245], contact.websiteUrl);
+  closeY += 6;
+  closingText(contact.availability, 8.5, [190, 190, 190]);
 
-  const pages = doc.getNumberOfPages();
-  const numbered = pages - coverPages - 1; // cover(s) and the closing page stay unnumbered
+  const numbered = itemPages; // cover(s) and closing pages stay unnumbered
   for (let p = coverPages + 1; p <= coverPages + numbered; p++) {
     doc.setPage(p); doc.setFont('Inter', 'normal'); doc.setFontSize(7); doc.setTextColor(...MUTED);
     doc.text(`${p - coverPages} / ${numbered}`, W - M, H - 8, { align: 'right' });
