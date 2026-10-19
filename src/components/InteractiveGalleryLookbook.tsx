@@ -18,6 +18,8 @@ import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHots
 import { curatingTeam } from "@/components/CuratingTeam";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import { galleryAlternatives } from "@/lib/galleryAlternatives";
+import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
+import { useShippingDestination } from "@/lib/shippingDestination";
 import type { RoomSlug } from "@/lib/roomCategories";
 
 type Scene = { title: string; id: string };
@@ -327,10 +329,10 @@ function CuratorsCanvas() {
 }
 
 /** Editorial hotspot pin: fine-lined ring, quiet by default, label + pulse on hover (Shop by Room). */
-function HotspotPin({ hotspot, editorial, active, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; onOpen: () => void; onPreview?: () => void }) {
+function HotspotPin({ hotspot, editorial, active, raised, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; raised?: boolean; onOpen: () => void; onPreview?: () => void }) {
   if (!editorial) {
     return (
-      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className={`group absolute ${raised ? "z-40" : "z-10"} size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
         <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
           <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
           <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -340,7 +342,7 @@ function HotspotPin({ hotspot, editorial, active, onOpen, onPreview }: { hotspot
   }
   const flipLabel = hotspot.x_percent > 72;
   return (
-    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className={`group absolute ${raised ? "z-40" : "z-10"} flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
       {active && <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-background/60 opacity-75 md:size-6" />}
       <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm backdrop-blur-[2px] transition-all duration-300 ease-out md:size-6 ${active ? "scale-110 border-background bg-background" : "border-muted-foreground/30 bg-foreground/85 group-hover:scale-110 group-hover:bg-foreground"}`}>
         <span className={`absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
@@ -654,15 +656,17 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
-  const focusedView = !!(portraitDock && selectedHotspot && activePin === selectedHotspot.id && dockAlternatives.length > 0 && activeSceneReady);
+  const overlayOpen = !!(portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady);
+  // Hotspot on the left half of the photo → card floats on the right margin, and vice versa.
+  const overlaySide: "left" | "right" = selectedHotspot && selectedHotspot.x_percent < 50 ? "right" : "left";
+  const { data: dockRrpMap = {} } = usePublicRrpMap(dockAlternatives.map((pick) => pick.id));
+  const dockDestination = useShippingDestination();
   useEffect(() => {
-    if (!focusedView || window.matchMedia("(max-width: 767px)").matches) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!overlayOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !lightboxProduct) setDockDismissed(true); };
     window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-  }, [focusedView, lightboxProduct]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [overlayOpen, lightboxProduct]);
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
@@ -706,7 +710,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`relative mx-auto w-full max-w-[1280px] ${focusedView ? "md:fixed md:inset-0 md:z-50 md:flex md:h-screen md:w-screen md:max-w-none md:flex-col md:justify-center md:bg-background md:px-10 lg:px-16" : ""}`}>
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
               <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
               <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2" : "mt-4 pb-2"}`}>
                 <h2 className="font-body text-[11px] font-bold uppercase tracking-widest text-foreground">
@@ -730,7 +734,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady ? "md:items-stretch" : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
@@ -764,12 +768,64 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                              }}
-                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${focusedView ? "md:!max-h-[80vh] md:min-h-[75vh] md:object-cover" : discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
-                            {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
+                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
+                            {portraitDock && pageScene.id === activeScene?.id && (
+                              <AnimatePresence mode="wait">
+                                {selectedHotspot && dockAlternatives.length > 0 && sceneReady && (
+                                  <motion.div
+                                    key={selectedHotspot.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.25, ease: "easeOut" }}
+                                    className="absolute inset-0 z-30"
+                                  >
+                                    <button
+                                      type="button"
+                                      aria-label="Close curated alternatives"
+                                      onClick={() => { setDockDismissed(true); setActivePin(null); }}
+                                      className="absolute inset-0 cursor-default bg-foreground/45"
+                                    />
+                                    <motion.aside
+                                      aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
+                                      initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      transition={{ duration: 0.3, ease: "easeOut" }}
+                                      className={`absolute z-10 flex flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md max-md:inset-x-3 max-md:bottom-3 max-md:top-auto max-md:max-h-[72%] md:inset-y-4 md:w-[300px] md:p-4 ${overlaySide === "left" ? "md:left-4" : "md:right-4"}`}
+                                    >
+                                      <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
+                                        <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
+                                        <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                                      </div>
+                                      <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-col md:gap-3">
+                                        {dockAlternatives.map((pick) => (
+                                          <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="h-auto min-w-0 w-full flex-col items-stretch rounded-sm bg-[hsl(var(--product-canvas))] p-2 text-left hover:bg-[hsl(var(--product-canvas))] hover:brightness-[0.97] md:p-3">
+                                            <span className="flex aspect-square w-full items-center justify-center overflow-hidden">
+                                              <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
+                                            </span>
+                                            <span className="mt-2 flex items-start justify-between gap-2 px-0.5">
+                                              <span className="min-w-0">
+                                                <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-foreground">{pick.brand_name}</span>
+                                                <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-muted-foreground">{pick.title}</span>
+                                              </span>
+                                              <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-foreground">
+                                                {formatPublicRrpForDestination(dockRrpMap[pick.id], dockDestination.currency) || "Price upon Request"}
+                                              </span>
+                                            </span>
+                                          </Button>
+                                        ))}
+                                      </div>
+                                    </motion.aside>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            )}
                             <div className="absolute bottom-3 right-3 z-20 hidden items-center md:flex">
                               <EditorialGalleryLandingHint key={pageScene.id} tone="hero" onClick={() => setExpandedScene(pageScene)} className="relative mr-2.5 py-1 text-[10px] tracking-[0.34em] before:absolute before:-inset-x-3 before:-inset-y-1.5 before:-z-10 before:rounded-sm before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]" />
                               <Button type="button" size="icon" variant="ghost" aria-label="Presentation" title="Presentation" onClick={() => setExpandedScene(pageScene)} className="relative isolate h-10 w-10 min-h-10 min-w-10 shrink-0 rounded-full border border-primary-foreground/35 bg-transparent text-primary-foreground shadow-none touch-manipulation animate-gallery-icon-pulse hover:bg-transparent hover:text-primary-foreground before:absolute before:-inset-1 before:-z-10 before:rounded-full before:bg-foreground/35 before:backdrop-blur-[2px] before:[mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_100%)]">
@@ -793,36 +849,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                 <AnimatePresence mode="wait">
-                   {portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady && (
-                     <motion.aside
-                       key={selectedHotspot.id}
-                       aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                       initial={{ opacity: 0, y: 24 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       exit={{ opacity: 0, y: 24 }}
-                       transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:static md:mx-0 md:flex md:w-[28%] md:max-w-none md:shrink-0 md:flex-col md:self-stretch md:rounded-none md:border-y-0 md:border-r-0 md:bg-muted/50 md:p-8 md:shadow-none md:backdrop-blur-none"
-                     >
-                       <div className="mb-2 flex items-start justify-between gap-3 md:mb-4 md:border-b md:border-border/60 md:pb-4">
-                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
-                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
-                       </div>
-                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-evenly md:gap-4 md:divide-y md:divide-border/60">
-                         {dockAlternatives.map((pick) => (
-                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:justify-start md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
-                             <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-28 md:bg-background md:p-2 xl:size-32" loading="lazy" />
-                             <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-sm">
-                               <span className="line-clamp-2 block">{pick.title}</span>
-                               <span className="mt-1 hidden truncate font-body text-[9px] uppercase text-muted-foreground sm:block md:mt-1.5 md:text-[10px] md:tracking-wider">{pick.brand_name}</span>
-                               <span className="mt-3 hidden font-body text-[10px] uppercase tracking-widest text-muted-foreground underline-offset-4 md:block">View details</span>
-                             </span>
-                           </Button>
-                          ))}
-                       </div>
-                     </motion.aside>
-                   )}
-                 </AnimatePresence>
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-px gap-1 bg-background/25" aria-hidden="true">
                   {galleryPages.map((galleryPage, index) => (
                     <span key={galleryPage.scenes.map((pageScene) => pageScene.id).join("-")} className={`h-full flex-1 ${index === sceneIdx ? "bg-background" : "bg-background/35"}`} />
