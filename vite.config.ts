@@ -143,10 +143,13 @@ function emitVersionPlugin(buildId: string): Plugin {
   // the deployed app is ahead of the synced GitHub repo (i.e. a sync is due).
   let commitSha: string | null = null;
   try {
-    commitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim() || null;
+    commitSha = execSync("git rev-parse HEAD", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
   } catch {
     commitSha = null;
   }
+  // Git-free fallback: digest of git blob SHAs for every file under src/.
+  // The github-sync-status function computes the same digest from the repo tree.
+  const sourceDigest = computeSourceDigest();
   return {
     name: "emit-version",
     apply: "build",
@@ -154,7 +157,7 @@ function emitVersionPlugin(buildId: string): Plugin {
       this.emitFile({
         type: "asset",
         fileName: "version.json",
-        source: JSON.stringify({ buildId, builtAt: new Date().toISOString(), commitSha }),
+        source: JSON.stringify({ buildId, builtAt: new Date().toISOString(), commitSha, sourceDigest }),
       });
     },
   };
