@@ -12305,6 +12305,16 @@ export type Database = {
         Args: { _from: string; _to: string }
         Returns: Json
       }
+      admin_manage_studio_member: {
+        Args: {
+          _action: string
+          _expected_role: Database["public"]["Enums"]["studio_role"]
+          _member_id: string
+          _role?: Database["public"]["Enums"]["studio_role"]
+          _studio_id: string
+        }
+        Returns: undefined
+      }
       admin_onboarding_stats: {
         Args: never
         Returns: {
