@@ -710,7 +710,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`relative mx-auto w-full max-w-[1280px] ${focusedView ? "md:fixed md:inset-0 md:z-50 md:flex md:h-screen md:w-screen md:max-w-none md:flex-col md:justify-center md:bg-background md:px-10 lg:px-16" : ""}`}>
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
               <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
               <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2" : "mt-4 pb-2"}`}>
                 <h2 className="font-body text-[11px] font-bold uppercase tracking-widest text-foreground">
@@ -734,7 +734,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady ? "md:items-stretch" : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
@@ -768,7 +768,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                              }}
-                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${focusedView ? "md:!max-h-[80vh] md:min-h-[75vh] md:object-cover" : discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
