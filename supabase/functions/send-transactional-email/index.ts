@@ -59,6 +59,7 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  let studioInviteEvent: { studio_id: string; invite_id: string; email: string; role: string; actor_id: string } | null = null
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -136,6 +137,7 @@ Deno.serve(async (req) => {
         invite.expires_at = renewed.expires_at
       }
       recipientEmail = invite.email
+      studioInviteEvent = { studio_id: invite.studio_id, invite_id: invite.id, email: invite.email, role: invite.role, actor_id: callerId }
       templateData = {
         studioName: studio.name, inviterName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Your colleague',
         role: invite.role, recipientEmail: invite.email, expiresAt: invite.expires_at,
@@ -517,6 +519,10 @@ Deno.serve(async (req) => {
   }
 
   console.log('Transactional email enqueued', { templateName })
+  if (studioInviteEvent) {
+    const { error: eventError } = await supabase.from('studio_invite_events').insert({ ...studioInviteEvent, event: 'emailed' })
+    if (eventError) console.error('Could not record invitation email event', eventError)
+  }
 
   return new Response(
     JSON.stringify({ success: true, queued: true }),
