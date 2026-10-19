@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams, useParams } from "react-router-dom";
 import RoomCollectionStory from '@/components/product/RoomCollectionStory';
 import RoomConsultationForm from '@/components/product/RoomConsultationForm';
+import { RoomShortlistProvider, RoomShortlistToolbar } from '@/components/product/RoomShortlist';
 import { isCollectionRoom, roomCollectionPath } from '@/lib/roomCollections';
 import RoomShopping from '@/components/product/RoomShopping';
 import TradeGallery from './TradeGallery';
@@ -296,13 +297,14 @@ export default function RoomSearch() {
       {!trade && <Navigation alwaysVisible />}
       <main className={trade ? 'min-h-[70vh]' : 'min-h-[70vh] pt-[var(--header-h)]'}>
         {room ? (
-          <>
+          <RoomShortlistProvider room={room}>
             {collection && <RoomCollectionStory room={roomSlug} trade={trade} />}
             <RoomShopping key={room} room={room} trade={trade} collection={collection} filters={roomFilters} onFiltersChange={updateRoomFilters} sort={roomSort} onSortChange={updateRoomSort} onRoomChange={next => navigate(isCollectionRoom(next) ? roomCollectionPath(next, trade) : `${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
             {!collection && !trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
+            <RoomShortlistToolbar />
             {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
             {collection && <RoomConsultationForm key={`consultation-${roomSlug}`} room={roomSlug} />}
-          </>
+          </RoomShortlistProvider>
         ) : roomParam || roomSlug ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>
