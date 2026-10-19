@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CartItem } from '@/lib/cart';
 import ProductCommerceCta from './ProductCommerceCta';
 
@@ -15,7 +15,8 @@ vi.mock('./SelectionDrawer', () => ({ default: ({ onCheckout }: { onCheckout: (m
 vi.mock('./BespokeConfigurationDialog', () => ({ default: () => null }));
 vi.mock('./OrderIntakeSheet', () => ({ default: (props: { isOpen: boolean; onComplete: (details: unknown) => void }) => { mocks.intake(props); return props.isOpen ? <button onClick={() => props.onComplete({ profile: 'private', city: 'London', email: 'client@example.com', notes: '', phone: '', company: '' })}>Complete intake</button> : null; } }));
 
-afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); mocks.clientSafe = false; vi.useRealTimers(); });
+beforeEach(() => { vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} }); vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} })); });
+afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); mocks.clientSafe = false; vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('mobile order intake', () => {
   it.each([false, true])('requires intake before ordering even for returning approved=%s buyers', (approved) => {
