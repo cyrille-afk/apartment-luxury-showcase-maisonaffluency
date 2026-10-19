@@ -12,10 +12,13 @@ import { roomAnchors, roomShoppingPairings } from '@/lib/shopByRoom';
 import type { PairingProduct } from '@/lib/curatedPairings';
 import PairingConfigurationSheet from './PairingConfigurationSheet';
 import { useAuth } from '@/hooks/useAuth';
+import RoomShoppingFilterBar from './RoomShoppingFilters';
+import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
+import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
 
 const rooms: RoomSlug[] = ['living-room', 'dining-room', 'bedroom', 'office', 'outdoor'];
 
-export default function RoomShopping({ room, trade = false, onRoomChange }: { room: RoomSlug; trade?: boolean; onRoomChange: (room: RoomSlug) => void }) {
+export default function RoomShopping({ room, trade = false, onRoomChange, filters, onFiltersChange }: { room: RoomSlug; trade?: boolean; onRoomChange: (room: RoomSlug) => void; filters: RoomShoppingFilters; onFiltersChange: (filters: RoomShoppingFilters) => void }) {
   const { data: catalogue = [], isLoading, isError, refetch } = useDbCuratorPicks();
   const { buyerProfile } = useCheckoutForm();
   const { user, isTradeUser, isAdmin, rolesLoaded } = useAuth();
@@ -25,7 +28,9 @@ export default function RoomShopping({ room, trade = false, onRoomChange }: { ro
   const [chosenId, setChosenId] = useState('');
   const [configuring, setConfiguring] = useState<PairingProduct | null>(null);
   const products = useMemo(() => catalogue.flatMap(({ pick, designerId, designerName }) => pick.id && pick.slug && pick.image ? [{ id: pick.id, title: pick.title, brand: designerName, category: pick.category, subcategory: pick.subcategory, image: pick.image, path: `/designers/${designerId}/${pick.slug}`, materials: pick.materials, leadTime: pick.lead_time, origin: pick.origin }] : []), [catalogue]);
-  const anchors = useMemo(() => roomAnchors(products, room), [products, room]);
+  const roomPieces = useMemo(() => roomAnchors(products, room), [products, room]);
+  const { data: finishes = {} } = useRoomShoppingFinishes(roomPieces.map(p => p.id));
+  const anchors = useMemo(() => roomPieces.filter(p => matchesRoomShoppingFilters(p, filters, finishes)), [roomPieces, filters, finishes]);
   const primary = anchors.find(p => p.id === chosenId) || anchors[0];
   const pairings = useMemo(() => primary ? roomShoppingPairings(primary, products, room, cart.flatMap(p => p.pickId ? [p.pickId] : []), rules) : [], [primary, products, room, cart, rules]);
 
@@ -35,6 +40,7 @@ export default function RoomShopping({ room, trade = false, onRoomChange }: { ro
     <nav aria-label="Rooms" className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-b border-border pb-5">
       {rooms.map(value => <Button key={value} variant="link" aria-current={room === value ? 'page' : undefined} onClick={() => { setChosenId(''); setConfiguring(null); onRoomChange(value); }} className={`h-auto rounded-none px-0 py-2 font-body text-sm underline-offset-8 ${value === room ? 'text-foreground underline' : 'text-muted-foreground'}`}>{ROOM_LABELS[value]}</Button>)}
     </nav>
+    <RoomShoppingFilterBar room={room} trade={trade} values={filters} onChange={onFiltersChange} />
     {privateClient && <div className="pt-8">
       <div className="flex flex-wrap items-end justify-between gap-5">
         <h2 className="font-display text-2xl text-foreground">Curated Pairings</h2>

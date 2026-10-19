@@ -25,6 +25,7 @@
 - Pairing browser regressions run production catalogPricing in an isolated Deno harness at the intercepted payment boundary; never mutate live rules or create payment intents for CI.
 - Curated pairing selection assigns every canonical subcategory a functional key and primary room, honoring explicit room context before defaults; room slots and context constrain candidates before maker ranking or preferred pieces, and incompatible preferred configurations never attach to replacements. Existing editable rule families govern activation without arbitrary decor fallbacks.
 - Shop by Room reuses the room catalogue and pairing selector on public and trade routes; public starting-piece browsing never writes the basket until the existing configuration sheet confirms an addition, while Trade retains product navigation inside its shell.
+- Room shopping type/finish filters use URL state and shared matching across starting pieces and Public/Trade grids; finish choices combine published material groups with active public swatch names only, avoiding private pricing reads and preserving filter links on return.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
