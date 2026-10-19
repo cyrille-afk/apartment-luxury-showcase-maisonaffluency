@@ -619,60 +619,6 @@ export default function ProductCommerceCta({
       </div>
       )}
 
-      {/* Mobile dock: an in-flow sibling of the product scroll region. Safari
-          therefore keeps it inside the dynamic viewport instead of compositing
-          it beneath the browser toolbar. */}
-      {false && dock && (
-        <div
-          data-mobile-commerce-dock
-          ref={setDockNode}
-          className="mobile-product-commerce-dock md:hidden sticky bottom-0 z-50 w-full bg-background border-t border-border px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom,0px))]"
-        >
-          <div className="flex min-h-11 w-full items-center justify-between gap-3">
-              <div className="mobile-product-commerce-summary min-w-0 flex-1">
-                {tradeApproved && netLabel ? (
-                  <div className="flex flex-col">
-                    <span className="font-body text-[9px] tracking-[0.04em] text-muted-foreground truncate">
-                      Retail: {retailLabel ?? "—"}
-                    </span>
-                    <span className="font-display text-base leading-tight truncate">{netLabel}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col">
-                    <span
-                      className={cn(
-                        "font-display leading-tight truncate block",
-                        finishSelectionRequired ? "text-sm" : "text-base"
-                      )}
-                    >
-                      {finishSelectionRequired
-                        ? "Select Finishes for Pricing"
-                        : rrpLabel ?? retailLabel ?? "Price upon Request"}
-                    </span>
-                    {!finishSelectionRequired && (
-                      <span className="font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/80 truncate">
-                        Excl. shipping &amp; duties
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => (finishSelectionRequired ? scrollToFinishes() : handleMobilePrimary())}
-                disabled={placingOrder}
-                className={cn(
-                  primaryBtn,
-                  "mobile-product-commerce-action h-11 shrink-0 w-auto px-7 whitespace-nowrap",
-                  isUnpriced && "px-4 text-[11px] tracking-wide",
-                  "active:scale-[0.98] transition-transform duration-150"
-                )}
-              >
-                {placingOrder ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : mobilePrimaryLabel}
-              </button>
-          </div>
-        </div>
-      )}
       {fixedDock && mobileDock ? createPortal(mobileDock, document.body) : mobileDock}
 
       {/* Slide-out mini-cart drawer (State A order confirmation) */}
