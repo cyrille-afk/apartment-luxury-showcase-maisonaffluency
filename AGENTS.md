@@ -57,4 +57,4 @@
 - Read src/components/trade/visualiser/AGENTS.md before visualiser edits. Per-piece materials persist with scene objects for consistent presets.
 - Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
-- Read subdirectory AGENTS.md rules before editing, including src/lib/AGENTS.md for slug guards.
+- Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.

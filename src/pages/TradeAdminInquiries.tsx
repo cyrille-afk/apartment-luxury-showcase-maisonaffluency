@@ -3,8 +3,9 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useMemo } from "react";
-import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2 } from "lucide-react";
+import { inquirySearchWhere, matchesInquirySearch } from "@/lib/inquirySearch";
+import { useEffect, useState, useMemo } from "react";
+import { Inbox, Mail, Phone, Package, User, Clock, ExternalLink, FileText, X, CheckCircle2, MessageCircle, Send, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -91,13 +92,20 @@ export default function TradeAdminInquiries() {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [sourceFilter, setSourceFilter] = useState("all");
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [quoteKind, setQuoteKind] = useState<"public" | "trade">("public");
   const [notesDraft, setNotesDraft] = useState<string>("");
 
+  // Debounce the box so typing doesn't fire a request per keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 250);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
   const { data: rows, isLoading } = useQuery({
-    queryKey: ["admin-inquiries", statusFilter, sourceFilter],
+    queryKey: ["admin-inquiries", statusFilter, sourceFilter, search],
     enabled: !!user && isAdmin,
     queryFn: async () => {
       let query = supabase
@@ -107,6 +115,9 @@ export default function TradeAdminInquiries() {
         .limit(500);
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (sourceFilter !== "all") query = query.eq("source", sourceFilter);
+      // One or-group per term, applied server-side, so a match older than the
+      // newest fetched page is still findable.
+      for (const group of inquirySearchWhere(search)) query = query.or(group);
       const { data, error } = await query;
       if (error) throw error;
       return (data || []) as InquiryRow[];
@@ -149,16 +160,12 @@ export default function TradeAdminInquiries() {
 
   const handlerName = (id: string | null) => (id ? adminNames?.[id] || "Admin" : null);
 
-  const filtered = useMemo(() => {
-    if (!rows) return [] as InquiryRow[];
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      [r.name, r.email, r.company, r.product_name, r.designer_name, r.message]
-        .filter(Boolean)
-        .some((v) => (v as string).toLowerCase().includes(q))
-    );
-  }, [rows, search]);
+  // The server already narrowed the inbox; this is the final guard so the list
+  // and the count can never disagree with what was typed.
+  const filtered = useMemo(
+    () => (rows || []).filter((r) => matchesInquirySearch(r, search)),
+    [rows, search],
+  );
 
   const selected = filtered.find((r) => r.id === selectedId) || filtered[0] || null;
 
@@ -270,13 +277,34 @@ export default function TradeAdminInquiries() {
           >
             {SOURCE_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
           </select>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, email, product…"
-            className="min-w-[220px] flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-          />
+          <div className="relative min-w-[240px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search name, email, or message…"
+              aria-label="Search inquiries"
+              className="w-full rounded-md border border-border bg-background py-1.5 pl-9 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+            {searchInput && (
+              <button
+                onClick={() => setSearchInput("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
+
+        {!isLoading && (
+          <p className="-mt-2 mb-3 text-[11px] text-muted-foreground">
+            {search
+              ? `${filtered.length} ${filtered.length === 1 ? "inquiry matches" : "inquiries match"} “${search}”`
+              : `${filtered.length} ${filtered.length === 1 ? "inquiry" : "inquiries"}`}
+          </p>
+        )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(320px,380px)_1fr]">
           {/* List */}
