@@ -18,6 +18,8 @@ import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHots
 import { curatingTeam } from "@/components/CuratingTeam";
 import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryNormalization";
 import { galleryAlternatives } from "@/lib/galleryAlternatives";
+import { formatPublicRrpForDestination, usePublicRrpMap } from "@/hooks/usePublicRrp";
+import { useShippingDestination } from "@/lib/shippingDestination";
 import type { RoomSlug } from "@/lib/roomCategories";
 
 type Scene = { title: string; id: string };
@@ -654,15 +656,17 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
-  const focusedView = !!(portraitDock && selectedHotspot && activePin === selectedHotspot.id && dockAlternatives.length > 0 && activeSceneReady);
+  const overlayOpen = !!(portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady);
+  // Hotspot on the left half of the photo → card floats on the right margin, and vice versa.
+  const overlaySide: "left" | "right" = selectedHotspot && selectedHotspot.x_percent < 50 ? "right" : "left";
+  const { data: dockRrpMap = {} } = usePublicRrpMap(dockAlternatives.map((pick) => pick.id));
+  const dockDestination = useShippingDestination();
   useEffect(() => {
-    if (!focusedView || window.matchMedia("(max-width: 767px)").matches) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!overlayOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !lightboxProduct) setDockDismissed(true); };
     window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-  }, [focusedView, lightboxProduct]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [overlayOpen, lightboxProduct]);
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
