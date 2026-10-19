@@ -29,6 +29,7 @@
 - Spec-sheet workspace renders all composed PDF pages with bundled PDF.js on every device — avoids native-viewer dependencies and missing mobile covers.
 - Expanded biographies interleave mobile media between narrative paragraphs independently of desktop staggered rows — prevents trailing photos and video/photo stacks on phones.
 - Product technical legends use the shared `technicalSpecs` length policy after size controls — keeps disclosure and ordering consistent across modes.
+- Product dimension detection accepts complete dotted-axis decimal-comma editor labels without inventing units; base-only fixed sizes fall back to the stored variant label, and selected text finish controls retain the editor's finish-axis caption — prevents imported specifications disappearing across Studio and Presentation.
 - Visualiser ceiling settings use a lightweight shared contract for page, presets and lazy-loaded geometry; emitters follow the opening and frame height so saved settings render consistently.
 - Product pages and lightboxes reuse PicturedFinishesStrip with the displayed photo index; multi-material mappings stay visible when pictured together — prevents missing photo legends.
 - Sandbox default photo is a presentation-only canvas layer replaced by custom backdrop state, not furniture changes — preserves compositions and imports.

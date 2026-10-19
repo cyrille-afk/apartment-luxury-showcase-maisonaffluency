@@ -889,7 +889,8 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         <ExpandableSpec
           icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
-          placeholder={getBasePlaceholder(product)}
+          placeholder={product.wood_label_override || getBasePlaceholder(product)}
+          selectedValueLabel={product.wood_label_override?.replace(/^select\s+(?:your\s+|the\s+)?/i, "") || formatVariantAxisLabel(product.base_axis_label) || undefined}
           singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
           swatchMode
           emphasized
@@ -983,6 +984,7 @@ const VariantDimensionsPanel: React.FC = () => {
     && isUpholsteryAxisLabel(topAxisLabelRaw) && !dualLabelsAreDimensions;
   const frameSwatchesCoverLabels = product.id === OOL_MINIBAR_PICK_ID || (frameOnLabel && everyOptionCoveredBySwatches(dualSizeOptions, linkedWoodFinishes));
   const physicalDimensions = variantsList.find((v: { dimensions?: string | null }) => v.dimensions)?.dimensions || product.dimensions;
+  const baseOnlyDimensions = physicalDimensions || baseOnlySizeOptions.find(looksLikeDimension);
 
   return (
     <div className="flex flex-col gap-2">
@@ -1118,8 +1120,8 @@ const VariantDimensionsPanel: React.FC = () => {
       {hasVariants && isBaseOnly && !baseAxisIsDim
         && baseOnlySizeOptions.length <= 1
         && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
-        && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
+        && baseOnlyDimensions && looksLikeDimension(baseOnlyDimensions) && (
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(baseOnlyDimensions)} />
       )}
 
       {isBaseOnly && baseAxisIsDim && (

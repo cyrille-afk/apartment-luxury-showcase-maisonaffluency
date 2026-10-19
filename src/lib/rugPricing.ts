@@ -93,6 +93,9 @@ export function looksLikeDimension(text: string | null | undefined): boolean {
       if (/\d\s*[×x*]\s*\d/i.test(line)) return true;
       if (/[Ø⌀]\s*\d/.test(line)) return true;
       if (/\b[HWLDhwld]\s*\d/.test(line)) return true;
+      // Editor imports may use dotted axes and decimal commas without units.
+      // Require a full dimension cluster, not a lone model code such as H.64.
+      if (/\b[HWLDhwld]\.\s*\d+(?:[.,]\d+)?\s*[×x]\s*[HWLDhwld]\.\s*\d/i.test(line)) return true;
       return false;
     });
 }
