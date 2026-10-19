@@ -47,6 +47,12 @@ const levenshtein = (a: string, b: string): number => {
  */
 const FUZZ_MAX = 2;
 
+// Supplier names may put the material first or last: "Ash Wood - Blackened"
+// and "Blackened Ash Wood" identify the same finish, not separate options.
+const wordKey = (value: string) => value.normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  .split(/[^a-z0-9]+/).filter(Boolean).sort().join(" ");
+
 /**
  * Map a single finish token to its canonical library spelling.
  *
@@ -83,12 +89,16 @@ export const normalizeFinishToken = (token: string, library: string[]): string =
   }
   if (sub) return sub.name;
 
+  const key = wordKey(t);
+  const reordered = library.find((l) => wordKey(l) === key);
+  if (key && reordered) return reordered;
+
   // 3. Fuzzy edit-distance match
   let best: { name: string; d: number } | null = null;
   for (const l of library) {
     const ll = l.trim().toLowerCase();
     if (!ll) continue;
-    const d = levenshtein(lower, ll);
+    const d = Math.min(levenshtein(lower, ll), levenshtein(key, wordKey(l)));
     if (!best || d < best.d) best = { name: l, d };
   }
   if (best) {

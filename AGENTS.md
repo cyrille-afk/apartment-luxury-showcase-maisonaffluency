@@ -48,6 +48,7 @@
 - Room catalogue sorting uses URL state and a shared stable comparator after filters and before display batching; price uses currency-normalized visible public RRP or approved catalogue RRP, never undisclosed/net prices, with unpriced and undated items last — prevents price leakage and partial-page ordering.
 - Dedicated room collection paths reuse RoomSearch and its catalogue/filter/pairing controls with shared editorial stories; purchase pairings retain private-client eligibility and Trade remains inside its shell — avoids duplicate shopping logic and price-policy drift.
 - Base-only product finish dropdowns remain selectable unless linked swatches cover every recorded base option; partial sample libraries must not hide unpictured priced finishes — preserves catalogue choices without inventing samples.
+- Finish coverage and Base swatch selection share finishNormalization, including reordered material words and bounded spelling correction — prevents duplicate menus and keeps sample selections attached to recorded variant prices.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.

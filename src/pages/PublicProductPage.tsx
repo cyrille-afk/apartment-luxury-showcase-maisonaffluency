@@ -73,6 +73,7 @@ import {
   makeSwatchAxisFilter,
 } from "@/lib/finishDuplication";
 import { useAuth } from "@/hooks/useAuth";
+import { normalizeFinishOption } from "@/lib/finishNormalization";
 import StudioSaveButton from "@/components/product/StudioSaveButton";
 import {
   PublicSpecTable,
@@ -720,13 +721,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
             onMaterialChange?.(frame, { base: nextBase, top: nextTop, size: frame, fromSwatch: true });
             return;
           }
-          const norm = (s: string) => s.trim().toLowerCase();
-          const nw = norm(woodName);
-          const match =
-            baseOptions.find((b) => norm(b) === nw)
-            || baseOptions.find((b) => nw.includes(norm(b)))
-            || baseOptions.find((b) => norm(b).includes(nw))
-            || woodName;
+          const match = normalizeFinishOption(woodName, baseOptions);
           setSelBase(match);
           let nextTop = selTop;
           if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selDualSize))) {

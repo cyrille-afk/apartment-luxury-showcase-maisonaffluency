@@ -59,6 +59,8 @@ import { ProductTitleBlock } from "@/components/trade/ProductTitleBlock";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
+import { everyOptionCoveredBySwatches } from "@/lib/finishDuplication";
+import { normalizeFinishOption } from "@/lib/finishNormalization";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import LegendDisclosure from "@/components/LegendDisclosure";
 import FinishSelector, { OOL_MINIBAR_PICK_ID } from "@/components/FinishSelector";
@@ -1701,13 +1703,7 @@ const TradeProductPage: React.FC = () => {
   // bases that lack a swatch (e.g. Walnut, Thermo-treated wood).
   const normFinish = (s: string) => (s || "").trim().toLowerCase();
   const allBasesHaveSwatches =
-    baseOptions.length > 0 && baseOptions.every((b) => {
-      const nb = normFinish(b);
-      return linkedWoodFinishes.some((lw) => {
-        const nlw = normFinish(lw);
-        return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
-      });
-    });
+    everyOptionCoveredBySwatches(baseOptions, linkedWoodFinishes);
   // When FinishSelector is present and exposes wood swatches, treat it as the
   // single source for the frame-finish axis — suppress the duplicate base
   // dropdown even if not every base option has a perfectly-matching swatch.
@@ -2373,13 +2369,7 @@ const TradeProductPage: React.FC = () => {
                     }
                     // Match the swatch name to a Base axis value (case/space tolerant,
                     // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
-                    const norm = (s: string) => s.trim().toLowerCase();
-                    const nw = norm(woodName);
-                    const match =
-                      baseOptions.find((b) => norm(b) === nw)
-                      || baseOptions.find((b) => nw.includes(norm(b)))
-                      || baseOptions.find((b) => norm(b).includes(nw))
-                      || woodName;
+                    const match = normalizeFinishOption(woodName, baseOptions);
                     setSelectedBase(match);
                     setSelectedBaseDisplay(match !== woodName && /\s\/\s/.test(match) ? woodName.trim() : null);
                     // If the current Top is incompatible with the new Base, clear it.

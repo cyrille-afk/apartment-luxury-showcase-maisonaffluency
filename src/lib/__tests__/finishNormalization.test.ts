@@ -19,6 +19,15 @@ const ALINEA_LIBRARY = [
 ];
 
 describe("normalizeFinishToken", () => {
+  it.each([
+    ["Ash Wood - Blackened", "Blackened Ash Wood"],
+    ["Ash Wood - Bleached", "Bleached Ash Wood"],
+    ["Marble - Nero Kinitra", "Nero Kinatra Marble"],
+    ["Travertine - Silver", "Silver Travertine"],
+  ])("resolves Portal sample %s to its priced variant %s", (sample, variant) => {
+    expect(normalizeFinishToken(sample, [variant, "White Travertine"])).toBe(variant);
+    expect(normalizeFinishToken(variant, [sample])).toBe(sample);
+  });
   it("returns the library spelling for an exact case-insensitive match", () => {
     expect(normalizeFinishToken("grafite", ALINEA_LIBRARY)).toBe("Grafite");
     expect(normalizeFinishToken("  KYKNOS ", ALINEA_LIBRARY)).toBe("Kyknos");
