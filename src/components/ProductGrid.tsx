@@ -33,10 +33,6 @@ import { getParentCategoryFromSubcategory as parentOfSub } from "@/lib/categoryN
 import RoomCollectionFilters, { type RoomFacet, type RoomFacetValues, type RoomFacetOptions } from "@/components/RoomCollectionFilters";
 import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
-import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
-import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
-import { roomPriceCents, sortRoomProducts, type RoomSort } from '@/lib/roomShoppingSort';
-import { RoomShortlistButton } from '@/components/product/RoomShortlist';
 
 const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, craft: null, handmade: null, material: null };
 const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "craft", "handmade", "material"];
@@ -228,7 +224,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, roomFilters, roomSort = 'curated', roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
@@ -246,8 +242,6 @@ const ProductGrid = ({ sectionScope, roomSlug, roomFilters, roomSort = 'curated'
   // The database-backed public catalogue is authoritative. Never merge the
   // legacy hardcoded roster here: it can contain drafts or trade-only makers.
   const allProducts: ProductItem[] = useMemo(() => dbPicks || [], [dbPicks]);
-  const roomFinishIds = useMemo(() => roomSlug ? allProducts.filter(item => pickMatchesRoom(item.pick, roomSlug)).flatMap(item => item.pick.id ? [item.pick.id] : []) : [], [allProducts, roomSlug]);
-  const { data: roomFinishes = {} } = useRoomShoppingFinishes(roomFinishIds);
   const [gridCols, setGridCols] = useState<3 | 4>(() => roomSlug ? 3 : 4);
   const [roomFiltersOpen, setRoomFiltersOpen] = useState(() => !showAll);
   const toggleCatalogueFilters = () => {
@@ -357,7 +351,6 @@ function singularizeSub(s: string): string {
 
     const matched = pool.filter(item => {
       if (roomSlug && !pickMatchesRoom(item.pick, roomSlug)) return false;
-      if (roomSlug && roomFilters && !matchesRoomShoppingFilters({ ...item.pick, id: item.pick.id || '' }, roomFilters, roomFinishes)) return false;
       if (!pickMatchesFilter(item.pick, roomSlug ? roomCategory ?? null : category, roomSlug ? roomSubcategory ?? null : subcategory)) return false;
       if (!normalizedQuery) return true;
 
@@ -381,7 +374,7 @@ function singularizeSub(s: string): string {
       seen.add(key);
       return true;
     });
-  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory, roomFilters, roomFinishes, showAll]);
+  }, [allProducts, category, subcategory, filterSource, textQuery, roomSlug, roomCategory, roomSubcategory, showAll]);
 
   const roomOptions = useMemo(() => {
     const options = {} as RoomFacetOptions;
@@ -409,18 +402,11 @@ function singularizeSub(s: string): string {
 
   // Avoid eager tonal-analysis downloads for hundreds of off-batch photos.
   const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image), { cachedOnly: true });
-  const curated = useMemo(
+  const filtered = useMemo(
     () => curateGrid(facetFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
-  // Price sorting requires every eligible public price, not only the first rendered batch.
-  const priceSortIds = useMemo(() => roomSlug && roomSort.startsWith('price-') ? facetFiltered.map(item => item.pick.id) : [], [roomSlug, roomSort, facetFiltered]);
-  const { data: sortingRrpMap = {} } = usePublicRrpMap(priceSortIds);
-  const filtered = useMemo(() => roomSlug ? sortRoomProducts(curated, roomSort, item => {
-    const rrp = sortingRrpMap[item.pick.id || ''];
-    return { name: item.pick.title, createdAt: (item as import('@/hooks/useDbCuratorPicks').DbProductItem).createdAt, priceCents: roomPriceCents(rrp?.rrp_price_cents, rrp?.currency || 'USD', destination.currency) };
-  }) : curated, [curated, roomSlug, roomSort, sortingRrpMap, destination.currency]);
   const batchKey = JSON.stringify([roomSlug, roomCategory, roomSubcategory, category, subcategory, textQuery, filterSource, roomFacets, filtered.map((item) => item.pick.id || `${item.designerId}:${item.pick.title}`)]);
   const { renderedItems, hasMore, sentinelRef } = useCatalogBatches(filtered, batchKey);
   const { data: publicRrpMap = {} } = usePublicRrpMap(renderedItems.map((item) => item.pick.id));
@@ -631,7 +617,6 @@ function singularizeSub(s: string): string {
                   />
                 </button>
                 {/* Compare pin button */}
-                <RoomShortlistButton overlay item={{ id: item.pick.id || `${item.designerId}-${item.pick.title}`, product_name: item.pick.title, brand_name: item.designerName, image_url: item.pick.image || null, category: item.pick.category, dimensions: item.pick.dimensions, materials: item.pick.materials, lead_time: item.pick.lead_time || null, public_url: productHref(item.pick) }} />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
