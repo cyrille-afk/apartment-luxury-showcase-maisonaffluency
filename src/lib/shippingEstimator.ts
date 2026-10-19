@@ -38,6 +38,16 @@ export interface ShippingBreakdown {
   transit_days_min: number | null;
   transit_days_max: number | null;
   available: boolean;
+  /** Exact selected rate inputs, for audit display only; amounts remain unchanged. */
+  rate_calculation?: {
+    billable_cbm: number;
+    chargeable_kg: number;
+    base_rate_cents: number;
+    rate_per_cbm_cents: number;
+    rate_per_kg_cents: number;
+    min_charge_cents: number;
+    hub_uplift_percent: number;
+  };
   /**
    * True when no direct lane existed and the estimate was derived from a
    * consolidation-hub lane (e.g. an Italian maker routed via the French hub).
@@ -258,6 +268,15 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     transit_days_min: best.lane.transit_days_min,
     transit_days_max: best.lane.transit_days_max,
     available: true,
+    rate_calculation: {
+      billable_cbm: cbm,
+      chargeable_kg: best.chargeableKg,
+      base_rate_cents: Number(best.bracket.base_rate_cents),
+      rate_per_cbm_cents: Number(best.bracket.rate_per_cbm_cents),
+      rate_per_kg_cents: Number(best.bracket.rate_per_kg_cents),
+      min_charge_cents: Number(best.bracket.min_charge_cents),
+      hub_uplift_percent: proxyOrigin ? HUB_TRANSFER_UPLIFT * 100 : 0,
+    },
     is_indicative: proxyOrigin != null,
     proxy_origin: proxyOrigin,
     reason: proxyOrigin
