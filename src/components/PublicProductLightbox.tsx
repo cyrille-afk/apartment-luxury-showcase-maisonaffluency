@@ -751,7 +751,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           {/* Mobile header */}
           <div
             data-swipe-dismiss-handle
-            className={cn("md:hidden sticky top-0 z-20 flex items-center justify-between bg-background/90 border-b border-border/60 shrink-0", !contextualPanel && "backdrop-blur-sm")}
+            className={cn("md:hidden sticky top-0 z-20 flex touch-none items-center justify-between bg-background/90 border-b border-border/60 shrink-0", !contextualPanel && "backdrop-blur-sm")}
             style={{
               paddingTop: "max(0.75rem, env(safe-area-inset-top))",
               paddingBottom: "0.5rem",
