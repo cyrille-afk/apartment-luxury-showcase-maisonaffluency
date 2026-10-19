@@ -654,6 +654,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
+  const focusedView = !!(portraitDock && selectedHotspot && activePin === selectedHotspot.id && dockAlternatives.length > 0 && activeSceneReady);
+  useEffect(() => {
+    if (!focusedView || window.matchMedia("(max-width: 767px)").matches) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !lightboxProduct) setDockDismissed(true); };
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+  }, [focusedView, lightboxProduct]);
+
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
       <div className="w-full bg-[hsl(var(--product-canvas))] p-3 lg:p-4">
@@ -696,7 +706,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
       <AnimatePresence mode="wait" initial={false}>
         {galleryState.kind === "tour" ? <GalleryTour /> : galleryState.kind === "curators" ? <CuratorsCanvas /> : (
-          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative mx-auto w-full max-w-[1280px]">
+          <motion.div key={space.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`relative mx-auto w-full max-w-[1280px] ${focusedView ? "md:fixed md:inset-0 md:z-50 md:flex md:h-screen md:w-screen md:max-w-none md:flex-col md:justify-center md:bg-background md:px-10 lg:px-16" : ""}`}>
               <div className={`relative mx-auto w-full max-w-full ${activeSceneIsPortrait ? "md:border-x md:border-border/40" : hasScenePicks ? "md:w-full" : "md:w-fit"}`}>
               <div className={`flex w-full items-center justify-between border-b border-border/60 px-4 md:px-0 ${discoveryRoom ? "py-2" : "mt-4 pb-2"}`}>
                 <h2 className="font-body text-[11px] font-bold uppercase tracking-widest text-foreground">
@@ -754,7 +764,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                              }}
-                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                               className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${focusedView ? "md:!max-h-[80vh] md:min-h-[75vh] md:object-cover" : discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
                             {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
@@ -792,13 +802,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                        animate={{ opacity: 1, y: 0 }}
                        exit={{ opacity: 0, y: 24 }}
                        transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:static md:mx-0 md:flex md:w-[28%] md:max-w-none md:shrink-0 md:flex-col md:self-stretch md:rounded-none md:border-y-0 md:border-r-0 md:bg-[hsl(var(--product-canvas))] md:p-6 md:shadow-none md:backdrop-blur-none"
+                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:static md:mx-0 md:flex md:w-[28%] md:max-w-none md:shrink-0 md:flex-col md:self-stretch md:rounded-none md:border-y-0 md:border-r-0 md:bg-muted/50 md:p-8 md:shadow-none md:backdrop-blur-none"
                      >
                        <div className="mb-2 flex items-start justify-between gap-3 md:mb-4 md:border-b md:border-border/60 md:pb-4">
                          <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
-                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setDockDismissed(true)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                        </div>
-                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-center md:gap-0 md:divide-y md:divide-border/60">
+                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-evenly md:gap-4 md:divide-y md:divide-border/60">
                          {dockAlternatives.map((pick) => (
                            <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:justify-start md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
                              <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-28 md:bg-background md:p-2 xl:size-32" loading="lazy" />
