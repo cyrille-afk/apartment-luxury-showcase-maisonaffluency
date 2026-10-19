@@ -8,6 +8,7 @@ const state = vi.hoisted(() => ({ auth: { user: { id: 'user-1' }, rolesLoaded: t
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => state.auth }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: state.rpc, functions: { invoke: state.invoke } } }));
 vi.mock('react-helmet-async', () => ({ Helmet: () => null }));
+vi.mock('@/components/trade/admin/StudioInviteHistory', () => ({ StudioInviteHistory: () => null }));
 vi.mock('@/components/ui/select', () => ({
   Select: ({ value, onValueChange, children }: { value: string; onValueChange: (value: string) => void; children: React.ReactNode }) => <div><select aria-label="Member role" value={value} onChange={event => onValueChange(event.target.value)}><option value="admin">admin</option><option value="editor">editor</option><option value="viewer">viewer</option></select>{children}</div>,
   SelectTrigger: () => null, SelectValue: () => null, SelectContent: () => null, SelectItem: () => null,
