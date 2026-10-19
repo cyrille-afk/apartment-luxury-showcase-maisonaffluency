@@ -40,7 +40,8 @@ export async function buildPaymentSummaryPdf(input: PaymentSummaryInput): Promis
   };
   const space = (height: number) => { if (y + height > H - 65) { doc.addPage(); header(); } };
   const row = (label: string, amount: number, strong = false) => {
-    doc.setFont("Inter").setFontSize(strong ? 11 : 9).setTextColor(...(strong ? PALETTE.jade : PALETTE.ink));
+    const color = strong ? PALETTE.jade : PALETTE.ink;
+    doc.setFont("Inter").setFontSize(strong ? 11 : 9).setTextColor(color[0], color[1], color[2]);
     const lines = doc.splitTextToSize(label, 290); const height = lines.length * 13 + 10;
     space(height); doc.text(lines, M, y); doc.text(money(amount), W - M, y, { align: "right" }); y += height;
   };
@@ -48,7 +49,7 @@ export async function buildPaymentSummaryPdf(input: PaymentSummaryInput): Promis
   for (const charge of rows) {
     doc.setFont("Inter").setFontSize(10);
     const lines = doc.splitTextToSize(charge.label, W - M * 2);
-    space(lines.length * 13 + 110);
+    space(lines.length * 13 + 145);
     doc.setTextColor(...PALETTE.jade).text(lines, M, y); y += lines.length * 13 + 8;
     row("Charge", charge.amountCents);
     row(`${input.taxLabel} (${charge.id === "shipping" ? 0 : input.taxRate}%)`, charge.gstCents);
