@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
-import { forgetPrivateClient, normalizeClientEmail, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import { forgetPrivateClient, normalizeClientEmail, rememberPrivateClient, unforgetPrivateClient } from "@/lib/returningPrivateClient";
 import { CODE_LIFETIME_MS, RESEND_WAIT_MS, formatCountdown } from "@/lib/verificationCodeTiming";
 
 export default function PrivateClientWelcome({ email, profile, locallyReturning }: {
@@ -19,8 +19,9 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [botKey, setBotKey] = useState(0);
-  const [intent, setIntent] = useState<"recognize" | "forget">("recognize");
+  const [intent, setIntent] = useState<"recognize" | "forget" | "optin">("recognize");
   const [forgotten, setForgotten] = useState<{email: string; server: boolean} | null>(null);
+  const [optedIn, setOptedIn] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const currentEmail = useRef(normalized);
   currentEmail.current = normalized;
