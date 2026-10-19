@@ -63,7 +63,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-const TradeGallery = () => {
+const TradeGallery = ({ roomSlug }: { roomSlug?: RoomSlug } = {}) => {
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
@@ -71,10 +71,10 @@ const TradeGallery = () => {
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery key={location.pathname} />;
+  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} />;
 };
 
-const StudioGallery = () => {
+const StudioGallery = ({ roomSlug }: { roomSlug?: RoomSlug }) => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
@@ -543,8 +543,11 @@ const StudioGallery = () => {
 
   // Explicit sort options layered on top of the curated sequence.
   const sorted = useMemo(
-    () => sortTradeProducts(filtered, sortBy),
-    [filtered, sortBy],
+    () => {
+      const roomIds = roomSlug ? new Set(roomShoppingProducts(filtered.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, image: p.image_url || '', path: '' })), roomSlug).map(p => p.id)) : null;
+      return sortTradeProducts(roomIds ? filtered.filter(p => roomIds.has(p.id)) : filtered, sortBy);
+    },
+    [filtered, sortBy, roomSlug],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
@@ -628,7 +631,7 @@ const StudioGallery = () => {
         <div>
           <h1 className="font-display text-base md:text-lg font-normal tracking-wide text-foreground">Trade Gallery</h1>
           <p className="mt-0.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "collected piece" : "collected pieces"}
+            {sorted.length} {sorted.length === 1 ? "collected piece" : "collected pieces"}
             {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
           </p>
         </div>
@@ -779,7 +782,7 @@ const StudioGallery = () => {
       {/* Content */}
       {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
         <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
-      ) : filtered.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">
             No products match your search criteria.
