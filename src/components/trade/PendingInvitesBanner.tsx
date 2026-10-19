@@ -7,6 +7,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { useSearchParams } from "react-router-dom";
 
 interface PendingInvite {
   id: string;
@@ -29,6 +30,8 @@ const ROLE_LABEL: Record<string, string> = {
 
 export function PendingInvitesBanner() {
   const { user } = useAuth();
+  const [params] = useSearchParams();
+  const linkedInviteId = params.get("studioInvite");
   const { refresh, setCurrentStudioId } = useStudio();
   const { toast } = useToast();
   const [invites, setInvites] = useState<PendingInvite[]>([]);
@@ -83,16 +86,18 @@ export function PendingInvitesBanner() {
     await load(false);
   };
 
-  if (loading || invites.length === 0) return null;
+  if (loading) return null;
+  const visibleInvites = linkedInviteId ? invites.filter(inv => inv.id === linkedInviteId) : invites;
+  if (visibleInvites.length === 0) return linkedInviteId ? <p role="status" className="border-l-2 border-border pl-4 text-sm text-muted-foreground">This invitation is unavailable for your signed-in email. Sign in with the invited email, or ask the studio owner for a current invitation.</p> : null;
 
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
       <div className="flex items-center gap-2 text-sm font-medium">
         <Mail className="h-4 w-4" />
-        Studio invitations ({invites.length})
+        Studio invitations ({visibleInvites.length})
       </div>
       <ul className="space-y-2">
-        {invites.map((inv) => (
+        {visibleInvites.map((inv) => (
           <li
             key={inv.id}
             className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 rounded-md border border-border/60 bg-background px-3 py-2"

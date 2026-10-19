@@ -1,7 +1,9 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
+import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
+import { copyTextToClipboard } from "@/lib/clipboard";
+import { studioInvitationLink } from "@/lib/studioInvitationLink";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio, StudioRole } from "@/hooks/useStudio";
@@ -201,6 +203,13 @@ export default function TradeStudioSettings() {
     try { await sendInviteEmail(invite.id, invite.email); }
     catch (error) { toast({ title: "Email not sent", description: error instanceof Error ? error.message : "Please retry", variant: "destructive" }); }
     finally { setSendingInviteId(null); await fetchData(); }
+  };
+
+  const handleCopyInvite = async (invite: Invite) => {
+    const copied = await copyTextToClipboard(studioInvitationLink(invite.id));
+    toast(copied
+      ? { title: "Invitation link copied", description: `Only ${invite.email} can accept after signing in.` }
+      : { title: "Link could not be copied", description: "Please try again.", variant: "destructive" });
   };
 
   const handleChangeRole = async (memberId: string, newRole: StudioRole) => {
@@ -476,14 +485,17 @@ export default function TradeStudioSettings() {
                 <div className="text-sm font-medium mb-2">Pending invites</div>
                 <div className="divide-y border rounded-md">
                   {invites.map((inv) => (
-                    <div key={inv.id} className="flex items-center justify-between p-3">
+                    <div key={inv.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <div className="text-sm truncate">{inv.email}</div>
                         <div className="text-xs text-muted-foreground">
                           {inv.role} • {new Date(inv.expires_at).getTime() <= Date.now() ? "expired" : "expires"} {new Date(inv.expires_at).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-1">
+                      <div className="flex shrink-0 flex-wrap items-center gap-1">
+                      <Button variant="outline" size="sm" title={new Date(inv.expires_at).getTime() <= Date.now() ? "Resend to renew this expired invitation" : "Copy invitation link"} onClick={() => handleCopyInvite(inv)} disabled={new Date(inv.expires_at).getTime() <= Date.now()}>
+                        <Copy className="mr-2 h-4 w-4" />Copy invitation link
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => handleResendInvite(inv)} disabled={inviting || sendingInviteId !== null}>
                         <Mail className="mr-2 h-4 w-4" />{sendingInviteId === inv.id ? "Sending…" : "Resend invite"}
                       </Button>

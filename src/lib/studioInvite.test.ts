@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { canSendStudioInvite, studioInviteKey } from '../../supabase/functions/send-transactional-email/studioInvite'
+import { studioInvitationLink } from './studioInvitationLink'
 
 describe('studio invitation sending', () => {
+  it('shares the canonical sign-in URL with the exact invitation preserved after login', () => {
+    const url = new URL(studioInvitationLink('invite-greg-1'));
+    expect(url.origin).toBe('https://www.maisonaffluency.com');
+    expect(url.pathname).toBe('/trade/login');
+    expect(url.searchParams.get('next')).toBe('/trade/me?studioInvite=invite-greg-1');
+  })
   it('allows studio owners and admins to send pending teammate invitations', () => {
     expect(canSendStudioInvite({ accepted_at: null, role: 'editor' }, 'owner')).toBe(true)
     expect(canSendStudioInvite({ accepted_at: null, role: 'viewer' }, 'admin')).toBe(true)
