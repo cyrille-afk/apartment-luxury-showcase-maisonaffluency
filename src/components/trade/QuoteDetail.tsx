@@ -41,6 +41,8 @@ import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import QuoteExtrasEditor from "@/components/trade/QuoteExtrasEditor";
 import QuoteChargeBreakdown from "@/components/trade/QuoteChargeBreakdown";
+import PaymentSummaryDownload from "@/components/trade/PaymentSummaryDownload";
+import type { PaymentSummaryInput } from "@/lib/paymentSummary";
 import type { QuoteCharge } from "@/lib/quoteChargeBreakdown";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
@@ -2540,6 +2542,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const paymentCheckPassed = paymentDataReady && paymentCheck?.key === paymentCheckKey && paymentCheck.ok;
   const currentPaymentKey = useRef(paymentCheckKey);
   currentPaymentKey.current = paymentCheckKey;
+  const summaryPaymentType = quoteStatus === "deposit_paid" ? "balance" : "deposit";
+  const summaryDueCents = summaryPaymentType === "deposit" ? screenDepositCents : screenOrderTotalCents - screenDepositCents;
+  const summaryFixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
+  const summaryCardTotalCents = Math.ceil((summaryDueCents + (summaryFixedFees[currency] ?? 50)) / (1 - 0.034));
+  const paymentSummary: PaymentSummaryInput = {
+    quoteNumber, clientName: displayNameForContact(clientName, shipTo.email) || clientName,
+    projectName, currency, locale: effectivePdfLocale, taxLabel, taxRate: gstEnabled ? gstRate : 0,
+    goodsCents: goodsAfterDiscountCents, shippingCents: screenShippingCents, charges: paymentItemizedCharges,
+    subtotalCents, discountCents: tradeDiscountCents, discountPct: tradeDiscountPct,
+    taxCents: screenTaxCents, totalCents: screenOrderTotalCents, depositCents: screenDepositCents,
+    balanceCents: screenOrderTotalCents - screenDepositCents, depositPct: depositPctLive,
+    paymentType: summaryPaymentType, processingFeeCents: summaryCardTotalCents - summaryDueCents,
+    cardTotalCents: summaryCardTotalCents,
+  };
 
   const checkPaymentAmounts = async () => {
     if (!paymentDataReady) return { ok: false, issues: ["Quote charges are still being verified."] };
@@ -5154,6 +5170,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     <p className="font-body text-[10px] text-muted-foreground mt-2 leading-relaxed">
                       Card-denominated foreign transaction fees (~1–2%) may apply separately. To avoid the processing fee, pay {fmt(depositCents)} {currency} via bank transfer using the details above.
                     </p>
+                    <div className="mt-4"><PaymentSummaryDownload input={paymentSummary} /></div>
                   </div>
                 );
               })()}
@@ -5232,6 +5249,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       If your card is denominated in a different currency, your bank may apply a foreign transaction fee of approximately <span className="font-medium text-foreground/70">1–2%</span>.
                     </li>
                   </ul>
+                  <div className="pt-3"><PaymentSummaryDownload input={paymentSummary} /></div>
                 </div>
               )}
 
