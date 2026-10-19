@@ -7,6 +7,7 @@ import { getCachedCatalog } from "@/lib/catalogSource";
 
 export interface DbProductItem {
   pick: CuratorPick;
+  createdAt?: string | null;
   designerName: string;
   designerId: string;
   section: "designers" | "collectibles" | "ateliers";
@@ -117,6 +118,7 @@ export function useDbCuratorPicks(options: { enabled?: boolean } = {}) {
 
         items.push({
           pick,
+          createdAt: row.created_at || null,
           designerName: designer.display_name || designer.name,
           designerId: designer.slug || designer.id,
           section,

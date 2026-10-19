@@ -9,9 +9,10 @@ import { pickMatchesRoom } from '@/lib/roomMatching';
 import { roomShoppingProducts } from '@/lib/shopByRoom';
 import { roomFilterOptions, matchesRoomShoppingFilters, type RoomFilterPiece, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
 import type { RoomSlug } from '@/lib/roomCategories';
+import { ROOM_SORT_OPTIONS, resolveRoomSort, type RoomSort } from '@/lib/roomShoppingSort';
 
-type Props = { room: RoomSlug; values: RoomShoppingFilters; onChange: (value: RoomShoppingFilters) => void };
-function FilterBar({ pieces, loading, values, onChange }: Omit<Props, 'room'> & { pieces: RoomFilterPiece[]; loading: boolean }) {
+type Props = { room: RoomSlug; values: RoomShoppingFilters; onChange: (value: RoomShoppingFilters) => void; sort: RoomSort; onSortChange: (sort: RoomSort) => void };
+function FilterBar({ pieces, loading, values, onChange, sort, onSortChange }: Omit<Props, 'room'> & { pieces: RoomFilterPiece[]; loading: boolean }) {
   const { data: finishes = {}, isLoading: finishesLoading, isError, refetch } = useRoomShoppingFinishes(pieces.map(p => p.id));
   const options = useMemo(() => roomFilterOptions(pieces, values, finishes), [pieces, values, finishes]);
   const count = pieces.filter(p => matchesRoomShoppingFilters(p, values, finishes)).length;
@@ -27,6 +28,13 @@ function FilterBar({ pieces, loading, values, onChange }: Omit<Props, 'room'> & 
           </SelectContent>
         </Select>
       </div>)}
+      <div className="w-full min-w-0 sm:ml-auto sm:w-64">
+        <label id="room-sort-label" className="mb-2 block font-body text-xs text-muted-foreground">Sort by</label>
+        <Select value={sort} onValueChange={value => onSortChange(resolveRoomSort(value))}>
+          <SelectTrigger aria-labelledby="room-sort-label" className="h-11 rounded-none"><SelectValue /></SelectTrigger>
+          <SelectContent>{ROOM_SORT_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
       {(values.type || values.finish) && <Button variant="ghost" onClick={() => onChange({ type: null, finish: null })} className="h-11 rounded-none text-xs"><X className="size-3" /> Clear room filters</Button>}
       <p role="status" className="py-3 font-body text-xs text-muted-foreground">{loading ? 'Loading pieces…' : `${count} ${count === 1 ? 'piece' : 'pieces'}`}{finishesLoading ? ' · Loading finishes…' : ''}</p>
     </div>

@@ -13,6 +13,7 @@ import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { resolveRoomSort, type RoomSort } from '@/lib/roomShoppingSort';
 
 // Room hero assets reused from the header mega-menu so the shared link
 // preview shows the same vignette the navigation pathway advertises.
@@ -178,6 +179,12 @@ export default function RoomSearch() {
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
   const roomFilters = { type: searchParams.get('roomType'), finish: searchParams.get('roomFinish') };
+  const roomSort = resolveRoomSort(searchParams.get('roomSort'));
+  const updateRoomSort = (sort: RoomSort) => {
+    const params = new URLSearchParams(searchParams);
+    if (sort === 'curated') params.delete('roomSort'); else params.set('roomSort', sort);
+    navigate(`${pathname}?${params.toString()}`, { replace: true, preventScrollReset: true });
+  };
   const updateRoomFilters = (filters: typeof roomFilters) => {
     const params = new URLSearchParams(searchParams);
     for (const [key, value] of [['roomType', filters.type], ['roomFinish', filters.finish]]) {
@@ -290,9 +297,9 @@ export default function RoomSearch() {
         {room ? (
           <>
             {collection && <RoomCollectionStory room={roomSlug} trade={trade} />}
-            <RoomShopping key={room} room={room} trade={trade} collection={collection} filters={roomFilters} onFiltersChange={updateRoomFilters} onRoomChange={next => navigate(isCollectionRoom(next) ? roomCollectionPath(next, trade) : `${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
+            <RoomShopping key={room} room={room} trade={trade} collection={collection} filters={roomFilters} onFiltersChange={updateRoomFilters} sort={roomSort} onSortChange={updateRoomSort} onRoomChange={next => navigate(isCollectionRoom(next) ? roomCollectionPath(next, trade) : `${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
             {!collection && !trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
+            {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
           </>
         ) : roomParam || roomSlug ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
