@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,20 +25,29 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
   const reducedMotion = useReducedMotion();
   const destination = useShippingDestination();
   const [configuring, setConfiguring] = useState<PairingProduct | null>(null);
+  const [addedPrimary, setAddedPrimary] = useState<PairingProduct | null>(null);
+  const [previousSuggestions, setPreviousSuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    if (!open) {
+      setAddedPrimary(null);
+      setPreviousSuggestions([]);
+      setConfiguring(null);
+    }
+  }, [open]);
   const pieces = useMemo(() => {
     const products = catalogue.flatMap(({ pick, designerName, designerId }) => pick.id && pick.slug && pick.image ? [{
       id: pick.id, title: pick.title || "", brand: designerName, category: pick.category, subcategory: pick.subcategory,
       image: pick.image, path: `/designers/${designerId}/${pick.slug}`,
       materials: pick.materials, leadTime: pick.lead_time, origin: pick.origin,
     }] : []);
-    const primary = products.find((p) => p.title.toLowerCase() === title.toLowerCase() && p.brand.toLowerCase() === brand.toLowerCase());
-    return selectCuratedPairings(primary ?? { id: "", title, brand }, products, excludedIds, rules);
-  }, [catalogue, title, brand, excludedIds, rules]);
+    const primary = addedPrimary ?? products.find((p) => p.title.toLowerCase() === title.toLowerCase() && p.brand.toLowerCase() === brand.toLowerCase()) ?? { id: "", title, brand };
+    return selectCuratedPairings(primary, products, [...excludedIds, ...previousSuggestions], rules);
+  }, [catalogue, title, brand, excludedIds, rules, addedPrimary, previousSuggestions]);
   const { data: prices = {} } = usePublicRrpMap(open ? pieces.map((p) => p.id) : []);
 
   return <><AnimatePresence>
     {open && pieces.length >= 2 && <motion.section
-      key={title}
+      key={addedPrimary?.id || title}
       role="region"
       aria-label="Curated Pairings"
       initial={{ opacity: 0, y: reducedMotion ? 0 : 24 }}
@@ -68,5 +77,8 @@ export default function CuratedPairings({ open, title, brand, excludedIds, onDis
       </div>
       <div className="mt-6 text-center"><Button variant="link" onClick={onDismiss} className="h-auto rounded-none font-body text-xs text-muted-foreground">No, thank you</Button></div>
     </motion.section>}
-  </AnimatePresence>{open && configuring && <PairingConfigurationSheet key={configuring.id} piece={configuring} onClose={() => setConfiguring(null)} onExplore={onExplore} />}</>;
+  </AnimatePresence>{open && configuring && <PairingConfigurationSheet key={configuring.id} piece={configuring} onClose={() => setConfiguring(null)} onExplore={onExplore} onAdded={(piece) => {
+    setPreviousSuggestions((previous) => [...new Set([...previous, ...pieces.map((suggestion) => suggestion.id)])]);
+    setAddedPrimary(piece);
+  }} />}</>;
 }
