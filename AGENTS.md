@@ -57,7 +57,7 @@
 - Admin/role gates must wait for `useAuth().rolesLoaded` before redirecting; /trade/login redirects carry `?next=`; a failed/pending role lookup is not "not admin", and spurious SIGNED_OUT (re-checked via getSession) must not demote a valid session.
 - No blocking beforeunload for admin drafts; persist to storage — it freezes the embedded preview on reloads.
 - Designer Editor restore uses a once-per-load sessionStorage guard (ma-designer-editor-restore-guard-v1): if the last load wasn't responsive for 5s, open collapsed.
-- Curator Notes: product pages = full-width list; lightbox = 3 columns.
+- Curator Notes: product page full-width; lightbox 3 cols.
 - Supplier PDFs stay labelled Fabric & Finishes, separate from spec sheets, so they never replace the generated swatch-selection PDF.
 - Match each slash-separated explicit category/subcategory placement independently in catalogue filters; dual-purpose pieces belong in both departments without generic tags overriding primary categories.
 - Room facets include own designer, parent house and exact published subtitle credit — credited makers stay filterable
@@ -77,4 +77,4 @@
 - Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
-- gallery_hotspots public RLS computes blocked designer names once per query via `_hotspot_blocked_designer_names()` in a scalar subquery — per-row name scans took ~0.66s per read.
+- gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
