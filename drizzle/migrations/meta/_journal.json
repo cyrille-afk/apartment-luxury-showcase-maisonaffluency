@@ -1443,6 +1443,13 @@
       "when": 1792396406803,
       "tag": "0205_verified_private_client_recognition",
       "breakpoints": true
+    },
+    {
+      "idx": 206,
+      "version": "7",
+      "when": 1792396564007,
+      "tag": "0206_lock_private_client_challenge_api",
+      "breakpoints": true
     }
   ]
 }
