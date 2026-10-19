@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canSendStudioInvite, studioInviteKey } from './studioInvite'
+import { canSendStudioInvite, studioInviteKey } from '../../supabase/functions/send-transactional-email/studioInvite'
 
 describe('studio invitation sending', () => {
   it('allows studio owners and admins to send pending teammate invitations', () => {
