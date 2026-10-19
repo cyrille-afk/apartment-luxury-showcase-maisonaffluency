@@ -25,6 +25,7 @@ import { calculateCeilingBudget, type CeilingBudgetInput } from "@/lib/ceilingBu
 import { formatPdfDate, formatPdfMoney, type PdfLocalePreset } from "@/lib/pdfFormatting";
 import { getQuoteBankTransfer } from "@/config/quoteBankTransfer";
 import { displayNameForContact } from "@/lib/quoteContact";
+import type { QuoteFreightAudit } from "@/lib/quoteFreightBreakdown";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -111,6 +112,7 @@ export interface QuotePdfArgs {
   /** Freight estimate in quote currency; included in Order total and 60/40 split. */
   shippingEstimateCents?: number;
   shippingShipmentCount?: number;
+  freightAudit?: QuoteFreightAudit;
   /** When all shipments share a single mode, the totals row reflects it
    *  (e.g. "Air freight estimate", "Sea LCL estimate"). Falls back to
    *  "Shipping estimate" when mixed or unknown. */
@@ -329,6 +331,31 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     // ---- Totals block (right aligned)
     y = ensureSpace(doc, y, 220, pageH);
     y = drawTotals(doc, args, quoteTotals, M, y, contentW);
+  }
+
+  if (args.freightAudit) {
+    const audit = args.freightAudit;
+    const auditLines = [
+      "Freight breakdown",
+      `Destination used: ${audit.destination}`,
+      `Destination source: ${audit.addressSource}`,
+      ...audit.shipments.flatMap((shipment) => [shipment.route, ...shipment.lines]),
+      `Total shipping estimate (before import tax): ${audit.total}`,
+    ];
+    const firstShipmentLines = ["Freight breakdown", `Destination used: ${audit.destination}`, `Destination source: ${audit.addressSource}`, ...(audit.shipments[0] ? [audit.shipments[0].route, ...audit.shipments[0].lines] : [])];
+    const firstBlockHeight = firstShipmentLines.reduce((height, line) => height + doc.splitTextToSize(line, contentW).length * 11 + 4, 12);
+    y = ensureSpace(doc, y, firstBlockHeight, pageH);
+    y += 12;
+    for (const [index, line] of auditLines.entries()) {
+      doc.setFont("helvetica", index === 0 ? "bold" : "normal");
+      doc.setFontSize(index === 0 ? 10 : 8);
+      const auditColor = index === 0 ? JADE : MUTED;
+      doc.setTextColor(auditColor[0], auditColor[1], auditColor[2]);
+      const wrapped = doc.splitTextToSize(line, contentW) as string[];
+      y = ensureSpace(doc, y, wrapped.length * 11 + 6, pageH);
+      doc.text(wrapped, M, y, { lineHeightFactor: 1.35 });
+      y += wrapped.length * 11 + 4;
+    }
   }
 
   // ---- FX audit line (compliance) — shown whenever a snapshot was passed,

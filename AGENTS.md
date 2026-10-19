@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Quote freight audit displays consume selected estimator rate metadata and one shared address-resolution/formatting helper for screen and PDF; audit presentation never recomputes charges — keeps provenance and figures aligned without changing pricing.
 - Quote payment charge breakdowns reuse the extras editor's quantity-adjusted converted rows and cumulative rounding for tax/deposit/balance allocations; presentation never changes payment totals — prevents duplicated reads and penny drift.
 - Copyable studio invitation links target the canonical sign-in page with an exact invitation return path; the existing email-scoped invitation reader and explicit acceptance RPC remain the only redemption mechanism — sharing must not bypass recipient authentication or expiry.
 - Admin studio directory/detail reads, member mutations and pending invitation revocation use server-authorized RPCs; mutations are confirmed and studio-scoped, member changes compare the prior role with owners immutable, and revocation shares invitation row locking with acceptance so accepted memberships cannot be invalidated. Detail responses exclude invitation tokens; platform roles and workspace content remain untouched — platform visibility must not grant workspace access.

@@ -52,6 +52,8 @@ import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageInde
 import { findQuoteFinishSwatches, type QuoteFinishSwatch, type QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
+import QuoteFreightBreakdown from "@/components/trade/QuoteFreightBreakdown";
+import { buildQuoteFreightAudit, resolveQuoteFreightDestination } from "@/lib/quoteFreightBreakdown";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
@@ -1269,11 +1271,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (supabase.from("clients" as any).select("billing_country").eq("id", clientId).maybeSingle() as any)
       .then(({ data }: any) => setClientCountry((data?.billing_country as string) || null));
   }, [clientId]);
-  const effectiveDestCountry = (() => {
-    // Ship-to country wins when a separate ship-to is set.
-    const v = ((!shipToSameAsBill && shipTo.country ? shipTo.country : clientCountry) || "").trim().toLowerCase();
-    return v;
-  })();
+  const freightDestination = resolveQuoteFreightDestination(shipToSameAsBill, shipTo.country, clientCountry);
+  const effectiveDestCountry = freightDestination.country;
   const isUkDestination = (() => {
     const c = effectiveDestCountry;
     return c === "uk" || c === "gb" || c === "united kingdom" || c === "great britain" || c === "england" || c === "scotland" || c === "wales" || c === "northern ireland";
@@ -2016,6 +2015,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       shippingShipmentCount: livePerLine.shipments.length,
       shippingModeLabel,
       shippingModeBreakdown,
+      freightAudit: buildQuoteFreightAudit(livePerLine, destIso, freightDestination.source, currency, fxQuoteEur, effectivePdfLocale),
       insuranceLabel: insuranceEnabled ? insLabel : null,
       insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
       insuranceEnabled,
@@ -2513,6 +2513,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     screenOrderTotalCents,
     screenDepositCents,
     clientName,
+    destIso,
+    freightDestination.source,
+    perLine.shipments.map((shipment) => [shipment.origin, shipment.mode, shipment.breakdown?.rate_calculation, shipment.shippingEurCents]),
     items.map((it) => [it.id, it.quantity, it.unit_price_cents, it.unit_price_currency, it.variant_label, it.notes]),
   ]);
 
@@ -4663,6 +4666,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                   )}
                 </div>
+                {items.length > 0 && (
+                  <div className="mt-4">
+                    <QuoteFreightBreakdown
+                      audit={buildQuoteFreightAudit(perLine, destIso, freightDestination.source, currency, fxQuoteEur, effectivePdfLocale)}
+                      loading={perLineLoading}
+                    />
+                  </div>
+                )}
                 {subtotalCents > 0 && destIso && perLine.shipments.length > 0 && (
                   <div className="mt-4">
                     <PerOriginShippingRecap
