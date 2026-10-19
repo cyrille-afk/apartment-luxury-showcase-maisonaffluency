@@ -730,7 +730,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           "flex justify-center",
           contextualPanel
             ? "pointer-events-none absolute inset-x-0 top-0 z-30 items-start"
-            : "fixed inset-0 z-[10000] items-stretch bg-foreground/60 backdrop-blur-sm md:items-center md:p-6 lg:p-8"
+            : "fixed inset-0 z-[10000] items-stretch bg-black/30 backdrop-blur-md md:items-center md:p-6 lg:p-8"
         )}
         onClick={contextualPanel ? undefined : requestClose}
       >

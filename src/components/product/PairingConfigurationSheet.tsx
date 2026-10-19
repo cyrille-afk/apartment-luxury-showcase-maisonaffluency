@@ -86,7 +86,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
       })}
     </div></fieldset>;
   }
-  return <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}><SheetContent aria-describedby="pairing-config-description" onEscapeKeyDown={(event) => { event.preventDefault(); onClose(); }} overlayClassName="!z-[10030] !bg-foreground/30 backdrop-blur-md motion-reduce:animate-none" className="!z-[10031] flex h-dvh w-full flex-col gap-0 !p-0 sm:!max-w-[1100px] motion-reduce:animate-none">
+  return <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}><SheetContent aria-describedby="pairing-config-description" onEscapeKeyDown={(event) => { event.preventDefault(); onClose(); }} overlayClassName="!z-[10030] !bg-black/30 backdrop-blur-md motion-reduce:animate-none" className="!z-[10031] flex h-dvh w-full flex-col gap-0 !p-0 sm:!max-w-[1100px] motion-reduce:animate-none">
     <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto overscroll-contain md:grid-cols-2 md:overflow-hidden">
       <div className="relative flex min-h-64 items-center justify-center border-b border-border/50 bg-muted/10 p-6 md:min-h-0 md:border-b-0 md:border-r md:p-10">
         <AnimatePresence mode="wait"><motion.img key={image} src={image} alt={`${piece.title}${dedicated ? ` — ${selectedNames.join(" / ")}` : ""}`} onError={() => setFailedImages(f => [...f, image])} initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduced ? 1 : 0 }} transition={{ duration: reduced ? 0 : 0.25 }} className="max-h-[32dvh] w-full object-contain md:max-h-[80dvh]" /></AnimatePresence>
