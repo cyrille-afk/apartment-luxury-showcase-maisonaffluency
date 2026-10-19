@@ -10,7 +10,6 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    buyer_profile: body.buyerProfile === 'private' || body.buyerProfile === 'designer' ? body.buyerProfile : null,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
@@ -87,6 +86,7 @@ Deno.serve(async (req) => {
     subtotal_cents: subtotal,
     items,
     status,
+    buyer_profile: body.buyerProfile === 'private' || body.buyerProfile === 'designer' ? body.buyerProfile : null,
     last_activity_at: new Date().toISOString(),
   }
   if (status === 'ordered') payload.recovered_at = new Date().toISOString()
