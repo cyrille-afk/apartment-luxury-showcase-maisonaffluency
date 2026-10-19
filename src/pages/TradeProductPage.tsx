@@ -1720,7 +1720,7 @@ const TradeProductPage: React.FC = () => {
       return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
     });
   });
-  const suppressBaseAsFinish = !baseAxisIsDim && (isFinishAxisLabel(baseAxisLabelRaw) || !baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressBaseAsFinish = !baseAxisIsDim && (isFinishAxisLabel(baseAxisLabelRaw) || !baseAxisLabelRaw) && (allBasesHaveSwatches || (!isBaseOnly && hasWoodSwatches));
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxisLabel(topAxisLabelRaw)));
 
   // When the product has variants but the user hasn't picked one yet, fall back
@@ -2279,7 +2279,7 @@ const TradeProductPage: React.FC = () => {
                       woodLabelOverride: (product as any).wood_label_override,
                     }).upholsteryLabel
                   }
-                  woodLabel={isOolMinibar ? getBasePlaceholder(product) :
+                  woodLabel={isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
                     resolveFinishSectionLabels({
                       baseAxisLabel: product.base_axis_label,
                       topAxisLabel: product.top_axis_label,

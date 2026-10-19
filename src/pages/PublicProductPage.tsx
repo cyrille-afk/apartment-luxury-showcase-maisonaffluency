@@ -595,7 +595,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (
     allBasesHaveSwatches
-    || (baseSwatchPool.length > 0 && (isFinishAxis(baseAxisLabelRaw) || !baseAxisLabelRaw))
+    || (!isBaseOnly && baseSwatchPool.length > 0 && (isFinishAxis(baseAxisLabelRaw) || !baseAxisLabelRaw))
     || isUpholsteryAxisLabel(baseAxisLabelRaw)
   );
   const suppressTopAsFinish = !topAxisIsDim && (
@@ -657,7 +657,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           }).upholsteryLabel
         }
         secondaryUpholsteryLabel={frameOnLabel ? getTopPlaceholder(product) : null}
-        woodLabel={isOolMinibar ? getBasePlaceholder(product) :
+        woodLabel={isBaseOnly && !suppressBaseAsFinish ? "Material Samples" : isOolMinibar ? getBasePlaceholder(product) :
           resolveFinishSectionLabels({
             baseAxisLabel: product.base_axis_label,
             topAxisLabel: product.top_axis_label,
