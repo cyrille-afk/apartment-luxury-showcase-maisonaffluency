@@ -69,14 +69,41 @@ Deno.serve(async (req) => {
     // Compare the deployed app's stamped commit against GitHub main to detect
     // a pending Lovable → GitHub sync (deployed ahead of the repo).
     let deployedSha: string | null = null
+    let deployedDigest: string | null = null
     try {
       const v = await fetch('https://www.maisonaffluency.com/version.json?t=' + Date.now())
-      if (v.ok) deployedSha = (await v.json())?.commitSha ?? null
+      if (v.ok) {
+        const j = await v.json()
+        deployedSha = j?.commitSha ?? null
+        deployedDigest = j?.sourceDigest ?? null
+      }
     } catch {
       deployedSha = null
     }
-    const syncState =
-      !deployedSha ? 'unknown' : deployedSha === sha ? 'in_sync' : 'ahead_of_github'
+    let syncState: 'unknown' | 'in_sync' | 'ahead_of_github' = 'unknown'
+    if (deployedSha) {
+      syncState = deployedSha === sha ? 'in_sync' : 'ahead_of_github'
+    } else if (deployedDigest) {
+      // Same digest as vite.config.ts computeSourceDigest: sha256 of sorted "path blobSha" for src/**.
+      try {
+        const tree = await gh(
+          `/repos/${OWNER}/${REPO}/git/trees/${commit.commit.tree.sha}?recursive=1`,
+          LOVABLE_API_KEY,
+          GITHUB_API_KEY,
+        )
+        if (!tree.truncated) {
+          const lines = (tree.tree as any[])
+            .filter((t) => t.type === 'blob' && String(t.path).startsWith('src/'))
+            .map((t) => `${t.path} ${t.sha}`)
+            .sort()
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(lines.join('\n')))
+          const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('')
+          syncState = hex === deployedDigest ? 'in_sync' : 'ahead_of_github'
+        }
+      } catch (e) {
+        console.error('tree digest failed', e)
+      }
+    }
 
     return json({
       deployed: { commitSha: deployedSha },
