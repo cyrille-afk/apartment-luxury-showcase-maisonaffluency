@@ -2513,6 +2513,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     screenOrderTotalCents,
     screenDepositCents,
     clientName,
+    destIso,
+    freightDestination.source,
+    perLine.shipments.map((shipment) => [shipment.origin, shipment.mode, shipment.breakdown?.rate_calculation, shipment.shippingEurCents]),
     items.map((it) => [it.id, it.quantity, it.unit_price_cents, it.unit_price_currency, it.variant_label, it.notes]),
   ]);
 

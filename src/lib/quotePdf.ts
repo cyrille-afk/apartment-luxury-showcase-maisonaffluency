@@ -342,6 +342,9 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
       ...audit.shipments.flatMap((shipment) => [shipment.route, ...shipment.lines]),
       `Total shipping estimate (before import tax): ${audit.total}`,
     ];
+    const firstShipmentLines = ["Freight breakdown", `Destination used: ${audit.destination}`, `Destination source: ${audit.addressSource}`, ...(audit.shipments[0] ? [audit.shipments[0].route, ...audit.shipments[0].lines] : [])];
+    const firstBlockHeight = firstShipmentLines.reduce((height, line) => height + doc.splitTextToSize(line, contentW).length * 11 + 4, 12);
+    y = ensureSpace(doc, y, firstBlockHeight, pageH);
     y += 12;
     for (const [index, line] of auditLines.entries()) {
       doc.setFont("helvetica", index === 0 ? "bold" : "normal");
