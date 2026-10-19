@@ -20,7 +20,8 @@ export const SHORTLIST_CONTACT_DEFAULTS = { conciergeEmail: 'concierge@maisonaff
 export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string; closingMessage: string; conciergeEmail: string; website: string; availability: string };
 export function shortlistCover(value: unknown): RoomShortlistCover {
   const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch(''), closingMessage: z.string().catch(''), conciergeEmail: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.conciergeEmail), website: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.website), availability: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.availability) }).safeParse(value);
-  return parsed.success ? parsed.data : { clientName: '', projectTitle: '', introduction: '', closingMessage: '', ...SHORTLIST_CONTACT_DEFAULTS };
+  const data = parsed.success ? parsed.data : undefined;
+  return { clientName: data?.clientName ?? '', projectTitle: data?.projectTitle ?? '', introduction: data?.introduction ?? '', closingMessage: data?.closingMessage ?? '', conciergeEmail: data?.conciergeEmail ?? SHORTLIST_CONTACT_DEFAULTS.conciergeEmail, website: data?.website ?? SHORTLIST_CONTACT_DEFAULTS.website, availability: data?.availability ?? SHORTLIST_CONTACT_DEFAULTS.availability };
 }
 export function shortlistContact(cover: RoomShortlistCover) {
   const conciergeEmail = cover.conciergeEmail.trim() || SHORTLIST_CONTACT_DEFAULTS.conciergeEmail;
