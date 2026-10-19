@@ -1,6 +1,7 @@
 - OOL 77 Mini bar shows exactly two finish dropdowns (Frame: Cement Stuc/Glossy Lacquer; Drawer: Wood species + Suede Leather). The single-value Shelf axis ("Wood") is auto-committed in FinishSelector without a third accordion, and the shelf swatch must never emit onWoodFinishPricingChange (it would hijack the "Frame:" price caption). Regression test: src/components/FinishSelector.ool-minibar.test.tsx.
 - OOL 77 Mini bar has no curated preset chips (removed at user request); its Frame/Drawer dropdowns mirror the finishes linked to the photo on screen from first load until the user picks one.
 - Curated Pairings configure catalogue variant axes on demand using public-only swatches/RRP and complete compatible selections; unpriced pieces open the product quote flow, and additive cart writes preserve existing configured lines.
+- Pairing sheets load product metadata through the shared on-demand public detail query and reuse edition/dimension formatters; finish accordions retain variant compatibility and pinned order controls remain additive cart writes — prevents invented specifications or pricing-policy drift.
 - Explicit pairing finish configurations replace catalogue options only for the rule's preferred piece; changing the piece clears them, and clearing all custom finishes restores catalogue defaults.
 - OOL 77 Mini bar sharing uses a readable public product address with frame/drawer finish-name slugs; the selector restores those names and legacy `?c=` links so existing shares survive catalogue reordering.
 

@@ -19,7 +19,7 @@ export function useCuratorPickDetail(pickId: string | null | undefined, enabled 
       const { data, error } = await supabase
         .from("designer_curator_picks_public" as any)
         .select(
-          "id, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map"
+          "id, subtitle, dimensions, materials, edition, lead_time, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map"
         )
         .eq("id", pickId)
         .maybeSingle();
