@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bookmark, Check, Link2, Trash2, X, FolderOpen } from 'lucide-react';
+import { Bookmark, Check, Link2, Trash2, X, FolderOpen, FileDown } from 'lucide-react';
+import { buildRoomShortlistPdf, shortlistPdfFilename } from '@/lib/roomShortlistPdf';
 import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,6 +69,20 @@ function RoomShortlistState({ room, children }: { room: RoomSlug; children: Reac
       setConfirmDelete(null); setShareUrl(''); await saved.refetch(); toast.success('Shortlist deleted');
     } catch { toast.error('Could not delete your shortlist'); } finally { setBusy(false); }
   };
+  const [exporting, setExporting] = useState(false);
+  const exportPdf = async () => {
+    if (!items.length || exporting) return;
+    setExporting(true);
+    try {
+      const title = name.trim() || `${ROOM_LABELS[room]} shortlist`;
+      const blob = await buildRoomShortlistPdf({ title, roomLabel: ROOM_LABELS[room], items });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = shortlistPdfFilename(title);
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      toast.success('Client PDF ready');
+    } catch { toast.error('Could not create the PDF'); } finally { setExporting(false); }
+  };
   return <Context.Provider value={{ items, toggle: item => { setItems(prev => toggleShortlistItem(prev, item)); setShareUrl(''); }, open: () => setOpen(true) }}>
     {children}
     <Sheet open={open} onOpenChange={setOpen}><SheetContent className="flex w-full flex-col sm:max-w-xl">
@@ -81,7 +96,8 @@ function RoomShortlistState({ room, children }: { room: RoomSlug; children: Reac
         <div className="space-y-3 border-t border-border pt-5">
           <label htmlFor="room-shortlist-name" className="text-sm">Shortlist name</label><Input id="room-shortlist-name" value={name} maxLength={150} onChange={e => setName(e.target.value)} placeholder={`${ROOM_LABELS[room]} shortlist`} />
           {user ? <div className="flex flex-wrap gap-2"><Button disabled={!items.length || busy} onClick={() => void save(false)}><Bookmark className="mr-2 size-4" />{busy ? 'Saving…' : 'Save shortlist'}</Button><Button variant="outline" disabled={!items.length || busy} onClick={() => void save(true)}><Link2 className="mr-2 size-4" />Save & share</Button></div> : <Button asChild><Link to={`/trade/login?next=${encodeURIComponent(location.pathname + location.search)}`}>Sign in to save & share</Link></Button>}
-          {shareUrl && <div><label htmlFor="room-shortlist-link" className="text-xs text-muted-foreground">Share link</label><Input id="room-shortlist-link" readOnly value={shareUrl} onFocus={e => e.currentTarget.select()} /><a href={shareUrl} className="mt-2 inline-block text-sm underline">Open shared shortlist</a></div>}
+          <Button variant="outline" disabled={!items.length || exporting} onClick={() => void exportPdf()}><FileDown className="mr-2 size-4" />{exporting ? 'Preparing PDF…' : 'Export client PDF'}</Button>
+          {shareUrl &&  <div><label htmlFor="room-shortlist-link" className="text-xs text-muted-foreground">Share link</label><Input id="room-shortlist-link" readOnly value={shareUrl} onFocus={e => e.currentTarget.select()} /><a href={shareUrl} className="mt-2 inline-block text-sm underline">Open shared shortlist</a></div>}
         </div>
         {user && <section className="mt-8 border-t border-border pt-5"><h3 className="font-display text-xl">Saved shortlists</h3>
           {saved.isLoading ? <p role="status" className="mt-3 text-sm text-muted-foreground">Loading…</p> : saved.isError ? <Button variant="link" onClick={() => void saved.refetch()}>Retry loading shortlists</Button> : !saved.data?.length ? <p className="mt-3 text-sm text-muted-foreground">No saved shortlists for this room.</p> : <ul className="mt-3 divide-y divide-border">{saved.data.map(s => <li key={s.id} className="py-3"><div className="flex items-center gap-2"><Button variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-0 text-left" onClick={() => { setItems(shortlistItems(s.items)); setName(s.name); setShareUrl(''); }}><FolderOpen className="mr-2 size-4 shrink-0" /><span>{s.name} · {shortlistItems(s.items).length}</span></Button><Button variant="ghost" size="icon" title="Copy share link" aria-label={`Share ${s.name}`} onClick={() => void copy(s.share_token)}><Link2 className="size-4" /></Button><Button variant="ghost" size="icon" title="Delete shortlist" aria-label={`Delete ${s.name}`} onClick={() => setConfirmDelete(s.id)}><Trash2 className="size-4" /></Button></div><p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString('en-GB')}</p>{confirmDelete === s.id && <div className="mt-3"><p className="text-sm">Delete this shortlist and disable its shared link?</p><div className="mt-2 flex gap-2"><Button variant="destructive" size="sm" disabled={busy} onClick={() => void removeSaved(s.id)}>Delete shortlist</Button><Button variant="outline" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</Button></div></div>}</li>)}</ul>}
