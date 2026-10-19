@@ -107,6 +107,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
       }
       if (action === "request") { setChallenge({email:target,id:data.challengeId,sentAt:Date.now()}); setNow(Date.now()); setCode(""); }
       else if (data?.forgotten) { setForgotten({email:target,server:true}); setCode(""); setChallenge(null); }
+      else if (data?.optedIn) { unforgetPrivateClient(target); setOptedIn(target); setForgotten(null); setIntent("recognize"); setCode(""); setChallenge(null); setExpanded(false); }
       else if (data?.verified) {
         setVerified({email:target,returning:data.returning === true});
         if (data.returning) rememberPrivateClient(target,"private");
@@ -126,6 +127,9 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
 
   return <div className="mt-3 font-body text-sm">
     {isForgotten && <p role="status" className="mb-2 text-muted-foreground">This device no longer recognises you. To also delete data saved with us, confirm your email with a code.</p>}
+    {isForgotten && <Button type="button" variant="link" className="mb-2 h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startOptin()}>
+      Turn recognition back on
+    </Button>}
     {!expanded ? <Button type="button" variant="link" className="h-auto p-0 text-muted-foreground" onClick={()=>setExpanded(true)}>
       <Mail className="mr-2 h-4 w-4" /> Verify email
     </Button> : <div className="space-y-3">
@@ -148,7 +152,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
         <p className="text-muted-foreground">We’ll email you a 6-digit code, valid for 10 minutes.</p>
         <Turnstile key={botKey} onVerify={setBotToken} onExpire={()=>setBotToken("")} />
         <Button type="button" variant="outline" disabled={busy || !botToken} onClick={()=>void submit("request")}>
-          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {intent === "forget" ? "Send code to delete my data" : "Send verification code"}
+          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {intent === "forget" ? "Send code to delete my data" : intent === "optin" ? "Send code to turn recognition back on" : "Send verification code"}
         </Button>
       </>}
       {error && <p role="alert" className="text-destructive">{error}</p>}
