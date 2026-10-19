@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import RoomShopping from '@/components/product/RoomShopping';
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
@@ -165,8 +166,9 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
 export default function RoomSearch() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const trade = useLocation().pathname.startsWith('/trade/');
   const roomParam = searchParams.get("room");
-  const room = resolveRoomSlug(roomParam);
+  const room = resolveRoomSlug(roomParam) || (!roomParam ? 'living-room' : null);
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
 
@@ -175,10 +177,10 @@ export default function RoomSearch() {
   const originalHead = useRef<Map<string, string | null> | null>(null);
 
   useEffect(() => {
-    if (room && roomParam !== room) {
+    if (room && roomParam && roomParam !== room) {
       const params = new URLSearchParams(searchParams);
       params.set("room", room);
-      navigate(`/search?${params.toString()}`, { replace: true });
+      navigate(`${trade ? '/trade/shop-by-room' : '/search'}?${params.toString()}`, { replace: true });
     }
   }, [navigate, room, roomParam, searchParams]);
 
@@ -269,12 +271,13 @@ export default function RoomSearch() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navigation alwaysVisible />
-      <main className="min-h-[70vh] pt-[var(--header-h)]">
+      {!trade && <Navigation alwaysVisible />}
+      <main className={trade ? 'min-h-[70vh]' : 'min-h-[70vh] pt-[var(--header-h)]'}>
         {room ? (
           <>
-            {!searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
+            <RoomShopping key={room} room={room} trade={trade} onRoomChange={next => navigate(`${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
+            {!trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
+            <ProductGrid key={room} tradeContext={trade} roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
           </>
         ) : roomParam ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
@@ -288,7 +291,7 @@ export default function RoomSearch() {
           <ProductGrid compactTop showAll />
         )}
       </main>
-      <Footer />
+      {!trade && <Footer />}
     </div>
   );
 }

@@ -24,6 +24,7 @@
 - Checkout 409s carry a structured `recovery` hint; card, wire and instant-transfer retries only reprice the matched line (pairing included) after explicit buyer acceptance. Instant routing keys include configured lines/freight and clear stale account details — prevents reuse of an unconfirmed amount.
 - Pairing browser regressions run production catalogPricing in an isolated Deno harness at the intercepted payment boundary; never mutate live rules or create payment intents for CI.
 - Curated pairing selection resolves functional room slots through shared taxonomy and ROOM_MAP before ranking makers or applying preferred pieces; incompatible preferred configurations never attach to replacement products.
+- Shop by Room reuses the room catalogue and pairing selector on public and trade routes; public starting-piece browsing never writes the basket until the existing configuration sheet confirms an addition, while Trade retains product navigation inside its shell.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
