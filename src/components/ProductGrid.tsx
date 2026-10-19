@@ -35,6 +35,7 @@ import { originToCountries } from "@/lib/productOrigin";
 import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMaterialCategories";
 import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
 import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
+import { roomPriceCents, sortRoomProducts, type RoomSort } from '@/lib/roomShoppingSort';
 
 const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, craft: null, handmade: null, material: null };
 const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "craft", "handmade", "material"];
@@ -226,7 +227,7 @@ function mergeWithDbPicks(hardcoded: ProductItem[], dbPicks: ProductItem[]): Pro
   return Array.from(merged.values());
 }
 
-const ProductGrid = ({ sectionScope, roomSlug, roomFilters, roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
+const ProductGrid = ({ sectionScope, roomSlug, roomFilters, roomSort = 'curated', roomCategory, roomSubcategory, compactTop, showAll }: { sectionScope?: "designers" | "collectibles" | "ateliers"; roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort; roomCategory?: string | null; roomSubcategory?: string | null; compactTop?: boolean; showAll?: boolean }) => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
   const { data: masterCatalogCount } = useMasterCatalogCount();
@@ -407,11 +408,18 @@ function singularizeSub(s: string): string {
 
   // Avoid eager tonal-analysis downloads for hundreds of off-batch photos.
   const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image), { cachedOnly: true });
-  const filtered = useMemo(
+  const curated = useMemo(
     () => curateGrid(facetFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
+  // Price sorting requires every eligible public price, not only the first rendered batch.
+  const priceSortIds = useMemo(() => roomSlug && roomSort.startsWith('price-') ? facetFiltered.map(item => item.pick.id) : [], [roomSlug, roomSort, facetFiltered]);
+  const { data: sortingRrpMap = {} } = usePublicRrpMap(priceSortIds);
+  const filtered = useMemo(() => roomSlug ? sortRoomProducts(curated, roomSort, item => {
+    const rrp = sortingRrpMap[item.pick.id || ''];
+    return { name: item.pick.title, createdAt: (item as import('@/hooks/useDbCuratorPicks').DbProductItem).createdAt, priceCents: roomPriceCents(rrp?.rrp_price_cents, rrp?.currency) };
+  }) : curated, [curated, roomSlug, roomSort, sortingRrpMap]);
   const batchKey = JSON.stringify([roomSlug, roomCategory, roomSubcategory, category, subcategory, textQuery, filterSource, roomFacets, filtered.map((item) => item.pick.id || `${item.designerId}:${item.pick.title}`)]);
   const { renderedItems, hasMore, sentinelRef } = useCatalogBatches(filtered, batchKey);
   const { data: publicRrpMap = {} } = usePublicRrpMap(renderedItems.map((item) => item.pick.id));

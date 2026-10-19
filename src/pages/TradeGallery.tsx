@@ -55,6 +55,7 @@ import { roomShoppingProducts } from '@/lib/shopByRoom';
 import type { RoomSlug } from '@/lib/roomCategories';
 import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
 import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
+import { roomPriceCents, sortRoomProducts, type RoomSort } from '@/lib/roomShoppingSort';
 
 
 const slugifyForUrl = (s: string) =>
@@ -65,7 +66,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-const TradeGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters } = {}) => {
+const TradeGallery = ({ roomSlug, roomFilters, roomSort }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort } = {}) => {
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
@@ -73,10 +74,10 @@ const TradeGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFilt
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} roomFilters={roomFilters} />;
+  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} roomFilters={roomFilters} roomSort={roomSort} />;
 };
 
-const StudioGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters }) => {
+const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort }) => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
@@ -549,9 +550,13 @@ const StudioGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFil
   const sorted = useMemo(
     () => {
       const roomIds = roomSlug ? new Set(roomShoppingProducts(filtered.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, image: p.image_url || '', path: '' })), roomSlug).map(p => p.id)) : null;
-      return sortTradeProducts(roomIds ? filtered.filter(p => roomIds.has(p.id) && (!roomFilters || matchesRoomShoppingFilters({ id: p.id, title: p.product_name, category: p.category, subcategory: p.subcategory, materials: p.materials }, roomFilters, roomFinishes))) : filtered, sortBy);
+      const pieces = roomIds ? filtered.filter(p => roomIds.has(p.id) && (!roomFilters || matchesRoomShoppingFilters({ id: p.id, title: p.product_name, category: p.category, subcategory: p.subcategory, materials: p.materials }, roomFilters, roomFinishes))) : filtered;
+      return roomSlug ? sortRoomProducts(pieces, roomSort, p => {
+        const price = getProductPrice(p);
+        return { name: p.product_name, createdAt: p.created_at, priceCents: roomPriceCents(price?.cents, price?.currency) };
+      }) : sortTradeProducts(pieces, sortBy);
     },
-    [filtered, sortBy, roomSlug, roomFilters, roomFinishes],
+    [filtered, sortBy, roomSlug, roomFilters, roomFinishes, roomSort, priceLookup, priceEntries],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
@@ -696,12 +701,12 @@ const StudioGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFil
           {subcategories.length > 0 && (
             <div className="w-full sm:w-52"><GalleryFilterSelect value={selectedSubcategory} onChange={setSelectedSubcategory} label="Filter by subcategory" allLabel="All Subcategories" options={subcategories} /></div>
           )}
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
+          {!roomSlug && <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
             <option value="curated">Sort: Curated order</option>
             <option value="designer">Sort: Designer A–Z</option>
             <option value="title">Sort: Title A–Z</option>
             <option value="recent">Sort: Most recently added</option>
-          </select>
+          </select>}
           <select value="" aria-label="Saved views"
               onChange={(e) => {
                 const val = e.target.value;

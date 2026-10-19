@@ -15,10 +15,11 @@ import { useAuth } from '@/hooks/useAuth';
 import RoomShoppingFilterBar from './RoomShoppingFilters';
 import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
 import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
+import type { RoomSort } from '@/lib/roomShoppingSort';
 
 const rooms: RoomSlug[] = ['living-room', 'dining-room', 'bedroom', 'office', 'outdoor'];
 
-export default function RoomShopping({ room, trade = false, onRoomChange, filters, onFiltersChange, collection = false }: { room: RoomSlug; trade?: boolean; onRoomChange: (room: RoomSlug) => void; filters: RoomShoppingFilters; onFiltersChange: (filters: RoomShoppingFilters) => void; collection?: boolean }) {
+export default function RoomShopping({ room, trade = false, onRoomChange, filters, onFiltersChange, sort, onSortChange, collection = false }: { room: RoomSlug; trade?: boolean; onRoomChange: (room: RoomSlug) => void; filters: RoomShoppingFilters; onFiltersChange: (filters: RoomShoppingFilters) => void; sort: RoomSort; onSortChange: (sort: RoomSort) => void; collection?: boolean }) {
   const { data: catalogue = [], isLoading, isError, refetch } = useDbCuratorPicks();
   const { buyerProfile } = useCheckoutForm();
   const { user, isTradeUser, isAdmin, rolesLoaded } = useAuth();
@@ -40,7 +41,7 @@ export default function RoomShopping({ room, trade = false, onRoomChange, filter
     <nav aria-label="Rooms" className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-b border-border pb-5">
       {rooms.map(value => <Button key={value} variant="link" aria-current={room === value ? 'page' : undefined} onClick={() => { setChosenId(''); setConfiguring(null); onRoomChange(value); }} className={`h-auto rounded-none px-0 py-2 font-body text-sm underline-offset-8 ${value === room ? 'text-foreground underline' : 'text-muted-foreground'}`}>{ROOM_LABELS[value]}</Button>)}
     </nav>
-    <RoomShoppingFilterBar room={room} trade={trade} values={filters} onChange={onFiltersChange} />
+    <RoomShoppingFilterBar room={room} trade={trade} values={filters} onChange={onFiltersChange} sort={sort} onSortChange={onSortChange} />
     {privateClient && <div className="pt-8">
       <div className="flex flex-wrap items-end justify-between gap-5">
         <h2 className="font-display text-2xl text-foreground">Curated Pairings</h2>
