@@ -12329,6 +12329,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      admin_revoke_studio_invitation: {
+        Args: { _invite_id: string; _studio_id: string }
+        Returns: undefined
+      }
       admin_stripe_metrics: { Args: { _days?: number }; Returns: Json }
       admin_studio_details: { Args: { _studio_id: string }; Returns: Json }
       admin_studio_directory: {

@@ -90,4 +90,31 @@ describe('admin studio detail access', () => {
     await waitFor(() => expect(state.invoke).toHaveBeenCalledTimes(2));
     expect(state.invoke.mock.calls[1][1].body.idempotencyKey).toBe(state.invoke.mock.calls[0][1].body.idempotencyKey);
   });
+  function withInvite() {
+    allow();
+    state.rpc.mockResolvedValue({ data: { ...details, invitations: [{ id: 'invite-1', email: 'greg@example.com', role: 'editor', created_at: '2026-10-19', expires_at: '2026-11-02', expired: false }] }, error: null });
+  }
+  it('cancelling invite revocation never changes the invitation', async () => {
+    withInvite(); mount();
+    fireEvent.click(await screen.findByRole('button', { name: 'Revoke invitation to greg@example.com' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(state.rpc).toHaveBeenCalledTimes(1);
+    expect(state.invoke).not.toHaveBeenCalled();
+  });
+  it('revokes only the selected invitation in the selected studio after confirmation', async () => {
+    withInvite(); mount();
+    fireEvent.click(await screen.findByRole('button', { name: 'Revoke invitation to greg@example.com' }));
+    expect(state.rpc).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation' }));
+    await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('admin_revoke_studio_invitation', { _studio_id: 'studio-1', _invite_id: 'invite-1' }));
+    expect(state.invoke).not.toHaveBeenCalled();
+  });
+  it('keeps rejected revocation open without losing the invitation', async () => {
+    withInvite(); mount();
+    fireEvent.click(await screen.findByRole('button', { name: 'Revoke invitation to greg@example.com' }));
+    state.rpc.mockResolvedValueOnce({ data: null, error: new Error('Accepted invitations cannot be revoked') });
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation' }));
+    await screen.findByRole('alert');
+    expect(screen.getByRole('button', { name: 'Revoke invitation' })).toBeTruthy();
+  });
 });

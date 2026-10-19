@@ -26,6 +26,8 @@ export default function TradeAdminStudioDetail() {
   const { toast } = useToast();
   const [pending, setPending] = useState<{ member: StudioDetails['members'][number]; role?: Exclude<MemberRole, 'owner'> } | null>(null);
   const [actionError, setActionError] = useState('');
+  const [revokeInvite, setRevokeInvite] = useState<StudioDetails['invitations'][number] | null>(null);
+  const [revokeError, setRevokeError] = useState('');
   const inviteAttempts = useRef(new Map<string, string>());
   const enabled = Boolean(user && rolesLoaded && (isAdmin || isSuperAdmin) && studioId);
   const query = useQuery({
@@ -52,6 +54,21 @@ export default function TradeAdminStudioDetail() {
     onSuccess: (_, invite) => toast({ title: 'Invitation email queued', description: `A fresh invitation is on its way to ${invite.email}.` }),
     onError: error => toast({ title: 'Email not sent', description: error.message, variant: 'destructive' }),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin-studio-detail'] }),
+  });
+  const revoke = useMutation({
+    mutationFn: async (invite: StudioDetails['invitations'][number]) => {
+      if (!enabled || !studioId) throw new Error('Administrator access required.');
+      const { error } = await supabase.rpc('admin_revoke_studio_invitation', { _studio_id: studioId, _invite_id: invite.id });
+      if (error) throw error;
+    },
+    onSuccess: async (_, invite) => {
+      setRevokeInvite(null);
+      setRevokeError('');
+      inviteAttempts.current.delete(invite.id);
+      toast({ title: 'Invitation revoked', description: 'The unused invitation link no longer works.' });
+      await queryClient.invalidateQueries({ queryKey: ['admin-studio-detail'] });
+    },
+    onError: error => setRevokeError(error.message || 'The invitation could not be revoked. Please retry.'),
   });
   const mutation = useMutation({
     mutationFn: async (change: NonNullable<typeof pending>) => {
@@ -97,9 +114,22 @@ export default function TradeAdminStudioDetail() {
             </tr>)}</tbody>
           </table></div>}
         </section>
-        <section aria-labelledby="studio-invitations"><h2 id="studio-invitations" className="mb-4 font-display text-xl text-foreground">Pending invitations <span className="text-muted-foreground">({data.invitations.length})</span></h2>{!data.invitations.length ? <p className="text-sm text-muted-foreground">No pending invitations.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y border-border text-xs text-muted-foreground"><tr>{['Email', 'Role', 'Status', 'Invited (UTC)', 'Expires (UTC)', ''].map(label => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{data.invitations.map(invite => <tr key={invite.id} className="border-b border-border"><td className="px-4 py-4 text-foreground">{invite.email}</td><td className="px-4 py-4 capitalize">{invite.role}</td><td className={`px-4 py-4 ${invite.expired ? 'text-destructive' : 'text-muted-foreground'}`}>{invite.expired ? 'Expired' : 'Pending'}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.created_at)}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.expires_at)}</td><td className="px-4 py-4"><Button variant="outline" size="sm" className="whitespace-nowrap" aria-label={`Resend invitation to ${invite.email}`} disabled={resend.isPending || invite.role === 'owner'} onClick={() => resend.mutate(invite)}><Mail className="mr-2 h-4 w-4" />{resend.isPending && resend.variables?.id === invite.id ? 'Sending…' : 'Resend invitation'}</Button></td></tr>)}</tbody></table></div>}</section>
+        <section aria-labelledby="studio-invitations"><h2 id="studio-invitations" className="mb-4 font-display text-xl text-foreground">Pending invitations <span className="text-muted-foreground">({data.invitations.length})</span></h2>{!data.invitations.length ? <p className="text-sm text-muted-foreground">No pending invitations.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y border-border text-xs text-muted-foreground"><tr>{['Email', 'Role', 'Status', 'Invited (UTC)', 'Expires (UTC)', ''].map(label => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{data.invitations.map(invite => <tr key={invite.id} className="border-b border-border"><td className="px-4 py-4 text-foreground">{invite.email}</td><td className="px-4 py-4 capitalize">{invite.role}</td><td className={`px-4 py-4 ${invite.expired ? 'text-destructive' : 'text-muted-foreground'}`}>{invite.expired ? 'Expired' : 'Pending'}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.created_at)}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.expires_at)}</td><td className="px-4 py-4"><Button variant="outline" size="sm" className="whitespace-nowrap" aria-label={`Resend invitation to ${invite.email}`} disabled={resend.isPending || revoke.isPending || invite.role === 'owner'} onClick={() => resend.mutate(invite)}><Mail className="mr-2 h-4 w-4" />{resend.isPending && resend.variables?.id === invite.id ? 'Sending…' : 'Resend invitation'}</Button><Button variant="ghost" size="icon" className="ml-2 text-destructive hover:text-destructive" title={`Revoke invitation to ${invite.email}`} aria-label={`Revoke invitation to ${invite.email}`} disabled={resend.isPending || revoke.isPending} onClick={() => { setRevokeError(''); setRevokeInvite(invite); }}><Trash2 className="h-4 w-4" /></Button></td></tr>)}</tbody></table></div>}</section>
       </>}
     </>}
+    <AlertDialog open={enabled && Boolean(revokeInvite)} onOpenChange={open => { if (!open && !revoke.isPending) { setRevokeInvite(null); setRevokeError(''); } }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revoke studio invitation?</AlertDialogTitle>
+          <AlertDialogDescription>Revoke the invitation to {revokeInvite?.email} for {data?.studio.name}? Its unused link will stop working. Existing members and their accounts will not be affected.</AlertDialogDescription>
+        </AlertDialogHeader>
+        {revokeError && <p role="alert" className="text-sm text-destructive">{revokeError}</p>}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={revoke.isPending}>Cancel</AlertDialogCancel>
+          <Button variant="destructive" disabled={revoke.isPending} onClick={() => { if (revokeInvite) revoke.mutate(revokeInvite); }}>{revoke.isPending ? 'Revoking…' : 'Revoke invitation'}</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <AlertDialog open={enabled && Boolean(pending)} onOpenChange={open => { if (!open && !mutation.isPending) { setPending(null); setActionError(''); } }}>
       <AlertDialogContent>
         <AlertDialogHeader>
