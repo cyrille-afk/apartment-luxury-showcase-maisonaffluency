@@ -6,12 +6,13 @@ type Props = {
   taxRate: number;
   taxLabel: string;
   nonTaxableCents: number;
+  depositPct?: number;
   format: (cents: number) => string;
 };
 
-export default function QuoteChargeBreakdown({ charges, goodsCents, taxRate, taxLabel, nonTaxableCents, format }: Props) {
+export default function QuoteChargeBreakdown({ charges, goodsCents, taxRate, taxLabel, nonTaxableCents, depositPct = 0.6, format }: Props) {
   if (!charges.length) return null;
-  const rows = quoteChargeBreakdown(charges, goodsCents, taxRate, nonTaxableCents);
+  const rows = quoteChargeBreakdown(charges, goodsCents, taxRate, nonTaxableCents, depositPct);
   return (
     <section aria-label="Additional charge payment breakdown" className="font-body text-[11px] border-y border-border py-3 my-3 space-y-3">
       {rows.map((row) => (
@@ -24,8 +25,8 @@ export default function QuoteChargeBreakdown({ charges, goodsCents, taxRate, tax
             {[
               [`${taxLabel} (${taxRate}%)`, row.gstCents],
               ["Including tax", row.totalCents],
-              ["60% deposit share", row.depositCents],
-              ["40% balance share", row.balanceCents],
+              [`${Math.round(depositPct * 100)}% deposit share`, row.depositCents],
+              [`${Math.round((1 - depositPct) * 100)}% balance share`, row.balanceCents],
             ].map(([label, amount]) => (
               <div key={String(label)}>
                 <dt>{label}</dt>

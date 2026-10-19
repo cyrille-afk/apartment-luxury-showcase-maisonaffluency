@@ -6,6 +6,7 @@ export function quoteChargeBreakdown(
   goodsCents: number,
   taxRate: number,
   nonTaxableCents = 0,
+  depositPct = 0.6,
 ) {
   const tax = (cents: number) => cents > 0 ? Math.round(cents * taxRate / 100) : 0;
   let taxable = goodsCents;
@@ -13,8 +14,8 @@ export function quoteChargeBreakdown(
   return charges.map((charge) => {
     const gstCents = tax(taxable + charge.amountCents) - tax(taxable);
     const totalCents = charge.amountCents + gstCents;
-    const depositCents = Math.round((payable + totalCents) * 0.6) - Math.round(payable * 0.6);
-    const balanceCents = Math.round((payable + totalCents) * 0.4) - Math.round(payable * 0.4);
+    const depositCents = Math.round((payable + totalCents) * depositPct) - Math.round(payable * depositPct);
+    const balanceCents = totalCents - depositCents;
     taxable += charge.amountCents;
     payable += totalCents;
     return { ...charge, gstCents, totalCents, depositCents, balanceCents };

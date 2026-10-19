@@ -2401,6 +2401,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   });
   const screenOrderTotalCents = screenTaxBaseCents + screenTaxCents + screenShippingCents;
   const screenDepositCents = Math.round(screenOrderTotalCents * depositPctLive);
+  const paymentItemizedCharges: QuoteCharge[] = [
+    ...(insurancePremiumCents > 0 ? [{ id: "quote-insurance", label: "Insurance", amountCents: insurancePremiumCents }] : []),
+    ...(cratingTotalCents > 0 ? [{ id: "quote-crating", label: "Crating & packing", amountCents: cratingTotalCents }] : []),
+    ...extraCharges,
+  ];
 
   /**
    * Pre-send guard: recompute the PDF totals from the very arguments about to
@@ -4975,13 +4980,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isPriced && (() => {
           const afterDiscount = goodsAfterDiscountCents;
-          const taxable = afterDiscount + extrasTotalCents;
-          const withGst = gstEnabled && taxable > 0 ? taxable + Math.round(taxable * gstRate / 100) : taxable;
-          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-            : 0;
-          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
-          const depositCents = Math.round(orderTotal * 0.6);
+          const shippingQuoteCents = screenShippingCents;
+          const orderTotal = screenOrderTotalCents;
+          const depositCents = screenDepositCents;
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((depositCents + fixedFee) / (1 - 0.034));
@@ -5040,15 +5041,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {gstEnabled && (
                         <Row label={`${taxLabel} (${gstRate}%)`} value={`+ ${fmt(gstCents)} ${currency}`} muted />
                       )}
-                      {cratingTotalCents > 0 && (
-                        <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
-                      )}
                       <QuoteChargeBreakdown
-                        charges={extraCharges}
+                        charges={paymentItemizedCharges}
                         goodsCents={afterDiscount}
                         taxRate={gstEnabled ? gstRate : 0}
                         taxLabel={taxLabel}
-                        nonTaxableCents={cratingTotalCents + shippingQuoteCents}
+                        nonTaxableCents={shippingQuoteCents}
+                        depositPct={depositPctLive}
                         format={(cents) => `${fmt(cents)} ${currency}`}
                       />
                       {shippingQuoteCents > 0 && (
@@ -5056,8 +5055,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       )}
                       <div className="border-t border-border my-1.5" />
                       <Row label="Order total" value={`${fmt(orderTotal)} ${currency}`} strong />
-                      <Row label="60% deposit due now" value={`${fmt(depositCents)} ${currency}`} strong />
-                      <Row label="40% balance" value={`${fmt(Math.round(orderTotal * 0.4))} ${currency}`} />
+                      <Row label={`${Math.round(depositPctLive * 100)}% deposit due now`} value={`${fmt(depositCents)} ${currency}`} strong />
+                      <Row label={`${Math.round((1 - depositPctLive) * 100)}% balance`} value={`${fmt(orderTotal - depositCents)} ${currency}`} />
                       <div className="border-t border-border my-1.5" />
                       <Row label="Stripe processing fee (3.4% + fixed)" value={`+ ${fmt(processingFee)} ${currency}`} muted />
                       <Row label="Total charge to your card" value={`${fmt(chargeTotal)} ${currency}`} strong />
@@ -5079,18 +5078,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {isConfirmed && !isFullyPaid && (() => {
           const afterDiscount = goodsAfterDiscountCents;
-          const taxable = afterDiscount + extrasTotalCents;
-          const withGst = gstEnabled && taxable > 0
-            ? taxable + Math.round(taxable * gstRate / 100)
-            : taxable;
-          const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
-            ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
-            : 0;
-          const orderTotal = withGst + cratingTotalCents + shippingQuoteCents;
+          const shippingQuoteCents = screenShippingCents;
+          const orderTotal = screenOrderTotalCents;
 
           const isPayingDeposit = quoteStatus === "confirmed";
           const isPayingBalance = quoteStatus === "deposit_paid";
-          const portionCents = isPayingDeposit ? Math.round(orderTotal * 0.6) : Math.round(orderTotal * 0.4);
+          const portionCents = isPayingDeposit ? screenDepositCents : orderTotal - screenDepositCents;
           const fixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
           const fixedFee = fixedFees[currency] ?? 50;
           const chargeTotal = Math.ceil((portionCents + fixedFee) / (1 - 0.034));
@@ -5135,11 +5128,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
                   <QuoteChargeBreakdown
-                    charges={extraCharges}
+                    charges={paymentItemizedCharges}
                     goodsCents={afterDiscount}
                     taxRate={gstEnabled ? gstRate : 0}
                     taxLabel={taxLabel}
-                    nonTaxableCents={cratingTotalCents + shippingQuoteCents}
+                    nonTaxableCents={shippingQuoteCents}
+                    depositPct={depositPctLive}
                     format={(cents) => `${currencySymbol(currency)}${formatPriceRaw(cents, currency)} ${currency}`}
                   />
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
