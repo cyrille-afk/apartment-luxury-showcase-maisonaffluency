@@ -46,6 +46,11 @@ export async function buildPaymentSummaryPdf(input: PaymentSummaryInput): Promis
     space(height); doc.text(lines, M, y); doc.text(money(amount), W - M, y, { align: "right" }); y += height;
   };
   header();
+  if (input.subtotalCents != null) {
+    row("Item subtotal", input.subtotalCents);
+    if ((input.discountCents ?? 0) > 0) row(`Trade discount (${Math.round((input.discountPct ?? 0) * 100)}%)`, -(input.discountCents ?? 0));
+    y += 8;
+  }
   for (const charge of rows) {
     doc.setFont("Inter").setFontSize(10);
     const lines = doc.splitTextToSize(charge.label, W - M * 2);

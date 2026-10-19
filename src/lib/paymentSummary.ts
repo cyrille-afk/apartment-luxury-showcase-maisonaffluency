@@ -4,6 +4,7 @@ import { reconcileQuotePayment } from "./quotePaymentReconciliation";
 export type PaymentSummaryInput = {
   quoteNumber: string; clientName: string; projectName?: string | null;
   currency: string; locale: string; taxLabel: string; taxRate: number;
+  subtotalCents?: number; discountCents?: number; discountPct?: number;
   goodsCents: number; shippingCents: number; charges: QuoteCharge[];
   taxCents: number; totalCents: number; depositCents: number; balanceCents: number;
   depositPct: number; paymentType: "deposit" | "balance";
