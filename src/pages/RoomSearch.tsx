@@ -173,6 +173,14 @@ export default function RoomSearch() {
   const room = resolveRoomSlug(roomParam) || (!roomParam && pathname.includes('shop-by-room') ? 'living-room' : null);
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
+  const roomFilters = { type: searchParams.get('roomType'), finish: searchParams.get('roomFinish') };
+  const updateRoomFilters = (filters: typeof roomFilters) => {
+    const params = new URLSearchParams(searchParams);
+    for (const [key, value] of [['roomType', filters.type], ['roomFinish', filters.finish]]) {
+      if (value) params.set(key, value); else params.delete(key);
+    }
+    navigate(`${pathname}?${params.toString()}`);
+  };
 
   // Original head values captured at mount so unmount restores the
   // default gallery/homepage metadata (no leakage onto standard grids).
@@ -277,9 +285,9 @@ export default function RoomSearch() {
       <main className={trade ? 'min-h-[70vh]' : 'min-h-[70vh] pt-[var(--header-h)]'}>
         {room ? (
           <>
-            <RoomShopping key={room} room={room} trade={trade} onRoomChange={next => navigate(`${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
+            <RoomShopping key={room} room={room} trade={trade} filters={roomFilters} onFiltersChange={updateRoomFilters} onRoomChange={next => navigate(`${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
             {!trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            {trade ? <TradeGallery key={room} roomSlug={room} /> : <ProductGrid key={room} roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
+            {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
           </>
         ) : roomParam ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
