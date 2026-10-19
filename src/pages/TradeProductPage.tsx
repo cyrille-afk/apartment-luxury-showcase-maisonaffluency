@@ -13,6 +13,7 @@
  */
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
@@ -2639,14 +2640,15 @@ const TradeProductPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Primary CTA — direct order at the net trade rate */}
-                <button
-                  onClick={handleProceedToOrder}
+                {/* Primary CTA — shared intake before the existing order path */}
+                <Button
+                  data-commerce-primary
+                  onClick={() => window.dispatchEvent(new Event("ma:open-workspace-order"))}
                   className="flex items-center justify-center gap-2 px-5 py-3 rounded-none font-body text-xs uppercase tracking-[0.18em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
                   <ShoppingCart size={14} />
                   Proceed to Order
-                </button>
+                </Button>
 
                 {/* Secondary — co-pilot workspace (quote) */}
                 <button
@@ -3308,6 +3310,7 @@ const TradeProductPage: React.FC = () => {
         productId={product.id}
         dockOnly
         fixedDock
+        orderTriggerEvent="ma:open-workspace-order"
         tradeApproved
         productTitle={product.title}
         designerName={designerDisplay}
