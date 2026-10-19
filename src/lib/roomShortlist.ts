@@ -16,9 +16,9 @@ export function toggleShortlistItem(items: RoomShortlistItem[], item: RoomShortl
   return items.some(p => p.id === item.id) ? items.filter(p => p.id !== item.id) : [...items, roomShortlistItemSchema.parse(item)];
 }
 export const roomShortlistDraftKey = (room: RoomSlug, userId?: string) => `ma-room-shortlist-v1:${userId || 'guest'}:${room}`;
-export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string };
+export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string; closingMessage: string };
 export function shortlistCover(value: unknown): RoomShortlistCover {
-  const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch('') }).safeParse(value);
-  return { clientName: parsed.success ? parsed.data.clientName || '' : '', projectTitle: parsed.success ? parsed.data.projectTitle || '' : '', introduction: parsed.success ? parsed.data.introduction || '' : '' };
+  const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch(''), closingMessage: z.string().catch('') }).safeParse(value);
+  return { clientName: parsed.success ? parsed.data.clientName || '' : '', projectTitle: parsed.success ? parsed.data.projectTitle || '' : '', introduction: parsed.success ? parsed.data.introduction || '' : '', closingMessage: parsed.success ? parsed.data.closingMessage || '' : '' };
 }
 export const shortlistCoverKey = (key: string, savedId?: string) => `${key}:pdf-cover:${savedId || 'draft'}`;

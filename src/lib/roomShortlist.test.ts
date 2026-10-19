@@ -18,10 +18,10 @@ describe('room collection shortlists', () => {
   });
   it('rejects damaged stored selections', () => { expect(shortlistItems([{ id: 'broken' }])).toEqual([]); });
   it('retains all optional cover fields as plain text without private extras', () => {
-    expect(shortlistCover({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', net: 9000 })).toEqual({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.' });
+    expect(shortlistCover({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.', net: 9000 })).toEqual({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', closingMessage: 'À votre service.' });
   });
   it('defaults missing cover details without sharing another shortlist draft', () => {
-    expect(shortlistCover(null)).toEqual({ clientName: '', projectTitle: '', introduction: '' });
+    expect(shortlistCover(null)).toEqual({ clientName: '', projectTitle: '', introduction: '', closingMessage: '' });
     expect(new Set(['draft', 'a', 'b'].map(id => shortlistCoverKey('owner:living', id))).size).toBe(3);
   });
 });
