@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
       templateData = {
         studioName: studio.name, inviterName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Your colleague',
         role: invite.role, recipientEmail: invite.email, expiresAt: invite.expires_at,
-        link: 'https://www.maisonaffluency.com/trade/login?next=%2Ftrade%2Fsettings%2Fstudio',
+        link: `https://www.maisonaffluency.com/trade/login?next=${encodeURIComponent(`/trade/me?studioInvite=${invite.id}`)}`,
       }
     } else if (templateName === 'board-collaborator-invite' && callerId) {
       // Always rebuild collaborator invitations from stored data, including for
