@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams, useParams } from "react-router-dom";
-import RoomCollectionStory from '@/components/product/RoomCollectionStory';
-import RoomConsultationForm from '@/components/product/RoomConsultationForm';
-import { RoomShortlistProvider, RoomShortlistToolbar } from '@/components/product/RoomShortlist';
-import { isCollectionRoom, roomCollectionPath } from '@/lib/roomCollections';
-import RoomShopping from '@/components/product/RoomShopping';
-import TradeGallery from './TradeGallery';
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
@@ -15,7 +9,6 @@ import { useRoomPreviewScene } from "@/hooks/useRoomPreviewScene";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { resolveRoomSort, type RoomSort } from '@/lib/roomShoppingSort';
 
 // Room hero assets reused from the header mega-menu so the shared link
 // preview shows the same vignette the navigation pathway advertises.
@@ -172,38 +165,20 @@ function RoomExperience({ room, roomLabel }: { room: RoomSlug; roomLabel: string
 export default function RoomSearch() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const pathname = useLocation().pathname;
-  const trade = pathname.startsWith('/trade/');
-  const { roomSlug } = useParams();
-  const collection = isCollectionRoom(roomSlug);
   const roomParam = searchParams.get("room");
-  const room = roomSlug ? (collection ? roomSlug : null) : resolveRoomSlug(roomParam) || (!roomParam && pathname.includes('shop-by-room') ? 'living-room' : null);
+  const room = resolveRoomSlug(roomParam);
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
-  const roomFilters = { type: searchParams.get('roomType'), finish: searchParams.get('roomFinish') };
-  const roomSort = resolveRoomSort(searchParams.get('roomSort'));
-  const updateRoomSort = (sort: RoomSort) => {
-    const params = new URLSearchParams(searchParams);
-    if (sort === 'curated') params.delete('roomSort'); else params.set('roomSort', sort);
-    navigate(`${pathname}?${params.toString()}`, { replace: true, preventScrollReset: true });
-  };
-  const updateRoomFilters = (filters: typeof roomFilters) => {
-    const params = new URLSearchParams(searchParams);
-    for (const [key, value] of [['roomType', filters.type], ['roomFinish', filters.finish]]) {
-      if (value) params.set(key, value); else params.delete(key);
-    }
-    navigate(`${pathname}?${params.toString()}`);
-  };
 
   // Original head values captured at mount so unmount restores the
   // default gallery/homepage metadata (no leakage onto standard grids).
   const originalHead = useRef<Map<string, string | null> | null>(null);
 
   useEffect(() => {
-    if (room && roomParam && roomParam !== room) {
+    if (room && roomParam !== room) {
       const params = new URLSearchParams(searchParams);
       params.set("room", room);
-      navigate(`${trade ? '/trade/shop-by-room' : '/search'}?${params.toString()}`, { replace: true });
+      navigate(`/search?${params.toString()}`, { replace: true });
     }
   }, [navigate, room, roomParam, searchParams]);
 
@@ -226,7 +201,7 @@ export default function RoomSearch() {
       originalHead.current = captured;
     }
 
-    if (!room || collection) return;
+    if (!room) return;
 
     const universe = ROOM_UNIVERSES[room];
     const curated = ROOM_CURATED[room];
@@ -254,7 +229,7 @@ export default function RoomSearch() {
       upsertMeta("property", "og:image", absolute);
       upsertMeta("name", "twitter:image", absolute);
     }
-  }, [room, collection]);
+  }, [room]);
 
   // Revert to default gallery meta on unmount so metadata never leaks
   // onto standard collection grids.
@@ -294,18 +269,14 @@ export default function RoomSearch() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {!trade && <Navigation alwaysVisible />}
-      <main className={trade ? 'min-h-[70vh]' : 'min-h-[70vh] pt-[var(--header-h)]'}>
+      <Navigation alwaysVisible />
+      <main className="min-h-[70vh] pt-[var(--header-h)]">
         {room ? (
-          <RoomShortlistProvider room={room}>
-            {collection && <RoomCollectionStory room={roomSlug} trade={trade} />}
-            <RoomShopping key={room} room={room} trade={trade} collection={collection} filters={roomFilters} onFiltersChange={updateRoomFilters} sort={roomSort} onSortChange={updateRoomSort} onRoomChange={next => navigate(isCollectionRoom(next) ? roomCollectionPath(next, trade) : `${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
-            {!collection && !trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
-            <RoomShortlistToolbar />
-            {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomSort={roomSort} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
-            {collection && <RoomConsultationForm key={`consultation-${roomSlug}`} room={roomSlug} />}
-          </RoomShortlistProvider>
-        ) : roomParam || roomSlug ? (
+          <>
+            {!searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
+            <ProductGrid roomSlug={room} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />
+          </>
+        ) : roomParam ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>
             <p className="mt-3 font-body text-sm text-muted-foreground">
@@ -317,7 +288,7 @@ export default function RoomSearch() {
           <ProductGrid compactTop showAll />
         )}
       </main>
-      {!trade && <Footer />}
+      <Footer />
     </div>
   );
 }

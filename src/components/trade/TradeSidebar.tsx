@@ -33,7 +33,6 @@ const topItems: NavItem[] = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "THE COLLECTION", url: "/trade/the-collection", icon: MapPin },
-  { title: "Shop by Room", url: "/trade/shop-by-room?room=living-room&view=grid", icon: Image },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Trade Concierge (Powered by Felix)", url: "/trade/concierge", icon: Sparkles },
   { title: "AI Extension Sync", url: "/trade/extension-sync", icon: Wand2 },

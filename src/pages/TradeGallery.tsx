@@ -51,12 +51,6 @@ import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import { readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
-import { roomShoppingProducts } from '@/lib/shopByRoom';
-import type { RoomSlug } from '@/lib/roomCategories';
-import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
-import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
-import { roomPriceCents, sortRoomProducts, type RoomSort } from '@/lib/roomShoppingSort';
-import { RoomShortlistButton } from '@/components/product/RoomShortlist';
 
 
 const slugifyForUrl = (s: string) =>
@@ -67,7 +61,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-const TradeGallery = ({ roomSlug, roomFilters, roomSort }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort } = {}) => {
+const TradeGallery = () => {
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
@@ -75,17 +69,15 @@ const TradeGallery = ({ roomSlug, roomFilters, roomSort }: { roomSlug?: RoomSlug
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} roomFilters={roomFilters} roomSort={roomSort} />;
+  ) : <StudioGallery key={location.pathname} />;
 };
 
-const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters; roomSort?: RoomSort }) => {
+const StudioGallery = () => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts: tradeProducts, publicTradeHiddenProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
-  const roomPieces = useMemo(() => roomSlug ? roomShoppingProducts(tradeProducts.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, materials: p.materials, image: p.image_url || '', path: '' })), roomSlug) : [], [tradeProducts, roomSlug]);
-  const { data: roomFinishes = {} } = useRoomShoppingFinishes(roomPieces.map(p => p.id));
   const publishedMakerNames = usePublishedMakerNames();
   // Drive the dropdown from the live published-profile list so it always
   // matches the maker count; fall back to product-derived brands while loading.
@@ -549,15 +541,8 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
 
   // Explicit sort options layered on top of the curated sequence.
   const sorted = useMemo(
-    () => {
-      const roomIds = roomSlug ? new Set(roomShoppingProducts(filtered.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, image: p.image_url || '', path: '' })), roomSlug).map(p => p.id)) : null;
-      const pieces = roomIds ? filtered.filter(p => roomIds.has(p.id) && (!roomFilters || matchesRoomShoppingFilters({ id: p.id, title: p.product_name, category: p.category, subcategory: p.subcategory, materials: p.materials }, roomFilters, roomFinishes))) : filtered;
-      return roomSlug ? sortRoomProducts(pieces, roomSort, p => {
-        const price = getProductPrice(p);
-        return { name: p.product_name, createdAt: p.created_at, priceCents: roomPriceCents(price?.cents, price?.currency, displayCurrency, fxRates) };
-      }) : sortTradeProducts(pieces, sortBy);
-    },
-    [filtered, sortBy, roomSlug, roomFilters, roomFinishes, roomSort, priceLookup, priceEntries, displayCurrency, fxRates],
+    () => sortTradeProducts(filtered, sortBy),
+    [filtered, sortBy],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
@@ -641,7 +626,7 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
         <div>
           <h1 className="font-display text-base md:text-lg font-normal tracking-wide text-foreground">Trade Gallery</h1>
           <p className="mt-0.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {sorted.length} {sorted.length === 1 ? "collected piece" : "collected pieces"}
+            {filtered.length} {filtered.length === 1 ? "collected piece" : "collected pieces"}
             {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
           </p>
         </div>
@@ -691,7 +676,7 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
             <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} counts={editionCounts} allCount={collectionCounts.total} />
           </div>
           <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
-            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : sorted.length} {sorted.length === 1 ? "Item" : "Items"} Found</span>
+            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : filtered.length} {filtered.length === 1 ? "Item" : "Items"} Found</span>
             <div className="flex items-center gap-1">
               <GridDensityToggle value={density === "compact" ? 4 : 3} onChange={(columns) => { setViewMode("grid"); setDensity(columns === 4 ? "compact" : "comfortable"); }} className="!flex shrink-0" />
               <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="icon" aria-label="Display list" aria-pressed={viewMode === "list"} title="Display list" onClick={() => setViewMode("list")} className={cn("h-10 w-10", viewMode === "list" && "bg-foreground text-background hover:bg-foreground/90")}><List /></Button>
@@ -702,12 +687,12 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
           {subcategories.length > 0 && (
             <div className="w-full sm:w-52"><GalleryFilterSelect value={selectedSubcategory} onChange={setSelectedSubcategory} label="Filter by subcategory" allLabel="All Subcategories" options={subcategories} /></div>
           )}
-          {!roomSlug && <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
             <option value="curated">Sort: Curated order</option>
             <option value="designer">Sort: Designer A–Z</option>
             <option value="title">Sort: Title A–Z</option>
             <option value="recent">Sort: Most recently added</option>
-          </select>}
+          </select>
           <select value="" aria-label="Saved views"
               onChange={(e) => {
                 const val = e.target.value;
@@ -792,7 +777,7 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
       {/* Content */}
       {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
         <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
-      ) : sorted.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">
             No products match your search criteria.
@@ -843,7 +828,6 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
                     </div>
                   )}
                   <ProductCardDescriptionOverlay description={product.description} />
-                  <RoomShortlistButton overlay item={{ id: product.id, product_name: product.product_name, brand_name: product.brand_name, image_url: product.image_url, category: product.category, dimensions: product.dimensions, materials: product.materials, lead_time: product.lead_time }} />
                    <div className="absolute top-2 left-2 z-10">
                      <TradeFavoriteFolderPicker
                        productId={product.id}
@@ -980,7 +964,6 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
                      <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
                    )}
                 </div>
-                <RoomShortlistButton item={{ id: product.id, product_name: product.product_name, brand_name: product.brand_name, image_url: product.image_url, category: product.category, dimensions: product.dimensions, materials: product.materials, lead_time: product.lead_time }} />
                 {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
                     {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.brand_name)}
