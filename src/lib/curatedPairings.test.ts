@@ -6,18 +6,18 @@ const selectCuratedPairings = (primary: PairingProduct, pool: PairingProduct[], 
 
 const product = (id: string, title: string): PairingProduct => ({ id, title, brand: "APPARATUS", image: "/test.jpg", path: `/products/${id}` });
 const primary = product("tassel", "Tassel 57 Pendant");
-const pool = [primary, product("pendant", "Another Pendant"), product("wall", "Cylinder Wall Sconce"), product("table", "Accent Side Table"), product("decor", "Bronze Bowl"), product("decor2", "Glass Vase")];
+const pool = [primary, product("pendant", "Another Pendant"), product("wall", "Dining Table"), product("table", "Dining Sideboard"), product("decor", "Dining Room Rug"), product("decor2", "Hand-Woven Rug")];
 describe("curated cart pairing rules", () => {
   it("disables recommendations for Interior Designer / Architect", () => expect(privatePairingsEnabled("designer")).toBe(false));
   it("enables recommendations only for Private Client", () => { expect(privatePairingsEnabled("private")).toBe(true); expect(privatePairingsEnabled(null)).toBe(false); });
-  it("pairs Tassel 57 with wall lighting, accent furniture and decor, never pendants", () => expect(selectCuratedPairings(primary, pool).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
+  it("pairs ceiling lighting with dining furniture and a rug, never more pendants", () => expect(selectCuratedPairings(primary, pool).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
   it("limits the selection to three pieces", () => expect(selectCuratedPairings(primary, pool)).toHaveLength(3));
   it("omits pieces already in the basket", () => expect(selectCuratedPairings(primary, pool, ["wall"]).map((p) => p.id)).toEqual(["table", "decor"]));
   it("does not show a single uncurated fallback", () => expect(selectCuratedPairings(primary, [primary])).toEqual([]));
-  it("uses edited category order", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, sort_order: 2 - r.sort_order }))).map((p) => p.id)).toEqual(["decor", "table", "wall"]));
-  it("uses an editor-selected published piece", () => expect(select(primary, pool, [], [{ ...rules[2], preferred_pick_id: "decor2" }]).map((p) => p.id)).toEqual(["decor2"]));
+  it("keeps functional room priority when generic category order changes", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, sort_order: 2 - r.sort_order }))).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
+  it("uses an editor-selected published piece within its functional slot", () => expect(select(primary, pool, [], rules.map(r => r.id === rules[2].id ? { ...r, preferred_pick_id: "decor2" } : r)).map((p) => p.id)).toEqual(["wall", "table", "decor2"]));
   it("omits paused matches", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, enabled: r.target_category !== "wall" }))).map((p) => p.id)).toEqual(["table", "decor"]));
-  it("rejects same-category matches even if supplied", () => expect(select(primary, pool, [], [{ ...rules[0], target_category: "ceiling" }])).toEqual([]));
+  it("room slots override generic target categories without recommending a substitute", () => expect(select(primary, pool, [], [{ ...rules[0], target_category: "ceiling" }]).map(p => p.id)).toEqual(["wall"]));
   it("does not substitute a preferred piece from the wrong category", () => expect(select(primary, pool, [], [{ ...rules[0], preferred_pick_id: "pendant" }]).map((p) => p.id)).toEqual(["wall"]));
   it("deduplicates repeated target matches and caps results at three", () => expect(select(primary, pool, [], [...rules, { ...rules[2], id: "extra", preferred_pick_id: "decor2", sort_order: 3 }]).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
   it("honors an empty editable catalog without hardcoded fallback", () => expect(select(primary, pool, [], [])).toEqual([]));
@@ -25,8 +25,8 @@ describe("curated cart pairing rules", () => {
 describe("pairings vary by first purchase", () => {
   it("different pendants of the same category don't all receive the same companions", () => {
     const other = (id: string, title: string): PairingProduct => ({ ...product(id, title), brand: "Other House" });
-    const decor = Array.from({ length: 12 }, (_, i) => other(`vase${i}`, `Glass Vase ${i}`));
-    const picks = new Set(Array.from({ length: 8 }, (_, i) => select(product(`p${i}`, `Pendant Light ${i}`), decor, [], [rules[2]])[0]?.id));
+    const decor = Array.from({ length: 12 }, (_, i) => other(`rug${i}`, `Hand-Woven Rug ${i}`));
+    const picks = new Set(Array.from({ length: 8 }, (_, i) => select(product(`p${i}`, `Pendant Light ${i}`), decor, [], rules)[0]?.id));
     expect(picks.size).toBeGreaterThan(1);
   });
 });
