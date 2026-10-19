@@ -519,6 +519,12 @@ html.product-detail-root .product-page-root {
     transform: none !important;
     flex: none;
   }
+  .mobile-product-commerce-dock-fixed {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    z-index: 9999 !important;
+  }
 }
 
 @media (max-width: 339px) {

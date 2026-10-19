@@ -3370,7 +3370,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
         </div>
 
       {/* One authoritative mobile dock, isolated from the scrolling product copy. */}
-      {showPublicCommerce && (
+      {!showMockTradeCommerce && (
         <ProductCommerceCta
           productId={product.id}
           rrpLabel={displayRrpLabel}

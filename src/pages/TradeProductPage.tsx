@@ -92,6 +92,7 @@ import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
 import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 import { addToCart } from "@/lib/cart";
 import NotFound from "@/pages/NotFound";
+import ProductCommerceCta from "@/components/product/ProductCommerceCta";
 
 
 const specIcon = (symbol: string, className = "") => (
@@ -3301,6 +3302,22 @@ const TradeProductPage: React.FC = () => {
           );
         })()}
       </div>
+
+      <div className="h-28 md:hidden" aria-hidden="true" />
+      <ProductCommerceCta
+        productId={product.id}
+        dockOnly
+        fixedDock
+        tradeApproved
+        productTitle={product.title}
+        designerName={designerDisplay}
+        imageUrl={images[galleryActiveIndex ?? 0] || product.image_url || null}
+        rrpLabel={priceLabels?.retailLabel ?? null}
+        retailLabelOverride={priceLabels?.retailLabel ?? null}
+        netLabelOverride={priceLabels?.netLabel ?? null}
+        selectedFinishes={[selectedBase, selectedTop, selectedDualSize, selectedSingleSize, selectedFabric?.name].filter((value): value is string => typeof value === "string" && value.length > 0)}
+        onPlaceOrder={() => currentRrpCents() ? handleProceedToOrder() : setCustomRequestOpen(true)}
+      />
 
       <QuoteDrawer
         open={drawerOpen}
