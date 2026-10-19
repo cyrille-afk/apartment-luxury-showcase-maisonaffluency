@@ -45,6 +45,7 @@ interface Invite {
 }
 
 const inviteExpired = (inv: Invite) => new Date(inv.expires_at).getTime() <= Date.now();
+const inviteDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 const ROLE_DESC: Record<StudioRole, string> = {
   owner: "Full control including billing & deletion",
