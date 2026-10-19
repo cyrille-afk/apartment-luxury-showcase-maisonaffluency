@@ -58,10 +58,13 @@ async function push(items: CartItem[], status: "active" | "ordered") {
   const contact = readContact();
   const { data: session } = await supabase.auth.getSession().catch(() => ({ data: null } as never));
   const user = session?.session?.user ?? null;
+  let buyerProfile: string | null = null;
+  try { buyerProfile = JSON.parse(localStorage.getItem("ma_checkout_form") || "null")?.buyerProfile ?? null; } catch { /* Optional tracking metadata. */ }
 
   const body = {
     sessionId: id,
     status,
+    buyerProfile,
     userId: user?.id ?? null,
     email: contact.email ?? user?.email ?? null,
     name: contact.name ?? null,

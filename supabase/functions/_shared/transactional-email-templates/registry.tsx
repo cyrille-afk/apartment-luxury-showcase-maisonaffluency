@@ -35,6 +35,7 @@ import { template as tradeProgramInvitation } from './trade-program-invitation.t
 import { template as boardCollaboratorInvite } from './board-collaborator-invite.tsx'
 import { template as studioTeammateInvite } from './studio-teammate-invite.tsx'
 import { template as boardAccessCode } from './board-access-code.tsx'
+import { template as privateClientCode } from './private-client-code.tsx'
 import { template as purchaseOrderDispatch } from './purchase-order-dispatch.tsx'
 import { template as designerPurchaseOrder } from './designer-purchase-order.tsx'
 import { template as clientQuotePayment } from './client-quote-payment.tsx'
@@ -79,6 +80,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'board-collaborator-invite': boardCollaboratorInvite,
   'studio-teammate-invite': studioTeammateInvite,
   'board-access-code': boardAccessCode,
+  'private-client-code': privateClientCode,
   'purchase-order-dispatch': purchaseOrderDispatch,
   'designer-purchase-order': designerPurchaseOrder,
   'client-quote-payment': clientQuotePayment,

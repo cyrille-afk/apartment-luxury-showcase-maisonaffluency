@@ -1,6 +1,7 @@
 // Mirrors the shopper's basket server-side so abandoned bags can be measured
 // and recovered. Public endpoint: anonymous shoppers must be able to write.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { cartBuyerProfileFields } from '../_shared/cartBuyerProfile.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +87,7 @@ Deno.serve(async (req) => {
     subtotal_cents: subtotal,
     items,
     status,
+    ...cartBuyerProfileFields(body.buyerProfile),
     last_activity_at: new Date().toISOString(),
   }
   if (status === 'ordered') payload.recovered_at = new Date().toISOString()
@@ -94,6 +96,7 @@ Deno.serve(async (req) => {
   if (!payload.email) delete payload.email
   if (!payload.name) delete payload.name
   if (!payload.user_id) delete payload.user_id
+  if (!payload.buyer_profile) delete payload.buyer_profile
 
   const { error } = await supabase
     .from('abandoned_carts')

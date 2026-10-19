@@ -27,6 +27,7 @@ import {
 } from "@/lib/cart";
 import { setCartContact } from "@/lib/cartTracking";
 import { isReturningPrivateClient, rememberedPrivateClients, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import PrivateClientWelcome from "@/components/product/PrivateClientWelcome";
 import { clearSecureBasket } from "@/lib/checkout/secureBasket";
 import { evaluateAllocation } from "@/config/tradeGuardrails";
 import {
@@ -425,11 +426,7 @@ export default function CartIdentify() {
                     delivery coordination.
                   </p>
                   <form onSubmit={handleGuest} className="mt-5 space-y-4">
-                    {isReturningPrivateClient(guestEmail, checkoutForm.buyerProfile, rememberedEmails) && (
-                      <p role="status" className="font-body text-sm leading-relaxed text-foreground">
-                        Welcome back. It’s a pleasure to see you again.
-                      </p>
-                    )}
+                    <PrivateClientWelcome email={guestEmail} profile={checkoutForm.buyerProfile} locallyReturning={isReturningPrivateClient(guestEmail, checkoutForm.buyerProfile, rememberedEmails)} />
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Input
                         type="email"
