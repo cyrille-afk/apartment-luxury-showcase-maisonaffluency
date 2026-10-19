@@ -346,7 +346,8 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
     for (const [index, line] of auditLines.entries()) {
       doc.setFont("helvetica", index === 0 ? "bold" : "normal");
       doc.setFontSize(index === 0 ? 10 : 8);
-      doc.setTextColor(...(index === 0 ? JADE : MUTED));
+      const auditColor = index === 0 ? JADE : MUTED;
+      doc.setTextColor(auditColor[0], auditColor[1], auditColor[2]);
       const wrapped = doc.splitTextToSize(line, contentW) as string[];
       y = ensureSpace(doc, y, wrapped.length * 11 + 6, pageH);
       doc.text(wrapped, M, y, { lineHeightFactor: 1.35 });

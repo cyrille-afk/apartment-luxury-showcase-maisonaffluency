@@ -94,6 +94,11 @@ describe("unsupported lane fallback", () => {
     expect(r.selected_lane_id).toBe("lane-fr-gb");
     // 50,000 + 10,000 × 5 = 100,000, +12% inland transfer uplift.
     expect(r.freight_cents).toBe(112_000);
+    expect(r.rate_calculation).toEqual({
+      billable_cbm: 5, chargeable_kg: 400, base_rate_cents: 50_000,
+      rate_per_cbm_cents: 10_000, rate_per_kg_cents: 0,
+      min_charge_cents: 0, hub_uplift_percent: 12,
+    });
     expect(r.reason).toMatch(/indicative/i);
     // It tried the direct lane before falling back to the hub.
     expect(laneFilters.map((f) => f["eq:origin_country"])).toEqual(["IT", "FR"]);
