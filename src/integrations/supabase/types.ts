@@ -2242,6 +2242,7 @@ export type Database = {
           id: string
           items: Json
           name: string
+          room_slug: string | null
           share_token: string
           user_id: string
         }
@@ -2250,6 +2251,7 @@ export type Database = {
           id?: string
           items?: Json
           name?: string
+          room_slug?: string | null
           share_token?: string
           user_id: string
         }
@@ -2258,6 +2260,7 @@ export type Database = {
           id?: string
           items?: Json
           name?: string
+          room_slug?: string | null
           share_token?: string
           user_id?: string
         }
