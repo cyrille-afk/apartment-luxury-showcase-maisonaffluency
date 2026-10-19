@@ -45,6 +45,11 @@ const ORIGIN_TO_ISO: Record<string, string> = {
   china: "CN", cn: "CN",
   "hong kong": "HK", hk: "HK",
   india: "IN", in: "IN",
+  // Destination markets (billing countries are stored as full names).
+  singapore: "SG", sg: "SG",
+  malaysia: "MY", thailand: "TH", indonesia: "ID", vietnam: "VN", "viet nam": "VN", philippines: "PH",
+  "united arab emirates": "AE", uae: "AE", "saudi arabia": "SA", qatar: "QA", kuwait: "KW", bahrain: "BH", oman: "OM",
+  australia: "AU", "new zealand": "NZ", "south korea": "KR", korea: "KR", taiwan: "TW", liechtenstein: "LI", luxembourg: "LU", monaco: "MC",
 };
 
 export const toIsoCountry = (raw: string | null | undefined, fallback = "FR"): string => {

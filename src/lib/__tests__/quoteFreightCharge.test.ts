@@ -16,3 +16,10 @@ describe("manual freight charge on quote PDF", () => {
     expect(t.grand).toBe(Math.round((1_337_586 + 120_000) * 1.09));
   });
 });
+
+import { toIsoCountry } from "@/lib/perLineShipping";
+describe("quote destination from client billing country", () => {
+  it("resolves 'Singapore' to SG so BE → SG freight is calculated", () => {
+    expect(toIsoCountry("Singapore", "")).toBe("SG");
+  });
+});
