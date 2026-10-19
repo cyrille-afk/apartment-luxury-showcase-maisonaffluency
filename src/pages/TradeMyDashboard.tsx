@@ -116,7 +116,7 @@ export default function TradeMyDashboard() {
   // Unified routing: approved trade accounts and admins always land on the
   // Curated Showroom dashboard. This alternate layout remains only for
   // restricted public accounts and admin impersonation.
-  if (hasOwnTradeAccess && !isImpersonating) {
+  if (hasOwnTradeAccess && !isImpersonating && !searchParams.get("studioInvite")) {
     return <Navigate to="/trade" replace />;
   }
 
