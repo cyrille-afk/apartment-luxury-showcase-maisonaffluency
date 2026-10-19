@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bookmark, Check, Link2, Trash2, X, FolderOpen } from 'lucide-react';
+import { Bookmark, Check, Link2, Trash2, X, FolderOpen, FileDown } from 'lucide-react';
+import { buildRoomShortlistPdf, shortlistPdfFilename } from '@/lib/roomShortlistPdf';
 import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,6 +68,20 @@ function RoomShortlistState({ room, children }: { room: RoomSlug; children: Reac
       if (error) throw error;
       setConfirmDelete(null); setShareUrl(''); await saved.refetch(); toast.success('Shortlist deleted');
     } catch { toast.error('Could not delete your shortlist'); } finally { setBusy(false); }
+  };
+  const [exporting, setExporting] = useState(false);
+  const exportPdf = async () => {
+    if (!items.length || exporting) return;
+    setExporting(true);
+    try {
+      const title = name.trim() || `${ROOM_LABELS[room]} shortlist`;
+      const blob = await buildRoomShortlistPdf({ title, roomLabel: ROOM_LABELS[room], items });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = shortlistPdfFilename(title);
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      toast.success('Client PDF ready');
+    } catch { toast.error('Could not create the PDF'); } finally { setExporting(false); }
   };
   return <Context.Provider value={{ items, toggle: item => { setItems(prev => toggleShortlistItem(prev, item)); setShareUrl(''); }, open: () => setOpen(true) }}>
     {children}
