@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Mobile pairing and quick-view overlays share a downward touch-dismiss hook; content gestures require scroll-top, handles bypass that check, and controls/multitouch/cancel never dismiss — preserves finish selection and native scrolling.
 - Room shortlists reuse owner-private comparator_shortlists with room_slug and the existing public token reader; account/room-scoped local drafts and allowlisted product snapshots exclude all pricing, while shared links never grant editing — keeps Public and Trade selections interoperable without duplicating sharing infrastructure.
 - Room collection consultation forms share one validated server intake that stores in the existing private inquiries inbox before fixed-recipient app emails; collection context is server-derived and submissions never create accounts — keeps Public and Trade inquiries visible to the owner without granting visitor read access.
 - Inquiry-created quotes copy contact fields; funnel and resumed drafts fall back to the linked inquiry without replacing explicit quote contacts. Email names are display-only unverified suggestions — avoids contact loss and false identity claims.

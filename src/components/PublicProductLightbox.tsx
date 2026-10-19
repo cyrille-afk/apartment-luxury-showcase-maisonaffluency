@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobileSwipeDismiss } from "@/hooks/useMobileSwipeDismiss";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
@@ -264,6 +265,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     setVisible(false);
     closeTimerRef.current = window.setTimeout(finishClose, prefersReducedMotion ? 180 : 420);
   }, [finishClose, prefersReducedMotion]);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useMobileSwipeDismiss({ containerRef: panelRef, enabled: isMobile && visible && !!propProduct && !contextualPanel, onDismiss: requestClose });
   // If the parent swaps in a new product while we're still mounted, reopen and
   // reset the close lifecycle. iOS/PWA occasionally misses framer-motion's exit
   // callback; the timeout above guarantees the invisible overlay is unmounted.
@@ -736,6 +739,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       >
         <motion.div
           {...panelMotion}
+          ref={panelRef}
           className={cn(
             "relative mx-auto flex w-full flex-col bg-background",
             contextualPanel
@@ -746,6 +750,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         >
           {/* Mobile header */}
           <div
+            data-swipe-dismiss-handle
             className={cn("md:hidden sticky top-0 z-20 flex items-center justify-between bg-background/90 border-b border-border/60 shrink-0", !contextualPanel && "backdrop-blur-sm")}
             style={{
               paddingTop: "max(0.75rem, env(safe-area-inset-top))",
