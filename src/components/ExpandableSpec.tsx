@@ -53,6 +53,8 @@ interface ExpandableSpecProps {
    * Ignored when multiple options render as a dropdown.
    */
   singleValueLabel?: string;
+  /** Keeps a finish axis identifiable after its selected value replaces the placeholder. */
+  selectedValueLabel?: string;
   /**
    * Renders the options as a horizontal row of circular material swatches
    * instead of a dropdown (luxury finish pickers: instant, one-tap, no
@@ -88,6 +90,7 @@ export default function ExpandableSpec({
   disabledIndices,
   helperText,
   singleValueLabel,
+  selectedValueLabel,
   swatchMode = false,
   forceDropdown = false,
 }: ExpandableSpecProps) {
@@ -336,7 +339,7 @@ export default function ExpandableSpec({
         >
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
             {diameterHint}
-            {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
+            {hasSelection ? `${selectedValueLabel ? `${selectedValueLabel}: ` : ""}${lines[selectedIdx ?? 0]}` : placeholder}
           </span>
 
           <ChevronRight

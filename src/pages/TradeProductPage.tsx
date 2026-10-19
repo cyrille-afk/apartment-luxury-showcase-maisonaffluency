@@ -2457,7 +2457,8 @@ const TradeProductPage: React.FC = () => {
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
+                  placeholder={product.wood_label_override || getBasePlaceholder(product)}
+                  selectedValueLabel={product.wood_label_override?.replace(/^select\s+(?:your\s+|the\s+)?/i, "") || formatVariantAxisLabel(product.base_axis_label) || undefined}
                   singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
                   emphasized
                   value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
@@ -2469,7 +2470,7 @@ const TradeProductPage: React.FC = () => {
                     }
                     const v = baseOptions[idx] ?? null;
                     setSelectedBase(v);
-                    handleMaterialChange(v, { base: v, top: null, size: null });
+                    handleMaterialChange(v, { base: v, top: null, size: selectedDualSize });
                   }}
                 />
               )}
