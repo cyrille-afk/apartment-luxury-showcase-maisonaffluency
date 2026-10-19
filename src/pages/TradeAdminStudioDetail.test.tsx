@@ -71,7 +71,7 @@ describe('admin studio detail access', () => {
     mount();
     const button = await screen.findByRole('button', { name: 'Resend invitation to greg@example.com' });
     fireEvent.click(button);
-    await waitFor(() => expect(button.disabled).toBe(false));
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
     expect(state.invoke).toHaveBeenCalledWith('send-transactional-email', { body: { templateName: 'studio-teammate-invite', idempotencyKey: expect.stringMatching(/^studio-invite-invite-1-/), templateData: { inviteId: 'invite-1' } } });
     const firstKey = state.invoke.mock.calls[0][1].body.idempotencyKey;
     fireEvent.click(button);
@@ -85,7 +85,7 @@ describe('admin studio detail access', () => {
     mount();
     const button = await screen.findByRole('button', { name: 'Resend invitation to greg@example.com' });
     fireEvent.click(button);
-    await waitFor(() => expect(button.disabled).toBe(false));
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
     fireEvent.click(button);
     await waitFor(() => expect(state.invoke).toHaveBeenCalledTimes(2));
     expect(state.invoke.mock.calls[1][1].body.idempotencyKey).toBe(state.invoke.mock.calls[0][1].body.idempotencyKey);
