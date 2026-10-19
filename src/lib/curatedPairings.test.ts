@@ -30,3 +30,33 @@ describe("pairings vary by first purchase", () => {
     expect(picks.size).toBeGreaterThan(1);
   });
 });
+describe("functional room-led pairings", () => {
+  const chair = product("chair", "Rua Leblon Armchair");
+  const coffee = product("coffee", "Praia da Granja Coffee Table");
+  const living = [chair, coffee, product("side", "Madison Side Table"), product("floor", "Reading Floor Lamp"), product("rug", "Living Room Rug"),
+    { ...product("tray", "Yugen Nbr 1"), category: "Décor", subcategory: "Trays & Change Trays" }, product("mirror", "Helios Mirror"),
+    product("dining", "Dining Table"), product("office", "Office Chair"), product("outdoor", "Outdoor Armchair")];
+  const roomRules = (source: string): PairingRule[] => ["tables", "table-light", "decor"].map((target_category, sort_order) => ({ id: String(sort_order), source_category: source, target_category, sort_order, enabled: true, preferred_pick_id: null }));
+  it("armchairs get side table, floor lighting and rug, never a tray", () => {
+    expect(select(chair, living, [], roomRules("seating")).map(p => p.id)).toEqual(["side", "floor", "rug"]);
+  });
+  it("coffee tables get living seating, floor lighting and rug, never a mirror", () => {
+    expect(select(coffee, living, [], roomRules("tables")).map(p => p.id)).toEqual(["chair", "floor", "rug"]);
+  });
+  it("an incompatible preferred tray cannot bypass room relevance or attach its custom price", () => {
+    const edited = roomRules("seating").map(r => ({ ...r, preferred_pick_id: "tray", finish_options: [{ id: "x", name: "Custom", price_cents: 999 }] }));
+    const result = select(chair, living, [], edited);
+    expect(result.map(p => p.id)).toEqual(["side", "floor", "rug"]);
+    expect(result.every(p => p.pairingRuleId === undefined)).toBe(true);
+  });
+  it("selection changes replace the functional companions and basket additions exclude them", () => {
+    expect(select(coffee, living, ["chair"], roomRules("tables")).map(p => p.id)).toEqual(["floor", "rug"]);
+    expect(select(chair, living, ["side"], roomRules("seating")).map(p => p.id)).toEqual(["coffee", "floor", "rug"]);
+  });
+  it("never fills empty room slots with unrelated decor", () => {
+    expect(select(chair, living.filter(p => ["tray", "mirror", "dining", "office", "outdoor"].includes(p.id)), [], roomRules("seating"))).toEqual([]);
+  });
+  it("room-led results are stable across catalogue ordering", () => {
+    expect(select(chair, [...living].reverse(), [], roomRules("seating"))).toEqual(select(chair, living, [], roomRules("seating")));
+  });
+});

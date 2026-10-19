@@ -12,6 +12,9 @@ const catalogue = [
   pick("bowl", "Bronze Bowl"),
   pick("vase", "Glass Vase"),
   pick("pendant2", "Globe Pendant"),
+  pick("floor", "Reading Floor Lamp"),
+  pick("rug", "Living Room Rug"),
+  pick("side", "Oak Side Table"),
 ];
 const rule = (id: string, source_category: string, target_category: string, sort_order: number) => ({ id, source_category, target_category, preferred_pick_id: null, sort_order, enabled: true });
 const rules = [
@@ -39,10 +42,10 @@ describe("curated pairings follow the private client's first purchase", () => {
     expect(shown()).toEqual(["Cylinder Wall Sconce", "Oak Console", expect.stringMatching(/Bronze Bowl|Glass Vase/)]);
   });
 
-  it("a lounge chair first purchase gets ceiling light, table and decor — not the pendant's set", () => {
+  it("a lounge chair first purchase gets a living-room table, floor light and rug", () => {
     render(<CuratedPairings {...props} title="Frenchmen Street Lounge Chair" brand="Atelier X" excludedIds={["frenchmen"]} />);
     const chair = shown();
-    expect(chair[0]).toMatch(/Pendant/);
+    expect(chair).toEqual(["Oak Side Table", "Reading Floor Lamp", "Living Room Rug"]);
     expect(chair).not.toContain("Cylinder Wall Sconce");
   });
 

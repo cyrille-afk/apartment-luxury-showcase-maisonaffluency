@@ -1,6 +1,7 @@
 import type { BuyerProfile } from "@/contexts/CheckoutFormContext";
 import { parsePairingFinishOptions, type PairingFinishOption } from "./pairingFinishPricing";
 import { parsePairingMedia, type PairingMedia } from './pairingMedia';
+import { pairingRoomKey, pairingRoomSlots } from './pairingRooms';
 
 export type PairingCategory = "ceiling" | "wall" | "table-light" | "seating" | "tables" | "decor" | "storage";
 export interface PairingProduct {
@@ -63,12 +64,18 @@ export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "titl
   if (!source) return [];
   const excluded = new Set([primary.id, ...excludedIds]);
   const pool = products.filter((p) => p.image && !excluded.has(p.id) && p.title.toLowerCase() !== primary.title.toLowerCase());
-  return rules.filter((r) => r.enabled && r.source_category === source && r.target_category !== source)
-    .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)).flatMap((rule) => {
-    const matches = pool.filter((p) => pairingCategory(p) === rule.target_category && !excluded.has(p.id));
-    const sameBrand = matches.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
+  const roomSlots = pairingRoomSlots(primary);
+  return rules.filter((r) => r.source_category === source)
+    .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)).flatMap((rule, index) => {
+    if (!rule.enabled || (!roomSlots && rule.target_category === source)) return [];
+    const slot = roomSlots?.[index];
+    if (roomSlots && !slot?.length) return [];
+    const matches = pool.filter((p) => !excluded.has(p.id) && (slot
+      ? slot.includes(pairingRoomKey(p) || "")
+      : pairingCategory(p) === rule.target_category));
     // Rotate deterministically per purchased piece so each first choice gets its own companions.
-    const ranked = [...matches].sort((a, b) => pairingSeed(primary.id + a.id) - pairingSeed(primary.id + b.id) || a.id.localeCompare(b.id));
+    const ranked = [...matches].sort((a, b) => (slot ? slot.indexOf(pairingRoomKey(a) || "") - slot.indexOf(pairingRoomKey(b) || "") : 0) || pairingSeed(primary.id + a.id) - pairingSeed(primary.id + b.id) || a.id.localeCompare(b.id));
+    const sameBrand = ranked.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
     const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? ranked[0];
     if (pick) excluded.add(pick.id);
     return pick ? [{ ...pick, ...(pick.id === rule.preferred_pick_id ? { finishMedia: parsePairingMedia(rule.finish_media) } : {}), ...(pick.id === rule.preferred_pick_id && parsePairingFinishOptions(rule.finish_options).length ? {
