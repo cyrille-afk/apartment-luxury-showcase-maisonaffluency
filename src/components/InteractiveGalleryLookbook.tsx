@@ -720,7 +720,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady ? "md:items-stretch" : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
@@ -792,22 +792,23 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                        animate={{ opacity: 1, y: 0 }}
                        exit={{ opacity: 0, y: 24 }}
                        transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:inset-x-6 md:p-4"
+                       className="absolute inset-x-4 bottom-4 z-30 mx-auto max-w-[860px] rounded-md border border-border/60 bg-[hsl(var(--product-canvas)/0.94)] p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md md:static md:mx-0 md:flex md:w-[28%] md:max-w-none md:shrink-0 md:flex-col md:self-stretch md:rounded-none md:border-y-0 md:border-r-0 md:bg-[hsl(var(--product-canvas))] md:p-6 md:shadow-none md:backdrop-blur-none"
                      >
-                       <div className="mb-2 flex items-center justify-between gap-3">
-                         <div className="min-w-0 truncate font-body text-[10px] font-semibold uppercase tracking-widest text-foreground">Curated alternatives · {selectedHotspot.product_name}</div>
+                       <div className="mb-2 flex items-start justify-between gap-3 md:mb-4 md:border-b md:border-border/60 md:pb-4">
+                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
                           <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => setDockDismissed(true)} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                        </div>
-                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:gap-3">
+                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-center md:gap-0 md:divide-y md:divide-border/60">
                          {dockAlternatives.map((pick) => (
-                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:gap-3 md:p-2">
-                             <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-16" loading="lazy" />
-                             <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-xs">
+                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
+                             <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-28 md:bg-background md:p-2 xl:size-32" loading="lazy" />
+                             <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-sm">
                                <span className="line-clamp-2 block">{pick.title}</span>
-                               <span className="mt-1 hidden truncate font-body text-[9px] uppercase text-muted-foreground sm:block">{pick.brand_name}</span>
+                               <span className="mt-1 hidden truncate font-body text-[9px] uppercase text-muted-foreground sm:block md:mt-1.5 md:text-[10px] md:tracking-wider">{pick.brand_name}</span>
+                               <span className="mt-3 hidden font-body text-[10px] uppercase tracking-widest text-muted-foreground underline-offset-4 md:block">View details</span>
                              </span>
                            </Button>
-                         ))}
+                          ))}
                        </div>
                      </motion.aside>
                    )}
