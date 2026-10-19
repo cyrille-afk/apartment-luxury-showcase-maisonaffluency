@@ -351,3 +351,27 @@ export default defineConfig(({ mode }) => {
 
   };
 });
+
+/** sha256 over sorted "path blobSha" lines for src/** (git blob SHA-1 per file). */
+function computeSourceDigest(): string | null {
+  try {
+    const base = process.cwd();
+    const lines: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, e.name);
+        if (e.isDirectory()) walk(full);
+        else if (e.isFile()) {
+          const buf = fs.readFileSync(full);
+          const blob = crypto.createHash("sha1").update(`blob ${buf.length}\0`).update(buf).digest("hex");
+          lines.push(`${path.relative(base, full).split(path.sep).join("/")} ${blob}`);
+        }
+      }
+    };
+    walk(path.resolve(base, "src"));
+    lines.sort();
+    return crypto.createHash("sha256").update(lines.join("\n")).digest("hex");
+  } catch {
+    return null;
+  }
+}
