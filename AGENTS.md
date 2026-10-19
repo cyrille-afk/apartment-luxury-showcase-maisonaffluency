@@ -77,3 +77,4 @@
 - Spec sheets open same-tab, same origin (`openSpecSheet`/SameOriginLinkGuard) — new tabs can lose sign-in.
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
+- gallery_hotspots public RLS computes blocked designer names once per query via `_hotspot_blocked_designer_names()` in a scalar subquery — per-row name scans took ~0.66s per read.
