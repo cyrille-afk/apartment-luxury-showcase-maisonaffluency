@@ -53,4 +53,18 @@ describe("dimensions render consistency", () => {
     expect(lightbox).toMatch(/let dimText = \(product\.dimensions \|\| ""\)\.trim\(\)/);
     expect(lightbox).toMatch(/withImperialPerLine\(dimText\)/);
   });
+
+  it("TradeProductPage renders dimensions below the finishes and above the purchase actions", () => {
+    const src = read("src/pages/TradeProductPage.tsx");
+    const finishesIdx = src.indexOf("<AlsoContainsFinishes pickId={product.id}");
+    const dimsIdx = src.indexOf("{/* Dimensions & size pickers");
+    const actionsIdx = src.indexOf("{/* ===== Primary action block");
+    expect(finishesIdx).toBeGreaterThan(-1);
+    expect(dimsIdx).toBeGreaterThan(-1);
+    expect(actionsIdx).toBeGreaterThan(-1);
+    // Finish selectors first, then dimensions/size pickers, then order CTAs.
+    expect(dimsIdx).toBeGreaterThan(finishesIdx);
+    expect(dimsIdx).toBeLessThan(actionsIdx);
+  });
 });
+
