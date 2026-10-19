@@ -135,10 +135,24 @@ serve(async (req) => {
         ? Math.round(msrpSubtotalCents * (1 - netDiscountPct / 100))
         : msrpSubtotalCents;
 
-    // GST only applies on the SGD path (Maison-of-record).
-    let payerTotalCents = payerSubtotalCents;
-    if (currency === "sgd" && payerSubtotalCents > 0) {
-      payerTotalCents += Math.round(payerSubtotalCents * 0.09);
+    // Manually added charges (e.g. forwarder freight) — server-read, never client-supplied.
+    const { data: extraRows } = await supabaseClient
+      .from("trade_quote_extras")
+      .select("label, amount_cents, currency, quantity")
+      .eq("quote_id", quoteId);
+    let extrasCents = 0;
+    for (const e of extraRows || []) {
+      const ec = String(e.currency || currencyUpper).toUpperCase();
+      if (ec !== currencyUpper) {
+        throw new Error(`Charge "${e.label}" is in ${ec}; re-enter it in ${currencyUpper} before payment.`);
+      }
+      extrasCents += Math.max(0, Math.round(Number(e.amount_cents) || 0)) * Math.max(1, Number(e.quantity) || 1);
+    }
+
+    // GST only applies on the SGD path (Maison-of-record); charges are taxed like the PDF.
+    let payerTotalCents = payerSubtotalCents + extrasCents;
+    if (currency === "sgd" && payerTotalCents > 0) {
+      payerTotalCents += Math.round(payerTotalCents * 0.09);
     }
     payerTotalCents += shippingCentsSafe;
 
