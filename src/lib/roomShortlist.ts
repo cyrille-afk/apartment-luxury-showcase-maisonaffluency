@@ -16,9 +16,23 @@ export function toggleShortlistItem(items: RoomShortlistItem[], item: RoomShortl
   return items.some(p => p.id === item.id) ? items.filter(p => p.id !== item.id) : [...items, roomShortlistItemSchema.parse(item)];
 }
 export const roomShortlistDraftKey = (room: RoomSlug, userId?: string) => `ma-room-shortlist-v1:${userId || 'guest'}:${room}`;
-export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string; closingMessage: string };
+export const SHORTLIST_CONTACT_DEFAULTS = { conciergeEmail: 'concierge@maisonaffluency.com', website: 'maisonaffluency.com', availability: 'By appointment, worldwide' };
+export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string; closingMessage: string; conciergeEmail: string; website: string; availability: string };
 export function shortlistCover(value: unknown): RoomShortlistCover {
-  const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch(''), closingMessage: z.string().catch('') }).safeParse(value);
-  return { clientName: parsed.success ? parsed.data.clientName || '' : '', projectTitle: parsed.success ? parsed.data.projectTitle || '' : '', introduction: parsed.success ? parsed.data.introduction || '' : '', closingMessage: parsed.success ? parsed.data.closingMessage || '' : '' };
+  const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch(''), closingMessage: z.string().catch(''), conciergeEmail: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.conciergeEmail), website: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.website), availability: z.string().catch(SHORTLIST_CONTACT_DEFAULTS.availability) }).safeParse(value);
+  const data = parsed.success ? parsed.data : undefined;
+  return { clientName: data?.clientName ?? '', projectTitle: data?.projectTitle ?? '', introduction: data?.introduction ?? '', closingMessage: data?.closingMessage ?? '', conciergeEmail: data?.conciergeEmail ?? SHORTLIST_CONTACT_DEFAULTS.conciergeEmail, website: data?.website ?? SHORTLIST_CONTACT_DEFAULTS.website, availability: data?.availability ?? SHORTLIST_CONTACT_DEFAULTS.availability };
+}
+export function shortlistContact(cover: RoomShortlistCover) {
+  const conciergeEmail = cover.conciergeEmail.trim() || SHORTLIST_CONTACT_DEFAULTS.conciergeEmail;
+  const website = cover.website.trim() || SHORTLIST_CONTACT_DEFAULTS.website;
+  const availability = cover.availability.trim() || SHORTLIST_CONTACT_DEFAULTS.availability;
+  let websiteUrl: string | undefined;
+  try {
+    const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(website) ? website : `https://${website}`);
+    if (url.protocol === 'https:' || url.protocol === 'http:') websiteUrl = url.href;
+  } catch { /* Keep invalid addresses as plain text rather than unsafe links. */ }
+  const emailUrl = z.string().email().safeParse(conciergeEmail).success ? `mailto:${conciergeEmail}` : undefined;
+  return { conciergeEmail, website, availability, emailUrl, websiteUrl };
 }
 export const shortlistCoverKey = (key: string, savedId?: string) => `${key}:pdf-cover:${savedId || 'draft'}`;
