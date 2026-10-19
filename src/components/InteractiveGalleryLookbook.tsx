@@ -748,12 +748,12 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                          animate={{ opacity: 1 }}
                          exit={{ opacity: 0 }}
                          transition={{ duration: 0.45 }}
-                          className={`relative mx-auto w-full overflow-hidden bg-transparent ${portraitDock && overlayOpen ? "md:h-full md:w-full md:max-w-full" : "md:w-fit md:max-w-full"}`}
+                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
                           {(() => {
                             const sceneReady = hotspotsReady && catalogReady && loadedScenes.has(pageScene.id);
                             return <>
-                         <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className={`block h-auto w-full rounded-none p-0 hover:bg-transparent ${portraitDock && overlayOpen ? "md:h-full md:w-full md:max-w-full" : "md:w-auto md:max-w-full"}`}>
+                         <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
                            <img
                              src={displayImage(pageScene.id)}
                              alt={`${space.label} — ${pageScene.title}`}
@@ -772,7 +772,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                               }}
-                             className={`block h-auto w-full cursor-zoom-in object-contain ${portraitDock && overlayOpen ? "md:h-full md:w-full md:object-cover" : `md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""}`} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                             className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
