@@ -47,14 +47,16 @@ interface Props {
   /** Called whenever the total of all extras changes, converted to the quote (display) currency in cents. */
   onTotalChange?: (totalCents: number) => void;
   onChargesChange?: (charges: QuoteCharge[]) => void;
+  onVerificationStateChange?: (state: "loading" | "ready" | "error") => void;
   /** Convert cents between currencies via the parent's live FX rates. */
   convertCents?: (cents: number | null, from: string, to: string) => number | null;
 }
 
-export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, onChargesChange, convertCents }: Props) => {
+export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, onChargesChange, onVerificationStateChange, convertCents }: Props) => {
   const { toast } = useToast();
   const [extras, setExtras] = useState<Extra[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
   const [draftQty, setDraftQty] = useState("1");
@@ -83,6 +85,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setLoadError(false);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
       .select("id, label, amount_cents, currency, quantity, sort_order, manual_freight_request_id")
@@ -91,6 +94,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
         .order("created_at", { ascending: true });
       if (cancelled) return;
       if (error) {
+        setLoadError(true);
         // Non-fatal: table might not exist on older deploys.
         setExtras([]);
       } else {
@@ -119,6 +123,10 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const totalMismatch = Math.abs(total - verifiedTotal) > extras.length; // >1 cent per row
 
   const missingRateRows = rowConversions.filter((r) => !r.sameCcy && !r.converted);
+
+  useEffect(() => {
+    onVerificationStateChange?.(loading ? "loading" : loadError || missingRateRows.length > 0 ? "error" : "ready");
+  }, [loading, loadError, missingRateRows.length, onVerificationStateChange]);
 
   useEffect(() => {
     onTotalChange?.(total);
