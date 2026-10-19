@@ -840,6 +840,7 @@ const App = () => {
                   <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
                   <Route path="/search" element={<Suspense fallback={<PageLoadingSkeleton />}><RoomSearch /></Suspense>} />
                   <Route path="/shop-by-room" element={<Suspense fallback={<PageLoadingSkeleton />}><RoomSearch /></Suspense>} />
+                  <Route path="/shop-by-room/:roomSlug" element={<Suspense fallback={<PageLoadingSkeleton />}><RoomSearch /></Suspense>} />
 
                   {/* Trade Portal */}
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
@@ -957,6 +958,7 @@ const App = () => {
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
                     <Route path="gallery" element={<TradeGallery />} />
                     <Route path="shop-by-room" element={<RoomSearch />} />
+                    <Route path="shop-by-room/:roomSlug" element={<RoomSearch />} />
                     <Route path="gallery/:slug" element={<TradeGallery />} />
                     <Route path="gallery/:slug/biography" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerBiography /></Suspense>} />
                     <Route path="gallery/:slug/profile" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicDesignerProfile presentation /></Suspense>} />

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams, useParams } from "react-router-dom";
+import RoomCollectionStory from '@/components/product/RoomCollectionStory';
+import { isCollectionRoom, roomCollectionPath } from '@/lib/roomCollections';
 import RoomShopping from '@/components/product/RoomShopping';
 import TradeGallery from './TradeGallery';
 import Navigation from "@/components/Navigation";
@@ -169,8 +171,10 @@ export default function RoomSearch() {
   const navigate = useNavigate();
   const pathname = useLocation().pathname;
   const trade = pathname.startsWith('/trade/');
+  const { roomSlug } = useParams();
+  const collection = isCollectionRoom(roomSlug);
   const roomParam = searchParams.get("room");
-  const room = resolveRoomSlug(roomParam) || (!roomParam && pathname.includes('shop-by-room') ? 'living-room' : null);
+  const room = roomSlug ? (collection ? roomSlug : null) : resolveRoomSlug(roomParam) || (!roomParam && pathname.includes('shop-by-room') ? 'living-room' : null);
   const gridLanding = searchParams.get("view") === "grid";
   const roomLabel = room ? ROOM_LABELS[room] : "Room not found";
   const roomFilters = { type: searchParams.get('roomType'), finish: searchParams.get('roomFinish') };
@@ -213,7 +217,7 @@ export default function RoomSearch() {
       originalHead.current = captured;
     }
 
-    if (!room) return;
+    if (!room || collection) return;
 
     const universe = ROOM_UNIVERSES[room];
     const curated = ROOM_CURATED[room];
@@ -241,7 +245,7 @@ export default function RoomSearch() {
       upsertMeta("property", "og:image", absolute);
       upsertMeta("name", "twitter:image", absolute);
     }
-  }, [room]);
+  }, [room, collection]);
 
   // Revert to default gallery meta on unmount so metadata never leaks
   // onto standard collection grids.
@@ -285,11 +289,12 @@ export default function RoomSearch() {
       <main className={trade ? 'min-h-[70vh]' : 'min-h-[70vh] pt-[var(--header-h)]'}>
         {room ? (
           <>
-            <RoomShopping key={room} room={room} trade={trade} filters={roomFilters} onFiltersChange={updateRoomFilters} onRoomChange={next => navigate(`${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
-            {!trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
+            {collection && <RoomCollectionStory room={roomSlug} trade={trade} />}
+            <RoomShopping key={room} room={room} trade={trade} collection={collection} filters={roomFilters} onFiltersChange={updateRoomFilters} onRoomChange={next => navigate(isCollectionRoom(next) ? roomCollectionPath(next, trade) : `${trade ? '/trade/shop-by-room' : '/search'}?room=${next}&view=grid`)} />
+            {!collection && !trade && !searchParams.get("category") && roomHasLookbookScene(room) && <InteractiveGalleryLookbook discoveryRoom={room} />}
             {trade ? <TradeGallery key={room} roomSlug={room} roomFilters={roomFilters} /> : <ProductGrid key={room} roomSlug={room} roomFilters={roomFilters} roomCategory={gridLanding ? searchParams.get("category") : null} roomSubcategory={gridLanding ? searchParams.get("subcategory") : null} compactTop />}
           </>
-        ) : roomParam ? (
+        ) : roomParam || roomSlug ? (
           <div className="mx-auto max-w-7xl px-6 py-20">
             <h1 className="font-display text-3xl text-foreground">Room not found</h1>
             <p className="mt-3 font-body text-sm text-muted-foreground">
