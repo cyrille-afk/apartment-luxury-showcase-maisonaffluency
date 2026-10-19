@@ -38,6 +38,7 @@ const STATUS_OPTIONS = [
   { key: "quote_drafted", label: "Quote drafted" },
   { key: "ready_to_send", label: "Ready to send" },
   { key: "sent", label: "Sent" },
+  { key: "resolved", label: "Resolved" },
   { key: "closed", label: "Closed" },
   { key: "rejected", label: "Rejected" },
 ];
@@ -47,6 +48,7 @@ const SOURCE_OPTIONS = [
   { key: "public_product", label: "Price upon Request" },
   { key: "concierge_lead", label: "Concierge chat" },
   { key: "contact_form", label: "Contact form" },
+  { key: "room_consultation", label: "Design consultation" },
 ];
 
 const whatsappHref = (phone: string | null) => {
@@ -56,11 +58,12 @@ const whatsappHref = (phone: string | null) => {
 };
 
 const STAGE_LABELS: Record<string, string> = {
-  new: "Open — not yet handled",
-  in_review: "Being handled",
+  new: "New",
+  in_review: "In progress",
   quote_drafted: "Quote drafted",
   ready_to_send: "Ready to send",
   sent: "Quote sent",
+  resolved: "Resolved",
   closed: "Closed",
   rejected: "Declined",
 };
@@ -75,6 +78,7 @@ const STATUS_STYLES: Record<string, string> = {
   quote_drafted: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   ready_to_send: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   sent: "bg-emerald-600/10 text-emerald-500 border-emerald-600/20",
+  resolved: "bg-emerald-600/10 text-emerald-500 border-emerald-600/20",
   closed: "bg-muted text-muted-foreground border-border",
   rejected: "bg-destructive/10 text-destructive border-destructive/20",
 };
@@ -572,6 +576,22 @@ export default function TradeAdminInquiries() {
 
                 {/* Status actions */}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    Status
+                    <select
+                      aria-label="Inquiry status"
+                      value={selected.status}
+                      onChange={(e) => updateInquiry.mutate({ id: selected.id, patch: { status: e.target.value } })}
+                      className="rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground"
+                    >
+                      {(selected.source === "room_consultation"
+                        ? ["new", "in_review", "resolved", "closed", "rejected"]
+                        : STATUS_OPTIONS.filter((o) => o.key !== "all").map((o) => o.key)
+                      ).map((k) => (
+                        <option key={k} value={k}>{stageLabel(k)}</option>
+                      ))}
+                    </select>
+                  </label>
                   {selected.status !== "in_review" && selected.status === "new" && (
                     <button
                       onClick={() => updateInquiry.mutate({ id: selected.id, patch: { status: "in_review" } })}
