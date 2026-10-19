@@ -3,20 +3,25 @@ type Store = {
   verify: (id: string, email: string, code: string) => Promise<boolean>;
   activity: (email: string, session: string | null) => Promise<boolean>;
   send: (email: string, id: string, code: string) => Promise<void>;
+  forget: (email: string) => Promise<void>;
 };
 
 /** Only verified email ownership permits an activity lookup. Requests never look up customers. */
 export async function recognizePrivateClient(
-  body: { action: string; email: string; challengeId?: string; code?: string; sessionId?: string },
+  body: { action: string; email: string; challengeId?: string; code?: string; sessionId?: string; intent?: string },
   verifiedEmail: string | null,
   ipHash: string,
   store: Store,
 ) {
   const email = body.email.trim().toLowerCase();
   const session = body.sessionId ?? null;
+  const forget = body.intent === "forget";
+  const done = async () => forget
+    ? (await store.forget(email), { status: 200, body: { forgotten: true } })
+    : { status: 200, body: { verified: true, returning: await store.activity(email, session) } };
   if (body.action === "check") {
     if (verifiedEmail?.trim().toLowerCase() !== email) return { status: 401, body: { error: "Verify your email to continue." } };
-    return { status: 200, body: { verified: true, returning: await store.activity(email, session) } };
+    return done();
   }
   if (body.action === "request") {
     const challenge = await store.request(email, ipHash);
@@ -27,5 +32,5 @@ export async function recognizePrivateClient(
   if (!body.challengeId || !body.code || !await store.verify(body.challengeId, email, body.code)) {
     return { status: 403, body: { error: "That code is incorrect or has expired." } };
   }
-  return { status: 200, body: { verified: true, returning: await store.activity(email, session) } };
+  return done();
 }

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { recognizePrivateClient } from "../../supabase/functions/_shared/privateClientRecognition";
 
 function store(returning = true) {
-  return {request:vi.fn(async()=>({id:"challenge",code:"123456"})),verify:vi.fn(async()=>true),activity:vi.fn(async()=>returning),send:vi.fn(async()=>{})};
+  return {request:vi.fn(async()=>({id:"challenge",code:"123456"})),verify:vi.fn(async()=>true),activity:vi.fn(async()=>returning),send:vi.fn(async()=>{}),forget:vi.fn(async()=>{})};
 }
 describe("verified cross-device recognition",()=>{
   it("never looks up customer activity while sending a code",async()=>{
@@ -35,5 +35,21 @@ describe("verified cross-device recognition",()=>{
     const s=store(false);
     expect((await recognizePrivateClient({action:"check",email:"CLIENT@example.com"},"client@example.com","ip",s)).body).toEqual({verified:true,returning:false});
     expect(s.request).not.toHaveBeenCalled();
+  });
+});describe("recognition opt-out",()=>{
+  it("deletes data only after the code is verified, never revealing activity",async()=>{
+    const s={...store(),forget:vi.fn(async()=>{})};
+    s.verify.mockResolvedValueOnce(false);
+    expect((await recognizePrivateClient({action:"verify",intent:"forget",email:"c@example.com",challengeId:"i",code:"111111"},null,"ip",s)).status).toBe(403);
+    expect(s.forget).not.toHaveBeenCalled();
+    const r=await recognizePrivateClient({action:"verify",intent:"forget",email:"C@example.com",challengeId:"i",code:"123456"},null,"ip",s);
+    expect(r.body).toEqual({forgotten:true});
+    expect(s.forget).toHaveBeenCalledWith("c@example.com");
+    expect(s.activity).not.toHaveBeenCalled();
+  });
+  it("signed-in clients may forget only their own email",async()=>{
+    const s={...store(),forget:vi.fn(async()=>{})};
+    expect((await recognizePrivateClient({action:"check",intent:"forget",email:"c@example.com"},"other@example.com","ip",s)).status).toBe(401);
+    expect(s.forget).not.toHaveBeenCalled();
   });
 });

@@ -6386,6 +6386,21 @@ export type Database = {
         }
         Relationships: []
       }
+      private_client_recognition_optouts: {
+        Row: {
+          created_at: string
+          email_hash: string
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+        }
+        Relationships: []
+      }
       product_cad_asset_geometry: {
         Row: {
           bbox_mm: Json | null
@@ -13084,8 +13099,13 @@ export type Database = {
         Args: { _code: string; _email: string; _id: string }
         Returns: boolean
       }
+      private_client_forget: { Args: { _email: string }; Returns: undefined }
       private_client_has_activity: {
         Args: { _email: string; _exclude_session?: string }
+        Returns: boolean
+      }
+      private_client_is_opted_out: {
+        Args: { _email: string }
         Returns: boolean
       }
       profile_privileged_fields_unchanged: {
