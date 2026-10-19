@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
-import { normalizeClientEmail, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import { forgetPrivateClient, normalizeClientEmail, rememberPrivateClient } from "@/lib/returningPrivateClient";
 import { CODE_LIFETIME_MS, RESEND_WAIT_MS, formatCountdown } from "@/lib/verificationCodeTiming";
 
 export default function PrivateClientWelcome({ email, profile, locallyReturning }: {
@@ -19,6 +19,8 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [botKey, setBotKey] = useState(0);
+  const [intent, setIntent] = useState<"recognize" | "forget">("recognize");
+  const [forgotten, setForgotten] = useState<{email: string; server: boolean} | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const currentEmail = useRef(normalized);
   currentEmail.current = normalized;
@@ -42,9 +44,28 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   }, [normalized, profile]);
 
   if (!normalized || profile !== "private") return null;
-  const returning = locallyReturning || (verified?.email === normalized && verified.returning);
-  if (returning) return <p role="status" className="mt-3 font-body text-sm leading-relaxed text-foreground">Welcome back. It’s a pleasure to see you again.</p>;
-  if (verified?.email === normalized) return <p role="status" className="mt-3 font-body text-sm text-muted-foreground">Email verified.</p>;
+
+  async function startForget() {
+    forgetPrivateClient(normalized);
+    setVerified(null); setChallenge(null); setCode(""); setError("");
+    setIntent("forget"); setForgotten({email: normalized, server: false}); setExpanded(true);
+    const {data} = await supabase.auth.getSession();
+    if (normalizeClientEmail(data.session?.user.email) !== normalized) return;
+    const {data: r, error: f} = await supabase.functions.invoke("private-client-recognition", {body:{action:"check",intent:"forget",email:normalized}});
+    if (!f && r?.forgotten) setForgotten({email: normalized, server: true});
+    else setError("Could not delete saved data. Please try again.");
+  }
+
+  const isForgotten = forgotten?.email === normalized;
+  if (isForgotten && forgotten.server) return <p role="status" className="mt-3 font-body text-sm text-muted-foreground">
+    Recognition is off for this email and your saved recognition data has been deleted. Your basket and orders are unaffected.
+  </p>;
+  const optOutLink = <Button type="button" variant="link" className="h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startForget()}>
+    Don’t recognise me — delete my saved data
+  </Button>;
+  const returning = !isForgotten && (locallyReturning || (verified?.email === normalized && verified.returning));
+  if (returning) return <div className="mt-3 space-y-1"><p role="status" className="font-body text-sm leading-relaxed text-foreground">Welcome back. It’s a pleasure to see you again.</p>{optOutLink}</div>;
+  if (!isForgotten && verified?.email === normalized) return <div className="mt-3 space-y-1"><p role="status" className="font-body text-sm text-muted-foreground">Email verified.</p>{optOutLink}</div>;
 
   const expiresIn = challenge ? challenge.sentAt + CODE_LIFETIME_MS - now : 0;
   const resendIn = challenge ? challenge.sentAt + RESEND_WAIT_MS - now : 0;
@@ -56,7 +77,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
     setBusy(true); setError("");
     try {
       const {data,error: failure} = await supabase.functions.invoke("private-client-recognition", {body:{
-        action,email:target,sessionId:sessionId(),
+        action,email:target,sessionId:sessionId(),intent,
         ...(action === "request" ? {turnstileToken:botToken} : {challengeId:challenge?.id,code}),
       }});
       if (currentEmail.current !== target) return;
@@ -68,6 +89,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
         throw new Error(message || "Could not verify your email. Please try again.");
       }
       if (action === "request") { setChallenge({email:target,id:data.challengeId,sentAt:Date.now()}); setNow(Date.now()); setCode(""); }
+      else if (data?.forgotten) { setForgotten({email:target,server:true}); setCode(""); setChallenge(null); }
       else if (data?.verified) {
         setVerified({email:target,returning:data.returning === true});
         if (data.returning) rememberPrivateClient(target,"private");
@@ -86,6 +108,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   const requestNew = () => { setChallenge(null); setCode(""); setError(""); };
 
   return <div className="mt-3 font-body text-sm">
+    {isForgotten && <p role="status" className="mb-2 text-muted-foreground">This device no longer recognises you. To also delete data saved with us, confirm your email with a code.</p>}
     {!expanded ? <Button type="button" variant="link" className="h-auto p-0 text-muted-foreground" onClick={()=>setExpanded(true)}>
       <Mail className="mr-2 h-4 w-4" /> Verify email
     </Button> : <div className="space-y-3">
@@ -108,11 +131,12 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
         <p className="text-muted-foreground">We’ll email you a 6-digit code, valid for 10 minutes.</p>
         <Turnstile key={botKey} onVerify={setBotToken} onExpire={()=>setBotToken("")} />
         <Button type="button" variant="outline" disabled={busy || !botToken} onClick={()=>void submit("request")}>
-          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Send verification code
+          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {intent === "forget" ? "Send code to delete my data" : "Send verification code"}
         </Button>
       </>}
       {error && <p role="alert" className="text-destructive">{error}</p>}
     </div>}
+    {!isForgotten && <div className="mt-1">{optOutLink}</div>}
   </div>;
 }
 
