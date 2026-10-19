@@ -393,6 +393,14 @@ export function TradeSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
+                    <NavLink to="/trade/admin/studios" className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors" activeClassName="text-foreground font-medium">
+                      <Users className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Studios</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
                     <NavLink
                       to="/trade/admin/inquiries"
                       className="flex items-start gap-3 px-3 py-2 font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
