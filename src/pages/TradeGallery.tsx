@@ -53,6 +53,8 @@ import { readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
 import { roomShoppingProducts } from '@/lib/shopByRoom';
 import type { RoomSlug } from '@/lib/roomCategories';
+import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
+import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
 
 
 const slugifyForUrl = (s: string) =>
@@ -63,7 +65,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-const TradeGallery = ({ roomSlug }: { roomSlug?: RoomSlug } = {}) => {
+const TradeGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters } = {}) => {
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
@@ -71,15 +73,17 @@ const TradeGallery = ({ roomSlug }: { roomSlug?: RoomSlug } = {}) => {
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} />;
+  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} roomFilters={roomFilters} />;
 };
 
-const StudioGallery = ({ roomSlug }: { roomSlug?: RoomSlug }) => {
+const StudioGallery = ({ roomSlug, roomFilters }: { roomSlug?: RoomSlug; roomFilters?: RoomShoppingFilters }) => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const { allProducts: tradeProducts, publicTradeHiddenProducts, liveProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
+  const roomPieces = useMemo(() => roomSlug ? roomShoppingProducts(tradeProducts.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, materials: p.materials, image: p.image_url || '', path: '' })), roomSlug) : [], [tradeProducts, roomSlug]);
+  const { data: roomFinishes = {} } = useRoomShoppingFinishes(roomPieces.map(p => p.id));
   const publishedMakerNames = usePublishedMakerNames();
   // Drive the dropdown from the live published-profile list so it always
   // matches the maker count; fall back to product-derived brands while loading.
@@ -545,9 +549,9 @@ const StudioGallery = ({ roomSlug }: { roomSlug?: RoomSlug }) => {
   const sorted = useMemo(
     () => {
       const roomIds = roomSlug ? new Set(roomShoppingProducts(filtered.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, image: p.image_url || '', path: '' })), roomSlug).map(p => p.id)) : null;
-      return sortTradeProducts(roomIds ? filtered.filter(p => roomIds.has(p.id)) : filtered, sortBy);
+      return sortTradeProducts(roomIds ? filtered.filter(p => roomIds.has(p.id) && (!roomFilters || matchesRoomShoppingFilters({ id: p.id, title: p.product_name, category: p.category, subcategory: p.subcategory, materials: p.materials }, roomFilters, roomFinishes))) : filtered, sortBy);
     },
-    [filtered, sortBy, roomSlug],
+    [filtered, sortBy, roomSlug, roomFilters, roomFinishes],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
