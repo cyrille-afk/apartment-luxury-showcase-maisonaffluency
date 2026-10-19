@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
 import { execSync } from "child_process";
+import crypto from "crypto";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 /**
