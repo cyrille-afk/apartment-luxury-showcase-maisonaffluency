@@ -553,10 +553,10 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
       const pieces = roomIds ? filtered.filter(p => roomIds.has(p.id) && (!roomFilters || matchesRoomShoppingFilters({ id: p.id, title: p.product_name, category: p.category, subcategory: p.subcategory, materials: p.materials }, roomFilters, roomFinishes))) : filtered;
       return roomSlug ? sortRoomProducts(pieces, roomSort, p => {
         const price = getProductPrice(p);
-        return { name: p.product_name, createdAt: p.created_at, priceCents: roomPriceCents(price?.cents, price?.currency) };
+        return { name: p.product_name, createdAt: p.created_at, priceCents: roomPriceCents(price?.cents, price?.currency, displayCurrency, fxRates) };
       }) : sortTradeProducts(pieces, sortBy);
     },
-    [filtered, sortBy, roomSlug, roomFilters, roomFinishes, roomSort, priceLookup, priceEntries],
+    [filtered, sortBy, roomSlug, roomFilters, roomFinishes, roomSort, priceLookup, priceEntries, displayCurrency, fxRates],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({

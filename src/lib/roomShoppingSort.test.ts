@@ -28,4 +28,8 @@ describe('room sorting', () => {
     expect(resolveRoomSort('newest')).toBe('newest');
     expect(resolveRoomSort('invalid')).toBe('curated');
   });
+  it('uses the displayed currency rates rather than stale fallback conversions', () => {
+    expect(roomPriceCents(10000, 'USD', 'EUR', { USD_EUR: 0.85 })).toBe(8500);
+    expect(roomPriceCents(10000, 'USD', 'GBP', { USD_GBP: 0.75 })).toBe(7500);
+  });
 });

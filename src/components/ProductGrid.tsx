@@ -418,8 +418,8 @@ function singularizeSub(s: string): string {
   const { data: sortingRrpMap = {} } = usePublicRrpMap(priceSortIds);
   const filtered = useMemo(() => roomSlug ? sortRoomProducts(curated, roomSort, item => {
     const rrp = sortingRrpMap[item.pick.id || ''];
-    return { name: item.pick.title, createdAt: (item as import('@/hooks/useDbCuratorPicks').DbProductItem).createdAt, priceCents: roomPriceCents(rrp?.rrp_price_cents, rrp?.currency) };
-  }) : curated, [curated, roomSlug, roomSort, sortingRrpMap]);
+    return { name: item.pick.title, createdAt: (item as import('@/hooks/useDbCuratorPicks').DbProductItem).createdAt, priceCents: roomPriceCents(rrp?.rrp_price_cents, rrp?.currency || 'USD', destination.currency) };
+  }) : curated, [curated, roomSlug, roomSort, sortingRrpMap, destination.currency]);
   const batchKey = JSON.stringify([roomSlug, roomCategory, roomSubcategory, category, subcategory, textQuery, filterSource, roomFacets, filtered.map((item) => item.pick.id || `${item.designerId}:${item.pick.title}`)]);
   const { renderedItems, hasMore, sentinelRef } = useCatalogBatches(filtered, batchKey);
   const { data: publicRrpMap = {} } = usePublicRrpMap(renderedItems.map((item) => item.pick.id));

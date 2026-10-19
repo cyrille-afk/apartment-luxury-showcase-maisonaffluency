@@ -12,9 +12,9 @@ export type RoomSort = typeof ROOM_SORT_OPTIONS[number]['value'];
 export function resolveRoomSort(value: string | null): RoomSort {
   return ROOM_SORT_OPTIONS.find(option => option.value === value)?.value || 'curated';
 }
-export function roomPriceCents(cents: number | null | undefined, currency: string | null | undefined): number | null {
+export function roomPriceCents(cents: number | null | undefined, currency: string | null | undefined, target = 'EUR', rates: Record<string, number> = FALLBACK_RATES): number | null {
   if (!cents || !Number.isFinite(cents) || cents <= 0) return null;
-  return convertCentsWithFallback(cents, (currency || 'EUR').toUpperCase(), 'EUR', FALLBACK_RATES);
+  return convertCentsWithFallback(cents, (currency || 'EUR').toUpperCase(), target.toUpperCase(), rates);
 }
 type SortDetails = { name: string; createdAt?: string | null; priceCents?: number | null };
 export function sortRoomProducts<T>(pieces: T[], sort: RoomSort, details: (piece: T) => SortDetails): T[] {
