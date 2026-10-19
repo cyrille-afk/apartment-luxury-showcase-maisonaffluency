@@ -329,10 +329,10 @@ function CuratorsCanvas() {
 }
 
 /** Editorial hotspot pin: fine-lined ring, quiet by default, label + pulse on hover (Shop by Room). */
-function HotspotPin({ hotspot, editorial, active, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; onOpen: () => void; onPreview?: () => void }) {
+function HotspotPin({ hotspot, editorial, active, raised, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; raised?: boolean; onOpen: () => void; onPreview?: () => void }) {
   if (!editorial) {
     return (
-      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className="group absolute z-10 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className={`group absolute ${raised ? "z-40" : "z-10"} size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
         <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
           <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
           <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -342,7 +342,7 @@ function HotspotPin({ hotspot, editorial, active, onOpen, onPreview }: { hotspot
   }
   const flipLabel = hotspot.x_percent > 72;
   return (
-    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className="group absolute z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9" style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className={`group absolute ${raised ? "z-40" : "z-10"} flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
       {active && <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-background/60 opacity-75 md:size-6" />}
       <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm backdrop-blur-[2px] transition-all duration-300 ease-out md:size-6 ${active ? "scale-110 border-background bg-background" : "border-muted-foreground/30 bg-foreground/85 group-hover:scale-110 group-hover:bg-foreground"}`}>
         <span className={`absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
@@ -772,7 +772,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
