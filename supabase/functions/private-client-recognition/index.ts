@@ -8,6 +8,7 @@ const Body = z.object({
   challengeId: z.string().uuid().optional(), code: z.string().regex(/^\d{6}$/).optional(),
   sessionId: z.string().regex(/^[0-9a-f-]{32,64}$/i).optional(),
   turnstileToken: z.string().max(2048).optional(),
+  intent: z.enum(['recognize','forget']).optional(),
 });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...corsHeaders, 'Content-Type':'application/json', 'Cache-Control':'no-store' },
@@ -55,9 +56,16 @@ Deno.serve(async req => {
         return data === true;
       },
       activity: async (email,session) => {
+        const {data:out,error:outErr} = await svc.rpc('private_client_is_opted_out',{_email:email});
+        if (outErr) throw outErr;
+        if (out === true) return false;
         const {data,error} = await svc.rpc('private_client_has_activity',{_email:email,_exclude_session:session ? 'h_' + await hash('cart:' + session) : null});
         if (error) throw error;
         return data === true;
+      },
+      forget: async (email) => {
+        const {error} = await svc.rpc('private_client_forget',{_email:email});
+        if (error) throw error;
       },
       send: async (email,id,code) => {
         const response = await fetch(`${url}/functions/v1/send-transactional-email`,{
