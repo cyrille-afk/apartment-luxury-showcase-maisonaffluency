@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Studio teammate invitations send through the shared app-email sender; current studio managers are verified server-side, recipient/copy come from stored records, expired pending invites renew on explicit send, and retries retain their attempt key — prevents silent invitations and arbitrary-recipient sends.
 - Both profile grids use profileEditionLine and getHouseEditionLabel together for page-scoped attribution, preserving genuine editions and maker credits — prevents stored metadata or generated fallbacks bypassing badge rules.
 - Mobile pairing and quick-view overlays share a downward touch-dismiss hook; content gestures require scroll-top, handles bypass that check, and controls/multitouch/cancel never dismiss — preserves finish selection and native scrolling.
 - Room shortlists reuse owner-private comparator_shortlists with room_slug and the existing public token reader; account/room-scoped local drafts and allowlisted product snapshots exclude all pricing, while shared links never grant editing — keeps Public and Trade selections interoperable without duplicating sharing infrastructure.

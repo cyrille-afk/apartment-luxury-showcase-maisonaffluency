@@ -6,6 +6,7 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.tsx
 import { prepareTradeActivation } from '../_shared/tradeActivation.ts'
 import { welcomeDesignerData } from '../_shared/welcomeDesignerCount.ts'
 import { displayNameForContact } from '../_shared/quoteContactDisplay.ts'
+import { canSendStudioInvite } from './studioInvite.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -112,7 +113,35 @@ Deno.serve(async (req) => {
         privileged = (roles?.length ?? 0) > 0
       }
     }
-    if (templateName === 'board-collaborator-invite' && callerId) {
+    if (templateName === 'studio-teammate-invite') {
+      if (!callerId) return deny(401, 'Sign in required')
+      const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+      const match = new RegExp(`^studio-invite-(${uuid})-(${uuid})$`, 'i').exec(idempotencyKey)
+      if (!match || templateData.inviteId !== match[1]) return deny(400, 'Invalid invitation')
+      const { data: invite, error: inviteError } = await svc.from('studio_invites')
+        .select('id, studio_id, email, role, accepted_at, expires_at').eq('id', match[1]).maybeSingle()
+      if (inviteError) return deny(500, 'Could not read invitation')
+      if (!invite) return deny(404, 'Invitation not found')
+      const { data: member } = await svc.from('studio_members').select('role')
+        .eq('studio_id', invite.studio_id).eq('user_id', callerId).maybeSingle()
+      if (!canSendStudioInvite(invite, member?.role ?? null)) return deny(403, 'Only studio managers can send pending invitations')
+      const { data: studio } = await svc.from('studios').select('name').eq('id', invite.studio_id).maybeSingle()
+      if (!studio) return deny(404, 'Studio not found')
+      const { data: profile } = await svc.from('profiles').select('first_name, last_name').eq('id', callerId).maybeSingle()
+      if (Date.parse(invite.expires_at) <= Date.now()) {
+        const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        const { data: renewed, error } = await svc.from('studio_invites').update({ expires_at: expiresAt })
+          .eq('id', invite.id).is('accepted_at', null).select('expires_at').maybeSingle()
+        if (error || !renewed) return deny(409, 'Invitation could not be renewed')
+        invite.expires_at = renewed.expires_at
+      }
+      recipientEmail = invite.email
+      templateData = {
+        studioName: studio.name, inviterName: [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Your colleague',
+        role: invite.role, recipientEmail: invite.email, expiresAt: invite.expires_at,
+        link: 'https://www.maisonaffluency.com/trade/login?next=%2Ftrade%2Fsettings%2Fstudio',
+      }
+    } else if (templateName === 'board-collaborator-invite' && callerId) {
       // Always rebuild collaborator invitations from stored data, including for
       // admin callers. This prevents placeholder copy and a dead "#" CTA.
       const m = /^board-invite-([0-9a-f-]{36})$/i.exec(String(idempotencyKey))
