@@ -661,6 +661,17 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   // Hotspot on the left half of the photo → card floats on the right margin, and vice versa.
   const overlaySide: "left" | "right" = selectedHotspot && selectedHotspot.x_percent < 50 ? "right" : "left";
   const openAspect = activeScene ? sceneAspects[activeScene.id] : undefined;
+  const imageBoxRef = useRef<HTMLDivElement>(null);
+  const [imageBoxHeight, setImageBoxHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const el = imageBoxRef.current;
+    if (!el || !(portraitDock && overlayOpen)) { setImageBoxHeight(null); return; }
+    const update = () => setImageBoxHeight(el.getBoundingClientRect().height);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [portraitDock, overlayOpen, openAspect, activeScene?.id]);
   const { data: dockRrpMap = {} } = usePublicRrpMap(dockAlternatives.map((pick) => pick.id));
   const dockDestination = useShippingDestination();
   useEffect(() => {
@@ -742,7 +753,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                  <div style={portraitDock && overlayOpen && openAspect ? { aspectRatio: openAspect } : undefined} className={`relative flex min-w-0 flex-1 items-start justify-center ${portraitDock && overlayOpen ? `md:flex-none md:aspect-[4/3] md:rounded-sm md:overflow-hidden ${openAspect && openAspect < 1 ? "md:h-[75vh]" : "md:w-[70%]"}` : ""}`}>
+                  <div ref={imageBoxRef} style={portraitDock && overlayOpen && openAspect ? { aspectRatio: openAspect } : undefined} className={`relative flex min-w-0 flex-1 items-start justify-center ${portraitDock && overlayOpen ? `md:flex-none md:self-start md:aspect-[4/3] md:rounded-sm md:overflow-hidden ${openAspect && openAspect < 1 ? "md:h-[75vh]" : "md:w-[70%]"}` : ""}`}>
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
                        <motion.div
@@ -860,6 +871,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
+                        style={imageBoxHeight ? { maxHeight: imageBoxHeight } : undefined}
                         className="hidden w-[30%] flex-col gap-4 overflow-y-auto max-h-[75vh] rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex"
                       >
                         <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
