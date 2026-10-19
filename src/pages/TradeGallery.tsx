@@ -681,7 +681,7 @@ const StudioGallery = ({ roomSlug }: { roomSlug?: RoomSlug }) => {
             <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} counts={editionCounts} allCount={collectionCounts.total} />
           </div>
           <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
-            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : filtered.length} {filtered.length === 1 ? "Item" : "Items"} Found</span>
+            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : sorted.length} {sorted.length === 1 ? "Item" : "Items"} Found</span>
             <div className="flex items-center gap-1">
               <GridDensityToggle value={density === "compact" ? 4 : 3} onChange={(columns) => { setViewMode("grid"); setDensity(columns === 4 ? "compact" : "comfortable"); }} className="!flex shrink-0" />
               <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="icon" aria-label="Display list" aria-pressed={viewMode === "list"} title="Display list" onClick={() => setViewMode("list")} className={cn("h-10 w-10", viewMode === "list" && "bg-foreground text-background hover:bg-foreground/90")}><List /></Button>

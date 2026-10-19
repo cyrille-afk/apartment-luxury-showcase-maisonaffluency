@@ -11,13 +11,15 @@ import { ROOM_LABELS, type RoomSlug } from '@/lib/roomCategories';
 import { roomAnchors, roomShoppingPairings } from '@/lib/shopByRoom';
 import type { PairingProduct } from '@/lib/curatedPairings';
 import PairingConfigurationSheet from './PairingConfigurationSheet';
+import { useAuth } from '@/hooks/useAuth';
 
 const rooms: RoomSlug[] = ['living-room', 'dining-room', 'bedroom', 'office', 'outdoor'];
 
 export default function RoomShopping({ room, trade = false, onRoomChange }: { room: RoomSlug; trade?: boolean; onRoomChange: (room: RoomSlug) => void }) {
   const { data: catalogue = [], isLoading, isError, refetch } = useDbCuratorPicks();
   const { buyerProfile } = useCheckoutForm();
-  const privateClient = !trade && buyerProfile !== 'designer';
+  const { user, isTradeUser, isAdmin, rolesLoaded } = useAuth();
+  const privateClient = !trade && buyerProfile !== 'designer' && !isTradeUser && !isAdmin && (!user || rolesLoaded);
   const { data: rules = [], isError: rulesError, refetch: refetchRules } = useCuratedPairingRules(privateClient);
   const cart = useCart();
   const [chosenId, setChosenId] = useState('');
