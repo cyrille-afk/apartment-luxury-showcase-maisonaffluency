@@ -776,7 +776,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
@@ -853,12 +853,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                       <motion.aside
                         key={selectedHotspot.id}
                         aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                        initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        initial={{ opacity: 0, x: 16 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        exit={{ opacity: 0, x: 16 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        style={imageBoxHeight ? { maxHeight: imageBoxHeight } : undefined}
-                        className="hidden w-[30%] flex-col gap-4 overflow-y-auto max-h-[75vh] rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex"
+                        className="fixed right-8 top-[20vh] z-50 hidden w-[350px] flex-col gap-6 overflow-y-auto max-h-[70vh] rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex"
                       >
                         <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                           <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
