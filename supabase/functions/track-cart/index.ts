@@ -10,6 +10,7 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
+    buyer_profile: body.buyerProfile === 'private' || body.buyerProfile === 'designer' ? body.buyerProfile : null,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
@@ -94,6 +95,7 @@ Deno.serve(async (req) => {
   if (!payload.email) delete payload.email
   if (!payload.name) delete payload.name
   if (!payload.user_id) delete payload.user_id
+  if (!payload.buyer_profile) delete payload.buyer_profile
 
   const { error } = await supabase
     .from('abandoned_carts')
