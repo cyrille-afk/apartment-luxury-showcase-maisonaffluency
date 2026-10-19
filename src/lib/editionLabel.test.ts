@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, formatEditionLabel, getHouseEditionLabel, isEcartReedition, productEditionBadge } from "./editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, formatEditionLabel, getHouseEditionLabel, isEcartReedition, productEditionBadge, profileEditionLine } from "./editionLabel";
 
 describe("Ecart re-edition labels", () => {
+  it('does not treat generic stored house attribution as an edition on child profiles', () => {
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).toBeNull();
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Yabu Pushelberg' })).toBeNull();
+  });
+  it('retains actual limited or signed editions on child profiles', () => {
+    expect(profileEditionLine({ edition: 'Edition of 8', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).not.toBeNull();
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', edition_number: '1/8', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).not.toBeNull();
+  });
+  it('retains house attribution on house pages and unscoped catalogues', () => {
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).not.toBeNull();
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts' })).not.toBeNull();
+  });
   it("labels Ecart and its affiliated designers", () => {
     expect(isEcartReedition({ designerName: "Ecart" })).toBe(true);
     expect(isEcartReedition({ designerName: "Jean-Michel Frank", founder: "Ecart" })).toBe(true);

@@ -62,7 +62,7 @@ import NewInSpotlight from "@/components/NewInSpotlight";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
 import NotFound from "@/pages/NotFound";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel, profileEditionLine } from "@/lib/editionLabel";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -1893,7 +1893,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                     parentBrand: parentBrandName || (isParentBrandDesigner(designer) ? designer.name : null),
                     pageDesignerName: designer.name,
                   });
-                  const curatorialEditionLine = formatCuratorialEditionLine(pick);
+                  const curatorialEditionLine = profileEditionLine({ ...pick, founder: designer.founder, pageDesignerName: designer.name });
 
                   // Arnold Madsen's three Clam Chair cards are finish-specific
                   // editorial entries, not separate products. Keep all three

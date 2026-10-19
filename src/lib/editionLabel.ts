@@ -50,6 +50,20 @@ const normalizeHouseName = (value?: string | null) =>
     .trim()
     .toLowerCase();
 
+/** Suppress stored house attribution masquerading as an edition on child profiles. */
+export function profileEditionLine(input: Parameters<typeof formatCuratorialEditionLine>[0] & {
+  founder?: string | null;
+  pageDesignerName?: string | null;
+}): string | null {
+  const line = formatCuratorialEditionLine(input);
+  const house = normalizeHouseName(input.founder);
+  const page = normalizeHouseName(input.pageDesignerName);
+  if (!line || !house || !page || page === house || input.edition_number?.trim() || input.edition_signing?.trim()) return line;
+  const label = normalizeHouseName(line);
+  const genericHouseLabels = [house, `${house} edition`, `${house} editions`, `${house} reedition`, `${house} re-edition`];
+  return genericHouseLabels.includes(label) ? null : line;
+}
+
 /** True when a product is edited by Ecart, including Ecart's designer family. */
 export function isEcartReedition(input: {
   designerName?: string | null;
