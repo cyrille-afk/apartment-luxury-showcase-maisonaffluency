@@ -13,13 +13,13 @@ function setup(enabled = true) {
   document.body.append(panel);
   const onDismiss = vi.fn();
   renderHook(() => useMobileSwipeDismiss({ containerRef: { current: panel }, enabled, onDismiss }));
-  const touch = (type: string, x: number, y: number, target = content, count = 1) => {
+  const touch = (type: string, x: number, y: number, target: HTMLElement = content, count = 1) => {
     const event = new Event(type, { bubbles: true, cancelable: true });
     Object.defineProperty(event, 'touches', { value: Array.from({ length: count }, () => ({ clientX: x, clientY: y })) });
     target.dispatchEvent(event);
     return event;
   };
-  const swipe = (dx: number, dy: number, target = content) => {
+  const swipe = (dx: number, dy: number, target: HTMLElement = content) => {
     touch('touchstart', 100, 100, target);
     touch('touchmove', 100 + dx, 100 + dy, target);
     touch('touchend', 100 + dx, 100 + dy, target);
