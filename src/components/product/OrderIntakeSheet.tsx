@@ -14,6 +14,7 @@ import PhoneDialField from "@/components/product/PhoneDialField";
 import { pushBespokeSync } from "@/lib/bespokeSync";
 import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
 import { isReturningPrivateClient, rememberedPrivateClients, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import PrivateClientWelcome from "./PrivateClientWelcome";
 import { setCartContact } from "@/lib/cartTracking";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -741,11 +742,7 @@ export default function OrderIntakeSheet({
                 className={inputCls}
                 onBlur={() => { if (!isQuote) rememberPrivateClient(email, profile); }}
               />
-              {buyerType === "individual" && isReturningPrivateClient(email, profile, rememberedEmails) && (
-                <p role="status" className="mt-3 font-body text-sm leading-relaxed text-foreground">
-                  Welcome back. It’s a pleasure to see you again.
-                </p>
-              )}
+              {buyerType === "individual" && <PrivateClientWelcome email={email} profile={profile} locallyReturning={isReturningPrivateClient(email, profile, rememberedEmails)} />}
               {buyerType === "business" && (
                 <>
                   <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">
