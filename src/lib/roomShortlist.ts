@@ -19,6 +19,6 @@ export const roomShortlistDraftKey = (room: RoomSlug, userId?: string) => `ma-ro
 export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string };
 export function shortlistCover(value: unknown): RoomShortlistCover {
   const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch('') }).safeParse(value);
-  return parsed.success ? parsed.data : { clientName: '', projectTitle: '', introduction: '' };
+  return { clientName: parsed.success ? parsed.data.clientName || '' : '', projectTitle: parsed.success ? parsed.data.projectTitle || '' : '', introduction: parsed.success ? parsed.data.introduction || '' : '' };
 }
 export const shortlistCoverKey = (key: string, savedId?: string) => `${key}:pdf-cover:${savedId || 'draft'}`;

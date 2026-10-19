@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { roomShortlistDraftKey, shortlistItems, toggleShortlistItem } from './roomShortlist';
+import { roomShortlistDraftKey, shortlistItems, toggleShortlistItem, shortlistCover, shortlistCoverKey } from './roomShortlist';
 const item = { id: 'chair', product_name: 'Chair', brand_name: 'Maker', image_url: null };
 describe('room collection shortlists', () => {
   it('keeps each room selection independent', () => {
@@ -17,4 +17,11 @@ describe('room collection shortlists', () => {
     expect(shortlistItems([{ ...item, trade_price_cents: 12345, net: 9000, user_id: 'secret' }])).toEqual([item]);
   });
   it('rejects damaged stored selections', () => { expect(shortlistItems([{ id: 'broken' }])).toEqual([]); });
+  it('retains all optional cover fields as plain text without private extras', () => {
+    expect(shortlistCover({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.', net: 9000 })).toEqual({ clientName: 'Élodie', projectTitle: 'Riverside Apartment', introduction: 'Dear Élodie,\nA personal selection.' });
+  });
+  it('defaults missing cover details without sharing another shortlist draft', () => {
+    expect(shortlistCover(null)).toEqual({ clientName: '', projectTitle: '', introduction: '' });
+    expect(new Set(['draft', 'a', 'b'].map(id => shortlistCoverKey('owner:living', id))).size).toBe(3);
+  });
 });
