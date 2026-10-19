@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useSearchParams } from "react-router-dom";
+import { inviteLinkGuidance, type InviteLinkStatus } from "@/lib/studioInvitationLink";
 
 interface PendingInvite {
   id: string;
@@ -37,6 +38,18 @@ export function PendingInvitesBanner() {
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+
+  const [linkStatus, setLinkStatus] = useState<{ status: InviteLinkStatus; studio_id?: string; studio_name?: string; is_member?: boolean } | null>(null);
+
+  useEffect(() => {
+    if (!user || !linkedInviteId) { setLinkStatus(null); return; }
+    let live = true;
+    supabase.rpc("studio_invite_link_status", { _invite_id: linkedInviteId }).then(({ data, error }) => {
+      if (!live) return;
+      setLinkStatus(error ? { status: "unavailable" } : (data as any));
+    });
+    return () => { live = false; };
+  }, [user?.id, linkedInviteId, invites.length]);
 
   const load = async (showLoading = true) => {
     if (!user) return;
@@ -88,7 +101,22 @@ export function PendingInvitesBanner() {
 
   if (loading) return null;
   const visibleInvites = linkedInviteId ? invites.filter(inv => inv.id === linkedInviteId) : invites;
-  if (visibleInvites.length === 0) return linkedInviteId ? <p role="status" className="border-l-2 border-border pl-4 text-sm text-muted-foreground">This invitation is unavailable for your signed-in email. Sign in with the invited email, or ask the studio owner for a current invitation.</p> : null;
+  const usable = visibleInvites.some(inv => !inv.is_expired);
+  if (linkedInviteId && !usable) {
+    if (!linkStatus) return null;
+    const guidance = inviteLinkGuidance(linkStatus.status === "pending" ? "unavailable" : linkStatus.status, linkStatus.studio_name, !!linkStatus.is_member);
+    if (!guidance) return null;
+    return (
+      <div role="status" className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+        <div className="flex items-center gap-2 text-sm font-medium"><AlertTriangle className="h-4 w-4 text-muted-foreground" />{guidance.title}</div>
+        <p className="text-sm text-muted-foreground">{guidance.body}</p>
+        {guidance.action === "studio" && linkStatus.studio_id && (
+          <Button size="sm" variant="outline" onClick={() => setCurrentStudioId(linkStatus.studio_id!)}>Open {linkStatus.studio_name ?? "studio"}</Button>
+        )}
+      </div>
+    );
+  }
+  if (visibleInvites.length === 0) return null;
 
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">

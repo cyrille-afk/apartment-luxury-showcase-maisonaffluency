@@ -35,3 +35,11 @@ describe('studio invitation sending', () => {
     expect(canSendStudioInvite({ accepted_at: null, role: 'owner' }, null, true)).toBe(false)
   })
 })
+import { inviteLinkGuidance } from './studioInvitationLink';
+describe('inviteLinkGuidance', () => {
+  it('pending links need no guidance', () => expect(inviteLinkGuidance('pending', 'A')).toBeNull());
+  it('expired links ask for a resend', () => expect(inviteLinkGuidance('expired', 'A')!.title).toBe('This invitation has expired'));
+  it('used links tell existing members they already joined', () => expect(inviteLinkGuidance('accepted', 'A', true)!.action).toBe('studio'));
+  it('used links for removed members ask for a new invite', () => expect(inviteLinkGuidance('accepted', 'A', false)!.title).toBe('This invitation has already been used'));
+  it('revoked or other-account links share one message', () => expect(inviteLinkGuidance('unavailable')!.title).toBe('This invitation is no longer available'));
+});

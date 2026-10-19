@@ -13132,6 +13132,7 @@ export type Database = {
         Args: { _state: string; _studio_id: string }
         Returns: boolean
       }
+      studio_invite_link_status: { Args: { _invite_id: string }; Returns: Json }
       submit_board_feedback: {
         Args: {
           _comment: string
