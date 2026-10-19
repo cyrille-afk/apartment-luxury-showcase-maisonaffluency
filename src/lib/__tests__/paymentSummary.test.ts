@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paymentSummaryRows, type PaymentSummaryInput } from "../paymentSummary";
+import { paymentSummaryRows, paymentSummaryDueDate, type PaymentSummaryInput } from "../paymentSummary";
 import { quoteChargeBreakdown } from "../quoteChargeBreakdown";
 
 const fixture = (): PaymentSummaryInput => ({ quoteNumber: "QU-TEST", clientName: "Client", currency: "SGD", locale: "en-SG", taxLabel: "GST", taxRate: 9,
@@ -9,6 +9,18 @@ const fixture = (): PaymentSummaryInput => ({ quoteNumber: "QU-TEST", clientName
   paymentType: "deposit", processingFeeCents: 37_557, cardTotalCents: 1_103_126 });
 
 describe("payment summary parity", () => {
+  it("keeps every monetary row identical when quote, customer and deadline metadata change", () => {
+    const input = fixture();
+    expect(paymentSummaryRows({ ...input, quoteNumber: "QU-9F86D9", clientName: "Hyeonmi Kim", paymentDueAt: "2026-11-02T00:00:00Z" }))
+      .toEqual(paymentSummaryRows(input));
+  });
+  it("formats a recorded payment deadline using the quote locale", () => {
+    expect(paymentSummaryDueDate({ paymentType: "balance", locale: "en-SG", paymentDueAt: "2026-11-02T00:00:00Z" })).toBe("2 November 2026");
+  });
+  it("uses existing payment terms rather than inventing a missing date", () => {
+    expect(paymentSummaryDueDate({ paymentType: "deposit", locale: "en-SG" })).toBe("On order confirmation");
+    expect(paymentSummaryDueDate({ paymentType: "balance", locale: "en-SG", paymentDueAt: "invalid" })).toBe("Before shipment — date to be confirmed");
+  });
   it("uses exactly the same additional charge allocations as the screen", () => {
     const input = fixture();
     expect(paymentSummaryRows(input).slice(1, 4)).toEqual(quoteChargeBreakdown(input.charges, input.goodsCents, 9, input.shippingCents, 0.6));

@@ -1,5 +1,6 @@
 import { quoteChargeBreakdown, type QuoteCharge } from "./quoteChargeBreakdown";
 import { reconcileQuotePayment } from "./quotePaymentReconciliation";
+import { formatPdfDate } from "./pdfFormatting";
 
 export type PaymentSummaryInput = {
   quoteNumber: string; clientName: string; projectName?: string | null;
@@ -9,7 +10,16 @@ export type PaymentSummaryInput = {
   taxCents: number; totalCents: number; depositCents: number; balanceCents: number;
   depositPct: number; paymentType: "deposit" | "balance";
   processingFeeCents: number; cardTotalCents: number;
+  paymentDueAt?: string | null;
 };
+
+export function paymentSummaryDueDate(input: Pick<PaymentSummaryInput, "paymentDueAt" | "paymentType" | "locale">): string {
+  if (input.paymentDueAt) {
+    const date = new Date(input.paymentDueAt);
+    if (Number.isFinite(date.getTime())) return formatPdfDate(date, input.locale);
+  }
+  return input.paymentType === "deposit" ? "On order confirmation" : "Before shipment — date to be confirmed";
+}
 
 export function paymentSummaryRows(input: PaymentSummaryInput) {
   const amounts = { chargesCents: input.charges.reduce((sum, charge) => sum + charge.amountCents, 0),

@@ -551,6 +551,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [respondedAt, setRespondedAt] = useState<string | null>(null);
   const [confirmedAtTs, setConfirmedAtTs] = useState<string | null>(null);
+  const [paymentDeadline, setPaymentDeadline] = useState<{ quoteId: string; dueAt: string | null } | null>(null);
   const [reviseOpen, setReviseOpen] = useState(false);
   const [reviseReason, setReviseReason] = useState("");
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -2543,6 +2544,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const currentPaymentKey = useRef(paymentCheckKey);
   currentPaymentKey.current = paymentCheckKey;
   const summaryPaymentType = quoteStatus === "deposit_paid" ? "balance" : "deposit";
+  useEffect(() => {
+    if (summaryPaymentType !== "balance") return;
+    let cancelled = false;
+    supabase.from("order_timeline").select("balance_due_at").eq("quote_id", quoteId).maybeSingle()
+      .then(({ data, error }) => {
+        if (!cancelled) setPaymentDeadline({ quoteId, dueAt: error ? null : data?.balance_due_at ?? null });
+      });
+    return () => { cancelled = true; };
+  }, [quoteId, summaryPaymentType]);
   const summaryDueCents = summaryPaymentType === "deposit" ? screenDepositCents : screenOrderTotalCents - screenDepositCents;
   const summaryFixedFees: Record<string, number> = { SGD: 50, USD: 30, EUR: 25, GBP: 20 };
   const summaryCardTotalCents = Math.ceil((summaryDueCents + (summaryFixedFees[currency] ?? 50)) / (1 - 0.034));
@@ -2555,6 +2565,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     balanceCents: screenOrderTotalCents - screenDepositCents, depositPct: depositPctLive,
     paymentType: summaryPaymentType, processingFeeCents: summaryCardTotalCents - summaryDueCents,
     cardTotalCents: summaryCardTotalCents,
+    paymentDueAt: summaryPaymentType === "deposit" ? confirmedAtTs
+      : paymentDeadline?.quoteId === quoteId ? paymentDeadline.dueAt : null,
   };
 
   const checkPaymentAmounts = async () => {
