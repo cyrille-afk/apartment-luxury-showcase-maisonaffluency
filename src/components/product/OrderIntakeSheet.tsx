@@ -13,6 +13,8 @@ import { getCurrentDestination } from "@/lib/shippingDestination";
 import PhoneDialField from "@/components/product/PhoneDialField";
 import { pushBespokeSync } from "@/lib/bespokeSync";
 import { cachePendingBespokeUpload } from "@/lib/pendingBespokeCache";
+import { isReturningPrivateClient, rememberedPrivateClients, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import { setCartContact } from "@/lib/cartTracking";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -101,6 +103,7 @@ export default function OrderIntakeSheet({
   const [sent, setSent] = useState(false);
   const [showingSuccess, setShowingSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [rememberedEmails, setRememberedEmails] = useState(rememberedPrivateClients);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<"designer" | "private" | null>(
     checkoutForm.buyerProfile,
@@ -167,6 +170,7 @@ export default function OrderIntakeSheet({
 
   useEffect(() => {
     if (isOpen) {
+      setRememberedEmails(rememberedPrivateClients());
       setStep(0);
       // Clear any confirmation retained by the legacy header-notice flow.
       dismiss();
@@ -346,6 +350,8 @@ export default function OrderIntakeSheet({
       return;
     }
     const confirmedDetails = details();
+    rememberPrivateClient(confirmedDetails.email, confirmedDetails.profile);
+    setCartContact(confirmedDetails.email);
     checkoutForm.setEmail(confirmedDetails.email);
     checkoutForm.update({
       projectCity: confirmedDetails.city,
