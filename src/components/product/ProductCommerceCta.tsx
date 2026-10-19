@@ -72,6 +72,8 @@ export interface ProductCommerceCtaProps {
   dockOnly?: boolean;
   /** Workspace routes use a body-level dock outside their scrolling shell. */
   fixedDock?: boolean;
+  /** Connects a separate page order button to this instance's shared intake. */
+  orderTriggerEvent?: string;
   /** Mini-cart drawer content */
   productTitle?: string;
   designerName?: string;
@@ -182,6 +184,7 @@ export default function ProductCommerceCta({
   dock = true,
   dockOnly = false,
   fixedDock = false,
+  orderTriggerEvent,
   productTitle,
   designerName,
   imageUrl,
@@ -272,27 +275,6 @@ export default function ProductCommerceCta({
     }
     setMiniCartOpen(true);
   };
-  /**
-   * Intent gate: public visitors qualify themselves (designer vs private
-   * client), state the project city and leave contact detail before either the
-   * order drawer or the bespoke dialog opens. Captured once per session —
-   * returning visitors go straight through.
-   */
-  // Captured once per browsing session (not forever): stored details only skip
-  // the gate after the visitor has actually completed it in this tab.
-  const intakeCaptured = Boolean(
-    checkoutForm.buyerProfile &&
-      checkoutForm.projectCity.trim() &&
-      checkoutForm.email.trim() &&
-      (() => {
-        try {
-          return sessionStorage.getItem("ma_intake_done") === "1";
-        } catch {
-          return true;
-        }
-      })(),
-  );
-
   const runIntent = (target: "order" | "bespoke") => {
     if (target === "order" && tradeApproved) onPlaceOrder(quantity);
     else if (target === "order") openSelection();
@@ -307,10 +289,6 @@ export default function ProductCommerceCta({
       return;
     }
     setDesktopDirectBespoke(false);
-    if (desktop && (tradeApproved || intakeCaptured)) {
-      runIntent(target);
-      return;
-    }
     setIntakeFor(target);
   };
 
@@ -337,7 +315,14 @@ export default function ProductCommerceCta({
     }
   };
 
-  const primaryAction = tradeApproved ? undefined : () => startIntent("order");
+  const primaryAction = () => startIntent("order");
+
+  useEffect(() => {
+    if (!orderTriggerEvent) return;
+    const handler = () => startIntent("order");
+    window.addEventListener(orderTriggerEvent, handler);
+    return () => window.removeEventListener(orderTriggerEvent, handler);
+  }, [orderTriggerEvent]);
 
   /**
    * Secondary CTA: bespoke / customisation enquiries open a centred overlay
@@ -555,11 +540,11 @@ export default function ProductCommerceCta({
         {tradeApproved ? (
           <>
             <QuantitySelector value={quantity} onChange={setQuantity} />
-            {/* Primary: direct order at the net trade rate — no workspace detour. */}
-            <button type="button" data-commerce-primary onClick={() => onPlaceOrder(quantity)} disabled={placingOrder} className={primaryBtn}>
+            {/* Ordering always starts with the shared client-type intake. */}
+            <Button type="button" data-commerce-primary onClick={primaryAction} disabled={placingOrder} className={primaryBtn}>
               {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
               {placingOrder ? "Opening checkout…" : primaryLabel}
-            </button>
+            </Button>
             {/* Secondary: co-pilot workspace planning. */}
             <Link to={workspaceHref} data-commerce-secondary state={redirectTo ? { from: redirectTo } : undefined} className={secondaryBtn}>
               Add to Co-Pilot Workspace
@@ -583,16 +568,16 @@ export default function ProductCommerceCta({
             {!isUnpriced && (
               <>
                 <QuantitySelector value={quantity} onChange={setQuantity} />
-                <button
+                <Button
                   type="button"
                   data-commerce-primary
-                  onClick={() => (finishSelectionRequired ? scrollToFinishes() : primaryAction())}
+                  onClick={primaryAction}
                   disabled={placingOrder}
                   className={primaryBtn}
                 >
                   {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
-                  {placingOrder ? "Opening checkout…" : finishSelectionRequired ? "Choose Finishes" : primaryLabel}
-                </button>
+                  {placingOrder ? "Opening checkout…" : primaryLabel}
+                </Button>
               </>
             )}
             {/* High-touch / contract buyers — opens the bespoke configuration

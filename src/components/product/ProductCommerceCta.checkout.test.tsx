@@ -36,6 +36,36 @@ describe('mobile order intake', () => {
 });
 
 describe('product selection checkout hand-off', () => {
+  it('gates a separate desktop workspace order button through intake', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+    vi.useFakeTimers();
+    sessionStorage.setItem('ma_intake_done', '1');
+    const placeOrder = vi.fn();
+    render(<ProductCommerceCta productId="chair" dockOnly tradeApproved orderTriggerEvent="ma:open-workspace-order" onPlaceOrder={placeOrder} />);
+    act(() => window.dispatchEvent(new Event('ma:open-workspace-order')));
+    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(true);
+    expect(placeOrder).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Complete intake' }));
+    act(() => vi.advanceTimersByTime(260));
+    expect(placeOrder).toHaveBeenCalledWith(1);
+  });
+
+  it.each([false, true])('requires desktop intake for returning approved=%s buyers', (approved) => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+    vi.useFakeTimers();
+    sessionStorage.setItem('ma_intake_done', '1');
+    const placeOrder = vi.fn();
+    const add = vi.fn();
+    render(<ProductCommerceCta productId="chair" dock={false} tradeApproved={approved} rrpLabel="$1,200" finishSelectionRequired onPlaceOrder={placeOrder} onAddToCart={add} />);
+    fireEvent.click(screen.getByRole('button', { name: approved ? 'Proceed to Order' : 'Place Order' }));
+    expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(true);
+    expect(placeOrder).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Complete intake' }));
+    act(() => vi.advanceTimersByTime(260));
+    expect(approved ? placeOrder : add).toHaveBeenCalledWith(1);
+  });
+
   it('retains the custom pairing reference and finish price with the original selection', () => {
     const original: CartItem = { key: 'pendant', pickId: 'pendant', designerSlug: 'atelier', productSlug: 'pendant', title: 'Pendant', designerName: 'Atelier', finishLabel: 'Brass', imageUrl: null, leadTime: null, unitPriceCents: 120000, currency: 'USD', quantity: 2 };
     const pairing: CartItem = { ...original, key: 'console', pickId: 'console', productSlug: 'console', title: 'Console', finishLabel: 'Ivory Lacquer / Aged Brass', unitPriceCents: 870000, quantity: 3, pairing: { ruleId: 'console-rule', optionId: 'ivory-brass' }, variant: { base: 'Brass', top: 'Ivory', size: null }, origin: 'FR', pickupCountry: 'FR' };
