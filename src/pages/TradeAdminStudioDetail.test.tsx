@@ -4,9 +4,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TradeAdminStudioDetail from './TradeAdminStudioDetail';
 
-const state = vi.hoisted(() => ({ auth: { user: { id: 'user-1' }, rolesLoaded: true, isAdmin: false, isSuperAdmin: false }, rpc: vi.fn() }));
+const state = vi.hoisted(() => ({ auth: { user: { id: 'user-1' }, rolesLoaded: true, isAdmin: false, isSuperAdmin: false }, rpc: vi.fn(), invoke: vi.fn() }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => state.auth }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: state.rpc } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: state.rpc, functions: { invoke: state.invoke } } }));
 vi.mock('react-helmet-async', () => ({ Helmet: () => null }));
 vi.mock('@/components/ui/select', () => ({
   Select: ({ value, onValueChange, children }: { value: string; onValueChange: (value: string) => void; children: React.ReactNode }) => <div><select aria-label="Member role" value={value} onChange={event => onValueChange(event.target.value)}><option value="admin">admin</option><option value="editor">editor</option><option value="viewer">viewer</option></select>{children}</div>,
@@ -20,6 +20,7 @@ describe('admin studio detail access', () => {
   beforeEach(() => {
     state.auth = { user: { id: 'user-1' }, rolesLoaded: true, isAdmin: false, isSuperAdmin: false };
     state.rpc.mockReset().mockResolvedValue({ data: null, error: null });
+    state.invoke.mockReset().mockResolvedValue({ data: { success: true }, error: null });
   });
   it('never requests private studio details for an ordinary member', () => { mount(); expect(state.rpc).not.toHaveBeenCalled(); });
   it('waits for roles before requesting private studio details', () => { state.auth.isAdmin = true; state.auth.rolesLoaded = false; mount(); expect(state.rpc).not.toHaveBeenCalled(); });
@@ -63,5 +64,30 @@ describe('admin studio detail access', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove member' }));
     await screen.findByRole('alert');
     expect(screen.getByRole('button', { name: 'Remove member' })).toBeTruthy();
+  });
+  it('resends the stored pending invitation with no caller-supplied recipient and a new key after success', async () => {
+    allow();
+    state.rpc.mockResolvedValue({ data: { ...details, invitations: [{ id: 'invite-1', email: 'greg@example.com', role: 'editor', created_at: '2026-10-19', expires_at: '2026-11-02', expired: false }] }, error: null });
+    mount();
+    const button = await screen.findByRole('button', { name: 'Resend invitation to greg@example.com' });
+    fireEvent.click(button);
+    await waitFor(() => expect(button.disabled).toBe(false));
+    expect(state.invoke).toHaveBeenCalledWith('send-transactional-email', { body: { templateName: 'studio-teammate-invite', idempotencyKey: expect.stringMatching(/^studio-invite-invite-1-/), templateData: { inviteId: 'invite-1' } } });
+    const firstKey = state.invoke.mock.calls[0][1].body.idempotencyKey;
+    fireEvent.click(button);
+    await waitFor(() => expect(state.invoke).toHaveBeenCalledTimes(2));
+    expect(state.invoke.mock.calls[1][1].body.idempotencyKey).not.toBe(firstKey);
+  });
+  it('retains the same attempt key after a failed resend', async () => {
+    allow();
+    state.rpc.mockResolvedValue({ data: { ...details, invitations: [{ id: 'invite-1', email: 'greg@example.com', role: 'editor', created_at: '2026-10-19', expires_at: '2026-11-02', expired: false }] }, error: null });
+    state.invoke.mockResolvedValueOnce({ data: null, error: new Error('Network error') });
+    mount();
+    const button = await screen.findByRole('button', { name: 'Resend invitation to greg@example.com' });
+    fireEvent.click(button);
+    await waitFor(() => expect(button.disabled).toBe(false));
+    fireEvent.click(button);
+    await waitFor(() => expect(state.invoke).toHaveBeenCalledTimes(2));
+    expect(state.invoke.mock.calls[1][1].body.idempotencyKey).toBe(state.invoke.mock.calls[0][1].body.idempotencyKey);
   });
 });

@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
       if (!invite) return deny(404, 'Invitation not found')
       const { data: member } = await svc.from('studio_members').select('role')
         .eq('studio_id', invite.studio_id).eq('user_id', callerId).maybeSingle()
-      if (!canSendStudioInvite(invite, member?.role ?? null)) return deny(403, 'Only studio managers can send pending invitations')
+      if (!canSendStudioInvite(invite, member?.role ?? null, privileged)) return deny(403, 'Only studio managers or platform administrators can send pending invitations')
       const { data: studio } = await svc.from('studios').select('name').eq('id', invite.studio_id).maybeSingle()
       if (!studio) return deny(404, 'Studio not found')
       const { data: profile } = await svc.from('profiles').select('first_name, last_name').eq('id', callerId).maybeSingle()
