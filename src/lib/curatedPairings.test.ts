@@ -14,8 +14,8 @@ describe("curated cart pairing rules", () => {
   it("limits the selection to three pieces", () => expect(selectCuratedPairings(primary, pool)).toHaveLength(3));
   it("omits pieces already in the basket", () => expect(selectCuratedPairings(primary, pool, ["wall"]).map((p) => p.id)).toEqual(["table", "decor"]));
   it("does not show a single uncurated fallback", () => expect(selectCuratedPairings(primary, [primary])).toEqual([]));
-  it("uses edited category order", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, sort_order: 2 - r.sort_order }))).map((p) => p.id)).toEqual(["decor", "table", "wall"]));
-  it("uses an editor-selected published piece", () => expect(select(primary, pool, [], [{ ...rules[2], preferred_pick_id: "decor2" }]).map((p) => p.id)).toEqual(["decor2"]));
+  it("keeps functional room priority when generic category order changes", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, sort_order: 2 - r.sort_order }))).map((p) => p.id)).toEqual(["wall", "table", "decor"]));
+  it("uses an editor-selected published piece within its functional slot", () => expect(select(primary, pool, [], rules.map(r => r.id === rules[2].id ? { ...r, preferred_pick_id: "decor2" } : r)).map((p) => p.id)).toEqual(["wall", "table", "decor2"]));
   it("omits paused matches", () => expect(select(primary, pool, [], rules.map((r) => ({ ...r, enabled: r.target_category !== "wall" }))).map((p) => p.id)).toEqual(["table", "decor"]));
   it("room slots override generic target categories without recommending a substitute", () => expect(select(primary, pool, [], [{ ...rules[0], target_category: "ceiling" }]).map(p => p.id)).toEqual(["wall"]));
   it("does not substitute a preferred piece from the wrong category", () => expect(select(primary, pool, [], [{ ...rules[0], preferred_pick_id: "pendant" }]).map((p) => p.id)).toEqual(["wall"]));

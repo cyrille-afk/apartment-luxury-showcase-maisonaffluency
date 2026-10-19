@@ -1,4 +1,4 @@
-import { inferSubcategory } from './productTaxonomy';
+import { ALL_CANONICAL_SUBCATEGORIES, inferSubcategory, normalizeSubcategory } from './productTaxonomy';
 import { ROOM_MAP, type RoomSlug } from './roomCategories';
 
 type RoomPiece = { title: string; category?: string | null; subcategory?: string | null };
@@ -32,7 +32,16 @@ export function explicitPairingRoom(piece: RoomPiece): RoomSlug | null {
 }
 
 export function pairingRoomKey(piece: RoomPiece): string {
-  const sub = inferSubcategory(piece.category || undefined, piece.subcategory || undefined, piece.title);
+  const placement = piece.subcategory?.split('/')[0]?.trim();
+  const normalized = normalizeSubcategory(placement);
+  const titleHint = /\bsofa[- ]?bed\b/i.test(piece.title) ? 'Sofa-Beds'
+    : /\b(bed|headboard)\b/i.test(piece.title) ? 'Beds'
+    : /\b(bedside table|nightstand)\b/i.test(piece.title) ? 'Bedside Tables'
+    : /\b(table|desk|portable) (lamp|light)\b/i.test(piece.title) ? 'Table Lights'
+    : /\bfloor (lamp|light)\b/i.test(piece.title) ? 'Floor Lights'
+    : undefined;
+  const sub = normalized && ALL_CANONICAL_SUBCATEGORIES.has(normalized) ? normalized
+    : titleHint || inferSubcategory(piece.category || undefined, placement, piece.title);
   const key = roomKeys[sub] || 'decorative-objects';
   const text = `${piece.subcategory || ''} ${piece.title}`;
   if (explicitPairingRoom(piece) === 'outdoor') {
