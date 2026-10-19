@@ -22,6 +22,7 @@ const rule = (id: string, source_category: string, target_category: string, sort
 const rules = [
   rule("c1", "ceiling", "wall", 0), rule("c2", "ceiling", "tables", 1), rule("c3", "ceiling", "decor", 2),
   rule("s1", "seating", "ceiling", 0), rule("s2", "seating", "tables", 1), rule("s3", "seating", "decor", 2),
+  rule("t1", "tables", "seating", 0), rule("t2", "tables", "table-light", 1), rule("t3", "tables", "decor", 2),
 ];
 
 vi.mock("@/hooks/useDbCuratorPicks", () => ({ useDbCuratorPicks: () => ({ data: catalogue }) }));
