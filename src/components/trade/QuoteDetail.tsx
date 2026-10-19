@@ -2338,6 +2338,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     totalCbm: perLine.shipments.reduce((s, x) => s + x.totalCbm, 0),
     totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
+  /** No freight rate matched this route — shipping would silently be zero. */
+  const freightMissing = !!destIso && !!fxQuoteEur && items.length > 0 && !perLineLoading
+    && perLine.totalShippingEurCents <= 0;
+  const freightRouteLabel = (() => {
+    const origins = Array.from(new Set(items.map((it) => it.ship_origin_country || it.trade_products?.origin || "").filter(Boolean)));
+    return `No freight rate for ${origins.length ? origins.join(", ") : "origin"} → ${destIso || "destination"}`;
+  })();
 
   /**
    * Insurance premium — calculated on CIF value (goods after discount + freight),
@@ -2403,6 +2410,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         .from("trade_quote_extras" as any)
         .select("label, amount_cents, currency, quantity")
         .eq("quote_id", quoteId);
+      if (freightMissing) {
+        const manualFreight = ((extraRowsRaw as any[]) || []).some(
+          (r) => /freight|shipping|transport|delivery/i.test(String(r.label || "")) && Number(r.amount_cents) > 0,
+        );
+        if (!manualFreight) {
+          toast({
+            title: "Freight missing — nothing sent",
+            description: `${freightRouteLabel}. Add the forwarder's freight amount under Additional charges (label it "Freight") before sending.`,
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
       const missingFxPairs: string[] = [];
       const seenPairs = new Set<string>();
       const notePair = (from: string) => {
@@ -4452,6 +4472,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 )}
               </div>
 
+              {freightMissing && (
+                <div role="alert" className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
+                  <div className="font-body text-xs text-foreground">
+                    <p className="font-medium">{freightRouteLabel}</p>
+                    <p className="text-muted-foreground">Shipping is not included in this total. Request a freight quote and add the amount below as a "Freight" charge — sending is blocked until then.</p>
+                  </div>
+                </div>
+              )}
               {/* Additional charges (crating, surcharges, manual fees) */}
               <QuoteExtrasEditor
                 key={`extras-${quoteId}-${freightRevision}`}
