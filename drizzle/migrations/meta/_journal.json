@@ -1394,6 +1394,13 @@
       "when": 1792379767470,
       "tag": "0198_admin_manage_studio_members",
       "breakpoints": true
+    },
+    {
+      "idx": 199,
+      "version": "7",
+      "when": 1792379931587,
+      "tag": "0199_fix_admin_studio_member_role_variable",
+      "breakpoints": true
     }
   ]
 }
