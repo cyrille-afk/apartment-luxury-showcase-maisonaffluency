@@ -1380,6 +1380,13 @@
       "when": 1792378278008,
       "tag": "0196_admin_studio_directory",
       "breakpoints": true
+    },
+    {
+      "idx": 197,
+      "version": "7",
+      "when": 1792379033537,
+      "tag": "0197_admin_studio_details",
+      "breakpoints": true
     }
   ]
 }

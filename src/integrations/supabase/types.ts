@@ -12320,6 +12320,7 @@ export type Database = {
         Returns: undefined
       }
       admin_stripe_metrics: { Args: { _days?: number }; Returns: Json }
+      admin_studio_details: { Args: { _studio_id: string }; Returns: Json }
       admin_studio_directory: {
         Args: { _offset?: number; _search?: string }
         Returns: Json
