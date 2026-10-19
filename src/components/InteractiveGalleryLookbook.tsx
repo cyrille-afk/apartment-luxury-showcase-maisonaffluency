@@ -800,7 +800,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                        </div>
                        <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-1 md:flex-col md:justify-center md:gap-0 md:divide-y md:divide-border/60">
                          {dockAlternatives.map((pick) => (
-                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
+                           <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-w-0 items-center gap-2 rounded-sm bg-background/85 p-1 text-left hover:bg-background md:justify-start md:gap-4 md:rounded-none md:bg-transparent md:px-0 md:py-5 md:hover:bg-background/60">
                              <img src={pick.image_url} alt="" className="size-12 shrink-0 object-contain md:size-28 md:bg-background md:p-2 xl:size-32" loading="lazy" />
                              <span className="min-w-0 whitespace-normal font-display text-[10px] leading-tight text-foreground md:text-sm">
                                <span className="line-clamp-2 block">{pick.title}</span>
