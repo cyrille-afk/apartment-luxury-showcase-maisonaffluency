@@ -734,7 +734,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && overlayOpen ? `md:items-start md:justify-center md:gap-8 ${overlaySide === "left" ? "md:flex-row-reverse" : ""}` : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
@@ -783,7 +783,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.25, ease: "easeOut" }}
-                                    className="absolute inset-0 z-30"
+                                    className="absolute inset-0 z-30 md:hidden"
                                   >
                                     <button
                                       type="button"
@@ -844,6 +844,42 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                      ))}
                    </AnimatePresence>
                  </div>
+                  {portraitDock && overlayOpen && selectedHotspot && (
+                    <AnimatePresence mode="wait">
+                      <motion.aside
+                        key={selectedHotspot.id}
+                        aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
+                        initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="hidden w-[300px] shrink-0 flex-col self-stretch overflow-y-auto rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex lg:w-[320px]"
+                      >
+                        <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
+                          <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
+                          <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                        </div>
+                        <div key={`${selectedHotspot.id}-${dockRotation}`} className="flex flex-col divide-y divide-border/50 animate-fade-in">
+                          {dockAlternatives.map((pick) => (
+                            <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="h-auto min-w-0 w-full flex-col items-stretch rounded-sm bg-[hsl(var(--product-canvas))] p-3 text-left hover:bg-[hsl(var(--product-canvas))] hover:brightness-[0.97]">
+                              <span className="flex aspect-square w-full items-center justify-center overflow-hidden">
+                                <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
+                              </span>
+                              <span className="mt-2 flex items-start justify-between gap-2 px-0.5">
+                                <span className="min-w-0">
+                                  <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-foreground">{pick.brand_name}</span>
+                                  <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-muted-foreground">{pick.title}</span>
+                                </span>
+                                <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-foreground">
+                                  {formatPublicRrpForDestination(dockRrpMap[pick.id], dockDestination.currency) || "Price upon Request"}
+                                </span>
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </motion.aside>
+                    </AnimatePresence>
+                  )}
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the right of this photo" className={`hidden w-40 shrink-0 content-center border-l border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredRightPicks.map(renderScenePick)}</div>
