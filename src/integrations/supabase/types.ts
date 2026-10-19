@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       abandoned_carts: {
         Row: {
+          buyer_profile: string | null
           created_at: string
           currency: string | null
           email: string | null
@@ -33,6 +34,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          buyer_profile?: string | null
           created_at?: string
           currency?: string | null
           email?: string | null
@@ -50,6 +52,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          buyer_profile?: string | null
           created_at?: string
           currency?: string | null
           email?: string | null
@@ -6347,6 +6350,39 @@ export type Database = {
           project_name?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      private_client_challenges: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string
         }
         Relationships: []
       }
@@ -13040,6 +13076,18 @@ export type Database = {
       }
       parse_lead_weeks: { Args: { p_text: string }; Returns: number }
       pick_is_publicly_visible: { Args: { _pick_id: string }; Returns: boolean }
+      private_client_code_request: {
+        Args: { _email: string; _ip_hash: string }
+        Returns: Json
+      }
+      private_client_code_verify: {
+        Args: { _code: string; _email: string; _id: string }
+        Returns: boolean
+      }
+      private_client_has_activity: {
+        Args: { _email: string; _exclude_session?: string }
+        Returns: boolean
+      }
       profile_privileged_fields_unchanged: {
         Args: {
           _id: string
