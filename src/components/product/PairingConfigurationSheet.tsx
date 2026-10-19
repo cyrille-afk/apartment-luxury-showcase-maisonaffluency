@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { pairingMediaKey } from '@/lib/pairingMedia';
 
 export interface PairingConfigurationStart { selection: PairingSelection; visual: Partial<PairingSelection>; customId: string; material: string }
-export default function PairingConfigurationSheet({ piece, onClose, onExplore, preview = false, initial }: { piece: PairingProduct; onClose: () => void; onExplore: () => void; preview?: boolean; initial?: PairingConfigurationStart }) {
+export default function PairingConfigurationSheet({ piece, onClose, onExplore, onAdded, preview = false, initial }: { piece: PairingProduct; onClose: () => void; onExplore: () => void; onAdded?: (piece: PairingProduct) => void; preview?: boolean; initial?: PairingConfigurationStart }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   useMobileSwipeDismiss({ containerRef: panelRef, enabled: isMobile, onDismiss: onClose });
@@ -84,6 +84,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
       ...(customOption && piece.pairingRuleId ? { pairing: { ruleId: piece.pairingRuleId, optionId: customOption.id } } : {}),
       imageUrl: image, leadTime: piece.leadTime || null, origin: piece.origin || null, unitPriceCents: unit, currency, quantity });
     toast.success(`${quantity} × ${piece.title} added to your selection`);
+    onAdded?.(piece);
     onClose();
   }
   function swatchGrid(label: string, options: string[], active: string | null, select: (name: string) => void, available = (_name: string) => true) {

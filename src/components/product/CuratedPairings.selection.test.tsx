@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import CuratedPairings from "./CuratedPairings";
 
 const pick = (id: string, title: string, designerName = "Other House") => ({ pick: { id, slug: id, image: `/${id}.jpg`, title }, designerName, designerId: "d" });
@@ -15,6 +15,8 @@ const catalogue = [
   pick("floor", "Reading Floor Lamp"),
   pick("rug", "Living Room Rug"),
   pick("side", "Oak Side Table"),
+  pick("floor2", "Brass Floor Lamp"),
+  pick("rug2", "Wool Living Room Rug"),
 ];
 const rule = (id: string, source_category: string, target_category: string, sort_order: number) => ({ id, source_category, target_category, preferred_pick_id: null, sort_order, enabled: true });
 const rules = [
@@ -26,6 +28,7 @@ vi.mock("@/hooks/useDbCuratorPicks", () => ({ useDbCuratorPicks: () => ({ data: 
 vi.mock("@/hooks/useCuratedPairingRules", () => ({ useCuratedPairingRules: () => ({ data: rules }) }));
 vi.mock("@/hooks/usePublicRrp", () => ({ usePublicRrpMap: () => ({ data: {} }), formatPublicRrpForDestination: () => null }));
 vi.mock("@/lib/shippingDestination", () => ({ useShippingDestination: () => ({ currency: "USD" }) }));
+vi.mock("./PairingConfigurationSheet", () => ({ default: ({ piece, onAdded, onClose }: { piece: { id: string }; onAdded: (piece: unknown) => void; onClose: () => void }) => <button onClick={() => { onAdded(piece); onClose(); }}>Confirm pairing addition</button> }));
 vi.mock("framer-motion", async () => {
   const React = await import("react");
   const strip = ({ initial, animate, exit, transition, ...rest }: Record<string, unknown>) => rest;
@@ -45,7 +48,9 @@ describe("curated pairings follow the private client's first purchase", () => {
   it("a lounge chair first purchase gets a living-room table, floor light and rug", () => {
     render(<CuratedPairings {...props} title="Frenchmen Street Lounge Chair" brand="Atelier X" excludedIds={["frenchmen"]} />);
     const chair = shown();
-    expect(chair).toEqual(["Oak Side Table", "Reading Floor Lamp", "Living Room Rug"]);
+    expect(chair[0]).toBe("Oak Side Table");
+    expect(chair[1]).toMatch(/Reading Floor Lamp|Brass Floor Lamp/);
+    expect(chair[2]).toMatch(/Living Room Rug/);
     expect(chair).not.toContain("Dining Table");
   });
 
@@ -63,5 +68,19 @@ describe("curated pairings follow the private client's first purchase", () => {
     rerender(<CuratedPairings {...props} title="Tassel 57 Pendant" brand="APPARATUS" excludedIds={["tassel", "sconce"]} />);
     expect(shown()).not.toContain("Dining Table");
     expect(shown()[0]).toBe("Round Dining Table");
+  });
+
+  it("refreshes the whole ensemble around the added pairing, excluding earlier suggestions and basket pieces", () => {
+    render(<CuratedPairings {...props} title="Frenchmen Street Lounge Chair" brand="Atelier X" excludedIds={["frenchmen"]} />);
+    const before = shown();
+    fireEvent.click(screen.getByRole("button", { name: "Configure Oak Side Table" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm pairing addition" }));
+    const after = shown();
+    expect(after).toHaveLength(2);
+    expect(after.every((name) => !before.includes(name))).toBe(true);
+    expect(after).not.toContain("Frenchmen Street Lounge Chair");
+    expect(after).not.toContain("Oak Side Table");
+    expect(after[0]).toMatch(/Reading Floor Lamp|Brass Floor Lamp/);
+    expect(after[1]).toMatch(/Living Room Rug/);
   });
 });
