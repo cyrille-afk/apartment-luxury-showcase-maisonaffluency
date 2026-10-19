@@ -24,6 +24,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import PayoutAccountsSection from "@/components/trade/settings/PayoutAccountsSection";
 import ResaleCertificatesSection from "@/components/trade/settings/ResaleCertificatesSection";
 import { StudioBrand } from "@/components/trade/StudioBrand";
+import { PendingInvitesBanner } from "@/components/trade/PendingInvitesBanner";
 import { BrandedPdfPreview } from "@/components/trade/settings/BrandedPdfPreview";
 import { PDF_LOCALE_LABELS, PDF_LOCALE_PRESETS, normalizePdfLocale, type PdfLocalePreset } from "@/lib/pdfFormatting";
 
@@ -311,6 +312,7 @@ export default function TradeStudioSettings() {
         <p className="text-muted-foreground mb-6">
           Create your first studio to start collaborating with your team.
         </p>
+        <div className="mb-6 text-left"><PendingInvitesBanner /></div>
         <Button onClick={() => setNewStudioOpen(true)}>
           <Plus className="h-4 w-4 mr-2" /> Create studio
         </Button>
@@ -332,6 +334,8 @@ export default function TradeStudioSettings() {
         <h1 className="text-3xl font-display tracking-tight">Studio Settings</h1>
         <p className="text-muted-foreground">Manage your studio, members, and invitations.</p>
       </div>
+
+      <PendingInvitesBanner />
 
       {/* Studio details */}
       <Card>
