@@ -16,3 +16,9 @@ export function toggleShortlistItem(items: RoomShortlistItem[], item: RoomShortl
   return items.some(p => p.id === item.id) ? items.filter(p => p.id !== item.id) : [...items, roomShortlistItemSchema.parse(item)];
 }
 export const roomShortlistDraftKey = (room: RoomSlug, userId?: string) => `ma-room-shortlist-v1:${userId || 'guest'}:${room}`;
+export type RoomShortlistCover = { clientName: string; projectTitle: string; introduction: string };
+export function shortlistCover(value: unknown): RoomShortlistCover {
+  const parsed = z.object({ clientName: z.string().catch(''), projectTitle: z.string().catch(''), introduction: z.string().catch('') }).safeParse(value);
+  return parsed.success ? parsed.data : { clientName: '', projectTitle: '', introduction: '' };
+}
+export const shortlistCoverKey = (key: string, savedId?: string) => `${key}:pdf-cover:${savedId || 'draft'}`;
