@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Building2, RefreshCw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Building2, Mail, RefreshCw, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ export default function TradeAdminStudioDetail() {
   const { toast } = useToast();
   const [pending, setPending] = useState<{ member: StudioDetails['members'][number]; role?: Exclude<MemberRole, 'owner'> } | null>(null);
   const [actionError, setActionError] = useState('');
+  const inviteAttempts = useRef(new Map<string, string>());
   const enabled = Boolean(user && rolesLoaded && (isAdmin || isSuperAdmin) && studioId);
   const query = useQuery({
     queryKey: ['admin-studio-detail', user?.id, studioId], enabled,
@@ -37,6 +38,21 @@ export default function TradeAdminStudioDetail() {
     },
   });
   const data = enabled ? query.data : undefined;
+  const resend = useMutation({
+    mutationFn: async (invite: StudioDetails['invitations'][number]) => {
+      if (!enabled || !data?.invitations.some(item => item.id === invite.id)) throw new Error('Pending invitation required.');
+      const attempt = inviteAttempts.current.get(invite.id) || crypto.randomUUID();
+      inviteAttempts.current.set(invite.id, attempt);
+      const { data: result, error } = await supabase.functions.invoke('send-transactional-email', {
+        body: { templateName: 'studio-teammate-invite', idempotencyKey: `studio-invite-${invite.id}-${attempt}`, templateData: { inviteId: invite.id } },
+      });
+      if (error || result?.success !== true) throw new Error('The invitation email could not be queued. Please retry.');
+      inviteAttempts.current.delete(invite.id);
+    },
+    onSuccess: (_, invite) => toast({ title: 'Invitation email queued', description: `A fresh invitation is on its way to ${invite.email}.` }),
+    onError: error => toast({ title: 'Email not sent', description: error.message, variant: 'destructive' }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin-studio-detail'] }),
+  });
   const mutation = useMutation({
     mutationFn: async (change: NonNullable<typeof pending>) => {
       if (!enabled || !studioId) throw new Error('Administrator access required.');
@@ -81,7 +97,7 @@ export default function TradeAdminStudioDetail() {
             </tr>)}</tbody>
           </table></div>}
         </section>
-        <section aria-labelledby="studio-invitations"><h2 id="studio-invitations" className="mb-4 font-display text-xl text-foreground">Pending invitations <span className="text-muted-foreground">({data.invitations.length})</span></h2>{!data.invitations.length ? <p className="text-sm text-muted-foreground">No pending invitations.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y border-border text-xs text-muted-foreground"><tr>{['Email', 'Role', 'Status', 'Invited (UTC)', 'Expires (UTC)'].map(label => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{data.invitations.map(invite => <tr key={invite.id} className="border-b border-border"><td className="px-4 py-4 text-foreground">{invite.email}</td><td className="px-4 py-4 capitalize">{invite.role}</td><td className={`px-4 py-4 ${invite.expired ? 'text-destructive' : 'text-muted-foreground'}`}>{invite.expired ? 'Expired' : 'Pending'}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.created_at)}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.expires_at)}</td></tr>)}</tbody></table></div>}</section>
+        <section aria-labelledby="studio-invitations"><h2 id="studio-invitations" className="mb-4 font-display text-xl text-foreground">Pending invitations <span className="text-muted-foreground">({data.invitations.length})</span></h2>{!data.invitations.length ? <p className="text-sm text-muted-foreground">No pending invitations.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y border-border text-xs text-muted-foreground"><tr>{['Email', 'Role', 'Status', 'Invited (UTC)', 'Expires (UTC)', ''].map(label => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{data.invitations.map(invite => <tr key={invite.id} className="border-b border-border"><td className="px-4 py-4 text-foreground">{invite.email}</td><td className="px-4 py-4 capitalize">{invite.role}</td><td className={`px-4 py-4 ${invite.expired ? 'text-destructive' : 'text-muted-foreground'}`}>{invite.expired ? 'Expired' : 'Pending'}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.created_at)}</td><td className="whitespace-nowrap px-4 py-4 text-muted-foreground">{date(invite.expires_at)}</td><td className="px-4 py-4"><Button variant="outline" size="sm" className="whitespace-nowrap" aria-label={`Resend invitation to ${invite.email}`} disabled={resend.isPending || invite.role === 'owner'} onClick={() => resend.mutate(invite)}><Mail className="mr-2 h-4 w-4" />{resend.isPending && resend.variables?.id === invite.id ? 'Sending…' : 'Resend invitation'}</Button></td></tr>)}</tbody></table></div>}</section>
       </>}
     </>}
     <AlertDialog open={enabled && Boolean(pending)} onOpenChange={open => { if (!open && !mutation.isPending) { setPending(null); setActionError(''); } }}>

@@ -26,4 +26,12 @@ describe('studio invitation sending', () => {
     expect(studioInviteKey('invite-1', 'attempt-1')).toBe('studio-invite-invite-1-attempt-1')
     expect(studioInviteKey('invite-1', 'attempt-2')).not.toBe(studioInviteKey('invite-1', 'attempt-1'))
   })
+  it('allows verified platform admins to resend pending teammate invites without workspace membership', () => {
+    expect(canSendStudioInvite({ accepted_at: null, role: 'editor' }, null, true)).toBe(true)
+    expect(canSendStudioInvite({ accepted_at: null, role: 'editor' }, null, false)).toBe(false)
+  })
+  it('never lets platform admin resends bypass acceptance or owner-role protection', () => {
+    expect(canSendStudioInvite({ accepted_at: '2026-10-19', role: 'editor' }, null, true)).toBe(false)
+    expect(canSendStudioInvite({ accepted_at: null, role: 'owner' }, null, true)).toBe(false)
+  })
 })
