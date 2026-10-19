@@ -105,7 +105,7 @@ describe('admin studio detail access', () => {
     withInvite(); mount();
     fireEvent.click(await screen.findByRole('button', { name: 'Revoke invitation to greg@example.com' }));
     expect(state.rpc).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation' }));
     await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('admin_revoke_studio_invitation', { _studio_id: 'studio-1', _invite_id: 'invite-1' }));
     expect(state.invoke).not.toHaveBeenCalled();
   });
@@ -113,8 +113,8 @@ describe('admin studio detail access', () => {
     withInvite(); mount();
     fireEvent.click(await screen.findByRole('button', { name: 'Revoke invitation to greg@example.com' }));
     state.rpc.mockResolvedValueOnce({ data: null, error: new Error('Accepted invitations cannot be revoked') });
-    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Revoke invitation' }));
     await screen.findByRole('alert');
-    expect(screen.getByRole('button', { name: 'Revoke invitation', exact: true })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Revoke invitation' })).toBeTruthy();
   });
 });
