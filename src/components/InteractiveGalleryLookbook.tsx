@@ -733,13 +733,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && overlayOpen ? `md:flex-row md:items-stretch md:justify-center md:gap-8 md:max-w-7xl md:mx-auto md:px-4 md:my-8 ${overlaySide === "left" ? "md:flex-row-reverse" : ""}` : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                  <div ref={imageBoxRef} style={portraitDock && overlayOpen && openAspect ? { aspectRatio: openAspect } : undefined} className={`relative flex min-w-0 flex-1 items-start justify-center ${portraitDock && overlayOpen ? `md:flex-none md:self-start md:aspect-[4/3] md:rounded-sm md:overflow-hidden ${openAspect && openAspect < 1 ? "md:h-[75vh]" : "md:w-[70%]"}` : ""}`}>
+                  <div className="relative flex min-w-0 flex-1 items-start justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
                        <motion.div
