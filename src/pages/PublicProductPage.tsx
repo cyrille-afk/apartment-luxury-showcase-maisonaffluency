@@ -3375,6 +3375,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
           productId={product.id}
           rrpLabel={displayRrpLabel}
           dockOnly
+          fixedDock={presentation}
           productTitle={product.title}
           designerName={designerDisplay}
           imageUrl={images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null}
