@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeClientEmail, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import { CODE_LIFETIME_MS, RESEND_WAIT_MS, formatCountdown } from "@/lib/verificationCodeTiming";
 
 export default function PrivateClientWelcome({ email, profile, locallyReturning }: {
   email: string; profile: string | null; locallyReturning: boolean;
@@ -12,14 +13,21 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   const normalized = normalizeClientEmail(email);
   const [verified, setVerified] = useState<{email: string; returning: boolean} | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const [challenge, setChallenge] = useState<{email: string; id: string} | null>(null);
+  const [challenge, setChallenge] = useState<{email: string; id: string; sentAt: number} | null>(null);
   const [code, setCode] = useState("");
   const [botToken, setBotToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [botKey, setBotKey] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const currentEmail = useRef(normalized);
   currentEmail.current = normalized;
+
+  useEffect(() => {
+    if (!challenge) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [challenge]);
 
   useEffect(() => {
     setExpanded(false); setChallenge(null); setCode(""); setError(""); setBotToken(""); setBusy(false);
@@ -38,6 +46,10 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   if (returning) return <p role="status" className="mt-3 font-body text-sm leading-relaxed text-foreground">Welcome back. It’s a pleasure to see you again.</p>;
   if (verified?.email === normalized) return <p role="status" className="mt-3 font-body text-sm text-muted-foreground">Email verified.</p>;
 
+  const expiresIn = challenge ? challenge.sentAt + CODE_LIFETIME_MS - now : 0;
+  const resendIn = challenge ? challenge.sentAt + RESEND_WAIT_MS - now : 0;
+  const expired = !!challenge && expiresIn <= 0;
+
   async function submit(action: "request" | "verify") {
     if (busy) return;
     const target = normalized;
@@ -55,7 +67,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
         }
         throw new Error(message || "Could not verify your email. Please try again.");
       }
-      if (action === "request") setChallenge({email:target,id:data.challengeId});
+      if (action === "request") { setChallenge({email:target,id:data.challengeId,sentAt:Date.now()}); setNow(Date.now()); setCode(""); }
       else if (data?.verified) {
         setVerified({email:target,returning:data.returning === true});
         if (data.returning) rememberPrivateClient(target,"private");
@@ -71,18 +83,29 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
     }
   }
 
+  const requestNew = () => { setChallenge(null); setCode(""); setError(""); };
+
   return <div className="mt-3 font-body text-sm">
     {!expanded ? <Button type="button" variant="link" className="h-auto p-0 text-muted-foreground" onClick={()=>setExpanded(true)}>
       <Mail className="mr-2 h-4 w-4" /> Verify email
     </Button> : <div className="space-y-3">
       {challenge?.email === normalized ? <>
-        <p className="text-muted-foreground">Enter the code sent to your email.</p>
-        <Input aria-label="Email verification code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,""))} />
-        <Button type="button" variant="outline" disabled={busy || code.length !== 6} onClick={()=>void submit("verify")}>
-          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Verify
-        </Button>
-        <Button type="button" variant="link" disabled={busy} onClick={()=>{setChallenge(null);setCode("");setError("");}}>Send a new code</Button>
+        <p className="text-muted-foreground">Enter the 6-digit code sent to your email. Each code can be used once.</p>
+        <p role="status" aria-live="polite" className={expired ? "text-destructive" : "text-muted-foreground"}>
+          {expired ? "This code has expired. Please request a new one." : `Code expires in ${formatCountdown(expiresIn)}.`}
+        </p>
+        <Input aria-label="Email verification code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} disabled={expired} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,""))} />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="button" variant="outline" disabled={busy || expired || code.length !== 6} onClick={()=>void submit("verify")}>
+            {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Verify
+          </Button>
+          <Button type="button" variant="link" className="h-auto p-0" disabled={busy || (!expired && resendIn > 0)} onClick={requestNew}>
+            {!expired && resendIn > 0 ? `Request a new code in ${formatCountdown(resendIn)}` : "Request a new code"}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Didn’t receive it? Check your spam folder. Requesting a new code replaces the previous one.</p>
       </> : <>
+        <p className="text-muted-foreground">We’ll email you a 6-digit code, valid for 10 minutes.</p>
         <Turnstile key={botKey} onVerify={setBotToken} onExpire={()=>setBotToken("")} />
         <Button type="button" variant="outline" disabled={busy || !botToken} onClick={()=>void submit("request")}>
           {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Send verification code
