@@ -31,8 +31,8 @@ describe('customer configuration preview', () => {
   });
   it('does not write to the cart while previewing finishes or quantities', () => {
     open(); fireEvent.click(screen.getByRole('button', { name: 'Increase Console quantity' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Add selection to ensemble' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Place Order' }));
     expect(mocks.add).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Add selection to ensemble' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Place Order' })).toBeDisabled();
   });
 });
