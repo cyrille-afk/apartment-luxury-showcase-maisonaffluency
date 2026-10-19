@@ -1387,6 +1387,13 @@
       "when": 1792379033537,
       "tag": "0197_admin_studio_details",
       "breakpoints": true
+    },
+    {
+      "idx": 198,
+      "version": "7",
+      "when": 1792379767470,
+      "tag": "0198_admin_manage_studio_members",
+      "breakpoints": true
     }
   ]
 }
