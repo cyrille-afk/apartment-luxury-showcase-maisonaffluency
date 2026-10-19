@@ -35,7 +35,7 @@ import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfA
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
 import { checkQuoteConsistency, summariseIssues } from "@/lib/quoteConsistency";
 import { computePdfTotals } from "@/lib/quoteConsistency";
-import { reconcileQuotePayment } from "@/lib/quotePaymentReconciliation";
+import { reconcileQuotePayment, type PaymentMismatch } from "@/lib/quotePaymentReconciliation";
 import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
@@ -2536,7 +2536,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     ceilingBudgetActive, effectiveCeilingCents, effectiveCeilingMarkupPct, effectiveCeilingDiscountPct,
     chargesVerification, perLineLoading, loading, fxQuoteEur]);
   const paymentStage = isPriced || (isConfirmed && !isFullyPaid);
-  const [paymentCheck, setPaymentCheck] = useState<{ key: string; ok: boolean; issues: string[] } | null>(null);
+  const [paymentCheck, setPaymentCheck] = useState<{ key: string; ok: boolean; issues: string[]; mismatches?: PaymentMismatch[] } | null>(null);
   const paymentDataReady = !loading && !perLineLoading && chargesVerification === "ready"
     && fxQuoteEur != null && items.length > 0;
   const paymentCheckPassed = paymentDataReady && paymentCheck?.key === paymentCheckKey && paymentCheck.ok;
@@ -2572,14 +2572,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         totalCents: screenOrderTotalCents, depositCents: screenDepositCents, balanceCents: screenOrderTotalCents - screenDepositCents },
       goodsCents: goodsAfterDiscountCents, shippingCents: screenShippingCents,
       taxRate: gstEnabled ? gstRate : 0, depositPct: depositPctLive, charges: paymentItemizedCharges,
+      quotedCharges: [...(quoted.insuranceCents > 0 ? [{ label: "Insurance", amountCents: quoted.insuranceCents }] : []), ...(args.extras || [])],
     });
-    const quotedRows = [...(quoted.insuranceCents > 0 ? [{ label: "Insurance", amountCents: quoted.insuranceCents }] : []), ...(args.extras || [])];
-    if (quotedRows.length !== paymentItemizedCharges.length || quotedRows.some((row, index) =>
-      row.amountCents !== paymentItemizedCharges[index]?.amountCents
-      || row.label?.replace(/ × \d+$/, "") !== paymentItemizedCharges[index]?.label)) {
-      result.issues.push("Individual charges do not match the quote.");
-      result.ok = false;
-    }
     return result;
   };
 
@@ -5076,6 +5070,25 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             <p className="text-muted-foreground mt-2">{chargesVerification === "error"
               ? "Additional charges could not be verified. Reload the quote or contact Maison Affluency."
               : paymentCheck?.key === paymentCheckKey ? paymentCheck.issues.join(" ") : "Charges, GST, deposit and balance must match the quote exactly."}</p>
+            {paymentDataReady && chargesVerification === "ready" && paymentCheck?.key === paymentCheckKey && !!paymentCheck.mismatches?.length && (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <caption className="text-left text-muted-foreground mb-2">Reconciliation differences · {currency}</caption>
+                  <thead className="border-b border-border text-muted-foreground">
+                    <tr><th scope="col" className="py-2 pr-4 font-medium">Value</th><th scope="col" className="py-2 px-2 text-right font-medium">Expected (quote)</th><th scope="col" className="py-2 pl-2 text-right font-medium">Displayed</th></tr>
+                  </thead>
+                  <tbody>
+                    {paymentCheck.mismatches.map((mismatch, index) => (
+                      <tr key={`${mismatch.label}-${index}`} className="border-b border-border">
+                        <th scope="row" className="py-2 pr-4 font-medium">{mismatch.label}</th>
+                        <td className="py-2 px-2 text-right tabular-nums whitespace-nowrap">{formatPdfMoney(mismatch.expectedCents, currency, effectivePdfLocale, "Unavailable")}</td>
+                        <td className="py-2 pl-2 text-right tabular-nums whitespace-nowrap">{formatPdfMoney(mismatch.displayedCents, currency, effectivePdfLocale, "Unavailable")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
