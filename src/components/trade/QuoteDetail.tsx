@@ -2339,10 +2339,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     totalKg: perLine.shipments.reduce((s, x) => s + x.totalKg, 0),
   } : null;
   /** No freight rate matched this route — shipping would silently be zero. */
-  const freightMissing = !!destIso && !!fxQuoteEur && items.length > 0 && !perLineLoading
-    && perLine.totalShippingEurCents <= 0;
+  const freightMissing = items.length > 0 && (!destIso
+    || (!!fxQuoteEur && !perLineLoading && perLine.totalShippingEurCents <= 0));
   const freightRouteLabel = (() => {
     const origins = Array.from(new Set(items.map((it) => it.ship_origin_country || it.trade_products?.origin || "").filter(Boolean)));
+    if (!destIso) return "No destination country — shipping can't be calculated. Add the client or ship-to country";
     return `No freight rate for ${origins.length ? origins.join(", ") : "origin"} → ${destIso || "destination"}`;
   })();
 
