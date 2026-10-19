@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CartItem } from '@/lib/cart';
 import ProductCommerceCta from './ProductCommerceCta';
@@ -25,12 +25,12 @@ describe('mobile order intake', () => {
     const placeOrder = vi.fn();
     const add = vi.fn();
     render(<ProductCommerceCta productId="chair" dockOnly tradeApproved={approved} rrpLabel="$1,200" finishSelectionRequired onPlaceOrder={placeOrder} onAddToCart={add} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Place Order', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: /^Place Order$/ }));
     expect(mocks.intake.mock.calls.at(-1)?.[0].isOpen).toBe(true);
     expect(placeOrder).not.toHaveBeenCalled();
     expect(add).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Complete intake' }));
-    vi.advanceTimersByTime(260);
+    act(() => vi.advanceTimersByTime(260));
     expect(approved ? placeOrder : add).toHaveBeenCalledWith(1);
   });
 });
