@@ -57,7 +57,9 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
   const startingPrice = startingPrices.length ? Math.min(...startingPrices) : null;
   const edition = formatCuratorialEditionLine(detail || {});
   const designerName = detail?.subtitle && edition?.toLowerCase().includes(piece.brand.toLowerCase()) ? detail.subtitle : piece.brand;
-  const dimensions = detail?.dimensions ? withImperialInline(detail.dimensions) : "";
+  const dimensionLabel = selection.label && /\bcm\b/i.test(selection.label) ? selection.label : null;
+  const dimensionSource = detail?.dimensions || dimensionLabel;
+  const dimensions = dimensionSource ? withImperialInline(dimensionSource.replace(/×/g, "x")) : "";
   const leadTime = detail?.lead_time || piece.leadTime;
   const { displayRow, toDisplayCents } = usePublicRrpDisplay({ rrp_price_cents: unit || null, currency, price_unit: null, price_prefix: "" });
   const images: string[] = detail?.gallery_images?.length ? detail.gallery_images : [piece.image];
@@ -85,7 +87,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
     onClose();
   }
   function swatchGrid(label: string, options: string[], active: string | null, select: (name: string) => void, available = (_name: string) => true) {
-    if (label === "Size") return <fieldset className="space-y-4"><legend className="font-body text-xs uppercase tracking-widest text-muted-foreground">{label}</legend><div className="flex flex-wrap gap-3">{options.map((name) => <Button key={name} variant="outline" aria-label={`${label}: ${name}`} aria-pressed={active === name} disabled={!available(name)} onClick={() => select(name)} className={cn("h-auto min-h-11 whitespace-normal rounded-none px-4 py-3 text-xs leading-relaxed", active === name && "border-gold")}>{name}</Button>)}</div></fieldset>;
+    if (label === "Size") return options.length === 1 && dimensions ? null : <fieldset className="space-y-4"><legend className="font-body text-xs uppercase tracking-widest text-muted-foreground">{label}</legend><div className="flex flex-wrap gap-3">{options.map((name) => <Button key={name} variant="outline" aria-label={`${label}: ${name}`} aria-pressed={active === name} disabled={!available(name)} onClick={() => select(name)} className={cn("h-auto min-h-11 whitespace-normal rounded-none px-4 py-3 text-xs leading-relaxed", active === name && "border-gold")}>{withImperialInline(name)}</Button>)}</div></fieldset>;
     const heading = /upholstery|fabric/i.test(label) ? "Select Your Upholstery" : /frame/i.test(label) ? "Select Your Frame Finish" : `Select Your ${label}`;
     return <Accordion type="single" collapsible defaultValue={preview ? label : undefined}><AccordionItem value={label} className="border-border/60"><AccordionTrigger className="gap-3 text-left hover:no-underline"><span className="min-w-0 flex-1"><span className="block font-body text-xs uppercase tracking-widest">{heading}</span><span className="mt-1 block break-words font-body text-xs font-normal text-muted-foreground">{active || "Choose a finish"}</span></span></AccordionTrigger><AccordionContent className="pt-3"><div className="grid grid-cols-3 gap-x-4 gap-y-5 sm:grid-cols-4 lg:grid-cols-4">
       {options.map((name) => {
