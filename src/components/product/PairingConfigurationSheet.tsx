@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobileSwipeDismiss } from "@/hooks/useMobileSwipeDismiss";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -18,6 +20,9 @@ import { pairingMediaKey } from '@/lib/pairingMedia';
 
 export interface PairingConfigurationStart { selection: PairingSelection; visual: Partial<PairingSelection>; customId: string; material: string }
 export default function PairingConfigurationSheet({ piece, onClose, onExplore, preview = false, initial }: { piece: PairingProduct; onClose: () => void; onExplore: () => void; preview?: boolean; initial?: PairingConfigurationStart }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  useMobileSwipeDismiss({ containerRef: panelRef, enabled: isMobile, onDismiss: onClose });
   const { data: detail, isPending: detailPending, isError } = useCuratorPickDetail(piece.id);
   const { data: price, isPending: pricePending } = usePublicRrp(piece.id);
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
@@ -86,7 +91,8 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, p
       })}
     </div></fieldset>;
   }
-  return <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}><SheetContent aria-describedby="pairing-config-description" onEscapeKeyDown={(event) => { event.preventDefault(); onClose(); }} overlayClassName="!z-[10030] !bg-black/30 backdrop-blur-md motion-reduce:animate-none" className="!z-[10031] flex h-dvh w-full flex-col gap-0 !p-0 sm:!max-w-[1100px] motion-reduce:animate-none">
+  return <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}><SheetContent ref={panelRef} aria-describedby="pairing-config-description" onEscapeKeyDown={(event) => { event.preventDefault(); onClose(); }} overlayClassName="!z-[10030] !bg-black/30 backdrop-blur-md motion-reduce:animate-none" className="!z-[10031] flex h-dvh w-full flex-col gap-0 !p-0 sm:!max-w-[1100px] motion-reduce:animate-none">
+    <div data-swipe-dismiss-handle className="flex h-10 shrink-0 items-center justify-center touch-none md:hidden"><span className="h-1 w-10 rounded-full bg-muted-foreground/30" /></div>
     <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto overscroll-contain md:grid-cols-2 md:overflow-hidden">
       <div className="relative flex min-h-64 items-center justify-center border-b border-border/50 bg-muted/10 p-6 md:min-h-0 md:border-b-0 md:border-r md:p-10">
         <AnimatePresence mode="wait"><motion.img key={image} src={image} alt={`${piece.title}${dedicated ? ` — ${selectedNames.join(" / ")}` : ""}`} onError={() => setFailedImages(f => [...f, image])} initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduced ? 1 : 0 }} transition={{ duration: reduced ? 0 : 0.25 }} className="max-h-[32dvh] w-full object-contain md:max-h-[80dvh]" /></AnimatePresence>
