@@ -34,6 +34,8 @@ import { downloadProcurementWorkbook, autoPoNumber, type ProcurementLine } from 
 import { downloadQuotePdf, previewQuotePdfUrl, type QuotePdfLine, type QuotePdfArgs } from "@/lib/quotePdf";
 import { publishQuotePdf } from "@/lib/publishQuotePdf";
 import { checkQuoteConsistency, summariseIssues } from "@/lib/quoteConsistency";
+import { computePdfTotals } from "@/lib/quoteConsistency";
+import { reconcileQuotePayment } from "@/lib/quotePaymentReconciliation";
 import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
@@ -542,6 +544,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   /** Sum of all rows in `trade_quote_extras` for this quote, in quote currency (cents). */
   const [extrasTotalCents, setExtrasTotalCents] = useState<number>(0);
   const [extraCharges, setExtraCharges] = useState<QuoteCharge[]>([]);
+  const [chargesVerification, setChargesVerification] = useState<"loading" | "ready" | "error">("loading");
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [respondedAt, setRespondedAt] = useState<string | null>(null);
@@ -1554,6 +1557,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleConfirmOrder = async () => {
+    if (!await verifyPaymentBeforeAction()) return;
     await supabase.from("trade_quotes").update({
       status: "confirmed",
       confirmed_at: new Date().toISOString(),
@@ -1715,6 +1719,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleStripePayment = async (paymentType: "deposit" | "balance" = "deposit") => {
+    if (!await verifyPaymentBeforeAction()) return;
     setPayingStripe(true);
     try {
       const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
@@ -2020,12 +2025,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       insuranceRateBps: insuranceEnabled ? insuranceRateBps : 0,
       insuranceEnabled,
       extras: await (async () => {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("trade_quote_extras" as any)
           .select("label, amount_cents, currency, quantity, sort_order")
           .eq("quote_id", quoteId)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: true });
+        if (error) throw error;
         const rows = ((data as any[]) || []).map((e) => {
           const qty = Math.max(1, Number(e.quantity) || 1);
           // Extras can be stored in their own currency (e.g. EUR packing on an
@@ -2523,6 +2529,69 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     perLine.shipments.map((shipment) => [shipment.origin, shipment.mode, shipment.breakdown?.rate_calculation, shipment.shippingEurCents]),
     items.map((it) => [it.id, it.quantity, it.unit_price_cents, it.unit_price_currency, it.variant_label, it.notes]),
   ]);
+
+  const paymentCheckKey = JSON.stringify([quoteId, pdfSignature, paymentItemizedCharges, depositPctLive,
+    ceilingBudgetActive, effectiveCeilingCents, effectiveCeilingMarkupPct, effectiveCeilingDiscountPct,
+    chargesVerification, perLineLoading, loading, fxQuoteEur]);
+  const paymentStage = isPriced || (isConfirmed && !isFullyPaid);
+  const [paymentCheck, setPaymentCheck] = useState<{ key: string; ok: boolean; issues: string[] } | null>(null);
+  const paymentDataReady = !loading && !perLineLoading && chargesVerification === "ready"
+    && fxQuoteEur != null && items.length > 0;
+  const paymentCheckPassed = paymentDataReady && paymentCheck?.key === paymentCheckKey && paymentCheck.ok;
+
+  const checkPaymentAmounts = async () => {
+    if (!paymentDataReady) return { ok: false, issues: ["Quote charges are still being verified."] };
+    const args = await buildPdfArgs();
+    if (args.ceilingBudget) {
+      // Ceiling quotes have a different PDF ledger; never expose itemized payments against it.
+      return { ok: false, issues: ["This budget quote requires a reconciled itemized quote before payment."] };
+    }
+    const quoted = computePdfTotals(args);
+    const result = reconcileQuotePayment({
+      quoted: { chargesCents: quoted.extrasCents + quoted.insuranceCents, gstCents: quoted.taxCents,
+        totalCents: quoted.grandTotalCents, depositCents: quoted.depositCents, balanceCents: quoted.balanceCents },
+      displayed: { chargesCents: screenChargesCents + insurancePremiumCents, gstCents: screenTaxCents,
+        totalCents: screenOrderTotalCents, depositCents: screenDepositCents, balanceCents: screenOrderTotalCents - screenDepositCents },
+      goodsCents: goodsAfterDiscountCents, shippingCents: screenShippingCents,
+      taxRate: gstEnabled ? gstRate : 0, depositPct: depositPctLive, charges: paymentItemizedCharges,
+    });
+    const quotedRows = [...(quoted.insuranceCents > 0 ? [{ label: "Insurance", amountCents: quoted.insuranceCents }] : []), ...(args.extras || [])];
+    if (quotedRows.length !== paymentItemizedCharges.length || quotedRows.some((row, index) =>
+      row.amountCents !== paymentItemizedCharges[index]?.amountCents
+      || row.label !== paymentItemizedCharges[index]?.label.replace(/$/, "" ) && row.label !== `${paymentItemizedCharges[index]?.label} × ${((row.label || "").split(" × ")[1] || "")}`)) {
+      result.issues.push("Individual charges do not match the quote.");
+      result.ok = false;
+    }
+    return result;
+  };
+
+  useEffect(() => {
+    if (!paymentStage || !paymentDataReady) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      checkPaymentAmounts().then((result) => {
+        if (!cancelled) setPaymentCheck({ key: paymentCheckKey, ...result });
+      }).catch(() => {
+        if (!cancelled) setPaymentCheck({ key: paymentCheckKey, ok: false, issues: ["Quote amounts could not be verified. Reload the quote or contact Maison Affluency."] });
+      });
+    }, 250);
+    return () => { cancelled = true; clearTimeout(timer); };
+    // The key includes every monetary input; stale checks never unlock controls.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentCheckKey, paymentStage, paymentDataReady]);
+
+  const verifyPaymentBeforeAction = async () => {
+    if (!paymentCheckPassed) return false;
+    try {
+      const result = await checkPaymentAmounts();
+      setPaymentCheck({ key: paymentCheckKey, ...result });
+      if (!result.ok) toast({ title: "Payment paused — quote mismatch", description: result.issues.join(" "), variant: "destructive" });
+      return result.ok;
+    } catch {
+      setPaymentCheck({ key: paymentCheckKey, ok: false, issues: ["Quote amounts could not be verified. Reload the quote or contact Maison Affluency."] });
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (loading || perLineLoading || items.length === 0) return;
@@ -4501,6 +4570,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 isReadOnly={isReadOnly}
                 onTotalChange={setExtrasTotalCents}
                 onChargesChange={setExtraCharges}
+                onVerificationStateChange={setChargesVerification}
                 convertCents={convertCents}
               />
 
@@ -4929,7 +4999,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isSuperAdmin && (() => {
+        {isSuperAdmin && paymentCheckPassed && (() => {
           const orderTotalCents = screenOrderTotalCents;
           return (
             <GuestPayLinkCard
@@ -4978,7 +5048,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {isPriced && (() => {
+        {paymentStage && !paymentCheckPassed && (
+          <div role="alert" className="border-t border-border p-4 md:p-6 lg:p-8 print:hidden font-body text-xs">
+            <p className="font-medium text-destructive flex items-center gap-2"><AlertTriangle className="h-4 w-4" />
+              {chargesVerification === "error" || (paymentCheck?.key === paymentCheckKey && !paymentCheck.ok)
+                ? "Payment paused — quote amounts need review" : "Checking quote amounts before payment…"}
+            </p>
+            <p className="text-muted-foreground mt-2">{chargesVerification === "error"
+              ? "Additional charges could not be verified. Reload the quote or contact Maison Affluency."
+              : paymentCheck?.key === paymentCheckKey ? paymentCheck.issues.join(" ") : "Charges, GST, deposit and balance must match the quote exactly."}</p>
+          </div>
+        )}
+
+        {isPriced && paymentCheckPassed && (() => {
           const afterDiscount = goodsAfterDiscountCents;
           const shippingQuoteCents = screenShippingCents;
           const orderTotal = screenOrderTotalCents;
@@ -5076,7 +5158,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           );
         })()}
 
-        {isConfirmed && !isFullyPaid && (() => {
+        {isConfirmed && !isFullyPaid && paymentCheckPassed && (() => {
           const afterDiscount = goodsAfterDiscountCents;
           const shippingQuoteCents = screenShippingCents;
           const orderTotal = screenOrderTotalCents;
