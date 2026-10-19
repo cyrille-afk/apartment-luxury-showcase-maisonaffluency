@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { QuoteCharge } from "@/lib/quoteChargeBreakdown";
 const formatPriceRaw = (cents: number, currency: string) => {
   const v = (cents || 0) / 100;
   try {
@@ -45,11 +46,12 @@ interface Props {
   isReadOnly?: boolean;
   /** Called whenever the total of all extras changes, converted to the quote (display) currency in cents. */
   onTotalChange?: (totalCents: number) => void;
+  onChargesChange?: (charges: QuoteCharge[]) => void;
   /** Convert cents between currencies via the parent's live FX rates. */
   convertCents?: (cents: number | null, from: string, to: string) => number | null;
 }
 
-export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, convertCents }: Props) => {
+export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, onChargesChange, convertCents }: Props) => {
   const { toast } = useToast();
   const [extras, setExtras] = useState<Extra[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,6 +124,12 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     onTotalChange?.(total);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [total]);
+
+  // Use the very same converted rows as the editor total, including quantities.
+  const chargesJson = JSON.stringify(rowConversions.map((row) => ({ id: row.id, label: row.label, amountCents: row.cents })));
+  useEffect(() => {
+    onChargesChange?.(JSON.parse(chargesJson) as QuoteCharge[]);
+  }, [chargesJson, onChargesChange]);
 
 
   const handleAdd = async () => {

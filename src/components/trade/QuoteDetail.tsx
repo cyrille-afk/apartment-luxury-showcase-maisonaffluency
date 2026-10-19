@@ -38,6 +38,8 @@ import { downloadInvoicePdf, type InvoiceMode } from "@/lib/invoicePdf";
 import { UkLandedCostPanel } from "@/components/trade/UkLandedCostPanel";
 import { HkLandedCostPanel } from "@/components/trade/HkLandedCostPanel";
 import QuoteExtrasEditor from "@/components/trade/QuoteExtrasEditor";
+import QuoteChargeBreakdown from "@/components/trade/QuoteChargeBreakdown";
+import type { QuoteCharge } from "@/lib/quoteChargeBreakdown";
 import { DEFAULT_HKD_LANDED_CBM, HKD_LANDED_KG_PER_CBM, useHkdLandedCost, type HkMode } from "@/hooks/useHkdLandedCost";
 import { QuoteDisplayCurrencyToggle } from "@/components/trade/QuoteDisplayCurrencyToggle";
 import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp, fetchFx, FX_BUFFER } from "@/hooks/useGbpLandedCost";
@@ -537,6 +539,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [insuranceRateBps, setInsuranceRateBps] = useState<number>(50);
   /** Sum of all rows in `trade_quote_extras` for this quote, in quote currency (cents). */
   const [extrasTotalCents, setExtrasTotalCents] = useState<number>(0);
+  const [extraCharges, setExtraCharges] = useState<QuoteCharge[]>([]);
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [respondedAt, setRespondedAt] = useState<string | null>(null);
@@ -4489,6 +4492,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 currency={currency}
                 isReadOnly={isReadOnly}
                 onTotalChange={setExtrasTotalCents}
+                onChargesChange={setExtraCharges}
                 convertCents={convertCents}
               />
 
@@ -5028,15 +5032,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {cratingTotalCents > 0 && (
                         <Row label="Crating & packing" value={`+ ${fmt(cratingTotalCents)} ${currency}`} muted />
                       )}
-                      {extrasTotalCents > 0 && (
-                        <Row label="Additional charges (incl. freight)" value={`+ ${fmt(extrasTotalCents)} ${currency}`} muted />
-                      )}
+                      <QuoteChargeBreakdown
+                        charges={extraCharges}
+                        goodsCents={afterDiscount}
+                        taxRate={gstEnabled ? gstRate : 0}
+                        taxLabel={taxLabel}
+                        nonTaxableCents={cratingTotalCents + shippingQuoteCents}
+                        format={(cents) => `${fmt(cents)} ${currency}`}
+                      />
                       {shippingQuoteCents > 0 && (
                         <Row label={`Shipping estimate (${perLine.shipments.length} shipment${perLine.shipments.length > 1 ? "s" : ""})`} value={`+ ${fmt(shippingQuoteCents)} ${currency}`} muted />
                       )}
                       <div className="border-t border-border my-1.5" />
                       <Row label="Order total" value={`${fmt(orderTotal)} ${currency}`} strong />
                       <Row label="60% deposit due now" value={`${fmt(depositCents)} ${currency}`} strong />
+                      <Row label="40% balance" value={`${fmt(Math.round(orderTotal * 0.4))} ${currency}`} />
                       <div className="border-t border-border my-1.5" />
                       <Row label="Stripe processing fee (3.4% + fixed)" value={`+ ${fmt(processingFee)} ${currency}`} muted />
                       <Row label="Total charge to your card" value={`${fmt(chargeTotal)} ${currency}`} strong />
@@ -5113,6 +5123,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {subtotalCents > 0 && (
                 <div className="mt-4 rounded-md border border-border bg-muted/30 px-4 py-3 space-y-1.5">
                   <p className="font-body text-[11px] text-foreground/80 font-medium">Payment Information</p>
+                  <QuoteChargeBreakdown
+                    charges={extraCharges}
+                    goodsCents={afterDiscount}
+                    taxRate={gstEnabled ? gstRate : 0}
+                    taxLabel={taxLabel}
+                    nonTaxableCents={cratingTotalCents + shippingQuoteCents}
+                    format={(cents) => `${currencySymbol(currency)}${formatPriceRaw(cents, currency)} ${currency}`}
+                  />
                   <ul className="font-body text-[10px] text-muted-foreground space-y-1 list-disc list-inside">
                     <li>You are paying the <span className="font-medium text-foreground/70">{isPayingDeposit ? "60% deposit" : "40% balance"}</span> of {currencySymbol(currency)}{formatPriceRaw(portionCents, currency)} {currency} (on an order total of {currencySymbol(currency)}{formatPriceRaw(orderTotal, currency)} {currency}{shippingQuoteCents > 0 ? ", goods + shipping" : ""}).</li>
                     <li>A processing fee of 3.4% + {feeDisplay} is included in the Stripe charge above.</li>
