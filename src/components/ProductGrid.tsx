@@ -36,6 +36,7 @@ import { ROOM_MATERIAL_CATEGORIES, roomMaterialCategories } from "@/lib/roomMate
 import { matchesRoomShoppingFilters, type RoomShoppingFilters } from '@/lib/roomShoppingFilters';
 import { useRoomShoppingFinishes } from '@/hooks/useRoomShoppingFinishes';
 import { roomPriceCents, sortRoomProducts, type RoomSort } from '@/lib/roomShoppingSort';
+import { RoomShortlistButton } from '@/components/product/RoomShortlist';
 
 const EMPTY_ROOM_FACETS: RoomFacetValues = { category: null, designer: null, leadTime: null, craft: null, handmade: null, material: null };
 const ROOM_FACET_KEYS: RoomFacet[] = ["category", "designer", "leadTime", "craft", "handmade", "material"];
@@ -630,6 +631,7 @@ function singularizeSub(s: string): string {
                   />
                 </button>
                 {/* Compare pin button */}
+                <RoomShortlistButton overlay item={{ id: item.pick.id || `${item.designerId}-${item.pick.title}`, product_name: item.pick.title, brand_name: item.designerName, image_url: item.pick.image || null, category: item.pick.category, dimensions: item.pick.dimensions, materials: item.pick.materials, lead_time: item.pick.lead_time || null, public_url: productHref(item.pick) }} />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
