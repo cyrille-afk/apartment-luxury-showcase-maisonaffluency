@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { recognizePrivateClient } from "../../supabase/functions/_shared/privateClientRecognition";
 
 function store(returning = true) {
-  return {request:vi.fn(async()=>({id:"challenge",code:"123456"})),verify:vi.fn(async()=>true),activity:vi.fn(async()=>returning),send:vi.fn(async()=>{}),forget:vi.fn(async()=>{})};
+  return {request:vi.fn(async()=>({id:"challenge",code:"123456"})),verify:vi.fn(async()=>true),activity:vi.fn(async()=>returning),send:vi.fn(async()=>{}),forget:vi.fn(async()=>{}),optin:vi.fn(async()=>{})};
 }
 describe("verified cross-device recognition",()=>{
   it("never looks up customer activity while sending a code",async()=>{
@@ -51,5 +51,28 @@ describe("verified cross-device recognition",()=>{
     const s={...store(),forget:vi.fn(async()=>{})};
     expect((await recognizePrivateClient({action:"check",intent:"forget",email:"c@example.com"},"other@example.com","ip",s)).status).toBe(401);
     expect(s.forget).not.toHaveBeenCalled();
+  });
+});describe("recognition opt-in",()=>{
+  it("re-enables recognition for a signed-in client without a code or activity lookup",async()=>{
+    const s=store();
+    const r=await recognizePrivateClient({action:"check",intent:"optin",email:"C@example.com"},"c@example.com","ip",s);
+    expect(r.body).toEqual({optedIn:true});
+    expect(s.optin).toHaveBeenCalledWith("c@example.com");
+    expect(s.activity).not.toHaveBeenCalled();
+    expect(s.request).not.toHaveBeenCalled();
+  });
+  it("never opts in another account's email",async()=>{
+    const s=store();
+    expect((await recognizePrivateClient({action:"check",intent:"optin",email:"c@example.com"},"other@example.com","ip",s)).status).toBe(401);
+    expect(s.optin).not.toHaveBeenCalled();
+  });
+  it("opts in only after the code is verified",async()=>{
+    const s=store();s.verify.mockResolvedValueOnce(false);
+    expect((await recognizePrivateClient({action:"verify",intent:"optin",email:"c@example.com",challengeId:"i",code:"111111"},null,"ip",s)).status).toBe(403);
+    expect(s.optin).not.toHaveBeenCalled();
+    const r=await recognizePrivateClient({action:"verify",intent:"optin",email:"c@example.com",challengeId:"i",code:"123456"},null,"ip",s);
+    expect(r.body).toEqual({optedIn:true});
+    expect(s.optin).toHaveBeenCalledWith("c@example.com");
+    expect(s.activity).not.toHaveBeenCalled();
   });
 });
