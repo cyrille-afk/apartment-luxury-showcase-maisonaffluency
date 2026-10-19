@@ -28,7 +28,7 @@ BEGIN
   UPDATE public.shop_orders SET status='cancelled' WHERE order_ref='recognition-test';
   IF public.private_client_has_activity('recognition-test@example.invalid',NULL) THEN RAISE EXCEPTION 'Cancelled order recognized'; END IF;
   IF has_function_privilege('authenticated','public.private_client_optin(text)','EXECUTE') OR has_function_privilege('anon','public.private_client_optin(text)','EXECUTE') THEN RAISE EXCEPTION 'Opt-in exposed'; END IF;
-  PERFORM public.private_client_optout('recognition-optin@example.invalid');
+  PERFORM public.private_client_forget('recognition-optin@example.invalid');
   IF NOT EXISTS (SELECT 1 FROM public.private_client_recognition_optouts WHERE email_hash=encode(digest('recognition-optin@example.invalid','sha256'),'hex')) THEN RAISE EXCEPTION 'Opt-out not recorded'; END IF;
   PERFORM public.private_client_optin('Recognition-Optin@example.invalid ');
   IF EXISTS (SELECT 1 FROM public.private_client_recognition_optouts WHERE email_hash=encode(digest('recognition-optin@example.invalid','sha256'),'hex')) THEN RAISE EXCEPTION 'Opt-in did not remove opt-out'; END IF;
