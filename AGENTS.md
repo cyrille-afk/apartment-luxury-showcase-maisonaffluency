@@ -67,8 +67,8 @@
 - Client View: one synchronous store + document-root CSS guard hides `[data-trade-sensitive]` (incl. portals/exit animations); not an authorization boundary.
 - Client prices use clientUnitCents: no markup shows RRP, never net trade, so Client View can't leak wholesale prices.
 - Static hardcoded trade cards must be filtered by DB is_hidden keys (curator picks + trade_products) in useTradeProducts — else hidden products resurface.
-- The Extension Integration sandbox embeds the trade sidebar via its same-origin route; parent-page sync notices must verify the saved project and board item before confirming success.
-- Top-down proforma ledgers inherit project defaults unless a quote selects itemized or target-ceiling mode; all ceiling arithmetic lives in `calculateCeilingBudget` so screen and PDF figures cannot drift.
+- Extension sandbox embeds the trade sidebar same-origin; sync notices verify the saved project + board item first.
+- Proforma ledgers inherit project defaults unless a quote picks itemized/ceiling mode; ceiling math only in `calculateCeilingBudget` (screen = PDF).
 - All trade PDFs use `pdfFormatting` for fixed two-decimal money and locale-preset dates; quotes may override their studio default so previews and downloads can't drift.
 - Maker-name variants (accents, casing, house/founder suffixes) map to the published profile name in src/lib/brandNormalization.ts via accent-folded keys — one maker, one filter entry/card label.
 - Edge-function deploy checks, MCP OAuth and extension folder rules live in supabase/functions/AGENTS.md.
