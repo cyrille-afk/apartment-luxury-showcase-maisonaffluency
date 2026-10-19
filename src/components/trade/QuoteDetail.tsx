@@ -2538,6 +2538,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const paymentDataReady = !loading && !perLineLoading && chargesVerification === "ready"
     && fxQuoteEur != null && items.length > 0;
   const paymentCheckPassed = paymentDataReady && paymentCheck?.key === paymentCheckKey && paymentCheck.ok;
+  const currentPaymentKey = useRef(paymentCheckKey);
+  currentPaymentKey.current = paymentCheckKey;
 
   const checkPaymentAmounts = async () => {
     if (!paymentDataReady) return { ok: false, issues: ["Quote charges are still being verified."] };
@@ -2558,7 +2560,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const quotedRows = [...(quoted.insuranceCents > 0 ? [{ label: "Insurance", amountCents: quoted.insuranceCents }] : []), ...(args.extras || [])];
     if (quotedRows.length !== paymentItemizedCharges.length || quotedRows.some((row, index) =>
       row.amountCents !== paymentItemizedCharges[index]?.amountCents
-      || row.label !== paymentItemizedCharges[index]?.label.replace(/$/, "" ) && row.label !== `${paymentItemizedCharges[index]?.label} × ${((row.label || "").split(" × ")[1] || "")}`)) {
+      || row.label?.replace(/ × \d+$/, "") !== paymentItemizedCharges[index]?.label)) {
       result.issues.push("Individual charges do not match the quote.");
       result.ok = false;
     }
@@ -2584,6 +2586,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (!paymentCheckPassed) return false;
     try {
       const result = await checkPaymentAmounts();
+      if (currentPaymentKey.current !== paymentCheckKey) return false;
       setPaymentCheck({ key: paymentCheckKey, ...result });
       if (!result.ok) toast({ title: "Payment paused — quote mismatch", description: result.issues.join(" "), variant: "destructive" });
       return result.ok;
