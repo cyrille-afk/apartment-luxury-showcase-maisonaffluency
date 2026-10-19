@@ -17,6 +17,16 @@ import {
  * (the Angelo M × Alinea marble palette bug).
  */
 describe("finish dropdown de-duplication", () => {
+  it("covers all nine Portal finishes despite material-first sample names", () => {
+    const options = ["Nero Kinatra Marble", "Blackened Ash Wood", "Bleached Ash Wood", "Nero Portoro Marble", "Lumachella Marble", "Silk Georgette Marble", "Bianco Arabescato Marble", "Navona Travertine", "Silver Travertine"];
+    const samples = ["Marble - Nero Kinitra", "Ash Wood - Blackened", "Ash Wood - Bleached", "Marble - Nero Portoro", "Marble - Lumachella", "Marble - Silk Georgette", "Marble - Bianco Arabescato", "Travertine - Navona", "Travertine - Silver"];
+    expect(everyOptionCoveredBySwatches(options, samples)).toBe(true);
+    expect(everyOptionCoveredBySwatches(options, samples.slice(1))).toBe(false);
+  });
+
+  it("does not hide Cloud's unpictured White finish behind partial samples", () => {
+    expect(everyOptionCoveredBySwatches(["Pink Travertine", "Silver Travertine", "White Travertine"], ["Pink Travertine", "Grey Travertine", "Silver Travertine"])).toBe(false);
+  });
   describe("isFinishAxisLabel", () => {
     it.each(["Frame", "Wood", "Finish", "Feet", "Leg", "Base", "Legs"])(
       "%s is a finish axis",
