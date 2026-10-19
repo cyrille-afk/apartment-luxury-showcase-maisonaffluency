@@ -24,7 +24,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
 import SwipeAlternateProductImage from "@/components/product/SwipeAlternateProductImage";
 import { useShippingDestination } from "@/lib/shippingDestination";
-import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
+import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel, profileEditionLine } from "@/lib/editionLabel";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -256,6 +256,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
             parentBrand: brandLabelOverride,
             pageDesignerName,
           });
+          const cardEditionLine = profileEditionLine({ ...pick, founder: designer.founder, pageDesignerName }) || houseEditionLabel;
 
           return (
             <div
@@ -299,9 +300,9 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
                     />
                   </div>
                 )}
-                {(formatCuratorialEditionLine(pick) || Boolean(houseEditionLabel)) && (
+                {cardEditionLine && (
                   <p className="absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">
-                    {formatCuratorialEditionLine(pick) || houseEditionLabel}
+                    {cardEditionLine}
                   </p>
                 )}
               </div>
