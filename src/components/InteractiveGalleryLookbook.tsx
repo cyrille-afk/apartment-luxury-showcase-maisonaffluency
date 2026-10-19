@@ -792,11 +792,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                     />
                                     <motion.aside
                                       aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                                      initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      initial={{ opacity: 0, y: 16 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: 16 }}
                                       transition={{ duration: 0.3, ease: "easeOut" }}
-                                      className={`absolute z-10 flex flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md max-md:inset-x-3 max-md:bottom-3 max-md:top-auto max-md:max-h-[72%] md:inset-y-4 md:w-[300px] md:p-4 ${overlaySide === "left" ? "md:left-4" : "md:right-4"}`}
+                                      className="absolute inset-x-3 bottom-3 top-auto z-10 flex max-h-[72%] flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md"
                                     >
                                       <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
