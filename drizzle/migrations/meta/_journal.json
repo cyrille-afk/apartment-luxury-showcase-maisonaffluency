@@ -1457,6 +1457,13 @@
       "when": 1792401648629,
       "tag": "0207_private_client_recognition_optout",
       "breakpoints": true
+    },
+    {
+      "idx": 208,
+      "version": "7",
+      "when": 1792403378539,
+      "tag": "0208_private_client_recognition_optin",
+      "breakpoints": true
     }
   ]
 }

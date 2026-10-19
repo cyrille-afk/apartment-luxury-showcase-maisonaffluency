@@ -13108,6 +13108,7 @@ export type Database = {
         Args: { _email: string }
         Returns: boolean
       }
+      private_client_optin: { Args: { _email: string }; Returns: undefined }
       profile_privileged_fields_unchanged: {
         Args: {
           _id: string
