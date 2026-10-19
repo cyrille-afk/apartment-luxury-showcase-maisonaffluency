@@ -1,5 +1,5 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Building2, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,6 +75,8 @@ export default function TradeStudioSettings() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<StudioRole>("editor");
   const [inviting, setInviting] = useState(false);
+  const [sendingInviteId, setSendingInviteId] = useState<string | null>(null);
+  const inviteAttempts = useRef(new Map<string, string>());
 
   const [newStudioOpen, setNewStudioOpen] = useState(params.get("new") === "1");
   const [newStudioName, setNewStudioName] = useState("");
@@ -156,26 +158,49 @@ export default function TradeStudioSettings() {
 
   const handleInvite = async () => {
     if (!currentStudio || !inviteEmail.trim() || !user) return;
-    setInviting(true);
-    const { error } = await supabase.from("studio_invites").insert({
-      studio_id: currentStudio.id,
-      email: inviteEmail.trim().toLowerCase(),
-      role: inviteRole,
-      invited_by: user.id,
-    });
-    setInviting(false);
-
-    if (error) {
-      toast({ title: "Invite failed", description: error.message, variant: "destructive" });
+    const email = inviteEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast({ title: "Enter a valid email address", variant: "destructive" });
       return;
     }
-    toast({
-      title: "Invite created",
-      description: `${inviteEmail} will be added to ${currentStudio.name} when they sign up or sign in.`,
+    setInviting(true);
+    try {
+      const existing = invites.find((invite) => invite.email.toLowerCase() === email);
+      let inviteId = existing?.id;
+      if (!inviteId) {
+        const { data, error } = await supabase.from("studio_invites").insert({
+          studio_id: currentStudio.id, email, role: inviteRole, invited_by: user.id,
+        }).select("id").single();
+        if (error || !data) throw new Error(error?.message || "Invitation could not be created");
+        inviteId = data.id;
+      }
+      await sendInviteEmail(inviteId, email);
+      setInviteEmail("");
+      setInviteRole("editor");
+    } catch (error) {
+      toast({ title: "Invite failed", description: error instanceof Error ? error.message : "Please try again", variant: "destructive" });
+    } finally {
+      setInviting(false);
+      await fetchData();
+    }
+  };
+
+  const sendInviteEmail = async (inviteId: string, email: string) => {
+    const attempt = inviteAttempts.current.get(inviteId) || crypto.randomUUID();
+    inviteAttempts.current.set(inviteId, attempt);
+    const { data, error } = await supabase.functions.invoke("send-transactional-email", {
+      body: { templateName: "studio-teammate-invite", idempotencyKey: `studio-invite-${inviteId}-${attempt}`, templateData: { inviteId } },
     });
-    setInviteEmail("");
-    setInviteRole("editor");
-    fetchData();
+    if (error || data?.success !== true) throw new Error("Invitation saved, but its email could not be queued. Use Resend invite to retry.");
+    inviteAttempts.current.delete(inviteId);
+    toast({ title: "Invitation email queued", description: `Your studio invitation is on its way to ${email}.` });
+  };
+
+  const handleResendInvite = async (invite: Invite) => {
+    setSendingInviteId(invite.id);
+    try { await sendInviteEmail(invite.id, invite.email); }
+    catch (error) { toast({ title: "Email not sent", description: error instanceof Error ? error.message : "Please retry", variant: "destructive" }); }
+    finally { setSendingInviteId(null); await fetchData(); }
   };
 
   const handleChangeRole = async (memberId: string, newRole: StudioRole) => {
@@ -443,7 +468,7 @@ export default function TradeStudioSettings() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {ROLE_DESC[inviteRole]}. They'll auto-join the studio when they sign up or next sign in with this email.
+              {ROLE_DESC[inviteRole]}. They'll receive an email and can accept the invitation after signing in.
             </p>
 
             {invites.length > 0 && (
@@ -455,12 +480,17 @@ export default function TradeStudioSettings() {
                       <div className="min-w-0">
                         <div className="text-sm truncate">{inv.email}</div>
                         <div className="text-xs text-muted-foreground">
-                          {inv.role} • expires {new Date(inv.expires_at).toLocaleDateString()}
+                          {inv.role} • {new Date(inv.expires_at).getTime() <= Date.now() ? "expired" : "expires"} {new Date(inv.expires_at).toLocaleDateString()}
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleRevokeInvite(inv.id)}>
+                      <div className="flex shrink-0 items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => handleResendInvite(inv)} disabled={inviting || sendingInviteId !== null}>
+                        <Mail className="mr-2 h-4 w-4" />{sendingInviteId === inv.id ? "Sending…" : "Resend invite"}
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled={sendingInviteId !== null} onClick={() => handleRevokeInvite(inv.id)}>
                         Revoke
                       </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

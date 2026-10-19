@@ -33,6 +33,7 @@ import { template as instantTransferTaxUpdated } from './instant-transfer-tax-up
 import { template as orderReceived } from './order-received.tsx'
 import { template as tradeProgramInvitation } from './trade-program-invitation.tsx'
 import { template as boardCollaboratorInvite } from './board-collaborator-invite.tsx'
+import { template as studioTeammateInvite } from './studio-teammate-invite.tsx'
 import { template as boardAccessCode } from './board-access-code.tsx'
 import { template as purchaseOrderDispatch } from './purchase-order-dispatch.tsx'
 import { template as designerPurchaseOrder } from './designer-purchase-order.tsx'
@@ -76,6 +77,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'order-received': orderReceived,
   'trade-program-invitation': tradeProgramInvitation,
   'board-collaborator-invite': boardCollaboratorInvite,
+  'studio-teammate-invite': studioTeammateInvite,
   'board-access-code': boardAccessCode,
   'purchase-order-dispatch': purchaseOrderDispatch,
   'designer-purchase-order': designerPurchaseOrder,
