@@ -75,6 +75,7 @@ export function pairingRoomSlots(piece: RoomPiece): string[][] {
   if (room === 'office' && key === 'desks') slots[room] = [['office-chairs'], ['table-lights', 'floor-lights'], ['bookcases', 'credenzas']];
   if (room === 'outdoor' && key === 'outdoor-tables') slots[room] = [['outdoor-seating'], ['outdoor-lights']];
   const departments: readonly string[] = ROOM_MAP[room];
+  if (room === 'living-room' && ['coffee-tables', 'side-tables', 'consoles'].includes(key)) slots[room] = [['armchairs', 'sofas'], ['floor-lights', 'table-lights'], ['rugs', 'credenzas']];
   return (slots[room] || []).map(slot => slot.filter(value => value !== key && departments.includes(value)));
 }
 

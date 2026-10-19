@@ -1,7 +1,7 @@
 import type { BuyerProfile } from "@/contexts/CheckoutFormContext";
 import { parsePairingFinishOptions, type PairingFinishOption } from "./pairingFinishPricing";
 import { parsePairingMedia, type PairingMedia } from './pairingMedia';
-import { pairingRoomKey, pairingRoomSlots } from './pairingRooms';
+import { pairingFitsRoom, pairingRoomKey, pairingRoomSlots } from './pairingRooms';
 
 export type PairingCategory = "ceiling" | "wall" | "table-light" | "seating" | "tables" | "decor" | "storage";
 export interface PairingProduct {
@@ -42,15 +42,14 @@ export function privatePairingsEnabled(profile: BuyerProfile): boolean {
 }
 
 export function pairingCategory(product: Pick<PairingProduct, "title" | "category" | "subcategory">): PairingCategory | null {
-  const value = `${product.subcategory || ""} ${product.title} ${product.category || ""}`.toLowerCase();
-  if (/pendant|chandelier|ceiling|suspension/.test(value)) return "ceiling";
-  if (/sconce|wall light|wall lamp/.test(value)) return "wall";
-  if (/table lamp|table light/.test(value)) return "table-light";
-  if (/chair|sofa|seating|stool|ottoman/.test(value)) return "seating";
-  if (/table|console|desk/.test(value)) return "tables";
-  if (/cabinet|sideboard|storage|buffet/.test(value)) return "storage";
-  if (/decor|vase|bowl|vessel|mirror|object/.test(value)) return "decor";
-  return null;
+  const key = pairingRoomKey(product);
+  if (key === 'ceiling-lights') return 'ceiling';
+  if (key === 'wall-lights') return 'wall';
+  if (key.endsWith('-lights')) return 'table-light';
+  if (['sofas', 'armchairs', 'chairs', 'daybeds', 'stools', 'bar-stools', 'office-chairs', 'outdoor-seating', 'beds', 'sofa-beds'].includes(key)) return 'seating';
+  if (['coffee-tables', 'side-tables', 'consoles', 'desks', 'dining-tables', 'nightstands', 'outdoor-tables'].includes(key)) return 'tables';
+  if (['credenzas', 'bookcases', 'bars'].includes(key)) return 'storage';
+  return 'decor';
 }
 
 function pairingSeed(value: string) {
@@ -67,12 +66,10 @@ export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "titl
   const roomSlots = pairingRoomSlots(primary);
   return rules.filter((r) => r.source_category === source)
     .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)).flatMap((rule, index) => {
-    if (!rule.enabled || (!roomSlots && rule.target_category === source)) return [];
-    const slot = roomSlots?.[index];
-    if (roomSlots && !slot?.length) return [];
-    const matches = pool.filter((p) => !excluded.has(p.id) && (slot
-      ? slot.includes(pairingRoomKey(p) || "")
-      : pairingCategory(p) === rule.target_category));
+    if (!rule.enabled) return [];
+    const slot = roomSlots[index];
+    if (!slot?.length) return [];
+    const matches = pool.filter((p) => !excluded.has(p.id) && pairingFitsRoom(p, primary) && slot.includes(pairingRoomKey(p)));
     // Rotate deterministically per purchased piece so each first choice gets its own companions.
     const ranked = [...matches].sort((a, b) => (slot ? slot.indexOf(pairingRoomKey(a) || "") - slot.indexOf(pairingRoomKey(b) || "") : 0) || pairingSeed(primary.id + a.id) - pairingSeed(primary.id + b.id) || a.id.localeCompare(b.id));
     const sameBrand = ranked.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
