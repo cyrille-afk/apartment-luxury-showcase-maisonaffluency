@@ -57,10 +57,26 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
     else setError("Could not delete saved data. Please try again.");
   }
 
-  const isForgotten = forgotten?.email === normalized;
-  if (isForgotten && forgotten.server) return <p role="status" className="mt-3 font-body text-sm text-muted-foreground">
-    Recognition is off for this email and your saved recognition data has been deleted. Your basket and orders are unaffected.
-  </p>;
+  const isForgotten = forgotten?.email === normalized && optedIn !== normalized;
+
+  async function startOptin() {
+    setError(""); setIntent("optin"); setExpanded(true); setChallenge(null); setCode("");
+    const {data} = await supabase.auth.getSession();
+    if (normalizeClientEmail(data.session?.user.email) !== normalized) return; // guests confirm with a code below
+    const {data: r, error: f} = await supabase.functions.invoke("private-client-recognition", {body:{action:"check",intent:"optin",email:normalized}});
+    if (!f && r?.optedIn) { unforgetPrivateClient(normalized); setOptedIn(normalized); setForgotten(null); setIntent("recognize"); setExpanded(false); }
+    else setError("Could not turn recognition back on. Please try again.");
+  }
+
+  if (isForgotten && forgotten.server) return <div className="mt-3 space-y-1 font-body text-sm">
+    <p role="status" className="text-muted-foreground">
+      Recognition is off for this email and your saved recognition data has been deleted. Your basket and orders are unaffected.
+    </p>
+    <Button type="button" variant="link" className="h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startOptin()}>
+      Turn recognition back on
+    </Button>
+    {error && <p role="alert" className="text-destructive">{error}</p>}
+  </div>;
   const optOutLink = <Button type="button" variant="link" className="h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startForget()}>
     Don’t recognise me — delete my saved data
   </Button>;
