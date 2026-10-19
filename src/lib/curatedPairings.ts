@@ -73,9 +73,9 @@ export function selectCuratedPairings(primary: Pick<PairingProduct, "id" | "titl
     const matches = pool.filter((p) => !excluded.has(p.id) && (slot
       ? slot.includes(pairingRoomKey(p) || "")
       : pairingCategory(p) === rule.target_category));
-    const sameBrand = matches.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
     // Rotate deterministically per purchased piece so each first choice gets its own companions.
     const ranked = [...matches].sort((a, b) => (slot ? slot.indexOf(pairingRoomKey(a) || "") - slot.indexOf(pairingRoomKey(b) || "") : 0) || pairingSeed(primary.id + a.id) - pairingSeed(primary.id + b.id) || a.id.localeCompare(b.id));
+    const sameBrand = ranked.find((p) => p.brand.toLowerCase() === primary.brand.toLowerCase());
     const pick = matches.find((p) => p.id === rule.preferred_pick_id) ?? sameBrand ?? ranked[0];
     if (pick) excluded.add(pick.id);
     return pick ? [{ ...pick, ...(pick.id === rule.preferred_pick_id ? { finishMedia: parsePairingMedia(rule.finish_media) } : {}), ...(pick.id === rule.preferred_pick_id && parsePairingFinishOptions(rule.finish_options).length ? {
