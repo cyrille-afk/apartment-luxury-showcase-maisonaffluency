@@ -658,20 +658,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
   const overlayOpen = !!(portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady);
-  // Hotspot on the left half of the photo → card floats on the right margin, and vice versa.
-  const overlaySide: "left" | "right" = selectedHotspot && selectedHotspot.x_percent < 50 ? "right" : "left";
-  const openAspect = activeScene ? sceneAspects[activeScene.id] : undefined;
-  const imageBoxRef = useRef<HTMLDivElement>(null);
-  const [imageBoxHeight, setImageBoxHeight] = useState<number | null>(null);
-  useEffect(() => {
-    const el = imageBoxRef.current;
-    if (!el || !(portraitDock && overlayOpen)) { setImageBoxHeight(null); return; }
-    const update = () => setImageBoxHeight(el.getBoundingClientRect().height);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [portraitDock, overlayOpen, openAspect, activeScene?.id]);
   const { data: dockRrpMap = {} } = usePublicRrpMap(dockAlternatives.map((pick) => pick.id));
   const dockDestination = useShippingDestination();
   useEffect(() => {
