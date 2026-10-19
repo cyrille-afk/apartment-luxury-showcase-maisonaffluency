@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Room collection consultation forms share one validated server intake that stores in the existing private inquiries inbox before fixed-recipient app emails; collection context is server-derived and submissions never create accounts — keeps Public and Trade inquiries visible to the owner without granting visitor read access.
 - Inquiry-created quotes copy contact fields; funnel and resumed drafts fall back to the linked inquiry without replacing explicit quote contacts. Email names are display-only unverified suggestions — avoids contact loss and false identity claims.
 - Public moodboard previews use published catalog and public RRP only; email unlock stays local so no account or trade entitlement is implied.
 - Product modes reuse the Client View store; Trade-origin portraits, picks and product links stay inside the trade shell to retain mode/return controls without changing public routes, retail-only presentation or account currency.
