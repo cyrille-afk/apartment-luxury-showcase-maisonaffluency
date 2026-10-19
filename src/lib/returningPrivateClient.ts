@@ -20,6 +20,15 @@ export function forgetPrivateClient(email: string) {
   } catch { /* never interrupt ordering */ }
 }
 
+/** Re-enables this device's local recognition after an opt-out. */
+export function unforgetPrivateClient(email: string) {
+  const normalized = normalizeClientEmail(email);
+  if (!normalized) return;
+  try {
+    localStorage.setItem(OPT_OUT_KEY, JSON.stringify([...optedOut()].filter((e) => e !== normalized)));
+  } catch { /* never interrupt ordering */ }
+}
+
 export function normalizeClientEmail(value: unknown): string {
   return typeof value === "string" && EMAIL_RE.test(value.trim()) ? value.trim().toLowerCase() : "";
 }

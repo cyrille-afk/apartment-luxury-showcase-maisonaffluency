@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Turnstile from "@/components/Turnstile";
 import { supabase } from "@/integrations/supabase/client";
-import { forgetPrivateClient, normalizeClientEmail, rememberPrivateClient } from "@/lib/returningPrivateClient";
+import { forgetPrivateClient, normalizeClientEmail, rememberPrivateClient, unforgetPrivateClient } from "@/lib/returningPrivateClient";
 import { CODE_LIFETIME_MS, RESEND_WAIT_MS, formatCountdown } from "@/lib/verificationCodeTiming";
 
 export default function PrivateClientWelcome({ email, profile, locallyReturning }: {
@@ -19,8 +19,9 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [botKey, setBotKey] = useState(0);
-  const [intent, setIntent] = useState<"recognize" | "forget">("recognize");
+  const [intent, setIntent] = useState<"recognize" | "forget" | "optin">("recognize");
   const [forgotten, setForgotten] = useState<{email: string; server: boolean} | null>(null);
+  const [optedIn, setOptedIn] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const currentEmail = useRef(normalized);
   currentEmail.current = normalized;
@@ -56,10 +57,26 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
     else setError("Could not delete saved data. Please try again.");
   }
 
-  const isForgotten = forgotten?.email === normalized;
-  if (isForgotten && forgotten.server) return <p role="status" className="mt-3 font-body text-sm text-muted-foreground">
-    Recognition is off for this email and your saved recognition data has been deleted. Your basket and orders are unaffected.
-  </p>;
+  const isForgotten = forgotten?.email === normalized && optedIn !== normalized;
+
+  async function startOptin() {
+    setError(""); setIntent("optin"); setExpanded(true); setChallenge(null); setCode("");
+    const {data} = await supabase.auth.getSession();
+    if (normalizeClientEmail(data.session?.user.email) !== normalized) return; // guests confirm with a code below
+    const {data: r, error: f} = await supabase.functions.invoke("private-client-recognition", {body:{action:"check",intent:"optin",email:normalized}});
+    if (!f && r?.optedIn) { unforgetPrivateClient(normalized); setOptedIn(normalized); setForgotten(null); setIntent("recognize"); setExpanded(false); }
+    else setError("Could not turn recognition back on. Please try again.");
+  }
+
+  if (isForgotten && forgotten.server) return <div className="mt-3 space-y-1 font-body text-sm">
+    <p role="status" className="text-muted-foreground">
+      Recognition is off for this email and your saved recognition data has been deleted. Your basket and orders are unaffected.
+    </p>
+    <Button type="button" variant="link" className="h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startOptin()}>
+      Turn recognition back on
+    </Button>
+    {error && <p role="alert" className="text-destructive">{error}</p>}
+  </div>;
   const optOutLink = <Button type="button" variant="link" className="h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startForget()}>
     Don’t recognise me — delete my saved data
   </Button>;
@@ -90,6 +107,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
       }
       if (action === "request") { setChallenge({email:target,id:data.challengeId,sentAt:Date.now()}); setNow(Date.now()); setCode(""); }
       else if (data?.forgotten) { setForgotten({email:target,server:true}); setCode(""); setChallenge(null); }
+      else if (data?.optedIn) { unforgetPrivateClient(target); setOptedIn(target); setForgotten(null); setIntent("recognize"); setCode(""); setChallenge(null); setExpanded(false); }
       else if (data?.verified) {
         setVerified({email:target,returning:data.returning === true});
         if (data.returning) rememberPrivateClient(target,"private");
@@ -109,6 +127,9 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
 
   return <div className="mt-3 font-body text-sm">
     {isForgotten && <p role="status" className="mb-2 text-muted-foreground">This device no longer recognises you. To also delete data saved with us, confirm your email with a code.</p>}
+    {isForgotten && <Button type="button" variant="link" className="mb-2 h-auto p-0 text-xs text-muted-foreground" onClick={()=>void startOptin()}>
+      Turn recognition back on
+    </Button>}
     {!expanded ? <Button type="button" variant="link" className="h-auto p-0 text-muted-foreground" onClick={()=>setExpanded(true)}>
       <Mail className="mr-2 h-4 w-4" /> Verify email
     </Button> : <div className="space-y-3">
@@ -131,7 +152,7 @@ export default function PrivateClientWelcome({ email, profile, locallyReturning 
         <p className="text-muted-foreground">We’ll email you a 6-digit code, valid for 10 minutes.</p>
         <Turnstile key={botKey} onVerify={setBotToken} onExpire={()=>setBotToken("")} />
         <Button type="button" variant="outline" disabled={busy || !botToken} onClick={()=>void submit("request")}>
-          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {intent === "forget" ? "Send code to delete my data" : "Send verification code"}
+          {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {intent === "forget" ? "Send code to delete my data" : intent === "optin" ? "Send code to turn recognition back on" : "Send verification code"}
         </Button>
       </>}
       {error && <p role="alert" className="text-destructive">{error}</p>}

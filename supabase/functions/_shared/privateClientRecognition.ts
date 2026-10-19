@@ -4,6 +4,7 @@ type Store = {
   activity: (email: string, session: string | null) => Promise<boolean>;
   send: (email: string, id: string, code: string) => Promise<void>;
   forget: (email: string) => Promise<void>;
+  optin: (email: string) => Promise<void>;
 };
 
 /** Only verified email ownership permits an activity lookup. Requests never look up customers. */
@@ -16,9 +17,12 @@ export async function recognizePrivateClient(
   const email = body.email.trim().toLowerCase();
   const session = body.sessionId ?? null;
   const forget = body.intent === "forget";
+  const optin = body.intent === "optin";
   const done = async () => forget
     ? (await store.forget(email), { status: 200, body: { forgotten: true } })
-    : { status: 200, body: { verified: true, returning: await store.activity(email, session) } };
+    : optin
+      ? (await store.optin(email), { status: 200, body: { optedIn: true } })
+      : { status: 200, body: { verified: true, returning: await store.activity(email, session) } };
   if (body.action === "check") {
     if (verifiedEmail?.trim().toLowerCase() !== email) return { status: 401, body: { error: "Verify your email to continue." } };
     return done();

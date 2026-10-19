@@ -8,7 +8,7 @@ const Body = z.object({
   challengeId: z.string().uuid().optional(), code: z.string().regex(/^\d{6}$/).optional(),
   sessionId: z.string().regex(/^[0-9a-f-]{32,64}$/i).optional(),
   turnstileToken: z.string().max(2048).optional(),
-  intent: z.enum(['recognize','forget']).optional(),
+  intent: z.enum(['recognize','forget','optin']).optional(),
 });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...corsHeaders, 'Content-Type':'application/json', 'Cache-Control':'no-store' },
@@ -65,6 +65,10 @@ Deno.serve(async req => {
       },
       forget: async (email) => {
         const {error} = await svc.rpc('private_client_forget',{_email:email});
+        if (error) throw error;
+      },
+      optin: async (email) => {
+        const {error} = await svc.rpc('private_client_optin',{_email:email});
         if (error) throw error;
       },
       send: async (email,id,code) => {

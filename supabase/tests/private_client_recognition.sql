@@ -25,7 +25,12 @@ BEGIN
  IF public.private_client_has_activity('recognition-test@example.invalid',NULL) THEN RAISE EXCEPTION 'Professional basket recognized'; END IF;
  INSERT INTO public.shop_orders(order_ref,email,buyer_type,status,currency,subtotal_cents,shipping_cents,total_cents,payment_method,paid_at) VALUES ('recognition-test','recognition-test@example.invalid','private','paid','EUR',100,0,100,'card',now());
  IF NOT public.private_client_has_activity('recognition-test@example.invalid',NULL) THEN RAISE EXCEPTION 'Paid private order not recognized'; END IF;
- UPDATE public.shop_orders SET status='cancelled' WHERE order_ref='recognition-test';
- IF public.private_client_has_activity('recognition-test@example.invalid',NULL) THEN RAISE EXCEPTION 'Cancelled order recognized'; END IF;
+  UPDATE public.shop_orders SET status='cancelled' WHERE order_ref='recognition-test';
+  IF public.private_client_has_activity('recognition-test@example.invalid',NULL) THEN RAISE EXCEPTION 'Cancelled order recognized'; END IF;
+  IF has_function_privilege('authenticated','public.private_client_optin(text)','EXECUTE') OR has_function_privilege('anon','public.private_client_optin(text)','EXECUTE') THEN RAISE EXCEPTION 'Opt-in exposed'; END IF;
+  PERFORM public.private_client_forget('recognition-optin@example.invalid');
+  IF NOT EXISTS (SELECT 1 FROM public.private_client_recognition_optouts WHERE email_hash=encode(digest('recognition-optin@example.invalid','sha256'),'hex')) THEN RAISE EXCEPTION 'Opt-out not recorded'; END IF;
+  PERFORM public.private_client_optin('Recognition-Optin@example.invalid ');
+  IF EXISTS (SELECT 1 FROM public.private_client_recognition_optouts WHERE email_hash=encode(digest('recognition-optin@example.invalid','sha256'),'hex')) THEN RAISE EXCEPTION 'Opt-in did not remove opt-out'; END IF;
 END $$;
 ROLLBACK;
