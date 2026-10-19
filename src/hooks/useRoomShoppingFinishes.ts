@@ -4,7 +4,8 @@ import type { RoomFinishMap } from '@/lib/roomShoppingFilters';
 
 /** Public, active finish names only; no variant prices or private catalogue fields. */
 export function useRoomShoppingFinishes(ids: string[]) {
-  const stableIds = [...new Set(ids)].sort();
+  // Legacy static Trade cards use tp-* identifiers, not public pick UUIDs.
+  const stableIds = [...new Set(ids.filter(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)))].sort();
   return useQuery({
     queryKey: ['room-shopping-finishes', stableIds],
     enabled: stableIds.length > 0,
