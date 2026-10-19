@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import PairingConfigurationSheet from './PairingConfigurationSheet';
 import type { PairingProduct } from '@/lib/curatedPairings';
+import { MemoryRouter } from 'react-router-dom';
 
 const mocks = vi.hoisted(() => ({ add: vi.fn() }));
 vi.mock('@/lib/cart', () => ({ addToCart: mocks.add }));
@@ -14,7 +15,7 @@ const photo = 'https://assets.example/oak.jpg';
 const macro = 'https://assets.example/oak-macro.jpg';
 const piece: PairingProduct = { id: 'pick', title: 'Console', brand: 'Atelier', image: hero, path: '/designers/atelier/console', pairingRuleId: 'rule', finishCurrency: 'USD', finishOptions: [{ id: 'oak', name: 'Oak', price_cents: 10000 }, { id: 'brass', name: 'Brass', price_cents: 20000 }], finishMedia: [{ key: 'custom:oak', label: 'Oak', product_image_url: photo, macro_image_url: macro }, { key: 'custom:brass', label: 'Brass', macro_image_url: macro }] };
 function open() {
-  render(<PairingConfigurationSheet preview piece={piece} initial={{ selection: { base: null, top: null, label: null }, visual: {}, customId: 'oak', material: '' }} onClose={vi.fn()} onExplore={vi.fn()} />);
+  render(<MemoryRouter><PairingConfigurationSheet preview piece={piece} initial={{ selection: { base: null, top: null, label: null }, visual: {}, customId: 'oak', material: '' }} onClose={vi.fn()} onExplore={vi.fn()} /></MemoryRouter>);
 }
 describe('customer configuration preview', () => {
   it('starts on the admin selected finish and uses its unsaved exact photo', () => {
