@@ -381,7 +381,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
   const [portraitSceneIds, setPortraitSceneIds] = useState<Set<string>>(() => new Set());
-  const [sceneAspects, setSceneAspects] = useState<Record<string, number>>({});
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
   const space = SPACES[roomSpaceIndex];
@@ -760,10 +759,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                              onLoad={(event) => {
                                 markSceneLoaded(pageScene.id);
                                const { naturalWidth, naturalHeight } = event.currentTarget;
-                               if (naturalWidth > 0 && naturalHeight > 0) {
-                                 const aspect = naturalWidth / naturalHeight;
-                                 setSceneAspects((current) => (current[pageScene.id] === aspect ? current : { ...current, [pageScene.id]: aspect }));
-                               }
                                if (naturalHeight <= naturalWidth) return;
                                setPortraitSceneIds((current) => {
                                  if (current.has(pageScene.id)) return current;
