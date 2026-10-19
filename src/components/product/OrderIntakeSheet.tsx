@@ -739,7 +739,13 @@ export default function OrderIntakeSheet({
                 }}
                 placeholder="you@studio.com"
                 className={inputCls}
+                onBlur={() => { if (!isQuote) rememberPrivateClient(email, profile); }}
               />
+              {buyerType === "individual" && isReturningPrivateClient(email, profile, rememberedEmails) && (
+                <p role="status" className="mt-3 font-body text-sm leading-relaxed text-foreground">
+                  Welcome back. It’s a pleasure to see you again.
+                </p>
+              )}
               {buyerType === "business" && (
                 <>
                   <label className={cn(labelCls, "mt-5")} htmlFor="intake-company">

@@ -5,6 +5,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { CartItem } from "@/lib/cart";
+import { rememberPrivateClient } from "@/lib/returningPrivateClient";
 
 const SESSION_KEY = "ma_cart_session_id";
 const CONTACT_KEY = "ma_cart_contact";
@@ -101,5 +102,9 @@ export function syncCart(items?: CartItem[]) {
 /** An order was placed — the bag is converted, not abandoned. */
 export function markCartOrdered(items: CartItem[]) {
   if (timer) clearTimeout(timer);
+  try {
+    const form = JSON.parse(localStorage.getItem("ma_checkout_form") || "null");
+    rememberPrivateClient(form?.email ?? readContact().email ?? "", form?.buyerProfile ?? null);
+  } catch { /* Purchase completion must never depend on recognition. */ }
   void push(items, "ordered");
 }
