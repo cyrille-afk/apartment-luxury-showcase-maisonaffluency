@@ -11,8 +11,17 @@ describe("Ecart re-edition labels", () => {
     expect(profileEditionLine({ edition: 'Edition of 8', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).not.toBeNull();
     expect(profileEditionLine({ edition: 'Man of Parts Edition', edition_number: '1/8', founder: 'Man of Parts', pageDesignerName: 'Sebastian Herkner' })).not.toBeNull();
   });
-  it('retains house attribution on house pages and unscoped catalogues', () => {
-    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).not.toBeNull();
+  it('suppresses redundant Man of Parts attribution on its own page without a generated fallback', () => {
+    expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).toBeNull();
+    expect(getHouseEditionLabel({ designerName: 'Sebastian Herkner', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).toBeNull();
+    expect(getHouseEditionLabel({ designerName: 'Yabu Pushelberg', parentBrand: 'Man of Parts', pageDesignerName: 'Man of Parts' })).toBeNull();
+  });
+  it('preserves genuine editions on the Man of Parts page', () => {
+    expect(profileEditionLine({ edition: 'Edition of 8', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).toBe('Edition of 8');
+    expect(profileEditionLine({ edition_number: '1/8', founder: 'Man of Parts', pageDesignerName: 'Man of Parts' })).toBe('Edition 1/8');
+  });
+  it('retains other house pages and unscoped catalogue attribution', () => {
+    expect(profileEditionLine({ edition: 'Veronese Edition', founder: 'Veronese', pageDesignerName: 'Veronese' })).toBe('Veronese Edition');
     expect(profileEditionLine({ edition: 'Man of Parts Edition', founder: 'Man of Parts' })).not.toBeNull();
   });
   it("labels Ecart and its affiliated designers", () => {
