@@ -51,6 +51,8 @@ import GridDensityToggle from "@/components/GridDensityToggle";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import { readTradeGalleryState } from "@/lib/tradeGalleryState";
 import { useTradeGalleryScroll } from "@/hooks/useTradeGalleryScroll";
+import { roomShoppingProducts } from '@/lib/shopByRoom';
+import type { RoomSlug } from '@/lib/roomCategories';
 
 
 const slugifyForUrl = (s: string) =>
@@ -61,7 +63,7 @@ interface DraftQuote {
   created_at: string;
 }
 
-const TradeGallery = () => {
+const TradeGallery = ({ roomSlug }: { roomSlug?: RoomSlug } = {}) => {
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
   const { clientSafe } = useClientSafeMode();
@@ -69,10 +71,10 @@ const TradeGallery = () => {
     <Suspense fallback={<div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>}>
       <EditorialDesignerProfile presentation />
     </Suspense>
-  ) : <StudioGallery key={location.pathname} />;
+  ) : <StudioGallery key={location.pathname} roomSlug={roomSlug} />;
 };
 
-const StudioGallery = () => {
+const StudioGallery = ({ roomSlug }: { roomSlug?: RoomSlug }) => {
   const { user, isAdmin } = useAuth();
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
@@ -541,8 +543,11 @@ const StudioGallery = () => {
 
   // Explicit sort options layered on top of the curated sequence.
   const sorted = useMemo(
-    () => sortTradeProducts(filtered, sortBy),
-    [filtered, sortBy],
+    () => {
+      const roomIds = roomSlug ? new Set(roomShoppingProducts(filtered.map(p => ({ id: p.id, title: p.product_name, brand: p.brand_name, category: p.category, subcategory: p.subcategory, image: p.image_url || '', path: '' })), roomSlug).map(p => p.id)) : null;
+      return sortTradeProducts(roomIds ? filtered.filter(p => roomIds.has(p.id)) : filtered, sortBy);
+    },
+    [filtered, sortBy, roomSlug],
   );
 
   const toCompareItem = (product: TradeProduct): CompareItem => ({
@@ -626,7 +631,7 @@ const StudioGallery = () => {
         <div>
           <h1 className="font-display text-base md:text-lg font-normal tracking-wide text-foreground">Trade Gallery</h1>
           <p className="mt-0.5 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "collected piece" : "collected pieces"}
+            {sorted.length} {sorted.length === 1 ? "collected piece" : "collected pieces"}
             {selectedBrand !== "all" ? ` from ${selectedBrand}` : ""}
           </p>
         </div>
@@ -676,7 +681,7 @@ const StudioGallery = () => {
             <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} counts={editionCounts} allCount={collectionCounts.total} />
           </div>
           <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
-            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : filtered.length} {filtered.length === 1 ? "Item" : "Items"} Found</span>
+            <span role="status" aria-live="polite" className="whitespace-nowrap font-body text-xs text-muted-foreground">{productsLoading ? "…" : sorted.length} {sorted.length === 1 ? "Item" : "Items"} Found</span>
             <div className="flex items-center gap-1">
               <GridDensityToggle value={density === "compact" ? 4 : 3} onChange={(columns) => { setViewMode("grid"); setDensity(columns === 4 ? "compact" : "comfortable"); }} className="!flex shrink-0" />
               <Button type="button" variant={viewMode === "list" ? "default" : "outline"} size="icon" aria-label="Display list" aria-pressed={viewMode === "list"} title="Display list" onClick={() => setViewMode("list")} className={cn("h-10 w-10", viewMode === "list" && "bg-foreground text-background hover:bg-foreground/90")}><List /></Button>
@@ -777,7 +782,7 @@ const StudioGallery = () => {
       {/* Content */}
       {(productsLoading || (routeBrandSlug && (designerLoading || galleryPicksLoading))) ? (
         <div className="flex min-h-48 items-center justify-center"><DotCircleLoader size="md" /></div>
-      ) : filtered.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <div className="border border-dashed border-border rounded-lg p-16 text-center">
           <p className="font-body text-sm text-muted-foreground">
             No products match your search criteria.
