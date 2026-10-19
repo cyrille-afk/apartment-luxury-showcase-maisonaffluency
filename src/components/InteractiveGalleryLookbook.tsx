@@ -381,7 +381,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
   const [portraitSceneIds, setPortraitSceneIds] = useState<Set<string>>(() => new Set());
-  const [sceneAspects, setSceneAspects] = useState<Record<string, number>>({});
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
   const space = SPACES[roomSpaceIndex];
@@ -658,20 +657,6 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   }, [selectedHotspot?.id, dockRotation, allPicks, manifest]);
 
   const overlayOpen = !!(portraitDock && selectedHotspot && dockAlternatives.length > 0 && activeSceneReady);
-  // Hotspot on the left half of the photo → card floats on the right margin, and vice versa.
-  const overlaySide: "left" | "right" = selectedHotspot && selectedHotspot.x_percent < 50 ? "right" : "left";
-  const openAspect = activeScene ? sceneAspects[activeScene.id] : undefined;
-  const imageBoxRef = useRef<HTMLDivElement>(null);
-  const [imageBoxHeight, setImageBoxHeight] = useState<number | null>(null);
-  useEffect(() => {
-    const el = imageBoxRef.current;
-    if (!el || !(portraitDock && overlayOpen)) { setImageBoxHeight(null); return; }
-    const update = () => setImageBoxHeight(el.getBoundingClientRect().height);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [portraitDock, overlayOpen, openAspect, activeScene?.id]);
   const { data: dockRrpMap = {} } = usePublicRrpMap(dockAlternatives.map((pick) => pick.id));
   const dockDestination = useShippingDestination();
   useEffect(() => {
@@ -747,13 +732,13 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   categoryDiscovery={categoryDiscovery}
                 />
               )}
-                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""} ${portraitDock && overlayOpen ? `md:flex-row md:items-stretch md:justify-center md:gap-8 md:max-w-7xl md:mx-auto md:px-4 md:my-8 ${overlaySide === "left" ? "md:flex-row-reverse" : ""}` : ""}`}>
+                <div className={`relative flex w-full items-center justify-center overflow-hidden bg-background ${hasScenePicks && !portraitDock ? "md:items-stretch md:gap-3 lg:gap-6" : ""}`}>
                    {hasScenePicks && !portraitDock && (
                       <aside aria-label="Products on the left of this photo" className={`hidden w-40 shrink-0 content-center border-r border-border/60 px-2 md:grid lg:w-52 lg:px-4 xl:w-56 xl:px-5 ${activeSceneReady ? "" : "invisible"}`}>
                         <div className="grid grid-cols-1 content-center gap-y-8">{featuredLeftPicks.map(renderScenePick)}</div>
                     </aside>
                   )}
-                  <div ref={imageBoxRef} style={portraitDock && overlayOpen && openAspect ? { aspectRatio: openAspect } : undefined} className={`relative flex min-w-0 flex-1 items-start justify-center ${portraitDock && overlayOpen ? `md:flex-none md:self-start md:aspect-[4/3] md:rounded-sm md:overflow-hidden ${openAspect && openAspect < 1 ? "md:h-[75vh]" : "md:w-[70%]"}` : ""}`}>
+                  <div className="relative flex min-w-0 flex-1 items-start justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
                        <motion.div
@@ -762,22 +747,18 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                          animate={{ opacity: 1 }}
                          exit={{ opacity: 0 }}
                          transition={{ duration: 0.45 }}
-                          className={`relative mx-auto w-full overflow-hidden bg-transparent ${portraitDock && overlayOpen ? "md:h-full md:w-full md:max-w-full" : "md:w-fit md:max-w-full"}`}
+                          className="relative mx-auto w-full overflow-hidden bg-transparent md:w-fit md:max-w-full"
                        >
                           {(() => {
                             const sceneReady = hotspotsReady && catalogReady && loadedScenes.has(pageScene.id);
                             return <>
-                         <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className={`block h-auto w-full rounded-none p-0 hover:bg-transparent ${portraitDock && overlayOpen ? "md:h-full md:w-full md:max-w-full" : "md:w-auto md:max-w-full"}`}>
+                         <Button type="button" variant="ghost" onClick={() => setExpandedScene(pageScene)} aria-label={`Expand ${pageScene.title} photo`} className="block h-auto w-full rounded-none p-0 hover:bg-transparent md:w-auto md:max-w-full">
                            <img
                              src={displayImage(pageScene.id)}
                              alt={`${space.label} — ${pageScene.title}`}
                              onLoad={(event) => {
                                 markSceneLoaded(pageScene.id);
                                const { naturalWidth, naturalHeight } = event.currentTarget;
-                               if (naturalWidth > 0 && naturalHeight > 0) {
-                                 const aspect = naturalWidth / naturalHeight;
-                                 setSceneAspects((current) => (current[pageScene.id] === aspect ? current : { ...current, [pageScene.id]: aspect }));
-                               }
                                if (naturalHeight <= naturalWidth) return;
                                setPortraitSceneIds((current) => {
                                  if (current.has(pageScene.id)) return current;
@@ -786,11 +767,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                  return next;
                                });
                               }}
-                             className={`block h-auto w-full cursor-zoom-in object-contain ${portraitDock && overlayOpen ? "md:h-full md:w-full md:object-cover" : `md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""}`} ${sceneReady ? "opacity-100" : "opacity-0"}`}
+                             className={`block h-auto w-full cursor-zoom-in object-contain md:max-h-[72vh] md:w-auto md:max-w-full ${discoveryRoom ? "md:max-h-[65vh]" : ""} ${sceneReady ? "opacity-100" : "opacity-0"}`}
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockDismissed(false); setDockRotation((n) => n + 1); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
@@ -811,11 +792,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                     />
                                     <motion.aside
                                       aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                                      initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                                      initial={{ opacity: 0, y: 16 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: 16 }}
                                       transition={{ duration: 0.3, ease: "easeOut" }}
-                                      className={`absolute z-10 flex flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md max-md:inset-x-3 max-md:bottom-3 max-md:top-auto max-md:max-h-[72%] md:inset-y-4 md:w-[300px] md:p-4 ${overlaySide === "left" ? "md:left-4" : "md:right-4"}`}
+                                      className="absolute inset-x-3 bottom-3 top-auto z-10 flex max-h-[72%] flex-col overflow-y-auto rounded-md border border-border/60 bg-background/95 p-3 shadow-[var(--shadow-elegant)] backdrop-blur-md"
                                     >
                                       <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
@@ -867,12 +848,11 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                       <motion.aside
                         key={selectedHotspot.id}
                         aria-label={`Curated alternatives for ${selectedHotspot.product_name}`}
-                        initial={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        initial={{ opacity: 0, x: 16 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: overlaySide === "left" ? -16 : 16 }}
+                        exit={{ opacity: 0, x: 16 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        style={imageBoxHeight ? { maxHeight: imageBoxHeight } : undefined}
-                        className="hidden w-[30%] flex-col gap-4 overflow-y-auto max-h-[75vh] rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex"
+                        className="fixed right-8 top-[20vh] z-50 hidden w-[350px] flex-col gap-6 overflow-y-auto max-h-[70vh] rounded-md border border-border/60 bg-neutral-50/50 p-4 md:flex"
                       >
                         <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                           <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
