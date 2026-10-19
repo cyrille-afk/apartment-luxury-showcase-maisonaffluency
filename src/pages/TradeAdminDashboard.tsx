@@ -38,6 +38,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Sample Requests", description: "Track sample shipments and returns", url: "/trade/admin", icon: Package },
   { title: "Trade Applications & Price Upon Request Submissions", description: "Review and approve new trade registrations, and reply to Price-upon-Request inquiries", url: "/trade/admin", icon: Shield },
   { title: "Registered Users", description: "View all sign-ups, roles, and application status", url: "/trade/registered-users", icon: Users },
+  { title: "Studios", description: "Created studios, owners and member counts", url: "/trade/admin/studios", icon: Users },
   { title: "Custom Requests", description: "Concierge inbox — reply to bespoke requests inline", url: "/trade/custom-requests", icon: Inbox },
   { title: "Client Directory", description: "Studio address book — companies, billing addresses, staff contacts, and attached documents (NDA, T&Cs, counterparty forms)", url: "/trade/clients", icon: Users },
   { title: "Quote Request Inbox", description: "Every 'Request a Quote' submission — company, product, selected finish, and contact details", url: "/trade/admin/inquiries", icon: MessageSquare },

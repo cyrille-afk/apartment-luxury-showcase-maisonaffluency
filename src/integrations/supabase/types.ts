@@ -12320,6 +12320,10 @@ export type Database = {
         Returns: undefined
       }
       admin_stripe_metrics: { Args: { _days?: number }; Returns: Json }
+      admin_studio_directory: {
+        Args: { _offset?: number; _search?: string }
+        Returns: Json
+      }
       apply_available_credit_to_quote: {
         Args: { _quote_id: string }
         Returns: number
