@@ -24,7 +24,7 @@ function RoomShortlistState({ room, children }: { room: RoomSlug; children: Reac
   const location = useLocation();
   const key = roomShortlistDraftKey(room, user?.id);
   const [items, setItems] = useState<RoomShortlistItem[]>(() => {
-    try { return shortlistItems(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return []; }
+    try { return shortlistItems(JSON.parse(localStorage.getItem(key) || (user ? localStorage.getItem(roomShortlistDraftKey(room)) : null) || '[]')); } catch { return []; }
   });
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');

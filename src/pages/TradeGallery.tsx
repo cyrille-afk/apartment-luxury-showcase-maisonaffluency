@@ -980,8 +980,8 @@ const StudioGallery = ({ roomSlug, roomFilters, roomSort = 'curated' }: { roomSl
                      <p className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground">{product.edition}</p>
                    )}
                 </div>
-                {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
                 <RoomShortlistButton item={{ id: product.id, product_name: product.product_name, brand_name: product.brand_name, image_url: product.image_url, category: product.category, dimensions: product.dimensions, materials: product.materials, lead_time: product.lead_time }} />
+                {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
                     {renderPriceDisplay(price, "font-display text-sm inline-flex items-center gap-1.5 flex-wrap justify-end", product.brand_name)}
                     <InlinePriceEditor
