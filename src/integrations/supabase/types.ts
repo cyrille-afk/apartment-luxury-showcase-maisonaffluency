@@ -12339,6 +12339,7 @@ export type Database = {
         }
       }
       _board_slug: { Args: { _board_id: string }; Returns: string }
+      _hotspot_blocked_designer_names: { Args: never; Returns: string[] }
       _hotspot_designer_public: {
         Args: { _designer_id: string; _designer_name: string }
         Returns: boolean

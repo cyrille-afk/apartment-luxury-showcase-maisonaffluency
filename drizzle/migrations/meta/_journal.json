@@ -1471,6 +1471,13 @@
       "when": 1792403467595,
       "tag": "0209_fix_private_client_optin_digest",
       "breakpoints": true
+    },
+    {
+      "idx": 210,
+      "version": "7",
+      "when": 1792447197380,
+      "tag": "0210_migration",
+      "breakpoints": true
     }
   ]
 }
