@@ -2194,9 +2194,10 @@ const TradeProductPage: React.FC = () => {
       on ? "border-foreground" : "border-border/60 hover:border-foreground/50",
     );
     return (
-      <div className="flex h-full min-h-0 min-w-0 flex-col gap-3" ref={galleryScrollRef}>
-        <div className="flex min-h-0 min-w-0 flex-1 gap-3 xl:gap-4">
-          <div className="flex h-full w-16 xl:w-[80px] 2xl:w-[88px] shrink-0 flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
+      <div className="flex min-w-0 flex-col" ref={galleryScrollRef}>
+        <div className="flex min-w-0 items-stretch gap-3 xl:gap-4">
+          <div className="relative w-16 xl:w-[80px] 2xl:w-[88px] shrink-0">
+          <div className="absolute inset-0 flex flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
             {r3d && (
               <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => { setWorkspaceAsset("3d"); setHoverPreviewIdx(null); }} className={thumbCls(asset === "3d")}>
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-muted font-body text-[9px] uppercase tracking-[0.14em] text-foreground">
@@ -2222,7 +2223,8 @@ const TradeProductPage: React.FC = () => {
               </button>
             ))}
           </div>
-          <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
+          </div>
+          <div className="relative flex aspect-[4/3] max-h-[calc(100vh-14rem)] min-w-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
             {asset === "3d" && r3d ? (
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
@@ -2270,7 +2272,9 @@ const TradeProductPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
+        <div className="mt-4">
+          <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
+        </div>
       </div>
     );
   };
@@ -2311,7 +2315,7 @@ const TradeProductPage: React.FC = () => {
 
         <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
           {isLg ? (
-            <div className="sticky top-4 min-w-0" style={masterHeight ? { height: masterHeight } : undefined}>
+            <div className="sticky top-4 min-w-0">
               {renderDesktopWorkspace()}
             </div>
           ) : (
