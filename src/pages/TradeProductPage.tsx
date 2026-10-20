@@ -699,7 +699,7 @@ const TradeProductPage: React.FC = () => {
       const el = masterRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      setMasterHeight(Math.max(480, window.innerHeight - top - 24));
+      setMasterHeight(Math.max(480, window.innerHeight - top - 56));
     };
     measure();
     window.addEventListener("resize", measure);
