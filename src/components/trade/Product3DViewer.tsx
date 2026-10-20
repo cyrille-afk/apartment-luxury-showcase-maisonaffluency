@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Box } from "lucide-react";
+import { AlertTriangle, Box, Lock, LockOpen } from "lucide-react";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -203,6 +203,30 @@ const Product3DViewer: React.FC<Props> = ({
   const [debugOpen, setDebugOpen] = useState(false);
   const [autoTagged, setAutoTagged] = useState(false);
   const [noTargets, setNoTargets] = useState(false);
+  // Camera lock — mirrors the Visualiser Sandbox position locks: when on,
+  // rotate/zoom/pan are disabled so the composition can't be nudged.
+  const [locked, setLocked] = useState(false);
+
+  // Clamp scroll-zoom to a band around the auto-framed radius so the piece
+  // can never be zoomed out of sight or into the camera. model-viewer
+  // already swallows wheel events over the canvas, so the page never scrolls.
+  useEffect(() => {
+    if (!opened || !ready) return;
+    const mv = mvRef.current as any;
+    if (!mv) return;
+    const clamp = () => {
+      try {
+        const radius = mv.getCameraOrbit?.()?.radius;
+        if (typeof radius === "number" && radius > 0) {
+          mv.setAttribute("min-camera-orbit", `auto auto ${(radius * 0.4).toFixed(3)}m`);
+          mv.setAttribute("max-camera-orbit", `auto auto ${(radius * 2.5).toFixed(3)}m`);
+        }
+      } catch { /* noop */ }
+    };
+    if (mv.model) clamp();
+    else mv.addEventListener("load", clamp, { once: true });
+    return () => mv.removeEventListener("load", clamp);
+  }, [opened, ready, url]);
 
   // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
@@ -453,6 +477,22 @@ const Product3DViewer: React.FC<Props> = ({
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Interactive 3D Model
         </span>
+        {opened && ready && (
+          <button
+            type="button"
+            onClick={() => setLocked((s) => !s)}
+            aria-pressed={locked}
+            title={locked ? "Unlock camera controls" : "Lock camera controls"}
+            className={`ml-auto flex items-center gap-1 rounded-sm border px-2 py-1 font-body text-[10px] uppercase tracking-[0.12em] transition-colors ${
+              locked
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {locked ? <Lock size={11} /> : <LockOpen size={11} />}
+            {locked ? "Locked" : "Lock"}
+          </button>
+        )}
       </div>
       <div className="relative w-full aspect-square">
         {!opened ? (
@@ -484,8 +524,7 @@ const Product3DViewer: React.FC<Props> = ({
             src={url}
             alt={alt}
             poster={poster || undefined}
-            camera-controls
-            auto-rotate
+            {...(!locked ? { "camera-controls": true, "auto-rotate": true } : {})}
             ar
             shadow-intensity="1"
             exposure="1"
@@ -502,7 +541,9 @@ const Product3DViewer: React.FC<Props> = ({
       </div>
       <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
         {opened
-          ? "Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)"
+          ? locked
+            ? "Camera locked — unlock above to rotate or zoom"
+            : "Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)"
           : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
 
