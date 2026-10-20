@@ -526,7 +526,7 @@ const TradeLayout = () => {
          </AnimatePresence>
 
         <div className="flex-1 flex flex-col min-w-0">
-          <header className={`trade-editorial-header ${designerRoute ? "min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0" : "h-14 md:h-16"} flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
+          <header className={`trade-editorial-header min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
                <div data-trade-sensitive><TradeMobileMenu
@@ -550,7 +550,7 @@ const TradeLayout = () => {
             </div>
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
-            <div className={`ml-auto flex min-w-0 ${designerRoute ? "max-w-full flex-wrap justify-end md:flex-nowrap" : ""} items-center gap-2 md:gap-4`} data-felix-target="account-panel">
+            <div className={`ml-auto flex min-w-0 max-w-full flex-wrap justify-end md:flex-nowrap items-center gap-2 md:gap-4`} data-felix-target="account-panel">
                {showTradePrice && <span data-trade-sensitive><StudioSwitcher /></span>}
                <span data-trade-sensitive><GlobalProjectSwitcher /></span>
               {/* The display-mode toggle only affects product, collection and
@@ -568,7 +568,7 @@ const TradeLayout = () => {
           <main className={`trade-editorial-main flex-1 ${presentation && (productRoute || designerRoute) ? "p-0" : fullBleed ? "min-h-0 overflow-hidden p-0" : "p-4 md:p-8 lg:p-12 pb-24 md:pb-10 lg:pb-14"}`}>
             <ToolsBreadcrumbProvider>
               {!fullBleed && !presentation && location.pathname.replace(/\/+$/, "") !== "/trade/the-collection" && (
-                 <div data-trade-sensitive className="sticky top-14 md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
+                 <div data-trade-sensitive className="relative md:sticky md:top-16 z-20 -mx-4 md:-mx-8 lg:-mx-12 -mt-4 md:-mt-8 lg:-mt-12 mb-4 bg-background/95 backdrop-blur-sm px-4 md:px-8 lg:px-12 pt-4 md:pt-5 pb-3 border-b border-border/40">
                   <ToolsBreadcrumb className="mb-0" />
                   <ProjectWorkspaceBreadcrumb />
                 </div>
