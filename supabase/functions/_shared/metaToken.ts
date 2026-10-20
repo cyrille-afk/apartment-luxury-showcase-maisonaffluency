@@ -8,7 +8,7 @@ export async function getMetaToken(): Promise<string | null> {
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (url && key) {
     try {
-      const db = createClient(url, key, { auth: { persistSession: false } });
+      const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
       const { data } = await db.from("integration_tokens").select("access_token").eq("provider", "meta").maybeSingle();
       if (data?.access_token) return data.access_token;
     } catch { /* fall back */ }
