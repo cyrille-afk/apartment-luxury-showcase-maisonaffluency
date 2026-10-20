@@ -48,3 +48,27 @@ describe("budget uses the matching size's price", () => {
     expect(priceForSize(715000, null, v, 3500, "about")).toBeNull();
   });
 });
+
+import { BUDGET_PRESETS, budgetPresetFields, budgetPresetLabel, activeBudgetPresetId } from "../gallerySearchIntent";
+describe("quick budget presets", () => {
+  it("writes field amounts that parse back to the preset's own bounds", () => {
+    for (const preset of BUDGET_PRESETS) {
+      const fields = budgetPresetFields(preset);
+      expect(parseBudgetAmount(fields.min).cents).toBe(preset.minCents);
+      expect(parseBudgetAmount(fields.max).cents).toBe(preset.maxCents);
+      expect(parseBudgetAmount(fields.min).currency).toBeNull();
+    }
+  });
+  it("recognises a matching range and ignores anything else", () => {
+    expect(activeBudgetPresetId(500_000, 2_000_000)).toBe("5k-20k");
+    expect(activeBudgetPresetId(null, 500_000)).toBe("under-5k");
+    expect(activeBudgetPresetId(10_000_000, null)).toBe("100k-plus");
+    expect(activeBudgetPresetId(600_000, 2_000_000)).toBeNull();
+    expect(activeBudgetPresetId(null, null)).toBeNull();
+  });
+  it("labels bands in the requested currency", () => {
+    expect(budgetPresetLabel(BUDGET_PRESETS[1], "EUR")).toBe("€5k – €20k");
+    expect(budgetPresetLabel(BUDGET_PRESETS[0], "SGD")).toBe("Under S$5k");
+    expect(budgetPresetLabel(BUDGET_PRESETS[4], "USD")).toBe("US$100k +");
+  });
+});

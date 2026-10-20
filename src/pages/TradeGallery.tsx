@@ -1,4 +1,4 @@
-import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
+import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, activeBudgetPresetId, budgetPresetFields, budgetPresetLabel, BUDGET_PRESETS, type PricedVariant } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -770,6 +770,38 @@ const StudioGallery = () => {
             <option value="__save">+ Save current view…</option>
             {savedViews.length > 0 && <optgroup label="Delete">{savedViews.map((v) => <option key={`d-${v.id}`} value={`__del:${v.id}`}>Delete “{v.name}”</option>)}</optgroup>}
           </select>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="gallery-budget-presets">
+          <span className="whitespace-nowrap font-body text-xs uppercase tracking-[0.1em] text-muted-foreground">Quick budgets</span>
+          {BUDGET_PRESETS.map((preset) => {
+            const active = preset.id === activeBudgetPresetId(fieldBudget.min, fieldBudget.max);
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                aria-pressed={active}
+                title={active ? "Clear this budget" : "Apply this budget"}
+                onClick={() => {
+                  if (active) {
+                    setBudgetMin("");
+                    setBudgetMax("");
+                    return;
+                  }
+                  const fields = budgetPresetFields(preset);
+                  setBudgetMin(fields.min);
+                  setBudgetMax(fields.max);
+                }}
+                className={cn(
+                  "rounded-full border px-3 py-1 font-body text-[11px] uppercase tracking-[0.1em] transition-colors",
+                  active
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:text-foreground",
+                )}
+              >
+                {budgetPresetLabel(preset, displayCurrency === "original" ? "EUR" : displayCurrency)}
+              </button>
+            );
+          })}
         </div>
       </div>
       {/* Active filter chips */}
