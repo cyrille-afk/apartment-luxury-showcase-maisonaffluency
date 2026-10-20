@@ -728,6 +728,12 @@ const StudioGallery = () => {
             <option value="title">Sort: Title A–Z</option>
             <option value="recent">Sort: Most recently added</option>
           </select>
+          <div className="flex items-center gap-2" data-testid="gallery-budget-filter">
+            <span className="whitespace-nowrap font-body text-xs uppercase tracking-[0.1em] text-muted-foreground">Budget</span>
+            <Input type="text" inputMode="decimal" aria-label="Minimum budget" placeholder="Min" value={budgetMin} onChange={(e) => setBudgetMin(e.target.value)} className={`${filterInputClass} w-24 rounded-full text-base sm:text-sm`} />
+            <span aria-hidden="true" className="text-muted-foreground">–</span>
+            <Input type="text" inputMode="decimal" aria-label="Maximum budget" placeholder="Max" value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} className={`${filterInputClass} w-24 rounded-full text-base sm:text-sm`} />
+          </div>
           <select value="" aria-label="Saved views"
               onChange={(e) => {
                 const val = e.target.value;
@@ -774,6 +780,11 @@ const StudioGallery = () => {
         if (activeBrand) activeFilters.push({ key: "brand", label: activeBrand, clear: () => handleBrandChange("all") });
         if (selectedCategory !== "all") activeFilters.push({ key: "category", label: selectedCategory, clear: () => { setSelectedCategory("all"); setSelectedSubcategory("all"); } });
         if (selectedSubcategory !== "all") activeFilters.push({ key: "subcategory", label: selectedSubcategory, clear: () => setSelectedSubcategory("all") });
+        if (budgetMin.trim() || budgetMax.trim()) activeFilters.push({
+          key: "budget",
+          label: `Budget ${budgetMin.trim()} – ${budgetMax.trim() || "∞"}`,
+          clear: () => { setBudgetMin(""); setBudgetMax(""); },
+        });
         if (selectedEdition !== "all") activeFilters.push({ key: "edition", label: selectedEdition, clear: () => setSelectedEdition("all") });
         if (activeFilters.length === 0) return null;
         return (
