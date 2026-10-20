@@ -3277,6 +3277,57 @@ export type Database = {
         }
         Relationships: []
       }
+      design_note_research_drafts: {
+        Row: {
+          colour: string | null
+          created_at: string
+          designer_name: string
+          form: string | null
+          function: string | null
+          id: string
+          pick_id: string
+          product_title: string
+          review_status: string
+          reviewer_notes: string | null
+          sources: Json
+          texture: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          colour?: string | null
+          created_at?: string
+          designer_name?: string
+          form?: string | null
+          function?: string | null
+          id?: string
+          pick_id: string
+          product_title?: string
+          review_status?: string
+          reviewer_notes?: string | null
+          sources?: Json
+          texture?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          colour?: string | null
+          created_at?: string
+          designer_name?: string
+          form?: string | null
+          function?: string | null
+          id?: string
+          pick_id?: string
+          product_title?: string
+          review_status?: string
+          reviewer_notes?: string | null
+          sources?: Json
+          texture?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       designer_curator_picks: {
         Row: {
           allocation_unit_cap: number
