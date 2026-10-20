@@ -6,6 +6,7 @@
 // Invoked by `trade-program-signup` (service role) on step-3 completion, or by
 // an admin from the Trade Applications queue (re-run).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getMetaToken } from "../_shared/metaToken.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
@@ -80,7 +81,7 @@ type ScrapeResult = { text: string; images: string[]; notes: string[]; screensho
 // Graph API's business_discovery (works for public Business/Creator accounts).
 async function instagramViaGraph(handle: string): Promise<ScrapeResult> {
   const notes: string[] = [];
-  const token = Deno.env.get("META_ACCESS_TOKEN");
+  const token = await getMetaToken();
   if (!token) return { text: "", images: [], notes: ["Meta token not configured"] };
   const G = "https://graph.facebook.com/v21.0";
   try {
