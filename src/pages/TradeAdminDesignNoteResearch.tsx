@@ -125,7 +125,7 @@ export default function TradeAdminDesignNoteResearch() {
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <div>
         <h1 className="font-display text-2xl">Design Note Research</h1>
-        <p className="text-sm text-muted-foreground">Drafts autosave. Publishing never overwrites existing product notes.</p>
+        <p className="text-sm text-muted-foreground"><a href="/trade/admin/design-note-coverage" className="underline">Coverage dashboard</a> · Drafts autosave. Publishing never overwrites existing product notes.</p>
       </div>
       <div className="relative">
         <Input placeholder="Add product to research (search title)…" value={search} onChange={(e) => setSearch(e.target.value)} />
