@@ -1513,6 +1513,13 @@
       "when": 1792500396788,
       "tag": "0215_design_note_research_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 216,
+      "version": "7",
+      "when": 1792540055851,
+      "tag": "0216_admin_delete_sales_funnel_entry",
+      "breakpoints": true
     }
   ]
 }
