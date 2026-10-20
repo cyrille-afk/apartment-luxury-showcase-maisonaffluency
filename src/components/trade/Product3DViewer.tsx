@@ -494,7 +494,7 @@ const Product3DViewer: React.FC<Props> = ({
       : "border-border text-muted-foreground hover:text-foreground",
     posterFallback: dark ? "bg-trade-stage-foreground/10" : "bg-muted/40",
     hint: dark
-      ? "text-trade-stage-foreground/80 border-trade-stage-foreground/15"
+      ? "text-trade-stage-foreground border-trade-stage-foreground/15"
       : "text-muted-foreground border-border",
     note: dark
       ? "bg-trade-stage-foreground/5 text-trade-stage-foreground/80"
