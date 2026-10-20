@@ -9587,6 +9587,7 @@ export type Database = {
           job_title: string | null
           legacy_application_id: string | null
           phone_number: string | null
+          radar_breakdown: Json | null
           radar_flag: string | null
           radar_score: number | null
           radar_scored_at: string | null
@@ -9620,6 +9621,7 @@ export type Database = {
           job_title?: string | null
           legacy_application_id?: string | null
           phone_number?: string | null
+          radar_breakdown?: Json | null
           radar_flag?: string | null
           radar_score?: number | null
           radar_scored_at?: string | null
@@ -9653,6 +9655,7 @@ export type Database = {
           job_title?: string | null
           legacy_application_id?: string | null
           phone_number?: string | null
+          radar_breakdown?: Json | null
           radar_flag?: string | null
           radar_score?: number | null
           radar_scored_at?: string | null
