@@ -1377,6 +1377,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     navigate,
   ]);
   const { data: visiblePublicRrp } = usePublicRrp(data?.product?.id);
+  const designNotes = useProductDesignNotes(data?.product?.id);
   const presentationPricing = tradeResult.data?.pricing;
   const publicRrpRow = presentation ? {
     rrp_price_cents: presentationPricing?.rrp_price_cents ?? null,

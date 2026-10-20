@@ -620,6 +620,7 @@ const TradeProductPage: React.FC = () => {
   }, [stateFrom]);
 
   const { data, isLoading } = useTradeProductBySlug(tradeProductIdParam, designerSlug, productSlug);
+  const designNotes = useProductDesignNotes((data as any)?.product?.id);
 
   // ── Pricing display state ──
   const displayCurrency = productDisplayPolicy(false, "EUR").currency as DisplayCurrency;
