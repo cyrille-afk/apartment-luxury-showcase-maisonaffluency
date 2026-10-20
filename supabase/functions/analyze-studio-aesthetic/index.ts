@@ -331,7 +331,7 @@ serve(async (req) => {
   // alone: keep prior images and manual tags, mark it retryable.
   if (!text && images.length === 0 && screenshots.length === 0) {
     if (resolveStudioSource(account.website_or_ig).instagramHandle) {
-      const error = "Instagram profile unverified — access unavailable. This is not negative evidence and does not lower the studio score.";
+      const error = "Instagram not checked automatically — our Instagram connection needs reconnecting (see Automatic Instagram checks above). The studio is not marked down for this.";
       await supabase.from("studio_aesthetic_dna").update({ status: "failed", error }).eq("trade_account_id", id);
       const update = unverifiedPortfolioUpdate(Boolean(dna?.analyzed_at));
       if (Object.keys(update).length) await supabase.from("trade_accounts").update(update).eq("id", id);
