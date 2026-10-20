@@ -81,3 +81,4 @@
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
 - gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
+- Meta/Instagram access tokens are read via `supabase/functions/_shared/metaToken.ts` (admin-saved `integration_tokens` row first, META_ACCESS_TOKEN secret fallback); the admin reconnect flow validates before saving — so a broken token can be replaced in-app without a redeploy.
