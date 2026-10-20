@@ -872,7 +872,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#EBEAE4] bg-[#F5F4F0] p-4 md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
                             <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
@@ -880,7 +880,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             </div>
                             <div key={`${selectedHotspot.id}-${dockRotation}`} className="flex min-h-0 flex-1 flex-col gap-4 animate-fade-in">
                               {dockAlternatives.map((pick) => (
-                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm bg-[hsl(var(--product-canvas))] p-3 text-left hover:bg-[hsl(var(--product-canvas))] hover:brightness-[0.97]">
+                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm border border-[#EBEAE4]/40 bg-white p-3 text-left shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:bg-white hover:brightness-[0.97]">
                                   <span className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
                                     <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
                                   </span>
