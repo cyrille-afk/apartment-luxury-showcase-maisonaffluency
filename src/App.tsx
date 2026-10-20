@@ -439,8 +439,7 @@ function RouteScrollLockFailsafe() {
 
     const isPublicProductDetail = /^\/designers\/[^/]+\/[^/]+\/?$/.test(location.pathname);
     const isProductDetail =
-      isPublicProductDetail ||
-      /^\/trade\/products\/[^/]+(?:\/[^/]+)?\/?$/.test(location.pathname);
+      isPublicProductDetail;
     document.documentElement.classList.toggle("product-detail-root", isProductDetail);
     document.documentElement.classList.toggle("public-product-canvas", isPublicProductDetail);
     if (location.pathname !== "/designers") releaseDesignersLandingScrollLock();
