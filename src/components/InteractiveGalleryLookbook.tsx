@@ -387,6 +387,18 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
   const [portraitSceneIds, setPortraitSceneIds] = useState<Set<string>>(() => new Set());
+  // The Shop-the-Room dock is desktop-only (lg = 1024px+): below that breakpoint
+  // the alternatives panel never renders and its hover/click logic never runs.
+  const [isDesktopViewport, setIsDesktopViewport] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsDesktopViewport(mql.matches);
+    setIsDesktopViewport(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   const roomSpaceIndex = galleryState.kind === "room" ? galleryState.spaceIndex : 0;
   const space = SPACES[roomSpaceIndex];
@@ -527,13 +539,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   }, [allPicks]);
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
-    setActivePin(hotspot.id);
-    setDockDismissed(false);
-    setDockRotation((n) => n + 1);
-    if (expandedScene || !discoveryRoom) {
-      setLightboxProduct(resolveHotspotProduct(hotspot));
+    // Dock state transitions only run at desktop scale; touch devices take the
+    // plain product lightbox instead of the alternatives-panel machinery.
+    if (isDesktopViewport && discoveryRoom && !expandedScene) {
+      setActivePin(hotspot.id);
+      setDockDismissed(false);
+      setDockRotation((n) => n + 1);
+      return;
     }
-  }, [resolveHotspotProduct, expandedScene, discoveryRoom, portraitSceneIds, activePage]);
+    setLightboxProduct(resolveHotspotProduct(hotspot));
+  }, [resolveHotspotProduct, expandedScene, discoveryRoom, isDesktopViewport, portraitSceneIds, activePage]);
 
   const step = useCallback((direction: number) => {
     if (galleryState.kind !== "room") return;
@@ -635,8 +650,9 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const featuredLeftPicks = scenePicks.filter((pick) => sideForPick(pick) === "left").sort(sortSidePicks);
   const featuredRightPicks = scenePicks.filter((pick) => sideForPick(pick) === "right").sort(sortSidePicks);
   const hasScenePicks = scenePicks.length > 0;
-  // Only Shop By Room replaces portrait side columns with a hotspot-driven dock.
-  const portraitDock = !!discoveryRoom && !expandedScene; void activeSceneIsPortrait;
+  // Only Shop By Room replaces portrait side columns with a hotspot-driven dock,
+  // and only at desktop scale (lg+); tablets/phones keep the plain gallery layout.
+  const portraitDock = !!discoveryRoom && !expandedScene && isDesktopViewport; void activeSceneIsPortrait;
   const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
   const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
     const product = resolveHotspotProduct(hotspot);
@@ -795,7 +811,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); if (dockClosedViaX) { setDockClosedViaX(false); setDockDismissed(false); } } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom && isDesktopViewport ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); if (dockClosedViaX) { setDockClosedViaX(false); setDockDismissed(false); } } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
@@ -872,7 +888,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] px-4 pb-4 pt-0 text-[#F9F9F7] md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] px-4 pb-4 pt-0 text-[#F9F9F7] lg:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
                             <div className="-mx-4 flex w-auto shrink-0 items-center justify-between gap-3 rounded-t-sm border-b border-[#EBEAE4] bg-[#F9F9F7] p-4">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-[#1E1E1F]">Curated alternatives: {selectedHotspot.product_name}</div>
