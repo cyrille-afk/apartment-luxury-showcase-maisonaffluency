@@ -19,6 +19,7 @@ import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
   Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
+  Maximize2 as FsIcon,
 } from "lucide-react";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 import { renderParagraph } from "@/components/EditorialBiography";
@@ -39,6 +40,7 @@ import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButt
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import ProductFullscreenGallery from "@/components/trade/ProductFullscreenGallery";
 import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -697,6 +699,7 @@ const TradeProductPage: React.FC = () => {
   const [viewer3dOpen, setViewer3dOpen] = useState(false);
   const [viewer3dKey, setViewer3dKey] = useState(0);
   const [hoverPreviewIdx, setHoverPreviewIdx] = useState<number | null>(null);
+  const [fsStart, setFsStart] = useState<number | null>(null);
   const masterRef = useRef<HTMLDivElement | null>(null);
   const [masterHeight, setMasterHeight] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -2258,6 +2261,9 @@ const TradeProductPage: React.FC = () => {
               </button>
             )}
             <div className={cn("absolute right-3 z-10 flex items-center gap-2", asset === "3d" ? "top-14" : "top-3")}>
+              <button type="button" aria-label="Open full-screen gallery" title="Full screen" onClick={() => setFsStart(asset === "3d" ? 0 : (r3d ? 1 : 0) + (photoIdx ?? 0))} className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-background/80 text-foreground/80 backdrop-blur-md hover:text-foreground">
+                <FsIcon className="h-4 w-4" strokeWidth={1.5} />
+              </button>
               <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
                 <AddToProjectPopover
                   productId={favoriteId}
@@ -2279,8 +2285,27 @@ const TradeProductPage: React.FC = () => {
     );
   };
 
+  const fs3d = resolve3d();
   return (
     <div className="motion-safe:animate-fade-in">
+      <ProductFullscreenGallery
+        open={fsStart !== null}
+        onClose={() => setFsStart(null)}
+        startIndex={fsStart ?? 0}
+        images={visibleImages}
+        alt={product.title}
+        render3d={fs3d ? () => (
+          <Product3DViewer
+            url={fs3d.url}
+            alt={`${product.title} — 3D model`}
+            poster={product.image_url}
+            fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
+            baseTextureUrl={selectedWoodPrice?.image_url || picturedFinishImgs.base || previewWoodImg || null}
+            topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
+            materialRoles={fs3d.roles}
+          />
+        ) : null}
+      />
       <Helmet>
         <title>{pageTitle} — Trade — Maison Affluency</title>
       </Helmet>
@@ -2334,6 +2359,14 @@ const TradeProductPage: React.FC = () => {
               firstImageBadge={null}
               overlay={
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label="Open full-screen gallery"
+                    onClick={(e) => { e.stopPropagation(); setFsStart((resolve3d() ? 1 : 0) + (visibleActiveIndex ?? 0)); }}
+                    className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                  >
+                    <FsIcon size={16} strokeWidth={1.5} />
+                  </button>
                   {/* Description now reads as Curator Notes below the gallery,
                       matching the public product page. */}
                   <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
