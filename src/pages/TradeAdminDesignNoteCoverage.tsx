@@ -69,7 +69,7 @@ export default function TradeAdminDesignNoteCoverage() {
   const { user, isAdmin, rolesLoaded } = useAuth();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home">("all");
+  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home" | `missing-${(typeof FIELDS)[number]}`>("all");
   const enabled = !!user && isAdmin;
 
   const { data, isLoading } = useQuery({
