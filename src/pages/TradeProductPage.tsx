@@ -705,7 +705,9 @@ const TradeProductPage: React.FC = () => {
       const el = masterRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      setMasterHeight(Math.max(480, window.innerHeight - top - 56));
+      // Workspace pins at top-4 while the page scrolls, so size it to the viewport.
+      void top;
+      setMasterHeight(Math.max(480, Math.min(window.innerHeight - 32, 1000)));
     };
     measure();
     window.addEventListener("resize", measure);
@@ -2313,8 +2315,12 @@ const TradeProductPage: React.FC = () => {
           className="mb-6"
         />
 
-        <div ref={masterRef} style={masterHeight ? { height: masterHeight } : undefined} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:overflow-hidden gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
-          {isLg ? renderDesktopWorkspace() : (
+        <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
+          {isLg ? (
+            <div className="sticky top-4 min-w-0" style={masterHeight ? { height: masterHeight } : undefined}>
+              {renderDesktopWorkspace()}
+            </div>
+          ) : (
           <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
               images={visibleImages}
@@ -2446,7 +2452,7 @@ const TradeProductPage: React.FC = () => {
           </div>
           )}
 
-          <div className="relative flex flex-col gap-4 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-3 [scrollbar-width:thin]">
+          <div className="relative flex flex-col gap-4 lg:min-w-0">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
                 <Link
@@ -3364,7 +3370,7 @@ const TradeProductPage: React.FC = () => {
             </div>
 
           {isLg && (
-            <details className="group border-t border-border/60">
+            <details open className="group border-t border-border/60">
               <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-display text-lg italic text-foreground select-none">
                 Curator Notes &amp; Logistics
                 <span className="font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">Open ▾</span>
@@ -3377,7 +3383,7 @@ const TradeProductPage: React.FC = () => {
         </div>
         {!isLg && renderLowerDetails()}
         {/* From the Same Maker — related picks */}
-        {!isLg && showTradePrice && relatedPicks.length > 0 && (() => {
+        {showTradePrice && relatedPicks.length > 0 && (() => {
           const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
             ? "From the Same Maker"
             : "From the Same Designer";
