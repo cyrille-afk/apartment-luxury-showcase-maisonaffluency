@@ -36,11 +36,18 @@ Deno.serve(async (req) => {
     if (error || !account) return response({ error: 'Application not found' }, 404)
     if (account.status !== status) return response({ error: 'Save the application decision before notifying' }, 409)
     const templateName = status === 'approved' ? 'trade-approval' : 'trade-rejection'
+    const templateData = { name: account.contact_name ?? undefined, companyName: account.studio_name ?? undefined, country: account.country ?? undefined }
     const { data, error: mailError } = await client.functions.invoke('send-transactional-email', {
-      body: { templateName, recipientEmail: account.email, idempotencyKey: `${templateName}-${account.id}`,
-        templateData: { name: account.contact_name ?? undefined, companyName: account.studio_name ?? undefined, country: account.country ?? undefined } },
+      body: { templateName, recipientEmail: account.email, idempotencyKey: `${templateName}-${account.id}`, templateData },
     })
-    if (mailError) return response({ error: 'Notification could not be queued' }, 502)
+    if (mailError || data?.success !== true) return response({ error: 'Notification could not be queued' }, 502)
+    // Staff copies (same idempotency keys as the in-app review flow, so never duplicated).
+    await Promise.all(['concierge', 'cyrille', 'gregoire'].map((who) => {
+      const copy = `${templateName}-copy-${who}`
+      return client.functions.invoke('send-transactional-email', {
+        body: { templateName: copy, idempotencyKey: `${copy}-${account.id}`, templateData },
+      }).catch(() => null)
+    }))
     return response(data)
   } catch {
     return response({ error: 'An unexpected error occurred' }, 500)
