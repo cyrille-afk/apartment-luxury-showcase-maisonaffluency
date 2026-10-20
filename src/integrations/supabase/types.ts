@@ -9581,6 +9581,8 @@ export type Database = {
           email: string
           id: string
           instagram_handle: string | null
+          instagram_retry_after: string | null
+          instagram_retry_claimed_at: string | null
           intent: string | null
           job_title: string | null
           legacy_application_id: string | null
@@ -9612,6 +9614,8 @@ export type Database = {
           email: string
           id?: string
           instagram_handle?: string | null
+          instagram_retry_after?: string | null
+          instagram_retry_claimed_at?: string | null
           intent?: string | null
           job_title?: string | null
           legacy_application_id?: string | null
@@ -9643,6 +9647,8 @@ export type Database = {
           email?: string
           id?: string
           instagram_handle?: string | null
+          instagram_retry_after?: string | null
+          instagram_retry_claimed_at?: string | null
           intent?: string | null
           job_title?: string | null
           legacy_application_id?: string | null
@@ -12509,6 +12515,12 @@ export type Database = {
         Returns: boolean
       }
       claim_board_invite: { Args: { _token: string }; Returns: Json }
+      claim_instagram_verification_retries: {
+        Args: never
+        Returns: {
+          id: string
+        }[]
+      }
       claim_prospect_enrichment: {
         Args: { batch_size?: number }
         Returns: {
@@ -12914,6 +12926,7 @@ export type Database = {
         Args: { file_name?: string; updates: Json }
         Returns: Json
       }
+      instagram_retry_dispatch: { Args: never; Returns: undefined }
       invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
       is_approved_trade_user: { Args: { _user_id?: string }; Returns: boolean }
       is_client_trade_approved: {
