@@ -98,12 +98,14 @@ export default function TradeAdminDesignNoteCoverage() {
 
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
+    const missingField = filter.startsWith("missing-") ? (filter.slice(8) as (typeof FIELDS)[number]) : null;
     return (data ?? []).filter((r) => {
       const c = FIELDS.filter((f) => r.fields[f]).length;
       if (filter === "complete" && c !== 4) return false;
       if (filter === "partial" && (c === 0 || c === 4)) return false;
       if (filter === "none" && c !== 0) return false;
       if (filter === "home" && !r.sources.some((x) => isHomePageUrl(x.url))) return false;
+      if (missingField && r.fields[missingField]) return false;
       return !term || `${r.title} ${r.designer}`.toLowerCase().includes(term);
     }).sort((a, b) => FIELDS.filter((f) => b.fields[f]).length - FIELDS.filter((f) => a.fields[f]).length || a.title.localeCompare(b.title));
   }, [data, q, filter]);
