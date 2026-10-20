@@ -2156,24 +2156,25 @@ const TradeProductPage: React.FC = () => {
               if (!resolvedGlbUrl) return null;
               const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
-                <details className="mt-6 group border border-border rounded-md bg-muted/20">
-                  <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-border">
+                <details className="mt-6 group border border-trade-stage/25 border-l-2 border-l-accent rounded-[2px] bg-trade-stage text-trade-stage-foreground">
+                  <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-trade-stage-foreground/15">
                     <div className="flex items-center gap-2">
-                      <Box size={14} className="text-foreground" />
-                      <span className="font-display text-base leading-none">Configure in 3D</span>
-                      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground ml-2">
+                      <Box size={14} className="text-accent" />
+                      <span className="font-display text-base leading-none text-trade-stage-foreground">Configure in 3D</span>
+                      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 ml-2">
                         Live preview · rotate · AR
                       </span>
                     </div>
-                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 group-open:hidden">
                       Open ▾
                     </span>
-                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline">
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 hidden group-open:inline">
                       Close ▴
                     </span>
                   </summary>
                   <div className="p-3">
                     <Product3DViewer
+                      tone="dark"
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
@@ -2182,7 +2183,7 @@ const TradeProductPage: React.FC = () => {
                       topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
                       materialRoles={resolvedRoles || undefined}
                     />
-                    <p className="mt-2 font-body text-[10px] leading-snug text-muted-foreground">
+                    <p className="mt-2 font-body text-[10px] leading-snug text-trade-stage-foreground/80">
                       Pick a fabric or wood finish on the right — the 3D preview updates live.
                     </p>
                   </div>

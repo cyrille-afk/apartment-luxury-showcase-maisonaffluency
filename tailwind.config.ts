@@ -76,6 +76,10 @@ export default {
           ink: "hsl(var(--moodboard-ink))",
         },
         "visualiser-canvas": "hsl(var(--visualiser-canvas))",
+        "trade-stage": {
+          DEFAULT: "hsl(var(--trade-stage))",
+          foreground: "hsl(var(--trade-stage-foreground))",
+        },
         "visual-evidence": "hsl(var(--visual-evidence))",
         "chip-affinity": "hsl(var(--chip-affinity))",
         "chip-affinity-foreground": "hsl(var(--chip-affinity-foreground))",
