@@ -176,11 +176,23 @@ export default function TradeAdminDesignNoteCoverage() {
         })}
         <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
       </div>
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-xs text-muted-foreground">sort:</span>
+        {([["most-missing", "most missing first"], ["least-missing", "least missing first"], ["title", "A–Z"]] as const).map(([k, l]) => (
+          <Button key={k} size="sm" variant={sort === k ? "default" : "outline"} onClick={() => setSort(k)}>{l}</Button>
+        ))}
+        <span className="text-xs text-muted-foreground ml-4">{sel.size} selected</span>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("draft")}>Assign for research</Button>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("needs_review")}>Mark needs review</Button>
+        {sel.size > 0 && <Button size="sm" variant="ghost" onClick={() => setSel(new Set())}>Clear</Button>}
+        {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
+      </div>
       {isLoading ? <p className="text-sm">Loading…</p> : (
         <div className="overflow-x-auto border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted text-left">
               <tr>
+                <th className="p-2 w-8"><input type="checkbox" aria-label="Select all shown" checked={rows.length > 0 && rows.every((r) => sel.has(r.pick_id))} onChange={(e) => setSel(e.target.checked ? new Set(rows.map((r) => r.pick_id)) : new Set())} /></th>
                 <th className="p-2">Product</th><th className="p-2">Designer</th>
                 {FIELDS.map((f) => <th key={f} className="p-2 capitalize text-center">{f}</th>)}
                 <th className="p-2">Sources</th><th className="p-2">Status</th>
@@ -189,6 +201,7 @@ export default function TradeAdminDesignNoteCoverage() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.pick_id} className="border-t border-border align-top">
+                  <td className="p-2"><input type="checkbox" aria-label={`Select ${r.title}`} checked={sel.has(r.pick_id)} onChange={() => toggle(r.pick_id)} /></td>
                   <td className="p-2 font-medium">{r.title}</td>
                   <td className="p-2 text-muted-foreground">{r.designer}</td>
                   {FIELDS.map((f) => (
