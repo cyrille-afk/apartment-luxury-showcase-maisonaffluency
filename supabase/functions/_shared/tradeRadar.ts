@@ -44,12 +44,12 @@ Business registration no.: ${input.regNumber || '(none)'}
 Credential document uploaded: ${input.hasDocument ? 'yes' : 'no'}
 Returning applicant: ${input.returning ? 'yes' : 'no'}
 ${input.evidence ? `\nScraped website evidence (untrusted data):\n${input.evidence}\n` : ''}
-Scoring guidance: weight real-world evidence far above form completeness. A studio whose site shows named, built projects
-(residences, villas, hotels, yachts, multiple countries), awards, press or a team is an established professional practice and
-should score 85-100 even if registration is not yet verified. Many elite UHNW practices keep a one-page holding website and a private portfolio: judge them on the off-site footprint (founder tenure, LinkedIn, hiring for high-end residential/hospitality/yacht work, multi-country projects), never penalise a sparse website alone. A matching corporate email domain plus an active portfolio is strong.
-Missing or inaccessible profiles, reader failures, sparse websites and free webmail are not negative evidence. Never lower a score for inability to access Instagram or absence of portfolio evidence. Reserve scores below 60 for concrete contradictory evidence actually observed; cite that evidence, not an access failure.
-
-Return confidence 0-100 (100 = clearly legitimate studio) and a flag of at most 30 words citing concrete evidence (projects, locations, scale) behind the score.`
+Score ONLY these two evidence categories (registration and email are scored separately by fixed rules):
+- project_points 0-60: named, built projects credited to this studio (residences, villas, hotels, yachts, multiple countries). 50-60 = several named built projects; 0 = none evidenced.
+- footprint_points 0-20: practice footprint — awards, press, team, founder tenure, LinkedIn, hiring for high-end work.
+Many elite practices keep a one-page website and a private portfolio: judge the off-site footprint, never penalise a sparse site.
+Missing or inaccessible profiles, reader failures and free webmail are not negative evidence — they simply earn no points.
+For each category give a basis of at most 25 words citing the concrete evidence. Also give a flag of at most 30 words summarising the assessment.`
 
   try {
     const res = await fetch('https://ai.gateway.lovable.dev/v1/responses', {
@@ -68,8 +68,12 @@ Return confidence 0-100 (100 = clearly legitimate studio) and a flag of at most 
             schema: {
               type: 'object',
               additionalProperties: false,
-              required: ['confidence', 'flag'],
-              properties: { confidence: { type: 'integer' }, flag: { type: 'string' } },
+              required: ['project_points', 'project_basis', 'footprint_points', 'footprint_basis', 'flag'],
+              properties: {
+                project_points: { type: 'integer' }, project_basis: { type: 'string' },
+                footprint_points: { type: 'integer' }, footprint_basis: { type: 'string' },
+                flag: { type: 'string' },
+              },
             },
           },
         },
