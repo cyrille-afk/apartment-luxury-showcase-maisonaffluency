@@ -659,10 +659,10 @@ const StudioGallery = () => {
       <DuplicateProductsBanner groups={duplicateGroups} />
 
         <div className="flex items-center justify-between gap-3 mt-2 mb-3">
-          <div className="flex min-w-0 items-center gap-3 w-full sm:w-[21rem]" data-testid="gallery-search-currency">
+          <div className="flex min-w-0 items-center gap-3 w-full sm:w-[26rem]" data-testid="gallery-search-currency">
             <div className="relative min-w-0 flex-1">
               <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" aria-label="Search pieces" placeholder="Search, e.g. 260 cm table under €20,000" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
+              <Input type="search" aria-label="Search pieces" placeholder="e.g. 260 cm table under €20,000" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
             </div>
             <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
           </div>
