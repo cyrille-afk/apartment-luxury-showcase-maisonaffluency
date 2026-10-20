@@ -872,32 +872,29 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] p-4 text-[#F9F9F7] md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] px-4 pb-4 pt-0 text-[#F9F9F7] md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
-                            <div className="flex items-start justify-between gap-3 border-b border-[#343438] pb-3">
-                              <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-[#F9F9F7]">Curated alternatives: {selectedHotspot.product_name}</div>
-                              <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); setDockClosedViaX(true); }} className="size-7 shrink-0 p-0 text-[#F9F9F7] hover:bg-white/10 hover:text-[#F9F9F7]"><X className="size-4" /></Button>
+                            <div className="-mx-4 flex w-auto shrink-0 items-center justify-between gap-3 rounded-t-sm border-b border-[#EBEAE4] bg-[#F9F9F7] p-4">
+                              <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-[#1E1E1F]">Curated alternatives: {selectedHotspot.product_name}</div>
+                              <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); setDockClosedViaX(true); }} className="size-7 shrink-0 p-0 text-[#1E1E1F] hover:bg-black/5 hover:text-[#1E1E1F]"><X className="size-4" /></Button>
                             </div>
                             <div key={`${selectedHotspot.id}-${dockRotation}`} className="flex min-h-0 flex-1 flex-col gap-4 animate-fade-in">
-                              {dockAlternatives.map((pick, idx) => {
-                                const isLead = idx === 0;
-                                return (
-                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className={`flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm p-3 text-left ${isLead ? "border border-[#EBEAE4] bg-[#F9F9F7] shadow-md hover:bg-[#F9F9F7] hover:brightness-[1.02]" : "border border-[#343438] bg-[#262629] hover:bg-[#262629] hover:brightness-[1.12]"}`}>
+                              {dockAlternatives.map((pick) => (
+                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm border border-[#343438] bg-[#262629] p-3 text-left hover:bg-[#262629] hover:brightness-[1.12]">
                                   <span className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
                                     <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
                                   </span>
                                   <span className="mt-2 flex shrink-0 items-start justify-between gap-2 px-0.5">
                                     <span className="min-w-0">
-                                      <span className={`block truncate font-body text-[9px] font-semibold uppercase tracking-wider ${isLead ? "text-[#1E1E1F]" : "text-[#EBEAE4]"}`}>{pick.brand_name}</span>
-                                      <span className={`mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug ${isLead ? "text-[#4A4A4A]" : "text-[#A1A1AA]"}`}>{pick.title}</span>
+                                      <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-[#EBEAE4]">{pick.brand_name}</span>
+                                      <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-[#A1A1AA]">{pick.title}</span>
                                     </span>
-                                    <span className={`shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight ${isLead ? "text-[#1E1E1F]" : "text-[#EBEAE4]"}`}>
+                                    <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-[#EBEAE4]">
                                       {formatPublicRrpForDestination(dockRrpMap[pick.id], dockDestination.currency) || "Price upon Request"}
                                     </span>
                                   </span>
                                 </Button>
-                                );
-                              })}
+                              ))}
 
                             </div>
                           </motion.aside>
