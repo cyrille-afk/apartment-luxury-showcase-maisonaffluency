@@ -197,7 +197,7 @@ const DimensionsButtonGrid = ({
       <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
         {parsed.length > 1 ? "Dimensions available" : "Dimensions"}
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {parsed.map((d, i) => {
           const selected = selectedIndex === i;
           return (

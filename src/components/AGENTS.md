@@ -24,3 +24,4 @@
 - Shared all-photo slides still pre-select a dropdown header when exactly one finish is mapped within that dropdown (Yoma: one wood, one stone, one metal); ambiguous groups stay unselected. Regression test: src/components/FinishSelector.shared-slide.test.tsx.
 - Curator Notes: product page full-width; lightbox 3 cols.
 - DesignersHoverHero groups live only in src/data/featuredDesignerGroups.json, also read by the publish-time seed script — a second copy dropped designers on publish.
+- Product spec rows and lightbox dimension cards use DimensionText for metric/imperial stacking and auxiliary-height grouping; paired unit rows remain a single size option — prevents unit conversions becoming selectable sizes.
