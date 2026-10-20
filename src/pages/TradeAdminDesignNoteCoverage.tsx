@@ -112,7 +112,7 @@ export default function TradeAdminDesignNoteCoverage() {
                   <td className="p-2">
                     {r.sources.filter((s) => s.url).map((s, i) => (
                       <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" title={s.evidence}
-                        className="block underline truncate max-w-[260px]">{new URL(s.url!, "https://x").hostname}</a>
+                        className="block underline truncate max-w-[260px]">{s.url!.replace(/^https?:\/\//, "").split("/")[0]}</a>
                     ))}
                   </td>
                   <td className="p-2 text-xs">{r.status}</td>
