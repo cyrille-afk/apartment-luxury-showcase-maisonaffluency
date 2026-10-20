@@ -2161,14 +2161,14 @@ const TradeProductPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Box size={14} className="text-accent" />
                       <span className="font-display text-base leading-none text-trade-stage-foreground">Configure in 3D</span>
-                      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/60 ml-2">
+                      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 ml-2">
                         Live preview · rotate · AR
                       </span>
                     </div>
-                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/60 group-open:hidden">
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 group-open:hidden">
                       Open ▾
                     </span>
-                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/60 hidden group-open:inline">
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-trade-stage-foreground/80 hidden group-open:inline">
                       Close ▴
                     </span>
                   </summary>
@@ -2183,7 +2183,7 @@ const TradeProductPage: React.FC = () => {
                       topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
                       materialRoles={resolvedRoles || undefined}
                     />
-                    <p className="mt-2 font-body text-[10px] leading-snug text-trade-stage-foreground/60">
+                    <p className="mt-2 font-body text-[10px] leading-snug text-trade-stage-foreground/80">
                       Pick a fabric or wood finish on the right — the 3D preview updates live.
                     </p>
                   </div>
