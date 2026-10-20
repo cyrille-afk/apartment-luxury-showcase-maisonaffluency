@@ -810,6 +810,8 @@ const StudioGallery = () => {
                   setSelectedCategory("all");
                   setSelectedSubcategory("all");
                   setSelectedEdition("all");
+                  setBudgetMin("");
+                  setBudgetMax("");
                   if (routeBrandName || selectedBrand !== "all") handleBrandChange("all");
                 }}
                 className="ml-1 font-body text-[11px] uppercase tracking-[0.1em] text-muted-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
