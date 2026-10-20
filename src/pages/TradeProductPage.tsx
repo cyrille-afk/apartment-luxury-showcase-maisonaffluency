@@ -3370,7 +3370,7 @@ const TradeProductPage: React.FC = () => {
             </div>
 
           {isLg && (
-            <details className="group border-t border-border/60">
+            <details open className="group border-t border-border/60">
               <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-display text-lg italic text-foreground select-none">
                 Curator Notes &amp; Logistics
                 <span className="font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">Open ▾</span>
