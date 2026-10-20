@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ const FIELDS = ["form", "function", "texture", "colour"] as const;
 type Src = { url?: string; evidence?: string };
 const normSources = (v: any): Src[] => {
   const toUrl = (u: string) => (/^https?:\/\//.test(u) ? u : `https://${u.replace(/^\/+/, "")}`);
+  if (typeof v === "string" && v.trim().startsWith("[")) { try { return normSources(JSON.parse(v)); } catch { /* fall through */ } }
   if (typeof v === "string") return v.split(/[;,\s]+/).filter((x) => x.includes(".")).map((u) => ({ url: toUrl(u) }));
   if (Array.isArray(v)) return v.flatMap((x) => typeof x === "string" ? normSources(x) : x?.url ? [{ url: toUrl(x.url), evidence: x.evidence ?? x.title }] : []);
   return [];
@@ -20,10 +21,55 @@ type Row = {
   sources: Src[]; status: string;
 };
 
+export const isHomePageUrl = (u?: string) => {
+  if (!u) return false;
+  try { const x = new URL(u); return (x.pathname === "/" || x.pathname === "") && !x.search; } catch { return true; }
+};
+
+function SourceCell({ row, onSaved }: { row: Row; onSaved: () => void }) {
+  const [editing, setEditing] = useState<number | null>(null);
+  const [val, setVal] = useState("");
+  const [err, setErr] = useState("");
+  const save = async (i: number) => {
+    const url = val.trim();
+    if (!/^https?:\/\//.test(url) || isHomePageUrl(url)) { setErr("Enter an exact product page URL"); return; }
+    const next = row.sources.map((s, j) => (j === i ? { ...s, url } : s));
+    const table = row.status === "published" ? "product_design_notes" : "design_note_research_drafts";
+    const { error } = await db.from(table).update({ sources: table === "product_design_notes" ? JSON.stringify(next) : next }).eq("pick_id", row.pick_id);
+    if (error) { setErr(error.message); return; }
+    setEditing(null); setErr(""); onSaved();
+  };
+  return (
+    <div className="space-y-1">
+      {row.sources.filter((s) => s.url).map((s, i) => editing === i ? (
+        <div key={i} className="flex gap-1">
+          <Input autoFocus className="h-7 text-xs min-w-[260px]" value={val} onChange={(e) => setVal(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && save(i)} placeholder="https://maker.com/product/…" />
+          <Button size="sm" className="h-7" onClick={() => save(i)}>Save</Button>
+          <Button size="sm" variant="ghost" className="h-7" onClick={() => { setEditing(null); setErr(""); }}>✕</Button>
+        </div>
+      ) : (
+        <div key={i} className="flex items-center gap-2">
+          <a href={s.url} target="_blank" rel="noopener noreferrer" title={s.evidence}
+            className="underline truncate max-w-[220px]">{s.url!.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a>
+          {isHomePageUrl(s.url) && (
+            <>
+              <span className="text-[10px] uppercase tracking-wide border border-destructive text-destructive px-1">Home page</span>
+              <button className="text-xs underline text-muted-foreground" onClick={() => { setEditing(i); setVal(s.url!); }}>Replace</button>
+            </>
+          )}
+        </div>
+      ))}
+      {err && <p className="text-xs text-destructive">{err}</p>}
+    </div>
+  );
+}
+
 export default function TradeAdminDesignNoteCoverage() {
   const { user, isAdmin, rolesLoaded } = useAuth();
+  const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none">("all");
+  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home">("all");
   const enabled = !!user && isAdmin;
 
   const { data, isLoading } = useQuery({
@@ -57,6 +103,7 @@ export default function TradeAdminDesignNoteCoverage() {
       if (filter === "complete" && c !== 4) return false;
       if (filter === "partial" && (c === 0 || c === 4)) return false;
       if (filter === "none" && c !== 0) return false;
+      if (filter === "home" && !r.sources.some((x) => isHomePageUrl(x.url))) return false;
       return !term || `${r.title} ${r.designer}`.toLowerCase().includes(term);
     }).sort((a, b) => FIELDS.filter((f) => b.fields[f]).length - FIELDS.filter((f) => a.fields[f]).length || a.title.localeCompare(b.title));
   }, [data, q, filter]);
@@ -86,8 +133,10 @@ export default function TradeAdminDesignNoteCoverage() {
       </div>
       <div className="flex flex-wrap gap-2 items-center">
         <Input className="max-w-xs" placeholder="Search product or designer" value={q} onChange={(e) => setQ(e.target.value)} />
-        {(["all", "complete", "partial", "none"] as const).map((f) => (
-          <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>{f}</Button>
+        {(["all", "complete", "partial", "none", "home"] as const).map((f) => (
+          <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>
+            {f === "home" ? `home-page citations (${all.filter((r) => r.sources.some((x) => isHomePageUrl(x.url))).length})` : f}
+          </Button>
         ))}
         <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
       </div>
@@ -109,12 +158,7 @@ export default function TradeAdminDesignNoteCoverage() {
                   {FIELDS.map((f) => (
                     <td key={f} className="p-2 text-center">{r.fields[f] ? <span className="text-primary">✓</span> : <span className="text-muted-foreground">—</span>}</td>
                   ))}
-                  <td className="p-2">
-                    {r.sources.filter((s) => s.url).map((s, i) => (
-                      <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" title={s.evidence}
-                        className="block underline truncate max-w-[260px]">{s.url!.replace(/^https?:\/\//, "").split("/")[0]}</a>
-                    ))}
-                  </td>
+                  <td className="p-2"><SourceCell row={r} onSaved={() => qc.invalidateQueries({ queryKey: ["design-note-coverage"] })} /></td>
                   <td className="p-2 text-xs">{r.status}</td>
                 </tr>
               ))}
