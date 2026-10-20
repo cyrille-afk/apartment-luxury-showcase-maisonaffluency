@@ -22,3 +22,5 @@
 - Reveal gallery photo with pins/catalog only when ready. Board guests use hashed-token RPCs; invites rebuild URLs server-side.
 - Room menu previews use room-specific percent pins and alternatives.
 - Shared all-photo slides still pre-select a dropdown header when exactly one finish is mapped within that dropdown (Yoma: one wood, one stone, one metal); ambiguous groups stay unselected. Regression test: src/components/FinishSelector.shared-slide.test.tsx.
+- Curator Notes: product page full-width; lightbox 3 cols.
+- DesignersHoverHero groups live only in src/data/featuredDesignerGroups.json, also read by the publish-time seed script — a second copy dropped designers on publish.
