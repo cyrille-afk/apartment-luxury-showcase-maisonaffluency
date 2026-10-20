@@ -50,6 +50,7 @@
 - Base-only product finish dropdowns remain selectable unless linked swatches cover every recorded base option; partial sample libraries must not hide unpictured priced finishes — preserves catalogue choices without inventing samples.
 - Finish coverage and Base swatch selection share finishNormalization, including reordered material words and bounded spelling correction — prevents duplicate menus and keeps sample selections attached to recorded variant prices.
 - Product configuration sheets match active linked samples through the product-page finish normalizer with ambiguity rejection, retaining original variant values for selection/pricing — prevents initials replacing existing sample photos.
+- Application evidence uses the shared studio-source resolver for bare handles, @handles and Instagram URLs; reader errors report provider failures rather than inferred origin blocking — prevents invalid-host requests.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
