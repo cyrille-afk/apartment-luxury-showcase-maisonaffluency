@@ -2033,7 +2033,7 @@ const TradeProductPage: React.FC = () => {
         <title>{pageTitle} — Trade — Maison Affluency</title>
       </Helmet>
 
-      <div className="max-w-7xl pb-12">
+      <div className="w-full max-w-[1760px] pb-12">
         <button
           type="button"
           onClick={() => navigate(fromPath || fallbackPath)}
@@ -2061,7 +2061,7 @@ const TradeProductPage: React.FC = () => {
           className="mb-6"
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(440px,1fr)] gap-8 lg:gap-12 xl:gap-20">
           <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
               images={visibleImages}
