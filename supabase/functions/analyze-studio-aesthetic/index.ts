@@ -10,6 +10,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
 import { scoreTradeApplication } from "../_shared/tradeRadar.ts";
+import { resolveStudioSource } from "../_shared/studioSource.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,10 +62,7 @@ async function fetchWithRetry(input: string, init: RequestInit, attempts = 2): P
 }
 
 function resolveSourceUrl(ref: string | null): string | null {
-  if (!ref) return null;
-  const v = ref.trim();
-  if (v.startsWith("@")) return `https://www.instagram.com/${v.slice(1)}/`;
-  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  return resolveStudioSource(ref).url;
 }
 
 function isCachedEvidenceUrl(url: string): boolean {
@@ -166,7 +164,7 @@ async function scrape(url: string): Promise<ScrapeResult> {
     } else {
       const t = (await res.text()).slice(0, 200);
       console.error("firecrawl failed", res.status, t);
-      notes.push(`${new URL(url).hostname} blocked the reader (${res.status})`);
+      notes.push(`Web reader could not retrieve ${new URL(url).hostname} (HTTP ${res.status}): ${t}`);
     }
   } catch (e) {
     console.error("firecrawl error", e);
@@ -206,9 +204,7 @@ const PERSONAL = /^(gmail|googlemail|yahoo|hotmail|outlook|live|icloud|me|aol|pr
 
 async function gather(ref: string | null, email: string | null): Promise<ScrapeResult & { source: string | null }> {
   const notes: string[] = [];
-  const v = (ref ?? "").trim();
-  const handle = v.startsWith("@") ? v.slice(1)
-    : (v.match(/instagram\.com\/([A-Za-z0-9._]+)/i)?.[1] ?? null);
+  const handle = resolveStudioSource(ref).instagramHandle;
   const links: string[] = [];
   let text = "", images: string[] = [], screenshots: string[] = [], source: string | null = resolveSourceUrl(ref);
   const merge = (r: ScrapeResult) => {
@@ -231,7 +227,8 @@ async function gather(ref: string | null, email: string | null): Promise<ScrapeR
       notes.push(...managed.notes);
     }
   }
-  if (website && images.length < MAX_IMAGES) { const r = await scrape(resolveSourceUrl(website)!); merge(r); notes.push(...r.notes); source ??= website; }
+  const websiteUrl = resolveSourceUrl(website);
+  if (websiteUrl && images.length < MAX_IMAGES) { const r = await scrape(websiteUrl); merge(r); notes.push(...r.notes); source ??= websiteUrl; }
   // Last resort: the studio's own domain from a business email.
   const domain = email?.split("@")[1]?.toLowerCase();
   if (!text && images.length === 0 && domain && !PERSONAL.test(domain)) {
@@ -321,7 +318,7 @@ serve(async (req) => {
   const { text, images, notes, source, screenshots = [] } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
   run.found = images.length;
-  run.reader = notes.filter((n) => /blocked|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
+  run.reader = notes.filter((n) => /blocked|could not retrieve|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
   run.rl += notes.filter((n) => /\(429\)/.test(n)).length;
   const priorImages = Array.isArray(dna?.image_urls)
     ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
