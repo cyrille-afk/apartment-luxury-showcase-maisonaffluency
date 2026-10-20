@@ -15,3 +15,18 @@ describe("gallery budget + size search", () => {
     expect(matchesSize("W 180 × D 90 × H 75 cm", 2600, "about")).toBe(false);
   });
 });
+
+import { priceForSize } from "../gallerySearchIntent";
+describe("budget uses the matching size's price", () => {
+  const v = [
+    { label: "W 200 × D 95 cm", price_cents: 715000 },
+    { label: "W 260 × D 95 cm", price_cents: 918000 },
+    { label: "W 260 × D 95 cm", price_cents: 834000 },
+  ];
+  it("picks the cheapest 260 cm variant, not the cheapest overall", () => {
+    expect(priceForSize(715000, null, v, 2600, "about")).toBe(834000);
+  });
+  it("returns null when the size isn't offered", () => {
+    expect(priceForSize(715000, null, v, 3500, "about")).toBeNull();
+  });
+});
