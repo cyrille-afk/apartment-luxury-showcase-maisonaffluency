@@ -2270,12 +2270,6 @@ const TradeProductPage: React.FC = () => {
             </div>
           </div>
         </div>
-        {asset === "3d" && r3d && (
-          <div className="shrink-0 space-y-0.5 pl-[76px] xl:pl-[96px] 2xl:pl-[104px] font-body text-[11px] leading-snug text-muted-foreground">
-            <p>Tap to load the interactive 3D model (downloads on demand)</p>
-            <p>Pick a fabric or wood finish on the right — the 3D preview updates live.</p>
-          </div>
-        )}
         <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
       </div>
     );
