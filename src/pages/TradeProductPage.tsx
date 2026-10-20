@@ -40,6 +40,7 @@ import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { picturedFinishesForImage } from "@/lib/picturedFinishes";
+import { parseDimensionString } from "@/lib/productDimensions";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -691,6 +692,11 @@ const TradeProductPage: React.FC = () => {
     return () => mql.removeEventListener("change", on);
   }, []);
   const [workspaceAsset, setWorkspaceAsset] = useState<"3d" | number>("3d");
+  // Once the 3D model is opened it stays the primary workspace asset:
+  // hovering a photo thumbnail previews its configuration, clicking locks it.
+  const [viewer3dOpen, setViewer3dOpen] = useState(false);
+  const [viewer3dKey, setViewer3dKey] = useState(0);
+  const [hoverPreviewIdx, setHoverPreviewIdx] = useState<number | null>(null);
   const masterRef = useRef<HTMLDivElement | null>(null);
   const [masterHeight, setMasterHeight] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -813,14 +819,13 @@ const TradeProductPage: React.FC = () => {
     };
   }, [(data as any)?.tradeProductId]);
 
-  // Resolve the finishes pictured in the active gallery photo so the 3D
-  // configurator opens with the real item's finishes applied.
+  // Resolve the finishes pictured in each gallery photo so the 3D
+  // configurator opens with the real item's finishes applied, and so hovering
+  // a thumbnail while the 3D view is live can preview that photo's finishes.
+  const [swatchRows, setSwatchRows] = useState<any[]>([]);
   useEffect(() => {
     const pickId = (data as any)?.product?.id as string | undefined;
-    if (!pickId) {
-      setPicturedFinishImgs({ base: null, top: null });
-      return;
-    }
+    if (!pickId) { setSwatchRows([]); return; }
     let cancelled = false;
     (async () => {
       const { data: rows } = await (supabase as any)
@@ -828,22 +833,25 @@ const TradeProductPage: React.FC = () => {
         .select("fabric_id, name, image_url, image_indices, category, is_active")
         .eq("pick_id", pickId);
       if (cancelled) return;
-      const active = (rows || []).filter(
+      setSwatchRows((rows || []).filter(
         (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
-      );
-      const shown: any[] = picturedFinishesForImage(active, galleryActiveIndex ?? 0);
-      const FRAME_RE = /^(cement stuc|glossy lacquer)\b/i;
-      const base = shown.filter((s: any) => FRAME_RE.test(s.name) || (s.category || "").toLowerCase() === "wood");
-      const top = shown.filter((s: any) => !base.includes(s));
-      setPicturedFinishImgs({
-        base: base.find((s: any) => s.image_url)?.image_url ?? null,
-        top: top.find((s: any) => s.image_url)?.image_url ?? null,
-      });
+      ));
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [(data as any)?.product?.id, galleryActiveIndex]);
+    return () => { cancelled = true; };
+  }, [(data as any)?.product?.id]);
+  const finishesForImage = useCallback((idx: number) => {
+    const shown: any[] = picturedFinishesForImage(swatchRows, idx);
+    const FRAME_RE = /^(cement stuc|glossy lacquer)\b/i;
+    const base = shown.filter((s: any) => FRAME_RE.test(s.name) || (s.category || "").toLowerCase() === "wood");
+    const top = shown.filter((s: any) => !base.includes(s));
+    const b = base.find((s: any) => s.image_url) || base[0];
+    const t = top.find((s: any) => s.image_url) || top[0];
+    return { base: b?.image_url ?? null, top: t?.image_url ?? null, baseName: (b?.name as string) ?? null, topName: (t?.name as string) ?? null };
+  }, [swatchRows]);
+  useEffect(() => {
+    const f = finishesForImage(galleryActiveIndex ?? 0);
+    setPicturedFinishImgs({ base: f.base, top: f.top });
+  }, [finishesForImage, galleryActiveIndex]);
 
 
 
@@ -2149,6 +2157,36 @@ const TradeProductPage: React.FC = () => {
     const asset: "3d" | number = workspaceAsset === "3d" && !r3d ? 0 : workspaceAsset;
     const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
     const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
+    const live3d = asset === "3d" && !!r3d && viewer3dOpen;
+    // Configuration carried by a photo: pictured finishes + the mapped variant (size).
+    const configForPhoto = (i: number) => {
+      const ri = realIdx(i);
+      const fin = finishesForImage(ri);
+      const variants = ((data?.pricing?.size_variants || (product as any)?.size_variants || []) as any[]);
+      const v = findVariantForImageIndex(buildProductFinishMap((product as any)?.variant_image_map), variants, ri);
+      const cur = parseDimensionString((activeVariant as any)?.label || selectedDualSize || selectedSingleSize || product.dimensions);
+      const nxt = parseDimensionString(v?.label);
+      let scale: string | null = null;
+      let dimLabel: string | null = null;
+      if (cur && nxt && cur.w && cur.d && cur.h) {
+        const r = [nxt.w / cur.w, nxt.h / cur.h, nxt.d / cur.d];
+        if (r.every((x) => x > 0.25 && x < 4) && r.some((x) => Math.abs(x - 1) > 0.01)) {
+          scale = r.map((x) => x.toFixed(3)).join(" ");
+        }
+        dimLabel = `W ${Math.round(nxt.w / 10)} × D ${Math.round(nxt.d / 10)} cm`;
+      }
+      const baseName = fin.baseName || v?.base || null;
+      const topName = fin.topName || v?.top || null;
+      const parts = [dimLabel, baseName, topName].filter(Boolean) as string[];
+      return { ri, fin, scale, label: parts.length ? parts.join(" · ") : `photo ${i + 1}` };
+    };
+    const hoverCfg = live3d && hoverPreviewIdx !== null ? configForPhoto(hoverPreviewIdx) : null;
+    const lockPhoto = (i: number) => {
+      // Locks the photo's configuration: the existing reverse sync snaps the
+      // Base/Top/size dropdowns to the variant mapped to this photo.
+      setGalleryActiveIndex(realIdx(i));
+      setHoverPreviewIdx(null);
+    };
     const thumbCls = (on: boolean) => cn(
       "relative shrink-0 h-16 w-16 xl:h-[80px] xl:w-[80px] 2xl:h-[88px] 2xl:w-[88px] overflow-hidden border bg-muted/40 transition-colors",
       on ? "border-foreground" : "border-border/60 hover:border-foreground/50",
@@ -2158,7 +2196,7 @@ const TradeProductPage: React.FC = () => {
         <div className="flex min-h-0 min-w-0 flex-1 gap-3 xl:gap-4">
           <div className="flex h-full w-16 xl:w-[80px] 2xl:w-[88px] shrink-0 flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
             {r3d && (
-              <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => setWorkspaceAsset("3d")} className={thumbCls(asset === "3d")}>
+              <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => { setWorkspaceAsset("3d"); setHoverPreviewIdx(null); }} className={thumbCls(asset === "3d")}>
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-muted font-body text-[9px] uppercase tracking-[0.14em] text-foreground">
                   <Box size={16} className="text-accent" />3D
                 </span>
@@ -2169,9 +2207,14 @@ const TradeProductPage: React.FC = () => {
                 key={src + i}
                 type="button"
                 aria-label={`Show photo ${i + 1}`}
-                aria-pressed={photoIdx === i}
-                onClick={() => { setWorkspaceAsset(i); setGalleryActiveIndex(realIdx(i)); }}
-                className={thumbCls(photoIdx === i)}
+                aria-pressed={live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i}
+                title={live3d ? "Hover to preview in 3D · click to apply" : undefined}
+                onMouseEnter={() => live3d && setHoverPreviewIdx(i)}
+                onMouseLeave={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
+                onFocus={() => live3d && setHoverPreviewIdx(i)}
+                onBlur={() => setHoverPreviewIdx((h) => (h === i ? null : h))}
+                onClick={() => { if (live3d) lockPhoto(i); else { setWorkspaceAsset(i); setGalleryActiveIndex(realIdx(i)); } }}
+                className={cn(thumbCls(live3d ? (galleryActiveIndex ?? 0) === realIdx(i) : photoIdx === i), live3d && hoverPreviewIdx === i && "border-accent")}
               >
                 <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
               </button>
@@ -2181,19 +2224,36 @@ const TradeProductPage: React.FC = () => {
             {asset === "3d" && r3d ? (
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
+                  key={viewer3dKey}
                   url={r3d.url}
                   alt={`${product.title} — 3D model${r3d.label ? ` (${r3d.label})` : ""}`}
                   poster={product.image_url}
                   fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
-                  baseTextureUrl={selectedWoodPrice?.image_url || picturedFinishImgs.base || previewWoodImg || null}
-                  topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
+                  baseTextureUrl={hoverCfg?.fin.base || selectedWoodPrice?.image_url || picturedFinishImgs.base || previewWoodImg || null}
+                  topTextureUrl={hoverCfg?.fin.top || selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
                   materialRoles={r3d.roles}
+                  scale={hoverCfg?.scale || null}
+                  onOpenedChange={setViewer3dOpen}
                 />
               </div>
             ) : photoIdx !== null && visibleImages[photoIdx] ? (
               <img src={visibleImages[photoIdx]} alt={`${product.title} — photo ${photoIdx + 1}`} className="h-full w-full object-contain" />
             ) : null}
-            <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+            {hoverCfg && (
+              <div role="status" aria-live="polite" className="pointer-events-none absolute bottom-12 left-1/2 z-20 max-w-[85%] -translate-x-1/2 truncate rounded-full border border-border/60 bg-background/90 px-3.5 py-1.5 font-body text-[11px] tracking-[0.04em] text-foreground shadow-sm backdrop-blur-md motion-safe:animate-fade-in">
+                Previewing {hoverCfg.label}
+              </div>
+            )}
+            {live3d && (
+              <button
+                type="button"
+                onClick={() => { setViewer3dOpen(false); setViewer3dKey((k) => k + 1); setWorkspaceAsset(visibleImageIndices ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? 0)) : (galleryActiveIndex ?? 0)); }}
+                className="absolute left-3 bottom-12 z-10 rounded-full border border-border/40 bg-background/80 px-3 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground/80 backdrop-blur-md hover:text-foreground"
+              >
+                Exit 3D
+              </button>
+            )}
+            <div className={cn("absolute right-3 z-10 flex items-center gap-2", asset === "3d" ? "top-14" : "top-3")}>
               <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
                 <AddToProjectPopover
                   productId={favoriteId}

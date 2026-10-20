@@ -20,6 +20,7 @@ declare global {
           "tone-mapping"?: string;
           loading?: "auto" | "lazy" | "eager";
           reveal?: "auto" | "manual";
+          scale?: string;
         },
         HTMLElement
       >;
@@ -123,6 +124,10 @@ interface Props {
    * matched for the current swatch. Intended for admin/debug use.
    */
   debug?: boolean;
+  /** model-viewer `scale` ("x y z"), used to morph proportions for size previews. */
+  scale?: string | null;
+  /** Reports when the user opens the interactive model. */
+  onOpenedChange?: (opened: boolean) => void;
 }
 
 
@@ -187,10 +192,13 @@ const Product3DViewer: React.FC<Props> = ({
   onMaterialsDiscovered,
   autoOpen = false,
   debug = false,
+  scale,
+  onOpenedChange,
 }) => {
   const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
   const [opened, setOpened] = useState(autoOpen);
+  useEffect(() => { onOpenedChange?.(opened); }, [opened, onOpenedChange]);
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
   );
@@ -448,7 +456,15 @@ const Product3DViewer: React.FC<Props> = ({
     };
 
     applyTextures();
-    return () => { cancelled = true; };
+    // A src swap (e.g. size variant GLB) fires "load" after this effect ran
+    // against the outgoing model — re-apply to the freshly loaded one.
+    const onModelLoad = () => {
+      if (cancelled) return;
+      originalTexturesRef.current = null;
+      applyTextures();
+    };
+    mv.addEventListener("load", onModelLoad);
+    return () => { cancelled = true; mv.removeEventListener("load", onModelLoad); };
   }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
@@ -526,6 +542,7 @@ const Product3DViewer: React.FC<Props> = ({
             poster={poster || undefined}
             {...(!locked ? { "camera-controls": true, "auto-rotate": true } : {})}
             ar
+            scale={scale || "1 1 1"}
             shadow-intensity="1"
             exposure="1"
             tone-mapping="neutral"
