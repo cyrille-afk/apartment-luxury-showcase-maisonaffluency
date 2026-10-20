@@ -11,6 +11,7 @@ const FIELDS = ["form", "function", "texture", "colour"] as const;
 type Src = { url?: string; evidence?: string };
 const normSources = (v: any): Src[] => {
   const toUrl = (u: string) => (/^https?:\/\//.test(u) ? u : `https://${u.replace(/^\/+/, "")}`);
+  if (typeof v === "string" && v.trim().startsWith("[")) { try { return normSources(JSON.parse(v)); } catch { /* fall through */ } }
   if (typeof v === "string") return v.split(/[;,\s]+/).filter((x) => x.includes(".")).map((u) => ({ url: toUrl(u) }));
   if (Array.isArray(v)) return v.flatMap((x) => typeof x === "string" ? normSources(x) : x?.url ? [{ url: toUrl(x.url), evidence: x.evidence ?? x.title }] : []);
   return [];
@@ -34,7 +35,7 @@ function SourceCell({ row, onSaved }: { row: Row; onSaved: () => void }) {
     if (!/^https?:\/\//.test(url) || isHomePageUrl(url)) { setErr("Enter an exact product page URL"); return; }
     const next = row.sources.map((s, j) => (j === i ? { ...s, url } : s));
     const table = row.status === "published" ? "product_design_notes" : "design_note_research_drafts";
-    const { error } = await db.from(table).update({ sources: next }).eq("pick_id", row.pick_id);
+    const { error } = await db.from(table).update({ sources: table === "product_design_notes" ? JSON.stringify(next) : next }).eq("pick_id", row.pick_id);
     if (error) { setErr(error.message); return; }
     setEditing(null); setErr(""); onSaved();
   };
