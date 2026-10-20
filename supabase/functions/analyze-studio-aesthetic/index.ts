@@ -258,7 +258,7 @@ serve(async (req) => {
     if (!auth.ok) return json(auth.body, auth.status);
   }
 
-  let body: { trade_account_id?: string } = {};
+  let body: { trade_account_id?: string; instagram_retry?: boolean } = {};
   try { body = await req.json(); } catch { /* */ }
   const id = String(body.trade_account_id ?? "");
   if (!UUID_RE.test(id)) return json({ error: "trade_account_id required" }, 400);
@@ -271,6 +271,8 @@ serve(async (req) => {
   const { data: account } = await supabase
     .from("trade_accounts").select("id, studio_name, website_or_ig, email, business_reg_number, radar_status").eq("id", id).maybeSingle();
   if (!account) return json({ error: "Trade account not found" }, 404);
+  const automaticInstagramRetry = isInternal && body.instagram_retry === true;
+  if (automaticInstagramRetry && (account.radar_status !== "unverified" || !resolveStudioSource(account.website_or_ig).instagramHandle)) return json({ ok: true, skipped: "not unverified Instagram" });
 
   // Admin re-run also re-scores the AI Critical Radar if it never finished.
   if (!isInternal && account.radar_status !== "scored") {
@@ -290,7 +292,7 @@ serve(async (req) => {
     .eq("trade_account_id", id)
     .maybeSingle();
   if (dna?.status === "processing") return json({ ok: true, skipped: "already processing" });
-  if (isInternal && (dna?.attempts ?? 0) >= MAX_ATTEMPTS) return json({ ok: false, skipped: "attempt cap" });
+  if (isInternal && !automaticInstagramRetry && (dna?.attempts ?? 0) >= MAX_ATTEMPTS) return json({ ok: false, skipped: "attempt cap" });
 
   const initialUrl = resolveSourceUrl(account.website_or_ig);
   await supabase.from("studio_aesthetic_dna").upsert({
