@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Box } from "lucide-react";
+import { AlertTriangle, Box, Lock, LockOpen } from "lucide-react";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -203,6 +203,30 @@ const Product3DViewer: React.FC<Props> = ({
   const [debugOpen, setDebugOpen] = useState(false);
   const [autoTagged, setAutoTagged] = useState(false);
   const [noTargets, setNoTargets] = useState(false);
+  // Camera lock — mirrors the Visualiser Sandbox position locks: when on,
+  // rotate/zoom/pan are disabled so the composition can't be nudged.
+  const [locked, setLocked] = useState(false);
+
+  // Clamp scroll-zoom to a band around the auto-framed radius so the piece
+  // can never be zoomed out of sight or into the camera. model-viewer
+  // already swallows wheel events over the canvas, so the page never scrolls.
+  useEffect(() => {
+    if (!opened || !ready) return;
+    const mv = mvRef.current as any;
+    if (!mv) return;
+    const clamp = () => {
+      try {
+        const radius = mv.getCameraOrbit?.()?.radius;
+        if (typeof radius === "number" && radius > 0) {
+          mv.setAttribute("min-camera-orbit", `auto auto ${(radius * 0.4).toFixed(3)}m`);
+          mv.setAttribute("max-camera-orbit", `auto auto ${(radius * 2.5).toFixed(3)}m`);
+        }
+      } catch { /* noop */ }
+    };
+    if (mv.model) clamp();
+    else mv.addEventListener("load", clamp, { once: true });
+    return () => mv.removeEventListener("load", clamp);
+  }, [opened, ready, url]);
 
   // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
