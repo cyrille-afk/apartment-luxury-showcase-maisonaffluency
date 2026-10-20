@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button";
 const db = supabase as any;
 const FIELDS = ["form", "function", "texture", "colour"] as const;
 type Src = { url?: string; evidence?: string };
+const normSources = (v: any): Src[] => {
+  const toUrl = (u: string) => (/^https?:\/\//.test(u) ? u : `https://${u.replace(/^\/+/, "")}`);
+  if (typeof v === "string") return v.split(/[;,\s]+/).filter((x) => x.includes(".")).map((u) => ({ url: toUrl(u) }));
+  if (Array.isArray(v)) return v.flatMap((x) => typeof x === "string" ? normSources(x) : x?.url ? [{ url: toUrl(x.url), evidence: x.evidence ?? x.title }] : []);
+  return [];
+};
 type Row = {
   pick_id: string; title: string; designer: string; fields: Record<string, boolean>;
   sources: Src[]; status: string;
@@ -37,7 +43,7 @@ export default function TradeAdminDesignNoteCoverage() {
         return {
           pick_id: p.id, title: p.title, designer: p.designers?.name ?? "",
           fields: Object.fromEntries(FIELDS.map((f) => [f, !!n?.[f]?.trim?.()])),
-          sources: Array.isArray(n?.sources) ? n.sources : Array.isArray(d?.sources) ? d.sources : [],
+          sources: normSources(n?.sources ?? d?.sources),
           status: n ? "published" : d?.review_status ?? "not started",
         };
       });
