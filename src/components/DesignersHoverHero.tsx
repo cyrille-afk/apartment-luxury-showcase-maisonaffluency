@@ -332,6 +332,7 @@ const FEATURED_GROUPS = [
       "atelier-demichelis",
       "christopher-boots",
       "delcourt-collection",
+      "emma-donnersberg",
       "emmanuel-levet-stenne",
 
       "garnier-linker",
