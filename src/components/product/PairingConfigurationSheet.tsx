@@ -31,9 +31,9 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, o
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
     queryKey: ["pairing-public-swatches", piece.id],
     queryFn: async (): Promise<PairingSwatch[]> => {
-      const result = await supabase.from("product_fabric_swatches_public").select("name, image_url").eq("pick_id", piece.id);
+      const result = await supabase.from("product_fabric_swatches_public").select("name, image_url, is_active").eq("pick_id", piece.id).order("sort_order", { ascending: true });
       if (result.error) throw result.error;
-      return result.data || [];
+      return (result.data || []).filter(swatch => swatch.is_active !== false);
     },
   });
   const reduced = useReducedMotion();
@@ -73,7 +73,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, o
     const swatch = pairingSwatchFor(name, swatches);
     return swatch?.image_url && !failedImages.includes(swatch.image_url) ? [{ name, image: swatch.image_url }] : [];
   });
-  const loading = detailPending || (!custom.length && pricePending);
+  const loading = detailPending || (!custom.length && (pricePending || swatchesPending));
   const canAdd = !!unit && complete && !loading && !isError && (custom.length ? !!piece.pairingRuleId : rows.length > 0 || (!swatchesPending && !swatchesError && !swatches.length));
   function add() {
     if (preview || !canAdd || !unit) return;

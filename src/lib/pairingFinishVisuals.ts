@@ -1,5 +1,6 @@
 import { buildProductFinishMap, resolveVariantImageIndex } from "./variantImageMap";
 import { pairingSelectionComplete, type PairingSelection, type PairingVariant } from "./curatedPairingConfiguration";
+import { normalizeFinishToken } from "./finishNormalization";
 
 export type PairingSwatch = { name: string; image_url: string | null };
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -10,7 +11,13 @@ export function pairingSwatchFor(name: string, swatches: PairingSwatch[]) {
   const exact = swatches.filter((swatch) => normalize(swatch.name.replace(/\s*\[[^\]]*\]\s*/g, "")) === key);
   if (exact.length === 1) return exact[0];
   const suffix = swatches.filter((swatch) => normalize(swatch.name).endsWith(key));
-  return suffix.length === 1 ? suffix[0] : undefined;
+  if (suffix.length) return suffix.length === 1 ? suffix[0] : undefined;
+  // Use the product-page matcher for reordered materials and supplier typos,
+  // but never select a sample when multiple library entries could match.
+  const matches = swatches.filter((swatch) =>
+    normalize(normalizeFinishToken(name, [swatch.name])) === normalize(swatch.name),
+  );
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 const familyKey = (value: string) => normalize(value.replace(/^\s*(fabric|leather|textile|velvet)\s*(cat(egory)?\.?|collection)\s*/i, ""));
