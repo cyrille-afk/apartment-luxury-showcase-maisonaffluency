@@ -4,6 +4,8 @@
 
 import { resolveStudioSource } from './studioSource.ts'
 
+declare const Deno: { env: { get(name: string): string | undefined } }
+
 export type RadarResult = { ok: true; score: number | null; flag: string } | { ok: false; error: string }
 
 export function unverifiedPortfolioUpdate(hasVerifiedEvidence: boolean) {
