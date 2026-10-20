@@ -291,6 +291,16 @@ export function useTradeProducts() {
       }
     }
 
+    // Parent/child dedup: when a child designer's piece also exists as a card
+    // under its parent house (reedition_by carries the founder/house name),
+    // keep only the studio card so category searches surface the studio once.
+    for (const [key, product] of merged) {
+      const parent = product.reedition_by?.trim().toLowerCase();
+      if (!parent) continue;
+      const parentKey = `${parent}::${product.product_name.trim().toLowerCase()}`;
+      if (parentKey !== key && merged.has(parentKey)) merged.delete(key);
+    }
+
     return Array.from(merged.values());
   }, [staticProducts, liveProducts, dbHiddenKeys]);
 
