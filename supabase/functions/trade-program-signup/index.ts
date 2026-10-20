@@ -308,13 +308,13 @@ Deno.serve(async (req) => {
       if (!radar.ok) console.error('trade radar failed', radar.error)
       if (acct?.id) {
         await supabase.from('trade_accounts').update(radar.ok
-          ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: 'scored', radar_scored_at: new Date().toISOString() }
+          ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: radar.score === null ? 'unverified' : 'scored', radar_scored_at: new Date().toISOString() }
           : { radar_status: 'failed', radar_flag: radar.error.slice(0, 300), radar_scored_at: new Date().toISOString() }
         ).eq('id', acct.id)
       }
-      const radarLines = radar.ok
+      const radarLines = radar.ok && radar.score !== null
         ? ['', '📊 *AI Critical Radar:*', `• *Confidence:* ${radar.score}/100`, `• *Flag:* ${radar.flag}`]
-        : ['', '📊 *AI Critical Radar:* unavailable']
+        : ['', '📊 *AI Critical Radar:* unverified — awaiting evidence']
       const waBody = [
         '🚨 *New Trade Account Request on Maison Affluency*',
         '',
