@@ -5,9 +5,9 @@ export async function retryWhenInstagramWorks(
 ) {
   if (state !== "working") return { paused: true, attempted: 0 };
   const accounts = await claim();
-  for (const account of accounts) {
+  await Promise.all(accounts.map(async (account) => {
     // Individual failures never prevent another studio's verification.
     try { await analyze(account.id); } catch { /* existing evidence/score remains untouched */ }
-  }
+  }));
   return { paused: false, attempted: accounts.length };
 }
