@@ -38,6 +38,7 @@ type Account = {
   radar_score: number | null;
   radar_flag: string | null;
   radar_status: string | null;
+  radar_breakdown?: unknown;
   studio_aesthetic_dna: Dna | Dna[] | null;
 };
 
@@ -51,7 +52,30 @@ const PORTAL_FILTERS: [PortalFilter, string][] = [
 
 const EFFECT_LABEL = { supports: "Supports", neutral: "No penalty", missing: "Not found" } as const;
 
+type RadarCategory = { key: string; label: string; points: number; max: number; basis: string };
+
 function EvidenceBreakdown({ a }: { a: Account }) {
+  const points = Array.isArray(a.radar_breakdown) ? (a.radar_breakdown as RadarCategory[]) : null;
+  if (points?.length) {
+    const total = points.reduce((s, c) => s + c.points, 0);
+    return (
+      <div className="mt-2 border-t border-border pt-2">
+        <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Score breakdown</p>
+        <ul className="space-y-1 text-xs">
+          {points.map((c) => (
+            <li key={c.key} className="flex gap-2">
+              <span className="w-14 shrink-0 font-medium tabular-nums text-foreground">{c.points}/{c.max}</span>
+              <span className="text-muted-foreground"><span className="text-foreground">{c.label}:</span> {c.basis}</span>
+            </li>
+          ))}
+          <li className="flex gap-2 border-t border-border pt-1">
+            <span className="w-14 shrink-0 font-medium tabular-nums text-foreground">{total}/100</span>
+            <span className="text-muted-foreground">Total. Points not earned are not yet evidenced — never deductions.</span>
+          </li>
+        </ul>
+      </div>
+    );
+  }
   const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
   const rows = radarEvidence({ ...a, dnaStatus: dna?.status ?? null });
   return (
