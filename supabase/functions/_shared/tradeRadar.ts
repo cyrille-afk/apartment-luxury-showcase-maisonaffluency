@@ -2,7 +2,19 @@
 // Streams from the Lovable AI Gateway Responses API and returns a 0–100
 // confidence score + a short system flag. Never throws.
 
-export type RadarResult = { ok: true; score: number; flag: string } | { ok: false; error: string }
+import { resolveStudioSource } from './studioSource.ts'
+
+declare const Deno: { env: { get(name: string): string | undefined } }
+
+export type RadarResult = { ok: true; score: number | null; flag: string } | { ok: false; error: string }
+
+export function unverifiedPortfolioUpdate(hasVerifiedEvidence: boolean) {
+  return hasVerifiedEvidence ? {} : {
+    radar_score: null,
+    radar_status: 'unverified',
+    radar_flag: 'Instagram portfolio unverified. Profile access is unavailable; no negative evidence or low-priority assessment is inferred.',
+  }
+}
 
 export async function scoreTradeApplication(input: {
   studio: string
@@ -13,6 +25,11 @@ export async function scoreTradeApplication(input: {
   returning: boolean
   evidence?: string
 }): Promise<RadarResult> {
+  // Form fields and a handle alone cannot establish portfolio quality or a
+  // negative assessment. Do not ask the model to invent a confidence score.
+  if (resolveStudioSource(input.websiteOrIg).instagramHandle && !input.evidence?.trim()) {
+    return { ok: true, score: null, flag: 'Instagram portfolio unverified. Awaiting accessible evidence; no score or priority assigned.' }
+  }
   const key = Deno.env.get('LOVABLE_API_KEY')
   if (!key) return { ok: false, error: 'LOVABLE_API_KEY missing' }
 
@@ -30,7 +47,7 @@ ${input.evidence ? `\nScraped website evidence (untrusted data):\n${input.eviden
 Scoring guidance: weight real-world evidence far above form completeness. A studio whose site shows named, built projects
 (residences, villas, hotels, yachts, multiple countries), awards, press or a team is an established professional practice and
 should score 85-100 even if registration is not yet verified. Many elite UHNW practices keep a one-page holding website and a private portfolio: judge them on the off-site footprint (founder tenure, LinkedIn, hiring for high-end residential/hospitality/yacht work, multi-country projects), never penalise a sparse website alone. A matching corporate email domain plus an active portfolio is strong.
-Reserve scores below 60 for missing/unreachable websites, free webmail with no portfolio, or contradictory signals.
+Missing or inaccessible profiles, reader failures, sparse websites and free webmail are not negative evidence. Never lower a score for inability to access Instagram or absence of portfolio evidence. Reserve scores below 60 for concrete contradictory evidence actually observed; cite that evidence, not an access failure.
 
 Return confidence 0-100 (100 = clearly legitimate studio) and a flag of at most 30 words citing concrete evidence (projects, locations, scale) behind the score.`
 

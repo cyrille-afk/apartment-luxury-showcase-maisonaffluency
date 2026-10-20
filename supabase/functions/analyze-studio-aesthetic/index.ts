@@ -9,7 +9,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
-import { scoreTradeApplication } from "../_shared/tradeRadar.ts";
+import { scoreTradeApplication, unverifiedPortfolioUpdate } from "../_shared/tradeRadar.ts";
 import { resolveStudioSource } from "../_shared/studioSource.ts";
 
 const corsHeaders = {
@@ -248,7 +248,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const backendUrl = Deno.env.get("SUPABASE_URL");
+  if (!serviceKey || !backendUrl) return json({ error: "Backend is not configured" }, 500);
   const isInternal = req.headers.get("Authorization") === `Bearer ${serviceKey}`;
   if (!isInternal) {
     const auth = await requireAdmin(req, "analyze-studio-aesthetic");
@@ -263,7 +265,7 @@ serve(async (req) => {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) return json({ error: "AI is not configured" }, 500);
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey, { auth: { persistSession: false } });
+  const supabase = createClient(backendUrl, serviceKey, { auth: { persistSession: false } });
 
   const { data: account } = await supabase
     .from("trade_accounts").select("id, studio_name, website_or_ig, email, business_reg_number, radar_status").eq("id", id).maybeSingle();
@@ -276,14 +278,14 @@ serve(async (req) => {
       regNumber: account.business_reg_number ?? "", hasDocument: false, returning: false,
     });
     await supabase.from("trade_accounts").update(radar.ok
-      ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: "scored", radar_scored_at: new Date().toISOString() }
+      ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: radar.score === null ? "unverified" : "scored", radar_scored_at: new Date().toISOString() }
       : { radar_status: "failed", radar_flag: radar.error.slice(0, 300), radar_scored_at: new Date().toISOString() },
     ).eq("id", id);
   }
 
   const { data: dna } = await supabase
     .from("studio_aesthetic_dna")
-    .select("status, attempts, image_urls, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials")
+    .select("status, attempts, image_urls, aesthetic_label, aesthetic_summary, dominant_tones, historical_affinities, materials, analyzed_at")
     .eq("trade_account_id", id)
     .maybeSingle();
   if (dna?.status === "processing") return json({ ok: true, skipped: "already processing" });
@@ -327,6 +329,14 @@ serve(async (req) => {
   // A crawl that captured nothing new must never re-profile from old evidence
   // alone: keep prior images and manual tags, mark it retryable.
   if (!text && images.length === 0 && screenshots.length === 0) {
+    if (resolveStudioSource(account.website_or_ig).instagramHandle) {
+      const error = "Instagram profile unverified — access unavailable. This is not negative evidence and does not lower the studio score.";
+      await supabase.from("studio_aesthetic_dna").update({ status: "failed", error }).eq("trade_account_id", id);
+      const update = unverifiedPortfolioUpdate(Boolean(dna?.analyzed_at));
+      if (Object.keys(update).length) await supabase.from("trade_accounts").update(update).eq("id", id);
+      await logRun("unverified", error);
+      return json({ ok: true, unverified: true, message: error });
+    }
     return fail(`Could not read the website / Instagram profile${notes.length ? ` — ${[...new Set(notes)].join("; ")}` : ""}`);
   }
 

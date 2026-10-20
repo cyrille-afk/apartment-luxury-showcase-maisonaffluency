@@ -161,6 +161,7 @@ export default function TradeApplicationsQueue() {
     });
     setBusy(null);
     if (error || data?.ok === false) toast.error(data?.error ?? "Analysis failed.");
+    else if (data?.unverified) toast.info(data.message ?? "Instagram profile unverified; no score penalty applied.");
     else toast.success("Aesthetic analysis updated.");
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
   };
@@ -299,6 +300,11 @@ export default function TradeApplicationsQueue() {
                       </div>
                       {a.radar_flag && <p className="text-muted-foreground">{a.radar_flag}</p>}
                     </>
+                  ) : a.radar_status === "unverified" ? (
+                    <div className="space-y-2 text-muted-foreground">
+                      <Badge variant="outline" className="rounded-none text-[10px] uppercase tracking-wider">Unverified</Badge>
+                      <p>{a.radar_flag ?? "Portfolio access unavailable. No score or priority assigned without evidence."}</p>
+                    </div>
                   ) : a.radar_status === "failed" ? (
                     <p className="text-destructive">Scoring failed{a.radar_flag ? `: ${a.radar_flag}` : ""}</p>
                   ) : (
@@ -356,7 +362,7 @@ export default function TradeApplicationsQueue() {
                   </div>
                 ) : dna.status === "failed" ? (
                   <>
-                    <div className="border-t border-border px-6 pt-5 text-xs text-destructive">{dna.error ?? "Analysis failed"} — use “Re-run analysis” to retry.</div>
+                    <div className={`border-t border-border px-6 pt-5 text-xs ${dna.error?.startsWith("Instagram profile unverified") ? "text-muted-foreground" : "text-destructive"}`}>{dna.error ?? "Analysis failed"} — use “Re-run analysis” to retry.</div>
                     <VisualThemeAnalysis dna={dna} accountId={a.id} onSaved={() => qc.invalidateQueries({ queryKey: ["trade-applications-queue"] })} />
                   </>
                 ) : (
