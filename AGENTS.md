@@ -82,3 +82,4 @@
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
 - gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
+- /designers hero groups (Masters/Contemporary Talents) live only in src/data/featuredDesignerGroups.json, read by both DesignersHoverHero and the publish-time seed script — a second copy silently dropped designers on publish.
