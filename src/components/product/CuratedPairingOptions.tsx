@@ -13,9 +13,9 @@ import { pairingAxes, pairingAxisOptions, pairingOptionAvailable, pairingSelecti
 import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
 import type { PairingProduct } from "@/lib/curatedPairings";
 import { toast } from "sonner";
+import { pairingSwatchFor } from "@/lib/pairingFinishVisuals";
 
 type Swatch = { name: string; image_url: string | null };
-const normalize = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
 export default function CuratedPairingOptions({ piece, onExplore }: { piece: PairingProduct; onExplore: () => void }) {
   const { data: detail, isPending: detailPending, isError } = useCuratorPickDetail(piece.id);
@@ -26,9 +26,9 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
     queryKey: ["pairing-public-swatches", piece.id],
     queryFn: async (): Promise<Swatch[]> => {
-      const { data, error } = await supabase.from("product_fabric_swatches_public").select("name, image_url").eq("pick_id", piece.id);
+      const { data, error } = await supabase.from("product_fabric_swatches_public").select("name, image_url, is_active").eq("pick_id", piece.id).order("sort_order", { ascending: true });
       if (error) throw error;
-      return data || [];
+      return (data || []).filter(swatch => swatch.is_active !== false);
     },
   });
   const rows: PairingVariant[] = detail?.size_variants || price?.rrp_size_variants || [];
@@ -40,7 +40,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
   const unit = complete ? pairingSelectionPrice(price, selection) : null;
   const imageList: string[] = detail?.gallery_images?.length ? detail.gallery_images : [piece.image];
   const selectedImage = resolveVariantImageIndex(buildProductFinishMap(detail?.variant_image_map), { ...selection, size: selection.label, variants: rows, imageCount: imageList.length });
-  const swatchFor = (option: string) => swatches.find((swatch) => normalize(swatch.name) === normalize(option) || normalize(swatch.name).endsWith(normalize(option)));
+  const swatchFor = (option: string) => pairingSwatchFor(option, swatches);
 
   const add = () => {
     if (!unit || !complete || isError) return;
@@ -52,7 +52,7 @@ export default function CuratedPairingOptions({ piece, onExplore }: { piece: Pai
     toast.success(`${quantity} × ${piece.title} added to your selection`);
   };
 
-  if (detailPending || pricePending) return <p role="status" className="mt-4 font-body text-xs text-muted-foreground">Loading finishes…</p>;
+  if (detailPending || pricePending || swatchesPending) return <p role="status" className="mt-4 font-body text-xs text-muted-foreground">Loading finishes…</p>;
   return <div className="mt-4 space-y-3">
     {!isError && !rows.length && <FinishSelector pickId={piece.id} productTitle={piece.title} includePricing={false} />}
     {!isError && pairingAxes.map((axis) => {
