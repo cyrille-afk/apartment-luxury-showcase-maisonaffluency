@@ -82,4 +82,3 @@
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
 - gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
-- Trade radar score = sum of fixed-cap categories in supabase/functions/_shared/radarRubric.ts (AI scores only evidence categories; registration/email are deterministic) — keeps point values auditable.
