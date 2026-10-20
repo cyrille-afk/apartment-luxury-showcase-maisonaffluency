@@ -2150,13 +2150,13 @@ const TradeProductPage: React.FC = () => {
     const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
     const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
     const thumbCls = (on: boolean) => cn(
-      "relative shrink-0 w-[72px] h-[72px] overflow-hidden border bg-muted/40 transition-colors",
+      "relative shrink-0 w-[88px] h-[88px] overflow-hidden border bg-muted/40 transition-colors",
       on ? "border-foreground" : "border-border/60 hover:border-foreground/50",
     );
     return (
       <div className="flex h-full min-h-0 flex-col gap-3" ref={galleryScrollRef}>
         <div className="flex min-h-0 flex-1 gap-4">
-          <div className="flex w-[76px] shrink-0 flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
+          <div className="flex h-full w-[88px] shrink-0 flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
             {r3d && (
               <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => setWorkspaceAsset("3d")} className={thumbCls(asset === "3d")}>
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-muted font-body text-[9px] uppercase tracking-[0.14em] text-foreground">
@@ -2208,6 +2208,12 @@ const TradeProductPage: React.FC = () => {
             </div>
           </div>
         </div>
+        {asset === "3d" && r3d && (
+          <div className="shrink-0 space-y-0.5 pl-[104px] font-body text-[11px] leading-snug text-muted-foreground">
+            <p>Tap to load the interactive 3D model (downloads on demand)</p>
+            <p>Pick a fabric or wood finish on the right — the 3D preview updates live.</p>
+          </div>
+        )}
         <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
       </div>
     );
@@ -2247,7 +2253,7 @@ const TradeProductPage: React.FC = () => {
           className="mb-6"
         />
 
-        <div ref={masterRef} style={masterHeight ? { height: masterHeight } : undefined} className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] lg:overflow-hidden gap-8 lg:gap-10 xl:gap-14">
+        <div ref={masterRef} style={masterHeight ? { height: masterHeight } : undefined} className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] lg:overflow-hidden gap-8 lg:gap-10 xl:gap-14">
           {isLg ? renderDesktopWorkspace() : (
           <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
