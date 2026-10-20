@@ -1809,16 +1809,8 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     category: product.category,
     subcategory: product.subcategory,
   });
-  const curatorNoteSections = (designNotes.length > 0
-    ? [
-        ...designNotes.map((n, i) => ({ label: n.label as string, text: n.text as string | null, Icon: [Award, Compass, FileText, FileText][i] ?? FileText })),
-        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-      ]
-    : [
-        { label: "Design Significance", text: curatorNotes.significance as string | null, Icon: Award },
-        { label: "Spatial Calculation", text: curatorNotes.spatial as string | null, Icon: Compass },
-        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-      ]).filter(({ text }) => Boolean(text));
+  // Only hand-written, sourced notes are shown; description-derived or stock copy never is.
+  const curatorNoteSections = designNotes.map((n, i) => ({ label: n.label as string, text: n.text, Icon: [Award, Compass, FileText, FileText][i] ?? FileText }));
 
   const compareItem: CompareItem = {
     pick: {
@@ -2615,7 +2607,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
 
 
-              {!isMobileOrPwa && (
+              {!isMobileOrPwa && curatorNoteSections.length > 0 && (
                 <section aria-label="Curator notes" className="mt-7 border-t border-border/50 pt-5">
                   <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
                   {/* Product page: notes read vertically beneath the gallery; only the lead note is highlighted. */}

@@ -34,7 +34,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
+import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import { designerBrowsePath, productBrowsePath } from "@/lib/tradeBrowsing";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 
@@ -352,19 +352,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     };
   }, [propProduct, variantPayload]);
 
-  // Curator Notes — derived from the ACTIVE product so they update whenever a
-  // "More from" thumbnail swaps the lightbox item.
-  const curatorNotes = useMemo(() => {
-    if (!product) return { significance: "", spatial: "", provenance: "" };
-    return buildProductCuratorNotes({
-      title: product.title,
-      brandName: product.brand_name,
-      description: product.description,
-      dimensions: product.dimensions,
-      category: product.category,
-      subcategory: product.subcategory,
-    });
-  }, [product]);
+  // Curator Notes — only hand-written, sourced notes for the ACTIVE product.
+  const designNotes = useProductDesignNotes(product?.id);
 
 
   // Resolve canonical designer slug (same hook used by product pages)
@@ -1075,7 +1064,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Curator Notes — immediate context below the product details */}
-          <motion.div
+          {designNotes.length > 0 && (<motion.div
             key={`curator-notes-${product.id}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1085,46 +1074,17 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <h3 className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
               Curator Notes
             </h3>
-            <div className={cn("grid grid-cols-1 gap-4 md:gap-8", curatorNotes.provenance ? "md:grid-cols-3" : "md:grid-cols-2")}>
-              <div className="flex gap-4">
-                <Award className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
-                <div>
-                  <p className="mb-2.5 inline-flex items-center rounded-[1px] bg-muted px-3 py-1.5 font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground">
-                    Design Significance
+            <div className={cn("grid grid-cols-1 gap-4 md:gap-8", designNotes.length >= 4 ? "md:grid-cols-4" : designNotes.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2")}>
+              {designNotes.map((n, i) => (
+                <div key={n.label}>
+                  <p className={cn("mb-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em]", i === 0 ? "inline-flex rounded-[1px] bg-muted px-3 font-semibold text-foreground" : "text-muted-foreground")}>
+                    {n.label}
                   </p>
-                  <p className="font-body text-xs leading-normal text-foreground/85">
-                    {curatorNotes.significance}
-                  </p>
+                  <p className="font-body text-xs leading-normal text-foreground/85">{n.text}</p>
                 </div>
-              </div>
-
-              <div className="flex gap-4">
-                <Compass className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
-                <div>
-                  <p className="mb-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                    Spatial Calculation
-                  </p>
-                  <p className="font-body text-xs leading-normal text-foreground/85">
-                    {curatorNotes.spatial}
-                  </p>
-                </div>
-              </div>
-
-              {curatorNotes.provenance && (
-              <div className="flex gap-4">
-                <FileText className="h-4 w-4 shrink-0 mt-2 text-muted-foreground/60" strokeWidth={1.5} />
-                <div>
-                  <p className="mb-2.5 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                    Historical Provenance
-                  </p>
-                  <p className="font-body text-xs leading-normal text-foreground/85">
-                    {curatorNotes.provenance}
-                  </p>
-                </div>
-              </div>
-              )}
+              ))}
             </div>
-          </motion.div>
+          </motion.div>)}
 
           {/* More From — final exploration tier */}
           {!product.restricted_gallery_pin && <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">

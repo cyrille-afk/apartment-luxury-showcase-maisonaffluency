@@ -66,16 +66,9 @@ export function buildProductCuratorNotes(source: CuratorNotesSource): ProductCur
   ) ?? (year ? sentences.find((s, i) => i >= 2 && s.includes(year)) : undefined);
 
   return {
-    significance:
-      sentences[0] ||
-      (year
-        ? `A definitive ${year} ${category} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`
-        : `A definitive ${category} in understated elegance, capturing the transition from historic craft to refined modern minimalism.`),
-    spatial:
-      sentences[1] ||
-      (dimensions
-        ? `Proportioned at ${dimensions}, with precise geometric balance to serve as a quiet, functional focal point for considered interiors.`
-        : "A stripped-back silhouette with precise geometric proportions, calculated to serve as a quiet, functional focal point for considered interiors."),
+    // Never invent copy: no stock filler when the description is too short.
+    significance: sentences[0] || "",
+    spatial: sentences[1] || "",
     provenance: provenanceSentence ?? null,
   };
 }
