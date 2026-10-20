@@ -1,11 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdmin } from "../_shared/auth.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getMetaToken, getInstagramMediaConnection } from "../_shared/metaToken.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3";
 
 /**
  * For CAROUSEL_ALBUM posts the top-level media_url may be absent or a
@@ -14,6 +11,7 @@ const corsHeaders = {
 async function getFullSizeImageUrl(
   post: Record<string, any>,
   accessToken: string,
+  graph: string,
 ): Promise<string | null> {
   // IMAGE posts: media_url is already full-size
   if (post.media_type === "IMAGE" && post.media_url) {
@@ -24,7 +22,7 @@ async function getFullSizeImageUrl(
   if (post.media_type === "CAROUSEL_ALBUM") {
     try {
       const childrenRes = await fetch(
-        `https://graph.instagram.com/v21.0/${post.id}/children?fields=id,media_type,media_url&access_token=${accessToken}`,
+        `${graph}/${post.id}/children?fields=id,media_type,media_url&access_token=${encodeURIComponent(accessToken)}`,
       );
       const childrenData = await childrenRes.json();
       if (childrenData.data?.length) {
@@ -63,31 +61,32 @@ Deno.serve(async (req) => {
   }
 
   const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
   try {
-    const { designerId } = await req.json();
-
-    if (!designerId) {
+    const parsed = z.object({ designerId: z.string().uuid() }).safeParse(await req.json());
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ success: false, error: "designerId is required" }),
+        JSON.stringify({ success: false, error: "A valid designerId is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    const { designerId } = parsed.data;
 
-    const accessToken = Deno.env.get("META_ACCESS_TOKEN");
+    const accessToken = await getMetaToken();
     if (!accessToken) {
       return new Response(
-        JSON.stringify({ success: false, error: "META_ACCESS_TOKEN not configured" }),
+        JSON.stringify({ success: false, error: "Reconnect Maison Affluency’s Instagram connection in Trade Applications before syncing." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Fetch recent media using Instagram Business Login API
+    const { graph, accountId } = await getInstagramMediaConnection(accessToken);
+    // Facebook Login uses the linked Instagram business account's media edge.
     const mediaRes = await fetch(
-      `https://graph.instagram.com/v21.0/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=25&access_token=${accessToken}`,
+      `${graph}/${accountId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp&limit=25&access_token=${encodeURIComponent(accessToken)}`,
     );
     const mediaData = await mediaRes.json();
 
@@ -143,7 +142,7 @@ Deno.serve(async (req) => {
       }
 
       // Get full-size image URL (handles CAROUSEL_ALBUM children)
-      const imageUrl = await getFullSizeImageUrl(post, accessToken);
+      const imageUrl = await getFullSizeImageUrl(post, accessToken, graph);
       let storedImageUrl: string | null = null;
 
       if (imageUrl) {

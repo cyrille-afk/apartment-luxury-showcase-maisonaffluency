@@ -8,12 +8,38 @@ export async function getMetaToken(): Promise<string | null> {
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (url && key) {
     try {
-      const db = createClient(url, key, { auth: { persistSession: false } });
+      const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
       const { data } = await db.from("integration_tokens").select("access_token").eq("provider", "meta").maybeSingle();
       if (data?.access_token) return data.access_token;
     } catch { /* fall back */ }
   }
   return Deno.env.get("META_ACCESS_TOKEN") ?? null;
+}
+
+/** Facebook Login tokens address the linked IG account, not graph.instagram.com/me. */
+export async function getInstagramAccount(token: string): Promise<{ id: string; username?: string }> {
+  const response = await fetch(`${GRAPH}/me/accounts?fields=instagram_business_account{username}&limit=100&access_token=${encodeURIComponent(token)}`, { signal: AbortSignal.timeout(15000) });
+  const accounts = await response.json();
+  if (accounts?.error) throw new Error(`Instagram connection needs reconnecting: ${accounts.error.message ?? "Meta rejected the login"}`);
+  const ig = (accounts?.data ?? []).map((page: { instagram_business_account?: { id: string; username?: string } }) => page.instagram_business_account).find((account: { id?: string } | undefined) => account?.id);
+  if (!ig?.id) throw new Error("No Instagram business account is linked to the saved Maison Affluency connection.");
+  return ig;
+}
+
+export async function getInstagramMediaConnection(token: string): Promise<{ graph: string; accountId: string }> {
+  try {
+    const account = await getInstagramAccount(token);
+    return { graph: GRAPH, accountId: account.id };
+  } catch (error) {
+    // Retain old Instagram Business Login installations only when that exact
+    // secret was used; a rejected newly saved token must never switch logins.
+    if (token !== Deno.env.get("META_ACCESS_TOKEN")) throw error;
+    const graph = "https://graph.instagram.com/v21.0";
+    const response = await fetch(`${graph}/me?fields=id&access_token=${encodeURIComponent(token)}`, { signal: AbortSignal.timeout(15000) });
+    const account = await response.json();
+    if (!response.ok || account.error || !account.id) throw error;
+    return { graph, accountId: account.id };
+  }
 }
 
 export type InstagramCheck = {
