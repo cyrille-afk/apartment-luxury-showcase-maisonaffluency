@@ -61,7 +61,10 @@ export async function checkInstagram(token: string | null): Promise<InstagramChe
       if (d && d.is_valid === false) return { state: "invalid_token", message: `Meta rejected the saved login (${d.error?.message ?? "invalid"}). Reconnect to resume automatic checks.` };
       if (d?.expires_at) expiresAt = new Date(d.expires_at * 1000).toISOString();
     }
-    const ig = await getInstagramAccount(token);
+    const acc = await fetch(`${GRAPH}/me/accounts?fields=instagram_business_account{username}&limit=25&access_token=${encodeURIComponent(token)}`).then((r) => r.json());
+    if (acc?.error) return { state: "invalid_token", message: `Meta rejected the saved login (${acc.error.message ?? "invalid"}). Reconnect to resume automatic checks.`, expiresAt };
+    const ig = (acc?.data ?? []).map((p: any) => p?.instagram_business_account).find(Boolean);
+    if (!ig?.id) return { state: "no_business_account", message: "Login works, but no Instagram business account is linked to a Facebook Page it manages.", expiresAt };
     const probe = await fetch(`${GRAPH}/${ig.id}?fields=business_discovery.username(${encodeURIComponent(ig.username)}){username}&access_token=${encodeURIComponent(token)}`).then((r) => r.json());
     if (probe?.error) return { state: "error", message: probe.error.message ?? "Profile lookup failed.", igUsername: ig.username, expiresAt };
     return { state: "working", message: "Automatic Instagram checks are working.", igUsername: ig.username, expiresAt };
