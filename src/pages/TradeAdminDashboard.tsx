@@ -78,6 +78,8 @@ const systemGroup: AdminCard[] = [
   { title: "Bulk Finishes & Fabrics", description: "Edit available_finishes and fabric_options across many trade products at once (add/remove/replace)", url: "/trade/admin/bulk-finishes", icon: Layers },
   { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
   { title: "Onboarding Funnel", description: "Step views, sub-step clicks, completes and skips — filterable by device", url: "/trade/admin/onboarding-funnel", icon: BarChart3 },
+  { title: "Design Notes Research", description: "Research workspace for Form, Function, Texture & Colour product notes — autosaving drafts with cited sources", url: "/trade/admin/design-note-research", icon: PenLine },
+  { title: "Design Note Coverage", description: "Which products have verified design notes — coverage counts, source links, missing-note filters and bulk actions", url: "/trade/admin/design-note-coverage", icon: Search },
   { title: "Duplicate Products", description: "Inspect and hide near-duplicate cards detected in the Trade catalog merge", url: "/trade/admin/duplicates", icon: Layers },
   
 ];
