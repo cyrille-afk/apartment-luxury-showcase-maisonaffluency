@@ -37,6 +37,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import { designerBrowsePath, productBrowsePath } from "@/lib/tradeBrowsing";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
+import DimensionText from "@/components/product/DimensionText";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
  *  Accents are transliterated (GÉLULE → gelule) so the generated URL matches
@@ -196,7 +197,7 @@ const DimensionsButtonGrid = ({
       <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2.5">
         {parsed.length > 1 ? "Dimensions available" : "Dimensions"}
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {parsed.map((d, i) => {
           const selected = selectedIndex === i;
           return (
@@ -213,13 +214,8 @@ const DimensionsButtonGrid = ({
               )}
             >
               <p className="font-body text-sm leading-snug text-foreground">
-                {d.metric}
+                <DimensionText text={`${d.metric}${d.imperial ? ` | ${d.imperial}` : ""}`} />
               </p>
-              {d.imperial && (
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-                  {d.imperial}
-                </p>
-              )}
               {d.qual && (
                 <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">
                   {d.qual}

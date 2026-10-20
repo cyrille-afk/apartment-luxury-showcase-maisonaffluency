@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
+import DimensionText from "@/components/product/DimensionText";
 
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -97,6 +98,14 @@ export default function ExpandableSpec({
 
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  // A stacked inch line belongs to its preceding metric option, not a new size.
+  lines = lines.reduce<string[]>((options, line) => {
+    const previous = options[options.length - 1];
+    if (/\bin\b/i.test(line) && !/\bcm\b/i.test(line) && previous && /\bcm\b/i.test(previous) && !previous.includes(" | ")) {
+      options[options.length - 1] = `${previous} | ${line}`;
+    } else options.push(line);
+    return options;
+  }, []);
   let didAutoSplit = false;
 
   // Auto-split single-line text into multiple finish options. Uses the shared
@@ -165,7 +174,7 @@ export default function ExpandableSpec({
         <div className="flex-1 min-w-0">
           {diameterHint}
           <p className={textClasses}>
-            {display}
+            <DimensionText text={display} />
             {secondaryText && (
               <span className="block text-xs mt-0.5 text-muted-foreground/70">
                 {secondaryText}
@@ -306,7 +315,7 @@ export default function ExpandableSpec({
                   isSelected ? "text-foreground font-medium" : "text-muted-foreground"
                 )}
               >
-                {line}
+                <DimensionText text={line} />
               </button>
             </li>
           );
@@ -339,7 +348,7 @@ export default function ExpandableSpec({
         >
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
             {diameterHint}
-            {hasSelection ? `${selectedValueLabel ? `${selectedValueLabel}: ` : ""}${lines[selectedIdx ?? 0]}` : placeholder}
+            {hasSelection ? <DimensionText text={`${selectedValueLabel ? `${selectedValueLabel}: ` : ""}${lines[selectedIdx ?? 0]}`} /> : placeholder}
           </span>
 
           <ChevronRight
@@ -413,7 +422,7 @@ export default function ExpandableSpec({
     <div className={cn(rowClasses, "items-start")}>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         {lines.map((line, i) => (
-          <p key={i} className={textClasses}>{line}</p>
+          <p key={i} className={textClasses}><DimensionText text={line} /></p>
         ))}
         {secondaryText && (
           <p className="text-xs mt-0.5 text-muted-foreground/70">{secondaryText}</p>
