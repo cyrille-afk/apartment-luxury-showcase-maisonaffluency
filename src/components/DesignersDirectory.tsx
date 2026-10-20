@@ -2099,6 +2099,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               </div>
           </div>
 
+          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
+          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 md:hidden">
+            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
+            masters and contemporary ateliers through our private trade desk or concierge service.
+          </p>
+
+
           {/* Results count */}
           {(searchQuery || activeFilterCount > 0) && (
             mode === "products" && picksLoading ? (
@@ -2234,6 +2241,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               )}
             </div>
           </div>
+
+          {/* Editorial framing: the grid below is a digital edit, not the full index. */}
+          <p className="font-serif text-neutral-400 text-xs tracking-wider italic text-center w-full mt-4 hidden md:block">
+            Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
+            masters and contemporary ateliers through our private trade desk or concierge service.
+          </p>
+
 
 
           {/* Desktop: Sidebar + Directory layout */}
