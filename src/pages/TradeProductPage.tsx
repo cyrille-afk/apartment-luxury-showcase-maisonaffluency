@@ -2435,9 +2435,6 @@ const TradeProductPage: React.FC = () => {
                       topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
                       materialRoles={resolvedRoles || undefined}
                     />
-                    <p className="mt-2 font-body text-[10px] leading-snug text-muted-foreground">
-                      Pick a fabric or wood finish on the right — the 3D preview updates live.
-                    </p>
                   </div>
                 </details>
               );
