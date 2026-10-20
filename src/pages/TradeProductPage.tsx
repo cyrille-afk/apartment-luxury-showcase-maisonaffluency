@@ -699,7 +699,7 @@ const TradeProductPage: React.FC = () => {
       const el = masterRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      setMasterHeight(Math.max(480, window.innerHeight - top - 16));
+      setMasterHeight(Math.max(480, window.innerHeight - top - 24));
     };
     measure();
     window.addEventListener("resize", measure);
@@ -2219,7 +2219,7 @@ const TradeProductPage: React.FC = () => {
         <title>{pageTitle} — Trade — Maison Affluency</title>
       </Helmet>
 
-      <div className="w-full max-w-[1760px] pb-12">
+      <div className="w-full max-w-[1760px] pb-12 lg:pb-0">
         <button
           type="button"
           onClick={() => navigate(fromPath || fallbackPath)}
