@@ -20,6 +20,8 @@ import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
   Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
   Maximize2 as FsIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 import { renderParagraph } from "@/components/EditorialBiography";
@@ -3397,19 +3399,15 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
-          {isLg && (
-            <details open className="group border-t border-border/60">
-              <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-display text-lg italic text-foreground select-none">
-                Curator Notes &amp; Logistics
-                <span className="font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">Open ▾</span>
-                <span className="hidden font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:inline">Close ▴</span>
-              </summary>
-              {renderLowerDetails()}
-            </details>
-          )}
           </div>
         </div>
-        {!isLg && renderLowerDetails()}
+        {isLg ? (
+          <section aria-label="Curator notes and logistics" className="mt-16 border-t border-border/50 pt-10">
+            <div className="grid grid-cols-[minmax(0,55fr)_minmax(0,45fr)] gap-6 xl:gap-10 2xl:gap-14">
+              <div className="min-w-0">{renderLowerDetails()}</div>
+            </div>
+          </section>
+        ) : renderLowerDetails()}
         {/* From the Same Maker — related picks */}
         {showTradePrice && relatedPicks.length > 0 && (() => {
           const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
@@ -3469,14 +3467,25 @@ const TradeProductPage: React.FC = () => {
                 </div>
 
                 {/* Product grid — mobile: horizontal swipe rail */}
-                <div className="lg:col-span-8 order-3 lg:order-2">
-                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:mx-0 md:px-0">
+                <div className="relative lg:col-span-8 order-3 lg:order-2">
+                  {relatedPicks.length > 3 && (
+                    <div className="mb-3 hidden justify-end gap-2 md:flex">
+                      {[-1, 1].map((d) => (
+                        <button key={d} type="button" aria-label={d < 0 ? "Previous pieces" : "Next pieces"}
+                          onClick={() => { const el = document.getElementById("same-designer-rail"); el?.scrollBy({ left: d * el.clientWidth, behavior: "smooth" }); }}
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:border-foreground">
+                          {d < 0 ? <ChevronLeft size={16} strokeWidth={1.5} /> : <ChevronRight size={16} strokeWidth={1.5} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div id="same-designer-rail" className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6 md:mx-0 md:px-0">
                     {relatedPicks.slice(0, 6).map((rp) => (
                       <Link
                         key={rp.id}
                         to={designer.slug ? `/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}` : fallbackPath}
                         state={{ from: location.pathname + location.search }}
-                        className="group block shrink-0 w-[62%] snap-start md:w-auto md:shrink"
+                        className="group block shrink-0 w-[62%] snap-start md:w-[calc((100%-3rem)/3)]"
                       >
                         <div className="relative aspect-square rounded-none overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           {rp.image_url ? (
