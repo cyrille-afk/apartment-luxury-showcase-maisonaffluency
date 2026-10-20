@@ -3,10 +3,11 @@
 // confidence score + a short system flag. Never throws.
 
 import { resolveStudioSource } from './studioSource.ts'
+import { buildRadarBreakdown, type RadarCategory } from './radarRubric.ts'
 
 declare const Deno: { env: { get(name: string): string | undefined } }
 
-export type RadarResult = { ok: true; score: number | null; flag: string } | { ok: false; error: string }
+export type RadarResult = { ok: true; score: number | null; flag: string; breakdown?: RadarCategory[] } | { ok: false; error: string }
 
 export function unverifiedPortfolioUpdate(hasVerifiedEvidence: boolean) {
   return hasVerifiedEvidence ? {} : {
@@ -103,9 +104,12 @@ For each category give a basis of at most 25 words citing the concrete evidence.
       }
     }
     const parsed = JSON.parse(text)
-    const score = Math.max(0, Math.min(100, Math.round(Number(parsed.confidence))))
-    if (!Number.isFinite(score)) return { ok: false, error: 'invalid score' }
-    return { ok: true, score, flag: String(parsed.flag ?? '').slice(0, 300) }
+    const { score, breakdown } = buildRadarBreakdown({
+      email: input.email, regNumber: input.regNumber, hasDocument: input.hasDocument,
+      projectPoints: parsed.project_points, projectBasis: String(parsed.project_basis ?? ''),
+      footprintPoints: parsed.footprint_points, footprintBasis: String(parsed.footprint_basis ?? ''),
+    })
+    return { ok: true, score, flag: String(parsed.flag ?? '').slice(0, 300), breakdown }
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e).slice(0, 300) }
   }
