@@ -70,6 +70,10 @@ export default function TradeAdminDesignNoteCoverage() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home" | `missing-${(typeof FIELDS)[number]}`>("all");
+  const [sort, setSort] = useState<"most-missing" | "least-missing" | "title">("most-missing");
+  const [sel, setSel] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
   const enabled = !!user && isAdmin;
 
   const { data, isLoading } = useQuery({
@@ -107,8 +111,29 @@ export default function TradeAdminDesignNoteCoverage() {
       if (filter === "home" && !r.sources.some((x) => isHomePageUrl(x.url))) return false;
       if (missingField && r.fields[missingField]) return false;
       return !term || `${r.title} ${r.designer}`.toLowerCase().includes(term);
-    }).sort((a, b) => FIELDS.filter((f) => b.fields[f]).length - FIELDS.filter((f) => a.fields[f]).length || a.title.localeCompare(b.title));
-  }, [data, q, filter]);
+    }).sort((a, b) => {
+      const ca = FIELDS.filter((f) => a.fields[f]).length, cb = FIELDS.filter((f) => b.fields[f]).length;
+      const d = sort === "most-missing" ? ca - cb : sort === "least-missing" ? cb - ca : 0;
+      return d || a.title.localeCompare(b.title);
+    });
+  }, [data, q, filter, sort]);
+
+  const toggle = (id: string) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const bulk = async (status: "draft" | "needs_review") => {
+    const targets = (data ?? []).filter((r) => sel.has(r.pick_id) && r.status !== "published");
+    const skipped = sel.size - targets.length;
+    if (!targets.length) { setMsg(`Nothing to update${skipped ? ` — ${skipped} already published` : ""}.`); return; }
+    setBusy(true); setMsg("");
+    const payload = targets.map((r) => ({ pick_id: r.pick_id, product_title: r.title, designer_name: r.designer, review_status: status, updated_by: user?.id }));
+    const { error } = status === "draft"
+      ? await db.from("design_note_research_drafts").upsert(payload, { onConflict: "pick_id", ignoreDuplicates: true })
+      : await db.from("design_note_research_drafts").upsert(payload.map(({ product_title, designer_name, ...p }) => p), { onConflict: "pick_id" });
+    setBusy(false);
+    if (error) { setMsg(`Failed: ${error.message}`); return; }
+    setMsg(`${status === "draft" ? "Assigned for research" : "Marked needs review"}: ${targets.length}${skipped ? ` (${skipped} published skipped)` : ""}${status === "draft" ? "; existing drafts kept their status" : ""}.`);
+    setSel(new Set());
+    qc.invalidateQueries({ queryKey: ["design-note-coverage"] });
+  };
 
   if (rolesLoaded && (!user || !isAdmin)) return <Navigate to="/trade" replace />;
 
@@ -151,11 +176,23 @@ export default function TradeAdminDesignNoteCoverage() {
         })}
         <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
       </div>
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-xs text-muted-foreground">sort:</span>
+        {([["most-missing", "most missing first"], ["least-missing", "least missing first"], ["title", "A–Z"]] as const).map(([k, l]) => (
+          <Button key={k} size="sm" variant={sort === k ? "default" : "outline"} onClick={() => setSort(k)}>{l}</Button>
+        ))}
+        <span className="text-xs text-muted-foreground ml-4">{sel.size} selected</span>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("draft")}>Assign for research</Button>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("needs_review")}>Mark needs review</Button>
+        {sel.size > 0 && <Button size="sm" variant="ghost" onClick={() => setSel(new Set())}>Clear</Button>}
+        {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
+      </div>
       {isLoading ? <p className="text-sm">Loading…</p> : (
         <div className="overflow-x-auto border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted text-left">
               <tr>
+                <th className="p-2 w-8"><input type="checkbox" aria-label="Select all shown" checked={rows.length > 0 && rows.every((r) => sel.has(r.pick_id))} onChange={(e) => setSel(e.target.checked ? new Set(rows.map((r) => r.pick_id)) : new Set())} /></th>
                 <th className="p-2">Product</th><th className="p-2">Designer</th>
                 {FIELDS.map((f) => <th key={f} className="p-2 capitalize text-center">{f}</th>)}
                 <th className="p-2">Sources</th><th className="p-2">Status</th>
@@ -164,6 +201,7 @@ export default function TradeAdminDesignNoteCoverage() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.pick_id} className="border-t border-border align-top">
+                  <td className="p-2"><input type="checkbox" aria-label={`Select ${r.title}`} checked={sel.has(r.pick_id)} onChange={() => toggle(r.pick_id)} /></td>
                   <td className="p-2 font-medium">{r.title}</td>
                   <td className="p-2 text-muted-foreground">{r.designer}</td>
                   {FIELDS.map((f) => (
