@@ -74,6 +74,7 @@ export default function TradeAdminDesignNoteCoverage() {
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [pending, setPending] = useState<null | "draft" | "needs_review">(null);
   const enabled = !!user && isAdmin;
 
   const { data, isLoading } = useQuery({
@@ -119,7 +120,14 @@ export default function TradeAdminDesignNoteCoverage() {
   }, [data, q, filter, sort]);
 
   const toggle = (id: string) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const changeFor = (r: Row, status: "draft" | "needs_review") => {
+    if (r.status === "published") return "skipped — notes already published";
+    if (r.status === "not started") return status === "draft" ? "added to workspace as draft" : "added to workspace as needs review";
+    if (status === "draft" || r.status === status) return `no change — stays ${r.status}`;
+    return `${r.status} → needs review`;
+  };
   const bulk = async (status: "draft" | "needs_review") => {
+    setPending(null);
     const targets = (data ?? []).filter((r) => sel.has(r.pick_id) && r.status !== "published");
     const skipped = sel.size - targets.length;
     if (!targets.length) { setMsg(`Nothing to update${skipped ? ` — ${skipped} already published` : ""}.`); return; }
@@ -182,11 +190,38 @@ export default function TradeAdminDesignNoteCoverage() {
           <Button key={k} size="sm" variant={sort === k ? "default" : "outline"} onClick={() => setSort(k)}>{l}</Button>
         ))}
         <span className="text-xs text-muted-foreground ml-4">{sel.size} selected</span>
-        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("draft")}>Assign for research</Button>
-        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => bulk("needs_review")}>Mark needs review</Button>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => setPending("draft")}>Assign for research</Button>
+        <Button size="sm" variant="outline" disabled={!sel.size || busy} onClick={() => setPending("needs_review")}>Mark needs review</Button>
         {sel.size > 0 && <Button size="sm" variant="ghost" onClick={() => setSel(new Set())}>Clear</Button>}
         {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
       </div>
+      {pending && (() => {
+        const list = (data ?? []).filter((r) => sel.has(r.pick_id));
+        const skipped = list.filter((r) => r.status === "published").length;
+        const changed = list.filter((r) => !changeFor(r, pending).startsWith("skipped") && !changeFor(r, pending).startsWith("no change")).length;
+        return (
+          <div className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center p-4" role="dialog" aria-label="Confirm bulk action">
+            <div className="bg-card border border-border max-w-2xl w-full max-h-[80vh] flex flex-col">
+              <div className="p-4 border-b border-border">
+                <h2 className="font-display text-lg">{pending === "draft" ? "Assign for research" : "Mark needs review"}</h2>
+                <p className="text-sm text-muted-foreground">{list.length} selected · {changed} will change · {list.length - changed - skipped} unchanged · {skipped} published skipped</p>
+              </div>
+              <ul className="overflow-y-auto p-4 space-y-1 text-sm">
+                {list.map((r) => (
+                  <li key={r.pick_id} className="flex justify-between gap-4 border-b border-border py-1">
+                    <span><span className="font-medium">{r.title}</span> <span className="text-muted-foreground">· {r.designer}</span></span>
+                    <span className="text-xs text-muted-foreground text-right">{changeFor(r, pending)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="p-4 border-t border-border flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setPending(null)}>Cancel</Button>
+                <Button disabled={busy || !changed} onClick={() => bulk(pending)}>Confirm ({changed})</Button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {isLoading ? <p className="text-sm">Loading…</p> : (
         <div className="overflow-x-auto border border-border">
           <table className="w-full text-sm">
