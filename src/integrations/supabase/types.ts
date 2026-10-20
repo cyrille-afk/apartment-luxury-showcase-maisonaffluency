@@ -12522,6 +12522,10 @@ export type Database = {
         Args: { _from: string; _to: string }
         Returns: Json
       }
+      admin_delete_sales_funnel_entry: {
+        Args: { _id: string; _source: string }
+        Returns: undefined
+      }
       admin_manage_studio_member: {
         Args: {
           _action: string

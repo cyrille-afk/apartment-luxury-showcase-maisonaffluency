@@ -6,6 +6,7 @@ import { resolveQuoteContact } from "@/lib/quoteContact";
 
 export interface FunnelEntry {
   id: string;
+  source?: "cart" | "inquiry" | "quote" | "order" | "acquisition";
   label: string;
   sublabel: string | null;
   createdAt: string;
@@ -200,6 +201,7 @@ export function useSalesFunnel(days: number) {
           description: "Pieces added to a bag with no order placed",
           entries: activeCarts.map((c) => ({
             id: c.id as string,
+            source: "cart",
             label: (Array.isArray(c.items) && (c.items as any[])[0]?.title) || "Shopping bag",
             sublabel: [
               c.email || "No email captured",
@@ -223,6 +225,7 @@ export function useSalesFunnel(days: number) {
           description: "Quote requests that never reached a draft",
           entries: notQuoted.map((i) => ({
             id: i.id as string,
+            source: "inquiry",
             label: i.product_name ?? "Quote request",
             sublabel: i.company || i.email || "Private client",
             createdAt: i.created_at as string,
@@ -242,6 +245,7 @@ export function useSalesFunnel(days: number) {
             const contact = resolveQuoteContact({ email: q.ship_to_email, phone: q.ship_to_phone }, q.source_inquiry);
             return {
               id: q.id as string,
+              source: "quote",
               label: product.name,
               sublabel: q.client_name ?? "Unnamed client",
               createdAt: q.created_at as string,
@@ -265,6 +269,7 @@ export function useSalesFunnel(days: number) {
             const contact = resolveQuoteContact({ email: q.ship_to_email, phone: q.ship_to_phone }, q.source_inquiry);
             return {
               id: q.id as string,
+              source: "quote",
               label: ref(q.id as string),
               productName: product.name,
               sublabel: [q.client_name ?? "Client", link ? "Pay link issued" : "No pay link"]
@@ -287,6 +292,7 @@ export function useSalesFunnel(days: number) {
           description: "Checkouts started but never settled",
           entries: pendingOrders.map((o) => ({
             id: o.id as string,
+            source: "order",
             label: (o.order_ref as string) ?? "Order",
             sublabel: (o.email as string) ?? "Guest",
             createdAt: o.created_at as string,
@@ -304,6 +310,7 @@ export function useSalesFunnel(days: number) {
             .filter((lead) => lead.campaign_status === "portal_activated")
             .map((lead) => ({
               id: lead.id,
+              source: "acquisition",
               label: lead.studio_name,
               sublabel: lead.founder_name || "Trade studio",
               createdAt:
