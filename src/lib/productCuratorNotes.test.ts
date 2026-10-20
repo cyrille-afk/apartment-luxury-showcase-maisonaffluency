@@ -34,3 +34,12 @@ describe("buildProductCuratorNotes provenance", () => {
     expect(notes.spatial).toBe("Second sentence.");
   });
 });
+
+import { buildProductCuratorNotes as buildNoFiller } from "./productCuratorNotes";
+import { it as itNoFiller, expect as expectNoFiller } from "vitest";
+itNoFiller("never invents stock copy when the description is empty", () => {
+  const n = buildNoFiller({ title: "Chair 1950", brandName: "X", description: "", dimensions: "W 50 cm" });
+  expectNoFiller(n.significance).toBe("");
+  expectNoFiller(n.spatial).toBe("");
+  expectNoFiller(n.provenance).toBeNull();
+});
