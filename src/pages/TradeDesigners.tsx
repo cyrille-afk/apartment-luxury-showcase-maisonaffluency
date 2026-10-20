@@ -343,6 +343,11 @@ const TradeDesigners = () => {
           </div>
         </div>
 
+        <p className="font-serif text-muted-foreground text-xs tracking-wider italic text-center w-full !mt-4">
+          Displaying a digital edit of our current physical catalog. Discover our complete index of over 300 global
+          masters and contemporary ateliers through our private trade desk or concierge service.
+        </p>
+
         {/* Carousels below title */}
         {(atelierCarouselEntries.length > 0 || designerCarouselEntries.length > 0) && (
           <>
