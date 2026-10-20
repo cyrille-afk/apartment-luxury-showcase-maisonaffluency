@@ -2342,8 +2342,11 @@ const TradeProductPage: React.FC = () => {
 
         <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
           {isLg ? (
-            <div className="sticky top-4 min-w-0">
+            <div className="min-w-0">
               {renderDesktopWorkspace()}
+              <section aria-label="Curator notes and logistics" className="mt-10 border-t border-border/50 pt-8">
+                {renderLowerDetails()}
+              </section>
             </div>
           ) : (
           <div className="relative self-start bg-background" ref={galleryScrollRef}>
@@ -3401,13 +3404,7 @@ const TradeProductPage: React.FC = () => {
 
           </div>
         </div>
-        {isLg ? (
-          <section aria-label="Curator notes and logistics" className="mt-16 border-t border-border/50 pt-10">
-            <div className="grid grid-cols-[minmax(0,55fr)_minmax(0,45fr)] gap-6 xl:gap-10 2xl:gap-14">
-              <div className="min-w-0">{renderLowerDetails()}</div>
-            </div>
-          </section>
-        ) : renderLowerDetails()}
+        {!isLg && renderLowerDetails()}
         {/* From the Same Maker — related picks */}
         {showTradePrice && relatedPicks.length > 0 && (() => {
           const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
