@@ -12,6 +12,7 @@ import FunnelPayLinkBlock from "@/components/trade/FunnelPayLinkBlock";
 import FunnelReminderPauseToggle from "@/components/trade/FunnelReminderPauseToggle";
 import SimulatePaymentLink from "@/components/trade/SimulatePaymentLink";
 import OutboundMetricsCard from "@/components/trade/OutboundMetricsCard";
+import SalesFunnelDeleteControl from "./SalesFunnelDeleteControl";
 
 import { suggestEmailName } from "@/lib/quoteContact";
 
@@ -57,6 +58,7 @@ const EntryCard = ({ entry, urgent = false, quoteCard = false }: { entry: Funnel
           <h3 className="line-clamp-2 font-display text-[15px] leading-tight text-foreground">
             {entry.label}
           </h3>
+          <SalesFunnelDeleteControl entry={entry} />
           <span className="shrink-0 font-body text-[10px] text-muted-foreground">
             {relative(entry.createdAt)}
           </span>
@@ -195,6 +197,7 @@ const AcquisitionEntryCard = ({ entry }: { entry: FunnelEntry }) => (
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="line-clamp-2 font-display text-[15px] leading-tight text-foreground">{entry.label}</h3>
+          <SalesFunnelDeleteControl entry={entry} />
           <span className="shrink-0 font-body text-[10px] text-muted-foreground">{relative(entry.createdAt)}</span>
         </div>
         <p className="mt-1 truncate font-body text-[11px] text-muted-foreground">{entry.sublabel}</p>
@@ -211,11 +214,11 @@ const AcquisitionEntryCard = ({ entry }: { entry: FunnelEntry }) => (
 );
 
 const TradeAdminSalesFunnel = () => {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, rolesLoaded } = useAuth();
   const [days, setDays] = useState(90);
   const { data, isLoading } = useSalesFunnel(days);
 
-  if (authLoading) {
+  if (!rolesLoaded) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <DotCircleLoader />
@@ -361,7 +364,7 @@ const TradeAdminSalesFunnel = () => {
                 </p>
               ) : (
                 <ul className="mt-3 space-y-2">
-                  {data!.reminders.slice(0, 8).map((r) => (
+                  {data?.reminders.slice(0, 8).map((r) => (
                     <li key={r.id} className="font-body text-xs text-muted-foreground">
                       <span className="text-foreground">{r.stage}</span> · {r.recipient_email} ·
                       reminder {r.reminder_number} · {relative(r.sent_at)}
