@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
 import { GRAPH, checkInstagram, getMetaToken } from "../_shared/metaToken.ts";
+import { parseMetaTokenInput } from "../_shared/metaTokenInput.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -22,8 +23,9 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { /* status */ }
 
   if (body.action === "save") {
-    let token = (body.token ?? "").trim();
-    if (!/^[A-Za-z0-9_\-|.]{40,}$/.test(token)) return json({ error: "That doesn't look like a Meta access token." }, 400);
+    const input = parseMetaTokenInput(body.token);
+    if (input.error) return json({ saved: false, error: input.error });
+    let token = input.token;
     const appId = Deno.env.get("META_APP_ID"), secret = Deno.env.get("META_APP_SECRET");
     if (appId && secret) {
       const ex = await fetch(`${GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${secret}&fb_exchange_token=${encodeURIComponent(token)}`).then((r) => r.json()).catch(() => null);

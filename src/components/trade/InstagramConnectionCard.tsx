@@ -23,6 +23,7 @@ export default function InstagramConnectionCard() {
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: ["instagram-connection-status"],
@@ -36,13 +37,24 @@ export default function InstagramConnectionCard() {
 
   const save = async () => {
     setSaving(true);
-    const { data: res, error } = await supabase.functions.invoke("instagram-connection", { body: { action: "save", token } });
-    setSaving(false);
-    if (error) { toast.error("Couldn't save the Instagram connection."); return; }
-    if (!res?.saved) { toast.error(`Not saved: ${res?.check?.message ?? "Meta rejected this login."}`); return; }
-    toast.success(`Connected as @${res.check.igUsername}. Automatic Instagram checks are working.`);
-    setToken(""); setOpen(false);
-    qc.setQueryData(["instagram-connection-status"], res.check);
+    setSaveError(null);
+    try {
+      const { data: res, error } = await supabase.functions.invoke("instagram-connection", { body: { action: "save", token } });
+      if (error) {
+        let detail: { error?: string; check?: Check } | null = null;
+        try { detail = await error.context?.json(); } catch { /* use safe fallback */ }
+        setSaveError(detail?.error ?? detail?.check?.message ?? "Couldn't save the connection. Please try again.");
+        return;
+      }
+      if (!res?.saved) { setSaveError(res?.error ?? res?.check?.message ?? "Meta rejected this login."); return; }
+      toast.success(`Connected as @${res.check.igUsername}. Automatic Instagram checks are working.`);
+      setToken(""); setOpen(false);
+      qc.setQueryData(["instagram-connection-status"], res.check);
+    } catch {
+      setSaveError("Couldn't reach the connection checker. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const ok = data?.state === "working";
@@ -81,10 +93,11 @@ export default function InstagramConnectionCard() {
             <li>Click <b>Generate Access Token</b> and approve, making sure the Maison Affluency Page and Instagram account are ticked.</li>
             <li>Copy the token and paste it below. We'll turn it into a 60-day login and test it before saving.</li>
           </ol>
-          <Input type="password" placeholder="Paste access token" value={token} onChange={(e) => setToken(e.target.value)} aria-label="Meta access token" />
+          <Input type="password" placeholder="Paste access token" value={token} onChange={(e) => { setToken(e.target.value); setSaveError(null); }} aria-label="Meta access token" aria-invalid={Boolean(saveError)} aria-describedby={saveError ? "instagram-save-error" : undefined} />
+          {saveError && <p id="instagram-save-error" role="alert" className="text-sm text-destructive">{saveError}</p>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={save} disabled={saving || token.trim().length < 40}>
+            <Button onClick={save} disabled={saving || !token.trim()}>
               {saving && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Test and save
             </Button>
           </div>
