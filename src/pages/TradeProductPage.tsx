@@ -2062,7 +2062,7 @@ const TradeProductPage: React.FC = () => {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-          <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 lg:sticky lg:top-24 self-start z-30 bg-background" ref={galleryScrollRef}>
+          <div className="sticky top-[max(1rem,env(safe-area-inset-top))] md:relative md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
               images={visibleImages}
               alt={product.title}
@@ -2190,51 +2190,88 @@ const TradeProductPage: React.FC = () => {
               );
             })()}
 
-            <section aria-label="Curator notes" className="hidden md:block mt-7 border-t border-border/50 pt-5">
-              <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
-              {/* Product page: notes read vertically beneath the gallery; the lightbox uses a separate three-column treatment. */}
-              <div className="flex flex-col gap-4">
-                {[
-                  { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
-                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
-                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
-                  const isLead = label === "Design Significance";
-                  return (
-                    <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
-                      <div
-                        className={cn(
-                          "mb-2 flex items-center justify-start gap-2"
-                        )}
-                      >
-
-                        <Icon
+          <div className="mt-10 flex flex-col gap-8">
+            <div>
+              <section aria-label="Curator notes" className="hidden md:block border-t border-border/50 pt-5">
+                <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
+                {/* Product page: notes read vertically beneath the gallery; the lightbox uses a separate three-column treatment. */}
+                <div className="flex flex-col gap-4">
+                  {[
+                    { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                    { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                    { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                  ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
+                    const isLead = label === "Design Significance";
+                    return (
+                      <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
+                        <div
                           className={cn(
-                            "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
-                            isLead ? "text-accent" : "text-muted-foreground/60"
-                          )}
-                          strokeWidth={1.25}
-                        />
-                        <h3
-                          className={cn(
-                            "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
-                            isLead && "font-bold"
+                            "mb-2 flex items-center justify-start gap-2"
                           )}
                         >
-                          {label}
-                        </h3>
+
+                          <Icon
+                            className={cn(
+                              "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
+                              isLead ? "text-accent" : "text-muted-foreground/60"
+                            )}
+                            strokeWidth={1.25}
+                          />
+                          <h3
+                            className={cn(
+                              "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
+                              isLead && "font-bold"
+                            )}
+                          >
+                            {label}
+                          </h3>
+                        </div>
+                        <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
+                          {text}
+                        </p>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+            <div className="flex flex-col gap-4">
+              {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
+              <CadAssetsSection productId={tradeProductId} productName={product.title} />
+
+
+              {/* Inline subtle nudge: Sample Requests live in Procurement */}
+              <p className="font-body text-[11px] text-muted-foreground text-center">
+                Need a material sample?{" "}
+                <Link
+                  to={sampleRequestUrl}
+                  className="underline underline-offset-2 hover:text-foreground transition-colors"
+                >
+                  Request via Procurement →
+                </Link>
+              </p>
+              <ShippingDetailsAccordion variant="row" />
+
+              {/* Origin only — lead time lives exclusively in the pricing block. */}
+              <div className="flex flex-col gap-2">
+                {(() => {
+                  const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, null);
+                  if (!handcrafted) return null;
+                  return (
+                    <div className="-mt-4 border-b border-border/60 py-4 flex items-start gap-5">
+                      {specIcon("✦", "mt-0.5")}
+                      <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                        <p>{handcrafted}</p>
                       </div>
-                      <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
-                        {text}
-                      </p>
-                    </article>
+                    </div>
                   );
-                })}
+                })()}
               </div>
-            </section>
+            </div>
+          </div>
           </div>
 
-          <div className="relative flex flex-col gap-4">
+          <div className="relative flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-2 [scrollbar-width:thin]">
             <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
                 <Link
@@ -3151,40 +3188,8 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
-            {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
-            <CadAssetsSection productId={tradeProductId} productName={product.title} />
-
-
-            {/* Inline subtle nudge: Sample Requests live in Procurement */}
-            <p className="font-body text-[11px] text-muted-foreground text-center">
-              Need a material sample?{" "}
-              <Link
-                to={sampleRequestUrl}
-                className="underline underline-offset-2 hover:text-foreground transition-colors"
-              >
-                Request via Procurement →
-              </Link>
-            </p>
-            <ShippingDetailsAccordion variant="row" />
-
-            {/* Origin only — lead time lives exclusively in the pricing block. */}
-            <div className="flex flex-col gap-2">
-              {(() => {
-                const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, null);
-                if (!handcrafted) return null;
-                return (
-                  <div className="-mt-4 border-b border-border/60 py-4 flex items-start gap-5">
-                    {specIcon("✦", "mt-0.5")}
-                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                      <p>{handcrafted}</p>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
           </div>
         </div>
-
         {/* From the Same Maker — related picks */}
         {showTradePrice && relatedPicks.length > 0 && (() => {
           const sameMakerLabel = (product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title)))
