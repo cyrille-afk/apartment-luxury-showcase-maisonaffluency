@@ -3465,8 +3465,19 @@ const TradeProductPage: React.FC = () => {
                 </div>
 
                 {/* Product grid — mobile: horizontal swipe rail */}
-                <div className="lg:col-span-8 order-3 lg:order-2">
-                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6 md:mx-0 md:px-0">
+                <div className="relative lg:col-span-8 order-3 lg:order-2">
+                  {relatedPicks.length > 3 && (
+                    <div className="mb-3 hidden justify-end gap-2 md:flex">
+                      {[-1, 1].map((d) => (
+                        <button key={d} type="button" aria-label={d < 0 ? "Previous pieces" : "Next pieces"}
+                          onClick={() => { const el = document.getElementById("same-designer-rail"); el?.scrollBy({ left: d * el.clientWidth, behavior: "smooth" }); }}
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:border-foreground">
+                          {d < 0 ? <ChevronLeft size={16} strokeWidth={1.5} /> : <ChevronRight size={16} strokeWidth={1.5} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div id="same-designer-rail" className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-6 md:mx-0 md:px-0">
                     {relatedPicks.slice(0, 6).map((rp) => (
                       <Link
                         key={rp.id}
