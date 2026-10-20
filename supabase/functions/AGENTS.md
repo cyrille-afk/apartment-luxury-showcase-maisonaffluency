@@ -11,4 +11,4 @@
 
 - Stripe rejection telemetry stores only unverified failure metadata; the watchdog reconciles live Stripe failures with local receipts and throttles only dispatched alerts — preserves fast acknowledgements.
 - Save provider availability and missing-live-event counts on each existing watchdog run, including healthy runs; delivery history must not depend on alert dispatch.
-- Meta/Instagram access tokens are read via `supabase/functions/_shared/metaToken.ts` (admin-saved `integration_tokens` row first, META_ACCESS_TOKEN secret fallback); the admin reconnect flow validates before saving — so a broken token can be replaced in-app without a redeploy.
+- All Instagram consumers read tokens via `_shared/metaToken.ts` (admin-saved connection first, secret fallback); media consumers resolve the linked Facebook Instagram business account and keep carousel requests on the same Graph host, with legacy Instagram Login routing only for the fallback secret — reconnecting must restore all features without mixing incompatible API logins.

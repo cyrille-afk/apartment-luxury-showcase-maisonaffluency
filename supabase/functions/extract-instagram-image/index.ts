@@ -1,11 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdmin } from "../_shared/auth.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getMetaToken, getInstagramMediaConnection } from "../_shared/metaToken.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 
@@ -77,8 +73,21 @@ type InstagramGraphMedia = {
 };
 
 async function resolveMediaUrlViaGraph(cleanUrl: string): Promise<{ url: string; method: string } | null> {
-  const accessToken = Deno.env.get("META_ACCESS_TOKEN");
+  const accessToken = await getMetaToken();
   if (!accessToken) return null;
+
+  // Resolve the connected account's posts directly, without depending on
+  // public oEmbed access to obtain a media ID first.
+  try {
+    const { graph, accountId } = await getInstagramMediaConnection(accessToken);
+    const recent = await fetchJson(`${graph}/${accountId}/media?fields=id,permalink,media_type,media_url,thumbnail_url,children{media_type,media_url,thumbnail_url}&limit=100&access_token=${encodeURIComponent(accessToken)}`, { signal: AbortSignal.timeout(15000) });
+    const post = (recent.data ?? []).find((media: { permalink?: string }) => media.permalink && normalizeInstagramUrl(media.permalink) === cleanUrl) as InstagramGraphMedia | undefined;
+    const child = post?.children?.data?.find((media) => media.media_type === "IMAGE" && media.media_url);
+    const image = child?.media_url ?? (post?.media_type === "VIDEO" ? post.thumbnail_url : post?.media_url ?? post?.thumbnail_url);
+    if (image) return { url: image, method: "graph-connected-account" };
+  } catch {
+    console.warn("Connected Instagram media unavailable; retaining existing post-image fallbacks.");
+  }
 
   try {
     const oembed = await fetchJson(
@@ -296,8 +305,8 @@ Deno.serve(async (req) => {
   }
 
   const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
   try {
