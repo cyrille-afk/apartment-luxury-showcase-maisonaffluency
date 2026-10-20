@@ -1,3 +1,4 @@
+import { parseGallerySearch, matchesSize } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -16,7 +17,7 @@ import { countTradeCollectionPieces, filterTradeProducts } from "@/lib/tradeFilt
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import CurrencyToggle, { type DisplayCurrency, convertCents, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
@@ -90,6 +91,7 @@ const StudioGallery = () => {
   const savedGallery = useRef(readTradeGalleryState(window.location.pathname)).current;
 
   const [search, setSearch] = useState(savedGallery.search ?? "");
+  const searchIntent = useMemo(() => parseGallerySearch(search), [search]);
   const [selectedBrand, setSelectedBrand] = useState(savedGallery.brand ?? "all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || savedGallery.category || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || savedGallery.subcategory || "all");
@@ -483,7 +485,7 @@ const StudioGallery = () => {
   const collectionCounts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return countTradeCollectionPieces(visible, {
-      search,
+      search: searchIntent.text,
       brand: routeBrandName || (selectedBrand === "all" ? null : selectedBrand),
       category: selectedCategory,
       subcategory: selectedSubcategory,
@@ -496,7 +498,7 @@ const StudioGallery = () => {
   const matchedProducts = useMemo(() => {
     const visible = allProducts.filter((p) => !isTradeProductMarkedHidden(p, hiddenTradeProductIds));
     return filterTradeProducts(visible, {
-      search,
+      search: searchIntent.text,
       brand: routeBrandName || (selectedBrand === "all" ? null : selectedBrand),
       category: selectedCategory,
       subcategory: selectedSubcategory,
@@ -515,7 +517,7 @@ const StudioGallery = () => {
       // Filter the shared public sequence, not the trade brand name: a credited
       // designer may feature a piece owned by a different atelier.
       const [kept] = filterTradeProducts([product], {
-        search,
+        search: searchIntent.text,
         category: selectedCategory,
         subcategory: selectedSubcategory,
         edition: selectedEdition,
@@ -524,19 +526,32 @@ const StudioGallery = () => {
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
+  // Budget/size phrases typed in search ("260 cm table under €20,000").
+  // Budget compares the price shown (trade or RRP, cheapest "From"); unpriced pieces can't be confirmed, so they drop out.
+  const fitsIntent = (p: TradeProduct) => {
+    if (searchIntent.sizeMm && !matchesSize(p.dimensions, searchIntent.sizeMm, searchIntent.sizeMode)) return false;
+    if (searchIntent.budgetCents) {
+      const price = getDisplayPrice(getProductPrice(p), p.brand_name);
+      if (!price || !price.cents) return false;
+      const cur = (searchIntent.budgetCurrency || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
+      if (price.currency !== cur && !fxRates[`${price.currency}_${cur}`]) return false;
+      if (convertCents(price.cents, price.currency, cur, fxRates) > searchIntent.budgetCents) return false;
+    }
+    return true;
+  };
   const filtered = useMemo(
     () => {
-      if (canonicalProducts) return canonicalProducts;
+      if (canonicalProducts) return canonicalProducts.filter(fitsIntent);
       // Trade-only designers have no public counterpart. Use their saved order.
       if (routeBrandName || selectedBrand !== "all") {
         return interleaveBySubcategory(sortCuratorPicks(
-          matchedProducts.map((p) => ({ ...p, sort_order: p.sort_order ?? null })),
+          matchedProducts.filter(fitsIntent).map((p) => ({ ...p, sort_order: p.sort_order ?? null })),
         ));
       }
-      return curateGrid(matchedProducts, (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]);
+      return curateGrid(matchedProducts.filter(fitsIntent), (p) => normalizeBrandToParent(p.brand_name).trim().toLowerCase(), (p) => imageTones[p.image_url || ""]);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [matchedProducts, canonicalProducts, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
+    [matchedProducts, canonicalProducts, fitsIntent, routeBrandName, selectedBrand, imageTones, Object.keys(imageTones).length],
   );
 
   // Explicit sort options layered on top of the curated sequence.
@@ -641,7 +656,7 @@ const StudioGallery = () => {
           <div className="flex min-w-0 items-center gap-3 w-full sm:w-[21rem]" data-testid="gallery-search-currency">
             <div className="relative min-w-0 flex-1">
               <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" aria-label="Search pieces" placeholder="Search pieces…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
+              <Input type="search" aria-label="Search pieces" placeholder="Search, e.g. 260 cm table under €20,000" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
             </div>
             <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
           </div>
