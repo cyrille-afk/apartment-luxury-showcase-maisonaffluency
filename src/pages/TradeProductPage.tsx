@@ -39,6 +39,7 @@ import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButt
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -787,6 +788,38 @@ const TradeProductPage: React.FC = () => {
       cancelled = true;
     };
   }, [(data as any)?.tradeProductId]);
+
+  // Resolve the finishes pictured in the active gallery photo so the 3D
+  // configurator opens with the real item's finishes applied.
+  useEffect(() => {
+    const pickId = (data as any)?.product?.id as string | undefined;
+    if (!pickId) {
+      setPicturedFinishImgs({ base: null, top: null });
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data: rows } = await (supabase as any)
+        .from("product_fabric_swatches_public")
+        .select("fabric_id, name, image_url, image_indices, category, is_active")
+        .eq("pick_id", pickId);
+      if (cancelled) return;
+      const active = (rows || []).filter(
+        (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
+      );
+      const shown = picturedFinishesForImage(active, galleryActiveIndex ?? 0);
+      const FRAME_RE = /^(cement stuc|glossy lacquer)\b/i;
+      const base = shown.filter((s: any) => FRAME_RE.test(s.name) || (s.category || "").toLowerCase() === "wood");
+      const top = shown.filter((s: any) => !base.includes(s));
+      setPicturedFinishImgs({
+        base: base.find((s: any) => s.image_url)?.image_url ?? null,
+        top: top.find((s: any) => s.image_url)?.image_url ?? null,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [(data as any)?.product?.id, galleryActiveIndex]);
 
 
 
@@ -2123,7 +2156,7 @@ const TradeProductPage: React.FC = () => {
               if (!resolvedGlbUrl) return null;
               const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
-                <details open className="mt-6 group border border-border rounded-md bg-muted/20">
+                <details className="mt-6 group border border-border rounded-md bg-muted/20">
                   <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-border">
                     <div className="flex items-center gap-2">
                       <Box size={14} className="text-foreground" />
@@ -2145,10 +2178,9 @@ const TradeProductPage: React.FC = () => {
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
                       fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
-                      baseTextureUrl={selectedWoodPrice?.image_url || previewWoodImg || null}
-                      topTextureUrl={selectedTopSwatch?.image_url || null}
+                      baseTextureUrl={selectedWoodPrice?.image_url || picturedFinishImgs.base || previewWoodImg || null}
+                      topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
                       materialRoles={resolvedRoles || undefined}
-                      autoOpen
                     />
                     <p className="mt-2 font-body text-[10px] leading-snug text-muted-foreground">
                       Pick a fabric or wood finish on the right — the 3D preview updates live.
