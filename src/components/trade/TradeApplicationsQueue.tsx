@@ -10,6 +10,7 @@ import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/Vis
 import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
 import InstagramConnectionCard from './InstagramConnectionCard';
+import { radarEvidence } from "@/lib/radarEvidence";
 import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
 import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
 import {
@@ -47,6 +48,28 @@ const PORTAL_FILTERS: [PortalFilter, string][] = [
   ["opened", "Opened from email"],
   ["not_opened", "Not opened"],
 ];
+
+const EFFECT_LABEL = { supports: "Supports", neutral: "No penalty", missing: "Not found" } as const;
+
+function EvidenceBreakdown({ a }: { a: Account }) {
+  const dna = Array.isArray(a.studio_aesthetic_dna) ? a.studio_aesthetic_dna[0] : a.studio_aesthetic_dna;
+  const rows = radarEvidence({ ...a, dnaStatus: dna?.status ?? null });
+  return (
+    <div className="mt-2 border-t border-border pt-2">
+      <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Evidence breakdown</p>
+      <ul className="space-y-1 text-xs">
+        {rows.map((r) => (
+          <li key={r.label} className="flex gap-2">
+            <span className={`w-20 shrink-0 uppercase tracking-wider text-[10px] ${r.effect === "supports" ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              {EFFECT_LABEL[r.effect]}
+            </span>
+            <span className="text-muted-foreground"><span className="text-foreground">{r.label}:</span> {r.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function priorityFor(score: number | null): { label: "High" | "Medium" | "Low"; variant: "default" | "secondary" | "destructive" } {
   if (score === null) return { label: "Low", variant: "secondary" };
@@ -302,11 +325,13 @@ export default function TradeApplicationsQueue() {
                         </Badge>
                       </div>
                       {a.radar_flag && <p className="text-muted-foreground">{a.radar_flag}</p>}
+                      <EvidenceBreakdown a={a} />
                     </>
                   ) : a.radar_status === "unverified" ? (
                     <div className="space-y-2 text-muted-foreground">
                       <Badge variant="outline" className="rounded-none text-[10px] uppercase tracking-wider">Unverified</Badge>
                       <p>{a.radar_flag ?? "Portfolio access unavailable. No score or priority assigned without evidence."}</p>
+                      <EvidenceBreakdown a={a} />
                     </div>
                   ) : a.radar_status === "failed" ? (
                     <p className="text-destructive">Scoring failed{a.radar_flag ? `: ${a.radar_flag}` : ""}</p>
