@@ -5,7 +5,7 @@ import { selectCuratedPairings, type PairingProduct } from "./curatedPairings";
 const option = { id: "finish-1", name: "Lacquer / Aged Brass", price_cents: 240000 };
 const rule = { id: "11111111-1111-4111-8111-111111111111", preferred_pick_id: "pick-1", enabled: true, source_category: "ceiling", target_category: "tables", sort_order: 0, finish_options: [option], finish_currency: "USD" };
 const ref = { ruleId: rule.id, optionId: option.id };
-const piece: PairingProduct = { id: "pick-1", title: "Segment Console Table", brand: "Apparatus", image: "/piece.jpg", path: "/designers/apparatus/segment" };
+const piece: PairingProduct = { id: "pick-1", title: "Segment Dining Table", brand: "Apparatus", image: "/piece.jpg", path: "/designers/apparatus/segment" };
 const primary = { ...piece, id: "primary", title: "Tassel 57 Pendant" };
 beforeEach(() => { localStorage.clear(); sessionStorage.clear(); });
 
