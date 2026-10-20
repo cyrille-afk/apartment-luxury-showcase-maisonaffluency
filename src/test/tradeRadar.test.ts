@@ -21,14 +21,14 @@ describe('Instagram scoring evidence', () => {
   it('a retry that gains portfolio evidence produces a real score', async () => {
     const body = new ReadableStream({
       start(c) {
-        c.enqueue(new TextEncoder().encode('data: {"type":"response.output_text.delta","delta":"{\\"confidence\\":88,\\"flag\\":\\"Built villas across three countries.\\"}"}\ndata: [DONE]\n'));
+        c.enqueue(new TextEncoder().encode('data: {"type":"response.output_text.delta","delta":"{\\"project_points\\":55,\\"project_basis\\":\\"Villas in three countries.\\",\\"footprint_points\\":18,\\"footprint_basis\\":\\"Press.\\",\\"flag\\":\\"Built villas.\\"}"}\ndata: [DONE]\n'));
         c.close();
       },
     });
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, body }));
     vi.stubGlobal('Deno', { env: { get: () => 'test-key' } });
     const result = await scoreTradeApplication({ ...input, evidence: 'Portfolio: named built projects.' });
-    expect(result).toMatchObject({ ok: true, score: 88 });
+    expect(result).toMatchObject({ ok: true, score: 73 });
   });
   it('a retry while access is still blocked stays unverified and never calls AI', async () => {
     const fetch = vi.fn();

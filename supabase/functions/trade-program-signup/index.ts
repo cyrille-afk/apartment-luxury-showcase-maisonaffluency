@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
       if (!radar.ok) console.error('trade radar failed', radar.error)
       if (acct?.id) {
         await supabase.from('trade_accounts').update(radar.ok
-          ? { radar_score: radar.score, radar_flag: radar.flag, radar_status: radar.score === null ? 'unverified' : 'scored', radar_scored_at: new Date().toISOString() }
+          ? { radar_score: radar.score, radar_flag: radar.flag, radar_breakdown: radar.breakdown ?? null, radar_status: radar.score === null ? 'unverified' : 'scored', radar_scored_at: new Date().toISOString() }
           : { radar_status: 'failed', radar_flag: radar.error.slice(0, 300), radar_scored_at: new Date().toISOString() }
         ).eq('id', acct.id)
       }
