@@ -9,6 +9,7 @@ import { CheckCircle2, Loader2, PauseCircle, RefreshCw, X } from "lucide-react";
 import VisualThemeAnalysis, { type VisualThemeDna } from "@/components/trade/VisualThemeAnalysis";
 import { WaitingClock } from "@/components/trade/TimeToApproval";
 import { updateTradeApplication, declineAndDeleteTradeApplication, resendTradeActivation } from "@/lib/tradeApplicationActions";
+import InstagramConnectionCard from './InstagramConnectionCard';
 import ApplicationNotificationDrawer from './ApplicationNotificationDrawer';
 import { createApplicationDraft, type NotificationDraft } from '../../../supabase/functions/_shared/applicationNotificationCopy';
 import {
@@ -236,6 +237,7 @@ export default function TradeApplicationsQueue() {
           </button>
         </div>
       </header>
+      <InstagramConnectionCard />
 
       {isLoading ? (
         <div className="flex items-center gap-2 px-6 py-8 text-sm text-muted-foreground">

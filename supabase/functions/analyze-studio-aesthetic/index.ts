@@ -6,6 +6,7 @@
 // Invoked by `trade-program-signup` (service role) on step-3 completion, or by
 // an admin from the Trade Applications queue (re-run).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getMetaToken } from "../_shared/metaToken.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
@@ -80,7 +81,7 @@ type ScrapeResult = { text: string; images: string[]; notes: string[]; screensho
 // Graph API's business_discovery (works for public Business/Creator accounts).
 async function instagramViaGraph(handle: string): Promise<ScrapeResult> {
   const notes: string[] = [];
-  const token = Deno.env.get("META_ACCESS_TOKEN");
+  const token = await getMetaToken();
   if (!token) return { text: "", images: [], notes: ["Meta token not configured"] };
   const G = "https://graph.facebook.com/v21.0";
   try {
@@ -330,7 +331,7 @@ serve(async (req) => {
   // alone: keep prior images and manual tags, mark it retryable.
   if (!text && images.length === 0 && screenshots.length === 0) {
     if (resolveStudioSource(account.website_or_ig).instagramHandle) {
-      const error = "Instagram profile unverified — access unavailable. This is not negative evidence and does not lower the studio score.";
+      const error = "Instagram not checked automatically — our Instagram connection needs reconnecting (see Automatic Instagram checks above). The studio is not marked down for this.";
       await supabase.from("studio_aesthetic_dna").update({ status: "failed", error }).eq("trade_account_id", id);
       const update = unverifiedPortfolioUpdate(Boolean(dna?.analyzed_at));
       if (Object.keys(update).length) await supabase.from("trade_accounts").update(update).eq("id", id);
