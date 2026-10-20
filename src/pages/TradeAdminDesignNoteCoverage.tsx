@@ -69,7 +69,7 @@ export default function TradeAdminDesignNoteCoverage() {
   const { user, isAdmin, rolesLoaded } = useAuth();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home">("all");
+  const [filter, setFilter] = useState<"all" | "complete" | "partial" | "none" | "home" | `missing-${(typeof FIELDS)[number]}`>("all");
   const enabled = !!user && isAdmin;
 
   const { data, isLoading } = useQuery({
@@ -98,12 +98,14 @@ export default function TradeAdminDesignNoteCoverage() {
 
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
+    const missingField = filter.startsWith("missing-") ? (filter.slice(8) as (typeof FIELDS)[number]) : null;
     return (data ?? []).filter((r) => {
       const c = FIELDS.filter((f) => r.fields[f]).length;
       if (filter === "complete" && c !== 4) return false;
       if (filter === "partial" && (c === 0 || c === 4)) return false;
       if (filter === "none" && c !== 0) return false;
       if (filter === "home" && !r.sources.some((x) => isHomePageUrl(x.url))) return false;
+      if (missingField && r.fields[missingField]) return false;
       return !term || `${r.title} ${r.designer}`.toLowerCase().includes(term);
     }).sort((a, b) => FIELDS.filter((f) => b.fields[f]).length - FIELDS.filter((f) => a.fields[f]).length || a.title.localeCompare(b.title));
   }, [data, q, filter]);
@@ -138,6 +140,15 @@ export default function TradeAdminDesignNoteCoverage() {
             {f === "home" ? `home-page citations (${all.filter((r) => r.sources.some((x) => isHomePageUrl(x.url))).length})` : f}
           </Button>
         ))}
+        <span className="text-xs text-muted-foreground px-1">missing:</span>
+        {FIELDS.map((f) => {
+          const n = all.filter((r) => !r.fields[f]).length;
+          return (
+            <Button key={f} size="sm" variant={filter === `missing-${f}` ? "default" : "outline"} onClick={() => setFilter(`missing-${f}`)}>
+              {f} ({n})
+            </Button>
+          );
+        })}
         <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
       </div>
       {isLoading ? <p className="text-sm">Loading…</p> : (
