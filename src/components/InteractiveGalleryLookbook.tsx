@@ -872,7 +872,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className="absolute left-[calc(100%+2rem)] top-0 z-40 hidden h-full w-[340px] flex-col gap-4 md:flex"
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
                             <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
