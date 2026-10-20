@@ -738,8 +738,12 @@ const TradeProductPage: React.FC = () => {
   // Preview-only default fabric/wood textures for the 3D configurator so it
   // opens with a plausible finish applied before the user picks a swatch.
   // Does NOT drive pricing or the "Draft Tearsheet" button.
-  const [previewFabricImg, setPreviewWoodImgPlaceholder] = useState<string | null>(null);
+  const [previewFabricImg, setPreviewFabricImg] = useState<string | null>(null);
   const [previewWoodImg, setPreviewWoodImg] = useState<string | null>(null);
+  // Pictured finishes of the active gallery photo — the 3D viewer's default
+  // textures, so the model opens looking like the real item until the user
+  // picks different swatches.
+  const [picturedFinishImgs, setPicturedFinishImgs] = useState<{ base: string | null; top: string | null }>({ base: null, top: null });
   const handlePreviewSwatchesResolved = useCallback(
     (p: { fabricImageUrl: string | null; woodImageUrl: string | null }) => {
       setPreviewFabricImg(p.fabricImageUrl);
