@@ -477,6 +477,22 @@ const Product3DViewer: React.FC<Props> = ({
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Interactive 3D Model
         </span>
+        {opened && ready && (
+          <button
+            type="button"
+            onClick={() => setLocked((s) => !s)}
+            aria-pressed={locked}
+            title={locked ? "Unlock camera controls" : "Lock camera controls"}
+            className={`ml-auto flex items-center gap-1 rounded-sm border px-2 py-1 font-body text-[10px] uppercase tracking-[0.12em] transition-colors ${
+              locked
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {locked ? <Lock size={11} /> : <LockOpen size={11} />}
+            {locked ? "Locked" : "Lock"}
+          </button>
+        )}
       </div>
       <div className="relative w-full aspect-square">
         {!opened ? (
@@ -508,8 +524,7 @@ const Product3DViewer: React.FC<Props> = ({
             src={url}
             alt={alt}
             poster={poster || undefined}
-            camera-controls
-            auto-rotate
+            {...(!locked ? { "camera-controls": true, "auto-rotate": true } : {})}
             ar
             shadow-intensity="1"
             exposure="1"
@@ -526,7 +541,9 @@ const Product3DViewer: React.FC<Props> = ({
       </div>
       <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
         {opened
-          ? "Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)"
+          ? locked
+            ? "Camera locked — unlock above to rotate or zoom"
+            : "Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)"
           : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
 
