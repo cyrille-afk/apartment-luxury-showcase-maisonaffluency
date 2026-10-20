@@ -222,7 +222,10 @@ const TradeDashboard = () => {
   const walkthroughPreviewRef = useRef<WalkthroughCardPreviewHandle>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }>>({});
+  // Cached overrides render instantly; until loaded, no default cover shows (prevents old-cover flash).
+  const [heroOverrides, setHeroOverrides] = useState<Record<string, { image_url: string; gravity: string }> | null>(() => {
+    try { return JSON.parse(localStorage.getItem("ma-dash-hero-overrides-v1") || "null"); } catch { return null; }
+  });
   const [studioStats, setStudioStats] = useState<{ count: number; latestImage: string | null }>({ count: 0, latestImage: null });
   const [spendCents, setSpendCents] = useState<number | null>(null);
 
@@ -262,11 +265,10 @@ const TradeDashboard = () => {
         .from("section_heroes")
         .select("section_key, image_url, gravity")
         .like("section_key", "dash-%");
-      if (heroes) {
-        const map: Record<string, { image_url: string; gravity: string }> = {};
-        heroes.forEach((h: any) => { map[h.section_key] = { image_url: h.image_url, gravity: h.gravity }; });
-        setHeroOverrides(map);
-      }
+      const map: Record<string, { image_url: string; gravity: string }> = {};
+      (heroes || []).forEach((h: any) => { map[h.section_key] = { image_url: h.image_url, gravity: h.gravity }; });
+      setHeroOverrides(map);
+      if (heroes) { try { localStorage.setItem("ma-dash-hero-overrides-v1", JSON.stringify(map)); } catch { /* ignore */ } }
 
       // Fetch brands
       const { data: docs } = await supabase
@@ -357,6 +359,7 @@ const TradeDashboard = () => {
   }, []);
 
   const getCardImage = (card: typeof DASH_CARDS[number]) => {
+    if (!heroOverrides) return "";
     const override = heroOverrides[card.key];
     if (override) return override.image_url;
     // 3D Studio: editorial brand fallback. Latest render surfaced inside the page.
@@ -367,7 +370,7 @@ const TradeDashboard = () => {
   };
 
   const getCardPosition = (card: typeof DASH_CARDS[number]) => {
-    const override = heroOverrides[card.key];
+    const override = heroOverrides?.[card.key];
     const gravity = override ? override.gravity : card.defaultGravity;
     return GRAVITY_TO_POSITION[gravity] || "";
   };
