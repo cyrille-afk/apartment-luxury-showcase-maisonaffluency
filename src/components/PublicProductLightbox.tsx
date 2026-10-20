@@ -37,6 +37,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import { designerBrowsePath, productBrowsePath } from "@/lib/tradeBrowsing";
 import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
+import DimensionText from "@/components/product/DimensionText";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage.
  *  Accents are transliterated (GÉLULE → gelule) so the generated URL matches
@@ -213,13 +214,8 @@ const DimensionsButtonGrid = ({
               )}
             >
               <p className="font-body text-sm leading-snug text-foreground">
-                {d.metric}
+                <DimensionText text={`${d.metric}${d.imperial ? ` | ${d.imperial}` : ""}`} />
               </p>
-              {d.imperial && (
-                <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-                  {d.imperial}
-                </p>
-              )}
               {d.qual && (
                 <p className="font-body text-[10px] text-muted-foreground/70 mt-0.5">
                   {d.qual}
