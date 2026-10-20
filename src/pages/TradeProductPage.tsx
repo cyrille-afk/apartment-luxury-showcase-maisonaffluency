@@ -20,6 +20,8 @@ import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
   Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
   Maximize2 as FsIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { buildProductCuratorNotes } from "@/lib/productCuratorNotes";
 import { renderParagraph } from "@/components/EditorialBiography";
