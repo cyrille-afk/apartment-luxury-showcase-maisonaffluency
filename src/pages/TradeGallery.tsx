@@ -637,7 +637,14 @@ const StudioGallery = () => {
 
       <DuplicateProductsBanner groups={duplicateGroups} />
 
-        <div className="flex items-center justify-end gap-2 mt-2 mb-1">
+        <div className="flex items-center justify-between gap-3 mt-2 mb-3">
+          <div className="flex min-w-0 items-center gap-3 w-full sm:w-[21rem]" data-testid="gallery-search-currency">
+            <div className="relative min-w-0 flex-1">
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input type="search" aria-label="Search pieces" placeholder="Search pieces…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
+            </div>
+            <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
+          </div>
           <button
             onClick={() => setDrawerOpen(true)}
             className="relative p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
@@ -657,14 +664,7 @@ const StudioGallery = () => {
       {/* Primary toolbar: search/currency, filters, then results/view controls. */}
       <div className="mb-4 border-y border-border py-4" data-testid="gallery-filter-toolbar">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex min-w-0 items-center gap-3 xl:w-[21rem] xl:shrink-0" data-testid="gallery-search-currency">
-            <div className="relative min-w-0 flex-1">
-              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" aria-label="Search pieces" placeholder="Search pieces…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
-            </div>
-            <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
-          </div>
-          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 xl:flex-1" data-testid="gallery-primary-filters">
+          <div className={cn("grid min-w-0 grid-cols-1 gap-3 xl:flex-1", subcategories.length > 0 ? "sm:grid-cols-4" : "sm:grid-cols-3")} data-testid="gallery-primary-filters">
             <div className="min-w-0 [&>div]:w-full">
               {productsLoading ? (
                 <div className={`${filterInputClass} gallery-filter-pill flex items-center rounded-full text-muted-foreground`} aria-busy="true">Loading designers…</div>
@@ -673,6 +673,7 @@ const StudioGallery = () => {
               )}
             </div>
             <GalleryFilterSelect value={selectedCategory} onChange={(value) => { setSelectedCategory(value); setSelectedSubcategory("all"); }} label="Filter by category" allLabel="All Categories" options={categories} />
+            {subcategories.length > 0 && <GalleryFilterSelect value={selectedSubcategory} onChange={setSelectedSubcategory} label="Filter by subcategory" allLabel="All Subcategories" options={subcategories} />}
             <GalleryFilterSelect value={selectedEdition} onChange={setSelectedEdition} label="Filter by collection or edition" allLabel="All Collections" options={editions} counts={editionCounts} allCount={collectionCounts.total} />
           </div>
           <div className="ml-auto flex shrink-0 items-center justify-end gap-3" data-testid="gallery-view-controls">
@@ -684,9 +685,6 @@ const StudioGallery = () => {
           </div>
         </div>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center" data-testid="gallery-secondary-tools">
-          {subcategories.length > 0 && (
-            <div className="w-full sm:w-52"><GalleryFilterSelect value={selectedSubcategory} onChange={setSelectedSubcategory} label="Filter by subcategory" allLabel="All Subcategories" options={subcategories} /></div>
-          )}
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort pieces" className={`${filterInputClass} text-base sm:w-52 sm:text-sm`}>
             <option value="curated">Sort: Curated order</option>
             <option value="designer">Sort: Designer A–Z</option>
