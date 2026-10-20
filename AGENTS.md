@@ -52,6 +52,7 @@
 - Product configuration sheets match active linked samples through the product-page finish normalizer with ambiguity rejection, retaining original variant values for selection/pricing — prevents initials replacing existing sample photos.
 - Application evidence uses the shared studio-source resolver for bare handles, @handles and Instagram URLs; reader errors report provider failures rather than inferred origin blocking — prevents invalid-host requests.
 - Instagram form-only radar returns no numeric score; unavailable retrieval marks radar unverified only without prior completed evidence, preserving evidence-backed scores and audit reader failures — prevents access failures becoming adverse studio assessments.
+- Instagram reconnect treats access tokens as opaque and delegates validity to Meta; obvious paste mistakes return recoverable unsaved responses and display inline, never exposing tokens or replacing a working connection — avoids guessed token formats and page-level errors.
 <!-- LOVABLE:END -->
 - Felix sourcing matching/ranking runs only in the `felix-sourcing` edge function; the client receives final results only — keeps matching rules out of the browser bundle.
 - No standalone Collectibles page: collectibles live only in the unified designers directory and shared product templates; /collectibles redirects to /designers.
