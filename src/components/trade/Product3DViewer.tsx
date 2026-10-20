@@ -123,12 +123,6 @@ interface Props {
    * matched for the current swatch. Intended for admin/debug use.
    */
   debug?: boolean;
-  /**
-   * Surface tone of the surrounding panel. "light" (default) matches the white
-   * workspace; "dark" matches the product page's dark 3D stage so the viewer's
-   * chrome stays legible on it.
-   */
-  tone?: "light" | "dark";
 }
 
 
@@ -193,7 +187,6 @@ const Product3DViewer: React.FC<Props> = ({
   onMaterialsDiscovered,
   autoOpen = false,
   debug = false,
-  tone = "light",
 }) => {
   const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
@@ -477,41 +470,11 @@ const Product3DViewer: React.FC<Props> = ({
     </div>
   );
 
-  const dark = tone === "dark";
-  /** Same structure, chrome tuned for a light or a dark surface. */
-  const ui = {
-    frame: dark ? "border-trade-stage-foreground/15 bg-transparent" : "border-border bg-muted/30",
-    header: dark
-      ? "border-trade-stage-foreground/15 bg-trade-stage-foreground/5"
-      : "border-border bg-background/50",
-    headerIcon: dark ? "text-gold-bright" : "text-muted-foreground",
-    headerLabel: dark ? "text-trade-stage-foreground/85" : "text-muted-foreground",
-    lockOn: dark
-      ? "border-trade-stage-foreground bg-trade-stage-foreground text-trade-stage"
-      : "border-foreground bg-foreground text-background",
-    lockOff: dark
-      ? "border-trade-stage-foreground/25 text-trade-stage-foreground/80 hover:text-trade-stage-foreground"
-      : "border-border text-muted-foreground hover:text-foreground",
-    posterFallback: dark ? "bg-trade-stage-foreground/10" : "bg-muted/40",
-    hint: dark
-      ? "text-trade-stage-foreground border-trade-stage-foreground/15"
-      : "text-muted-foreground border-border",
-    note: dark
-      ? "bg-trade-stage-foreground/5 text-trade-stage-foreground/80"
-      : "bg-muted/40 text-muted-foreground",
-    debugBar: dark
-      ? "bg-trade-stage-foreground/5 border-trade-stage-foreground/15"
-      : "bg-background/60 border-border",
-    debugToggle: dark
-      ? "text-trade-stage-foreground/80 hover:text-trade-stage-foreground"
-      : "text-muted-foreground hover:text-foreground",
-  };
-
   return (
-    <div className={`border rounded-md overflow-hidden ${ui.frame}`}>
-      <div className={`flex items-center gap-2 px-3 py-2 border-b ${ui.header}`}>
-        <Box size={13} className={ui.headerIcon} />
-        <span className={`font-body text-[11px] uppercase tracking-[0.12em] ${ui.headerLabel}`}>
+    <div className="border border-border rounded-md overflow-hidden bg-muted/30">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-background/50">
+        <Box size={13} className="text-muted-foreground" />
+        <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Interactive 3D Model
         </span>
         {opened && ready && (
@@ -521,7 +484,9 @@ const Product3DViewer: React.FC<Props> = ({
             aria-pressed={locked}
             title={locked ? "Unlock camera controls" : "Lock camera controls"}
             className={`ml-auto flex items-center gap-1 rounded-sm border px-2 py-1 font-body text-[10px] uppercase tracking-[0.12em] transition-colors ${
-              locked ? ui.lockOn : ui.lockOff
+              locked
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             {locked ? <Lock size={11} /> : <LockOpen size={11} />}
@@ -546,7 +511,7 @@ const Product3DViewer: React.FC<Props> = ({
                 className="absolute inset-0 h-full w-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
               />
             ) : (
-              <div className={`absolute inset-0 ${ui.posterFallback}`} />
+              <div className="absolute inset-0 bg-muted/40" />
             )}
             <span className="relative z-10 flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 border border-border shadow-sm font-body text-[11px] uppercase tracking-[0.12em] text-foreground group-hover:bg-background transition-colors">
               <Box size={13} />
@@ -574,7 +539,7 @@ const Product3DViewer: React.FC<Props> = ({
           </div>
         )}
       </div>
-      <p className={`px-3 py-2 font-body text-[10px] border-t ${ui.hint}`}>
+      <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
         {opened
           ? locked
             ? "Camera locked — unlock above to rotate or zoom"
@@ -595,8 +560,8 @@ const Product3DViewer: React.FC<Props> = ({
         </div>
       )}
       {opened && !hasExplicitRoles && autoTagged && (
-        <div className={`px-3 py-2 border-t ${ui.note}`}>
-          <p className="font-body text-[10px] leading-snug">
+        <div className="px-3 py-2 border-t border-border bg-muted/40">
+          <p className="font-body text-[10px] leading-snug text-muted-foreground">
             Material roles auto-detected from texture names / base colours.
             For a permanent mapping, ask an admin to tag roles in the GLB
             manager.
@@ -605,11 +570,11 @@ const Product3DViewer: React.FC<Props> = ({
       )}
 
       {debug && debugInfo && (
-        <div className={`border-t ${ui.debugBar}`}>
+        <div className="border-t border-border bg-background/60">
           <button
             type="button"
             onClick={() => setDebugOpen((s) => !s)}
-            className={`w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] transition-colors ${ui.debugToggle}`}
+            className="w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <span>
               Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} · top {debugInfo.top.matched.length} / {debugInfo.all.length}
