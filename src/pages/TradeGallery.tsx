@@ -1,4 +1,4 @@
-import { parseGallerySearch, matchesSize } from "@/lib/gallerySearchIntent";
+import { parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -168,8 +168,8 @@ const StudioGallery = () => {
   }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   // Price lookup from trade_products table
-  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }>>(new Map());
-  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }[]>([]);
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null; variants?: PricedVariant[] }>>(new Map());
+  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null; variants?: PricedVariant[] }[]>([]);
 
   const normalizeName = (s: string) =>
     s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
@@ -187,11 +187,11 @@ const StudioGallery = () => {
       .from("designer_curator_picks")
       .select("title, trade_price_cents, currency, price_prefix, size_variants, designers(name, founder)");
 
-    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }>();
-    const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }[] = [];
+    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null; variants?: PricedVariant[] }>();
+    const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null; variants?: PricedVariant[] }[] = [];
 
-    const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null, brand_name?: string | null) => {
-      const entry = { name, cents, currency, price_unit, price_prefix, brand_name };
+    const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null, brand_name?: string | null, variants?: PricedVariant[]) => {
+      const entry = { name, cents, currency, price_unit, price_prefix, brand_name, variants };
       entries.push(entry);
       const aliases = new Set([name, stripDesignerSuffix(name)].filter(Boolean));
       for (const alias of aliases) {
@@ -204,21 +204,21 @@ const StudioGallery = () => {
     for (const p of cpData ?? []) {
       const designer = Array.isArray((p as any).designers) ? (p as any).designers[0] : (p as any).designers;
       const brandName = designer?.name ? normalizeBrandToParent(designer.name) : null;
+      const variants = Array.isArray((p as any).size_variants) ? ((p as any).size_variants as PricedVariant[]) : [];
       if (p.trade_price_cents) {
-        addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix, brandName);
+        addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix, brandName, variants);
         continue;
       }
       // Fallback: derive a "from" price from size_variants when the row-level
       // trade_price_cents wasn't filled in but per-variant prices exist
       // (e.g. Niko Sofa where each size has its own price).
-      const variants = Array.isArray((p as any).size_variants) ? ((p as any).size_variants as any[]) : [];
       const variantPrices = variants
         .map((v) => Number(v?.price_cents))
         .filter((n) => Number.isFinite(n) && n > 0);
       if (variantPrices.length > 0) {
         const minPrice = Math.min(...variantPrices);
         const prefix = variantPrices.length > 1 ? (p.price_prefix || "from") : p.price_prefix;
-        addEntry(p.title, minPrice, p.currency, undefined, prefix, brandName);
+        addEntry(p.title, minPrice, p.currency, undefined, prefix, brandName, variants);
       }
     }
 
@@ -527,17 +527,23 @@ const StudioGallery = () => {
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
   // Budget/size phrases typed in search ("260 cm table under €20,000").
-  // Budget compares the price shown (trade or RRP, cheapest "From"); unpriced pieces can't be confirmed, so they drop out.
+  // Budget compares the shown price mode (trade or RRP) of the matching size; unpriced pieces can't be confirmed, so they drop out.
   const fitsIntent = (p: TradeProduct) => {
-    if (searchIntent.sizeMm && !matchesSize(p.dimensions, searchIntent.sizeMm, searchIntent.sizeMode)) return false;
-    if (searchIntent.budgetCents) {
-      const price = getDisplayPrice(getProductPrice(p), p.brand_name);
-      if (!price || !price.cents) return false;
-      const cur = (searchIntent.budgetCurrency || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
-      if (price.currency !== cur && !fxRates[`${price.currency}_${cur}`]) return false;
-      if (convertCents(price.cents, price.currency, cur, fxRates) > searchIntent.budgetCents) return false;
+    const { sizeMm, sizeMode, budgetCents } = searchIntent;
+    if (!sizeMm && !budgetCents) return true;
+    const base = getProductPrice(p);
+    const variants = (base as { variants?: PricedVariant[] } | null)?.variants;
+    if (sizeMm && !budgetCents) {
+      return matchesSize(p.dimensions, sizeMm, sizeMode) ||
+        (variants || []).some((v) => [v.label, v.base, v.top].some((t) => matchesSize(t, sizeMm, sizeMode)));
     }
-    return true;
+    // Budget is tested against the matching size's own price, never the cheapest "From".
+    const cents = priceForSize(base?.cents ?? null, p.dimensions, variants, sizeMm, sizeMode);
+    if (!base || !cents) return false;
+    const price = getDisplayPrice({ ...base, cents }, p.brand_name)!;
+    const cur = (searchIntent.budgetCurrency || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
+    if (price.currency !== cur && !fxRates[`${price.currency}_${cur}`]) return false;
+    return convertCents(price.cents, price.currency, cur, fxRates) <= budgetCents!;
   };
   const filtered = useMemo(
     () => {

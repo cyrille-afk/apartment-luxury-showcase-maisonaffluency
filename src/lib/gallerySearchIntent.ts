@@ -93,3 +93,26 @@ export function matchesSize(dimensions: string | undefined | null, sizeMm: numbe
   if (mode === "max") return lengths.some((l) => l <= sizeMm);
   return lengths.some((l) => Math.abs(l - sizeMm) <= SIZE_TOLERANCE_MM);
 }
+
+export interface PricedVariant { label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }
+
+/**
+ * Price to test against a budget: the cheapest variant whose size matches the
+ * searched dimensions (finish unspecified), else the base price when the
+ * product's own dimensions match. null = size not offered / no price.
+ */
+export function priceForSize(
+  baseCents: number | null,
+  dimensions: string | undefined | null,
+  variants: PricedVariant[] | undefined,
+  sizeMm: number | null,
+  mode: GallerySearchIntent["sizeMode"],
+): number | null {
+  if (!sizeMm) return baseCents;
+  const sized = (variants || []).filter((v) =>
+    Number(v.price_cents) > 0 && [v.label, v.base, v.top].some((t) => matchesSize(t, sizeMm, mode)));
+  if (sized.length) return Math.min(...sized.map((v) => Number(v.price_cents)));
+  // Variants list sizes but none match → this size isn't offered.
+  if ((variants || []).some((v) => [v.label, v.base, v.top].some((t) => planLengthsMm(t).length))) return null;
+  return matchesSize(dimensions, sizeMm, mode) ? baseCents : null;
+}
