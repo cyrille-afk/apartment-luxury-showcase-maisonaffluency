@@ -11,6 +11,7 @@
  *   2. sessionStorage("trade_product_from_path") fallback for refresh resilience
  *   3. /trade/gallery as final fallback
  */
+import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
@@ -619,6 +620,7 @@ const TradeProductPage: React.FC = () => {
   }, [stateFrom]);
 
   const { data, isLoading } = useTradeProductBySlug(tradeProductIdParam, designerSlug, productSlug);
+  const designNotes = useProductDesignNotes((data as any)?.product?.id);
 
   // ── Pricing display state ──
   const displayCurrency = productDisplayPolicy(false, "EUR").currency as DisplayCurrency;
@@ -1484,6 +1486,16 @@ const TradeProductPage: React.FC = () => {
     category: product.category,
     subcategory: product.subcategory,
   });
+  const curatorNoteSections = (designNotes.length > 0
+    ? [
+        ...designNotes.map((n, i) => ({ label: n.label as string, text: n.text as string | null, Icon: [Award, Compass, FileText, FileText][i] ?? FileText })),
+        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+      ]
+    : [
+        { label: "Design Significance", text: curatorNotes.significance as string | null, Icon: Award },
+        { label: "Spatial Calculation", text: curatorNotes.spatial as string | null, Icon: Compass },
+        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+      ]).filter(({ text }) => Boolean(text));
 
   const compareItem: CompareItem = {
     pick: {
@@ -2084,12 +2096,8 @@ const TradeProductPage: React.FC = () => {
               <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
               {/* Product page: notes read vertically beneath the gallery; the lightbox uses a separate three-column treatment. */}
               <div className="grid grid-cols-1 gap-4">
-                {[
-                  { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
-                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
-                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
-                  const isLead = label === "Design Significance";
+                {curatorNoteSections.map(({ label, text, Icon }, noteIdx) => {
+                  const isLead = noteIdx === 0;
                   return (
                     <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
                       <div

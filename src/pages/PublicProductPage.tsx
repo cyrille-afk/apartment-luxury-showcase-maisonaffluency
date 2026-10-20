@@ -1,3 +1,4 @@
+import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import React, { useState, useEffect, useRef } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
@@ -1376,6 +1377,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     navigate,
   ]);
   const { data: visiblePublicRrp } = usePublicRrp(data?.product?.id);
+  const designNotes = useProductDesignNotes(data?.product?.id);
   const presentationPricing = tradeResult.data?.pricing;
   const publicRrpRow = presentation ? {
     rrp_price_cents: presentationPricing?.rrp_price_cents ?? null,
@@ -1807,6 +1809,16 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     category: product.category,
     subcategory: product.subcategory,
   });
+  const curatorNoteSections = (designNotes.length > 0
+    ? [
+        ...designNotes.map((n, i) => ({ label: n.label as string, text: n.text as string | null, Icon: [Award, Compass, FileText, FileText][i] ?? FileText })),
+        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+      ]
+    : [
+        { label: "Design Significance", text: curatorNotes.significance as string | null, Icon: Award },
+        { label: "Spatial Calculation", text: curatorNotes.spatial as string | null, Icon: Compass },
+        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+      ]).filter(({ text }) => Boolean(text));
 
   const compareItem: CompareItem = {
     pick: {
@@ -2608,12 +2620,8 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                   <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
                   {/* Product page: notes read vertically beneath the gallery; only the lead note is highlighted. */}
                   <div className="flex flex-col gap-4">
-                    {[
-                      { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
-                      { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
-                      { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-                    ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
-                      const isLead = label === "Design Significance";
+                    {curatorNoteSections.map(({ label, text, Icon }, noteIdx) => {
+                      const isLead = noteIdx === 0;
                       return (
                         <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
                           <div
