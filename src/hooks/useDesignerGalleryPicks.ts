@@ -6,10 +6,11 @@ import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { interleaveBySubcategory, sortCuratorPicks } from "@/lib/curatorPickSort";
 
 /** One saved sequence and one set of cover images for public and trade designer galleries. */
-export function useDesignerGalleryPicks(designer: Designer | null | undefined) {
+export function useDesignerGalleryPicks(designer: Designer | null | undefined, { trade = false }: { trade?: boolean } = {}) {
   const isParentBrand = isParentBrandDesigner(designer);
   const isArnoldMadsen = designer?.slug === "arnold-madsen";
-  const publicOnly = !designer?.trade_only;
+  // Trade pages read the full catalogue (incl. Trade-only collaborations).
+  const publicOnly = !trade && !designer?.trade_only;
   const { data: groupedPicks = [], isPending: groupedPending } = useGroupedDesignerPicks(isParentBrand ? designer : undefined, { publicOnly });
   const { data: ownPicks = [], isPending: ownPending } = useDesignerPicks(designer?.id, { publicOnly });
   const { data: attributedPicks = [], isPending: attributedPending } = useAttributedDesignerPicks(designer && !isParentBrand ? designer : undefined, { publicOnly });

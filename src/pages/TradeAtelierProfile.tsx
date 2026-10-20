@@ -169,7 +169,7 @@ const TradeAtelierProfile = () => {
   // For parent brands (founder === name) or child designers, fetch picks from all related designers
   const isParentBrand = !!(designer?.founder && designer.founder === designer.name);
   const isChildDesigner = !!(designer?.founder && designer.founder !== designer.name);
-  const { picks } = useDesignerGalleryPicks(designer);
+  const { picks } = useDesignerGalleryPicks(designer, { trade: true });
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
 
