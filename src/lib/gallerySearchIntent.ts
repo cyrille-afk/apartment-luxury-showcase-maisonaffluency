@@ -1,3 +1,5 @@
+import { currencySymbol } from "./pdfFormatting";
+
 /**
  * Budget and size phrases inside the Trade Gallery search box.
  *
@@ -129,4 +131,51 @@ export function priceForSize(
   // Variants list sizes but none match → this size isn't offered.
   if ((variants || []).some((v) => [v.label, v.base, v.top].some((t) => planLengthsMm(t).length))) return null;
   return matchesSize(dimensions, sizeMm, mode) ? baseCents : null;
+}
+
+/** One-click budget band. null bound = open-ended, in the gallery's display currency. */
+export interface BudgetPreset {
+  id: string;
+  minCents: number | null;
+  maxCents: number | null;
+}
+
+/**
+ * Bands follow the live catalogue spread (277 pieces under €5k, 291 €5k–€20k,
+ * 88 €20k–€50k, 9 €50k–€100k, 7 over €100k) so every preset returns results.
+ */
+export const BUDGET_PRESETS: BudgetPreset[] = [
+  { id: "under-5k", minCents: null, maxCents: 500_000 },
+  { id: "5k-20k", minCents: 500_000, maxCents: 2_000_000 },
+  { id: "20k-50k", minCents: 2_000_000, maxCents: 5_000_000 },
+  { id: "50k-100k", minCents: 5_000_000, maxCents: 10_000_000 },
+  { id: "100k-plus", minCents: 10_000_000, maxCents: null },
+];
+
+/** Amounts to write into the Min/Max fields — no currency symbol, so the
+ *  preset keeps following the gallery's display currency if it changes. */
+export function budgetPresetFields(preset: BudgetPreset): { min: string; max: string } {
+  const amount = (cents: number | null) => (cents === null ? "" : (cents / 100).toLocaleString("en-US"));
+  return { min: amount(preset.minCents), max: amount(preset.maxCents) };
+}
+
+/** "€5k – €20k" / "Under €5k" / "€100k +" in the given currency. */
+export function budgetPresetLabel(preset: BudgetPreset, currency: string): string {
+  const sym = currencySymbol(currency);
+  const short = (cents: number) => {
+    const units = cents / 100;
+    return units >= 1000 ? `${units / 1000}k` : String(units);
+  };
+  if (preset.minCents === null) return `Under ${sym}${short(preset.maxCents!)}`;
+  if (preset.maxCents === null) return `${sym}${short(preset.minCents)} +`;
+  return `${sym}${short(preset.minCents)} – ${sym}${short(preset.maxCents)}`;
+}
+
+/** The preset whose bounds the current Min/Max cents match exactly, else null. */
+export function activeBudgetPresetId(
+  minCents: number | null,
+  maxCents: number | null,
+  presets: BudgetPreset[] = BUDGET_PRESETS,
+): string | null {
+  return presets.find((p) => p.minCents === minCents && p.maxCents === maxCents)?.id ?? null;
 }
