@@ -62,7 +62,7 @@ export default function ProductFullscreenGallery({ open, onClose, images, alt, r
   };
 
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={`${alt} — full-screen gallery`} className="fixed inset-0 z-[100] flex flex-col bg-background">
+    <div role="dialog" aria-modal="true" aria-label={`${alt} — full-screen gallery`} className="fixed inset-0 z-[2147483000] flex flex-col bg-background">
       <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <span className="font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground" aria-live="polite">
           {is3d ? "3D model" : `Photo ${photo + 1} / ${images.length}`}
