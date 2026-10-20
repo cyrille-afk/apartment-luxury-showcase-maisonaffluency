@@ -140,6 +140,15 @@ export default function TradeAdminDesignNoteCoverage() {
             {f === "home" ? `home-page citations (${all.filter((r) => r.sources.some((x) => isHomePageUrl(x.url))).length})` : f}
           </Button>
         ))}
+        <span className="text-xs text-muted-foreground px-1">missing:</span>
+        {FIELDS.map((f) => {
+          const n = all.filter((r) => !r.fields[f]).length;
+          return (
+            <Button key={f} size="sm" variant={filter === `missing-${f}` ? "default" : "outline"} onClick={() => setFilter(`missing-${f}`)}>
+              {f} ({n})
+            </Button>
+          );
+        })}
         <span className="text-xs text-muted-foreground ml-auto">{rows.length} shown</span>
       </div>
       {isLoading ? <p className="text-sm">Loading…</p> : (
