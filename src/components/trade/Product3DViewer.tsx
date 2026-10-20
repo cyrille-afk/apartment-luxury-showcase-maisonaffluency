@@ -556,12 +556,15 @@ const Product3DViewer: React.FC<Props> = ({
           </div>
         )}
       </div>
-      <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
+      <p className="px-3 py-2 font-body text-[10px] leading-snug text-muted-foreground/70 border-t border-border">
         {opened
-          ? locked
-            ? "Camera locked — unlock above to rotate or zoom"
-            : "Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)"
-          : "Tap to load the interactive 3D model (downloads on demand)"}
+          ? (locked
+              ? "Camera locked — unlock above to rotate or zoom"
+              : "Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)")
+          : (<>
+              <span className="block">Tap to load the interactive 3D model (downloads on demand)</span>
+              <span className="block">Pick a fabric or wood finish on the right — the 3D preview updates live.</span>
+            </>)}
       </p>
 
       {opened && !hasExplicitRoles && noTargets && (
