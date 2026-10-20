@@ -2138,7 +2138,6 @@ const TradeProductPage: React.FC = () => {
                 Request via Procurement →
               </Link>
             </p>
-            <ShippingDetailsAccordion variant="row" />
 
             {/* Origin only — lead time lives exclusively in the pricing block. */}
             <div className="flex flex-col gap-2">
@@ -3134,6 +3133,11 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
             </div>
+
+            {/* Logistics sits with the specification block, directly beneath
+                the dimensions row — never down with the curator notes. */}
+            <ShippingDetailsAccordion variant="row" />
+
 
 
 
