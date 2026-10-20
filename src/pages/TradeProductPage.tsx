@@ -2051,6 +2051,168 @@ const TradeProductPage: React.FC = () => {
   // Sample request deep-link to Procurement
   const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}&productId=${encodeURIComponent(product.id)}`;
 
+  const resolve3d = () => {
+    const norm = (v: string | null | undefined) => (v || "").trim().toLowerCase().replace(/\s+/g, " ");
+    const av: any = activeVariant || {};
+    const candidates = [av.label, selectedDualSize, selectedSingleSize, av.base, av.top, selectedBase, selectedTop, [av.base, av.top].filter(Boolean).join(" × ")]
+      .map(norm).filter(Boolean);
+    const byLabel = candidates.reduce<any>((hit, cand) => hit || glbVariants.find((v) => norm(v.variant_label) === cand) || null, null);
+    const variant = byLabel || glbVariants.find((v) => v.is_default) || null;
+    const url = variant?.glb_url || glbUrl || null;
+    return url ? { url, roles: variant?.material_roles || undefined, label: byLabel?.variant_label as string | undefined } : null;
+  };
+
+  const renderLowerDetails = () => (
+        <div className={isLg ? "flex flex-col gap-6 pt-4" : "mt-16 flex flex-col gap-10 border-t border-border/50 pt-10"}>
+          <div>
+            <section aria-label="Curator notes" className="hidden md:block">
+              <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
+              {/* Product page: notes read vertically beneath the gallery; the lightbox uses a separate three-column treatment. */}
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { label: "Design Significance", text: curatorNotes.significance, Icon: Award },
+                  { label: "Spatial Calculation", text: curatorNotes.spatial, Icon: Compass },
+                  { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
+                ].filter(({ text }) => Boolean(text)).map(({ label, text, Icon }) => {
+                  const isLead = label === "Design Significance";
+                  return (
+                    <article key={label} className={cn("group flex min-w-0 flex-col", isLead && "rounded-[2px] bg-muted px-4 py-2.5 border-l-2 border-l-accent")}>
+                      <div
+                        className={cn(
+                          "mb-2 flex items-center justify-start gap-2"
+                        )}
+                      >
+
+                        <Icon
+                          className={cn(
+                            "h-4 w-4 shrink-0 transition-colors duration-150 group-hover:text-foreground",
+                            isLead ? "text-accent" : "text-muted-foreground/60"
+                          )}
+                          strokeWidth={1.25}
+                        />
+                        <h3
+                          className={cn(
+                            "font-body text-[10px] uppercase tracking-[0.2em] text-foreground",
+                            isLead && "font-bold"
+                          )}
+                        >
+                          {label}
+                        </h3>
+                      </div>
+                      <p className="font-body text-sm italic leading-relaxed text-justify text-muted-foreground">
+                        {text}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+          <div className="flex flex-col gap-4">
+            {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
+            <CadAssetsSection productId={tradeProductId} productName={product.title} />
+
+
+            {/* Inline subtle nudge: Sample Requests live in Procurement */}
+            <p className="font-body text-[11px] text-muted-foreground text-center">
+              Need a material sample?{" "}
+              <Link
+                to={sampleRequestUrl}
+                className="underline underline-offset-2 hover:text-foreground transition-colors"
+              >
+                Request via Procurement →
+              </Link>
+            </p>
+            <ShippingDetailsAccordion variant="row" />
+
+            {/* Origin only — lead time lives exclusively in the pricing block. */}
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const handcrafted = formatHandcrafted(showTradePrice ? product.origin : null, null);
+                if (!handcrafted) return null;
+                return (
+                  <div className="-mt-4 border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{handcrafted}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+  );
+
+  const renderDesktopWorkspace = () => {
+    const r3d = resolve3d();
+    const asset: "3d" | number = workspaceAsset === "3d" && !r3d ? 0 : workspaceAsset;
+    const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
+    const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
+    const thumbCls = (on: boolean) => cn(
+      "relative shrink-0 w-[72px] h-[72px] overflow-hidden border bg-muted/40 transition-colors",
+      on ? "border-foreground" : "border-border/60 hover:border-foreground/50",
+    );
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-3" ref={galleryScrollRef}>
+        <div className="flex min-h-0 flex-1 gap-4">
+          <div className="flex w-[76px] shrink-0 flex-col gap-2 overflow-y-auto [scrollbar-width:none]" aria-label="Product views">
+            {r3d && (
+              <button type="button" aria-label="Show 3D model" aria-pressed={asset === "3d"} onClick={() => setWorkspaceAsset("3d")} className={thumbCls(asset === "3d")}>
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-muted font-body text-[9px] uppercase tracking-[0.14em] text-foreground">
+                  <Box size={16} className="text-accent" />3D
+                </span>
+              </button>
+            )}
+            {visibleImages.map((src, i) => (
+              <button
+                key={src + i}
+                type="button"
+                aria-label={`Show photo ${i + 1}`}
+                aria-pressed={photoIdx === i}
+                onClick={() => { setWorkspaceAsset(i); setGalleryActiveIndex(realIdx(i)); }}
+                className={thumbCls(photoIdx === i)}
+              >
+                <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+          <div className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
+            {asset === "3d" && r3d ? (
+              <div className="aspect-square h-full max-h-full max-w-full">
+                <Product3DViewer
+                  url={r3d.url}
+                  alt={`${product.title} — 3D model${r3d.label ? ` (${r3d.label})` : ""}`}
+                  poster={product.image_url}
+                  fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
+                  baseTextureUrl={selectedWoodPrice?.image_url || picturedFinishImgs.base || previewWoodImg || null}
+                  topTextureUrl={selectedTopSwatch?.image_url || picturedFinishImgs.top || null}
+                  materialRoles={r3d.roles}
+                />
+              </div>
+            ) : photoIdx !== null && visibleImages[photoIdx] ? (
+              <img src={visibleImages[photoIdx]} alt={`${product.title} — photo ${photoIdx + 1}`} className="h-full w-full object-contain" />
+            ) : null}
+            <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+              <CornerTooltip label={favorited ? "Saved to Project" : "Add to Project"} side="bottom" align="end">
+                <AddToProjectPopover
+                  productId={favoriteId}
+                  productName={product.title}
+                  onAdded={async () => { if (!isFavorited(favoriteId)) await toggleFavorite(favoriteId); }}
+                >
+                  <button type="button" aria-label="Add to Project" className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-background/80 text-foreground/80 backdrop-blur-md">
+                    <Heart className={cn("h-4 w-4", favorited && "fill-current")} strokeWidth={1.5} />
+                  </button>
+                </AddToProjectPopover>
+              </CornerTooltip>
+            </div>
+          </div>
+        </div>
+        <PicturedFinishesStrip pickId={product.id} activeIndex={galleryActiveIndex ?? 0} baseLabel={product.base_axis_label} topLabel={product.top_axis_label} biekeLayout={designer.slug === "bieke-casteleyn"} />
+      </div>
+    );
+  };
+
   return (
     <div className="motion-safe:animate-fade-in">
       <Helmet>
@@ -3135,6 +3297,16 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
+          {isLg && (
+            <details className="group border-t border-border/60">
+              <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-display text-lg italic text-foreground select-none">
+                Curator Notes &amp; Logistics
+                <span className="font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">Open ▾</span>
+                <span className="hidden font-body text-[10px] not-italic uppercase tracking-[0.12em] text-muted-foreground group-open:inline">Close ▴</span>
+              </summary>
+              {renderLowerDetails()}
+            </details>
+          )}
           </div>
         </div>
         {!isLg && renderLowerDetails()}
