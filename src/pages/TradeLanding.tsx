@@ -82,12 +82,8 @@ const benefits = [
   },
 ];
 
-const stats: { value: string; label: string; note?: string }[] = [
-  {
-    value: "300+",
-    label: "Ateliers & Partners",
-    note: "Digital selection expanding weekly. Full physical archive available on demand.",
-  },
+const stats: { value: string; label: string }[] = [
+  { value: "300+", label: "Ateliers & Partners" },
   { value: "15+", label: "Countries Served" },
   { value: "100%", label: "Insured Shipping" },
   { value: "Priority", label: "Tier Allocation" },
@@ -665,15 +661,13 @@ const TradeLanding = () => {
                 <span className="mt-0.5 text-center font-body text-[8px] uppercase tracking-[0.08em] text-foreground md:mt-1 md:text-xs md:tracking-[0.15em] md:text-muted-foreground">
                   {stat.label}
                 </span>
-                {stat.note && (
-                  <span className="mt-1 text-center text-[10px] uppercase tracking-widest text-neutral-500">
-                    {stat.note}
-                  </span>
-                )}
               </motion.div>
             ))}
           </div>
         </div>
+        <p className="w-full text-center text-[10px] text-neutral-400 font-light uppercase tracking-[0.2em] mt-6 mb-12 block">
+          Digital selection expanding weekly. Full physical archive available on demand.
+        </p>
 
         {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
