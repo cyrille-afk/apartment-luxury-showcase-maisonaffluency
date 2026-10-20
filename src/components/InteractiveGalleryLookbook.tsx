@@ -811,7 +811,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); if (dockClosedViaX) { setDockClosedViaX(false); setDockDismissed(false); } } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom && isDesktopViewport ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); if (dockClosedViaX) { setDockClosedViaX(false); setDockDismissed(false); } } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
@@ -888,7 +888,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] px-4 pb-4 pt-0 text-[#F9F9F7] md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 rounded-sm border border-[#2D2D30] bg-[#1E1E1F] px-4 pb-4 pt-0 text-[#F9F9F7] lg:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
                             <div className="-mx-4 flex w-auto shrink-0 items-center justify-between gap-3 rounded-t-sm border-b border-[#EBEAE4] bg-[#F9F9F7] p-4">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-[#1E1E1F]">Curated alternatives: {selectedHotspot.product_name}</div>
