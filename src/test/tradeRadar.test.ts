@@ -26,6 +26,7 @@ describe('Instagram scoring evidence', () => {
       },
     });
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, body }));
+    vi.stubGlobal('Deno', { env: { get: () => 'test-key' } });
     const result = await scoreTradeApplication({ ...input, evidence: 'Portfolio: named built projects.' });
     expect(result).toMatchObject({ ok: true, score: 88 });
   });
