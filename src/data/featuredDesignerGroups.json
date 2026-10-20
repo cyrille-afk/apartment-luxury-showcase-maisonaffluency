@@ -1,0 +1,45 @@
+[
+  {
+    "label": "Masters",
+    "slugs": [
+      "alexander-lamont",
+      "andree-putman",
+      "arnold-madsen",
+      "emmanuel-babled",
+      "felix-agostini",
+      "jean-michel-frank",
+      "kiko-lopez",
+      "lazzarini-pickering",
+      "michel-boyer",
+      "paul-laszlo",
+      "pierre-bonnefille",
+      "pierre-chareau",
+      "stephane-parmentier",
+      "thierry-lemaire",
+      "tristan-auer"
+    ]
+  },
+  {
+    "label": "Contemporary Talents",
+    "slugs": [
+      "apparatus-studio",
+      "dagmar-london",
+      "atelier-demichelis",
+      "christopher-boots",
+      "delcourt-collection",
+      "emma-donnersberg",
+      "emmanuel-levet-stenne",
+      "garnier-linker",
+      "gilles-boissier",
+      "hamrei",
+      "collection-particuliere",
+      "humbert-poyet",
+      "kerstens",
+      "le-berre-vevaud",
+      "leo-aerts-alinea",
+      "marta-sala-editions",
+      "pouenat",
+      "victoria-magniant"
+    ]
+  }
+]

@@ -17,44 +17,11 @@ import { createClient } from "@supabase/supabase-js";
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "src/data/featuredDesigners.json");
 
-// Keep this list in sync with FEATURED_GROUPS in
-// src/components/DesignersHoverHero.tsx.
-const FEATURED_SLUGS = [
-  // Masters
-  "alexander-lamont",
-  "andree-putman",
-  "arnold-madsen",
-  "dagmar-london",
-  "emmanuel-babled",
-  "felix-agostini",
-  "jean-michel-frank",
-  "michel-boyer",
-  "kiko-lopez",
-  "lazzarini-pickering",
-  "paul-laszlo",
-  "pierre-bonnefille",
-  "pierre-chareau",
-  "stephane-parmentier",
-  "thierry-lemaire",
-  "tristan-auer",
-  // Contemporary Talents
-  "apparatus-studio",
-  "atelier-demichelis",
-  "christopher-boots",
-  "delcourt-collection",
-  "emmanuel-levet-stenne",
-  "garnier-linker",
-  "gilles-boissier",
-  "collection-particuliere",
-  "hamrei",
-  "humbert-poyet",
-  "kerstens",
-  "le-berre-vevaud",
-  "leo-aerts-alinea",
-  "marta-sala-editions",
-  "pouenat",
-  "victoria-magniant",
-];
+// Shared with FEATURED_GROUPS in src/components/DesignersHoverHero.tsx —
+// one list so the publish-time seed can never drop a curated designer.
+const FEATURED_SLUGS = JSON.parse(
+  await readFile(path.join(ROOT, "src/data/featuredDesignerGroups.json"), "utf8")
+).flatMap((g) => g.slugs);
 
 try {
   const envText = await readFile(path.join(ROOT, ".env"), "utf8");

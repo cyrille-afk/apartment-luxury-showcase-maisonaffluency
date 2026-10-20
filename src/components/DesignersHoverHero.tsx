@@ -34,6 +34,7 @@ import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFor
 import { cldResponsiveImg } from "@/lib/cloudinary";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import featuredDesignersSeed from "@/data/featuredDesigners.json";
+import featuredDesignerGroups from "@/data/featuredDesignerGroups.json";
 
 interface FeaturedDesigner {
   id: string;
@@ -303,52 +304,11 @@ function DesignerGridCard({
   );
 }
 
-const FEATURED_GROUPS = [
-  {
-    label: "Masters",
-    slugs: [
-      "alexander-lamont",
-      "andree-putman",
-      "arnold-madsen",
-      "emmanuel-babled",
-      "felix-agostini",
-      "jean-michel-frank",
-      "kiko-lopez",
-      "lazzarini-pickering",
-      "michel-boyer",
-      "paul-laszlo",
-      "pierre-bonnefille",
-      "pierre-chareau",
-      "stephane-parmentier",
-      "thierry-lemaire",
-      "tristan-auer",
-    ].sort(),
-  },
-  {
-    label: "Contemporary Talents",
-    slugs: [
-      "apparatus-studio",
-      "dagmar-london",
-      "atelier-demichelis",
-      "christopher-boots",
-      "delcourt-collection",
-      "emma-donnersberg",
-      "emmanuel-levet-stenne",
-
-      "garnier-linker",
-      "gilles-boissier",
-      "hamrei",
-      "collection-particuliere",
-      "humbert-poyet",
-      "kerstens",
-      "le-berre-vevaud",
-      "leo-aerts-alinea",
-      "marta-sala-editions",
-      "pouenat",
-      "victoria-magniant",
-    ].sort(),
-  },
-];
+// Single source of truth shared with scripts/build-featured-designers.mjs,
+// which bakes the publish-time seed — two copies drifted and hid designers live.
+const FEATURED_GROUPS = (featuredDesignerGroups as { label: string; slugs: string[] }[]).map(
+  (g) => ({ label: g.label, slugs: [...g.slugs].sort() })
+);
 
 const MOBILE_ONLY_EXCLUDED_DESIGNERS = new Set(["paul-laszlo", "pouenat"]);
 const DESKTOP_ONLY_FEATURED_SLUGS = new Set(["garnier-linker", "gilles-boissier"]);
