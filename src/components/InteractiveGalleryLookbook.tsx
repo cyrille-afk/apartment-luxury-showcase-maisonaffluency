@@ -379,6 +379,10 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [dockRotation, setDockRotation] = useState(0);
   // X-close re-arms hover so hovering a pin reopens the dock; Escape keeps it suppressed.
   const [dockClosedViaX, setDockClosedViaX] = useState(false);
+  // Dock placement: beside the picture when space allows, flipped left otherwise,
+  // else floating over the picture's right edge — the picture itself never moves.
+  const [dockSide, setDockSide] = useState<"right" | "left" | "overlay">("right");
+  const dockAnchorRef = useRef<HTMLDivElement | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
@@ -667,6 +671,23 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [overlayOpen, lightboxProduct]);
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const measure = () => {
+      const rect = dockAnchorRef.current?.getBoundingClientRect();
+      if (!rect || rect.width === 0) return;
+      const gap = 32;
+      const panelW = 340;
+      if (window.innerWidth - rect.right - gap >= panelW) setDockSide("right");
+      else if (rect.left - gap >= panelW) setDockSide("left");
+      else setDockSide("overlay");
+    };
+    measure();
+    const t1 = window.setTimeout(measure, 400);
+    const t2 = window.setTimeout(measure, 1200);
+    window.addEventListener("resize", measure);
+    return () => { window.clearTimeout(t1); window.clearTimeout(t2); window.removeEventListener("resize", measure); };
+  }, [overlayOpen, activeScene?.id]);
 
   const renderScenePick = ({ hotspot, product, image }: ScenePick) => (
     <Button key={hotspot.id} type="button" variant="ghost" onClick={() => openHotspot(hotspot)} aria-label={`View ${hotspot.product_name} details`} className="h-auto min-w-0 w-full flex-col items-start rounded-none p-0 text-left hover:bg-transparent">
@@ -743,7 +764,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                   <div className="relative flex min-w-0 flex-1 items-start justify-center">
                    <AnimatePresence mode="wait">
                      {activePage.scenes.map((pageScene) => (
-                       <motion.div
+                        <motion.div
+                         ref={dockAnchorRef}
                          key={pageScene.id}
                          initial={{ opacity: 0 }}
                          animate={{ opacity: 1 }}
@@ -850,7 +872,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 16 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className="absolute left-[calc(100%+2rem)] top-0 z-40 hidden h-full w-[340px] flex-col gap-4 md:flex"
+                            className={`absolute top-0 z-40 hidden h-full w-[340px] flex-col gap-4 md:flex ${dockSide === "right" ? "left-[calc(100%+2rem)]" : dockSide === "left" ? "right-[calc(100%+2rem)]" : "right-0"}`}
                           >
                             <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
