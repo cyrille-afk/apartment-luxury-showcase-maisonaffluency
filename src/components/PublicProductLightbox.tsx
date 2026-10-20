@@ -1064,7 +1064,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div>
 
           {/* Curator Notes — immediate context below the product details */}
-          <motion.div
+          {designNotes.length > 0 && (<motion.div
             key={`curator-notes-${product.id}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1084,7 +1084,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 </div>
               ))}
             </div>
-          </motion.div>
+          </motion.div>)}
 
           {/* More From — final exploration tier */}
           {!product.restricted_gallery_pin && <div className="w-full border-t border-border/40 pt-3 md:pt-4 pb-2 md:pb-3">
