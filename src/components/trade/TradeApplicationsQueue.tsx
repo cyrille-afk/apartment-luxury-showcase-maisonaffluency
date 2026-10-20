@@ -161,7 +161,8 @@ export default function TradeApplicationsQueue() {
     });
     setBusy(null);
     if (error || data?.ok === false) toast.error(data?.error ?? "Analysis failed.");
-    else if (data?.unverified) toast.info(data.message ?? "Instagram profile unverified; no score penalty applied.");
+    else if (data?.unverified) toast.info(data.message ?? "Instagram profile still unverified; no score penalty applied. Retry once access is available.");
+    else if (data?.radar?.score != null) toast.success(`Verification complete — scored ${data.radar.score}/100 on portfolio evidence.`);
     else toast.success("Aesthetic analysis updated.");
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
   };
