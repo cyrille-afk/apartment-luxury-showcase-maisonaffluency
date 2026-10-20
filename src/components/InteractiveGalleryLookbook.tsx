@@ -332,7 +332,7 @@ function CuratorsCanvas() {
 function HotspotPin({ hotspot, editorial, active, raised, onOpen, onPreview }: { hotspot: Hotspot; editorial?: boolean; active?: boolean; raised?: boolean; onOpen: () => void; onPreview?: () => void }) {
   if (!editorial) {
     return (
-      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className={`group absolute ${raised ? "z-40" : "z-10"} size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+      <Button key={hotspot.id} type="button" variant="ghost" size="icon" aria-label={`View ${hotspot.product_name}`} onClick={onOpen} className={`group absolute ${raised ? "z-40" : "z-10 group-hover:z-40"} size-11 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
         <span className="relative block size-6 rounded-full border border-background/90 bg-foreground/65 shadow-lg backdrop-blur-sm transition-transform group-hover:scale-110">
           <span className="absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 bg-background" />
           <span className="absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-background" />
@@ -342,13 +342,13 @@ function HotspotPin({ hotspot, editorial, active, raised, onOpen, onPreview }: {
   }
   const flipLabel = hotspot.x_percent > 72;
   return (
-    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className={`group absolute ${raised ? "z-40" : "z-10"} flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
+    <Button key={hotspot.id} type="button" variant="ghost" aria-label={`View ${hotspot.product_name}`} aria-pressed={active} onClick={onOpen} onMouseEnter={onPreview} onFocus={onPreview} className={`group absolute ${raised || active ? "z-40" : "z-10 group-hover:z-40"} flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full p-0 hover:bg-transparent focus-visible:bg-transparent md:size-9`} style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}>
       {active && <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-background/60 opacity-75 md:size-6" />}
       <span aria-hidden="true" className={`pointer-events-none absolute left-1/2 top-1/2 block size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border shadow-sm backdrop-blur-[2px] transition-all duration-300 ease-out md:size-6 ${active ? "scale-110 border-background bg-background" : "border-muted-foreground/30 bg-foreground/85 group-hover:scale-110 group-hover:bg-foreground"}`}>
         <span className={`absolute left-1/2 top-1/2 h-px w-2.5 -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
         <span className={`absolute left-1/2 top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 ${active ? "bg-foreground" : "bg-background"}`} />
       </span>
-      <span aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-20 hidden -translate-y-1/2 flex-col items-start whitespace-nowrap rounded-md border border-background/40 bg-background/95 px-4 py-2.5 opacity-0 shadow-[0_12px_32px_rgba(20,20,20,0.16)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 md:flex ${flipLabel ? "right-full mr-3 translate-x-1 group-hover:translate-x-0" : "left-full ml-3 -translate-x-1 group-hover:translate-x-0"}`}>
+      <span aria-hidden="true" className={`pointer-events-none absolute top-1/2 z-30 hidden -translate-y-1/2 flex-col items-start whitespace-nowrap rounded-md border border-background/40 bg-background/95 px-4 py-2.5 opacity-0 shadow-[0_12px_32px_rgba(20,20,20,0.16)] backdrop-blur-sm transition-all duration-300 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 md:flex ${flipLabel ? "right-full mr-3 translate-x-1 group-hover:translate-x-0" : "left-full ml-3 -translate-x-1 group-hover:translate-x-0"}`}>
         <span className="font-display text-[13px] font-normal leading-snug text-foreground">
           {hotspot.product_name}
         </span>
@@ -377,6 +377,8 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const [dockDismissed, setDockDismissed] = useState(false);
   // Bumped on every hotspot hover/open so the dock draws a fresh trio from the pool.
   const [dockRotation, setDockRotation] = useState(0);
+  // X-close re-arms hover so hovering a pin reopens the dock; Escape keeps it suppressed.
+  const [dockClosedViaX, setDockClosedViaX] = useState(false);
   const [lightboxProduct, setLightboxProduct] = useState<PublicLightboxItem | null>(null);
   const [expandedScene, setExpandedScene] = useState<Scene | null>(null);
   const [expandedLoadedScene, setExpandedLoadedScene] = useState<string | null>(null);
@@ -661,7 +663,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   const dockDestination = useShippingDestination();
   useEffect(() => {
     if (!overlayOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !lightboxProduct) setDockDismissed(true); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !lightboxProduct) { setDockDismissed(true); setDockClosedViaX(false); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [overlayOpen, lightboxProduct]);
@@ -771,7 +773,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                            />
                          </Button>
                              {sceneReady && hotspotsForScene(pageScene).map((hotspot) => (
-                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); } : undefined} />
+                              <HotspotPin key={hotspot.id} hotspot={hotspot} editorial={!!discoveryRoom} active={!!discoveryRoom && selectedHotspot?.id === hotspot.id} raised={overlayOpen} onOpen={() => openHotspot(hotspot)} onPreview={discoveryRoom ? () => { setActivePin(hotspot.id); setDockRotation((n) => n + 1); if (dockClosedViaX) { setDockClosedViaX(false); setDockDismissed(false); } } : undefined} />
                             ))}
                             {portraitDock && pageScene.id === activeScene?.id && (
                               <AnimatePresence mode="wait">
@@ -787,7 +789,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                     <button
                                       type="button"
                                       aria-label="Close curated alternatives"
-                                      onClick={() => { setDockDismissed(true); setActivePin(null); }}
+                                      onClick={() => { setDockDismissed(true); setActivePin(null); setDockClosedViaX(true); }}
                                       className="absolute inset-0 cursor-default bg-foreground/45"
                                     />
                                     <motion.aside
@@ -800,7 +802,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                                     >
                                       <div className="mb-3 flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                                         <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
-                                        <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                                        <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); setDockClosedViaX(true); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                                       </div>
                                       <div key={`${selectedHotspot.id}-${dockRotation}`} className="grid grid-cols-3 gap-2 animate-fade-in md:flex md:flex-col md:gap-3">
                                         {dockAlternatives.map((pick) => (
@@ -852,7 +854,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                           >
                             <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-3">
                               <div className="min-w-0 font-body text-[10px] font-semibold uppercase leading-relaxed tracking-widest text-foreground">Curated alternatives: {selectedHotspot.product_name}</div>
-                              <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
+                              <Button type="button" variant="ghost" size="icon-sm" aria-label="Close curated alternatives" onClick={() => { setDockDismissed(true); setActivePin(null); setDockClosedViaX(true); }} className="size-7 shrink-0 p-0"><X className="size-4" /></Button>
                             </div>
                             <div key={`${selectedHotspot.id}-${dockRotation}`} className="flex min-h-0 flex-1 flex-col gap-4 animate-fade-in">
                               {dockAlternatives.map((pick) => (
