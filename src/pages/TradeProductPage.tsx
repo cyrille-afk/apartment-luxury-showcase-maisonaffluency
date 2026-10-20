@@ -2082,7 +2082,7 @@ const TradeProductPage: React.FC = () => {
   };
 
   const renderLowerDetails = () => (
-        <div className={isLg ? "flex flex-col gap-6 pt-4" : "mt-16 flex flex-col gap-10 border-t border-border/50 pt-10"}>
+        <div className={isLg ? "flex flex-col gap-6" : "mt-16 flex flex-col gap-10 border-t border-border/50 pt-10"}>
           <div>
             {curatorNoteSections.length > 0 && (<section aria-label="Curator notes" className="hidden md:block">
               <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
@@ -2343,7 +2343,7 @@ const TradeProductPage: React.FC = () => {
           {isLg ? (
             <div className="min-w-0">
               {renderDesktopWorkspace()}
-              <section aria-label="Curator notes and logistics" className="mt-10 border-t border-border/50 pt-8">
+              <section aria-label="Curator notes and logistics" className="mt-7 border-t border-border/50 pt-5">
                 {renderLowerDetails()}
               </section>
             </div>
