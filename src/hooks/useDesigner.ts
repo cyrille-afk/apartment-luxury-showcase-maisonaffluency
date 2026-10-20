@@ -290,21 +290,24 @@ export function attributedDesignerPicksQueryOptions(
 
       const { data, error } = await query.returns<PickRow[]>();
       if (error) throw error;
-      const rows = (data || []).filter((row) => creditsDesigner(row, designer.name));
+      let rows = (data || []).filter((row) => creditsDesigner(row, designer.name));
       if (rows.length === 0) return [];
 
       const ownerIds = [...new Set(rows.map((row) => row.designer_id).filter(Boolean))];
       const { data: owners, error: ownersError } = await supabase
         .from("designers")
-        .select("id, name, slug")
+        .select("id, name, slug, trade_only")
         .in("id", ownerIds);
       if (ownersError) throw ownersError;
       const ownerMap = Object.fromEntries((owners || []).map((owner) => [owner.id, owner]));
-      const missingOwnerIds = ownerIds.filter((id) => !ownerMap[id]);
-      if (publicOnly && missingOwnerIds.length) {
-        const { data: publicOwners, error: creditError } = await supabase.rpc("public_collaboration_owner_metadata", { _ids: missingOwnerIds });
-        if (creditError) throw creditError;
-        for (const owner of publicOwners || []) ownerMap[owner.id] = owner;
+      if (publicOnly) {
+        // Collaborations owned by a Trade-only house (e.g. Michel Amar × Emma
+        // Donnersberg) stay on the Trade side only — never on public pages.
+        rows = rows.filter((row) => {
+          const owner = ownerMap[row.designer_id as string];
+          return !!owner && !(owner as any).trade_only;
+        });
+        if (rows.length === 0) return [];
       }
 
       return sortCuratorPicks(dedupePicks(rows.map((row) => ({

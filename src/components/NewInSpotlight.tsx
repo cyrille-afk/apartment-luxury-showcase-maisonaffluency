@@ -86,7 +86,7 @@ const NewInSpotlight = ({ designer, showEyebrow = true, variant = "default", pro
   );
   // Trade-only designer rows only load for approved trade/admin sessions, so
   // their full catalogue is safe here; public designers stay on the public view.
-  const publicOnly = !designer.trade_only;
+  const publicOnly = !location.pathname.startsWith("/trade/") && !designer.trade_only;
   const { data: simplePicks = [] } = useDesignerPicks(profileOnly || hasOverride ? undefined : designer.id, { publicOnly });
   const { data: attributedPicks = [] } = useAttributedDesignerPicks(
     !profileOnly && !hasOverride && !isParentBrand ? designer : undefined,
