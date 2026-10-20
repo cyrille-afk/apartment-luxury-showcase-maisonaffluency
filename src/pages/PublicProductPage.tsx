@@ -1809,16 +1809,8 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
     category: product.category,
     subcategory: product.subcategory,
   });
-  const curatorNoteSections = (designNotes.length > 0
-    ? [
-        ...designNotes.map((n, i) => ({ label: n.label as string, text: n.text as string | null, Icon: [Award, Compass, FileText, FileText][i] ?? FileText })),
-        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-      ]
-    : [
-        { label: "Design Significance", text: curatorNotes.significance as string | null, Icon: Award },
-        { label: "Spatial Calculation", text: curatorNotes.spatial as string | null, Icon: Compass },
-        { label: "Historical Provenance", text: curatorNotes.provenance, Icon: FileText },
-      ]).filter(({ text }) => Boolean(text));
+  // Only hand-written, sourced notes are shown; description-derived or stock copy never is.
+  const curatorNoteSections = designNotes.map((n, i) => ({ label: n.label as string, text: n.text, Icon: [Award, Compass, FileText, FileText][i] ?? FileText }));
 
   const compareItem: CompareItem = {
     pick: {
