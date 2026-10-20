@@ -540,7 +540,17 @@ const Product3DViewer: React.FC<Props> = ({
             src={url}
             alt={alt}
             poster={poster || undefined}
-            {...(!locked ? { "camera-controls": true, "auto-rotate": true } : {})}
+            {...(!locked
+              ? {
+                  "camera-controls": true,
+                  "auto-rotate": true,
+                  // Touch: one finger orbits (in any direction), pinch zooms,
+                  // two-finger drag pans. Lock hands the gesture back to page scroll.
+                  "touch-action": "none",
+                  "auto-rotate-delay": "4000",
+                  "interaction-prompt": "none",
+                }
+              : {})}
             ar
             scale={scale || "1 1 1"}
             shadow-intensity="1"
@@ -560,7 +570,10 @@ const Product3DViewer: React.FC<Props> = ({
         {opened
           ? (locked
               ? "Camera locked — unlock above to rotate or zoom"
-              : "Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)")
+              : (<>
+                  <span className="hidden md:inline">Drag to rotate · scroll to zoom (bounded) · tap the cube to view in your room (AR)</span>
+                  <span className="md:hidden">Drag to rotate · pinch to zoom · two fingers to move · Lock to scroll the page</span>
+                </>))
           : (<>
               <span className="block">Tap to load the interactive 3D model (downloads on demand)</span>
               <span className="block">Pick a fabric or wood finish on the right — the 3D preview updates live.</span>
