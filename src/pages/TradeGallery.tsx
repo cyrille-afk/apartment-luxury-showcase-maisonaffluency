@@ -533,24 +533,33 @@ const StudioGallery = () => {
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
-  // Budget/size phrases typed in search ("260 cm table under €20,000").
-  // Budget compares the shown price mode (trade or RRP) of the matching size; unpriced pieces can't be confirmed, so they drop out.
+  // Budget/size phrases typed in search ("260 cm table under €20,000"), plus the
+  // standalone Min/Max budget fields. Budget compares the shown price mode
+  // (trade or RRP) of the matching size; unpriced pieces can't be confirmed, so they drop out.
   const fitsIntent = (p: TradeProduct) => {
     const { sizeMm, sizeMode, budgetCents } = searchIntent;
-    if (!sizeMm && !budgetCents) return true;
+    const hasFieldBudget = fieldBudget.min !== null || fieldBudget.max !== null;
+    if (!sizeMm && !budgetCents && !hasFieldBudget) return true;
     const base = getProductPrice(p);
     const variants = (base as { variants?: PricedVariant[] } | null)?.variants;
-    if (sizeMm && !budgetCents) {
-      return matchesSize(p.dimensions, sizeMm, sizeMode) ||
+    if (sizeMm) {
+      const sizeOk = matchesSize(p.dimensions, sizeMm, sizeMode) ||
         (variants || []).some((v) => [v.label, v.base, v.top].some((t) => matchesSize(t, sizeMm, sizeMode)));
+      if (!sizeOk) return false;
     }
+    if (!hasFieldBudget && !budgetCents) return true;
     // Budget is tested against the matching size's own price, never the cheapest "From".
-    const cents = priceForSize(base?.cents ?? null, p.dimensions, variants, sizeMm, sizeMode);
-    if (!base || !cents) return false;
+    if (!base) return false;
+    const cents = priceForSize(base.cents, p.dimensions, variants, sizeMm, sizeMode);
+    if (!cents) return false;
     const price = getDisplayPrice({ ...base, cents }, p.brand_name)!;
-    const cur = (searchIntent.budgetCurrency || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
+    const cur = ((budgetCents != null ? searchIntent.budgetCurrency : fieldBudget.currency) || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
     if (price.currency !== cur && !fxRates[`${price.currency}_${cur}`]) return false;
-    return convertCents(price.cents, price.currency, cur, fxRates) <= budgetCents!;
+    const shown = convertCents(price.cents, price.currency, cur, fxRates);
+    if (budgetCents != null && shown > budgetCents) return false;
+    if (fieldBudget.min !== null && shown < fieldBudget.min) return false;
+    if (fieldBudget.max !== null && shown > fieldBudget.max) return false;
+    return true;
   };
   const filtered = useMemo(
     () => {
