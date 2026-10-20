@@ -485,25 +485,25 @@ const Product3DViewer: React.FC<Props> = ({
       ? "border-trade-stage-foreground/15 bg-trade-stage-foreground/5"
       : "border-border bg-background/50",
     headerIcon: dark ? "text-gold-bright" : "text-muted-foreground",
-    headerLabel: dark ? "text-trade-stage-foreground/70" : "text-muted-foreground",
+    headerLabel: dark ? "text-trade-stage-foreground/85" : "text-muted-foreground",
     lockOn: dark
       ? "border-trade-stage-foreground bg-trade-stage-foreground text-trade-stage"
       : "border-foreground bg-foreground text-background",
     lockOff: dark
-      ? "border-trade-stage-foreground/25 text-trade-stage-foreground/60 hover:text-trade-stage-foreground"
+      ? "border-trade-stage-foreground/25 text-trade-stage-foreground/80 hover:text-trade-stage-foreground"
       : "border-border text-muted-foreground hover:text-foreground",
     posterFallback: dark ? "bg-trade-stage-foreground/10" : "bg-muted/40",
     hint: dark
-      ? "text-trade-stage-foreground/55 border-trade-stage-foreground/15"
+      ? "text-trade-stage-foreground/80 border-trade-stage-foreground/15"
       : "text-muted-foreground border-border",
     note: dark
-      ? "bg-trade-stage-foreground/5 text-trade-stage-foreground/60"
+      ? "bg-trade-stage-foreground/5 text-trade-stage-foreground/80"
       : "bg-muted/40 text-muted-foreground",
     debugBar: dark
       ? "bg-trade-stage-foreground/5 border-trade-stage-foreground/15"
       : "bg-background/60 border-border",
     debugToggle: dark
-      ? "text-trade-stage-foreground/60 hover:text-trade-stage-foreground"
+      ? "text-trade-stage-foreground/80 hover:text-trade-stage-foreground"
       : "text-muted-foreground hover:text-foreground",
   };
 
