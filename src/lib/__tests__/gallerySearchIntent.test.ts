@@ -1,5 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { parseGallerySearch, matchesSize } from "../gallerySearchIntent";
+import { parseGallerySearch, matchesSize, parseBudgetAmount } from "../gallerySearchIntent";
+
+describe("standalone budget field parsing", () => {
+  it("parses plain numbers, thousands separators and k suffix", () => {
+    expect(parseBudgetAmount("20,000")).toEqual({ cents: 2_000_000, currency: null });
+    expect(parseBudgetAmount("2,500.50")).toEqual({ cents: 250_050, currency: null });
+    expect(parseBudgetAmount("20k")).toEqual({ cents: 2_000_000, currency: null });
+  });
+  it("recognises currency words and symbols", () => {
+    expect(parseBudgetAmount("€20,000").currency).toBe("EUR");
+    expect(parseBudgetAmount("5000 SGD").currency).toBe("SGD");
+    expect(parseBudgetAmount("$30k").currency).toBe("USD");
+  });
+  it("rejects empty, zero and non-numeric input", () => {
+    expect(parseBudgetAmount("")).toEqual({ cents: null, currency: null });
+    expect(parseBudgetAmount("0")).toEqual({ cents: null, currency: null });
+    expect(parseBudgetAmount("abc")).toEqual({ cents: null, currency: null });
+  });
+});
 
 describe("gallery budget + size search", () => {
   it("parses '260 cm table under Eur 20,000'", () => {

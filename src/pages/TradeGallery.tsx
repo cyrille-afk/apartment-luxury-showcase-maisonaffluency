@@ -1,4 +1,4 @@
-import { parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
+import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -92,6 +92,13 @@ const StudioGallery = () => {
 
   const [search, setSearch] = useState(savedGallery.search ?? "");
   const searchIntent = useMemo(() => parseGallerySearch(search), [search]);
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
+  const fieldBudget = useMemo(() => {
+    const min = parseBudgetAmount(budgetMin);
+    const max = parseBudgetAmount(budgetMax);
+    return { min: min.cents, max: max.cents, currency: min.currency ?? max.currency ?? null };
+  }, [budgetMin, budgetMax]);
   const [selectedBrand, setSelectedBrand] = useState(savedGallery.brand ?? "all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || savedGallery.category || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || savedGallery.subcategory || "all");
@@ -526,24 +533,33 @@ const StudioGallery = () => {
       return [{ ...product, image_url: pick.image_url, hover_image_url: pick.hover_image_url || undefined }];
     });
   }, [routeBrandSlug, galleryDesigner, galleryPicks, allProducts, liveProducts, hiddenTradeProductIds, search, selectedCategory, selectedSubcategory, selectedEdition]);
-  // Budget/size phrases typed in search ("260 cm table under €20,000").
-  // Budget compares the shown price mode (trade or RRP) of the matching size; unpriced pieces can't be confirmed, so they drop out.
+  // Budget/size phrases typed in search ("260 cm table under €20,000"), plus the
+  // standalone Min/Max budget fields. Budget compares the shown price mode
+  // (trade or RRP) of the matching size; unpriced pieces can't be confirmed, so they drop out.
   const fitsIntent = (p: TradeProduct) => {
     const { sizeMm, sizeMode, budgetCents } = searchIntent;
-    if (!sizeMm && !budgetCents) return true;
+    const hasFieldBudget = fieldBudget.min !== null || fieldBudget.max !== null;
+    if (!sizeMm && !budgetCents && !hasFieldBudget) return true;
     const base = getProductPrice(p);
     const variants = (base as { variants?: PricedVariant[] } | null)?.variants;
-    if (sizeMm && !budgetCents) {
-      return matchesSize(p.dimensions, sizeMm, sizeMode) ||
+    if (sizeMm) {
+      const sizeOk = matchesSize(p.dimensions, sizeMm, sizeMode) ||
         (variants || []).some((v) => [v.label, v.base, v.top].some((t) => matchesSize(t, sizeMm, sizeMode)));
+      if (!sizeOk) return false;
     }
+    if (!hasFieldBudget && !budgetCents) return true;
     // Budget is tested against the matching size's own price, never the cheapest "From".
-    const cents = priceForSize(base?.cents ?? null, p.dimensions, variants, sizeMm, sizeMode);
-    if (!base || !cents) return false;
+    if (!base) return false;
+    const cents = priceForSize(base.cents, p.dimensions, variants, sizeMm, sizeMode);
+    if (!cents) return false;
     const price = getDisplayPrice({ ...base, cents }, p.brand_name)!;
-    const cur = (searchIntent.budgetCurrency || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
+    const cur = ((budgetCents != null ? searchIntent.budgetCurrency : fieldBudget.currency) || (displayCurrency === "original" ? "EUR" : displayCurrency)) as DisplayCurrency;
     if (price.currency !== cur && !fxRates[`${price.currency}_${cur}`]) return false;
-    return convertCents(price.cents, price.currency, cur, fxRates) <= budgetCents!;
+    const shown = convertCents(price.cents, price.currency, cur, fxRates);
+    if (budgetCents != null && shown > budgetCents) return false;
+    if (fieldBudget.min !== null && shown < fieldBudget.min) return false;
+    if (fieldBudget.max !== null && shown > fieldBudget.max) return false;
+    return true;
   };
   const filtered = useMemo(
     () => {
@@ -712,6 +728,12 @@ const StudioGallery = () => {
             <option value="title">Sort: Title A–Z</option>
             <option value="recent">Sort: Most recently added</option>
           </select>
+          <div className="flex items-center gap-2" data-testid="gallery-budget-filter">
+            <span className="whitespace-nowrap font-body text-xs uppercase tracking-[0.1em] text-muted-foreground">Budget</span>
+            <Input type="text" inputMode="decimal" aria-label="Minimum budget" placeholder="Min" value={budgetMin} onChange={(e) => setBudgetMin(e.target.value)} className={`${filterInputClass} w-24 rounded-full text-base sm:text-sm`} />
+            <span aria-hidden="true" className="text-muted-foreground">–</span>
+            <Input type="text" inputMode="decimal" aria-label="Maximum budget" placeholder="Max" value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} className={`${filterInputClass} w-24 rounded-full text-base sm:text-sm`} />
+          </div>
           <select value="" aria-label="Saved views"
               onChange={(e) => {
                 const val = e.target.value;
@@ -758,6 +780,11 @@ const StudioGallery = () => {
         if (activeBrand) activeFilters.push({ key: "brand", label: activeBrand, clear: () => handleBrandChange("all") });
         if (selectedCategory !== "all") activeFilters.push({ key: "category", label: selectedCategory, clear: () => { setSelectedCategory("all"); setSelectedSubcategory("all"); } });
         if (selectedSubcategory !== "all") activeFilters.push({ key: "subcategory", label: selectedSubcategory, clear: () => setSelectedSubcategory("all") });
+        if (budgetMin.trim() || budgetMax.trim()) activeFilters.push({
+          key: "budget",
+          label: `Budget ${budgetMin.trim()} – ${budgetMax.trim() || "∞"}`,
+          clear: () => { setBudgetMin(""); setBudgetMax(""); },
+        });
         if (selectedEdition !== "all") activeFilters.push({ key: "edition", label: selectedEdition, clear: () => setSelectedEdition("all") });
         if (activeFilters.length === 0) return null;
         return (
@@ -783,6 +810,8 @@ const StudioGallery = () => {
                   setSelectedCategory("all");
                   setSelectedSubcategory("all");
                   setSelectedEdition("all");
+                  setBudgetMin("");
+                  setBudgetMax("");
                   if (routeBrandName || selectedBrand !== "all") handleBrandChange("all");
                 }}
                 className="ml-1 font-body text-[11px] uppercase tracking-[0.1em] text-muted-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
