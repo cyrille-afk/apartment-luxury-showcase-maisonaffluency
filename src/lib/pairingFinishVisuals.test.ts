@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { pairingFinishImage, pairingSwatchFor, pairingVisualOptions } from "./pairingFinishVisuals";
 
 describe("pairing finish visual linking", () => {
+  it("matches all nine Portal table options to their product-page samples without changing priced values", () => {
+    const options = ["Nero Kinatra Marble", "Blackened Ash Wood", "Bleached Ash Wood", "Nero Portoro Marble", "Lumachella Marble", "Silk Georgette Marble", "Bianco Arabescato Marble", "Navona Travertine", "Silver Travertine"];
+    const names = ["Marble - Nero Kinitra", "Ash Wood - Blackened", "Ash Wood - Bleached", "Marble - Nero Portoro", "Marble - Lumachella", "Marble - Silk Georgette", "Marble - Bianco Arabescato", "Travertine - Navona", "Travertine - Silver"];
+    const swatches = names.map((name, index) => ({ name, image_url: `sample-${index}.jpg` }));
+    expect(options.map(option => pairingSwatchFor(option, swatches)?.image_url)).toEqual(names.map((_, index) => `sample-${index}.jpg`));
+    expect(pairingVisualOptions(options, swatches)).toEqual(options.map((value, index) => ({ value, name: names[index] })));
+  });
   const rows = [{ base: "Lacquer", top: "Aged Brass" }, { base: "Lacquer", top: "Tarnished Silver" }];
   const images = ["hero.jpg", "brass.jpg", "silver.jpg"];
   it("switches to a dedicated complete combination photo", () => {
