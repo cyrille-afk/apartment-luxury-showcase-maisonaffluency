@@ -161,7 +161,8 @@ export default function TradeApplicationsQueue() {
     });
     setBusy(null);
     if (error || data?.ok === false) toast.error(data?.error ?? "Analysis failed.");
-    else if (data?.unverified) toast.info(data.message ?? "Instagram profile unverified; no score penalty applied.");
+    else if (data?.unverified) toast.info(data.message ?? "Instagram profile still unverified; no score penalty applied. Retry once access is available.");
+    else if (data?.radar?.score != null) toast.success(`Verification complete — scored ${data.radar.score}/100 on portfolio evidence.`);
     else toast.success("Aesthetic analysis updated.");
     qc.invalidateQueries({ queryKey: ["trade-applications-queue"] });
   };
@@ -332,6 +333,18 @@ export default function TradeApplicationsQueue() {
                     {busy === a.id + "on_hold" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PauseCircle className="mr-2 h-4 w-4" />}
                     Hold / Review
                   </Button>
+                  {a.radar_status === "unverified" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => rerun(a)}
+                      disabled={busy !== null}
+                      className="mt-1 rounded-none text-[10px] uppercase tracking-[0.18em]"
+                    >
+                      {busy === a.id + "dna" ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-2 h-3 w-3" />}
+                      Retry Instagram verification
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
