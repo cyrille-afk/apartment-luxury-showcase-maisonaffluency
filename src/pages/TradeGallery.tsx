@@ -1,4 +1,4 @@
-import { parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
+import { parseBudgetAmount, parseGallerySearch, matchesSize, priceForSize, type PricedVariant } from "@/lib/gallerySearchIntent";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { readSavedViews, saveView, deleteView, type TradeSavedView } from "@/lib/tradeSavedViews";
 import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSavedViewsSync";
@@ -92,6 +92,13 @@ const StudioGallery = () => {
 
   const [search, setSearch] = useState(savedGallery.search ?? "");
   const searchIntent = useMemo(() => parseGallerySearch(search), [search]);
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
+  const fieldBudget = useMemo(() => {
+    const min = parseBudgetAmount(budgetMin);
+    const max = parseBudgetAmount(budgetMax);
+    return { min: min.cents, max: max.cents, currency: min.currency ?? max.currency ?? null };
+  }, [budgetMin, budgetMax]);
   const [selectedBrand, setSelectedBrand] = useState(savedGallery.brand ?? "all");
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || savedGallery.category || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || savedGallery.subcategory || "all");

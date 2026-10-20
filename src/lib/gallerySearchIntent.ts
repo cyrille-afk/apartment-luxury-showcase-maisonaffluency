@@ -71,6 +71,20 @@ export function parseGallerySearch(raw: string): GallerySearchIntent {
   return { text, sizeMm, sizeMode, budgetCents, budgetCurrency };
 }
 
+/**
+ * Standalone budget field ("20,000", "€2k", "5,000 SGD") → cents + ISO currency.
+ * Currency null means "use the gallery's display currency".
+ */
+export function parseBudgetAmount(raw: string): { cents: number | null; currency: string | null } {
+  const text = raw.trim();
+  if (!text) return { cents: null, currency: null };
+  const m = text.match(new RegExp(`${CUR}?\\s*${AMOUNT}\\s*${CUR}?`, "i"));
+  const n = m ? toNumber(m[2], m[3]) : null;
+  if (!n || n <= 0) return { cents: null, currency: null };
+  const cur = ((m?.[1] || "") + (m?.[4] || "")).toLowerCase();
+  return { cents: Math.round(n * 100), currency: cur ? CURRENCY_WORDS[cur] ?? null : null };
+}
+
 /** Every plan length (W/L/D/Ø, incl. "W 200 / 240") in a dimension string, in mm. */
 export function planLengthsMm(dimensions?: string | null): number[] {
   if (!dimensions) return [];
