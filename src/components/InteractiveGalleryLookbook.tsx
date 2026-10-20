@@ -880,16 +880,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
                             </div>
                             <div key={`${selectedHotspot.id}-${dockRotation}`} className="flex min-h-0 flex-1 flex-col gap-4 animate-fade-in">
                               {dockAlternatives.map((pick) => (
-                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm border border-[#343438] bg-[#262629] p-3 text-left hover:bg-[#262629] hover:brightness-[1.12]">
+                                <Button key={pick.id} type="button" variant="ghost" onClick={() => setLightboxProduct(pick)} aria-label={`View ${pick.title} details`} className="flex h-auto min-h-0 min-w-0 w-full flex-1 flex-col items-stretch rounded-sm border border-[#EBEAE4] bg-[#F9F9F7] p-3 text-left shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:bg-[#F9F9F7] hover:brightness-[0.97]">
                                   <span className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
                                     <img src={pick.image_url} alt={pick.title} loading="lazy" className="max-h-full max-w-full object-contain" />
                                   </span>
                                   <span className="mt-2 flex shrink-0 items-start justify-between gap-2 px-0.5">
                                     <span className="min-w-0">
-                                      <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-[#EBEAE4]">{pick.brand_name}</span>
-                                      <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-[#A1A1AA]">{pick.title}</span>
+                                      <span className="block truncate font-body text-[9px] font-semibold uppercase tracking-wider text-[#1E1E1F]">{pick.brand_name}</span>
+                                      <span className="mt-0.5 line-clamp-2 block font-display text-xs italic leading-snug text-[#4A4A4A]">{pick.title}</span>
                                     </span>
-                                    <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-[#EBEAE4]">
+                                    <span className="shrink-0 pt-0.5 text-right font-body text-[9px] font-semibold leading-tight text-[#1E1E1F]">
                                       {formatPublicRrpForDestination(dockRrpMap[pick.id], dockDestination.currency) || "Price upon Request"}
                                     </span>
                                   </span>
