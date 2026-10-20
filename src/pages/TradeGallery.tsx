@@ -17,7 +17,7 @@ import { countTradeCollectionPieces, filterTradeProducts } from "@/lib/tradeFilt
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import CurrencyToggle, { type DisplayCurrency, convertCents, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { getSubcategories, type TradeProduct } from "@/lib/tradeProducts";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
@@ -656,7 +656,7 @@ const StudioGallery = () => {
           <div className="flex min-w-0 items-center gap-3 w-full sm:w-[21rem]" data-testid="gallery-search-currency">
             <div className="relative min-w-0 flex-1">
               <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" aria-label="Search pieces" placeholder="Search pieces…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
+              <Input type="search" aria-label="Search pieces" placeholder="Search, e.g. 260 cm table under €20,000" value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 border-border pl-9 font-body" />
             </div>
             <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} variant="dropdown" className="[&>button]:h-11 [&>button]:px-3 [&>button]:tracking-normal" />
           </div>
