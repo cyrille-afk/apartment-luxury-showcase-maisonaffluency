@@ -6550,6 +6550,51 @@ export type Database = {
           },
         ]
       }
+      product_design_notes: {
+        Row: {
+          colour: string | null
+          form: string | null
+          function: string | null
+          pick_id: string
+          sources: string | null
+          texture: string | null
+          updated_at: string
+        }
+        Insert: {
+          colour?: string | null
+          form?: string | null
+          function?: string | null
+          pick_id: string
+          sources?: string | null
+          texture?: string | null
+          updated_at?: string
+        }
+        Update: {
+          colour?: string | null
+          form?: string | null
+          function?: string | null
+          pick_id?: string
+          sources?: string | null
+          texture?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_design_notes_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "curator_pick_slug_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_design_notes_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: true
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_embeddings: {
         Row: {
           content_chunk: string
