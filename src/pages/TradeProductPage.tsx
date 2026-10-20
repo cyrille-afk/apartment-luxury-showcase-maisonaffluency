@@ -2121,7 +2121,7 @@ const TradeProductPage: React.FC = () => {
                   );
                 })}
               </div>
-            </section>
+            </section>)}
           </div>
           <div className="flex flex-col gap-4">
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}

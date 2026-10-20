@@ -2607,7 +2607,7 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
 
 
 
-              {!isMobileOrPwa && (
+              {!isMobileOrPwa && curatorNoteSections.length > 0 && (
                 <section aria-label="Curator notes" className="mt-7 border-t border-border/50 pt-5">
                   <h2 className="mb-3 font-display text-2xl italic text-foreground">Curator Notes</h2>
                   {/* Product page: notes read vertically beneath the gallery; only the lead note is highlighted. */}
