@@ -807,7 +807,7 @@ const TradeProductPage: React.FC = () => {
       const active = (rows || []).filter(
         (r: any) => r && r.is_active !== false && Array.isArray(r.image_indices) && r.image_indices.length,
       );
-      const shown = picturedFinishesForImage(active, galleryActiveIndex ?? 0);
+      const shown: any[] = picturedFinishesForImage(active, galleryActiveIndex ?? 0);
       const FRAME_RE = /^(cement stuc|glossy lacquer)\b/i;
       const base = shown.filter((s: any) => FRAME_RE.test(s.name) || (s.category || "").toLowerCase() === "wood");
       const top = shown.filter((s: any) => !base.includes(s));
