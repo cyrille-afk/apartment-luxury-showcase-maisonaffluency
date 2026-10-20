@@ -82,8 +82,12 @@ const benefits = [
   },
 ];
 
-const stats = [
-  { value: "300+", label: "Ateliers & Partners" },
+const stats: { value: string; label: string; note?: string }[] = [
+  {
+    value: "300+",
+    label: "Ateliers & Partners",
+    note: "Digital selection expanding weekly. Full physical archive available on demand.",
+  },
   { value: "15+", label: "Countries Served" },
   { value: "100%", label: "Insured Shipping" },
   { value: "Priority", label: "Tier Allocation" },
@@ -661,6 +665,11 @@ const TradeLanding = () => {
                 <span className="mt-0.5 text-center font-body text-[8px] uppercase tracking-[0.08em] text-foreground md:mt-1 md:text-xs md:tracking-[0.15em] md:text-muted-foreground">
                   {stat.label}
                 </span>
+                {stat.note && (
+                  <span className="mt-1 text-center text-[10px] uppercase tracking-widest text-neutral-500">
+                    {stat.note}
+                  </span>
+                )}
               </motion.div>
             ))}
           </div>
