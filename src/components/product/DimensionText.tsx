@@ -7,7 +7,7 @@ export function splitDimensionHeights(text: string): { main: string; heights: st
   return { main: text.slice(0, match.index).trim(), heights: text.slice(match.index + match[0].length).trim() };
 }
 
-export default function DimensionText({ text }: { text: string }) {
+export default function DimensionText({ text, inlineHeights = false }: { text: string; inlineHeights?: boolean }) {
   if (!/\b(?:cm|mm|in)\b/i.test(text)) return <>{text}</>;
   const { dim, qual } = splitDimensionQualifier(text);
   const [metric, suppliedImperial] = dim.split(/\s*\|\s*/);
@@ -17,8 +17,13 @@ export default function DimensionText({ text }: { text: string }) {
     {rows.map((row, index) => {
       const { main, heights } = splitDimensionHeights(row);
       return <span key={index} className={index ? "mt-1 block text-xs text-muted-foreground" : "block"}>
-        <span className="block whitespace-nowrap">{main}</span>
-        {heights && <span className="block whitespace-nowrap">{heights}</span>}
+        {inlineHeights ? <span className="block">
+          <span className="whitespace-nowrap">{main}</span>
+          {heights && <span className="whitespace-nowrap">{` / ${heights}`}</span>}
+        </span> : <>
+          <span className="block whitespace-nowrap">{main}</span>
+          {heights && <span className="block whitespace-nowrap">{heights}</span>}
+        </>}
       </span>;
     })}
     {qual && <span className="mt-1 block text-xs text-muted-foreground">{qual}</span>}
