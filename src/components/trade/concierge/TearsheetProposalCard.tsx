@@ -346,7 +346,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem & { title: string } => ({
     pick_id: p.id,
-    title: p.title ?? "",
+    title: p.title,
     designer_name: p.designer_name,
     materials: p.materials,
     category: (p as any).category ?? null,
@@ -1176,7 +1176,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             onClick={() => sendConciergePrefill(
                               buildSwapPrompt({
                                 pick_id: p.id,
-                                title: p.title ?? "",
+                                title: p.title,
                                 designer_name: p.designer_name,
                                 materials: p.materials,
                                 category: (p as any).category ?? null,

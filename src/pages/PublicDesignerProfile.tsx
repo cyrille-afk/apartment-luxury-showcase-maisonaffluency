@@ -128,6 +128,25 @@ function pickSrcSet(url: string): string {
 // Visible fallback paragraph to lift designer pages out of "thin content" when
 // the source biography is brief. Rendered only when the user-visible biography
 // has fewer than ~60 words; never overrides existing rich biographies.
+function slugIndex(slug: string | null | undefined, n: number): number {
+  if (!n) return 0;
+  const s = (slug || "").toLowerCase();
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return ((h % n) + n) % n;
+}
+
+// Extract the leading product-category keyword from a free-text specialty
+// ("Lighting, lacquer, parchment" → "lighting"). Falls back to generic
+// "collectible design" when nothing usable is present.
+function categoryKeyword(specialty?: string | null): string {
+  const raw = (specialty || "").toLowerCase().replace(/[^a-z, &/-]+/g, " ").trim();
+  if (!raw) return "collectible design";
+  const first = raw.split(/[,/]| and /)[0].trim();
+  return first || "collectible design";
+}
+
+
 function buildThinContentFallback(args: {
   name: string;
   founder?: string | null;
