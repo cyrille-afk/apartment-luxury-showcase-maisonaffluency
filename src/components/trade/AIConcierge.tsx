@@ -5318,7 +5318,6 @@ export function AIConcierge({
                     )}
                     {/* Curated-selection empty-state card intentionally removed per product decision. */}
                     {item.role === "assistant" && item.appliedConstraints?.empty && (item.appliedConstraints.applied_to?.length ?? 0) > 0 && (() => {
-                      const s = undefined;
                       const ac = item.appliedConstraints;
                       const detected = {
                         style: [],

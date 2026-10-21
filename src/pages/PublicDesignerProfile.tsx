@@ -98,6 +98,28 @@ function parseByAttribution(title: string): { cleanTitle: string; attribution?: 
   return { cleanTitle: m[1].trim(), attribution: m[2].trim() };
 }
 
+/**
+ * Derive small inventory badges for a curator-pick card.
+ * Matches tags/edition strings to "Available Now" or explicit "Exclusive" labels shown
+ * in the lower-left corner of product thumbnails.
+ */
+function inventoryBadgesForPick(pick: AttributedCuratorPick): string[] {
+  const tags = (pick.tags || []).map((t) => t.toLowerCase());
+  const edition = (pick.edition || "").toLowerCase();
+  const badges: string[] = [];
+  if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/.test(t))) {
+    badges.push("Available Now");
+  }
+  if (edition.includes("exclusive") || tags.some((t) => /\bexclusive\b/.test(t))) {
+    badges.push("Exclusive");
+  }
+  return badges;
+}
+
+// Per-slug overrides for pages where the algorithmic title collides with a
+// sibling slug or otherwise fails to describe the page uniquely. Keep each
+// override within Google's 40-60 char title band.
+
 function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
 }

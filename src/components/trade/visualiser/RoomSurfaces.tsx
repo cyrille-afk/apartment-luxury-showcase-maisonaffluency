@@ -1,6 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { useTexture } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
+import { useThree, type ThreeElements } from "@react-three/fiber";
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
 import * as THREE from "three";
 import oakImage from "@/assets/room-oak-chevron.jpg";
 import cementImage from "@/assets/room-micro-cement.jpg";
