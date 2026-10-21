@@ -107,16 +107,20 @@ export default function ProjectAssetsDrawer({
                     <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
                       {item.brandName}
                     </p>
-                    <p className="truncate text-xs text-foreground">{item.productName}</p>
+                    <p className="break-words text-xs text-foreground">{item.productName}</p>
+                    {item.selectedUpholstery && <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">Upholstery: {item.selectedUpholstery}</p>}
+                    {item.selectedFrameFinish && <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">Frame Finish: {item.selectedFrameFinish}</p>}
                     {(item.variantLabel || item.dimensions) && (
                       <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-muted-foreground">
-                        {[item.dimensions, item.variantLabel].filter(Boolean).join(" · ")}
+                        {[item.dimensions, !item.selectedUpholstery && !item.selectedFrameFinish ? item.variantLabel : null].filter(Boolean).join(" · ")}
                       </p>
                     )}
                   </div>
 
                   <div className="flex shrink-0 flex-col items-center gap-1">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="icon"
                       type="button"
                       onClick={() => onPlace(item)}
                       aria-label={`Drag ${item.productName} to layout`}
@@ -124,15 +128,17 @@ export default function ProjectAssetsDrawer({
                       className="flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
                       <GripVertical className="h-4 w-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       type="button"
                       onClick={() => removeFromInventory(item.id, item.variantLabel)}
                       aria-label={`Remove ${item.productName} from project assets`}
                       className="flex h-6 w-8 items-center justify-center text-muted-foreground/60 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                     >
                       <X className="h-3 w-3" />
-                    </button>
+                    </Button>
                   </div>
                 </li>
               );

@@ -14,21 +14,12 @@ import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/Proje
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
-import { createPlacedObject, MAX_PLACED_OBJECTS, type PlaceableProduct } from "@/lib/placedObjectFactory";
+import { createPlacedObject, inventoryItemToPlaceable, MAX_PLACED_OBJECTS } from "@/lib/placedObjectFactory";
 import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
 const Axonometric = lazy(() => import("./TradeAxonometric"));
-
-const inventoryItemToPlaceable = (item: ProjectInventoryItem): PlaceableProduct => ({
-  id: item.id,
-  product_name: item.productName,
-  brand_name: item.brandName,
-  image_url: item.imageUrl,
-  dimensions: item.dimensions,
-  glb_url: item.glbUrl,
-});
 
 function WorkspacePanels() {
   const { isAdmin } = useAuth();
