@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 
-const guardCss = readFileSync("src/index.css", "utf8");
+const guardCss = readFileSync("src/styles.css", "utf8");
 
 afterEach(() => {
   document.head.querySelector("#client-mask-test-style")?.remove();
@@ -17,7 +17,12 @@ describe("Client View document guard", () => {
     localStorage.setItem("ma_client_safe_mode", "1");
     const style = document.createElement("style");
     style.id = "client-mask-test-style";
-    style.textContent = guardCss.slice(guardCss.indexOf("html[data-client-view="), guardCss.indexOf("/* Trade routes"));
+    // jsdom 20 resolves these declarations by source order rather than CSS
+    // specificity/!important; place the real default rule before overrides.
+    const rules = guardCss.slice(guardCss.indexOf("html[data-client-view="), guardCss.indexOf("/* Trade routes"));
+    const fallback = "[data-client-placeholder] { display: none; }";
+    expect(rules).toContain(fallback);
+    style.textContent = fallback + rules.replace(fallback, "");
     document.head.appendChild(style);
     document.body.innerHTML = '<span data-trade-sensitive>SECRET SUPPLIER · FACTORY-SECRET-49 · Trade $7,782.30</span><span data-client-placeholder>Loading</span><span>Client $9,727.88</span>';
 

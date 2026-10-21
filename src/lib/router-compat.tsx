@@ -13,6 +13,7 @@ import {
   Navigate as TSNavigate,
   Outlet as TSOutlet,
   RouterProvider,
+  RouterContextProvider,
   createMemoryHistory,
   createRootRoute,
   createRoute,
@@ -112,7 +113,8 @@ export function useLocation() {
 const ParamsOverrideContext = createContext<Record<string, string> | null>(null);
 
 export function useParams<T extends Record<string, string | undefined> = Record<string, string | undefined>>(): T {
-  const params = tsParams({ strict: false } as never) as Record<string, string | undefined>;
+  // shouldThrow: false lets test-only <Routes> (which supply params via context) render outside a route match.
+  const params = (tsParams({ strict: false, shouldThrow: false } as never) ?? {}) as Record<string, string | undefined>;
   const override = useContext(ParamsOverrideContext);
   return (override ? { ...params, ...override } : params) as T;
 }
@@ -260,7 +262,9 @@ export function MemoryRouter({ children, initialEntries = ["/"] }: { children?: 
     const splat = createRoute({ getParentRoute: () => rootRoute, path: "$", component: () => null });
     return createRouter({ routeTree: rootRoute.addChildren([splat]), history: createMemoryHistory({ initialEntries }) });
   });
-  return <RouterProvider router={router} />;
+  // Test children must mount synchronously, as they did in react-router.
+  // RouterProvider waits for asynchronous route matching before mounting them.
+  return <RouterContextProvider router={router}>{children}</RouterContextProvider>;
 }
 
 function matchPath(pattern: string, pathname: string): Record<string, string> | null {
