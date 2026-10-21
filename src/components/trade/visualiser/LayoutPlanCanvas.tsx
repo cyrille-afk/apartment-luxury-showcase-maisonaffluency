@@ -31,6 +31,7 @@ export default function LayoutPlanCanvas({
   onSelect,
   onMove,
   onDropAssetKey,
+  showGuides = true,
 }: {
   objects: PlacedObject[];
   bounds: RoomBounds;
