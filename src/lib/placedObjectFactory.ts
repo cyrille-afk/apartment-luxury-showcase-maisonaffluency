@@ -1,5 +1,6 @@
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import type { ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 
 /** Hard cap for one composition, shared by every placement entry point. */
 export const MAX_PLACED_OBJECTS = 15;
@@ -14,7 +15,26 @@ export type PlaceableProduct = {
   image_url: string | null;
   dimensions: string | null;
   glb_url: string | null;
+  productType?: string;
+  selectedUpholstery?: string | null;
+  selectedFrameFinish?: string | null;
+  variantLabel?: string | null;
+  finishes?: string[];
+  upholsteryMaterial?: PlacedObject["upholsteryMaterial"];
 };
+
+/** Transfer the frozen page selection, never re-resolve a similar catalogue piece. */
+export function inventoryItemToPlaceable(item: ProjectInventoryItem): PlaceableProduct {
+  return {
+    id: item.id, product_name: item.productName, productType: item.productName,
+    brand_name: item.brandName, image_url: item.imageUrl,
+    dimensions: item.dimensions, glb_url: item.glbUrl,
+    selectedUpholstery: item.selectedUpholstery ?? null,
+    selectedFrameFinish: item.selectedFrameFinish ?? null,
+    variantLabel: item.variantLabel, finishes: [...item.finishes],
+    upholsteryMaterial: item.upholsteryMaterial ? { ...item.upholsteryMaterial } : null,
+  };
+}
 
 /**
  * Single spawn path for every placed piece — catalogue drawer, Project Assets
@@ -29,6 +49,11 @@ export function createPlacedObject(
     instanceId: `${product.id}-${Date.now()}`,
     id: product.id,
     product_name: product.product_name,
+    productType: product.product_name,
+    selectedUpholstery: product.selectedUpholstery ?? null,
+    selectedFrameFinish: product.selectedFrameFinish ?? null,
+    variantLabel: product.variantLabel ?? null,
+    finishes: product.finishes ? [...product.finishes] : [],
     brand_name: product.brand_name,
     image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
     dimensions: product.dimensions,
@@ -38,6 +63,6 @@ export function createPlacedObject(
     scale: 1,
     material: null,
     baseMaterial: null,
-    upholsteryMaterial: null,
+    upholsteryMaterial: product.upholsteryMaterial ? { ...product.upholsteryMaterial } : null,
   };
 }

@@ -21,7 +21,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
 import { DEFAULT_LAYOUT_BOUNDS, layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
 import { formatGap, nearestClearance } from "@/lib/layoutGuides";
-import { createPlacedObject } from "@/lib/placedObjectFactory";
+import { createPlacedObject, inventoryItemToPlaceable, type PlaceableProduct } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
@@ -664,7 +664,7 @@ const TradeVisualiser = () => {
   const focusRef = useRef<(() => [number, number] | null) | null>(null);
   const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
   const { projectInventory } = useProjectInventory();
-  const addObject = (product: CatalogueProduct) => {
+  const addObject = (product: PlaceableProduct) => {
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
       return;
@@ -697,14 +697,7 @@ const TradeVisualiser = () => {
   // the catalogue drawer.
   const placeInventoryAsset = (item: ProjectInventoryItem) => {
     addObject({
-      id: item.id,
-      product_name: item.productName,
-      brand_name: item.brandName,
-      image_url: item.imageUrl,
-      category: "",
-      dimensions: item.dimensions,
-      glb_url: item.glbUrl,
-      source_pick_id: null,
+      ...inventoryItemToPlaceable(item),
     });
   };
 

@@ -167,7 +167,9 @@ export default function LayoutPlanCanvas({
           const d = ((dims?.d ?? FALLBACK_FOOTPRINT_M * 1000) / 1000) * scale;
           const deg = (object.rotation[1] * 180) / Math.PI;
           const selected = object.instanceId === selectedId;
-          const label = object.product_name.length > 26 ? `${object.product_name.slice(0, 25)}…` : object.product_name;
+          const label = object.product_name;
+          // Keep labels below the rotated footprint, not underneath its corners.
+          const labelY = Math.max(Math.abs(Math.sin(object.rotation[1])) * w + Math.abs(Math.cos(object.rotation[1])) * d, 0.5) / 2;
           return (
             <g
               key={object.instanceId}
@@ -199,7 +201,7 @@ export default function LayoutPlanCanvas({
                 fill="transparent"
               />
               <text
-                y={Math.max(d, 0.5) / 2 + 0.22}
+                y={labelY + 0.22}
                 textAnchor="middle"
                 fontSize={0.16}
                 className={cn("pointer-events-none", selected ? "fill-primary" : "fill-foreground")}
@@ -207,7 +209,7 @@ export default function LayoutPlanCanvas({
                 {label}
               </text>
               <text
-                y={Math.max(d, 0.5) / 2 + 0.42}
+                y={labelY + 0.42}
                 textAnchor="middle"
                 fontSize={0.12}
                 className="pointer-events-none fill-muted-foreground"

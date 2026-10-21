@@ -26,6 +26,11 @@ export type PlacedObject = {
   restoreKey?: number;
   id: string;
   product_name: string;
+  productType?: string;
+  selectedUpholstery?: string | null;
+  selectedFrameFinish?: string | null;
+  variantLabel?: string | null;
+  finishes?: string[];
   brand_name: string;
   image_url: string | null;
   dimensions: string | null;

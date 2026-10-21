@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import type { VisualiserMaterial } from "./VisualiserMaterialContext";
 
 /**
  * Global project inventory: products added from the product page via
@@ -13,6 +14,11 @@ export interface ProjectInventoryItem {
   /** Product id (trade product or curator pick id). */
   id: string;
   productName: string;
+  /** Exact page item identity, never a related product or taxonomy label. */
+  productType?: string;
+  selectedUpholstery?: string | null;
+  selectedFrameFinish?: string | null;
+  upholsteryMaterial?: VisualiserMaterial | null;
   brandName: string;
   imageUrl: string | null;
   /** 3D model path (GLB) when the product has one. */
@@ -36,6 +42,13 @@ interface ProjectInventoryContextValue {
 const ProjectInventoryContext = createContext<ProjectInventoryContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "ma:project-inventory-v1";
+
+export function upsertInventory(current: ProjectInventoryItem[], item: Omit<ProjectInventoryItem, "addedAt">): ProjectInventoryItem[] {
+  const snapshot = { ...item, productType: item.productName, finishes: [...item.finishes], addedAt: Date.now() };
+  const index = current.findIndex(entry => entry.id === item.id && entry.variantLabel === item.variantLabel);
+  if (index < 0) return [...current, snapshot];
+  return current.map((entry, i) => i === index ? { ...snapshot, addedAt: entry.addedAt } : entry);
+}
 
 function loadInitial(): ProjectInventoryItem[] {
   if (typeof window === "undefined") return [];
@@ -61,14 +74,7 @@ export function ProjectInventoryProvider({ children }: { children: ReactNode }) 
   }, [projectInventory]);
 
   const addToInventory = (item: Omit<ProjectInventoryItem, "addedAt">) => {
-    setProjectInventory((current) => {
-      // Same product + same variant is already in the project — don't duplicate.
-      const exists = current.some(
-        (entry) => entry.id === item.id && entry.variantLabel === item.variantLabel,
-      );
-      if (exists) return current;
-      return [...current, { ...item, addedAt: Date.now() }];
-    });
+    setProjectInventory((current) => upsertInventory(current, item));
   };
 
   const removeFromInventory = (id: string, variantLabel: string | null) => {
