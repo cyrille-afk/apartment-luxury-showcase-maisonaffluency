@@ -249,11 +249,6 @@ const NewIn = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        {ogImage && <meta property="og:image" content={ogImage} />}
-        <meta property="og:url" content="https://www.maisonaffluency.com/new-in" />
-        <meta property="og:type" content="website" />
       </Helmet>
 
       <Navigation />
