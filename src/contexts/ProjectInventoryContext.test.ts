@@ -3,7 +3,7 @@ import { upsertInventory, type ProjectInventoryItem } from "./ProjectInventoryCo
 import { createPlacedObject, inventoryItemToPlaceable } from "@/lib/placedObjectFactory";
 import { layoutItems, patchLayoutItem } from "@/lib/activeProjectLayout";
 
-const armchair: Omit<ProjectInventoryItem, "addedAt"> = {
+const armchair: Omit<ProjectInventoryItem, "addedAt" | "instanceId"> = {
   id: "armchair-id", productName: "Frenchmen Street Armchair", productType: "Frenchmen Street Armchair",
   brandName: "Sebastian Herkner", imageUrl: null, glbUrl: "https://assets.example/armchair.glb",
   dimensions: "W 62 × D 59 × H 80 cm", variantLabel: "Fabric Cat. Opera · Zero 005",
