@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 
 const DesignDetails = () => {

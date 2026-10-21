@@ -65,7 +65,7 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
         onClick={() => handleOpenChange(true)}
         aria-label={`Change shipping destination. Currently shipping to ${current.name}`}
         className={cn(
-          "flex items-center gap-1.5 transition-opacity hover:opacity-70 outline-none",
+          "flex items-center gap-1.5 transition-opacity hover:opacity-70 outline-hidden",
           compact && (showIso ? "min-h-11 px-1 justify-center" : "min-h-11 min-w-11 justify-center"),
           className
         )}

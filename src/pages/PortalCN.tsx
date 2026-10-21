@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -149,7 +149,7 @@ export default function PortalCN() {
                   type="text"
                   value={corporateId}
                   onChange={(e) => setCorporateId(e.target.value)}
-                  className="w-full bg-transparent border-b border-[#c9b98a]/30 px-0 py-2 text-[#f4ecd8] placeholder:text-[#e8e2d5]/25 focus:outline-none focus:border-[#c9b98a] transition-colors"
+                  className="w-full bg-transparent border-b border-[#c9b98a]/30 px-0 py-2 text-[#f4ecd8] placeholder:text-[#e8e2d5]/25 focus:outline-hidden focus:border-[#c9b98a] transition-colors"
                   placeholder="e.g. Studio-Shanghai / wxwork-…"
                   maxLength={120}
                   autoFocus
@@ -163,7 +163,7 @@ export default function PortalCN() {
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  className="w-full bg-transparent border-b border-[#c9b98a]/30 px-0 py-2 text-[#f4ecd8] placeholder:text-[#e8e2d5]/25 focus:outline-none focus:border-[#c9b98a] transition-colors tracking-[0.2em]"
+                  className="w-full bg-transparent border-b border-[#c9b98a]/30 px-0 py-2 text-[#f4ecd8] placeholder:text-[#e8e2d5]/25 focus:outline-hidden focus:border-[#c9b98a] transition-colors tracking-[0.2em]"
                   placeholder="XXXX-XXXX"
                   maxLength={64}
                 />

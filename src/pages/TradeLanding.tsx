@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { captureOutreachClick } from "@/lib/outreachLink";
 import { motion } from "framer-motion";
 import { LoaderCircle, Quote, Sparkles, Upload } from "lucide-react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -285,7 +285,7 @@ const HeroJoinForm = ({
     ghost ? "text-white/85" : "text-muted-foreground"
   );
   const inputCls = cn(
-    "h-10 md:h-12 w-full border border-border bg-transparent px-4 font-body text-[10px] uppercase tracking-widest text-foreground outline-none transition-colors duration-300 placeholder:text-[10px] placeholder:uppercase placeholder:tracking-widest placeholder:text-muted-foreground/60 focus:border-foreground",
+    "h-10 md:h-12 w-full border border-border bg-transparent px-4 font-body text-[10px] uppercase tracking-widest text-foreground outline-hidden transition-colors duration-300 placeholder:text-[10px] placeholder:uppercase placeholder:tracking-widest placeholder:text-muted-foreground/60 focus:border-foreground",
     ghost
       ? "border-background/60 bg-background/90 backdrop-blur-sm focus:border-background"
       : ""

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { Check, ChevronDown, FolderKanban, FolderOpen, Plus, X } from "lucide-react";
 import { useProjects, getRecentProjectIds, pushRecentProject } from "@/hooks/useProjects";
 import { useProjectFilter } from "@/hooks/useProjectFilter";

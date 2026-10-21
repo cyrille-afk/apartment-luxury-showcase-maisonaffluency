@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "@/lib/router-compat";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, FileText, Maximize2, Instagram } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";

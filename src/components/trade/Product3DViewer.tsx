@@ -515,7 +515,7 @@ const Product3DViewer: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setOpened(true)}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 group focus:outline-hidden focus:ring-2 focus:ring-primary/40"
             aria-label="Load interactive 3D model"
           >
             {poster ? (

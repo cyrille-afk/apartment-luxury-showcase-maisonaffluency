@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
-import { useParams } from "react-router-dom";
+import { useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
 import { Box, Heart, MessageSquare, ThumbsDown, ThumbsUp, Plus, X } from "lucide-react";

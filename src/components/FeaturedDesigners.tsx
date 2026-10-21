@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { CldPicture } from "@/components/ui/CldPicture";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";

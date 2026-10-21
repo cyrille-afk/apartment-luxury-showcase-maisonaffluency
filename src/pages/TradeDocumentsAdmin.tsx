@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileText, X, Image, Loader2, ArrowUp, ArrowDown, Star } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -46,7 +46,7 @@ const emptyDoc = (): Omit<TradeDocument, "id" | "created_at"> => ({
 });
 
 const inputClass =
-  "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors";
+  "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors";
 
 /** Extract the first page of a PDF as a high-quality JPEG blob */
 async function extractPdfCover(pdfUrl: string): Promise<Blob> {
@@ -350,7 +350,7 @@ const TradeDocumentsAdmin = () => {
               <input
                 value={editing.file_url}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, file_url: e.target.value } : null)}
-                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-none focus:border-foreground transition-colors font-mono"
+                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-hidden focus:border-foreground transition-colors font-mono"
                 placeholder="Or paste URL manually…"
               />
             </div>

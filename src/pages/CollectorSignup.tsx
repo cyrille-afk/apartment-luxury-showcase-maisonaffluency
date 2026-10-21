@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { z } from "zod";
 import { Lock, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -217,7 +217,7 @@ const Field = ({
     <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
     <input
       {...rest}
-      className="mt-1 w-full px-3 py-2.5 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-none focus:border-foreground/60"
+      className="mt-1 w-full px-3 py-2.5 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-hidden focus:border-foreground/60"
     />
     {error && <span className="font-body text-[11px] text-destructive mt-1 block">{error}</span>}
   </label>
@@ -233,7 +233,7 @@ const TextArea = ({
     <textarea
       rows={3}
       {...rest}
-      className="mt-1 w-full px-3 py-2.5 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-none focus:border-foreground/60 resize-none"
+      className="mt-1 w-full px-3 py-2.5 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-hidden focus:border-foreground/60 resize-none"
     />
     {error && <span className="font-body text-[11px] text-destructive mt-1 block">{error}</span>}
   </label>

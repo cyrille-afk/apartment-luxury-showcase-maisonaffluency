@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useLocation, useSearchParams, Navigate } from "react-router-dom";
+import { Link, useLocation, useSearchParams, Navigate } from "@/lib/router-compat";
 import { toast } from "sonner";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";

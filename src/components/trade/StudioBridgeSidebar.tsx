@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Smartphone, FileText, Box, ExternalLink, BellRing, Check, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudioBridge, useStudioAlerts, type StudioAlert } from "@/hooks/useStudioBridge";

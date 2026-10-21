@@ -1,4 +1,4 @@
-import { Link, useParams, Navigate } from "react-router-dom";
+import { Link, useParams, Navigate } from "@/lib/router-compat";
 import {
   ArrowLeft,
   Download,

@@ -2,7 +2,7 @@ import { useProductConfigOptional } from "@/contexts/ProductConfigContext";
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { getCart, shouldUseFullPageCart, useCart, formatMoney, cartSubtotalCents, setQuantity as setCartQuantity, removeFromCart } from "@/lib/cart";
 import { Loader2, Minus, Plus } from "lucide-react";
 import SelectionDrawer, { type PaymentMethod } from "@/components/product/SelectionDrawer";

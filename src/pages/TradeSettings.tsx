@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Building, Phone, Mail, Save, Camera, Award, TrendingUp, Compass, Sparkles, Smartphone } from "lucide-react";
 import { saveName, sanitizeName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import StudioMemoryCard from "@/components/trade/StudioMemoryCard";
 import { MobileHandoffDialog } from "@/components/trade/MobileHandoffDialog";
@@ -241,7 +241,7 @@ const TradeSettings = () => {
   };
 
   const inputClass =
-    "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
+    "w-full px-4 py-3 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
 
 
   const errorInputClass = "border-destructive focus:ring-destructive/30 focus:border-destructive/50";

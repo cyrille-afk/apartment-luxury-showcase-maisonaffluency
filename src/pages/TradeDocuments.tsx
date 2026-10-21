@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/trackDownload";
 import { FileDown, Search, FolderOpen, FileText, BookOpen, FileSpreadsheet, X } from "lucide-react";
@@ -164,7 +164,7 @@ const TradeDocuments = () => {
   useToolsBreadcrumbExtras(selectedBrand === "all" ? [] : [{ label: selectedBrand }]);
 
   const inputClass =
-    "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
+    "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 transition-colors";
 
 
   return (

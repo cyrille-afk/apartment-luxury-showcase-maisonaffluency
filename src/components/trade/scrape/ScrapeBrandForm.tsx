@@ -95,7 +95,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
               value={brand.brand_name}
               onChange={(e) => onUpdate(brand.id, "brand_name", e.target.value)}
               placeholder="e.g. Atelier Février"
-              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
             />
           </div>
         </div>
@@ -105,7 +105,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
             value={brand.category}
             onChange={(e) => onUpdate(brand.id, "category", e.target.value)}
             placeholder="e.g. Rugs, Lighting"
-            className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
           />
         </div>
         <div>
@@ -113,7 +113,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
           <select
             value={brand.location}
             onChange={(e) => onUpdate(brand.id, "location", e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30"
           >
             {COUNTRY_OPTIONS.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -132,7 +132,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
               value={mapUrl}
               onChange={(e) => setMapUrl(e.target.value)}
               placeholder="Brand page URL, e.g. https://example.com/designer/brand-name/"
-              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
             />
           </div>
           <div className="relative w-40">
@@ -141,7 +141,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
               value={mapSearch}
               onChange={(e) => setMapSearch(e.target.value)}
               placeholder="Filter (optional)"
-              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
             />
           </div>
           <button
@@ -202,7 +202,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
                 value={previewFilter}
                 onChange={(e) => { setPreviewFilter(e.target.value); setPreviewPage(0); }}
                 placeholder="Filter URLs…"
-                className="w-full pl-8 pr-3 py-1.5 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full pl-8 pr-3 py-1.5 rounded border border-border bg-background font-body text-[10px] text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
               />
             </div>
 
@@ -296,7 +296,7 @@ const ScrapeBrandForm = ({ brand, index, canRemove, onUpdate, onRemove }: Scrape
           onChange={(e) => onUpdate(brand.id, "urls_text", e.target.value)}
           rows={5}
           placeholder={"https://example.com/product/item-1/\nhttps://example.com/product/item-2/"}
-          className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary/30 font-mono leading-relaxed resize-y"
+          className="w-full px-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/30 focus:outline-hidden focus:ring-1 focus:ring-primary/30 font-mono leading-relaxed resize-y"
         />
         <p className="font-body text-[10px] text-muted-foreground/50 mt-0.5">
           {brand.urls_text.split(/[\n,]+/).filter((u) => u.trim().startsWith("http")).length} URL(s)

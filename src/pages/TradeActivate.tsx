@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from '@/lib/router-compat';
 import { recordEmailPortalClick } from '@/lib/emailPortalClick';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';

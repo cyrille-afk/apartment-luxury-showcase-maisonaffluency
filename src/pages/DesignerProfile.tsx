@@ -1,4 +1,4 @@
-import { Navigate, useLocation, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "@/lib/router-compat";
 
 const DesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();

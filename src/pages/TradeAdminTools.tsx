@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate } from "@/lib/router-compat";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight, FileBox, Inbox, Instagram, MapPin, Sparkles, Tags, Truck } from "lucide-react";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";

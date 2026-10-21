@@ -2,7 +2,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { cn } from "@/lib/utils";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import QuoteRequestDialog from "./QuoteRequestDialog";

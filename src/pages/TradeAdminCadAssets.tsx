@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -238,13 +238,13 @@ const TradeAdminCadAssets = () => {
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
                   placeholder="Filter by product, brand, variant, format…"
-                  className="w-72 max-w-full pl-8 pr-3 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground/30"
+                  className="w-72 max-w-full pl-8 pr-3 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground/30"
                 />
               </div>
               <select
                 value={variantFilter}
                 onChange={(e) => setVariantFilter(e.target.value)}
-                className="px-2 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground focus:outline-none focus:border-foreground/30"
+                className="px-2 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/30"
                 aria-label="Filter by variant"
               >
                 <option value="">All variants</option>
@@ -259,7 +259,7 @@ const TradeAdminCadAssets = () => {
               <select
                 value={versionFilter}
                 onChange={(e) => setVersionFilter(e.target.value)}
-                className="px-2 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground focus:outline-none focus:border-foreground/30"
+                className="px-2 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/30"
                 aria-label="Filter by version"
               >
                 <option value="">All versions</option>
@@ -483,7 +483,7 @@ const TradeAdminCadAssets = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by product or brand…"
-              className="w-full pl-8 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground/30"
+              className="w-full pl-8 pr-3 py-2 rounded-md border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground/30"
             />
           </div>
           {products.length > 0 && (

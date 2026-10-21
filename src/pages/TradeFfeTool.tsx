@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Layout, Construction, ChevronLeft } from "lucide-react";
 import { useFfeEntitlement } from "@/hooks/useFfeEntitlement";
 import { Button } from "@/components/ui/button";

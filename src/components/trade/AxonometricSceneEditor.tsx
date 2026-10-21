@@ -474,7 +474,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
                 <select
                   value={sceneCategory}
                   onChange={(e) => { setSceneCategory(e.target.value); setSceneSubcategory(""); }}
-                  className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                 >
                   <option value="">All Categories</option>
                   {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -483,7 +483,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
                   <select
                     value={sceneSubcategory}
                     onChange={(e) => setSceneSubcategory(e.target.value)}
-                    className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    className="flex-1 border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                   >
                     <option value="">All {sceneCategory}</option>
                     {(SUBCATEGORY_MAP[sceneCategory] || []).map((s) => <option key={s} value={s}>{s}</option>)}
@@ -493,7 +493,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
               <select
                 value={sceneBrand}
                 onChange={(e) => setSceneBrand(e.target.value)}
-                className="w-full border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                className="w-full border border-border rounded-md px-2 py-1.5 font-body text-[10px] bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
               >
                 <option value="">All Brands</option>
                 {allBrands.map((b) => <option key={b} value={b}>{b}</option>)}
@@ -505,7 +505,7 @@ const AxonometricSceneEditor = ({ imageUrl, style, onClose, onResult }: Props) =
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full pl-8 pr-3 py-1.5 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  className="w-full pl-8 pr-3 py-1.5 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                 />
               </div>
             </div>

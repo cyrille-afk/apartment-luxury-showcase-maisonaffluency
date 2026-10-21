@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 

@@ -17,7 +17,7 @@ import { usePublishedMakerCount } from "@/hooks/usePublishedMakerCount";
  */
 import { setDarkIosChrome, clearDarkIosChrome } from "@/lib/iosChrome";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { motion, animate } from "framer-motion";
 import SilentLink from "@/components/SilentLink";
 import { Search, X, ImageIcon, ArrowRight } from "lucide-react";
@@ -231,7 +231,7 @@ function DesignerGridCard({
       }}
       onTouchStart={() => { void warmProfile(); }}
       onMouseEnter={() => { void warmProfile(); }}
-      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-900 border border-white/[0.08] focus:outline-none focus:ring-2 focus:ring-gold/60"
+      className="group relative block w-full aspect-[4/5] rounded-none overflow-hidden bg-neutral-900 border border-white/[0.08] focus:outline-hidden focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
         lqip
@@ -2380,14 +2380,14 @@ const DesignersHoverHero = () => {
             spellCheck={false}
             aria-expanded={searchOpen}
             aria-controls="designers-search-sheet"
-            className="h-full min-w-0 flex-1 appearance-none bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-white outline-none placeholder:text-white placeholder:opacity-100 focus:bg-transparent focus:outline-none focus:ring-0"
+            className="h-full min-w-0 flex-1 appearance-none bg-transparent px-3 font-body text-[10px] uppercase tracking-[0.2em] text-white outline-hidden placeholder:text-white placeholder:opacity-100 focus:bg-transparent focus:outline-hidden focus:ring-0"
           />
           {searchOpen && (
             <button
               type="button"
               onClick={closeDesignerSearch}
               aria-label="Close search"
-              className="p-1 text-background/55 transition-colors hover:text-background focus-visible:outline-none focus-visible:text-background"
+              className="p-1 text-background/55 transition-colors hover:text-background focus-visible:outline-hidden focus-visible:text-background"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -2477,7 +2477,7 @@ const DesignersHoverHero = () => {
                   autoCapitalize="none"
                   spellCheck={false}
                   className={cn(
-                    "w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-none placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]",
+                    "w-full rounded-lg border border-gold/10 bg-white/[0.03] py-2.5 pl-9 pr-9 font-body text-sm text-white outline-hidden placeholder:text-white/60 focus:border-gold/25 focus:bg-white/[0.05]",
                     "lg:h-auto lg:rounded-lg lg:border-gold/10 lg:bg-white/[0.03]",
                     desktopDirectoryMode === "az" && "lg:hidden"
                   )}

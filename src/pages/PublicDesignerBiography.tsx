@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, Navigate, useNavigate, useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import { designerBrowsePath } from "@/lib/tradeBrowsing";

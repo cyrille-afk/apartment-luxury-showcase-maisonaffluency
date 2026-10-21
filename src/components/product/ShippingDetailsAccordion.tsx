@@ -61,7 +61,7 @@ export default function ShippingDetailsAccordion({
             type="button"
             onClick={() => setOpen(true)}
             aria-haspopup="dialog"
-            className="flex items-center w-full py-2.5 md:py-4 text-left font-body text-sm text-foreground font-medium transition-colors hover:text-foreground/80 focus:outline-none focus-visible:ring-0"
+            className="flex items-center w-full py-2.5 md:py-4 text-left font-body text-sm text-foreground font-medium transition-colors hover:text-foreground/80 focus:outline-hidden focus-visible:ring-0"
           >
             <span className="flex-1 min-w-0">View Logistics</span>
             <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />

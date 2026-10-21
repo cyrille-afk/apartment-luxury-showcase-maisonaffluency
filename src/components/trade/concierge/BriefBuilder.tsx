@@ -705,7 +705,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent ${
+        className={`mt-1 block w-full rounded-lg border px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-accent ${
           invalid ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-border bg-background"
         } ${glow ? "brief-field-glow" : ""}`}
         aria-required={required}
@@ -1320,7 +1320,7 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
                 emit(values, next, "");
               }}
               rows={4}
-              className="w-full rounded-md border border-accent/30 bg-background/60 p-2 font-body text-[12px] outline-none focus:border-accent"
+              className="w-full rounded-md border border-accent/30 bg-background/60 p-2 font-body text-[12px] outline-hidden focus:border-accent"
               placeholder="Free-form notes captured from your paste…"
             />
           </section>
@@ -1512,7 +1512,7 @@ export const BriefBuilder = React.forwardRef<BriefBuilderHandle, {
               value={pasteFallbackText}
               onChange={(e) => setPasteFallbackText(e.target.value)}
               rows={10}
-              className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-none focus:border-accent"
+              className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-hidden focus:border-accent"
               placeholder="e.g. The living room is 5×6m with a 4m high ceiling. Understated luxury — sofa, armchairs, coffee table and side table. Rug and chandelier to be selected later."
             />
             {(() => {

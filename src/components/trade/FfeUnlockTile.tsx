@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useFfeEntitlement } from "@/hooks/useFfeEntitlement";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 export function FfeUnlockTile({ userId, readOnly = false }: { userId?: string; readOnly?: boolean } = {}) {
   const {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle, Download } from "lucide-react";
 

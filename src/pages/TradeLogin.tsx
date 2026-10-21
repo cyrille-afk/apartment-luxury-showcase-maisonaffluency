@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { Helmet } from "react-helmet-async";
 import { X, Loader2, CircleCheck, CircleAlert } from "lucide-react";
@@ -208,7 +208,7 @@ const TradeLogin = () => {
               placeholder="Trade ID or Email Address"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
+              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
             />
             <input
               type="password"
@@ -218,7 +218,7 @@ const TradeLogin = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
+              className="w-full border border-border bg-transparent px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
             />
 
             <button
@@ -353,7 +353,7 @@ const TradeLogin = () => {
                 placeholder="Email Address"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
-                className="w-full border border-border bg-transparent px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-foreground transition-colors rounded-none"
+                className="w-full border border-border bg-transparent px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/70 outline-hidden focus:border-foreground transition-colors rounded-none"
               />
               <button
                 type="submit"

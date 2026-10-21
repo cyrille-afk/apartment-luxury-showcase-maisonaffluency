@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, Loader2, AlertCircle, Image } from "lucide-react";

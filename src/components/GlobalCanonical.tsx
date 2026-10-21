@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL, absoluteUrl } from "@/config/site";
 

@@ -182,7 +182,7 @@ const DesignerAssignSelect = ({ leadId, studioName, value, onChange }: Props) =>
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search designers…"
-                  className="w-full rounded-none border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none"
+                  className="w-full rounded-none border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-hidden"
                 />
               </div>
 

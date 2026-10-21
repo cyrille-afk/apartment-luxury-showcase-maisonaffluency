@@ -242,7 +242,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
                 }}
                 placeholder="Project name…"
                 disabled={creatingSaving}
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-hidden focus:ring-1 focus:ring-accent"
               />
               <button
                 onClick={handleCreateAndAssign}
@@ -284,7 +284,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
                 }}
                 disabled={saving !== null || creatingSaving}
                 defaultValue=""
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-hidden focus:ring-1 focus:ring-accent"
               >
                 <option value="" disabled>
                   More projects ({rest.length})…

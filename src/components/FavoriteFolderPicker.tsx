@@ -233,7 +233,7 @@ const FavoriteFolderPicker = ({
                 }}
                 placeholder="e.g., Bel Air Living Room"
                 maxLength={60}
-                className="w-full bg-transparent border-b border-border focus:border-foreground outline-none font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
+                className="w-full bg-transparent border-b border-border focus:border-foreground outline-hidden font-body text-xs py-1 placeholder:font-serif placeholder:italic placeholder:text-xs placeholder:text-muted-foreground/60"
               />
               <div className="mt-3 flex items-center gap-3">
                 <button

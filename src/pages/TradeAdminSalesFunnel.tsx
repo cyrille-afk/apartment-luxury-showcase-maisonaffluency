@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate } from "@/lib/router-compat";
 import { ArrowLeft, ArrowRight, Check, Mail, PackageOpen, ShoppingBag, TrendingDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";

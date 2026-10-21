@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Box } from "lucide-react";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { cn } from "@/lib/utils";

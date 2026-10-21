@@ -223,7 +223,7 @@ export default function ProcurementBoardPanel({ boardId, items, finishOverrides 
                       <td className="px-2 text-muted-foreground">
                         <Popover onOpenChange={(o) => o && setDraft(notes[r.id] || "")}>
                           <PopoverTrigger asChild>
-                            <button type="button" aria-label={`Feedback and notes for ${r.product_name}`} className="group flex h-7 w-full items-center gap-2 border border-transparent px-1.5 text-left transition-colors hover:border-border/60 hover:bg-muted/30 focus:border-border focus:outline-none">
+                            <button type="button" aria-label={`Feedback and notes for ${r.product_name}`} className="group flex h-7 w-full items-center gap-2 border border-transparent px-1.5 text-left transition-colors hover:border-border/60 hover:bg-muted/30 focus:border-border focus:outline-hidden">
                               {hearts > 0 && <span className="flex shrink-0 items-center gap-0.5"><Heart className="h-3 w-3 fill-current text-primary" />{hearts}</span>}
                               {ups > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsUp className="h-3 w-3" />{ups}</span>}
                               {downs > 0 && <span className="flex shrink-0 items-center gap-0.5"><ThumbsDown className="h-3 w-3" />{downs}</span>}

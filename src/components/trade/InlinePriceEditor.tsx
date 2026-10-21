@@ -197,7 +197,7 @@ export default function InlinePriceEditor({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
-          className="w-20 px-1.5 py-0.5 border border-border rounded text-xs font-body bg-background text-foreground outline-none focus:ring-1 focus:ring-accent"
+          className="w-20 px-1.5 py-0.5 border border-border rounded text-xs font-body bg-background text-foreground outline-hidden focus:ring-1 focus:ring-accent"
           placeholder="0"
         />
         <button onClick={save} disabled={saving} className="p-0.5 text-emerald-600 hover:text-emerald-700 transition-colors">

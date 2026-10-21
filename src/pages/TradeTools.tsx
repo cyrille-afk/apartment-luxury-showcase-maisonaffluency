@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
@@ -162,7 +162,7 @@ export default function TradeTools() {
           placeholder="Search tools by name or description…"
           aria-label="Search tools"
           aria-keyshortcuts="Control+K Meta+K"
-          className="w-full h-11 pl-10 pr-20 rounded-xl border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-foreground/40 focus:ring-2 focus:ring-foreground/5 transition-colors"
+          className="w-full h-11 pl-10 pr-20 rounded-xl border border-border bg-background font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden focus:border-foreground/40 focus:ring-2 focus:ring-foreground/5 transition-colors"
         />
         {query ? (
           <button

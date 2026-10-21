@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { Check } from "lucide-react";
 import { jsPDF } from "jspdf";

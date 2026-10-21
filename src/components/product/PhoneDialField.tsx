@@ -91,7 +91,7 @@ export default function PhoneDialField({
             emit(dial, raw.replace(/[^\d\s\-().]/g, ""));
           }}
           placeholder={placeholder}
-          className="h-full flex-1 bg-transparent px-3 font-body text-sm focus:outline-none"
+          className="h-full flex-1 bg-transparent px-3 font-body text-sm focus:outline-hidden"
         />
       </div>
 

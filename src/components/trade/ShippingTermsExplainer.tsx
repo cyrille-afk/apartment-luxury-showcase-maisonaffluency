@@ -106,7 +106,7 @@ const ShippingTermsExplainer = () => {
               id="shipping-explainer-country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="appearance-none bg-background border border-border rounded-full px-5 py-2 pr-10 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-border/60 min-w-[220px]"
+              className="appearance-none bg-background border border-border rounded-full px-5 py-2 pr-10 font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-border/60 min-w-[220px]"
             >
               {DESTINATIONS.map((d) => (
                 <option key={d.country} value={d.country}>

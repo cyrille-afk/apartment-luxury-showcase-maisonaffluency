@@ -171,7 +171,7 @@ export default function RugSizeColourPicker({
 
   const rowTriggerClass =
     "group flex h-auto w-full items-center justify-between gap-4 rounded-none border-0 border-t border-border/60 bg-transparent px-0 py-4 text-left " +
-    "font-display text-base text-foreground hover:bg-muted/20 transition-colors focus:outline-none focus:ring-0 focus:ring-offset-0";
+    "font-display text-base text-foreground hover:bg-muted/20 transition-colors focus:outline-hidden focus:ring-0 focus:ring-offset-0";
 
   return (
     <div className="space-y-5">
@@ -246,7 +246,7 @@ export default function RugSizeColourPicker({
                 min={1}
                 value={lengthInput}
                 onChange={(e) => setLengthInput(e.target.value)}
-                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -257,7 +257,7 @@ export default function RugSizeColourPicker({
                 min={1}
                 value={widthInput}
                 onChange={(e) => setWidthInput(e.target.value)}
-                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               />
             </label>
             <div className="inline-flex rounded-md border border-input overflow-hidden text-xs">
@@ -295,7 +295,7 @@ export default function RugSizeColourPicker({
           value={customColour}
           onChange={(e) => setCustomColour(e.target.value)}
           placeholder={`Describe your ${colourAxis.toLowerCase()}`}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
         />
       )}
 

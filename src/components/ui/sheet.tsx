@@ -66,7 +66,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
               ? { left: "calc(env(safe-area-inset-left, 0px) + 0.75rem)" }
               : { right: "calc(env(safe-area-inset-right, 0px) + 0.75rem)" }),
           }}
-          className="absolute z-10 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none p-2"
+          className="absolute z-10 rounded-sm opacity-70 ring-offset-background transition-opacity data-[state=open]:bg-secondary hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none p-2"
         >
           <X className="h-6 w-6" />
           <span className="sr-only">Close</span>

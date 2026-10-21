@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";

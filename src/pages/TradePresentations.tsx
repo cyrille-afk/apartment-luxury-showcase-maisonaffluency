@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, Eye, EyeOff, Pencil, FileText, Download, Presentation } from "lucide-react";

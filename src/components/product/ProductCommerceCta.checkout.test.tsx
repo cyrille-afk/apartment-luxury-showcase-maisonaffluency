@@ -4,7 +4,7 @@ import type { CartItem } from '@/lib/cart';
 import ProductCommerceCta from './ProductCommerceCta';
 
 const mocks = vi.hoisted(() => ({ navigate: vi.fn(), items: [] as CartItem[], intake: vi.fn(), clientSafe: false }));
-vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.navigate, useLocation: () => ({ state: null }), Link: () => null }));
+vi.mock('@/lib/router-compat', () => ({ useNavigate: () => mocks.navigate, useLocation: () => ({ state: null }), Link: () => null }));
 vi.mock('@/lib/cart', async (original) => ({ ...await original<typeof import('@/lib/cart')>(), useCart: () => mocks.items }));
 vi.mock('@/contexts/ProductConfigContext', () => ({ useProductConfigOptional: () => null }));
 vi.mock('@/contexts/CheckoutFormContext', () => ({ useCheckoutForm: () => ({ buyerProfile: 'private', projectCity: 'London', email: 'client@example.com', update: vi.fn() }) }));

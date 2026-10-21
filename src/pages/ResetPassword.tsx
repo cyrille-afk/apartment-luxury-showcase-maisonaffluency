@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -114,7 +114,7 @@ const ResetPassword = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
             />
           </div>
           <div>
@@ -126,7 +126,7 @@ const ResetPassword = () => {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
             />
           </div>
 

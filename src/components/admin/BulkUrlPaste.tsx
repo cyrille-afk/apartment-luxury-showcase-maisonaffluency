@@ -115,7 +115,7 @@ export default function BulkUrlPaste({
             onChange={(e) => updateText(e.target.value)}
             rows={5}
             placeholder={placeholder}
-            className="w-full text-xs font-mono bg-background border border-border rounded p-2 outline-none focus:ring-1 focus:ring-ring"
+            className="w-full text-xs font-mono bg-background border border-border rounded p-2 outline-hidden focus:ring-1 focus:ring-ring"
           />
           <div className="flex flex-wrap items-center gap-2">
             <button

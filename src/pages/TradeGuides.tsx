@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useEffect, useRef } from "react";
 import { BookOpen, Users, ChevronRight, BarChart3, FileSpreadsheet, FileText, Smartphone, Download } from "lucide-react";
 import { prefetchGuide } from "./guides/registry";

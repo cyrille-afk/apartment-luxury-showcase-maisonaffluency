@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Smartphone } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import QRCode from "qrcode";
 import { useEffect, useRef } from "react";

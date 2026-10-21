@@ -391,7 +391,7 @@ function composeBriefPrefill(
 }
 
 
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent, type MoodboardSignalsEvent, type PickPreview } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
@@ -4444,7 +4444,7 @@ export function AIConcierge({
                       autoFocus
                       maxLength={32}
                       placeholder={DEFAULT_NAME}
-                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-accent"
                     />
                     <div className="mt-1 font-body text-[10px] text-muted-foreground">
                       {copy.nameHint}
@@ -4859,7 +4859,7 @@ export function AIConcierge({
                       onChange={(e) => setFactDrafts((d) => ({ ...d, [key]: e.target.value }))}
                       placeholder={placeholder}
                       className={cn(
-                        "mt-0.5 w-full rounded-md border px-2.5 py-1.5 font-body text-xs outline-none focus:border-accent",
+                        "mt-0.5 w-full rounded-md border px-2.5 py-1.5 font-body text-xs outline-hidden focus:border-accent",
                         modalMode ? "border-cream/20 bg-transparent text-cream placeholder:text-cream/40" : "border-border bg-background text-foreground placeholder:text-muted-foreground/60",
                       )}
                     />
@@ -6416,7 +6416,7 @@ export function AIConcierge({
                   onKeyDown={handleKeyDown}
                   placeholder={composerPlaceholder}
                   rows={3}
-                  className="min-h-[96px] w-full resize-none bg-transparent px-3.5 pt-3 pb-1 font-body text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  className="min-h-[96px] w-full resize-none bg-transparent px-3.5 pt-3 pb-1 font-body text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-hidden"
                   disabled={streaming}
                 />
               )}
@@ -6621,7 +6621,7 @@ export function AIConcierge({
                             onChange={(e) => setNextStepFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
                             placeholder={f.placeholder}
                             rows={3}
-                            className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-none"
+                            className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-foreground/30 resize-none"
                           />
                         ) : (
                           <input
@@ -6629,7 +6629,7 @@ export function AIConcierge({
                             value={nextStepFields[f.key] || ""}
                             onChange={(e) => setNextStepFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
                             placeholder={f.placeholder}
-                            className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/30"
+                            className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-foreground/30"
                           />
                         )}
                       </div>

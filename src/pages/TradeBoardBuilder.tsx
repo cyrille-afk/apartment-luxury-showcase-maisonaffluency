@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { trimLogoUrl } from "@/lib/cloudinaryLogo";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "@/lib/router-compat";
 import type { ReactNode } from "react";
 import { ArrowLeft, Plus, Share2, FileText, Trash2, Check, X, FolderPlus, Folder, ChevronDown, ChevronRight, MoreHorizontal, Pencil, RefreshCw, Palette, Box, Mail, Phone, ExternalLink } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -562,7 +562,7 @@ const TradeBoardBuilder = () => {
       <button
         type="button"
         onClick={() => openProductSheet(item)}
-        className="aspect-square bg-muted relative w-full block cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+        className="aspect-square bg-muted relative w-full block cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-ring"
         aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
       >
         {item.product?.image_url ? (
@@ -596,7 +596,7 @@ const TradeBoardBuilder = () => {
         <button
           type="button"
           onClick={() => openProductSheet(item)}
-          className="font-body text-sm text-foreground font-medium truncate text-left w-full hover:underline focus:outline-none"
+          className="font-body text-sm text-foreground font-medium truncate text-left w-full hover:underline focus:outline-hidden"
         >
           {item.product?.product_name}
         </button>

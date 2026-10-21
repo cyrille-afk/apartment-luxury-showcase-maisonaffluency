@@ -1,6 +1,6 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { studioInvitationLink } from "@/lib/studioInvitationLink";

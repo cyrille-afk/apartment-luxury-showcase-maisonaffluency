@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { ArrowLeft, BarChart3, Check, Eye, Link2, Loader2, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
@@ -451,7 +451,7 @@ export default function TradeGuidesAnalytics() {
                               <Link
                                 to={`/designers/${slug}`}
                                 aria-label={`Open ${row.brand} profile`}
-                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                className="font-body text-sm text-foreground hover:text-primary truncate flex items-center gap-1.5 rounded-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                               >
                                 {inner}
                               </Link>
@@ -475,7 +475,7 @@ export default function TradeGuidesAnalytics() {
                             type="button"
                             onClick={() => setDrillBrand(row.brand)}
                             aria-label={`View users contributing to ${row.brand}`}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           >
                             <Users className="h-3.5 w-3.5" aria-hidden="true" />
                           </button>
@@ -498,7 +498,7 @@ export default function TradeGuidesAnalytics() {
                                     aria-label={`${label} for ${row.brand}`}
                                     aria-describedby={isCopied ? tipId : undefined}
                                     title={label}
-                                    className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                    className="inline-flex h-7 items-center gap-1 px-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                   >
                                     {isCopied ? (
                                       <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />

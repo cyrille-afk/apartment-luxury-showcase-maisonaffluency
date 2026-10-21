@@ -1,11 +1,11 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ArrowLeft, UserCheck, UserX, Clock, Search, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_LABEL, useTierConfig, type TradeTier } from "@/hooks/useTradeDiscount";
@@ -201,7 +201,7 @@ export default function TradeRegisteredUsers() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, email, tier, month…"
-                className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 w-56"
+                className="pl-8 pr-3 py-1.5 text-sm font-body rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 w-56"
               />
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function TradeRegisteredUsers() {
                           value={u.trade_tier}
                           disabled={savingId === u.id}
                           onChange={(e) => updateTier(u.id, e.target.value as TradeTier)}
-                          className={`text-[11px] font-body px-2 py-1 rounded border outline-none focus:ring-1 focus:ring-primary/30 ${tierBadgeClass(u.trade_tier)} ${savingId === u.id ? "opacity-50" : ""}`}
+                          className={`text-[11px] font-body px-2 py-1 rounded border outline-hidden focus:ring-1 focus:ring-primary/30 ${tierBadgeClass(u.trade_tier)} ${savingId === u.id ? "opacity-50" : ""}`}
                         >
                           {TIER_OPTIONS.map((t) => (
                             <option key={t} value={t}>

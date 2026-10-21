@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw, Layers, Square, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
@@ -393,7 +393,7 @@ export default function TradeDescriptionWriter() {
                 setBulkDesigner("");
                 setBulkRows([]);
               }}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
             >
               <option value="curator_picks">Curator Picks (Gallery)</option>
               <option value="trade_products">Trade Products (Showroom)</option>
@@ -517,7 +517,7 @@ export default function TradeDescriptionWriter() {
                       if (tone !== "seo" || e.target.value.length <= 160) setSeoWarning(null);
                     }}
                     rows={Math.min(20, Math.max(6, result.split("\n").length + 2))}
-                    className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                     placeholder="Edit the generated description…"
                   />
                   <details className="group">

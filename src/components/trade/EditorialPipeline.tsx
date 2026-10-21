@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABELS, type JournalCategory } from "@/lib/journal";
 import { useToast } from "@/hooks/use-toast";
@@ -308,13 +308,13 @@ const EditorialPipeline = () => {
                   value={editForm.title || ""}
                   onChange={e => setEditForm(f => f ? { ...f, title: e.target.value } : null)}
                   placeholder="Article title"
-                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 />
                 <div className="flex gap-3">
                   <select
                     value={editForm.category || "design_trend"}
                     onChange={e => setEditForm(f => f ? { ...f, category: e.target.value as JournalCategory } : null)}
-                    className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-none"
+                    className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden"
                   >
                     {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
                       <option key={k} value={k}>{v}</option>
@@ -323,7 +323,7 @@ const EditorialPipeline = () => {
                   <select
                     value={editForm.status || "idea"}
                     onChange={e => setEditForm(f => f ? { ...f, status: e.target.value as PipelineStatus } : null)}
-                    className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-none"
+                    className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden"
                   >
                     {STATUS_ORDER.map(s => (
                       <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
@@ -334,25 +334,25 @@ const EditorialPipeline = () => {
                   type="date"
                   value={editForm.target_date || ""}
                   onChange={e => setEditForm(f => f ? { ...f, target_date: e.target.value } : null)}
-                  className="pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-none"
+                  className="pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden"
                 />
                 <input
                   value={editForm.designer_or_brand || ""}
                   onChange={e => setEditForm(f => f ? { ...f, designer_or_brand: e.target.value } : null)}
                   placeholder="Designer / Brand"
-                  className="pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-none"
+                  className="pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden"
                 />
                 <input
                   value={editForm.angle || ""}
                   onChange={e => setEditForm(f => f ? { ...f, angle: e.target.value } : null)}
                   placeholder="Angle / Hook"
-                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-none"
+                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden"
                 />
                 <input
                   value={editForm.notes || ""}
                   onChange={e => setEditForm(f => f ? { ...f, notes: e.target.value } : null)}
                   placeholder="Notes"
-                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none"
+                  className="col-span-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-hidden"
                 />
               </div>
               <div className="flex gap-2 justify-end">
@@ -404,7 +404,7 @@ const EditorialPipeline = () => {
                           <select
                             value={item.status}
                             onChange={e => updateStatus(item.id, e.target.value as PipelineStatus)}
-                            className={`shrink-0 px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider border-none outline-none cursor-pointer ${STATUS_CONFIG[item.status].color}`}
+                            className={`shrink-0 px-2 py-0.5 rounded-full font-body text-[10px] uppercase tracking-wider border-none outline-hidden cursor-pointer ${STATUS_CONFIG[item.status].color}`}
                           >
                             {STATUS_ORDER.map(s => (
                               <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>

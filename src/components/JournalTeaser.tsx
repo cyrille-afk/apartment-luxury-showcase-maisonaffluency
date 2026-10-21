@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { fetchPublishedArticles, CATEGORY_LABELS, type JournalArticle } from "@/lib/journal";

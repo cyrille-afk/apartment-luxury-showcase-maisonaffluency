@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { CalendarClock, ChevronRight, CalendarPlus, ImageOff, Download, FileSpreadsheet, FileText, Search } from "lucide-react";
@@ -634,7 +634,7 @@ export default function TradeDeliveryTracker() {
                                   <button
                                     type="button"
                                     onClick={() => setPreviewLine(l)}
-                                    className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    className="group relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded border border-border/50 bg-muted/20 transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     aria-label={`Preview ${l.product_name}`}
                                   >
                                     {l.image_url ? (

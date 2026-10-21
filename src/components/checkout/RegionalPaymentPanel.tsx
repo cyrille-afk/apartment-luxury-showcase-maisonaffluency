@@ -10,7 +10,7 @@
  * receipt for treasury reconciliation.
  */
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Check, Copy, Download, Loader2, Lock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

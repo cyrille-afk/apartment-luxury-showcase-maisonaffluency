@@ -20,7 +20,7 @@ export default function HotspotPickMapper({ options, value, onChange }: {
     () => options.filter(o => o.designer === designer).sort((a, b) => a.title.localeCompare(b.title)),
     [options, designer],
   );
-  const cls = "w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30";
+  const cls = "w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-hidden focus:ring-1 focus:ring-primary/30";
   return (
     <div className="space-y-1.5">
       <label className="block text-[10px] uppercase tracking-wide text-muted-foreground">Link to catalogue product</label>

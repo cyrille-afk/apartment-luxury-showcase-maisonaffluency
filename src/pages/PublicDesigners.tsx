@@ -1,6 +1,6 @@
 import { setDarkIosChrome } from "@/lib/iosChrome";
 import React, { lazy, Suspense } from "react";
-import { useSearchParams, Navigate } from "react-router-dom";
+import { useSearchParams, Navigate } from "@/lib/router-compat";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";

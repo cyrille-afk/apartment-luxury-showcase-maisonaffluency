@@ -136,7 +136,7 @@ export default function ActiveFilterChips({
       aria-label="Active filters"
       tabIndex={-1}
       onKeyDown={handleKeyDown}
-      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 outline-none ${className}`}
+      className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 outline-hidden ${className}`}
     >
       <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
         Filters:
@@ -165,7 +165,7 @@ export default function ActiveFilterChips({
           ref={(el) => { itemsRef.current[clearAllSlot] = el; }}
           type="button"
         onClick={() => (confirmClearAll ? setConfirmOpen(true) : handleClearAll())}
-          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm px-1.5 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground"
+          className="ml-auto font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-sm px-1.5 py-0.5 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground"
         >
           Clear all
         </button>
@@ -215,7 +215,7 @@ function Chip({
         type="button"
         onClick={onClear}
         aria-label={`Clear ${label.toLowerCase()} filter: ${value}`}
-        className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground focus-visible:scale-110"
+        className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:bg-primary focus-visible:text-primary-foreground focus-visible:scale-110"
       >
         <X className="h-3 w-3" aria-hidden="true" />
       </button>

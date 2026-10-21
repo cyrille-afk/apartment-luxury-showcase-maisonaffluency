@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 
 /** Admin-only gate: waits for role lookup before deciding, so a pending lookup never redirects an admin. */

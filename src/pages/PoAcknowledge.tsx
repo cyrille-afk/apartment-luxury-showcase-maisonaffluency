@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "@/lib/router-compat";
 
 /**
  * Pretty, branded acknowledgement URL used in designer PO emails:

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { FileText, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { prefillLineShippingFromCatalog } from "@/lib/prefillLineShipping";
@@ -464,7 +464,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
                 value={bulkRoom}
                 onChange={(e) => setBulkRoom(e.target.value)}
                 placeholder="e.g. Living Room"
-                className="w-full font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-none"
+                className="w-full font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-hidden"
               />
             </div>
             <Button variant="outline" size="sm" onClick={applyBulk} disabled={!bulkRoom.trim()}>
@@ -507,7 +507,7 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
                       value={row.room}
                       onChange={(e) => updateRoom(row.product_id, e.target.value)}
                       placeholder="Room"
-                      className="w-40 shrink-0 font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none"
+                      className="w-40 shrink-0 font-body text-xs text-foreground bg-background border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden"
                     />
                   </li>
                 ))}

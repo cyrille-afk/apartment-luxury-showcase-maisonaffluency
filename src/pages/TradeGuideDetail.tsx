@@ -1,4 +1,4 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate } from "@/lib/router-compat";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { lazy, Suspense, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";

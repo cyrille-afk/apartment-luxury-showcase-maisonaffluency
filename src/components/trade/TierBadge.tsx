@@ -1,5 +1,5 @@
 import { Award } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useTradeDiscount, type TradeTier } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
 import { useClientSafeMode } from "@/lib/clientSafeMode";

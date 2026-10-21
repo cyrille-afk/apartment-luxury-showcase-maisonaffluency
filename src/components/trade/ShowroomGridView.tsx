@@ -5,7 +5,7 @@ import { clientUnitCents } from "@/lib/tradePricing";
  */
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "@/lib/router-compat";
 import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag, LayoutGrid, Grid2X2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
@@ -613,7 +613,7 @@ const ShowroomGridView = ({
   
 
   const inputClass =
-    "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors";
+    "px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 transition-colors";
 
   if (loading) {
     return (

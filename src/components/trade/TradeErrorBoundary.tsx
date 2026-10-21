@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 interface Props {
   children: ReactNode;

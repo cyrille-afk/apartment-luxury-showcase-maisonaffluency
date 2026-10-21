@@ -444,7 +444,7 @@ export function ProjectCuratorialGuide({
               value={activeItem?.product_id || ""}
               onChange={(event) => onActiveItemChange(event.target.value)}
               aria-label="Active source piece"
-              className="mt-4 w-full border-0 border-b border-border bg-transparent py-2 font-body text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-none"
+              className="mt-4 w-full border-0 border-b border-border bg-transparent py-2 font-body text-[10px] uppercase tracking-[0.12em] text-foreground focus:outline-hidden"
             >
               {items.map((item) => <option key={item.product_id} value={item.product_id}>{item.name}</option>)}
             </select>

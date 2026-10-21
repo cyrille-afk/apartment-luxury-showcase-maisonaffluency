@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2, Scan } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { projectDefaultUrl, useProjectBoardTree } from "@/hooks/useProjectBoardTree";

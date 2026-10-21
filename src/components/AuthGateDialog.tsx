@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { X, FileDown, UserPlus } from "lucide-react";
 import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -287,15 +287,15 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
               <div className="grid grid-cols-2 gap-4">
                 <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
                 <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <input type="email" placeholder="Email address *" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
                 <input type="password" placeholder="Create password *" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); }} required minLength={8} autoComplete="new-password"
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
               </div>
               <p className="font-body text-xs text-muted-foreground">
                 Password: at least 8 characters, mixing letters, numbers and a symbol. Common or previously leaked passwords are rejected.
@@ -342,9 +342,9 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
             {divider}
             <form onSubmit={handleLogin} className="space-y-3">
               <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]" />
               <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password"
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]" />
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]" />
               <button type="submit" disabled={loading}
                 className="w-full py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:opacity-90 transition-opacity disabled:opacity-50">
                 {loading ? "Signing in..." : "Sign In"}

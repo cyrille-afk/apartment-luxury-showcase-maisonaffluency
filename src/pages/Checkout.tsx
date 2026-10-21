@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, createContext, useContext } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "@/lib/router-compat";
 import { Elements, PaymentElement, AddressElement, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Lock, Check, Loader2, Copy } from "lucide-react";
@@ -345,7 +345,7 @@ function BuyerTypeSection({
   const valid = business && isBuyerTaxIdValid(rule, buyerGstNumber);
   const idLabel = rule?.buyerIdLabel ?? "VAT / GST Registration Number";
   const field =
-    "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
+    "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground";
 
   return (
     <div className="space-y-3">
@@ -1293,7 +1293,7 @@ function PurchaseOrderForm({
       setSubmitting(false);
     }
   };
-  const fieldClass = "mt-2 h-12 w-full rounded-none border border-border bg-background px-4 text-sm outline-none focus:border-foreground";
+  const fieldClass = "mt-2 h-12 w-full rounded-none border border-border bg-background px-4 text-sm outline-hidden focus:border-foreground";
   return (
     <div>
       {optionsSlot}
@@ -1309,7 +1309,7 @@ function PurchaseOrderForm({
           <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Companies House / registration number<input value={form.companyRegistrationNumber} onChange={(e) => update("companyRegistrationNumber", e.target.value)} className={fieldClass} autoCapitalize="characters" /></label>
           <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK VAT number<input value={form.buyerVatId} onChange={(e) => update("buyerVatId", e.target.value)} className={cn(fieldClass, form.buyerVatId && !validVat && "border-destructive")} placeholder="GB123456789" /></label>
           <label className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Your PO reference<input value={form.poNumber} onChange={(e) => update("poNumber", e.target.value)} className={fieldClass} placeholder="PO-2026-001" /></label>
-          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK delivery address<textarea value={form.deliveryAddress} onChange={(e) => update("deliveryAddress", e.target.value)} className="mt-2 min-h-24 w-full rounded-none border border-border bg-background px-4 py-3 text-sm normal-case tracking-normal outline-none focus:border-foreground" /></label>
+          <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">UK delivery address<textarea value={form.deliveryAddress} onChange={(e) => update("deliveryAddress", e.target.value)} className="mt-2 min-h-24 w-full rounded-none border border-border bg-background px-4 py-3 text-sm normal-case tracking-normal outline-hidden focus:border-foreground" /></label>
           <label className="sm:col-span-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Requested payment terms
             <select value={form.paymentTerms} onChange={(e) => update("paymentTerms", e.target.value)} className={fieldClass}>
               <option value="cia_stage">Cash in advance / staged payments</option>
@@ -1442,7 +1442,7 @@ function PaymentForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
-            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground"
           />
         )}
 
@@ -1831,7 +1831,7 @@ function WireForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines]);
 
-  const field = "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground";
+  const field = "h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground";
 
   return (
     <>
@@ -1849,7 +1849,7 @@ function WireForm({
           </>
         )}
         <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" type="tel" inputMode="tel" autoComplete="tel" className={field} />
-        <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-neutral-200 bg-background p-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground" />
+        <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" rows={3} className="w-full rounded-none border border-neutral-200 bg-background p-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground" />
 
         {sgB2BApplicable && (
           <BuyerTypeSection
@@ -1991,13 +1991,13 @@ function ShippingQuoteCard({
             onChange={(e) => setAmount(e.target.value)}
             placeholder={`Shipping amount (${(currency || "usd").toUpperCase()})`}
             inputMode="decimal"
-            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground"
           />
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="Shipping quote reference (from your advisor)"
-            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-none transition-colors hover:border-neutral-300 focus:border-foreground"
+            className="h-14 w-full rounded-none border border-neutral-200 bg-background px-5 text-base font-light outline-hidden transition-colors hover:border-neutral-300 focus:border-foreground"
           />
           <button
             type="button"

@@ -1,0 +1,13 @@
+{
+  "customizations": [
+    { "token": "tailwind theme colors (border, input, ring, background, foreground, primary, secondary, destructive, muted, accent, popover, card, jade, terracotta, gold, cream, moodboard, visualiser and chip colors)", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css via @config tailwind.legacy.config.ts" },
+    { "token": "tailwind screens xs/xsp/short and container", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css via @config tailwind.legacy.config.ts" },
+    { "token": "tailwind fontFamily/keyframes/animation/borderRadius extensions", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css via @config tailwind.legacy.config.ts" },
+    { "token": "tailwindcss-animate plugin utilities", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css via @config tailwind.legacy.config.ts" },
+    { "token": ":root/.dark HSL design variables", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "@layer base rules", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "@layer utilities rules", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "custom keyframes (tradeEditorialReveal, heroFadeIn, tour-pulse, shimmer-line, gallery-icon-pulse, brief-field-glow and others)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "client-view, WhatsApp, tour and spec-sheet guard rules", "source": "src/index.css", "reappliedIn": "src/styles.css" }
+  ]
+}

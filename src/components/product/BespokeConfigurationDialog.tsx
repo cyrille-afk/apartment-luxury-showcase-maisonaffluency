@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { X, Loader2, Check, UploadCloud, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Turnstile from "@/components/Turnstile";
@@ -351,7 +351,7 @@ export default function BespokeConfigurationDialog({
                   value={specs}
                   onChange={(e) => setSpecs(e.target.value)}
                   placeholder={specsPlaceholder}
-                  className="mt-2 w-full resize-none border border-border/60 bg-background px-4 py-3 font-body text-sm leading-relaxed text-foreground placeholder:font-body placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                  className="mt-2 w-full resize-none border border-border/60 bg-background px-4 py-3 font-body text-sm leading-relaxed text-foreground placeholder:font-body placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-foreground/40"
                 />
               </label>
 
@@ -422,7 +422,7 @@ export default function BespokeConfigurationDialog({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@studio.com"
-                    className="mt-2 h-11 w-full border border-border/60 bg-background px-3 font-body text-sm focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                    className="mt-2 h-11 w-full border border-border/60 bg-background px-3 font-body text-sm focus:outline-hidden focus:ring-1 focus:ring-foreground/40"
                   />
                 </label>
                 <label className="block">

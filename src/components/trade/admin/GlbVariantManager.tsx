@@ -304,7 +304,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
             value={customLabel}
             onChange={(e) => setCustomLabel(e.target.value)}
             placeholder='e.g. "2-seater", "Sofa 220", "Ottoman"'
-            className="flex-1 px-2 py-1.5 border border-border rounded bg-background font-body text-sm focus:outline-none focus:border-foreground/40"
+            className="flex-1 px-2 py-1.5 border border-border rounded bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40"
             onKeyDown={(e) => {
               if (e.key === "Enter") handleAddCustom();
             }}

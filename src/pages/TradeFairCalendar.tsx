@@ -119,7 +119,7 @@ export default function TradeFairCalendar() {
                   <select
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
-                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-none focus:border-foreground/40 min-w-[160px]"
+                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/40 min-w-[160px]"
                   >
                     <option value="all">All cities</option>
                     {cityOptions.map((c) => (
@@ -134,7 +134,7 @@ export default function TradeFairCalendar() {
                   <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-none focus:border-foreground/40 min-w-[160px] capitalize"
+                    className="bg-background border border-border rounded-md px-3 py-2 font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/40 min-w-[160px] capitalize"
                   >
                     <option value="all">All categories</option>
                     {categoryOptions.map((c) => (

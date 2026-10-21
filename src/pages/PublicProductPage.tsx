@@ -2,7 +2,7 @@ import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import React, { useState, useEffect, useRef } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { Button } from "@/components/ui/button";
-import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation, Navigate } from "@/lib/router-compat";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, Award, Compass } from "lucide-react";

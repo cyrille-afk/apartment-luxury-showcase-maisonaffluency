@@ -493,7 +493,7 @@ export default function SelectionDrawer({
                     value={conciergePhone}
                     onChange={(e) => setConciergePhone(e.target.value)}
                     placeholder="+65 9123 4567"
-                    className="mt-1 h-10 w-full border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                    className="mt-1 h-10 w-full border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden focus:ring-1 focus:ring-foreground/40"
                   />
                 </label>
                 <label className="mt-3 block">
@@ -506,7 +506,7 @@ export default function SelectionDrawer({
                     value={conciergeMessage}
                     onChange={(e) => setConciergeMessage(e.target.value)}
                     placeholder="e.g. Questions on payment limits or delivery timing…"
-                    className="mt-1 w-full resize-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-foreground/40"
+                    className="mt-1 w-full resize-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden focus:ring-1 focus:ring-foreground/40"
                   />
                 </label>
                 {conciergeError && (

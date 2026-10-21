@@ -502,7 +502,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                 onChange={(e) => setProjectName(e.target.value)}
                 disabled={!includeCover}
                 placeholder={zone || "Untitled Project"}
-                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-hidden focus:border-accent/60 disabled:opacity-50"
               />
             </div>
 
@@ -516,7 +516,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                 onChange={(e) => setDesignerName(e.target.value)}
                 disabled={!includeCover}
                 placeholder="e.g. Maison Affluency"
-                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-hidden focus:border-accent/60 disabled:opacity-50"
               />
             </div>
 
@@ -587,7 +587,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                 value={coverDate}
                 onChange={(e) => setCoverDate(e.target.value)}
                 disabled={!includeCover}
-                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-hidden focus:border-accent/60 disabled:opacity-50"
               />
             </div>
             <div className="space-y-1">

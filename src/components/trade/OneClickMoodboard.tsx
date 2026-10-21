@@ -5,7 +5,7 @@ import { usePublicRrpMap, formatPublicRrpForDestination } from "@/hooks/usePubli
 import { useShippingDestination } from "@/lib/shippingDestination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { trackFelixEvent } from "@/lib/felixEvents";

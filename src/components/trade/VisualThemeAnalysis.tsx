@@ -168,7 +168,7 @@ function EditableBlock({ title, values, onChange, placeholder, suggestions, onPi
             placeholder={`+ Add ${placeholder}`}
             role={suggestions ? "combobox" : undefined}
             aria-expanded={suggestions ? showList : undefined}
-            className="w-full border-b border-dashed border-border bg-transparent px-1 py-1 font-body text-[11px] text-foreground placeholder:text-muted-foreground focus:border-foreground focus:outline-none"
+            className="w-full border-b border-dashed border-border bg-transparent px-1 py-1 font-body text-[11px] text-foreground placeholder:text-muted-foreground focus:border-foreground focus:outline-hidden"
           />
           {showList && (
             <ul role="listbox" className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-auto border border-border bg-visual-evidence text-xs shadow-md">

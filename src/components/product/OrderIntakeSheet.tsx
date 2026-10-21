@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowLeft, Check, ChevronDown, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ interface Props {
 }
 
 const inputCls =
-  "h-12 w-full rounded-none border border-border/60 bg-background px-4 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-foreground focus:outline-none transition-colors";
+  "h-12 w-full rounded-none border border-border/60 bg-background px-4 font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-foreground focus:outline-hidden transition-colors";
 const labelCls =
   "mb-2 block font-body text-[10px] uppercase tracking-widest text-muted-foreground";
 
@@ -641,7 +641,7 @@ export default function OrderIntakeSheet({
                     type="button"
                     onClick={() => setFinishOpen((o) => !o)}
                     aria-expanded={finishOpen}
-                    className="flex h-12 w-full items-center justify-between border border-border/60 bg-background px-4 font-body text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
+                    className="flex h-12 w-full items-center justify-between border border-border/60 bg-background px-4 font-body text-sm text-foreground transition-colors focus:border-foreground focus:outline-hidden"
                   >
                     <span className={cn("truncate", !finish && "text-muted-foreground/50")}>
                       {finish || "Select a finish"}

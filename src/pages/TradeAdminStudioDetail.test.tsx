@@ -1,6 +1,6 @@
 import { render, waitFor, cleanup, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from '@/lib/router-compat';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TradeAdminStudioDetail from './TradeAdminStudioDetail';
 

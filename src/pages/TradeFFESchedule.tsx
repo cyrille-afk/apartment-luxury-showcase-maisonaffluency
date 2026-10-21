@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import {
@@ -722,7 +722,7 @@ export default function TradeFFESchedule() {
               <select
                 value={filterProjectId}
                 onChange={(e) => setFilterProjectId(e.target.value)}
-                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
               >
                 <option value="">All Projects</option>
                 {projectOptions.map(([id, name]) => (
@@ -732,7 +732,7 @@ export default function TradeFFESchedule() {
               <select
                 value={filterStudioId}
                 onChange={(e) => setFilterStudioId(e.target.value)}
-                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
               >
                 <option value="">All Studios</option>
                 {studioOptions.map(([id, name]) => (
@@ -742,7 +742,7 @@ export default function TradeFFESchedule() {
               <select
                 value={filterClient}
                 onChange={(e) => setFilterClient(e.target.value)}
-                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
               >
                 <option value="">All Clients</option>
                 {clientOptions.map((name) => (
@@ -767,7 +767,7 @@ export default function TradeFFESchedule() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search items, brands, projects, POs…"
-                  className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-3 font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-3 font-body text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:ring-1 focus:ring-ring"
                 />
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -851,7 +851,7 @@ export default function TradeFFESchedule() {
                           }}
                           placeholder="Preset name…"
                           maxLength={60}
-                          className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                          className="h-7 min-w-0 flex-1 rounded border border-border bg-background px-2 font-body text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                         />
                         <Button
                           variant="secondary"
@@ -986,7 +986,7 @@ export default function TradeFFESchedule() {
                                     const v = e.target.value;
                                     if ((v || null) !== (item.required_by_date || null)) saveRequiredBy(item.item_id, v);
                                   }}
-                                  className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                  className="w-full min-w-0 rounded border border-border bg-background px-1 py-0.5 font-body text-[10px] text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                                 />
                               </td>}
                               {isColVisible("slack") && <td className={`${tableDensity.td} text-center font-body ${tableDensity.body}`}>{slackBadge(slackDays)}</td>}

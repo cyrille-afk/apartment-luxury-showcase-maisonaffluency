@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useSearchParams, useLocation, Link } from "react-router-dom";
+import { useSearchParams, useLocation, Link } from "@/lib/router-compat";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import brandCategories from "@/data/brandCategories.json";
 import type { Designer } from "@/hooks/useDesigner";

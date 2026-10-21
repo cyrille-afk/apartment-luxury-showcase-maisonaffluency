@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";

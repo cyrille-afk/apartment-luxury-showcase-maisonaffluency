@@ -333,7 +333,7 @@ export function GlbBulkUpload({ onChange }: Props) {
             setOrphans([]);
           }}
           disabled={running}
-          className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40 appearance-none"
+          className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40 appearance-none"
         >
           <option value="">Choose a brand…</option>
           {brands.map((b) => (
@@ -428,7 +428,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                       value={f.productId || ""}
                       onChange={(e) => setFile(f.key, { productId: e.target.value || null })}
                       disabled={running || f.status === "done"}
-                      className="max-w-[220px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-none focus:border-foreground/40"
+                      className="max-w-[220px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
                       aria-label="Assign product"
                     >
                       <option value="">Assign product…</option>
@@ -441,7 +441,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                       onChange={(e) => setFile(f.key, { label: e.target.value })}
                       disabled={running || f.status === "done"}
                       placeholder="Variant label"
-                      className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-none focus:border-foreground/40"
+                      className="w-[130px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
                       aria-label="Variant label"
                     />
                     {f.status === "done" ? (
@@ -502,7 +502,7 @@ export function GlbBulkUpload({ onChange }: Props) {
                       value={o.attachTo || ""}
                       onChange={(e) => setOrphan(o.key, { attachTo: e.target.value || null })}
                       disabled={running}
-                      className="max-w-[220px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-none focus:border-foreground/40"
+                      className="max-w-[220px] px-2 py-1.5 border border-border rounded bg-background font-body text-xs focus:outline-hidden focus:border-foreground/40"
                       aria-label="Attach to OBJ"
                     >
                       <option value="">Attach to .obj…</option>

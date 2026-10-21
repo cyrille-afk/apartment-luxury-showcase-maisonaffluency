@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate } from "@/lib/router-compat";
 import { ArrowLeft, BadgeCheck, Check, FileText, Receipt } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from '@/lib/router-compat';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Building2, ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';

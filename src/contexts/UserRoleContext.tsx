@@ -73,7 +73,7 @@ export function DevRoleToggle() {
           if (v === "AUTO") clearRole?.();
           else setRole(v as UserRole);
         }}
-        className="h-6 rounded-none border border-border/50 bg-background px-1.5 font-body text-[10px] uppercase tracking-wider text-foreground focus:outline-none"
+        className="h-6 rounded-none border border-border/50 bg-background px-1.5 font-body text-[10px] uppercase tracking-wider text-foreground focus:outline-hidden"
         aria-label="Dev: toggle user role"
       >
         <option value="AUTO">Auto (real account)</option>

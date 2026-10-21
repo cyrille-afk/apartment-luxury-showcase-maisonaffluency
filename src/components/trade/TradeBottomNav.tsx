@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, MapPin, Heart, FileText, Image, Scan } from "lucide-react";
 import { cn } from "@/lib/utils";

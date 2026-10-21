@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from "react";
-import { useSearchParams, useLocation, Link } from "react-router-dom";
+import { useSearchParams, useLocation, Link } from "@/lib/router-compat";
 import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Designer } from "@/hooks/useDesigner";

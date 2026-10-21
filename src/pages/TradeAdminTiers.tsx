@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Save, Award, Sparkles, TrendingUp, TrendingDown, Minus, Eye } from "lucide-react";
@@ -311,7 +311,7 @@ export default function TradeAdminTiers() {
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-foreground/70" />
                     <input
-                      className="font-display text-base bg-transparent border-b border-transparent focus:border-border outline-none w-full"
+                      className="font-display text-base bg-transparent border-b border-transparent focus:border-border outline-hidden w-full"
                       value={row.label}
                       onChange={(e) => setField(row.tier, "label", e.target.value)}
                     />

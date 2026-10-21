@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Link, useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams, useLocation } from "@/lib/router-compat";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";

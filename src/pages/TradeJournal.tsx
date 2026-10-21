@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, EyeOff, ExternalLink, Upload, X, ImageIcon, FileUp, Star } from "lucide-react";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -247,7 +247,7 @@ const TradeJournal = () => {
                     slug: prev.id ? prev.slug : generateSlug(title),
                   } : null);
                 }}
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 placeholder="Article title"
               />
             </div>
@@ -258,7 +258,7 @@ const TradeJournal = () => {
               <input
                 value={editing.slug}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, slug: e.target.value } : null)}
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none focus:border-foreground transition-colors font-mono"
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-hidden focus:border-foreground transition-colors font-mono"
                 placeholder="article-url-slug"
               />
             </div>
@@ -270,7 +270,7 @@ const TradeJournal = () => {
                 <select
                   value={editing.category}
                   onChange={(e) => setEditing(prev => prev ? { ...prev, category: e.target.value as JournalCategory } : null)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none"
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden"
                 >
                   {CATEGORIES.map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -282,7 +282,7 @@ const TradeJournal = () => {
                 <input
                   value={editing.author}
                   onChange={(e) => setEditing(prev => prev ? { ...prev, author: e.target.value } : null)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 />
               </div>
               <div>
@@ -292,7 +292,7 @@ const TradeJournal = () => {
                   min={1}
                   value={editing.read_time_minutes || ""}
                   onChange={(e) => setEditing(prev => prev ? { ...prev, read_time_minutes: parseInt(e.target.value) || null } : null)}
-                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                  className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 />
               </div>
             </div>
@@ -319,7 +319,7 @@ const TradeJournal = () => {
               <input
                 value={editing.cover_image_url || ""}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, cover_image_url: e.target.value } : null)}
-                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-none focus:border-foreground transition-colors font-mono"
+                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-hidden focus:border-foreground transition-colors font-mono"
                 placeholder="Or paste image URL…"
               />
               {editing.cover_image_url && (
@@ -359,7 +359,7 @@ const TradeJournal = () => {
               <input
                 value={editing.pdf_url || ""}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, pdf_url: e.target.value } : null)}
-                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-none focus:border-foreground transition-colors font-mono"
+                className="w-full mt-2 pb-2 border-b border-border bg-transparent font-body text-[10px] text-muted-foreground/60 outline-hidden focus:border-foreground transition-colors font-mono"
                 placeholder="Or paste URL manually…"
               />
             </div>
@@ -384,7 +384,7 @@ const TradeJournal = () => {
                 <input
                   id="gallery-url-input"
                   placeholder="Or paste image URL and press Enter"
-                  className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-none focus:border-foreground transition-colors font-mono"
+                  className="flex-1 pb-2 border-b border-border bg-transparent font-body text-xs text-muted-foreground outline-hidden focus:border-foreground transition-colors font-mono"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       const input = e.currentTarget;
@@ -425,7 +425,7 @@ const TradeJournal = () => {
                           spellCheck={false}
                           autoCorrect="off"
                           autoCapitalize="words"
-                          className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
+                          className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden focus:border-foreground transition-colors"
                           placeholder="Photo caption (e.g. Designer Name, 'Title', 2025)"
                         />
                         <button
@@ -468,7 +468,7 @@ const TradeJournal = () => {
                 rows={2}
                 value={editing.excerpt}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, excerpt: e.target.value } : null)}
-                className="w-full p-3 border border-border rounded-md bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors resize-y"
+                className="w-full p-3 border border-border rounded-md bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors resize-y"
                 placeholder="Short summary for listing cards and SEO..."
               />
             </div>
@@ -551,7 +551,7 @@ const TradeJournal = () => {
                 rows={16}
                 value={editing.content}
                 onChange={(e) => setEditing(prev => prev ? { ...prev, content: e.target.value } : null)}
-                className="w-full p-3 border border-border rounded-md bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors resize-y font-mono leading-relaxed"
+                className="w-full p-3 border border-border rounded-md bg-transparent font-body text-xs text-foreground outline-hidden focus:border-foreground transition-colors resize-y font-mono leading-relaxed"
                 placeholder="Write article content in Markdown. Use **bold**, *italic*, ## headings..."
               />
             </div>
@@ -562,7 +562,7 @@ const TradeJournal = () => {
               <input
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 placeholder="collectible design, singapore, luxury interiors"
               />
             </div>

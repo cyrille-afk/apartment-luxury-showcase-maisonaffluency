@@ -6,7 +6,7 @@ import { useParentBrandDesignerCountsFiltered } from "@/hooks/useParentBrandDesi
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import CuratorPicksLegend from "./CuratorPicksLegend";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GALLERY } from "@/constants/galleryIndex";

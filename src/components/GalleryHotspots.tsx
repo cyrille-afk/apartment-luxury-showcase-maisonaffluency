@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { Plus, X, Trash2, GripVertical, Pencil, Check, ShoppingCart, MessageSquare, FileText, Settings, Copy, ClipboardPaste } from "lucide-react";
@@ -538,10 +538,10 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                     <div className="p-3 w-[260px]">
                       <h5 className="font-serif text-sm text-foreground mb-2">Edit Hotspot</h5>
                       <div className="space-y-2">
-                        <input type="text" placeholder="Product name *" value={editData.product_name} onChange={e => setEditData(d => ({ ...d, product_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" autoFocus />
-                        <input type="text" placeholder="Designer name" value={editData.designer_name} onChange={e => setEditData(d => ({ ...d, designer_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
-                        <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
-                        <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                        <input type="text" placeholder="Product name *" value={editData.product_name} onChange={e => setEditData(d => ({ ...d, product_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30" autoFocus />
+                        <input type="text" placeholder="Designer name" value={editData.designer_name} onChange={e => setEditData(d => ({ ...d, designer_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30" />
+                        <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30" />
+                        <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30" />
                         <div>
                           <HotspotPickMapper options={pickOptions} value={editData.mapped_pick_id} onChange={p => setEditData(d => p ? { ...d, mapped_pick_id: p.id, product_name: p.title, designer_name: p.designer, product_image_url: p.image_url || d.product_image_url } : { ...d, mapped_pick_id: "" })} />
                         </div>
@@ -760,7 +760,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 placeholder="Product name *"
                 value={formData.product_name}
                 onChange={e => setFormData(f => ({ ...f, product_name: e.target.value }))}
-                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30"
                 autoFocus
               />
               <input
@@ -768,21 +768,21 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 placeholder="Designer name"
                 value={formData.designer_name}
                 onChange={e => setFormData(f => ({ ...f, designer_name: e.target.value }))}
-                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30"
               />
               <input
                 type="text"
                 placeholder="Product image URL"
                 value={formData.product_image_url}
                 onChange={e => setFormData(f => ({ ...f, product_image_url: e.target.value }))}
-                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30"
               />
               <input
                 type="text"
                 placeholder="Link URL"
                 value={formData.link_url}
                 onChange={e => setFormData(f => ({ ...f, link_url: e.target.value }))}
-                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-hidden focus:ring-1 focus:ring-primary/30"
               />
               <div>
                 <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>

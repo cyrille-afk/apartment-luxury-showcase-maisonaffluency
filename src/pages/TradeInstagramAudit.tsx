@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Instagram, ExternalLink, AlertTriangle, CheckCircle, XCircle, Search, ArrowLeft, Pencil, Save, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { toast } from "sonner";
 
 interface DesignerIG {

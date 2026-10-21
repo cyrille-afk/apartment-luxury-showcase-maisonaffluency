@@ -1490,7 +1490,7 @@ export default function ProposalBuilder({
                   <select
                     value={p.room_section || ""}
                     onChange={(e) => updateRoomSection(p.id, e.target.value)}
-                    className="mt-1 w-full bg-transparent border border-border rounded px-1 py-0.5 font-body text-[9px] text-muted-foreground outline-none focus:border-foreground transition-colors cursor-pointer"
+                    className="mt-1 w-full bg-transparent border border-border rounded px-1 py-0.5 font-body text-[9px] text-muted-foreground outline-hidden focus:border-foreground transition-colors cursor-pointer"
                   >
                     <option value="">Room section…</option>
                     {ROOM_SECTIONS.map((r) => (
@@ -1506,7 +1506,7 @@ export default function ProposalBuilder({
                       )
                     }
                     placeholder="Material override… e.g. brushed brass"
-                    className="mt-1 w-full bg-transparent border border-border rounded px-1.5 py-0.5 font-body text-[9px] text-muted-foreground placeholder:text-muted-foreground/40 outline-none focus:border-foreground transition-colors"
+                    className="mt-1 w-full bg-transparent border border-border rounded px-1.5 py-0.5 font-body text-[9px] text-muted-foreground placeholder:text-muted-foreground/40 outline-hidden focus:border-foreground transition-colors"
                   />
                 </div>
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1644,7 +1644,7 @@ export default function ProposalBuilder({
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value); setSubcategory(""); }}
-                className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
               >
                 <option value="">All Categories</option>
                 {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -1653,7 +1653,7 @@ export default function ProposalBuilder({
                 <select
                   value={subcategory}
                   onChange={(e) => setSubcategory(e.target.value)}
-                  className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                 >
                   <option value="">All {category}</option>
                   {subcategories.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -1662,7 +1662,7 @@ export default function ProposalBuilder({
               <select
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
               >
                 <option value="">All Brands</option>
                 {brands.map((b) => <option key={b} value={b}>{b}</option>)}

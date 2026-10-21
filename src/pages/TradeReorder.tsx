@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Loader2, RefreshCw, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { FileDown, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
@@ -214,7 +214,7 @@ export function ProjectSpecDrawer({
                       placeholder={axis.toUpperCase()}
                       inputMode="numeric"
                       aria-label={`Custom ${axis === "w" ? "width" : axis === "d" ? "depth" : "height"} in millimetres`}
-                      className="w-16 border-0 border-b border-border bg-transparent pb-1 font-body text-[11px] tracking-[0.05em] text-foreground placeholder:text-muted-foreground/50 focus:border-foreground focus:outline-none"
+                      className="w-16 border-0 border-b border-border bg-transparent pb-1 font-body text-[11px] tracking-[0.05em] text-foreground placeholder:text-muted-foreground/50 focus:border-foreground focus:outline-hidden"
                     />
                   </span>
                 ))}

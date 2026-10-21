@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, waitFor, cleanup } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "@/lib/router-compat";
 import { HelmetProvider } from "react-helmet-async";
 
 const FIXTURE_STUDIOS = [

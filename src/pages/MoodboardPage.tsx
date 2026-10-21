@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import OneClickMoodboard from "@/components/trade/OneClickMoodboard";
 import heroImage from "@/assets/moodboard-hero.jpg";

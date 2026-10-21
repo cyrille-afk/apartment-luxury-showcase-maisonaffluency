@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { formatEditionLabel } from "@/lib/editionLabel";
 
 /**

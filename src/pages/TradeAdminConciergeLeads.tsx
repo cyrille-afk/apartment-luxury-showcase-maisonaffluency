@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -179,7 +179,7 @@ export default function TradeAdminConciergeLeads() {
               placeholder="Search name, city, message…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-10 pl-9 pr-3 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full h-10 pl-9 pr-3 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -340,7 +340,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-10 rounded-md border border-input bg-background text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${icon ? "pl-8 pr-8" : "px-3"}`}
+        className={`h-10 rounded-md border border-input bg-background text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${icon ? "pl-8 pr-8" : "px-3"}`}
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>

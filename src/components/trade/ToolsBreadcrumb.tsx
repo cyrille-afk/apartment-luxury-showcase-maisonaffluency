@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/lib/router-compat";
 import { resolveToolsCrumbs, type ToolsCrumb } from "@/lib/toolsBreadcrumbs";
 
 /** Extra, page-owned segments appended after the automatic tool crumb. */

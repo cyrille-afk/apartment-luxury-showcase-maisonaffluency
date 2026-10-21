@@ -7,7 +7,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { inviteLinkGuidance, type InviteLinkStatus } from "@/lib/studioInvitationLink";
 
 interface PendingInvite {

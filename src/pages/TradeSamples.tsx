@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { supabase } from "@/integrations/supabase/client";

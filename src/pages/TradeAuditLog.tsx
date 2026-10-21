@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { format } from "date-fns";
 import { History, Trash2, Pencil, Plus, ChevronDown, ChevronRight, Search, Filter, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -198,7 +198,7 @@ const TradeAuditLog = () => {
               placeholder="Search by name…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground w-56 focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              className="pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground w-56 focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
             />
           </div>
           <div className="flex items-center gap-1.5">

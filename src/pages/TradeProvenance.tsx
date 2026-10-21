@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, EyeOff, Award, Clock, MapPin, Save, X, ChevronDown, ChevronUp } from "lucide-react";
 import SectionHero from "@/components/trade/SectionHero";

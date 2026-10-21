@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -184,7 +184,7 @@ export default function TradeAdminCollectorApplications() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, occupation…"
-            className="ml-auto min-w-[240px] px-3 py-1.5 rounded-md border border-border bg-background text-sm font-body focus:outline-none focus:border-foreground/40"
+            className="ml-auto min-w-[240px] px-3 py-1.5 rounded-md border border-border bg-background text-sm font-body focus:outline-hidden focus:border-foreground/40"
           />
         </div>
 

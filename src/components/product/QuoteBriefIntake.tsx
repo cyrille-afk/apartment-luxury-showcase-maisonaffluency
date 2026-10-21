@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Loader2, Lock, Paperclip, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +11,7 @@ const MAX_FILES = 5;
 const MAX_MB = 12;
 
 const inputCls =
-  "h-12 w-full rounded-none border border-border/60 bg-background px-4 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors";
+  "h-12 w-full rounded-none border border-border/60 bg-background px-4 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground transition-colors";
 const labelCls =
   "font-body text-[10px] uppercase tracking-widest text-muted-foreground";
 
@@ -343,7 +343,7 @@ export default function QuoteBriefIntake({
                       autoFocus
                       placeholder="0000"
                       aria-label="Secure passcode"
-                      className="h-12 w-44 rounded-none border border-neutral-300 bg-background text-center font-body text-lg tracking-[0.4em] text-foreground focus:outline-none focus:border-foreground"
+                      className="h-12 w-44 rounded-none border border-neutral-300 bg-background text-center font-body text-lg tracking-[0.4em] text-foreground focus:outline-hidden focus:border-foreground"
                     />
                     <button
                       type="button"
@@ -384,7 +384,7 @@ export default function QuoteBriefIntake({
             value={brief}
             onChange={(e) => setBrief(e.target.value)}
             placeholder="Rooms, quantities, finishes, timeline, or customisation required…"
-            className="mt-2 w-full resize-none rounded-none border border-border/60 bg-background px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors"
+            className="mt-2 w-full resize-none rounded-none border border-border/60 bg-background px-4 py-3 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground transition-colors"
           />
         </div>
 

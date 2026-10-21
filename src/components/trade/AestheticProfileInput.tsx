@@ -75,7 +75,7 @@ const AestheticProfileInput = ({ leadId, studioName, value, onChange }: Props) =
         disabled={saving}
         placeholder="Click to add material syntax notes…"
         rows={2}
-        className="w-full resize-none rounded-none border border-border bg-background p-2.5 text-[13px] leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-60"
+        className="w-full resize-none rounded-none border border-border bg-background p-2.5 text-[13px] leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-hidden focus:ring-0 disabled:opacity-60"
       />
       <span
         aria-live="polite"

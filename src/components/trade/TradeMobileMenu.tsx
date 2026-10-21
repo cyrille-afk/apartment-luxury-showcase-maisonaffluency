@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderKanban, MapPin,

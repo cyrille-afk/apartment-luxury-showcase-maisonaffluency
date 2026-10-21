@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { commitProposal, type TearsheetProposal, type PickPreview } from "@/lib/tradeConciergeStream";
 import { buildLogisticsTag } from "@/lib/logisticsTag";
 import { supabase } from "@/integrations/supabase/client";
@@ -764,7 +764,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 onKeyDown={(e) => { if (e.key === "Enter") setEditingTitle(false); }}
                 autoFocus
                 maxLength={120}
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-display text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-display text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-accent"
               />
             ) : (
               <h4 className="flex-1 font-display text-sm text-foreground">{title || "Untitled tearsheet"}</h4>
@@ -808,7 +808,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             }}
             placeholder="e.g. Apt 4B · Malibu Beach House"
             maxLength={80}
-            className="flex-1 bg-transparent font-body text-[11px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+            className="flex-1 bg-transparent font-body text-[11px] text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden"
           />
           {projectDraft && (
             <button
@@ -1141,7 +1141,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             type="button"
                             onClick={() => toggleAssets(p.id)}
                             className={cn(
-                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent/60",
                               assetsOpen.has(p.id)
                                 ? "border-accent/50 bg-accent/10 text-accent"
                                 : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
@@ -1158,7 +1158,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             onClick={() => toggleLock(p.id)}
                             disabled={isExcluded}
                             className={cn(
-                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent/60",
                               isLocked
                                 ? "bg-slate-700 text-amber-300 border-slate-600 hover:bg-slate-600"
                                 : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
@@ -1186,7 +1186,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                                 displayText: `Swap "${p.title}"${p.designer_name ? ` by ${p.designer_name}` : ""} for a similar piece in a darker, richer palette.`,
                               },
                             )}
-                            className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-2 py-1 rounded border border-border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60 hover:border-foreground/30"
+                            className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-2 py-1 rounded border border-border transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent/60 hover:border-foreground/30"
                             aria-label={`Swap ${p.title || "this pick"} for a similar piece`}
                             title="Swap for a similar piece (darker wood / warmer finish)"
                           >
@@ -1196,7 +1196,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           <button
                             onClick={() => togglePick(p.id)}
                             className={cn(
-                              "text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
+                              "text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-accent/60",
                               isExcluded
                                 ? "border-border text-foreground hover:text-accent hover:border-accent/40"
                                 : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",

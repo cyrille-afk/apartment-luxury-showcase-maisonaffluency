@@ -4,7 +4,7 @@
  * Lovable editor cannot blank them out.
  */
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

@@ -15,7 +15,7 @@ import { useProductDesignNotes } from "@/hooks/useProductDesignNotes";
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Button } from "@/components/ui/button";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
