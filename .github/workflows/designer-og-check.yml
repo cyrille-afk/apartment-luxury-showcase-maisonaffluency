@@ -1,0 +1,37 @@
+name: Designer link previews
+
+# Server-renders every public designer profile and fails if any page's
+# Open Graph title, description, link or share photo (1200×630, < 300KB)
+# is wrong — catches preview regressions before publishing.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *" # nightly: catches designer data/photo changes made outside code
+  workflow_dispatch:
+
+jobs:
+  designer-og:
+    name: Designer Open Graph tags
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Start server-rendered app
+        run: |
+          nohup bunx vite dev --port 8080 --strictPort > /tmp/vite.log 2>&1 &
+          for i in $(seq 1 90); do
+            curl -sf -o /dev/null http://localhost:8080/designers && exit 0
+            sleep 2
+          done
+          cat /tmp/vite.log; exit 1
+      - name: Verify designer previews
+        run: bun --env-file=.env scripts/verify-designer-og.ts http://localhost:8080
+      - name: Server log on failure
+        if: failure()
+        run: tail -200 /tmp/vite.log || true
