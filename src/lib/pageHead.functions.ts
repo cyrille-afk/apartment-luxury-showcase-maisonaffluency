@@ -36,6 +36,14 @@ const clamp = (s: string, max: number) => {
   return (sp > max * 0.6 ? cut.slice(0, sp) : cut).trimEnd() + "…";
 };
 
+/** Share-sized 1200×630 JPEG: Cloudinary transform, or Storage image rendering (originals can exceed WhatsApp's ~300KB limit). */
+function shareImage(src: string | null | undefined): string | null {
+  if (!src || !/^https:\/\//.test(src)) return null;
+  const m = src.match(/^(https:\/\/[^/]+\.supabase\.co)\/storage\/v1\/object\/public\/(.+?)(\?.*)?$/);
+  if (m) return `${m[1]}/storage/v1/render/image/public/${m[2]}?width=1200&height=630&resize=cover&quality=75`;
+  return toOgImage(src);
+}
+
 export const getJournalHead = createServerFn({ method: "GET" })
   .inputValidator((input: { slug: string }) => ({ slug: slugOf(input?.slug) }))
   .handler(async ({ data }): Promise<PageHeadInput | null> => {
@@ -53,7 +61,7 @@ export const getJournalHead = createServerFn({ method: "GET" })
       title,
       description: clamp(a.excerpt || "Design stories and curatorial insights from the Maison Affluency Journal.", 160),
       path: `/journal/${a.slug}`,
-      image: a.cover_image_url ? toOgImage(a.cover_image_url) : null,
+      image: shareImage(a.cover_image_url),
       imageAlt: a.title || undefined,
       type: "article",
     };
@@ -97,11 +105,12 @@ export const getProductHead = createServerFn({ method: "GET" })
       designer = d;
     }
     const maker = designer?.display_name || designer?.name || "";
-    const title = `${pick.title}${maker ? ` by ${maker}` : ""} — Maison Affluency`;
+    const name = pick.title.replace(/\s+/g, " ").trim();
+    const title = `${name}${maker ? ` by ${maker}` : ""} — Maison Affluency`;
     const description = clamp(
-      pick.description || `${pick.title}${maker ? ` by ${maker}` : ""}. ${pick.materials || "Collectible design at Maison Affluency."}`,
+      pick.description || `${name}${maker ? ` by ${maker}` : ""}. ${pick.materials || "Collectible design at Maison Affluency."}`,
       155,
     );
     const path = data.designerSlug ? `/designers/${data.designerSlug}/${data.productSlug}` : `/products/${data.productSlug}`;
-    return { title, description, path, image: pick.image_url ? toOgImage(pick.image_url) : null, imageAlt: title, type: "product" };
+    return { title, description, path, image: shareImage(pick.image_url), imageAlt: title, type: "product" };
   });
