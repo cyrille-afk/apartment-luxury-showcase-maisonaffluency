@@ -63,6 +63,8 @@ import ProjectAssetsDrawer, { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade
 import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 import "@/components/trade/visualiser/visualiserToolbar.css";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
+import PhotoPerspectiveOverlay from "@/components/trade/visualiser/PhotoPerspectiveOverlay";
+import { defaultPhotoCalibration, photoFloorPoint, validPhotoCorners, type PhotoCalibration } from "@/lib/photoPerspective";
 
 // three.js / @react-three/* live behind this boundary so they are never part
 // of the main bundle — they download only when the Visualiser route mounts.
@@ -103,6 +105,7 @@ type CatalogueProduct = {
 };
 
 type PersistedSandbox = CeilingSettings & {
+  photoCalibration?: PhotoCalibration | null;
   backdropDataUrl: string | null;
   backdrop: string | null;
   objects: PlacedObject[];
@@ -168,6 +171,7 @@ const readSandbox = (storageKey = STORAGE_KEY, projectId?: string): PersistedSan
     const parsed = JSON.parse(raw) as PersistedSandbox;
     return {
       backdrop: parsed.backdrop ?? null,
+      photoCalibration: parsed.photoCalibration && validPhotoCorners(parsed.photoCalibration.corners) && parsed.photoCalibration.aspect > 0 ? parsed.photoCalibration : null,
       backdropDataUrl: parsed.backdropDataUrl ?? null,
       objects: Array.isArray(parsed.objects) ? parsed.objects.map((object) => ({ ...object, positionLocked: object.positionLocked ?? object.finishesLocked ?? false, finishesLocked: false })) : [],
       projectId: parsed.projectId ?? null,
@@ -264,6 +268,21 @@ const TradeVisualiser = () => {
   const [trayOpen, setTrayOpen] = useState(false);
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
+  const [photoCalibration, setPhotoCalibration] = useState<PhotoCalibration | null>(initial.photoCalibration ?? null);
+  const roomPhotoRef = useRef<HTMLInputElement>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const [mediaSize, setMediaSize] = useState({ width: 0, height: 0 });
+  const photoMode = Boolean(photoCalibration) && (!activeProject || activeProject.view === "sandbox");
+  useEffect(() => {
+    const el = mediaRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setMediaSize({ width: entry.contentRect.width, height: entry.contentRect.height }));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const photoWidth = photoMode && photoCalibration ? Math.min(mediaSize.width, mediaSize.height * photoCalibration.aspect) : mediaSize.width;
+  const photoHeight = photoMode && photoCalibration ? photoWidth / photoCalibration.aspect : mediaSize.height;
+  const photoFit = photoMode ? { width: photoWidth, height: photoHeight, left: (mediaSize.width - photoWidth) / 2, top: (mediaSize.height - photoHeight) / 2 } : undefined;
   const [orbitEnabled, setOrbitEnabled] = useState(true);
   const [spacing, setSpacing] = useState<number>(initial.spacing ?? DEFAULT_SLOT_SPACING);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(initial.snapToGrid ?? false);
@@ -460,6 +479,7 @@ const TradeVisualiser = () => {
       sandboxJson = JSON.stringify({
         backdrop: backdrop?.startsWith("blob:") ? null : backdrop,
         backdropDataUrl,
+        photoCalibration,
         objects,
         projectId,
         selectedId,
@@ -507,7 +527,7 @@ const TradeVisualiser = () => {
       try { sessionStorage.setItem(LAST_GOOD_KEY, json); } catch { /* ignore */ }
     }, STABLE_AFTER_MS);
     return () => window.clearTimeout(timer);
-  }, [sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
+  }, [photoCalibration, sceneFailed, backdrop, backdropDataUrl, objects, projectId, selectedId, spacing, snapToGrid, showGrid, showLabels, depthOfField, dofStrength, dofFocusSelected, environmentSource, advancedRendering, floorFinish, showRearWall, wallHeight, ceilingHeight, ceilingThickness, ceilingOpening, floorGlare, wallColor, wallFinish, wallCustomHex, wallFinishIntensity, rugColorKey, rugBorderColorKey, rugBorderThicknessMm, rugBorderTwistMm, rugBorderRoughness, rugWeaveKey, rugPile, rugWidth, rugDepth, rugOffsetX, rugOffsetZ, rugRotation, showRug, featureWallFinishKey, backdropColor, backdropBrightness]);
 
   useEffect(() => {
     const requestId = searchParams.get("fromAxo");
@@ -667,13 +687,13 @@ const TradeVisualiser = () => {
   const focusRef = useRef<(() => [number, number] | null) | null>(null);
   const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
   const { projectInventory } = useProjectInventory();
-  const addObject = (product: PlaceableProduct) => {
+  const addObject = (product: PlaceableProduct, at?: [number, number]) => {
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
       return;
     }
     const next: PlacedObject = {
-      ...createPlacedObject(product, pickFootprintSlot(
+      ...createPlacedObject(product, at ? [at[0], 0, at[1]] : pickFootprintSlot(
         objects.map((o) => ({ position: o.position, radius: footprintRadius(parseDimensionString(o.dimensions), o.scale) })),
         footprintRadius(parseDimensionString(product.dimensions)),
         spacing,
@@ -823,13 +843,14 @@ const TradeVisualiser = () => {
     ));
   }, [materialSearch, materials, linkedMaterials, effectiveTarget, productSchema]);
 
-  const uploadBackdrop = (file: File | null) => {
+  const uploadBackdrop = (file: File | null, matchPerspective = false) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Choose a JPEG, PNG, or WebP image.");
       return;
     }
     setBackdrop(URL.createObjectURL(file));
+    setPhotoCalibration(null);
     // Downscale to a storage-friendly data URL so the backdrop can persist
     // with the scene and inside scene presets without blowing localStorage quota.
     const reader = new FileReader();
@@ -838,6 +859,11 @@ const TradeVisualiser = () => {
       if (!raw) { setBackdropDataUrl(null); return; }
       const img = new Image();
       img.onload = () => {
+        if (matchPerspective) {
+          setPhotoCalibration(defaultPhotoCalibration(img.width / img.height));
+          setPathTrace(false);
+          toast.success("Room photo ready for perspective alignment.");
+        }
         const MAX = 1920;
         const scale = Math.min(1, MAX / Math.max(img.width, img.height));
         const canvas = document.createElement("canvas");
@@ -858,6 +884,7 @@ const TradeVisualiser = () => {
     setSelectedId(null);
     setBackdrop(null);
     setBackdropDataUrl(null);
+    setPhotoCalibration(null);
     sessionStorage.removeItem(STORAGE_KEY);
     toast.success("Sandbox reset.");
   };
@@ -867,6 +894,7 @@ const TradeVisualiser = () => {
   const resetIndustrialRoom = async () => {
     try { await clearLocalExr(); } catch { /* nothing stored */ }
     setEnvironmentSource("studio-hdr");
+    setPhotoCalibration(null);
     setBackdrop(null);
     setBackdropDataUrl(null);
     toast.success("Industrial room restored.");
@@ -919,21 +947,22 @@ const TradeVisualiser = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden">
+      <div ref={mediaRef} className="relative min-h-0 flex-1 overflow-hidden">
       <ProjectLayoutOverview />
       {backdropSrc && (
         <img
           src={backdropSrc}
           alt=""
           aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-center"
+          style={photoFit}
+          className={cn("pointer-events-none absolute z-0 object-center", photoMode ? "object-fill" : "inset-0 h-full w-full object-cover")}
         />
       )}
 
       {showPhotorealGhost && photorealGhost && (
         <img src={photorealGhost} alt="" aria-hidden data-photoreal-ghost className="pointer-events-none absolute inset-0 z-0 h-full w-full object-fill" />
       )}
-      {!pathTrace && !sceneFailed && initialRoomReady && (
+      {!photoMode && !pathTrace && !sceneFailed && initialRoomReady && (
         <div className="absolute bottom-3 left-3 z-30">
           <Button variant="outline" size="sm" onClick={togglePhotoreal} className="gap-2 bg-background/90 text-xs backdrop-blur-sm">
             <span aria-hidden="true">✦</span> Start Photoreal Render
@@ -948,7 +977,8 @@ const TradeVisualiser = () => {
       )}
       <div
         ref={canvasWrapRef}
-        className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}
+        style={photoFit}
+        className={cn("absolute z-10", !photoMode && "inset-0", showPhotorealGhost && "opacity-75")}
         onDragOver={(event) => {
           if (event.dataTransfer.types.includes(PROJECT_ASSET_DRAG_TYPE)) {
             event.preventDefault();
@@ -960,7 +990,15 @@ const TradeVisualiser = () => {
           if (!key) return;
           event.preventDefault();
           const item = projectInventory.find((entry) => entry.instanceId === key);
-          if (item) placeInventoryAsset(item);
+          if (item) {
+            if (photoMode && photoCalibration) {
+              if (!photoCalibration.locked) { toast.error("Lock the ground plane before placing furniture."); return; }
+              const rect = event.currentTarget.getBoundingClientRect();
+              const at = photoFloorPoint([(event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height], photoCalibration, activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS);
+              if (!at) { toast.error("Drop the piece inside the calibrated floor."); return; }
+              addObject(inventoryItemToPlaceable(item), at);
+            } else placeInventoryAsset(item);
+          }
         }}
       >
         {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
@@ -971,8 +1009,9 @@ const TradeVisualiser = () => {
         <SceneErrorBoundary key={canvasEpoch} onError={handleSceneCrash}>
         <Suspense fallback={<CanvasLoader />}>
           <VisualiserCanvas
+            photoCalibration={photoMode ? photoCalibration : null}
             workspaceCamera={workspaceCamera}
-            roomBounds={activeProject?.state.bounds}
+            roomBounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS}
             onInitialReady={revealInitialRoom}
             focusRef={focusRef}
             objects={objects}
@@ -988,7 +1027,7 @@ const TradeVisualiser = () => {
             showGrid={showGrid}
             showLabels={showLabels}
             depthOfField={depthOfField}
-            pathTrace={pathTrace && (!activeProject || activeProject.view === "sandbox")}
+            pathTrace={!photoMode && pathTrace && (!activeProject || activeProject.view === "sandbox")}
             renderCheckpointKey={user ? `${user.id}:sandbox` : undefined}
             onRenderCheckpoint={(event) => {
               setCheckpointStatus(event);
@@ -1029,6 +1068,7 @@ const TradeVisualiser = () => {
           />
         </Suspense>
         </SceneErrorBoundary>
+        {photoMode && photoCalibration && <PhotoPerspectiveOverlay calibration={photoCalibration} bounds={activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS} onChange={setPhotoCalibration} />}
       </div>
 
 
@@ -1045,7 +1085,7 @@ const TradeVisualiser = () => {
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
-      <VisualiserInspector onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
+      <VisualiserInspector sidebarActions={(!activeProject || activeProject.view === "sandbox") && <><input ref={roomPhotoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" aria-label="Empty room photo" onChange={e => { uploadBackdrop(e.target.files?.[0] ?? null, true); e.target.value = ""; }} /><Button variant="outline" size="sm" className="w-full gap-2" onClick={() => roomPhotoRef.current?.click()}><ImageUp className="h-4 w-4" />Upload Empty Room Photo</Button></>} onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
         {selected && (<>
           {activeProject?.view === "axonometric" && <div className="mt-3 grid grid-cols-2 gap-2">{(["x", "y", "rotation"] as const).map(axis => <label key={axis} className="text-xs text-muted-foreground">{axis === "rotation" ? "Rotation (°)" : `${axis === "x" ? "X" : "Y"} (m)`}<input aria-label={`Layout ${axis}`} type="number" step={axis === "rotation" ? 5 : 0.1} disabled={selected.positionLocked} value={axis === "rotation" ? Math.round(selected.rotation[1] * 180 / Math.PI) : selected.position[axis === "x" ? 0 : 2]} className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-1 text-foreground" onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value)) setObjects(current => patchLayoutItem(current, selected.instanceId, { [axis]: axis === "rotation" ? value * Math.PI / 180 : value })); }} /></label>)}</div>}
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">
@@ -1168,7 +1208,7 @@ const TradeVisualiser = () => {
       </VisualiserInspector>
 
       {/* Project Assets — pieces added from product pages, placeable into the layout */}
-      {activeProject?.view === "axonometric" && <ProjectAssetsDrawer onPlace={placeInventoryAsset} />}
+      {(activeProject?.view === "axonometric" || photoMode) && <ProjectAssetsDrawer onPlace={placeInventoryAsset} />}
 
       {/* Sourcing tray */}
       {trayOpen && (
