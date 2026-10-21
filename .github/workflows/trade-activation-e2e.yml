@@ -9,7 +9,7 @@ on:
 jobs:
   activation:
     timeout-minutes: 20
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Fork PRs have no secrets; the test skips itself there.
     env:
       E2E_SETUP_TOKEN: ${{ secrets.E2E_SETUP_TOKEN }}
