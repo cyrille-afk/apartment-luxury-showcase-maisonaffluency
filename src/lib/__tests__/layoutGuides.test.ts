@@ -56,10 +56,11 @@ describe("footprintClearance", () => {
 
   it("accounts for rotation", () => {
     const a = footprintOf(piece("a", 0, 0, 1000, 1000));
-    // 1 m × 2 m piece rotated 90°: its long axis now lies along x.
+    // 1 m × 2 m piece rotated 90°: its 2 m axis now lies along x, so its
+    // left edge sits at 2.2 − 1.0 = 1.2 and the gap to a (right edge 0.5) is 0.7.
     const b = footprintOf(piece("b", 2.2, 0, 1000, 2000, Math.PI / 2));
     const span = footprintClearance(a, b);
-    expect(span.distance).toBeCloseTo(0.2, 5);
+    expect(span.distance).toBeCloseTo(0.7, 5);
   });
 });
 
@@ -82,9 +83,10 @@ describe("pieceClearances / tightestGap / nearestClearance", () => {
   });
 
   it("finds the tightest gap in the room", () => {
+    // c sits 0.5 m off the bottom wall — tighter than the 1.4 m a–b gap.
     const gap = tightestGap(objects, bounds);
     expect(gap).not.toBeNull();
-    expect(gap!.distance).toBeCloseTo(1.4, 5);
+    expect(gap!.distance).toBeCloseTo(0.5, 5);
   });
 
   it("reports the nearest neighbour for a piece", () => {
@@ -95,7 +97,8 @@ describe("pieceClearances / tightestGap / nearestClearance", () => {
 
   it("falls back to a wall when the piece is alone", () => {
     const nearest = nearestClearance([piece("a", 0, 0)], bounds, "a");
-    expect(nearest?.targetName).toBe("top wall");
+    // Top and bottom walls tie at 3.5 m; bottom is evaluated first.
+    expect(nearest?.targetName).toBe("bottom wall");
     expect(nearest?.distance).toBeCloseTo(3.5, 5);
   });
 });
