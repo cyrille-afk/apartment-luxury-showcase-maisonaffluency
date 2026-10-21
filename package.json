@@ -28,7 +28,8 @@
     "check:edge-live": "deno run -A --no-config scripts/edge-live-check.ts",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:og:designers": "bun --env-file=.env scripts/verify-designer-og.ts"
   },
   "overrides": {
     "uuid": "11.1.1",
