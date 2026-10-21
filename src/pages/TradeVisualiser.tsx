@@ -955,7 +955,23 @@ const TradeVisualiser = () => {
           {checkpointStatus.kind !== "restored" && <div className={restoredInfo ? "text-muted-foreground" : undefined}>{checkpointStatusText(checkpointStatus)}</div>}
         </div>
       )}
-      <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
+      <div
+        ref={canvasWrapRef}
+        className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}
+        onDragOver={(event) => {
+          if (event.dataTransfer.types.includes(PROJECT_ASSET_DRAG_TYPE)) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={(event) => {
+          const key = event.dataTransfer.getData(PROJECT_ASSET_DRAG_TYPE);
+          if (!key) return;
+          event.preventDefault();
+          const item = projectInventory.find((entry) => `${entry.id}::${entry.variantLabel ?? ""}` === key);
+          if (item) placeInventoryAsset(item);
+        }}
+      >
         {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
         {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
@@ -1159,6 +1175,9 @@ const TradeVisualiser = () => {
           )}
         </>)}
       </VisualiserInspector>
+
+      {/* Project Assets — pieces added from product pages, placeable into the layout */}
+      {activeProject?.view === "axonometric" && <ProjectAssetsDrawer onPlace={placeInventoryAsset} />}
 
       {/* Sourcing tray */}
       {trayOpen && (
