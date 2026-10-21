@@ -157,7 +157,7 @@ function resolveGalleryImageByFinishFilename(heroList: string[], labels: Array<s
     .filter((term) => term.length >= 4 && !["finish", "fabric", "marble", "wood", "ashwood"].includes(term));
 
   let best: { url: string; score: number; index: number } | null = null;
-  heroList.forEach((url, index) => {
+  for (const [index, url] of heroList.entries()) {
     const haystack = decodeURIComponent(url).toLowerCase().replace(/[^a-z0-9]+/g, " ");
     let score = 0;
     cleanLabels.forEach((label) => {
@@ -168,7 +168,7 @@ function resolveGalleryImageByFinishFilename(heroList: string[], labels: Array<s
     if (score > 0 && (!best || score > best.score || (score === best.score && index < best.index))) {
       best = { url, score, index };
     }
-  });
+  }
 
   return best?.url ?? null;
 }
@@ -979,7 +979,7 @@ const TradeProductPage: React.FC = () => {
       // so the quote line records exactly what the user picked.
       let variantLabel: string | null = null;
       let overrideUnitPriceCents: number | null = null;
-      const sv: any[] | undefined = data?.pricing?.size_variants;
+      const sv: any[] | undefined = data?.pricing?.size_variants ?? undefined;
       const buildDualLabel = (v: any): string =>
         [v?.base, v?.top, v?.size, v?.label].filter(Boolean).map((s: string) => String(s).trim()).join(" · ");
       if (rugSelection && rugSelection.sizeLabel) {
@@ -1100,7 +1100,7 @@ const TradeProductPage: React.FC = () => {
         _quantity: 1,
         // Merge key: same product + same variant merges qty; different variants
         // (e.g. 10-Lights vs 20-Lights) stay as separate lines with their own price.
-        _variant_label: variantLabel,
+        _variant_label: variantLabel ?? undefined,
       });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -1336,7 +1336,7 @@ const TradeProductPage: React.FC = () => {
   // the on-page price reflects the finishes the architect just chose.
   // Runs BEFORE the auto-default effect so ?base=/?top= take priority.
   useEffect(() => {
-    const sv = data?.pricing?.size_variants;
+    const sv = data?.pricing?.size_variants ?? undefined;
     if (!sv || !sv.length) return;
     if (selectedBase || selectedTop || selectedSingleMaterial || selectedDualSize) return;
     const qp = new URLSearchParams(location.search);
@@ -1390,7 +1390,7 @@ const TradeProductPage: React.FC = () => {
   // "Aged Brass + Bisque Leather" → "Paglierino Travertine"). Picking the
   // other base then auto-swaps the top via the existing handlers.
   useEffect(() => {
-    const sv = data?.pricing?.size_variants;
+    const sv = data?.pricing?.size_variants ?? undefined;
     if (!sv || !sv.length || selectedBase || selectedTop) return;
     // Shared gating: only auto-default when there is genuinely one pairing
     // to show. Products with multiple bases (e.g. Stone D Coffee Table)
@@ -1843,7 +1843,7 @@ const TradeProductPage: React.FC = () => {
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price upon Request".
   // Variants without a price (price_cents = 0 → "Price upon Request" finishes) are skipped here.
   const pricedVariantCents = hasVariants && sizeVariants
-    ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
+    ? sizeVariants.map((v) => v.price_cents).filter((c): c is number => typeof c === "number" && c > 0)
     : [];
   const minVariantCents = pricedVariantCents.length > 0 ? Math.min(...pricedVariantCents) : null;
   // If the user has actively selected a Base/Top/Size in a dual-axis product

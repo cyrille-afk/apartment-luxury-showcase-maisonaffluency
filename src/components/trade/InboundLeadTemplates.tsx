@@ -141,6 +141,7 @@ export default function InboundLeadTemplates({ leads, openSignal }: { leads: Lea
     if (error) return toast.error("Could not log the demo booking.");
     toast.success("Demo logged — added to the Trade ID Audit checklist.");
     qc.invalidateQueries({ queryKey: ["acquisition-demo-bookings"] });
+    return undefined;
   };
 
   const toggleAudit = async (b: (typeof bookings)[number], key: string, checked: boolean) => {
@@ -153,6 +154,7 @@ export default function InboundLeadTemplates({ leads, openSignal }: { leads: Lea
       .eq("id", b.id);
     if (error) return toast.error("Checklist could not be saved.");
     qc.invalidateQueries({ queryKey: ["acquisition-demo-bookings"] });
+    return undefined;
   };
 
   return (

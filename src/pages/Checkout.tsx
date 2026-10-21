@@ -2341,6 +2341,7 @@ export default function Checkout() {
     // Analytics is strictly best-effort: any failure here must never block or
     // delay the confirmation route.
     try {
+      if (!summary) throw new Error("Order summary unavailable for telemetry");
       const isTrade = Boolean(
         account && (isTradeUser || tradeStatus === "approved" || isAdmin || isSuperAdmin),
       );

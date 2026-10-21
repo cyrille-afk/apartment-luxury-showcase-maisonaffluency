@@ -116,7 +116,7 @@ const PublicFavorites = () => {
       }
 
       // Fetch designer names
-      const designerIds = [...new Set(data.map((p) => p.designer_id))];
+      const designerIds = [...new Set(data.map((p) => p.designer_id).filter((id): id is string => id !== null))];
       const { data: designers } = await supabase
         .from("designers")
         .select("id, name, slug")
@@ -125,12 +125,12 @@ const PublicFavorites = () => {
       const designerMap = new Map(designers?.map((d) => [d.id, d]) || []);
 
       const enriched: FavPick[] = data.map((p) => {
-        const d = designerMap.get(p.designer_id);
+        const d = p.designer_id === null ? undefined : designerMap.get(p.designer_id);
         return {
           id: p.id,
-          title: p.title,
+          title: p.title!,
           subtitle: p.subtitle,
-          image_url: p.image_url,
+          image_url: p.image_url!,
           hover_image_url: p.hover_image_url,
           materials: p.materials,
           materials_description: (p as any).materials_description ?? null,
@@ -142,7 +142,7 @@ const PublicFavorites = () => {
           subcategory: p.subcategory,
           pdf_url: p.pdf_url || ((p as any).pdf_urls as any[] | null)?.[0]?.url || null,
           pdf_urls: ((p as any).pdf_urls as any) ?? null,
-          designer_id: p.designer_id,
+          designer_id: p.designer_id!,
           designer_name: d?.name || "",
           designer_slug: d?.slug || "",
           size_variants: (p as any).size_variants ?? null,
@@ -180,9 +180,9 @@ const PublicFavorites = () => {
     () =>
       picks.map((p) => ({
         id: p.id,
-        title: p.title,
+        title: p.title!,
         subtitle: p.subtitle,
-        image_url: p.image_url,
+        image_url: p.image_url!,
         hover_image_url: p.hover_image_url,
         brand_name: p.designer_name || "",
         materials: p.materials,

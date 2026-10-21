@@ -307,6 +307,7 @@ function EntryDrawer({ lane, onClose, onSaved }: { lane: Lane | null; onClose: (
     if (!f.type.startsWith("image/")) return toast.error("Please attach an image");
     if (f.size > 10 * 1024 * 1024) return toast.error("Image must be under 10 MB");
     setFile(f);
+    return undefined;
   };
 
   const submit = async () => {
@@ -341,6 +342,7 @@ function EntryDrawer({ lane, onClose, onSaved }: { lane: Lane | null; onClose: (
     if (error) return toast.error("Could not save entry");
     toast.success("Entry logged");
     reset(); onClose(); onSaved();
+    return undefined;
   };
 
   return (

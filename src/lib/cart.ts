@@ -513,7 +513,7 @@ function subscribe(cb: () => void) {
 }
 
 export function useCart() {
-  return useSyncExternalStore(subscribe, getCart, () => [] as CartItem[]);
+  return useSyncExternalStore(subscribe, getCart, getServerCart);
 }
 
 export function cartSubtotalCents(list: CartItem[]) {
@@ -549,4 +549,10 @@ export function cartItemCount(list: CartItem[] = getCart()) {
 
 export function shouldUseFullPageCart(list: CartItem[] = getCart()) {
   return list.length >= FULL_PAGE_CART_MIN_ITEMS;
+}
+
+/** Stable empty basket for server rendering (a fresh array each call loops React). */
+const SERVER_CART: CartItem[] = [];
+function getServerCart(): CartItem[] {
+  return SERVER_CART;
 }

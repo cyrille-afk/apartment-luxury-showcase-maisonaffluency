@@ -107,7 +107,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   const { direction: scrollDir, scrollY: navScrollY } = useScrollDirection();
   const navHidden = scrollDir === "down" && navScrollY > 240;
   const isScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
 
   useEffect(() => {

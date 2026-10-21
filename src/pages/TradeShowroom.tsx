@@ -73,9 +73,9 @@ const TradeShowroom = () => {
         _product_name: product.product_name,
         _brand_name: product.designer_name || "Unknown",
         _category: "",
-        _image_url: product.product_image_url || null,
-        _dimensions: product.dimensions || null,
-        _materials: product.materials || null,
+        _image_url: product.product_image_url || undefined,
+        _dimensions: product.dimensions || undefined,
+        _materials: product.materials || undefined,
         _quantity: 1,
       });
       if (error) {

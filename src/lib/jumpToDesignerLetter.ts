@@ -84,8 +84,9 @@ export function jumpToDesignerLetter(letter: string) {
   const runSettle = () => {
     if (mySession !== session) return;
     const startedAt = performance.now();
-    let prev = measureTargetY(letter);
-    if (prev === null) return;
+    const initialY = measureTargetY(letter);
+    if (initialY === null) return;
+    let prev: number = initialY;
     window.scrollTo(0, prev);
     let stableCount = 0;
 

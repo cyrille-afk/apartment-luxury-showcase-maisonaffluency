@@ -83,8 +83,8 @@ export function registerModelMeshes(productId: string, list: ModelMesh[], labels
 }
 
 export const usePartOverrides = (productId: string | undefined) =>
-  useSyncExternalStore(subscribe, () => (productId && overrides[productId]) || EMPTY);
+  useSyncExternalStore(subscribe, () => (productId && overrides[productId]) || EMPTY, () => EMPTY);
 export const useModelMeshes = (productId: string | undefined) =>
-  useSyncExternalStore(subscribe, () => (productId && meshes[productId]) || NO_MESHES);
+  useSyncExternalStore(subscribe, () => (productId && meshes[productId]) || NO_MESHES, () => NO_MESHES);
 export const usePartGroupLabels = (productId: string | undefined) =>
-  useSyncExternalStore(subscribe, () => (productId && groupLabels[productId]) || NO_LABELS);
+  useSyncExternalStore(subscribe, () => (productId && groupLabels[productId]) || NO_LABELS, () => NO_LABELS);

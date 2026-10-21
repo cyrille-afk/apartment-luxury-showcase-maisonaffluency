@@ -1,3 +1,11 @@
+import type { ThreeElements } from "@react-three/fiber";
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
+
 import { ARCHITECTURE, type architecturalRoomLayout } from "@/lib/visualiserArchitecture";
 import { FEATURE_WALL } from "@/lib/visualiserFeatureWall";
 

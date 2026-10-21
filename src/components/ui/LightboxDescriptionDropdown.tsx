@@ -53,6 +53,7 @@ const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) =>
       });
       return () => window.cancelAnimationFrame(id);
     }
+    return undefined;
   }, [expanded]);
 
   if (!description || !description.trim()) return null;

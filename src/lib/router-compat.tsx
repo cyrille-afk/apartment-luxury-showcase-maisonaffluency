@@ -30,14 +30,27 @@ import {
   useState,
   forwardRef,
   type ComponentProps,
+  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";
+import { cn } from "@/lib/utils";
 
 // ---------- shared URL parsing ----------
 
-function parseTo(to: string): { pathname: string; search?: Record<string, string>; hash?: string } {
-  const [beforeHash, hashStr] = (to ?? "").split("#");
+/** react-router `To`: a path string or a partial path object. */
+export type To = string | { pathname?: string; search?: string; hash?: string };
+
+function toString(to: To): string {
+  if (typeof to === "string") return to;
+  const search = to.search ? (to.search.startsWith("?") ? to.search : `?${to.search}`) : "";
+  const hash = to.hash ? (to.hash.startsWith("#") ? to.hash : `#${to.hash}`) : "";
+  return `${to.pathname ?? ""}${search}${hash}`;
+}
+
+function parseTo(input: To): { pathname: string; search?: Record<string, string>; hash?: string } {
+  const to = toString(input);
+  const [beforeHash = "", hashStr] = (to ?? "").split("#");
   const [pathname, searchStr] = beforeHash.split("?");
   return {
     // react-router keeps the current path for search-only ("?a=1") and
@@ -50,17 +63,18 @@ function parseTo(to: string): { pathname: string; search?: Record<string, string
 
 // ---------- useNavigate ----------
 
-type NavigateOptions = { replace?: boolean; state?: unknown };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NavigateOptions = { replace?: boolean; state?: any; preventScrollReset?: boolean };
 
 type NavigateFn = {
-  (to: string | number, options?: NavigateOptions): void;
+  (to: To, options?: NavigateOptions): void;
   (delta: number): void;
 };
 
 export function useNavigate(): NavigateFn {
   const tsNav = tsNavigate();
   const router = useRouter();
-  return useCallback((to: string | number, options?: NavigateOptions) => {
+  return useCallback((to: To | number, options?: NavigateOptions) => {
     if (typeof to === "number") {
       router.history.go(to);
       return;
@@ -72,6 +86,7 @@ export function useNavigate(): NavigateFn {
       hash,
       state: options?.state as never,
       replace: options?.replace,
+      resetScroll: options?.preventScrollReset ? false : undefined,
     });
   }, [tsNav, router]) as NavigateFn;
 }
@@ -153,10 +168,13 @@ export function useSearchParams(): [URLSearchParams, (init: URLSearchParams | Re
 
 // ---------- Link ----------
 
-type LinkProps = Omit<ComponentProps<typeof TSLink>, "to"> & {
-  to: string;
+type LinkProps = Omit<ComponentProps<typeof TSLink>, "to" | "state" | "replace" | "search" | "hash" | "children" | "className" | "style"> & {
+  to: To;
   replace?: boolean;
-  state?: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  state?: any;
+  className?: string;
+  style?: CSSProperties;
   children?: ReactNode;
 };
 
@@ -183,7 +201,8 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 // ---------- Navigate ----------
 
-export function Navigate({ to, replace, state }: { to: string; replace?: boolean; state?: unknown }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function Navigate({ to, replace, state }: { to: To; replace?: boolean; state?: any }) {
   const { pathname, search, hash } = parseTo(to);
   return <TSNavigate to={pathname as never} search={search as never} hash={hash} state={state as never} replace={replace} />;
 }
@@ -192,10 +211,43 @@ export function Navigate({ to, replace, state }: { to: string; replace?: boolean
 
 export const Outlet = TSOutlet;
 
-// ---------- NavLink (minimal) ----------
+// ---------- NavLink ----------
 
-export const NavLink = Link;
-export type NavLinkProps = LinkProps;
+type NavLinkRenderProps = { isActive: boolean; isPending: boolean };
+
+export type NavLinkProps = Omit<LinkProps, "className" | "style" | "children"> & {
+  end?: boolean;
+  caseSensitive?: boolean;
+  className?: string | ((p: NavLinkRenderProps) => string | undefined);
+  style?: CSSProperties | ((p: NavLinkRenderProps) => CSSProperties | undefined);
+  children?: ReactNode | ((p: NavLinkRenderProps) => ReactNode);
+};
+
+/** react-router NavLink semantics: active on exact match, or on descendants unless `end`. */
+export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
+  { to, end, caseSensitive, className, style, children, ...rest },
+  ref,
+) {
+  const { pathname } = useLocation();
+  const targetRaw = parseTo(to).pathname;
+  const target = targetRaw === "." ? pathname : targetRaw.replace(/\/+$/, "") || "/";
+  const cur = caseSensitive ? pathname : pathname.toLowerCase();
+  const tgt = caseSensitive ? target : target.toLowerCase();
+  const isActive = cur === tgt || (!end && tgt !== "/" && cur.startsWith(`${tgt}/`));
+  const p = { isActive, isPending: false };
+  return (
+    <Link
+      ref={ref}
+      to={to}
+      aria-current={isActive ? "page" : undefined}
+      className={typeof className === "function" ? className(p) : cn(className, isActive && "active")}
+      style={typeof style === "function" ? style(p) : style}
+      {...rest}
+    >
+      {typeof children === "function" ? children(p) : children}
+    </Link>
+  );
+});
 
 // ---------- Test-only routers (@/lib/router-compat compatible) ----------
 

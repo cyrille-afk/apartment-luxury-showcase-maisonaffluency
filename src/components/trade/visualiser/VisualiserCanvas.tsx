@@ -1,3 +1,11 @@
+import type { ThreeElements } from "@react-three/fiber";
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
+
 import { advancedSceneLighting, DEFAULT_ADVANCED_RENDERING, type AdvancedRenderingSettings, type EnvironmentSourcePref } from "@/lib/visualiserAdvancedRendering";
 import softboxAsset from "@/assets/studio-softbox.exr.asset.json";
 import windowAsset from "@/assets/window-interior.exr.asset.json";

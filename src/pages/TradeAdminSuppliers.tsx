@@ -246,6 +246,7 @@ export default function TradeAdminSuppliers() {
     setAddEmail("");
     setAddCc("");
     void load();
+    return undefined;
   };
 
   const resetImport = () => {

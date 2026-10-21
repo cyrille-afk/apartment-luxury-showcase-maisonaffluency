@@ -390,7 +390,7 @@ export default function TradeClients() {
       const payload = {
         studio_id: currentStudio.id,
         created_by: editing.created_by || user.id,
-        name: editing.name.trim(),
+        name: (editing.name ?? "").trim(),
         type: (editing.type || "company") as ClientType,
         website: editing.website || null,
         tax_id: editing.tax_id || null,

@@ -354,7 +354,7 @@ export default function TradeDeliveryTracker() {
     }
     const lateItems = items.filter((l) => l.slack != null && l.slack < 0);
     const avgDaysOverdue = lateItems.length
-      ? Math.round(lateItems.reduce((sum, l) => sum + Math.abs(l.slack), 0) / lateItems.length)
+      ? Math.round(lateItems.reduce((sum, l) => sum + Math.abs(l.slack!), 0) / lateItems.length)
       : 0;
     return { totalItems: items.length, byCurrency, avgDaysOverdue };
   }, [visibleGroups]);

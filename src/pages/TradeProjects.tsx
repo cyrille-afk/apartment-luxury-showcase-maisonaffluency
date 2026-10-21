@@ -144,7 +144,7 @@ export default function TradeProjects() {
                 <Users className="h-3 w-3" />
                 Showing projects in <span className="text-foreground">{currentStudio.name}</span>
               </span>
-              {hiddenForMeCount > 0 && (
+              {(hiddenForMeCount ?? 0) > 0 && (
                 <span
                   className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted"
                   title={isAdmin
@@ -240,20 +240,20 @@ export default function TradeProjects() {
         projects.length === 0 && tab === "active" ? (
           // Studio-wide empty state: no visible projects in any tab
           <div className="text-center py-20 px-6 border border-dashed border-border rounded-md max-w-xl mx-auto">
-            {hiddenForMeCount > 0 ? (
+            {(hiddenForMeCount ?? 0) > 0 ? (
               <EyeOff className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
             ) : (
               <FolderOpen className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
             )}
             <h2 className="font-display text-lg text-foreground mb-2">
-              {hiddenForMeCount > 0
+              {(hiddenForMeCount ?? 0) > 0
                 ? "No projects visible to you"
                 : currentStudio
                   ? `${currentStudio.name} has no projects yet`
                   : "No projects yet"}
             </h2>
             <p className="font-body text-sm text-muted-foreground mb-5">
-              {hiddenForMeCount > 0 ? (
+              {(hiddenForMeCount ?? 0) > 0 ? (
                 <>
                   This studio has {hiddenForMeCount} project{hiddenForMeCount === 1 ? "" : "s"} you don't currently have access to.
                   Ask a studio admin to grant you access, or {canEdit ? "start a new project below" : "request a higher role to create one"}.

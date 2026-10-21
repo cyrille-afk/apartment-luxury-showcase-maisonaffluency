@@ -344,7 +344,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
   };
 
-  const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem => ({
+  const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem & { title: string } => ({
     pick_id: p.id,
     title: p.title,
     designer_name: p.designer_name,
@@ -515,7 +515,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
     setStatus("approved");
     const duplicates = res.duplicates || 0;
-    setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
+    setResult({ boardId: res.board_id!, url: res.url, added: res.added, duplicates });
 
     // ── Auto-grouping ──────────────────────────────────────────────────
     // If the concierge session has a projectName (from the inline "Save to
@@ -548,7 +548,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           await supabase
             .from("client_boards")
             .update({ project_id: autoProjectId })
-            .eq("id", res.board_id);
+            .eq("id", res.board_id!);
         }
       }
     }
@@ -558,7 +558,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       const { data: boardRow } = await supabase
         .from("client_boards")
         .select("project_id")
-        .eq("id", res.board_id)
+        .eq("id", res.board_id!)
         .maybeSingle();
       return (boardRow?.project_id as string | null) ?? null;
     })());
@@ -579,7 +579,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     const willPromptForProject = !currentProjectId;
 
     onResolved?.("approved", {
-      boardId: res.board_id,
+      boardId: res.board_id!,
       url: res.url,
       added: res.added,
       duplicates,

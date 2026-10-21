@@ -193,7 +193,7 @@ export default function ProductCommerceCta({
 }: ProductCommerceCtaProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const fromPairing = location.state?.curatedPairing === true;
+  const fromPairing = (location.state as { curatedPairing?: boolean } | null)?.curatedPairing === true;
   // Quantity lives in the container engine so both layout variants share it;
   // falls back to local state when rendered outside ProductPageContainer.
   const productConfig = useProductConfigOptional();

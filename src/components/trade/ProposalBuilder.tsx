@@ -693,8 +693,8 @@ export default function ProposalBuilder({
                 _product_name: product.product_name,
                 _brand_name: product.brand_name,
                 _image_url: product.image_url,
-                _dimensions: product.dimensions || null,
-                _materials: product.materials || null,
+                _dimensions: product.dimensions || undefined,
+                _materials: product.materials || undefined,
                 _quantity: 1,
               });
             } catch (e) {

@@ -967,7 +967,7 @@ export default function EditorialBiography({
     });
 
     // Group consecutive text blocks that follow an image, pair them for split layout
-    const elements: JSX.Element[] = [];
+    const elements: React.JSX.Element[] = [];
     let imageIdx = startImageIndex;
     let i = 0;
 
@@ -979,7 +979,7 @@ export default function EditorialBiography({
     }
 
     // Mobile image hoisting disabled — keep identical order on all viewports
-    const earlyMobileImage = null;
+    const earlyMobileImage = null as Extract<Block, { type: "image" }> | null;
 
     if (leadingText.length > 0) {
       if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);
@@ -1213,7 +1213,7 @@ export default function EditorialBiography({
     }
 
     // Build final children array for the collapsible wrapper
-    const wrapperChildren: JSX.Element[] = [];
+    const wrapperChildren: React.JSX.Element[] = [];
     if (debugMediaOrder && debugEvents.length > 0) {
       wrapperChildren.push(
         <div key="debug" className="mb-4 rounded-md border border-border bg-muted/30 p-3 font-body text-sm md:text-[15px] leading-relaxed md:leading-[1.8] text-foreground/85">
@@ -1299,7 +1299,7 @@ export default function EditorialBiography({
 
   // Distribute media among paragraphs
   const interval = Math.max(2, Math.ceil(paragraphs.length / (parsedMedia.length + 1)));
-  const elements: JSX.Element[] = [];
+  const elements: React.JSX.Element[] = [];
   let mediaIndex = 0;
   let textAccum: string[] = [];
   const debugEvents: string[] = [];

@@ -421,6 +421,7 @@ const TradeAxonometric = () => {
       const id = setTimeout(() => navigate("/trade", { replace: true }), 2500);
       return () => clearTimeout(id);
     }
+    return undefined;
   }, [isAdmin, navigate]);
 
   if (!isAdmin) {

@@ -262,7 +262,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     closeTimerRef.current = window.setTimeout(finishClose, prefersReducedMotion ? 180 : 420);
   }, [finishClose, prefersReducedMotion]);
   const panelRef = useRef<HTMLDivElement>(null);
-  useMobileSwipeDismiss({ containerRef: panelRef, enabled: isMobile && visible && !!propProduct && !contextualPanel && !gateOpen, onDismiss: requestClose });
+  useMobileSwipeDismiss({ containerRef: panelRef as React.RefObject<HTMLDivElement>, enabled: isMobile && visible && !!propProduct && !contextualPanel && !gateOpen, onDismiss: requestClose });
   // If the parent swaps in a new product while we're still mounted, reopen and
   // reset the close lifecycle. iOS/PWA occasionally misses framer-motion's exit
   // callback; the timeout above guarantees the invisible overlay is unmounted.
@@ -647,8 +647,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       subtitle: product.subtitle || undefined,
       image: product.image_url,
       hoverImage: product.hover_image_url || undefined,
-      materials: product.materials,
-      dimensions: product.dimensions,
+      materials: product.materials ?? undefined,
+      dimensions: product.dimensions ?? undefined,
       category: product.category || undefined,
       subcategory: product.subcategory || undefined,
     },

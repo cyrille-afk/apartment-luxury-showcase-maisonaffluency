@@ -1843,7 +1843,7 @@ function slugifyProduct(s: string) {
 }
 
 const FeaturedDesigners = () => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const navigate = useNavigate();
   const { isPinned, togglePin, items: compareItems } = useCompare();

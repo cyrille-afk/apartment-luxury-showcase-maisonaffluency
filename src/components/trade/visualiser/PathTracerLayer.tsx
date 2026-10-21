@@ -206,7 +206,7 @@ const PathTracerLayer = ({ signature, checkpointKey, onCheckpoint, onSamples, qu
       camera.updateMatrixWorld();
       const renderCamera = physicalCamera.current;
       // Copy the view without PhysicalCamera.copy reading absent lens properties.
-      THREE.PerspectiveCamera.prototype.copy.call(renderCamera, camera, false);
+      THREE.PerspectiveCamera.prototype.copy.call(renderCamera, camera as THREE.PerspectiveCamera, false);
       renderCamera.bokehSize = photographicBokeh(depthOfField, dofStrength);
       renderCamera.focusDistance = photographicFocusDistance(camera, focusTarget);
       const focusChanged = Math.abs(lastFocus.current.bokeh - renderCamera.bokehSize) > 0.001 ||

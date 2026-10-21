@@ -396,7 +396,7 @@ const resolveCollectiblePickDescription = (
 
 const Collectibles = () => {
   const navigate = useNavigate();
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
   const visibleCollectibles = useVisibleCollectibleDesigners();
   const rosterRef = useRef(visibleCollectibles);
   rosterRef.current = visibleCollectibles;

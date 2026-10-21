@@ -25,7 +25,7 @@ import { filterVideoRendersByMonth, formatUsdCents, monthlyCostBreakdown, previo
 const job = (over: Partial<VideoRenderRecord>): VideoRenderRecord => ({
   job_id: over.job_id ?? "job",
   state: over.state ?? "completed",
-  video_url: "video_url" in over ? over.video_url : "https://example.com/v.mp4",
+  video_url: "video_url" in over ? over.video_url ?? null : "https://example.com/v.mp4",
   failure: over.failure ?? null,
   created_at: over.created_at ?? "2026-10-09T02:00:00Z",
   quality: over.quality ?? "720p",

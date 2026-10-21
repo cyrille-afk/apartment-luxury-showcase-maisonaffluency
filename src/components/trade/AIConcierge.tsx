@@ -3254,7 +3254,7 @@ export function AIConcierge({
         // (b) any prior user turn's text (e.g. user answered "Singapore" on
         // turn 1, then "furnish my GCB" on turn 2), (c) captured profile.
         const projectLocation = text.match(/\b([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})\s+(?:brownstone|townhouse|penthouse|residence|apartment|loft)\b/)?.[1]?.trim() || null;
-        let city = projectLocation || scale.city;
+        let city: string | null = projectLocation || scale.city;
         let country = scale.country;
         if (!city) {
           city = text.match(/\b([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})\s+(?:brownstone|townhouse|penthouse|residence|apartment|loft)\b/)?.[1]?.trim() || null;
@@ -3286,7 +3286,7 @@ export function AIConcierge({
           .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
           .map((t) => t.content || "")
           .join(" \n ");
-        const prefilled = composeBriefPrefill(scale, city, country, priorFurnitureText, text);
+        const prefilled = composeBriefPrefill(scale, city ?? "", country ?? "", priorFurnitureText, text);
         briefProjectLocationRef.current = city || null;
 
         // Keep Felix's thinking/reveal pacing, then remain in the narrative
@@ -5318,14 +5318,13 @@ export function AIConcierge({
                     )}
                     {/* Curated-selection empty-state card intentionally removed per product decision. */}
                     {item.role === "assistant" && item.appliedConstraints?.empty && (item.appliedConstraints.applied_to?.length ?? 0) > 0 && (() => {
-                      const s = undefined;
                       const ac = item.appliedConstraints;
                       const detected = {
-                        style: s?.style ?? [],
-                        palette: [...new Set([...(s?.palette ?? []), ...((ac?.colors) ?? [])])],
-                        material: [...new Set([...(s?.materials ?? []), ...((ac?.materials) ?? [])])],
-                        typology: [...new Set([...(s?.subcategories ?? []), ...(s?.categories ?? []), ...((ac?.categories) ?? [])])],
-                        room: s?.room_type ? [s.room_type] : [],
+                        style: [],
+                        palette: [...new Set([...((ac?.colors) ?? [])])],
+                        material: [...new Set([...((ac?.materials) ?? [])])],
+                        typology: [...new Set([...((ac?.categories) ?? [])])],
+                        room: [],
                       };
                       const axes: Array<{ key: keyof typeof detected; label: string }> = [
                         { key: "style", label: "Style" },

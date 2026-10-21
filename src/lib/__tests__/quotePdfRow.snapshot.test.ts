@@ -81,7 +81,7 @@ beforeAll(() => {
 
   if (typeof Blob.prototype.arrayBuffer !== "function") {
     (Blob.prototype as unknown as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer =
-      function () {
+      function (this: Blob) {
         return new Promise<ArrayBuffer>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as ArrayBuffer);

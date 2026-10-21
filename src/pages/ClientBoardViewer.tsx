@@ -113,7 +113,7 @@ const ClientBoardViewer = () => {
     if (!board || board.status !== "shared" || !token) return;
     const { error } = await supabase.rpc("update_item_approval_by_token", {
       _token: token,
-      _item_id: itemId,
+      _item_id: itemId ?? undefined,
       _approval_status: status,
     });
     if (!error) {
@@ -130,7 +130,7 @@ const ClientBoardViewer = () => {
       _content: commentText.trim(),
       _author_name: clientName || "Client",
       _is_client: true,
-      _item_id: itemId,
+      _item_id: itemId ?? undefined,
     });
     if (!error && data) {
       // Refetch comments to get the full row

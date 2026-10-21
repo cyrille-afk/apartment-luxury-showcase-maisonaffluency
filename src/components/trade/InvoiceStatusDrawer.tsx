@@ -87,6 +87,7 @@ export function InvoiceStatusDrawer({
       const timer = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(timer);
     }
+    return undefined;
   }, [open]);
 
   useEffect(() => {

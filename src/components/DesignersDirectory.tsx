@@ -1761,8 +1761,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   // Build designer→category mapping from curator picks
   const designerIdsByCategory = useMemo(() => {
-    const map: Record<string, Set<string>> = {};
-    const subMap: Record<string, Set<string>> = {};
+    const map: Record<string, Set<string | null>> = {};
+    const subMap: Record<string, Set<string | null>> = {};
     const pickSubCounts: Record<string, number> = {};
 
     for (const pick of curatorPicksData) {
@@ -1855,7 +1855,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     let base = topLevelItems;
 
     if (selectedCategory || selectedSubcategory) {
-      let matchingIds: Set<string> | null = null;
+      let matchingIds: Set<string | null> | null = null;
       if (selectedSubcategory) {
         matchingIds = designerIdsByCategory.bySubcategory[selectedSubcategory] || new Set();
       } else if (selectedCategory) {
