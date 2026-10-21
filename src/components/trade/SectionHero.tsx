@@ -144,7 +144,7 @@ const SectionHero = ({ section, title, subtitle, children }: SectionHeroProps) =
             className={`w-full h-full object-cover ${objectPositionClass}`}
             loading="eager"
             decoding="async"
-            {...{ fetchpriority: "high" }}
+            fetchPriority="high"
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/30 via-foreground/15 to-foreground/5" />

@@ -263,7 +263,7 @@ function DesignerGridCard({
           height={750}
           alt=""
           loading="eager"
-          {...(priority ? { fetchpriority: "high" as any } : {})}
+          {...(priority ? { fetchPriority: "high" as const } : {})}
           decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}

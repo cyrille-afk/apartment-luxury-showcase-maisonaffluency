@@ -35,7 +35,7 @@ function CatalogCardImages({ primary, alternate, alt, sizes, room }: Props) {
       {...cldResponsiveImg(alternate, { widths: [300, 400, 600, 800], sizes })}
       alt={`${alt} — alternate view`} aria-hidden="true" data-alternate-ready={ready}
       className={cn(imageClass, "pointer-events-none opacity-0", ready && "group-hover:opacity-100 group-focus-visible:opacity-100")}
-      loading="eager" {...{ fetchpriority: "low" }} decoding="async" />}
+      loading="eager" fetchPriority="low" decoding="async" />}
   </>;
 }
 export default memo(CatalogCardImages);
