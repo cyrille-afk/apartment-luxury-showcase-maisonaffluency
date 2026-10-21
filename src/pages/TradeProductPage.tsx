@@ -1283,7 +1283,7 @@ const TradeProductPage: React.FC = () => {
         // Mirror the piece into the global project inventory so the Spatial
         // Visualiser's Project Assets drawer can place it into the room.
         addToInventory({
-          id: String(tradeProductId || (product as any)?.id || product.title),
+          id: String(data.tradeProductId || (product as any)?.id || product.title),
           productName: product.title,
           brandName: designer.name,
           imageUrl: resolvedImageUrl,
@@ -1313,7 +1313,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, addToInventory, tradeProductId, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, addToInventory, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Preselect Base/Top/Size (dual-axis) or Material/Size (single-axis) from
   // URL query params — used when the concierge 3D drawer deep-links here so

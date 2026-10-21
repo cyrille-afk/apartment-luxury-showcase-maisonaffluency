@@ -658,6 +658,7 @@ const TradeVisualiser = () => {
 
   const focusRef = useRef<(() => [number, number] | null) | null>(null);
   const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
+  const { projectInventory } = useProjectInventory();
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);

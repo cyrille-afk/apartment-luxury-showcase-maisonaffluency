@@ -838,7 +838,8 @@ const App = () => {
               ) : (
                 <TradeCopilotProvider>
                 <VisualiserMaterialProvider>
-                <Routes>
+                <ProjectInventoryProvider>
+                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
                   <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
@@ -1095,6 +1096,7 @@ const App = () => {
                   ))}
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
+                </ProjectInventoryProvider>
                 </VisualiserMaterialProvider>
                 </TradeCopilotProvider>
               )}
