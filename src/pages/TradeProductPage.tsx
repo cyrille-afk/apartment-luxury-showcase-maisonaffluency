@@ -104,6 +104,7 @@ import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activePro
 import { addToCart } from "@/lib/cart";
 import NotFound from "@/pages/NotFound";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
+import { resolveSwatchImageEvent } from "@/lib/swatchPreviewState";
 
 
 const specIcon = (symbol: string, className = "") => (
@@ -2030,7 +2031,10 @@ const TradeProductPage: React.FC = () => {
     productId: product.id,
     productName: product.title,
     brandName: designerDisplay,
-    imageUrl: product.gallery_images?.[galleryActiveIndex] ?? product.image_url,
+    // Historical snapshot of the explicitly selected photo (lockedItem.savedImageField);
+    // hover previews never reach the locked Felix card.
+    imageUrl: permanentlySelectedImage || null,
+    savedImageField: permanentlySelectedImage || null,
     fabricLabel: selectedFabric?.name ?? null,
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
@@ -2201,6 +2205,8 @@ const TradeProductPage: React.FC = () => {
     const r3d = resolve3d();
     const asset: "3d" | number = workspaceAsset === "3d" && !r3d ? 0 : workspaceAsset;
     const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
+    const hoverVisibleIdx = hoveredPreviewImage ? visibleImages.indexOf(hoveredPreviewImage) : -1;
+    const stagePhotoIdx = hoverVisibleIdx >= 0 && !(asset === "3d" && viewer3dOpen) ? hoverVisibleIdx : photoIdx;
     const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
     const live3d = asset === "3d" && !!r3d && viewer3dOpen;
     // Configuration carried by a photo: pictured finishes + the mapped variant (size).
@@ -2268,7 +2274,7 @@ const TradeProductPage: React.FC = () => {
           </div>
           </div>
           <div className="relative flex aspect-[4/3] max-h-[calc(100vh-14rem)] min-w-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
-            {asset === "3d" && r3d ? (
+            {asset === "3d" && r3d && (viewer3dOpen || hoverVisibleIdx < 0) ? (
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
                   key={viewer3dKey}
@@ -2283,8 +2289,8 @@ const TradeProductPage: React.FC = () => {
                   onOpenedChange={setViewer3dOpen}
                 />
               </div>
-            ) : photoIdx !== null && visibleImages[photoIdx] ? (
-              <img src={visibleImages[photoIdx]} alt={`${product.title} — photo ${photoIdx + 1}`} className="h-full w-full object-contain" />
+            ) : stagePhotoIdx !== null && visibleImages[stagePhotoIdx] ? (
+              <img src={visibleImages[stagePhotoIdx]} alt={`${product.title} — photo ${stagePhotoIdx + 1}`} className="h-full w-full object-contain" />
             ) : null}
             {/* Fractional counter, lower-left — matches the public gallery. The 3D slide counts as 1. */}
             {(visibleImages.length + (r3d ? 1 : 0)) > 1 && (
