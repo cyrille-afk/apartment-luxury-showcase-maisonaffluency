@@ -5,6 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
+- Workspace inventory snapshots bind page identity and selected finish names/materials; both plan and 3D placement consume inventoryItemToPlaceable before createPlacedObject, without catalogue rematching — prevents sibling substitution and lost swatches.
 - Single and bulk 3D uploads capture primary source format and filenames before conversion and persist them on variant insert/replacement; historical NULL provenance stays unknown — a stored GLB extension cannot establish its source format.
 - Returning private-client greetings share device-local recognition and a server-only activity lookup gated by matching verified JWT email or a consumed purpose-specific email challenge; requests are bot-protected and activity-independent, verification is atomic, and responses expose only a boolean, never history or checkout-step bypass — enables cross-device welcomes without customer enumeration or login-session changes.
 - Cart tracking persists buyer classification in the stored basket payload via the shared classification helper, omitting unknown values on later pings — recognition must distinguish private clients from professionals without erasing earlier classification.
