@@ -2362,7 +2362,11 @@ const TradeProductPage: React.FC = () => {
 
         <div ref={masterRef} className="grid grid-cols-1 lg:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] lg:items-start gap-8 lg:gap-6 xl:gap-10 2xl:gap-14">
           {isLg ? (
-            <div className="min-w-0">
+            // Pinned media viewport: the whole left column (3D/photo stage,
+            // pictured finishes, Curator Notes, technical details) stays
+            // stuck to the viewport while the configuration drawer scrolls.
+            // Overflowing notes scroll inside the pinned column itself.
+            <div className="min-w-0 lg:sticky lg:top-24 lg:flex lg:h-[calc(100vh-12rem)] lg:flex-col lg:overflow-y-auto lg:[scrollbar-width:none]">
               {renderDesktopWorkspace()}
               <section aria-label="Curator notes and logistics" className="mt-7 border-t border-border/50 pt-5">
                 {renderLowerDetails()}
