@@ -13,7 +13,7 @@ const armchair: Omit<ProjectInventoryItem, "addedAt"> = {
 
 describe("exact workspace entity binding", () => {
   it("keeps Frenchmen Street Armchair identity, model and dimensions through storage, placement and movement", () => {
-    const restored = JSON.parse(JSON.stringify(upsertInventory([], armchair))) as ProjectInventoryItem[];
+    const restored = JSON.parse(JSON.stringify(upsertInventory([], { ...armchair, productName: "Frenchmen Street Armchair " }))) as ProjectInventoryItem[];
     const placed = createPlacedObject(inventoryItemToPlaceable(restored[0]), [1, 0, 2]);
     const moved = patchLayoutItem([placed], placed.instanceId, { x: 3, rotation: Math.PI / 4 })[0];
     expect(moved.productType).toBe("Frenchmen Street Armchair");

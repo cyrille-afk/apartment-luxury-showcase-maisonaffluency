@@ -44,7 +44,8 @@ const ProjectInventoryContext = createContext<ProjectInventoryContextValue | und
 const STORAGE_KEY = "ma:project-inventory-v1";
 
 export function upsertInventory(current: ProjectInventoryItem[], item: Omit<ProjectInventoryItem, "addedAt">): ProjectInventoryItem[] {
-  const snapshot = { ...item, productType: item.productName, finishes: [...item.finishes], addedAt: Date.now() };
+  const productName = item.productName.trim();
+  const snapshot = { ...item, productName, productType: productName, finishes: [...item.finishes], addedAt: Date.now() };
   const index = current.findIndex(entry => entry.id === item.id && entry.variantLabel === item.variantLabel);
   if (index < 0) return [...current, snapshot];
   return current.map((entry, i) => i === index ? { ...snapshot, addedAt: entry.addedAt } : entry);
