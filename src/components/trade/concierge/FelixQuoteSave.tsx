@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Save, FolderOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import type { Json } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -33,7 +34,12 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
     }), quoteId);
     pending.current = prepared;
     try {
-      const { error } = await supabase.rpc("save_felix_quote", { p_id: quoteId, p_studio_id: currentStudio?.id ?? null, p_project_id: projectId ?? null, p_cards: prepared as any });
+      // The SQL RPC accepts null studio/project IDs for personal, unassigned quotes.
+      const saveQuote = supabase.rpc.bind(supabase) as (
+        name: "save_felix_quote",
+        args: { p_id: string; p_studio_id: string | null; p_project_id: string | null; p_cards: Json },
+      ) => ReturnType<typeof supabase.rpc>;
+      const { error } = await saveQuote("save_felix_quote", { p_id: quoteId, p_studio_id: currentStudio?.id ?? null, p_project_id: projectId ?? null, p_cards: prepared as unknown as Json });
       if (error) throw error;
       onSaved?.(prepared); pending.current = null;
       toast.success("Felix quote saved");

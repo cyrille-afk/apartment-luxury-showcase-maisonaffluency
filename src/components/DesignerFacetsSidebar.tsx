@@ -220,7 +220,7 @@ const Section: React.FC<SectionProps> = ({ heading, paramKey, options, active, p
                   state={{ preserveScroll: true }}
                   rel={isActive ? undefined : "nofollow"}
                   aria-pressed={isActive}
-                  preventScrollReset
+                  {...{ preventScrollReset: true }}
                   onPointerDown={() => {
                     scrollYRef.current = window.scrollY;
                   }}

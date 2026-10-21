@@ -152,7 +152,7 @@ export default function StudioSaveButton({
         variant_label: chosen[0] || null,
         // Flags the item for the desktop bridge: gold dot + morning digest.
         saved_via: "mobile",
-        added_by: user.id,
+        added_by: user!.id,
       } as any);
       if (error) { toast.error("Couldn't save", { description: error.message }); return; }
 

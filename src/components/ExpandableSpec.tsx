@@ -298,7 +298,7 @@ export default function ExpandableSpec({
           return (
             <li key={i}>
               <button
-                ref={(el) => (optionRefs.current[i] = el)}
+                ref={(el) => { optionRefs.current[i] = el; }}
                 type="button"
                 role="option"
                 aria-selected={isSelected}
