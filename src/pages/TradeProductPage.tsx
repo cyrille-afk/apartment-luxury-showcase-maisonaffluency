@@ -704,6 +704,9 @@ const TradeProductPage: React.FC = () => {
   const [viewer3dOpen, setViewer3dOpen] = useState(false);
   const [viewer3dKey, setViewer3dKey] = useState(0);
   const [hoverPreviewIdx, setHoverPreviewIdx] = useState<number | null>(null);
+  // Swatch-grid hover pool: main viewport only, cleared on mouse leave.
+  // Never read by Felix, the inventory or the locked sidebar card.
+  const [hoveredPreviewIndex, setHoveredPreviewIndex] = useState<number | null>(null);
   const [fsStart, setFsStart] = useState<number | null>(null);
   const masterRef = useRef<HTMLDivElement | null>(null);
   const [masterHeight, setMasterHeight] = useState<number | null>(null);
@@ -1576,9 +1579,13 @@ const TradeProductPage: React.FC = () => {
     : finishGroupingPending && images.length > 1
     ? images.slice(0, 1)
     : images;
+  // Main viewport shows the hover preview when present, else the permanent pick.
+  const viewportImageIndex = hoveredPreviewIndex ?? galleryActiveIndex;
   const visibleActiveIndex = visibleImageIndices
-    ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
-    : galleryActiveIndex;
+    ? Math.max(0, visibleImageIndices.indexOf(viewportImageIndex ?? visibleImageIndices[0]))
+    : viewportImageIndex;
+  const hoveredPreviewImage: string | null = hoveredPreviewIndex !== null ? images[hoveredPreviewIndex] ?? null : null;
+  const permanentlySelectedImage: string = images[galleryActiveIndex ?? 0] || product?.image_url || "";
 
 
 
