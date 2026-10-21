@@ -71,7 +71,7 @@ export default function ProjectAssetsDrawer({
         ) : (
           <ul className="flex flex-col gap-1">
             {projectInventory.map((item) => {
-              const key = `${item.id}::${item.variantLabel ?? ""}`;
+              const key = item.instanceId;
               return (
                 <li
                   key={key}
@@ -133,7 +133,7 @@ export default function ProjectAssetsDrawer({
                       variant="ghost"
                       size="icon"
                       type="button"
-                      onClick={() => removeFromInventory(item.id, item.variantLabel)}
+                      onClick={() => removeFromInventory(item.instanceId)}
                       aria-label={`Remove ${item.productName} from project assets`}
                       className="flex h-6 w-8 items-center justify-center text-muted-foreground/60 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                     >

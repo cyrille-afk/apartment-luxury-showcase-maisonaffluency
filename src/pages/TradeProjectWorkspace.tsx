@@ -76,7 +76,7 @@ function WorkspacePanels() {
   };
 
   const handlePlanDrop = (key: string, x: number, y: number) => {
-    const item = projectInventory.find((entry) => `${entry.id}::${entry.variantLabel ?? ""}` === key);
+    const item = projectInventory.find((entry) => entry.instanceId === key);
     if (item) placeInventoryItem(item, [x, y]);
   };
 

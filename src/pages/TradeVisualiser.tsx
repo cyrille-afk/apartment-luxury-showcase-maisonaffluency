@@ -956,7 +956,7 @@ const TradeVisualiser = () => {
           const key = event.dataTransfer.getData(PROJECT_ASSET_DRAG_TYPE);
           if (!key) return;
           event.preventDefault();
-          const item = projectInventory.find((entry) => `${entry.id}::${entry.variantLabel ?? ""}` === key);
+          const item = projectInventory.find((entry) => entry.instanceId === key);
           if (item) placeInventoryAsset(item);
         }}
       >
