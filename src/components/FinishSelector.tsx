@@ -106,7 +106,7 @@ interface FinishSelectorProps {
    * mapped image indices. Receives the 1-based gallery indices the product
    * page should jump the hero gallery to. Null clears the override.
    */
-  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; restore?: boolean; swatchName?: string; jumpOnly?: boolean }) => void;
   /**
    * Fires once the per-finish gallery grouping has been resolved for this
    * product (either a default finish group was applied, or the product has no
@@ -407,6 +407,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // would hide the thumbnail column entirely.
     onSwatchImagesChange?.(locked?.indices ?? null, {
       committed: false,
+      restore: true,
       swatchName: locked?.name,
     });
 
