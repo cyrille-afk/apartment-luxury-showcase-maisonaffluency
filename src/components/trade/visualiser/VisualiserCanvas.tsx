@@ -32,7 +32,7 @@ import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentati
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
 import ProjectArchitecture from "./ProjectArchitecture";
-import { columnObstacles, clampToRoom, type PlanColumn } from "@/lib/activeProjectLayout";
+import { columnObstacles, type PlanColumn } from "@/lib/activeProjectLayout";
 import ArchitecturalDownlights from "./ArchitecturalDownlights";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
