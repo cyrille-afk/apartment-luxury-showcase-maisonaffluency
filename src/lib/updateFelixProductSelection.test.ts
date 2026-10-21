@@ -21,4 +21,9 @@ describe("Felix product selection updates", () => {
     expect(result[0]).toBe(timeline[0]);
     expect(result[1]).toBe(timeline[1]);
   });
+  it("keeps the locked photo when the page photo changes", () => {
+    const locked = { ...ava, imageUrl: "photo-2.jpg", savedImageField: "photo-2.jpg" };
+    const result = updateFelixProductSelection([{ kind: "proactive_tearsheet", data: locked }], { ...ava, imageUrl: "tobacco.jpg", savedImageField: "tobacco.jpg" });
+    expect(result[0].data).toMatchObject({ imageUrl: "photo-2.jpg", savedImageField: "photo-2.jpg" });
+  });
 });
