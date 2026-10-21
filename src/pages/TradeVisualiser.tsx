@@ -57,6 +57,8 @@ import { VisualiserSelectionProvider } from "@/components/trade/visualiser/Visua
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
 import ProjectSnapshots from "@/components/trade/visualiser/ProjectSnapshots";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
+import ProjectAssetsDrawer, { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade/visualiser/ProjectAssetsDrawer";
+import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 import "@/components/trade/visualiser/visualiserToolbar.css";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
@@ -656,6 +658,7 @@ const TradeVisualiser = () => {
 
   const focusRef = useRef<(() => [number, number] | null) | null>(null);
   const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
+  const { projectInventory } = useProjectInventory();
   const addObject = (product: CatalogueProduct) => {
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
@@ -692,6 +695,22 @@ const TradeVisualiser = () => {
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
+  };
+
+  // Places a Project Assets drawer item (added via "Add to Co-Pilot Workspace"
+  // on a product page) into the room through the same placement pipeline as
+  // the catalogue drawer.
+  const placeInventoryAsset = (item: ProjectInventoryItem) => {
+    addObject({
+      id: item.id,
+      product_name: item.productName,
+      brand_name: item.brandName,
+      image_url: item.imageUrl,
+      category: "",
+      dimensions: item.dimensions,
+      glb_url: item.glbUrl,
+      source_pick_id: null,
+    });
   };
 
   const transformObject = useCallback((
@@ -936,7 +955,23 @@ const TradeVisualiser = () => {
           {checkpointStatus.kind !== "restored" && <div className={restoredInfo ? "text-muted-foreground" : undefined}>{checkpointStatusText(checkpointStatus)}</div>}
         </div>
       )}
-      <div ref={canvasWrapRef} className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}>
+      <div
+        ref={canvasWrapRef}
+        className={cn("absolute inset-0 z-10", showPhotorealGhost && "opacity-75")}
+        onDragOver={(event) => {
+          if (event.dataTransfer.types.includes(PROJECT_ASSET_DRAG_TYPE)) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={(event) => {
+          const key = event.dataTransfer.getData(PROJECT_ASSET_DRAG_TYPE);
+          if (!key) return;
+          event.preventDefault();
+          const item = projectInventory.find((entry) => `${entry.id}::${entry.variantLabel ?? ""}` === key);
+          if (item) placeInventoryAsset(item);
+        }}
+      >
         {!initialRoomReady && !sceneFailed && <div role="status" data-room-loading className="absolute inset-0 z-20 flex items-center justify-center bg-visualiser-canvas"><span className="text-xs text-muted-foreground">Preparing your room…</span></div>}
         {sceneFailed && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-background/90">
           <p className="text-sm text-muted-foreground">The 3D view stopped. Your furniture layout is unchanged.</p>
@@ -1140,6 +1175,9 @@ const TradeVisualiser = () => {
           )}
         </>)}
       </VisualiserInspector>
+
+      {/* Project Assets — pieces added from product pages, placeable into the layout */}
+      {activeProject?.view === "axonometric" && <ProjectAssetsDrawer onPlace={placeInventoryAsset} />}
 
       {/* Sourcing tray */}
       {trayOpen && (

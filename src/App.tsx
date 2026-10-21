@@ -16,6 +16,7 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
+import { ProjectInventoryProvider } from "@/contexts/ProjectInventoryContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ClientCurrencyDetection from "@/components/ClientCurrencyDetection";
 import GoogleOAuthReturnRecovery from "@/components/GoogleOAuthReturnRecovery";
@@ -837,7 +838,8 @@ const App = () => {
               ) : (
                 <TradeCopilotProvider>
                 <VisualiserMaterialProvider>
-                <Routes>
+                <ProjectInventoryProvider>
+                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products-category/:categorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
                   <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
@@ -1094,6 +1096,7 @@ const App = () => {
                   ))}
                   <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
                 </Routes>
+                </ProjectInventoryProvider>
                 </VisualiserMaterialProvider>
                 </TradeCopilotProvider>
               )}
