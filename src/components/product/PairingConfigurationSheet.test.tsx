@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import PairingConfigurationSheet from './PairingConfigurationSheet';
 import type { PairingProduct } from '@/lib/curatedPairings';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@/lib/router-compat';
 
 const mocks = vi.hoisted(() => ({ add: vi.fn() }));
 vi.mock('@/lib/cart', () => ({ addToCart: mocks.add }));

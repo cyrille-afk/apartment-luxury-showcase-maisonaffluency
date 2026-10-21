@@ -1036,7 +1036,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         {pairingExplanation ? (
           <Tooltip delayDuration={150}>
             <TooltipTrigger asChild>
-              <div tabIndex={0} aria-label={`${f.name}. ${pairingExplanation}`} className="outline-none focus-visible:ring-1 focus-visible:ring-foreground">
+              <div tabIndex={0} aria-label={`${f.name}. ${pairingExplanation}`} className="outline-hidden focus-visible:ring-1 focus-visible:ring-foreground">
                 {tileButton}
               </div>
             </TooltipTrigger>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Check, X, ExternalLink, ClipboardList, Minus, Plus, FolderOpen, Repeat } from "lucide-react";
 import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { commitProposal, type FfeProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";

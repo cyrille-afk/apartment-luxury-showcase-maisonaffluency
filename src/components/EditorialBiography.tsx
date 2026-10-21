@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Play, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import { captionFromUrl } from "@/lib/sanitizeFilenameCaption";

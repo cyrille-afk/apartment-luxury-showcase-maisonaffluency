@@ -9,7 +9,7 @@ import CameraPathPreview from "@/components/trade/visualiser/CameraPathPreview";
 import CinematicCameraRig from "@/components/trade/visualiser/CinematicCameraRig";
 import { CINEMATIC_ENTRY_SECONDS, WALKTHROUGH_SPEEDS, playbackTimeLabel, steppedPlaybackSpeed, walkthroughShortcut } from "@/lib/cinematicPlayback";
 import { buildCustomCinematicPath, type CustomPathNode } from "@/lib/customCameraPaths";
-import { useParams } from "react-router-dom";
+import { useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";

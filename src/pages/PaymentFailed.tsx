@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { AlertCircle } from "lucide-react";
 import Navigation from "@/components/Navigation";

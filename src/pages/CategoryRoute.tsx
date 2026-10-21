@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate } from "@/lib/router-compat";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";

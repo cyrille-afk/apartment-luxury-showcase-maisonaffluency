@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "@/lib/router-compat";
 import { AlertTriangle, Check, CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";

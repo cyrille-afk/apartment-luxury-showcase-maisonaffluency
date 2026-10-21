@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -468,7 +468,7 @@ const TradeAdminOnboarding = () => {
 
 // ---------------------------------------------------------------------------
 const inputClass =
-  "w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
+  "w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="mb-10 pb-10 border-b border-border last:border-b-0">

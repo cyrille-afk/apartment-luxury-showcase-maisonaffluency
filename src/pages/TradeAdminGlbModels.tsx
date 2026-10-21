@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter, Upload, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -218,7 +218,7 @@ const TradeAdminGlbModels: React.FC = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search product or brand…"
-                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40"
+                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40"
                 />
               </div>
 
@@ -304,7 +304,7 @@ const TradeAdminGlbModels: React.FC = () => {
                   value={managerSearch}
                   onChange={(e) => setManagerSearch(e.target.value)}
                   placeholder="Filter by product name…"
-                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40"
+                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40"
                 />
               </div>
               <div className="relative min-w-[220px]">
@@ -312,7 +312,7 @@ const TradeAdminGlbModels: React.FC = () => {
                 <select
                   value={managerBrand}
                   onChange={(e) => setManagerBrand(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40 appearance-none"
+                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40 appearance-none"
                 >
                   <option value="">All brands</option>
                   {Array.from(new Set(withGlb.map((r) => r.brand_name).filter(Boolean) as string[]))
@@ -326,7 +326,7 @@ const TradeAdminGlbModels: React.FC = () => {
                 <select
                   value={managerSort}
                   onChange={(e) => setManagerSort(e.target.value as SortKey)}
-                  className="w-full pl-3 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40 appearance-none"
+                  className="w-full pl-3 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-hidden focus:border-foreground/40 appearance-none"
                   aria-label="Sort GLB library"
                 >
                   <option value="updated_desc">Newest uploads first</option>

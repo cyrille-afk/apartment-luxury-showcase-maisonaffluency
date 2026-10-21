@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { cn } from "@/lib/utils";
 
 export type Audience = "trade" | "retail";
@@ -77,7 +77,7 @@ export default function TradeFirstCta({
   }
 
   const tabBase =
-    "flex-1 py-2.5 font-body text-[10px] uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+    "flex-1 py-2.5 font-body text-[10px] uppercase tracking-[0.2em] transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring";
 
   return (
     <div className={cn("flex flex-col gap-5", className)}>

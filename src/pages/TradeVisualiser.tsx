@@ -24,7 +24,7 @@ import { formatGap, nearestClearance } from "@/lib/layoutGuides";
 import { createPlacedObject, inventoryItemToPlaceable, type PlaceableProduct } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { finishTargetsFromParts, getPartMaterial, hasAnyFinish, materialFitsTarget, targetLabel, withPartMaterial, type FinishPart, type FinishTarget } from "@/lib/visualiserFinishTargets";
 import { findProductSchema, schemaFits, schemaLabels, schemaTargets } from "@/lib/visualiserProductSchema";
 import PartMappingControl from "@/components/trade/visualiser/PartMappingControl";
@@ -1188,7 +1188,7 @@ const TradeVisualiser = () => {
               onChange={(event) => setMaterialSearch(event.target.value)}
               placeholder="Search finishes"
               aria-label="Search finishes"
-              className="mt-3 w-full border-b border-foreground/10 bg-transparent pb-2 text-xs outline-none placeholder:text-muted-foreground"
+              className="mt-3 w-full border-b border-foreground/10 bg-transparent pb-2 text-xs outline-hidden placeholder:text-muted-foreground"
             />
             <div className="mt-3 flex max-h-28 gap-3 overflow-x-auto pb-2">
               {filteredMaterials.slice(0, 24).map((material) => (
@@ -1637,19 +1637,19 @@ const TradeVisualiser = () => {
                 </DropdownMenu>
                 <label className={cn(toolbarButton, "gap-1")} title="Resolution used while the camera is moving">
                   Preview
-                  <select aria-label="Preview quality" className="bg-transparent outline-none" value={ptQuality.previewScale} onChange={(e) => setPtQuality({ previewScale: Number(e.target.value) })}>
+                  <select aria-label="Preview quality" className="bg-transparent outline-hidden" value={ptQuality.previewScale} onChange={(e) => setPtQuality({ previewScale: Number(e.target.value) })}>
                     <option value={0.15}>Draft</option><option value={0.25}>Low</option><option value={0.5}>Medium</option><option value={1}>Full</option>
                   </select>
                 </label>
                 <label className={cn(toolbarButton, "gap-1")} title="Stop refining after this many samples">
                   Samples
-                  <select aria-label="Final sample count" className="bg-transparent outline-none" value={ptQuality.maxSamples} onChange={(e) => { setPtSamples(0); setPtQuality({ maxSamples: Number(e.target.value) }); }}>
+                  <select aria-label="Final sample count" className="bg-transparent outline-hidden" value={ptQuality.maxSamples} onChange={(e) => { setPtSamples(0); setPtQuality({ maxSamples: Number(e.target.value) }); }}>
                     <option value={64}>64</option><option value={256}>256</option><option value={512}>512</option><option value={1024}>1024</option><option value={2048}>2048</option><option value={0}>Unlimited</option>
                   </select>
                 </label>
                 <label className={cn(toolbarButton, "gap-1")} title="Final render resolution relative to the screen">
                   Resolution
-                  <select aria-label="Render resolution" className="bg-transparent outline-none" value={ptQuality.renderScale} onChange={(e) => { setPtSamples(0); setPtQuality({ renderScale: Number(e.target.value) }); }}>
+                  <select aria-label="Render resolution" className="bg-transparent outline-hidden" value={ptQuality.renderScale} onChange={(e) => { setPtSamples(0); setPtQuality({ renderScale: Number(e.target.value) }); }}>
                     <option value={0.5}>50%</option><option value={0.75}>75%</option><option value={1}>100%</option><option value={1.5}>150%</option><option value={2}>200%</option>
                   </select>
                 </label>

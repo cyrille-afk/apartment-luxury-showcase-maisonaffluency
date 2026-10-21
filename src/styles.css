@@ -1,0 +1,1190 @@
+@import "tailwindcss";
+@config "../tailwind.legacy.config.ts";
+
+/* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button { border-color: hsl(var(--border)); }
+}
+
+/* Presentation guard: applied synchronously at the document root, before
+   React paints, and remains in force for suspended routes and exit animations. */
+html[data-client-view="active"] [data-trade-sensitive] {
+  display: none !important;
+  visibility: hidden !important;
+}
+html[data-client-view="active"] [data-client-placeholder] {
+  display: block !important;
+}
+[data-client-placeholder] { display: none; }
+
+/* Lift only the Step 6 header above the tour veil. The toggle remains the
+   sole active presentation control while the rest of the page stays dimmed. */
+html[data-felix-tour-step="client-safe-presentations"] .trade-editorial-header {
+  z-index: 133;
+}
+
+/* Trade routes never mount or expose the third-party floating WhatsApp launcher.
+   The data attribute is also applied to launchers injected after React mounts. */
+html.hide-whatsapp-widget #whatsapp-floating-widget,
+html.hide-whatsapp-widget [id*="whatsapp-widget" i],
+html.hide-whatsapp-widget [class*="whatsapp-widget" i],
+html.hide-whatsapp-widget [data-widget*="whatsapp" i],
+html.hide-whatsapp-widget [data-trade-floating-whatsapp="hidden"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+.spec-sheet-workspace {
+  --background: 60 11.111% 98.235%;
+  --foreground: 0 0% 6.667%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 6.667%;
+  --muted: 60 5% 94%;
+  --muted-foreground: 0 0% 36%;
+  --border: 0 0% 6.667%;
+  --input: 0 0% 6.667%;
+  --primary: 0 0% 6.667%;
+  --primary-foreground: 60 11.111% 98.235%;
+  --accent: 60 5% 94%;
+  --accent-foreground: 0 0% 6.667%;
+  --ring: 0 0% 6.667%;
+  --shadow-document: 0 12px 40px hsl(0 0% 6.667% / 0.08), 0 1px 4px hsl(0 0% 6.667% / 0.08);
+}
+.spec-sheet-document { box-shadow: var(--shadow-document); }
+.spec-sheet-print-frame { position: fixed; width: 1px; height: 1px; left: -10000px; top: 0; border: 0; }
+
+@layer base {
+  :root {
+    --background: 32 20% 97%;
+    --foreground: 168 10% 8%;
+    --crimson-black: 350 32% 7%;
+    /* Editorial trade-gallery page tone (#FBF9F6); cards stay pure white on top. */
+    --trade-gallery-bg: 36 39% 97%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 168 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 168 15% 15%;
+
+    --primary: 168 45% 30%;
+    --primary-foreground: 32 20% 97%;
+
+    --secondary: 15 70% 58%;
+    --secondary-foreground: 32 20% 97%;
+
+    --muted: 32 15% 90%;
+    --muted-foreground: 168 10% 38%;
+
+    --accent: 36 40% 65%;
+    --accent-foreground: 168 15% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 32 15% 88%;
+    --input: 32 15% 88%;
+    --ring: 168 45% 30%;
+
+    --radius: 0px;
+
+    /* Micro-radius for functional controls: enough to read as "tappable"
+       without softening the editorial, sharp-cornered layout language. */
+    --radius-control: 3px;
+    /* Native-feeling overlay sheets (bottom trays, toasts). */
+    --radius-sheet: 12px;
+
+    
+    /* Custom Design Tokens */
+    --jade: 168 45% 30%;
+    --jade-light: 168 35% 50%;
+    --jade-soft: 168 25% 85%;
+    --terracotta: 15 70% 58%;
+    --terracotta-light: 15 60% 70%;
+    --gold: 36 55% 50%;
+    /* Brighter bronze-gold used for text over dark hero imagery */
+    --gold-bright: 38 70% 72%;
+    /* One-Click Moodboard palette: off-white editorial canvas + deep teal actions */
+    --moodboard-cream: 60 11% 97.5%;  /* #FAF9F6 */
+    --moodboard-teal: 180 63% 18%;    /* #114D4D */
+    --moodboard-teal-foreground: 60 11% 97.5%;
+    --moodboard-ink: 0 0% 6.7%;       /* #111111 */
+    --cream: 32 20% 97%;
+    --canvas: 0 0% 97.6%;
+    --product-canvas: 42 33% 94%;
+    --collection-card-canvas: 60 20% 98%;
+    --alternative-frame: 40 18% 95%;
+    --edition-foreground: 0 0% 0%;
+    --visualiser-canvas: 40 20% 97.1%;
+    --visual-evidence: 60 11% 98.2%;
+    --chip-affinity: 0 0% 10.2%;
+    --chip-affinity-foreground: 60 4% 96%;
+    --chip-material: 60 15% 94.9%;
+    --chip-material-foreground: 0 0% 15%;
+    --chip-material-border: 60 8% 88.8%;
+    --suggestion-material: 60 12% 78%;
+    --product-canvas-dark: 0 0% 10.2%;
+    --warm-gray: 32 10% 50%;
+    --spec-dimension-icon: 207 24% 68%;
+    --lookbook-bg: 0 0% 4%;
+    --lookbook-foreground: 32 20% 97%;
+    --lookbook-muted: 30 8% 72%;
+    --lookbook-border: 32 10% 82% / 0.28;
+    --lookbook-overlay: linear-gradient(180deg, hsl(0 0% 0% / 0.42) 0%, hsl(0 0% 0% / 0.08) 42%, hsl(0 0% 0% / 0.62) 100%);
+
+    /* Brand / third-party colors */
+    --whatsapp: 142 70% 49%;
+    --pdf-red: 0 68% 51%;
+    --success: 142 60% 40%;
+    --info: 210 60% 50%;
+    --warning: 38 92% 50%;
+
+    /* Gradients */
+    --gradient-jade: linear-gradient(135deg, hsl(168 45% 30%) 0%, hsl(168 35% 50%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(32 20% 97%) 0%, hsl(32 15% 92%) 100%);
+    --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-elegant: 0 10px 40px rgba(0, 0, 0, 0.12);
+    
+    /* Typography */
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+    
+    /* Transitions */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-quick: all 0.2s ease;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 168 15% 12%;
+    --foreground: 32 20% 95%;
+    --trade-gallery-bg: 168 15% 10%;
+
+    --card: 168 15% 15%;
+    --card-foreground: 32 20% 95%;
+
+    --popover: 168 15% 15%;
+    --popover-foreground: 32 20% 95%;
+
+    --primary: 168 35% 50%;
+    --primary-foreground: 168 15% 12%;
+
+    --secondary: 15 60% 50%;
+    --secondary-foreground: 32 20% 95%;
+
+    --muted: 168 10% 20%;
+    --muted-foreground: 168 5% 65%;
+
+    --accent: 36 38% 60%;
+    --accent-foreground: 168 15% 12%;
+
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 32 20% 95%;
+
+    --border: 168 10% 25%;
+    --input: 168 10% 25%;
+    --ring: 168 35% 50%;
+    /* Custom Design Tokens – dark overrides */
+    --jade: 168 40% 45%;
+    --jade-light: 168 35% 58%;
+    --jade-soft: 168 20% 25%;
+    --terracotta: 15 65% 55%;
+    --terracotta-light: 15 55% 65%;
+    --gold: 36 38% 60%;
+    --gold-bright: 38 62% 76%;
+    --cream: 32 15% 90%;
+    --warm-gray: 32 8% 60%;
+    --product-canvas: 34 18% 18%;
+    --collection-card-canvas: 34 18% 18%;
+    --alternative-frame: 34 18% 22%;
+    --edition-foreground: 0 0% 0%;
+    --visualiser-canvas: 168 12% 14%;
+    --visual-evidence: 168 10% 18%;
+    --chip-affinity: 0 0% 10.2%;
+    --chip-affinity-foreground: 60 4% 96%;
+    --chip-material: 60 15% 94.9%;
+    --chip-material-foreground: 0 0% 15%;
+    --chip-material-border: 60 8% 88.8%;
+    --suggestion-material: 60 10% 70%;
+    --spec-dimension-icon: 207 24% 68%;
+    --lookbook-bg: 0 0% 4%;
+    --lookbook-foreground: 32 20% 97%;
+    --lookbook-muted: 30 8% 72%;
+    --lookbook-border: 32 10% 82% / 0.28;
+    --lookbook-overlay: linear-gradient(180deg, hsl(0 0% 0% / 0.42) 0%, hsl(0 0% 0% / 0.08) 42%, hsl(0 0% 0% / 0.62) 100%);
+
+    --gradient-jade: linear-gradient(135deg, hsl(168 40% 45%) 0%, hsl(168 35% 58%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(168 15% 12%) 0%, hsl(168 12% 16%) 100%);
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  html[data-felix-tour-step="collection"] [data-felix-hotspot] {
+    display: flex;
+  }
+  .text-crimson-black {
+    color: hsl(var(--crimson-black));
+  }
+
+  .text-gradient-jade {
+    @apply bg-gradient-to-r from-[hsl(var(--jade))] to-[hsl(var(--jade-light))] bg-clip-text text-transparent;
+  }
+  
+  .instagram-gradient {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  }
+  
+  .instagram-gradient-text {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .image-overlay {
+    position: relative;
+  }
+
+  .image-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-overlay);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .image-overlay:hover::after {
+    opacity: 1;
+  }
+
+  /* Elegant underline grow from center */
+  .link-underline-grow {
+    position: relative;
+    display: inline-block;
+  }
+
+  .link-underline-grow::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .group:hover .link-underline-grow::after,
+  .link-underline-grow:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Trade Portal — flat editorial workspace. Presentation Mode (data-presentation)
+   opts out so client-facing pages keep the public site's palette, type and radii. */
+.trade-portal-shell:not([data-presentation]) {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10.2%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10.2%;
+  --muted: 40 20% 97.1%;
+  --muted-foreground: 0 0% 40%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 10.2%;
+  --sidebar-accent: 40 20% 97.1%;
+  --sidebar-accent-foreground: 0 0% 10.2%;
+  --sidebar-border: 0 0% 89.8%;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: 'Inter', sans-serif;
+}
+
+.trade-portal-shell:not([data-presentation]) .font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.trade-portal-shell:not([data-presentation]) .font-display {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 0;
+}
+
+.trade-portal-shell:not([data-presentation]) [class*="shadow"] {
+  box-shadow: none;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main [class*="rounded"],
+.trade-portal-shell:not([data-presentation]) .trade-editorial-header [class*="rounded"],
+.trade-editorial-sidebar [class*="rounded"] {
+  border-radius: 0;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main .material-library-swatch {
+  border-radius: 9999px;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main .gallery-filter-pill {
+  border-radius: 9999px;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main :where(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Curator Notes lead header keeps its bold weight inside the trade shell */
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main h3.font-bold {
+  font-weight: 700;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-micro-label {
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-card-description {
+  color: hsl(var(--muted-foreground) / 0.72);
+}
+
+.trade-portal-shell:not([data-presentation]) .trade-editorial-main > * {
+  animation: tradeEditorialReveal 500ms ease-out both;
+}
+
+.trade-editorial-sidebar [data-sidebar="menu-button"] {
+  border-radius: 0;
+}
+
+/* Nav labels wrap to two lines instead of truncating into an ellipsis */
+.trade-editorial-sidebar [data-sidebar="menu-button"] > span:last-child {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+
+.trade-editorial-sidebar [data-sidebar="menu-button"]:hover,
+.trade-editorial-sidebar [data-sidebar="menu-button"][data-active="true"] {
+  background: transparent;
+}
+
+@keyframes tradeEditorialReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trade-portal-shell:not([data-presentation]) .trade-editorial-main > * { animation: none; }
+}
+
+/* Hide scrollbar for horizontal swipe strips */
+.scrollbar-hide,
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hero CSS-only entrance animations — no JS dependency */
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-fade-in           { animation: heroFadeIn 0.8s ease-out 0.2s both; }
+.hero-fade-in-delayed-1 { animation: heroFadeIn 0.6s ease-out 0.4s both; }
+.hero-fade-in-delayed-2 { animation: heroFadeIn 0.8s ease-out 0.6s both; }
+.hero-fade-in-delayed-3 { animation: heroFadeIn 0.6s ease-out 0.8s both; }
+.hero-fade-in-delayed-4 { animation: heroFadeIn 0.6s ease-out 1.0s both; }
+.hero-fade-in-delayed-5 { animation: heroFadeIn 0.6s ease-out 1.2s both; }
+
+/* Mobile LCP optimization: paint hero text immediately */
+@media (max-width: 767px) {
+  .hero-fade-in,
+  .hero-fade-in-delayed-1,
+  .hero-fade-in-delayed-2,
+  .hero-fade-in-delayed-3,
+  .hero-fade-in-delayed-4,
+  .hero-fade-in-delayed-5 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Desktop product pages retain normal document scrolling. */
+html.product-detail-root,
+html.product-detail-root body,
+html.product-detail-root #root {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html.product-detail-root,
+html.product-detail-root body,
+html.product-detail-root #root,
+html.product-detail-root .product-page-root {
+  min-height: 100dvh;
+}
+
+/* iOS gets one dynamic-height shell and one internal scroller. The commerce
+   panel remains an in-flow sticky sibling, avoiding Safari's fixed-layer
+   compositing beneath its collapsing toolbar. */
+@media (max-width: 767px) {
+  html.product-detail-root,
+  html.product-detail-root body,
+  html.product-detail-root #root,
+  html.product-detail-root .product-configurator-canvas,
+  html.product-detail-root .product-page-root {
+    width: 100%;
+    height: 100dvh !important;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  html.product-detail-root .product-page-scroll {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .mobile-product-commerce-dock {
+    position: sticky !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 50 !important;
+    transform: none !important;
+    flex: none;
+  }
+  .mobile-product-commerce-dock-fixed {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    z-index: 9999 !important;
+  }
+}
+
+@media (max-width: 339px) {
+  .mobile-product-commerce-summary {
+    display: none !important;
+  }
+
+  .mobile-product-commerce-action {
+    width: 100% !important;
+  }
+}
+
+/* The public product surface remains light, while its outer document canvas is
+   dark so iOS elastic scrolling and retracting browser chrome reveal no white gap. */
+html.public-product-canvas,
+html.public-product-canvas body,
+html.public-product-canvas #root,
+html.public-product-canvas .product-configurator-canvas {
+  background-color: hsl(var(--product-canvas-dark));
+}
+
+html.public-product-canvas .product-page-root,
+html.public-product-canvas .product-page-root > main {
+  background-color: hsl(var(--background));
+}
+
+#product-root-overlays {
+  position: static;
+  overflow: visible;
+  transform: none;
+  contain: none;
+  isolation: auto;
+}
+
+/* Print styles for quote PDF export */
+@media print {
+  /* Hide all navigation, sidebar, and UI chrome */
+  nav, header, footer,
+  [data-trade-sidebar],
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Remove layout constraints so the quote fills the page */
+  body, html {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Reset the trade layout wrapper */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Clean page margins */
+  @page {
+    margin: 1.5cm 2cm;
+    size: A4;
+  }
+
+  /* Prevent page breaks inside items */
+  .divide-y > div {
+    break-inside: avoid;
+  }
+}
+
+/* Journal article editorial styling */
+.journal-article h2 {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-top: 2rem;
+  margin-bottom: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+@media (min-width: 768px) {
+  .journal-article h2 {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    padding-top: 3rem;
+  }
+}
+
+.journal-article h2:first-child {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.journal-article blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  margin: 1.5rem 0;
+  padding: 1rem 0 1rem 1.25rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground) / 0.65);
+}
+
+@media (min-width: 768px) {
+  .journal-article blockquote {
+    margin: 3rem 0;
+    padding: 1.5rem 0 1.5rem 2rem;
+    font-size: 1.25rem;
+  }
+}
+
+.journal-article blockquote p {
+  margin: 0;
+}
+
+.journal-article figure {
+  margin: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  .journal-article figure {
+    margin: 3.5rem 0;
+  }
+}
+
+.journal-article p.journal-subheader > strong {
+  display: block;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .journal-article p.journal-subheader > strong {
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Quick Tour: spotlight the active step's target tile/section */
+body[data-tour-step="designers"] [data-tour-target="designers"],
+body[data-tour-step="designers"] [data-tour-target="resources"],
+body[data-tour-step="brief"] [data-tour-target="brief"],
+body[data-tour-step="tools"] [data-tour-target="tools"],
+body[data-tour-step="procurement"] [data-tour-target="procurement"] {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px hsl(var(--accent) / 0.18), 0 12px 30px -10px hsl(var(--accent) / 0.45);
+  border-radius: 0.5rem;
+  animation: tour-pulse 1.8s ease-in-out infinite;
+  position: relative;
+  z-index: 110;
+}
+
+@keyframes tour-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px hsl(var(--accent) / 0.18), 0 12px 30px -10px hsl(var(--accent) / 0.45); }
+  50%      { box-shadow: 0 0 0 10px hsl(var(--accent) / 0.10), 0 12px 30px -10px hsl(var(--accent) / 0.45); }
+}
+
+/* ─────────────────────────────────────────────
+   Consistent header offset for in-page anchors.
+   Mobile nav is h-24 (96px); desktop nav stack
+   is taller. Use a single utility so every
+   gallery / collectibles / directory section
+   clears the fixed header during scroll.
+   ───────────────────────────────────────────── */
+:root {
+  --header-h: 6.5rem;   /* mobile: 96px nav + small breathing room */
+  --mobile-nav-height: calc(5rem + env(safe-area-inset-top, 0px));
+}
+@media (min-width: 390px) and (max-width: 767px) {
+  :root {
+    --mobile-nav-height: calc(6rem + env(safe-area-inset-top, 0px));
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 7rem; /* desktop: locked 64px brand row + 48px primary row */
+  }
+}
+.scroll-header-offset {
+  scroll-margin-top: var(--header-h);
+}
+
+/* ─────────────────────────────────────────────
+   iOS standalone (PWA) safe-area handling.
+   When the app runs from the Home Screen, the
+   status-bar inset (env(safe-area-inset-top))
+   is non-zero and the fixed nav grows by that
+   amount. Page content uses pt-24/28/32 to
+   clear the nav — extend those on mobile to
+   include the safe-area inset so headlines and
+   intro copy are no longer hidden behind the
+   notch / dynamic island.
+   ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .pt-24 { padding-top: calc(6rem + env(safe-area-inset-top)); }
+  .pt-28 { padding-top: calc(7rem + env(safe-area-inset-top)); }
+  .pt-32 { padding-top: calc(8rem + env(safe-area-inset-top)); }
+}
+
+/* Extend scroll anchor offset to include safe-area inset on mobile. */
+@media (max-width: 767px) {
+  :root { --header-h: calc(6.5rem + env(safe-area-inset-top)); }
+}
+
+/* ─────────────────────────────────────────────
+   PWA standalone sizing & native-feel rules.
+   When launched from the Home Screen on iOS or
+   Android, the app runs without browser chrome.
+   These rules:
+   - lock viewport height to the dynamic viewport
+     so the URL bar collapse doesn't reflow,
+   - apply horizontal safe-area insets (landscape
+     notch / Dynamic Island),
+   - prevent rubber-band overscroll,
+   - prevent iOS auto-zoom on form inputs (font
+     size must be ≥16px),
+   - disable tap highlight for native feel.
+   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────
+   Accessibility: pinch-zoom + font sizing.
+   - Honor user/system font scaling everywhere
+     (text-size-adjust: 100%) so iOS/Android
+     don't silently up- or down-scale text in
+     landscape or standalone.
+   - touch-action: manipulation keeps double-tap
+     zoom on content while removing the 300ms
+     click delay. We never set touch-action:none
+     globally — pinch-zoom must remain available.
+   - Minimum readable body size of 16px so the
+     OS does not trigger auto-zoom on focus and
+     so users with default accessibility settings
+     can read without manual zoom.
+   ───────────────────────────────────────────── */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  /* Keep pinch-zoom enabled; only suppress double-tap delay. */
+  touch-action: manipulation;
+  /* Lock global horizontal swipe — prevents sideways leaks / phantom columns on touch.
+     `clip` keeps the lock without turning the root into a scroll container,
+     which would break position: sticky (mobile product image dock). */
+  overflow-x: hidden;
+  overflow-x: clip;
+  width: 100vw;
+}
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+  width: 100vw;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-tap-highlight-color: transparent;
+  font-size: max(16px, 1rem);
+  line-height: 1.5;
+}
+/* ─────────────────────────────────────────────
+   Safari iOS focus-zoom guard.
+   Mobile Safari auto-zooms (and won't zoom back)
+   when a form control's *computed* font-size is
+   below 16px. Tailwind utilities like text-xs /
+   text-sm on inputs trigger this. Enforce a 16px
+   floor on every editable surface — including
+   contenteditable, date/time pickers, and our
+   custom select triggers — at @media (max-width:
+   768px) so desktop typography is unaffected.
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  [contenteditable="true"],
+  [contenteditable=""],
+  [role="textbox"],
+  [role="combobox"],
+  [role="searchbox"],
+  [role="spinbutton"],
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"] {
+    font-size: max(16px, 1rem) !important;
+    line-height: 1.4 !important;
+  }
+  /* shadcn / Radix select trigger surface its inner span — cover both. */
+  [data-radix-select-trigger],
+  [data-radix-select-trigger] > span {
+    font-size: max(16px, 1rem) !important;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Mobile/PWA designer profile: tighten the gap
+   between the truncated bio / "View full portrait"
+   link and the product grid below it.
+   ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .portrait-link-container {
+    margin-bottom: 2px !important;
+  }
+  .mobile-filter-bar {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    margin-top: 0px !important;
+  }
+  .bio-description-mobile {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    /* First line fully solid; only the tail of the 2nd line fades. */
+    -webkit-mask-image: linear-gradient(black, black),
+      linear-gradient(to right, black 78%, transparent 100%);
+    mask-image: linear-gradient(black, black),
+      linear-gradient(to right, black 78%, transparent 100%);
+    -webkit-mask-size: 100% 1.6em, 100% 100%;
+    mask-size: 100% 1.6em, 100% 100%;
+    -webkit-mask-position: left top, left bottom;
+    mask-position: left top, left bottom;
+    -webkit-mask-repeat: no-repeat, no-repeat;
+    mask-repeat: no-repeat, no-repeat;
+  }
+}
+/* Always-on (desktop + mobile) baseline so JS-driven focus calls don't zoom. */
+input, select, textarea {
+  font-size: max(16px, 1rem);
+}
+
+/* ─────────────────────────────────────────────
+   Cross-browser focus ring (Safari iOS friendly).
+   - :focus-visible only — mouse/touch taps don't
+     leave a permanent ring, keyboard / a11y do.
+   - Implemented as box-shadow (not outline width
+     or border width) so the element's box never
+     reflows — zero layout shift on focus.
+   - Strips Safari's fuzzy default outline + the
+     iOS tap highlight to avoid double rings.
+   - Font-size is already locked ≥16px, so the
+     ring can't trigger Safari's focus-zoom.
+   ───────────────────────────────────────────── */
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]):focus {
+  outline: none;
+}
+:where(input, select, textarea, button, a, summary, [role="button"],
+       [role="textbox"], [role="combobox"], [role="searchbox"],
+       [role="spinbutton"], [contenteditable="true"], [contenteditable=""]):focus-visible {
+  outline: 2px solid transparent; /* visible in forced-colors mode */
+  outline-offset: 2px;
+  /* Two-layer shadow: 1px contrast halo + 3px ring. No layout impact. */
+  box-shadow:
+    0 0 0 1px hsl(var(--background)),
+    0 0 0 3px hsl(var(--ring) / 0.65);
+  border-radius: inherit;
+  transition: box-shadow 120ms ease-out;
+}
+@media (forced-colors: active) {
+  :where(input, select, textarea, button, a, summary,
+         [role="button"], [role="textbox"], [role="combobox"]):focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+}
+@media (display-mode: standalone) {
+  html, body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Mobile / iOS chrome backing — unified gradient treatment.
+   The canvas behind the iOS navigation panel is never a flat white or flat
+   black block: it starts from the page surface (--ios-chrome-base, overridable
+   per route) and fades into deep black at the very bottom, mirroring the
+   gradient used at the bottom of the product page. */
+@media (max-width: 767px) {
+  html {
+    background-color: hsl(var(--background));
+  }
+
+  /* Dark routes only (hero + designers landing) get the black canvas and the
+     bottom fade behind the iOS toolbar. Light routes keep the page surface. */
+  html.ios-chrome-dark {
+    background-color: var(--ios-chrome-base, #000000);
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.28) 84%,
+      rgba(0, 0, 0, 0.62) 100%
+    );
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+  }
+
+  /* iOS Safari samples the BODY canvas — not the html background — behind its
+     translucent bottom toolbar and safe area. The default body surface is the
+     near-white page background, which rendered as a solid white band at the
+     very bottom of the dark hero landing and visually masked fixed bottom
+     controls. Keep the body canvas on the dark chrome colour; page sections
+     paint their own backgrounds above it. */
+  html.ios-chrome-dark body {
+    background-color: var(--ios-chrome-base, #000000);
+  }
+
+  /* The Trade Program hero reaches the physical bottom edge. The root
+     underlay is solid white so the native iOS panel area defaults to white
+     and never flashes black beneath the photograph. */
+  html.ios-chrome-image {
+    background-color: #ffffff;
+    background-image: none;
+  }
+
+  html.ios-chrome-image body,
+  html.ios-chrome-image #root {
+    background-color: transparent;
+  }
+
+  /* Track the live iOS glass viewport edge regardless of Safari toolbar
+     expansion state. */
+  html.ios-chrome-image,
+  html.ios-chrome-image body,
+  html.ios-chrome-image #root {
+    min-height: 100dvh;
+  }
+
+  /* iOS does not reliably render a fixed background attached to <html> under
+     its translucent bottom chrome. A fixed body layer gives Safari and an
+     installed PWA a real painted surface through the bottom safe area. */
+  html.ios-chrome-image body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--ios-chrome-image);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  html.ios-chrome-image #root {
+    position: relative;
+    z-index: 1;
+  }
+
+
+  html.ios-safari-browser body,
+  html.ios-safari-browser #root {
+    background-color: transparent;
+  }
+
+  html.ios-safari-browser #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+}
+
+@media (max-width: 767px) and (display-mode: standalone) {
+  body,
+  #root {
+    background-color: transparent;
+  }
+}
+
+/* Skip layout and paint work for homepage sections until they approach the
+   mobile viewport. Intrinsic sizing preserves document height and scroll restore. */
+@media (max-width: 767px) {
+  .home-deferred-section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
+  }
+}
+
+
+/* Respect users who request reduced motion — but never disable zoom. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* Product image frame — width is explicit so the gallery and thumbnail rail
+   cannot collapse inside their flex column. */
+.product-image-frame {
+  width: 100%;
+  margin-inline: auto;
+  aspect-ratio: 1 / 1;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  contain: layout paint;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.product-image-frame--compact {
+  width: min(78%, 30svh);
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-image-frame {
+    transition: none;
+  }
+}
+@media (min-width: 768px) {
+  .product-image-frame,
+  .product-image-frame--compact {
+    width: 100%;
+  }
+}
+
+@keyframes shimmer-line {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* Landing engagement cue: a soft 3-beat pulse on the editorial gallery icon.
+   Scale-only (transform), so the fixed 40px control footprint never shifts. */
+@keyframes gallery-icon-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 7px rgba(0,0,0,0.045); }
+}
+.animate-gallery-icon-pulse {
+  animation: gallery-icon-pulse 2s ease-in-out 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-gallery-icon-pulse { animation: none; }
+}
+
+.proposal-print-document {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body:has(.proposal-print-document) > *:not(.proposal-print-document) {
+    display: none !important;
+  }
+
+  .proposal-print-document {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 210mm !important;
+    min-height: 296.5mm !important;
+    margin: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .proposal-print-document header,
+  .proposal-print-document footer,
+  .proposal-line-item {
+    display: grid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .proposal-print-document header {
+    display: flex !important;
+  }
+
+  .proposal-print-document footer {
+    display: flex !important;
+  }
+
+  .proposal-line-item img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+
+/* Freeze the header while the designer A–Z directory is open */
+body.designer-directory-open nav[data-site-header] {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Brief Builder validation glow — flashes a soft gold ring around the first
+   missing required field after a blocked submit. */
+@keyframes brief-field-glow {
+  0% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); border-color: hsl(var(--accent) / 0.9); }
+  35% { box-shadow: 0 0 0 5px hsl(var(--accent) / 0.28); border-color: hsl(var(--accent)); }
+  100% { box-shadow: 0 0 0 8px hsl(var(--accent) / 0); border-color: hsl(var(--accent) / 0.4); }
+}
+.brief-field-glow {
+  animation: brief-field-glow 1.3s ease-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brief-field-glow { animation: none; border-color: hsl(var(--accent)); }
+}
+
+/* Past Curations — fixed-height scroll frame with a bottom fade hint and a
+   razor-thin minimalist scrollbar. */
+.curation-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.curation-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.curation-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.curation-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+.curation-scroll-fade {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 26px), transparent 100%);
+}
+
+/* Trade asset protection: block selection & image drag, keep form fields usable */
+.trade-portal-shell { -webkit-user-select: none; user-select: none; }
+.trade-portal-shell img { -webkit-user-drag: none; user-drag: none; }
+.trade-portal-shell input, .trade-portal-shell textarea, .trade-portal-shell [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+
+/* While the Felix mobile sheet is open, page-level floating controls must not
+   cover the composer toolbar (helpers + send). */
+html[data-felix-sheet-open] .mobile-product-commerce-dock,
+html[data-felix-sheet-open] .gallery-details-floating-nav {
+  display: none;
+}

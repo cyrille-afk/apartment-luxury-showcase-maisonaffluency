@@ -170,7 +170,7 @@ const LeadContactsEditor = ({
             onKeyDown={handleKeyDown}
             placeholder="Name"
             aria-label={`Contact ${i + 1} name for ${studioName}`}
-            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+            className="w-[45%] min-w-0 bg-transparent px-1 py-0.5 text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden"
           />
           <input
             type="email"
@@ -180,7 +180,7 @@ const LeadContactsEditor = ({
             onKeyDown={handleKeyDown}
             placeholder="email@studio.com"
             aria-label={`Contact ${i + 1} email for ${studioName}`}
-            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent px-1 py-0.5 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden"
           />
           <button
             type="button"

@@ -5,7 +5,7 @@ import { syncSavedViews, pushSavedView, removeSavedView } from "@/lib/tradeSaved
 import { useClientSafeMode } from "@/lib/clientSafeMode";
 const EditorialDesignerProfile = lazy(() => import("./PublicDesignerProfile"));
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { Heart, FolderOpen } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -642,7 +642,7 @@ const StudioGallery = () => {
   };
 
   const filterInputClass =
-    "h-11 w-full min-w-0 border border-border bg-background px-4 font-body text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors";
+    "h-11 w-full min-w-0 border border-border bg-background px-4 font-body text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring transition-colors";
 
   return (
     <>

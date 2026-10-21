@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins, Repeat, Box } from "lucide-react";
 import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
 import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { commitProposal, type QuoteProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

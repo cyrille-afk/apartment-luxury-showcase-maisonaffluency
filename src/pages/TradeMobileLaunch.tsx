@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Loader2, Smartphone, Share, Plus, MoreVertical, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 

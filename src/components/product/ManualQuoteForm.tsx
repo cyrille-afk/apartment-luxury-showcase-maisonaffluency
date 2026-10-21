@@ -14,7 +14,7 @@ interface Props {
 }
 
 const inputCls =
-  "h-11 w-full rounded-none border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-foreground transition-colors";
+  "h-11 w-full rounded-none border border-border/60 bg-background px-3 font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden focus:border-foreground transition-colors";
 
 const fieldLabel =
   "font-body text-[10px] uppercase tracking-widest text-muted-foreground";
@@ -154,7 +154,7 @@ export default function ManualQuoteForm({ productTitle, designerName, onDone, on
             rows={4}
             value={form.message}
             onChange={update("message")}
-            className="mt-1 w-full rounded-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-foreground transition-colors resize-none"
+            className="mt-1 w-full rounded-none border border-border/60 bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden focus:border-foreground transition-colors resize-none"
             placeholder="Tell us about the piece, the room, or the project…"
           />
         </div>

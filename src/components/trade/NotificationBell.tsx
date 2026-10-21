@@ -3,7 +3,7 @@ import { Bell, X, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { formatDistanceToNow } from "date-fns";
 
 interface NotificationMetadata {

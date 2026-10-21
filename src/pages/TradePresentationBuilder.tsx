@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Save, Eye, Check, Share2, X, UserPlus } from "lucide-react";
@@ -28,7 +28,7 @@ interface GalleryItem {
 }
 
 const inputClass =
-  "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors";
+  "w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors";
 
 const TradePresentationBuilder = () => {
   const { id } = useParams<{ id: string }>();
@@ -353,13 +353,13 @@ const TradePresentationBuilder = () => {
                   <input
                     value={slide.title}
                     onChange={(e) => handleUpdateSlide(slide.id, "title", e.target.value)}
-                    className="w-full font-display text-sm text-foreground bg-transparent outline-none border-b border-transparent focus:border-border transition-colors"
+                    className="w-full font-display text-sm text-foreground bg-transparent outline-hidden border-b border-transparent focus:border-border transition-colors"
                     placeholder="Slide title"
                   />
                   <input
                     value={slide.description || ""}
                     onChange={(e) => handleUpdateSlide(slide.id, "description", e.target.value)}
-                    className="w-full font-body text-xs text-muted-foreground bg-transparent outline-none border-b border-transparent focus:border-border transition-colors"
+                    className="w-full font-body text-xs text-muted-foreground bg-transparent outline-hidden border-b border-transparent focus:border-border transition-colors"
                     placeholder="Description"
                   />
                   <div className="flex gap-4 text-[10px] text-muted-foreground/60 font-body">

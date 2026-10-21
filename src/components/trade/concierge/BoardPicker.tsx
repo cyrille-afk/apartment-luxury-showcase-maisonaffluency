@@ -81,7 +81,7 @@ export function BoardPicker({ value, onChange, onCreateNew, disabled }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search tearsheets…"
-              className="flex-1 bg-transparent font-body text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="flex-1 bg-transparent font-body text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden"
             />
           </div>
 

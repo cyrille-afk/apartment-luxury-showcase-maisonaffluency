@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@/lib/router-compat';
 import { HelmetProvider } from 'react-helmet-async';
 import TradeActivate from './TradeActivate';
 
 const mocks = vi.hoisted(() => ({ verifyOtp: vi.fn(), updateUser: vi.fn(), getUser: vi.fn(), refreshSession: vi.fn(), invoke: vi.fn(), navigate: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: mocks, functions: { invoke: mocks.invoke } } }));
-vi.mock('react-router-dom', async importOriginal => ({ ...await importOriginal<typeof import('react-router-dom')>(), useNavigate: () => mocks.navigate }));
+vi.mock('@/lib/router-compat', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/router-compat')>(), useNavigate: () => mocks.navigate }));
 const open = () => render(<HelmetProvider><MemoryRouter initialEntries={['/trade/activate?type=recovery&token_hash=' + 'a'.repeat(64)]}><TradeActivate /></MemoryRouter></HelmetProvider>);
 describe('Trade activation password setup', () => {
   beforeEach(() => {

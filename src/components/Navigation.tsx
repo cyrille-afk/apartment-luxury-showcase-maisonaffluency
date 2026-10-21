@@ -1,6 +1,6 @@
 import { ROOM_PREVIEW_SCENES } from "@/lib/roomPreviewScenes";
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import TradeServicesRequestModal from "@/components/trade/TradeServicesRequestModal";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -193,7 +193,7 @@ const RoomVisualPreview = ({ room, selectedRoomSlug, onPieceNavigate }: { room: 
             {scene.pieces.map((piece, index) => (
               <a key={piece.src} href={piece.href} aria-disabled={!piece.href}
                 onClick={(event) => { if (!piece.href) { event.preventDefault(); return; } if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; event.preventDefault(); onPieceNavigate(piece.href); }}
-                className={cn("group/piece flex w-full flex-col rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", piece.href ? "cursor-pointer" : "pointer-events-none")}>
+                className={cn("group/piece flex w-full flex-col rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring", piece.href ? "cursor-pointer" : "pointer-events-none")}>
                 <div className={cn("relative mb-2.5 flex aspect-[4/4.5] w-full items-center justify-center overflow-hidden rounded-sm bg-[hsl(var(--alternative-frame))] transition-shadow duration-300", selected && index === scene.highlightIndex && "ring-1 ring-primary")}>
                   <img src={piece.src} alt={piece.alt} className="max-h-[90%] max-w-[90%] object-contain mix-blend-multiply transition-transform duration-500 group-hover/piece:scale-105" />
                </div>
@@ -243,7 +243,7 @@ const RoomDropdownPanel = ({ room, activeCategory, onSelectCategory, onCategoryN
         <button
           type="button"
           onClick={onFullCatalogue}
-          className="group -mx-3 -my-2 flex w-[calc(100%+1.5rem)] flex-col items-start rounded-none px-3 py-3 text-left transition-colors duration-200 hover:bg-[hsl(var(--accent))]/40 focus-visible:bg-[hsl(var(--accent))]/40 focus-visible:outline-none"
+          className="group -mx-3 -my-2 flex w-[calc(100%+1.5rem)] flex-col items-start rounded-none px-3 py-3 text-left transition-colors duration-200 hover:bg-[hsl(var(--accent))]/40 focus-visible:bg-[hsl(var(--accent))]/40 focus-visible:outline-hidden"
         >
           <span className="font-display text-sm font-bold uppercase tracking-[0.18em] text-foreground transition-colors group-hover:text-primary">
             All Categories
@@ -1193,7 +1193,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
                   type="button"
                   onClick={closeContactView}
                   aria-label="Close contact view and go back"
-                  className="group p-1 outline-none"
+                  className="group p-1 outline-hidden"
                 >
                   <X className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </button>
@@ -1239,7 +1239,7 @@ const Navigation = ({ borderless = false, alwaysVisible = false }: NavigationPro
               )}
 
               <DropdownMenu onOpenChange={(o) => setAccountMenuOpen(o)}>
-                <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-none">
+                <DropdownMenuTrigger aria-label="Account menu" title="Account" className="relative group p-1 outline-hidden">
                   <span className="sr-only">Account menu</span>
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </DropdownMenuTrigger>

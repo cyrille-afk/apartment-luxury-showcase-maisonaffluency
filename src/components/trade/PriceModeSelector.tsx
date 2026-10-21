@@ -47,7 +47,7 @@ export default function PriceModeSelector({ className = "" }: PriceModeSelectorP
         aria-checked={!showTradePrice}
         onClick={() => setShowTradePrice(!showTradePrice)}
         className={cn(
-          "p-0 text-[10px] font-body uppercase tracking-[0.15em] transition-colors focus-visible:outline-none focus-visible:underline",
+          "p-0 text-[10px] font-body uppercase tracking-[0.15em] transition-colors focus-visible:outline-hidden focus-visible:underline",
           !showTradePrice
             ? "text-foreground underline underline-offset-4"
             : "text-muted-foreground hover:text-foreground",

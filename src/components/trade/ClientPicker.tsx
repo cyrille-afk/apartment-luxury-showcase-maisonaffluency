@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, Plus, User as UserIcon, X, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
@@ -226,7 +226,7 @@ export default function ClientPicker({
           </PopoverTrigger>
           <PopoverContent
             align="start"
-            className="p-0 w-[--radix-popover-trigger-width] min-w-[280px]"
+            className="p-0 w-[var(--radix-popover-trigger-width)] min-w-[280px]"
             onOpenAutoFocus={(e) => { e.preventDefault(); inputRef.current?.focus(); }}
           >
             <div className="p-2 border-b border-border">

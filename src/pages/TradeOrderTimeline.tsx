@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";

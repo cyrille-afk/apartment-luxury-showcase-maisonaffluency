@@ -5,7 +5,7 @@
  */
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { X, Loader2, Wand2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -135,7 +135,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                 value={dimensionChanges}
                 onChange={(e) => setDimensionChanges(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none resize-y"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden resize-y"
                 placeholder="Describe the dimension or proportion changes you need…"
               />
             </Field>
@@ -145,7 +145,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                 value={finishNotes}
                 onChange={(e) => setFinishNotes(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none resize-y"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden resize-y"
                 placeholder="Describe finish or material substitutions…"
               />
             </Field>
@@ -156,7 +156,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                   type="text"
                   value={comColFabric}
                   onChange={(e) => setComColFabric(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden"
                   placeholder="e.g. Dedar Karakorum 014"
                 />
               </Field>
@@ -167,7 +167,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                   min="0"
                   value={yardage}
                   onChange={(e) => setYardage(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden"
                   placeholder="—"
                 />
               </Field>
@@ -180,7 +180,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                   min={1}
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value || "1", 10))}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden"
                 />
               </Field>
               <Field label="Target lead (wks)">
@@ -189,7 +189,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                   min={0}
                   value={targetLead}
                   onChange={(e) => setTargetLead(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden"
                   placeholder="—"
                 />
               </Field>
@@ -198,7 +198,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                   type="text"
                   value={budgetNotes}
                   onChange={(e) => setBudgetNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden"
                   placeholder="—"
                 />
               </Field>
@@ -209,7 +209,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-none resize-y"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:border-foreground/50 outline-hidden resize-y"
                 placeholder="Project context, deadlines, anything else our concierge should know…"
               />
             </Field>

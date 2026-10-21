@@ -22,7 +22,7 @@ const schema = z.object({
 type Form = Record<keyof z.infer<typeof schema>, string>;
 const empty: Form = { first_name: "", last_name: "", company_name: "", phone: "", email: "", postal_code: "", country: "", preferred_contact: "", service_type: "" };
 
-const field = "h-14 w-full border border-border bg-background px-5 font-body text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-foreground transition-colors rounded-none";
+const field = "h-14 w-full border border-border bg-background px-5 font-body text-sm text-foreground placeholder:text-muted-foreground outline-hidden focus:border-foreground transition-colors rounded-none";
 
 export default function TradeServicesRequestModal({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [form, setForm] = useState<Form>(empty);

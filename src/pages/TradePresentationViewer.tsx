@@ -6,7 +6,7 @@ import { useExportCurrency } from "@/lib/displayMoney";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "@/lib/router-compat";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, MessageSquare, Send, FileDown, Loader2, Link2, Check } from "lucide-react";
 import { format } from "date-fns";
@@ -630,7 +630,7 @@ const TradePresentationViewer = () => {
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSubmitComment()}
                   placeholder="Add a comment…"
-                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors"
+                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors"
                 />
                 <button
                   onClick={handleSubmitComment}

@@ -3,7 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useMobileSwipeDismiss } from "@/hooks/useMobileSwipeDismiss";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Check, Minus, Plus } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";

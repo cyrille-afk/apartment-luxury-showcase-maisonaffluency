@@ -13,7 +13,7 @@
  * quantity in either surface calculates against identical data variables.
  */
 import { Suspense, lazy, useEffect, useState } from "react";
-import { Navigate, useLocation, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "@/lib/router-compat";
 import { ProductConfigProvider } from "@/contexts/ProductConfigContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientSafeMode } from "@/lib/clientSafeMode";

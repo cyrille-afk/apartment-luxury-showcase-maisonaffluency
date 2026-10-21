@@ -42,7 +42,7 @@ export default function LegendDisclosure({
         className={cn(
           "flex items-center justify-start w-full h-auto px-0 rounded-none py-2.5 md:py-4 text-left hover:bg-transparent",
           "font-body text-sm text-foreground font-medium",
-          "focus:outline-none focus-visible:ring-0",
+          "focus:outline-hidden focus-visible:ring-0",
           "hover:text-foreground transition-colors"
         )}
       >

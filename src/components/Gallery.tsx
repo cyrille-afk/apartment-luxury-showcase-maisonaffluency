@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";

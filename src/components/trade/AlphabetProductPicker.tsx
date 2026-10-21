@@ -123,7 +123,7 @@ const AlphabetProductPicker = ({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "w-full inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground text-left focus:outline-none focus:ring-1 focus:ring-foreground/20",
+          "w-full inline-flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground text-left focus:outline-hidden focus:ring-1 focus:ring-foreground/20",
           className
         )}
       >

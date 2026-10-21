@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Plus, ExternalLink } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";

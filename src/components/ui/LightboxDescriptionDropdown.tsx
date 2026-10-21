@@ -76,7 +76,7 @@ const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) =>
           "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5",
           "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm",
           "font-display italic text-[12px] leading-none text-foreground/90 hover:text-foreground transition-colors",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-1"
+          "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-1"
         )}
       >
         <span aria-hidden="true">{expanded ? "Close" : "Creation"}</span>
@@ -105,7 +105,7 @@ const LightboxDescriptionDropdown = ({ description, ariaDescribedBy }: Props) =>
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "absolute right-0 top-full mt-1.5 w-[min(24rem,calc(100vw-3rem))] rounded-lg bg-white/95 backdrop-blur-md border border-white/60 shadow-md px-4 py-3",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+              "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-foreground/30"
             )}
           >
             <p className="font-body text-[12px] text-foreground/90 leading-snug whitespace-pre-line max-h-[min(60vh,420px)] overflow-y-auto pr-1">

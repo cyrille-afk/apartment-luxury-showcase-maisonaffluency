@@ -379,7 +379,7 @@ export default function TradeMediaLibrary() {
                 <input
                   readOnly
                   value={preview.publicUrl}
-                  className="flex-1 bg-transparent font-mono text-[10px] text-muted-foreground outline-none select-all"
+                  className="flex-1 bg-transparent font-mono text-[10px] text-muted-foreground outline-hidden select-all"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
                 <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]" onClick={() => handleCopy(preview.publicUrl)}>

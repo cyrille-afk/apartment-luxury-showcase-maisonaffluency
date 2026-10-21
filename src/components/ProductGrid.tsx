@@ -17,7 +17,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { normalizeSubcategory, getParentCategoryFromSubcategory } from "@/lib/categoryNormalization";
 import CatalogCardImages from "@/components/product/CatalogCardImages";
 import { useCatalogBatches } from "@/hooks/useCatalogBatches";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { ECART_REEDITION_LABEL, formatCuratorialEditionLine, isEcartReedition, getHouseEditionLabel } from "@/lib/editionLabel";
 import { ROOM_LABELS, type RoomSlug } from "@/lib/roomCategories";
 import { pickMatchesRoom, pickMatchesFilter } from "@/lib/roomMatching";

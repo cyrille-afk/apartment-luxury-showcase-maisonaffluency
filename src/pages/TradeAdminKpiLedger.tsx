@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";

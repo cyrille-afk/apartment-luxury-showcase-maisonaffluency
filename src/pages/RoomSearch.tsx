@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/router-compat";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";

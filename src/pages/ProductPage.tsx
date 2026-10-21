@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "@/lib/router-compat";
 import { ArrowLeft, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";

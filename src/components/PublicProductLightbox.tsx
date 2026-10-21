@@ -1,5 +1,5 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { X, FileDown, Heart, Scale, ArrowRight, ChevronLeft, ChevronRight, Award, Compass, FileText, Info } from "lucide-react";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";

@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useStudio } from "@/hooks/useStudio";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 const ROLE_LABEL: Record<string, string> = {
   owner: "Owner",

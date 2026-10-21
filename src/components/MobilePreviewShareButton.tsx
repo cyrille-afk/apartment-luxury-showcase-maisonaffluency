@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { Smartphone, X, RotateCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 

@@ -85,7 +85,7 @@ const ScrapeDiscoverAll = ({ onLoadBrands }: ScrapeDiscoverAllProps) => {
             value={discoverSiteUrl}
             onChange={(e) => setDiscoverSiteUrl(e.target.value)}
             placeholder="e.g. https://theinvisiblecollection.com"
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="w-full pl-9 pr-3 py-2 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
           />
         </div>
         <button
@@ -116,7 +116,7 @@ const ScrapeDiscoverAll = ({ onLoadBrands }: ScrapeDiscoverAllProps) => {
                 value={slugFilter}
                 onChange={(e) => setSlugFilter(e.target.value)}
                 placeholder="Filter brands…"
-                className="w-full pl-9 pr-3 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full pl-9 pr-3 py-1.5 rounded-md border border-border bg-background font-body text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-hidden focus:ring-1 focus:ring-primary/30"
               />
             </div>
             <button

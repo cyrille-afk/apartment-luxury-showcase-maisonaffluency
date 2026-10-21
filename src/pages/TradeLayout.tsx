@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } fro
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { LayoutDashboard, ChevronUp } from "lucide-react";
-import { Outlet, Navigate, useLocation, Link } from "react-router-dom";
+import { Outlet, Navigate, useLocation, Link } from "@/lib/router-compat";
 import { TRADE_SANDBOX_ONLY } from "@/lib/tradeSandboxOnly";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";

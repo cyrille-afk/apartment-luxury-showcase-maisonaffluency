@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "@/lib/router-compat";
 import { E2ETokenCopier } from "@/components/admin/E2ETokenCopier";
 import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
 import { SalesFunnelCard } from "@/components/trade/SalesFunnelCard";

@@ -23,7 +23,7 @@ export const DesignDirectorCtaButton: React.FC<DesignDirectorCtaButtonProps> = (
         "transition-all duration-200 ease-out",
         "hover:-translate-y-0.5 hover:border-foreground/40 hover:bg-background hover:shadow-md hover:shadow-foreground/5",
         "active:translate-y-0 active:scale-[0.99]",
-        "focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/30",
+        "focus:outline-hidden focus:ring-2 focus:ring-accent/40 focus:border-accent/30",
         className
       )}
     >

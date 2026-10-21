@@ -200,7 +200,7 @@ export function BrandPicker({
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search ateliers and brands"
-                    className="min-w-0 flex-1 bg-transparent font-body text-xs text-foreground outline-none placeholder:text-muted-foreground"
+                    className="min-w-0 flex-1 bg-transparent font-body text-xs text-foreground outline-hidden placeholder:text-muted-foreground"
                   />
                 </label>
                 <Button

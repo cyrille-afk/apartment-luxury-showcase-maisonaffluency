@@ -6,7 +6,7 @@
  * control, the guard below is convenience.
  */
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import TradeApplicationsQueue from "@/components/trade/TradeApplicationsQueue";

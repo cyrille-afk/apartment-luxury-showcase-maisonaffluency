@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { MapPin, Users, FileText, X, ArrowRight, ArrowLeft, Check, Sparkles, Image as ImageIcon, Box, Compass, BookOpen, FolderOpen, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";

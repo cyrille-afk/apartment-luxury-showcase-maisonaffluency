@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useTradeCopilot } from "@/contexts/TradeCopilotContext";
 import { saveName } from "@/components/trade/conciergeGreeting";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
@@ -125,7 +125,7 @@ export default function TradeOnboarding() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Or enter a custom name... (e.g., Felix, Pierre)"
-                  className="w-full max-w-md rounded-none border border-black bg-transparent px-4 py-3 text-black placeholder:text-black/40 focus:outline-none focus:ring-1 focus:ring-black font-sans text-sm mb-8"
+                  className="w-full max-w-md rounded-none border border-black bg-transparent px-4 py-3 text-black placeholder:text-black/40 focus:outline-hidden focus:ring-1 focus:ring-black font-sans text-sm mb-8"
                 />
 
                 <button
@@ -160,7 +160,7 @@ export default function TradeOnboarding() {
                     id="base-currency"
                     value={baseCurrency}
                     onChange={(e) => setBaseCurrency(e.target.value as DisplayCurrency)}
-                    className="w-full rounded-none border-0 border-b border-black/25 bg-transparent px-0 py-2 font-mono text-[12px] uppercase tracking-[0.18em] text-black focus:outline-none focus:border-black appearance-none"
+                    className="w-full rounded-none border-0 border-b border-black/25 bg-transparent px-0 py-2 font-mono text-[12px] uppercase tracking-[0.18em] text-black focus:outline-hidden focus:border-black appearance-none"
                   >
                     {CURRENCY_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ChevronDown, Search, X } from "lucide-react";
 import { useParentBrandDesigners } from "@/hooks/useParentBrandDesigners";
 import { cn } from "@/lib/utils";
@@ -67,7 +67,7 @@ export function ParentHouseOverview({ parentName }: { parentName: string }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search designers"
               aria-label={`Search the designers of ${parentName}`}
-              className="w-full bg-transparent border-0 border-b border-border/40 focus:border-foreground/60 outline-none pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/60 transition-colors"
+              className="w-full bg-transparent border-0 border-b border-border/40 focus:border-foreground/60 outline-hidden pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/60 transition-colors"
             />
             {query && (
               <button

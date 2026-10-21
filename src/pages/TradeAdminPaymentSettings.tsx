@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Copy, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";

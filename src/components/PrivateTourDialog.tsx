@@ -188,7 +188,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                   id="profession"
                   value={formData.profession}
                   onChange={handleChange}
-                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.profession ? "border-destructive" : ""} ${!formData.profession ? "text-muted-foreground/60" : ""}`}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] ${errors.profession ? "border-destructive" : ""} ${!formData.profession ? "text-muted-foreground/60" : ""}`}
                 >
                   <option value="" disabled>Select your profession</option>
                   {PROFESSION_OPTIONS.map((p) => (
@@ -206,7 +206,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                   type="text"
                   value={formData.company}
                   onChange={handleChange}
-                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.company ? "border-destructive" : ""}`}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] ${errors.company ? "border-destructive" : ""}`}
                   placeholder="Studio or firm name"
                 />
                 {errors.company && <p className="font-body text-[10px] text-destructive mt-1">{errors.company}</p>}
@@ -222,7 +222,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.name ? "border-destructive" : ""}`}
+                className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] ${errors.name ? "border-destructive" : ""}`}
                 placeholder="Your full name"
               />
               {errors.name && <p className="font-body text-[10px] text-destructive mt-1">{errors.name}</p>}
@@ -238,7 +238,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.email ? "border-destructive" : ""}`}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] ${errors.email ? "border-destructive" : ""}`}
                   placeholder="your@email.com"
                 />
                 {errors.email && <p className="font-body text-[10px] text-destructive mt-1">{errors.email}</p>}
@@ -253,7 +253,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder={phonePlaceholder}
-                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] placeholder:text-muted-foreground/50 ${errors.phone ? "border-destructive" : ""}`}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] placeholder:text-muted-foreground/50 ${errors.phone ? "border-destructive" : ""}`}
                 />
                 {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
               </div>
@@ -270,7 +270,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                 type="text"
                 value={formData.preferredDate}
                 onChange={handleChange}
-                className="w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                className="w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
                 placeholder="e.g. Next Tuesday, 2pm"
               />
             </div>
@@ -284,7 +284,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                 value={formData.message}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors resize-y text-[16px] placeholder:text-muted-foreground/60"
+                className="w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors resize-y text-[16px] placeholder:text-muted-foreground/60"
                 placeholder="Tell us what you would like to see..."
               />
             </div>

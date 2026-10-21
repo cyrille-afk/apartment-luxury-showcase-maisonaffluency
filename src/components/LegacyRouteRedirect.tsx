@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "@/lib/router-compat";
 import { useNoIndex } from "@/hooks/useNoIndex";
 
 /**

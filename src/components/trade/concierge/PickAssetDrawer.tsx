@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { FileText, FolderPlus, Loader2, RotateCcw, Check, Pencil, ExternalLink } from "lucide-react";
@@ -530,7 +530,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 onClick={() =>
                   setSelected(selectedId === s.fabric_id ? null : s.fabric_id)
                 }
-                className="shrink-0 w-20 flex flex-col items-center gap-0.5 group focus:outline-none"
+                className="shrink-0 w-20 flex flex-col items-center gap-0.5 group focus:outline-hidden"
                 title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
                 aria-pressed={isSelected}
               >
@@ -669,7 +669,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                           setSelectedTopId(c.top.fabric_id);
                         }
                       }}
-                      className="shrink-0 w-36 flex flex-col items-center gap-0.5 group focus:outline-none"
+                      className="shrink-0 w-36 flex flex-col items-center gap-0.5 group focus:outline-hidden"
                       title={c.label}
                       aria-pressed={isSelected}
                     >
@@ -802,7 +802,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                       onChange={(e) => setProjectDraft(e.target.value)}
                       placeholder="e.g. Apt 4B"
                       autoFocus={editingProject}
-                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] focus:outline-none focus:ring-1 focus:ring-foreground/30"
+                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] focus:outline-hidden focus:ring-1 focus:ring-foreground/30"
                     />
                     <button
                       type="submit"

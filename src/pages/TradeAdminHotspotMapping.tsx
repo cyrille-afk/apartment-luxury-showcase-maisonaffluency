@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link } from "@/lib/router-compat";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Save, Wand2, CheckCircle2, AlertCircle } from "lucide-react";
@@ -224,7 +224,7 @@ export default function TradeAdminHotspotMapping() {
             placeholder="Search product or designer…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 max-w-md text-sm border border-border rounded px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="flex-1 max-w-md text-sm border border-border rounded px-3 py-2 bg-background focus:outline-hidden focus:ring-1 focus:ring-primary/30"
           />
           <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
             <input
@@ -292,7 +292,7 @@ export default function TradeAdminHotspotMapping() {
                         onChange={(e) =>
                           setDraft((d) => ({ ...d, [h.id]: e.target.value }))
                         }
-                        className="w-full text-xs border border-border rounded px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
+                        className="w-full text-xs border border-border rounded px-2 py-1.5 bg-background focus:outline-hidden focus:ring-1 focus:ring-primary/30"
                       >
                         <option value="">— Auto-match by name —</option>
                         {picks.map((p) => (

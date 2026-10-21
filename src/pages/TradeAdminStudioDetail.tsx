@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@/lib/router-compat';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Building2, Mail, RefreshCw, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';

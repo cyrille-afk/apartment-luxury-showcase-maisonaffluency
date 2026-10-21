@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";

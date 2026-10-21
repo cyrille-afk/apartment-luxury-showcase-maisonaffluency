@@ -8,7 +8,7 @@ import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates, type FxAppliedPair } from "@/components/trade/FxAppliedRates";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, Send, CheckCircle, DollarSign, ChevronRight, ArrowLeft, Save, CreditCard, Trash2, Edit3, XCircle } from "lucide-react";
 import { QuoteCardSkeleton, QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -758,7 +758,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             value={priceStr}
                             onChange={(e) => setItemPrices((prev) => ({ ...prev, [item.id]: e.target.value }))}
                             placeholder="0.00"
-                            className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
+                            className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-hidden focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
                         {effectiveOwnerDiscountPct > 0 && cents > 0 && (
@@ -783,7 +783,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             value={priceStr}
                             onChange={(e) => setItemPrices((prev) => ({ ...prev, [item.id]: e.target.value }))}
                             placeholder="0.00"
-                            className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30 text-[16px]"
+                            className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-hidden focus:ring-1 focus:ring-primary/30 text-[16px]"
                           />
                         </div>
                       </div>
@@ -925,7 +925,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             onChange={(e) => setAdminNotes(e.target.value)}
             placeholder="Add pricing notes, lead times, special conditions…"
             rows={3}
-            className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none text-[16px] sm:text-sm"
+            className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden focus:ring-1 focus:ring-primary/30 resize-none text-[16px] sm:text-sm"
           />
           <button onClick={handleSaveNotes} className="mt-1 font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors">
             Save Notes

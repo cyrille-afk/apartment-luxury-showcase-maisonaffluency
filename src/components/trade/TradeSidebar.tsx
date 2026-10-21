@@ -6,7 +6,7 @@ import {
   TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen, Clapperboard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {

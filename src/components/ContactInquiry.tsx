@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -460,7 +460,7 @@ const ContactInquiry = () => {
                 id="profession"
                 value={formData.profession}
                 onChange={handleInputChange}
-                className={`w-full h-11 px-3 rounded-lg border bg-background font-body text-sm text-foreground outline-none focus:border-foreground transition-colors ${errors.profession ? "border-destructive" : "border-border"} ${!formData.profession ? "text-muted-foreground/70" : ""}`}
+                className={`w-full h-11 px-3 rounded-lg border bg-background font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors ${errors.profession ? "border-destructive" : "border-border"} ${!formData.profession ? "text-muted-foreground/70" : ""}`}
               >
                 <option value="" disabled>Select your profession</option>
                 {PROFESSION_OPTIONS.map((p) => (

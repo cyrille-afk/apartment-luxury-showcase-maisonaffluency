@@ -24,7 +24,7 @@ import { useClientSafeMode } from "@/lib/clientSafeMode";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle, Info, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import ClientPicker from "@/components/trade/ClientPicker";
@@ -3215,7 +3215,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       const v = e.target.value || null;
                       await supabase.from("trade_quotes").update({ issue_date: v } as any).eq("id", quoteId);
                     }}
-                    className="bg-transparent border-b border-border focus:outline-none focus:border-primary text-foreground text-sm font-body py-0.5"
+                    className="bg-transparent border-b border-border focus:outline-hidden focus:border-primary text-foreground text-sm font-body py-0.5"
                   />
                 ) : (
                   <span className="text-foreground">{formatDate(createdDate)}</span>
@@ -3350,7 +3350,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       onBlur={() => setEditingGstRate(false)}
                       onKeyDown={(e) => e.key === "Enter" && setEditingGstRate(false)}
                       autoFocus
-                      className="w-12 font-body text-[10px] text-foreground bg-transparent border-b border-foreground outline-none text-center"
+                      className="w-12 font-body text-[10px] text-foreground bg-transparent border-b border-foreground outline-hidden text-center"
                     />
                   ) : (
                     <button
@@ -3870,7 +3870,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   }
                                 }}
                                 placeholder="Exception or spec note…"
-                                className="w-full font-body text-[11px] text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-none resize-y"
+                                className="w-full font-body text-[11px] text-foreground bg-background border border-border rounded px-2 py-1.5 focus:border-foreground/50 outline-hidden resize-y"
                                 autoFocus
                               />
                               <span className="font-body text-[9px] text-muted-foreground/60">Ctrl+Enter to save · Esc to cancel</span>
@@ -3919,7 +3919,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                       }
                                     }}
                                     placeholder="Private exception, margin note, supplier issue…"
-                                    className="w-full font-body text-[11px] text-foreground bg-background border border-amber-500/30 rounded px-2 py-1.5 focus:border-amber-500/60 outline-none resize-y"
+                                    className="w-full font-body text-[11px] text-foreground bg-background border border-amber-500/30 rounded px-2 py-1.5 focus:border-amber-500/60 outline-hidden resize-y"
                                     autoFocus
                                   />
                                   <span className="font-body text-[9px] text-muted-foreground/60">Ctrl+Enter to save · Esc to cancel</span>
@@ -3975,7 +3975,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                     onChange={(e) => { setEditingQtyValue(e.target.value.replace(/\D/g, "")); setEditingQtyError(null); }}
                                     onBlur={() => commitEditQty(item.id)}
                                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitEditQty(item.id); } else if (e.key === "Escape") { cancelEditQty(); } }}
-                                    className={`font-body text-xs text-foreground w-8 text-center bg-background border rounded px-1 py-0.5 focus:border-foreground/50 outline-none ${editingQtyError ? "border-destructive" : "border-border"}`}
+                                    className={`font-body text-xs text-foreground w-8 text-center bg-background border rounded px-1 py-0.5 focus:border-foreground/50 outline-hidden ${editingQtyError ? "border-destructive" : "border-border"}`}
                                     autoFocus
                                   />
                                   {editingQtyError && <span className="font-body text-[9px] text-destructive mt-0.5">{editingQtyError}</span>}
@@ -4007,7 +4007,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 else if (e.key === "Escape") { cancelEditPrice(); }
                               }}
                               placeholder={`${currencySymbol(currency)} 0`}
-                              className="w-24 font-body text-xs text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                              className="w-24 font-body text-xs text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-hidden"
                               autoFocus
                             />
                           ) : (
@@ -4050,7 +4050,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   onChange={(e) => { setEditingQtyValue(e.target.value.replace(/\D/g, "")); setEditingQtyError(null); }}
                                   onBlur={() => commitEditQty(item.id)}
                                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitEditQty(item.id); } else if (e.key === "Escape") { cancelEditQty(); } }}
-                                  className={`font-body text-sm text-foreground w-10 text-center bg-background border rounded px-1 py-0.5 focus:border-foreground/50 outline-none ${editingQtyError ? "border-destructive" : "border-border"}`}
+                                  className={`font-body text-sm text-foreground w-10 text-center bg-background border rounded px-1 py-0.5 focus:border-foreground/50 outline-hidden ${editingQtyError ? "border-destructive" : "border-border"}`}
                                   autoFocus
                                 />
                                 {editingQtyError && <span className="font-body text-[9px] text-destructive mt-0.5">{editingQtyError}</span>}
@@ -4086,7 +4086,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                   else if (e.key === "Escape") { cancelEditPrice(); }
                                 }}
                                 placeholder={`${currencySymbol(currency)} 0`}
-                                className="w-full font-body text-sm text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-none"
+                                className="w-full font-body text-sm text-foreground tabular-nums text-right bg-background border border-border rounded px-2 py-0.5 focus:border-foreground/50 outline-hidden"
                                 autoFocus
                               />
                             );
@@ -4149,7 +4149,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = e.target.value.trim();
                               if (v !== (item.room || "")) updateItemField(item.id, { room: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -4167,7 +4167,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = e.target.value.trim();
                               if (v !== (item.po_number || "")) updateItemField(item.id, { po_number: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -4185,7 +4185,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = e.target.value.trim();
                               if (v !== (item.cost_code || "")) updateItemField(item.id, { cost_code: v || null });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -4209,7 +4209,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 const v = parsed != null && parsed >= 0 ? parsed : null;
                                 if (v !== getLeadWeeksOverride(item.lead_time_weeks_override)) updateItemField(item.id, { lead_time_weeks_override: v });
                               }}
-                              className="flex-1 min-w-0 font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
+                              className="flex-1 min-w-0 font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                             />
                             <button
                               type="button"
@@ -4250,7 +4250,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = raw === "" ? null : Math.max(0, Math.min(100, parseInt(raw, 10))) / 100;
                               if (v !== item.deposit_pct_override) updateItemField(item.id, { deposit_pct_override: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none tabular-nums"
                           />
                         </label>
                       </div>
@@ -4272,7 +4272,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const next = v || null;
                               if (next !== item.ship_origin_country) updateItemField(item.id, { ship_origin_country: next });
                             }}
-                            className="font-body text-[11px] uppercase text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="font-body text-[11px] uppercase text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -4285,7 +4285,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = e.target.value || null;
                               if (v !== item.ship_mode) updateItemField(item.id, { ship_mode: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             <option value="">Auto</option>
                             <option value="road">Road</option>
@@ -4311,7 +4311,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = raw === "" ? null : Math.max(0, parseFloat(raw));
                               if (v !== (item.ship_cbm != null ? Number(item.ship_cbm) : null)) updateItemField(item.id, { ship_cbm: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
                           />
                         </label>
                         <label className="flex flex-col gap-0.5">
@@ -4330,7 +4330,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               const v = raw === "" ? null : Math.max(0, parseFloat(raw));
                               if (v !== (item.ship_weight_kg != null ? Number(item.ship_weight_kg) : null)) updateItemField(item.id, { ship_weight_kg: v });
                             }}
-                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                            className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
                           />
                         </label>
                         {(() => {
@@ -4360,7 +4360,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                     updateItemField(item.id, { crating_cents: v, crating_currency: v == null ? null : crateCcy } as any);
                                   }
                                 }}
-                                className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-none disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
+                                className="font-body text-[11px] text-foreground bg-transparent border border-border rounded px-2 py-1 focus:border-foreground/50 outline-hidden disabled:opacity-60 disabled:cursor-not-allowed tabular-nums"
                               />
                               <span className="font-body text-[9px] text-muted-foreground/70 tabular-nums">
                                 {convertedTotal > 0
@@ -4566,7 +4566,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         onBlur={() => persistInsurance({ insurance_notes: insuranceNotes || null })}
                         placeholder="Coverage notes — declared value, certificate holder, named insured, installation site…"
                         rows={2}
-                        className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
+                        className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden focus:ring-1 focus:ring-primary/30 resize-none transition-colors"
                       />
                     ) : insuranceNotes ? (
                       <p className="font-body text-[11px] text-muted-foreground italic">Coverage notes: {insuranceNotes}</p>
@@ -4901,7 +4901,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 onBlur={handleSaveNotes}
                 placeholder="Add any special requirements…"
                 rows={3}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-hidden focus:ring-1 focus:ring-primary/30 resize-none transition-colors text-[16px] sm:text-sm"
               />
               <button onClick={handleSaveNotes} className="font-body text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors">
                 Save Notes
@@ -5335,7 +5335,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             placeholder={isSuperAdmin
               ? "Optional — e.g. Client called to remove all items except Lady Bud side table."
               : "e.g. Please swap the sofa for the linen variant and remove item 3…"}
-            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-hidden focus:border-primary"
           />
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setReviseOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Cancel</button>
@@ -5359,7 +5359,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             onChange={(e) => setCancelReason(e.target.value)}
             rows={4}
             placeholder="e.g. Project on hold, client changed direction…"
-            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-none focus:border-primary"
+            className="w-full border border-border rounded-md p-3 font-body text-sm focus:outline-hidden focus:border-primary"
           />
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setCancelOpen(false)} className="px-3 py-1.5 border border-border rounded-md font-body text-xs hover:bg-muted">Keep quote</button>
@@ -5433,14 +5433,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               <input
                 value={emailSubject}
                 onChange={(e) => setEmailSubject(e.target.value)}
-                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-hidden focus:ring-1 focus:ring-ring"
               />
               <span className="uppercase tracking-[0.12em] text-muted-foreground pt-1">Message</span>
               <textarea
                 value={emailBody}
                 onChange={(e) => setEmailBody(e.target.value)}
                 rows={7}
-                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-none focus:ring-1 focus:ring-ring font-body text-xs leading-relaxed resize-y"
+                className="w-full border border-border rounded-md px-2 py-1.5 text-foreground bg-background focus:outline-hidden focus:ring-1 focus:ring-ring font-body text-xs leading-relaxed resize-y"
               />
               <span className="uppercase tracking-[0.12em] text-muted-foreground">Attachment</span>
               <a

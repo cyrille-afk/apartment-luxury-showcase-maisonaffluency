@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "@/lib/router-compat";
 import { ChevronRight, FolderKanban, Home, ChevronDown } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,7 +170,7 @@ export default function TradeBreadcrumb({
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  className={`${isLast ? leafCls : linkCls} rounded-sm px-1 -mx-1 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary`}
+                  className={`${isLast ? leafCls : linkCls} rounded-sm px-1 -mx-1 hover:bg-muted/40 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary`}
                 >
                   {seg.icon}
                   {seg.label}

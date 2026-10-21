@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";

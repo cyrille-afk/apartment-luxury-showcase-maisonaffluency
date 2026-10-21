@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ArrowUp, ChevronDown, Clock, Download, FileText, ImagePlus, Loader2, Plus, Search, Square, Trash2, X } from "lucide-react";
 import { renderCurationPdf } from "@/lib/curationExport";
@@ -390,7 +390,7 @@ export default function TradeConcierge() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name or product…"
-                  className="h-7 w-full rounded-sm border border-border/60 bg-background py-1 pl-8 pr-8 text-[11px] text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                  className="h-7 w-full rounded-sm border border-border/60 bg-background py-1 pl-8 pr-8 text-[11px] text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-hidden"
                 />
                 {search && (
                   <button type="button" aria-label="Clear search" onClick={() => setSearch("")}
@@ -403,7 +403,7 @@ export default function TradeConcierge() {
             {threadsLoaded && pastItems.length > 0 && (
               <div className="mb-3">
                 <button type="button" onClick={() => setFiltersOpen((o) => !o)} aria-expanded={filtersOpen}
-                  className="flex w-full items-center justify-between rounded-sm border border-border/60 bg-background px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground focus:outline-none">
+                  className="flex w-full items-center justify-between rounded-sm border border-border/60 bg-background px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-accent hover:text-foreground focus:outline-hidden">
                   <span className="flex items-center gap-1.5">
                     Filter &amp; Sort
                     {(filtersActive || sortBy !== "date-desc") && <span className="h-1 w-1 rounded-full bg-accent" aria-hidden />}
@@ -415,7 +415,7 @@ export default function TradeConcierge() {
                     <div className="grid grid-cols-3 gap-1.5">
                       <div className="relative">
                         <select value={dateRange} onChange={(e) => setDateRange(e.target.value as typeof dateRange)} aria-label="Filter by date"
-                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-hidden">
                           <option value="all">All dates</option>
                           <option value="7">Last 7 days</option>
                           <option value="30">Last 30 days</option>
@@ -425,7 +425,7 @@ export default function TradeConcierge() {
                       </div>
                       <div className="relative">
                         <select value={designerSel} onChange={(e) => setDesignerSel(e.target.value)} aria-label="Filter by designer"
-                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-hidden">
                           <option value="all">All designers</option>
                           {designerNames.map((d) => <option key={d} value={d}>{d}</option>)}
                         </select>
@@ -433,7 +433,7 @@ export default function TradeConcierge() {
                       </div>
                       <div className="relative">
                         <select value={projectSel} onChange={(e) => setProjectSel(e.target.value)} aria-label="Filter by project"
-                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                          className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-hidden">
                           <option value="all">All projects</option>
                           <option value="none">No project</option>
                           {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -443,7 +443,7 @@ export default function TradeConcierge() {
                     </div>
                     <div className="relative">
                       <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} aria-label="Sort curations"
-                        className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-none">
+                        className="h-7 w-full appearance-none rounded-sm border border-border/60 bg-background py-1 pl-2 pr-5 text-[11px] text-foreground focus:border-accent focus:outline-hidden">
                         <option value="date-desc">Sort: Newest first</option>
                         <option value="date-asc">Sort: Oldest first</option>
                         <option value="designer">Sort: Designer A–Z</option>

@@ -53,7 +53,7 @@ const FinishPresets = ({ object, onRestore }: { object: PlacedObject; onRestore:
           placeholder={hasFinish ? "Name this configuration" : "Apply a finish first"}
           disabled={!hasFinish}
           aria-label="Configuration name"
-          className="min-w-0 flex-1 border-b border-foreground/10 bg-transparent pb-1 text-xs outline-none placeholder:text-muted-foreground disabled:opacity-50"
+          className="min-w-0 flex-1 border-b border-foreground/10 bg-transparent pb-1 text-xs outline-hidden placeholder:text-muted-foreground disabled:opacity-50"
         />
         <button onClick={save} disabled={!hasFinish || !name.trim()} className={cn(microLabel, "text-foreground disabled:text-muted-foreground")}>Save</button>
       </div>

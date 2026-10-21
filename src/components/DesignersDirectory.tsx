@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect, createContext, useContext } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "@/lib/router-compat";
 import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Plus, SlidersHorizontal, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -2227,7 +2227,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter by designer…"
                 aria-label="Filter by designer"
-                className="w-full bg-transparent border-0 border-b border-border/60 focus:border-foreground/60 focus:outline-none pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/70 transition-colors duration-200 [&::-webkit-search-cancel-button]:hidden"
+                className="w-full bg-transparent border-0 border-b border-border/60 focus:border-foreground/60 focus:outline-hidden pl-6 pr-6 py-2 font-body text-sm placeholder:text-muted-foreground/70 transition-colors duration-200 [&::-webkit-search-cancel-button]:hidden"
               />
               {searchQuery && (
                 <button

@@ -3,10 +3,10 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { cn } from "@/lib/utils";
 import { priceRugVariantFromLabel, isRugCategory } from "@/lib/rugPricing";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem, Lock, LockOpen } from "lucide-react";
@@ -2912,7 +2912,7 @@ const TradeDesignersAdmin = () => {
                                     spellCheck={false}
                                     autoCorrect="off"
                                     autoCapitalize="words"
-                                    className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-none focus:border-foreground transition-colors"
+                                    className="w-full pb-1 border-b border-border bg-transparent font-body text-xs text-foreground outline-hidden focus:border-foreground transition-colors"
                                     placeholder="Caption (e.g. Designer Name, 'Title', 2025)"
                                   />
                                   {isVideo && (

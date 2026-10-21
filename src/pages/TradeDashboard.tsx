@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Helmet } from "react-helmet-async";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -13,7 +13,7 @@ import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/ske
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { NewInquiriesAlert } from "@/components/trade/NewInquiriesAlert";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";

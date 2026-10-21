@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, ArrowUpRight, Box, ChevronDown, RefreshCw, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

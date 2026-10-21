@@ -8,7 +8,7 @@
  * INTERNAL_BACKLINKS_LOW + PAGE_DEPTH_DEEP across /designers/*.
  */
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { sortNameKey } from "@/lib/nameFormat";
 import designersSeed from "@/data/designersIndex.json";

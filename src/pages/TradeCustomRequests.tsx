@@ -5,7 +5,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { Loader2, Wand2, Inbox, Save, ShieldCheck, History, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -271,7 +271,7 @@ export default function TradeCustomRequests() {
                                 [r.id]: { ...getDraft(r), status: e.target.value },
                               }))
                             }
-                            className="bg-background border border-border rounded-md px-2 py-1.5 font-body text-xs text-foreground focus:outline-none focus:border-foreground/40"
+                            className="bg-background border border-border rounded-md px-2 py-1.5 font-body text-xs text-foreground focus:outline-hidden focus:border-foreground/40"
                           >
                             {STATUS_OPTIONS.map((s) => (
                               <option key={s} value={s}>{STATUS_LABELS[s]}</option>
@@ -289,7 +289,7 @@ export default function TradeCustomRequests() {
                         }
                         rows={4}
                         placeholder="Write your concierge response — pricing guidance, lead time, fabric availability, etc."
-                        className="w-full bg-background border border-border rounded-md px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground/40 resize-y"
+                        className="w-full bg-background border border-border rounded-md px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground/40 resize-y"
                       />
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-body text-[10px] text-muted-foreground/70">

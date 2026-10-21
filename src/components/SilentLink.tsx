@@ -1,5 +1,5 @@
 import { forwardRef, useRef, MouseEvent, AnchorHTMLAttributes } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 interface SilentLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
   to: string;

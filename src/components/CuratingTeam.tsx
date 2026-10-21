@@ -70,7 +70,7 @@ const CuratingTeam = () => {
               <DialogTrigger asChild>
                 <div className="relative cursor-pointer group mb-4">
                   <button 
-                    className="relative aspect-square rounded-full overflow-hidden bg-primary/5 border border-primary/20 w-24 h-24 md:w-32 md:h-32 transition-transform duration-300 group-hover:scale-105 group-hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="relative aspect-square rounded-full overflow-hidden bg-primary/5 border border-primary/20 w-24 h-24 md:w-32 md:h-32 transition-transform duration-300 group-hover:scale-105 group-hover:border-primary/30 focus:outline-hidden focus:ring-2 focus:ring-primary/20"
                     aria-label={`View ${member.name}'s profile`}
                     onClick={() => setSelectedMember(member)}
                   >

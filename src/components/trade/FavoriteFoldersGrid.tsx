@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { FolderOpen, Plus, MoreVertical, Trash2, Pencil } from "lucide-react";
 import { useFavoriteFolders } from "@/hooks/useFavoriteFolders";
 import { Button } from "@/components/ui/button";

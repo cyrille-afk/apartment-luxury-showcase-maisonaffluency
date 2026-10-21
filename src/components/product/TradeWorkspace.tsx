@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { FileDown, Loader2, Laptop, Check } from "lucide-react";
 import { toast } from "sonner";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";

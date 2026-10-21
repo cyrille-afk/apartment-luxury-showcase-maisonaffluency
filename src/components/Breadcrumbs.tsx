@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ChevronRight } from "lucide-react";
 
 export interface Crumb {

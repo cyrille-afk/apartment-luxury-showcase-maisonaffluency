@@ -307,7 +307,7 @@ export default function ExpandableSpec({
                 onClick={() => pick(i)}
                 className={cn(
                   "w-full text-left font-body text-xs md:text-sm py-3 md:py-2 leading-relaxed whitespace-normal transition-colors active:opacity-60",
-                  "focus:outline-none focus-visible:bg-muted/40",
+                  "focus:outline-hidden focus-visible:bg-muted/40",
                   "md:border-0 border-b border-border/60 last:border-0",
                   isDisabled
                     ? "line-through text-muted-foreground/50 cursor-not-allowed"
@@ -337,7 +337,7 @@ export default function ExpandableSpec({
           className={cn(
             "flex items-center w-full py-2.5 md:py-4 text-left",
             "font-body text-sm",
-            "focus:outline-none focus-visible:ring-0",
+            "focus:outline-hidden focus-visible:ring-0",
             "hover:text-foreground transition-colors",
             !hasSelection
               ? "text-muted-foreground"
@@ -364,7 +364,7 @@ export default function ExpandableSpec({
             role="listbox"
             tabIndex={-1}
             onKeyDown={onListKey}
-            className="pb-3 pr-2 flex flex-col focus:outline-none"
+            className="pb-3 pr-2 flex flex-col focus:outline-hidden"
           >
             {optionNodes}
           </ul>
@@ -388,7 +388,7 @@ export default function ExpandableSpec({
                 <ul
                   role="listbox"
                   tabIndex={-1}
-                  className="flex flex-col max-h-[58vh] overflow-y-auto overscroll-contain focus:outline-none"
+                  className="flex flex-col max-h-[58vh] overflow-y-auto overscroll-contain focus:outline-hidden"
                 >
                   {optionNodes}
                 </ul>

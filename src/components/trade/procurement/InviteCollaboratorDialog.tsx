@@ -13,9 +13,10 @@ const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
 // Share links must always point at the public production domain — the preview
 // runs on a sandbox origin (lovableproject.com) that recipients cannot use.
-const SHARE_ORIGIN = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-  ? window.location.origin
-  : "https://www.maisonaffluency.com";
+const shareOrigin = () =>
+  typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? window.location.origin
+    : "https://www.maisonaffluency.com";
 
 /** Masked display alias — never shows the raw token. */
 function maskLink(url: string) {
@@ -51,7 +52,7 @@ export default function InviteCollaboratorDialog({ open, onOpenChange, boardId, 
     }
     const { id, token } = data as { id: string; token: string };
     const { data: slug } = await supabase.rpc("board_share_slug" as any, { _board_id: boardId });
-    const url = `${SHARE_ORIGIN}/shared/board/${(slug as string) || token}`;
+    const url = `${shareOrigin()}/shared/board/${(slug as string) || token}`;
     setLink(url);
     const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
       body: { templateName: "board-collaborator-invite", recipientEmail: parsed.data, idempotencyKey: `board-invite-${id}`, templateData: { token } },

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "@/lib/router-compat";
 import { AlertTriangle, ArrowLeft, Check, CheckCircle2, Download, Loader2, Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,7 +97,7 @@ const PriceCell = ({ value, currency, saving, onSave, placeholder }: PriceCellPr
             if (e.key === "Enter") commit();
             if (e.key === "Escape") setEditing(false);
           }}
-          className="w-24 px-1.5 py-0.5 border border-border rounded text-xs font-body bg-background text-foreground outline-none focus:ring-1 focus:ring-accent text-right"
+          className="w-24 px-1.5 py-0.5 border border-border rounded text-xs font-body bg-background text-foreground outline-hidden focus:ring-1 focus:ring-accent text-right"
           placeholder={placeholder ?? "0"}
         />
         <button onClick={commit} disabled={saving} className="p-0.5 text-emerald-600 hover:text-emerald-700">

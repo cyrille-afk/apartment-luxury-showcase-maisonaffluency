@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, X } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";

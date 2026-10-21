@@ -51,7 +51,7 @@ export default function CatalogDrawer<T extends VisualiserCatalogItem>({ product
         <div className="mt-3 flex items-center gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2 border-b border-border py-2">
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search the collection" aria-label="Search the collection" className="min-w-0 w-full bg-transparent font-body text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search the collection" aria-label="Search the collection" className="min-w-0 w-full bg-transparent font-body text-sm text-foreground outline-hidden placeholder:text-muted-foreground" />
           </div>
           <span aria-live="polite" className="shrink-0 font-body text-xs tabular-nums text-muted-foreground">{loading ? "Loading…" : `${matching.length} ${matching.length === 1 ? "item" : "items"}`}</span>
         </div>

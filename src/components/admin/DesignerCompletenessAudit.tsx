@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChevronRight, CheckCircle2, AlertCircle, Circle, Search } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 interface DesignerStatus {
   id: string;

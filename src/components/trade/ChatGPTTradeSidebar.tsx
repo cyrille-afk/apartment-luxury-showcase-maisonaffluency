@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { ChevronDown, FolderPlus, Package, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -302,7 +302,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search the collection"
-            className="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-0"
           />
           <Button
             variant="ghost"
@@ -324,7 +324,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
               id="chatgpt-trade-category"
               value={category}
               onChange={(event) => { setCategory(event.target.value); setFiltersOpen(false); }}
-              className="mt-1.5 w-full border-b border-border bg-transparent py-2 font-body text-sm text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="mt-1.5 w-full border-b border-border bg-transparent py-2 font-body text-sm text-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="all">All Categories</option>
               {categories.map((value) => <option key={value} value={value}>{value}</option>)}
@@ -347,7 +347,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
           <div className="flex flex-col gap-5">
             {products.map((product) => (
               <article key={`${product.brand_name}-${product.product_name}-${product.id}`} className="group min-w-0 bg-card p-2.5">
-                <Link to={productUrl(product)} state={{ from: location.pathname }} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`View ${product.product_name}`}>
+                <Link to={productUrl(product)} state={{ from: location.pathname }} className="block focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring" aria-label={`View ${product.product_name}`}>
                 <div className="flex aspect-[5/4] w-full items-center justify-center overflow-hidden bg-[hsl(var(--product-canvas))]">
                   {product.image_url ? <img src={optimizeImageUrl(product.image_url, "f_auto,q_auto,w_400,dpr_auto,c_limit")} alt={product.product_name} loading="lazy" decoding="async" width={400} height={320} sizes="400px" className="h-full w-full object-contain object-center p-3 transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none" /> : <Package className="size-6 text-muted-foreground/50" aria-hidden="true" />}
                 </div>
@@ -409,7 +409,7 @@ function TradeSidebarFeed({ optimistic = false }: { optimistic?: boolean }) {
             )}
             {!creating ? <Button variant="ghost" type="button" disabled={!canEdit || studioLoading || saving} onClick={() => setCreating(true)} className="mt-2 h-11 w-full justify-start gap-2 px-0 font-body text-xs text-foreground"><FolderPlus className="size-4" /> Create New Project Workflow</Button> : (
               <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void createAndStage(); }}>
-                <input autoFocus aria-label="New project name" value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} placeholder="Project name" className="min-w-0 flex-1 border-b border-border bg-transparent px-1 py-2 font-body text-sm text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                <input autoFocus aria-label="New project name" value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} placeholder="Project name" className="min-w-0 flex-1 border-b border-border bg-transparent px-1 py-2 font-body text-sm text-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-ring" />
                 <Button size="sm" type="submit" disabled={saving || !newProjectName.trim()}>Create</Button>
                 <Button size="icon-sm" variant="ghost" type="button" aria-label="Cancel new project" onClick={() => setCreating(false)}><X className="size-4" /></Button>
               </form>

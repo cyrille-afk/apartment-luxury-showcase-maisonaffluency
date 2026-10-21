@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Search, Users, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
@@ -59,7 +59,7 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
         navigate(`/trade/designers/${brand.slug}`);
       }}
       className={cn(
-        "group text-left rounded-xl overflow-hidden border transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-background",
+        "group text-left rounded-xl overflow-hidden border transition-all hover:shadow-xl focus:outline-hidden focus:ring-2 focus:ring-primary/30 bg-background",
         isAtelier
           ? "border-primary/40 ring-1 ring-primary/20 hover:border-primary/60"
           : "border-border hover:border-foreground/30"
@@ -332,7 +332,7 @@ const TradeDesigners = () => {
                 placeholder="Search designers, materials…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+                className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-md font-body text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary/30 transition-colors"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">

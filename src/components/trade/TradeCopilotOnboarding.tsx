@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-compat";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2, Check, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -167,7 +167,7 @@ export default function TradeCopilotOnboarding() {
                   placeholder={DEFAULT_NAME}
                   maxLength={32}
                   disabled={busy}
-                  className="w-full bg-background border border-border focus:border-foreground/40 text-foreground placeholder:text-muted-foreground/60 px-5 py-3.5 font-body text-sm rounded-sm transition-colors outline-none focus:ring-1 focus:ring-foreground/10 disabled:opacity-60"
+                  className="w-full bg-background border border-border focus:border-foreground/40 text-foreground placeholder:text-muted-foreground/60 px-5 py-3.5 font-body text-sm rounded-sm transition-colors outline-hidden focus:ring-1 focus:ring-foreground/10 disabled:opacity-60"
                 />
                 <p className="mt-2 font-body text-[10px] text-muted-foreground tracking-wide">
                   This is how your copilot will introduce itself across your trade dashboard.

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, Download, Loader2, Lock, Printer, Share2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";

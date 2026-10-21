@@ -20,7 +20,7 @@ import {
   Truck,
   Tag,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 
 type BillingMode = "agent_commission" | "net_buy" | "msrp_only";
 

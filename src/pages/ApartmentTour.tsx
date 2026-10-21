@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";

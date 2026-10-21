@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PaymentMethod } from "@/components/product/SelectionDrawer";

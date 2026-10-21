@@ -73,7 +73,7 @@ export default function TradePriceToggle({ className = "" }: TradePriceTogglePro
             setShowTradePrice(!showTradePrice);
           }
         }}
-        className="inline-flex items-center border border-border rounded-md p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex items-center border border-border rounded-md p-0.5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span
           className={`px-2 py-1 text-xs font-body rounded transition-colors ${

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "@/lib/router-compat";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
 import { Helmet } from "react-helmet-async";

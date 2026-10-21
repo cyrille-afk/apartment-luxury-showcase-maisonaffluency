@@ -25,7 +25,7 @@ import {
 import ClientDocumentsSection from "@/components/trade/ClientDocumentsSection";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { useClientTierUpgrades, tierUpgradeLabel } from "@/hooks/useClientTierUpgrades";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { SHIPPING_COUNTRIES } from "@/lib/shippingDestination";
 import { clientLocationDetails, currencyForClientCountry as currencyForCountry } from "@/lib/clientLocation";
 
@@ -544,7 +544,7 @@ export default function TradeClients() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search clients or contacts…"
-          className="w-full bg-transparent border-0 border-b border-border/60 pl-7 pr-2 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-foreground transition-colors"
+          className="w-full bg-transparent border-0 border-b border-border/60 pl-7 pr-2 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-hidden focus:border-foreground transition-colors"
         />
       </div>
 

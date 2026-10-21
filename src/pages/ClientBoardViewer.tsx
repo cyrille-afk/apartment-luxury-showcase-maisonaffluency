@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "@/lib/router-compat";
 import { Check, X, MessageSquare, Send, Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -272,7 +272,7 @@ const ClientBoardViewer = () => {
                           <Link
                             to={`/product/${item.product_id}`}
                             state={{ from: location.pathname + location.search }}
-                            className="aspect-square bg-muted relative block focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="aspect-square bg-muted relative block focus:outline-hidden focus:ring-2 focus:ring-ring"
                             aria-label={`Open ${item.product?.product_name ?? "product"} sheet`}
                           >
                           {item.product?.image_url ? (

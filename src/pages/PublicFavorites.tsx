@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { CldPicture } from "@/components/ui/CldPicture";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowLeft, Heart, Trash2 } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { motion, AnimatePresence } from "framer-motion";

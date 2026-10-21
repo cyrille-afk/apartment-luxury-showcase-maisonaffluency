@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { PortraitCtaLink } from "@/components/ui/portrait-cta-link";
-import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "@/lib/router-compat";
 import { tradeGalleryReturnPath } from "@/lib/tradeGalleryState";
 import { absoluteUrl } from "@/config/site";
 import { Helmet } from "react-helmet-async";
@@ -437,7 +437,7 @@ function ProfileCollapsible({
 
           aria-expanded={expanded}
           aria-controls={panelId}
-          className="group inline-flex items-center gap-3 px-7 py-3 border border-foreground/25 text-foreground font-body text-[11px] tracking-[0.22em] uppercase hover:border-foreground/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          className="group inline-flex items-center gap-3 px-7 py-3 border border-foreground/25 text-foreground font-body text-[11px] tracking-[0.22em] uppercase hover:border-foreground/60 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
           {expanded ? "Close full profile" : "View full profile"}
           {expanded ? (
@@ -1705,7 +1705,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           disabled={categories.length === 0}
-                          className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-none disabled:opacity-40"
+                          className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-hidden disabled:opacity-40"
                         >
                           <SlidersHorizontal className="h-3 w-3" strokeWidth={1.5} aria-hidden="true" />
                           Filter
@@ -1718,7 +1718,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           aria-label="Sort products"
-                          className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-none"
+                          className="inline-flex items-center gap-1.5 font-body text-[10px] uppercase tracking-widest text-foreground focus:outline-hidden"
                         >
                           <span className="max-w-[38vw] truncate">
                             {sortMode === "price-asc"
@@ -1805,7 +1805,7 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
                           value={sortMode}
                           onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
                           aria-label="Sort products"
-                          className="appearance-none bg-transparent border border-border/70 rounded-none px-3 py-2 pr-8 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none focus:border-foreground transition-colors"
+                          className="appearance-none bg-transparent border border-border/70 rounded-none px-3 py-2 pr-8 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-hidden focus:border-foreground transition-colors"
                           style={{
                             backgroundImage:
                               "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1'><path d='M6 9l6 6 6-6'/></svg>\")",

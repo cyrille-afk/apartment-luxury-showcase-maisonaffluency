@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router-dom";
+import { useParams } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";

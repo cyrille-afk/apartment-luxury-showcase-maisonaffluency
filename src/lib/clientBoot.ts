@@ -1,0 +1,146 @@
+/* Browser start-up work ported from the pre-TanStack main.tsx. Runs once, client-only. */
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { loadOgBridgeIndex } from "@/lib/ogBridgeResolver";
+import { startEnvironmentIndexingGuard } from "@/lib/environmentIndexingGuard";
+import { bootIossRouting } from "@/config/iossConfig";
+import { ensureStorageHeadroom, installStorageQuotaGuard } from "@/lib/storageReclaim";
+import { installFunctionsAuthRetry } from "@/lib/installFunctionsAuthRetry";
+
+let booted = false;
+
+export function bootClient(): void {
+  if (booted || typeof window === "undefined") return;
+  booted = true;
+  // Refresh the sign-in and retry once whenever any backend function says 401.
+  installFunctionsAuthRetry();
+
+  const isTradeRoute = window.location.pathname.includes("/trade");
+  document.documentElement.classList.toggle("hide-whatsapp-widget", isTradeRoute);
+
+  // Background edge-function failures must never blank an otherwise healthy page.
+  // The caller still receives its error and remains responsible for its own UI.
+  window.addEventListener("unhandledrejection", (e) => {
+    const r: any = e.reason;
+    const name = r?.name ?? "";
+    const msg = String(r?.message ?? r ?? "");
+    const status = r?.context?.status ?? r?.status;
+    if (
+      /Functions(Http|Fetch|Relay)Error/.test(name) ||
+      status === 401 ||
+      /Edge function returned (?:401|5\d\d)|IDLE_TIMEOUT|Failed to send a request to the Edge Function/i.test(msg)
+    ) {
+      console.warn("[backend] background edge function failure:", status ?? name);
+      e.preventDefault();
+    }
+  });
+
+  // Keep room for the login session: a full browser store makes sign-in fail.
+  installStorageQuotaGuard();
+  ensureStorageHeadroom();
+
+  // Align the browser's tax preview with the server's EU routing switch.
+  bootIossRouting();
+
+  // Block indexing + rewrite canonicals on any preview/staging/dev host.
+  startEnvironmentIndexingGuard();
+
+  // Warm the OG bridge manifest so share links resolve to real files, never 404
+  // guesses. Deferred to idle: the manifest is ~84 KB of JSON and parsing it on
+  // the critical path added a long main-thread task on mobile.
+  const __warmOgBridgeIndex = () => { void loadOgBridgeIndex(); };
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(__warmOgBridgeIndex, { timeout: 5000 });
+  } else {
+    setTimeout(__warmOgBridgeIndex, 2500);
+  }
+
+
+  const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
+
+  function isStandaloneHomeLaunch(): boolean {
+    if (typeof window === "undefined") return false;
+    const isStandalone = isPwaStandaloneDisplay();
+
+    return isStandalone && window.location.pathname === "/" && !window.location.hash;
+  }
+
+  function pinStandaloneHomeLaunchToHero() {
+    if (!isStandaloneHomeLaunch()) return;
+
+    try {
+      if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+      sessionStorage.removeItem("__scroll_y");
+    } catch {
+      /* noop */
+    }
+
+    const startedAt = performance.now();
+    let userInteracted = false;
+    const stop = () => { userInteracted = true; };
+    const keepAtTop = () => {
+      if (userInteracted) return;
+      window.scrollTo(0, 0);
+      if (performance.now() - startedAt < 2500) requestAnimationFrame(keepAtTop);
+    };
+
+    window.addEventListener("touchstart", stop, { once: true, passive: true });
+    window.addEventListener("pointerdown", stop, { once: true, passive: true });
+    window.addEventListener("wheel", stop, { once: true, passive: true });
+    window.addEventListener("keydown", stop, { once: true });
+    keepAtTop();
+  }
+
+  /**
+   * Clears any leftover service worker / Cache Storage from older builds.
+   * Runs at most once per browser (tracked in localStorage) and never reloads
+   * the page — reloading here was causing the preview/test environment to
+   * refresh on its own in a loop whenever a SW or cache happened to exist.
+   */
+  async function clearStaleFrontendCachesOnce() {
+    if (typeof window === "undefined") return;
+    try {
+      if (localStorage.getItem(CACHE_RESET_KEY)) return;
+      localStorage.setItem(CACHE_RESET_KEY, "true");
+    } catch {
+      return;
+    }
+
+    if ("serviceWorker" in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      } catch { /* noop */ }
+    }
+
+    if ("caches" in window) {
+      try {
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map((k) => caches.delete(k)));
+      } catch { /* noop */ }
+    }
+  }
+
+  void clearStaleFrontendCachesOnce().then(() => {
+    // Do not register an app-shell service worker. The published /sw.js is now
+    // a one-release cleanup worker so stale installed PWAs fetch the current UI.
+  });
+  pinStandaloneHomeLaunchToHero();
+
+  // Defer non-critical boot work (build-update watcher + RUM) off the initial
+  // JS critical path. These end up in their own async chunks, so Lighthouse
+  // stops flagging them as "unused JavaScript" during LCP.
+  const __deferBootWork = () => {
+    void import("@/lib/buildVersionWatcher").then((m) => m.startBuildVersionWatcher());
+    void import("@/lib/rum").then((m) => m.initRum());
+  };
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(__deferBootWork, { timeout: 3000 });
+  } else {
+    setTimeout(__deferBootWork, 1500);
+  }
+
+
+  // CSS is now loaded (import above is synchronous in the bundled output).
+  // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
+  document.documentElement.classList.add("css-ready");
+}

@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -283,7 +283,7 @@ export default function TradeAdminInquiries() {
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search name, email, or message…"
               aria-label="Search inquiries"
-              className="w-full rounded-md border border-border bg-background py-1.5 pl-9 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+              className="w-full rounded-md border border-border bg-background py-1.5 pl-9 pr-8 text-sm focus:outline-hidden focus:ring-1 focus:ring-accent"
             />
             {searchInput && (
               <button
@@ -555,7 +555,7 @@ export default function TradeAdminInquiries() {
                       }
                     }}
                     rows={3}
-                    className="mt-1 w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="mt-1 w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-accent"
                     placeholder="Internal notes about this inquiry…"
                   />
                 </div>

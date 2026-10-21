@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 interface Props {
   /** Optional path for the menu button. Defaults to /designers */

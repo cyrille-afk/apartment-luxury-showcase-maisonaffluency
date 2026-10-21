@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "@/lib/router-compat";
 import { ArrowLeft, FileDown, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProject } from "@/hooks/useProjects";

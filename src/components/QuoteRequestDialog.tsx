@@ -190,7 +190,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 required
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
               />
             </div>
             <div>
@@ -202,7 +202,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 required
                 value={form.firstName}
                 onChange={(e) => update("firstName", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
               />
             </div>
             <div>
@@ -214,7 +214,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 required
                 value={form.lastName}
                 onChange={(e) => update("lastName", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
               />
             </div>
             <div>
@@ -227,7 +227,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
                 placeholder={getPhonePlaceholder(form.country)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] placeholder:text-muted-foreground/50"
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px] placeholder:text-muted-foreground/50"
               />
             </div>
           </div>
@@ -239,7 +239,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               <select
                 value={form.country}
                 onChange={(e) => update("country", e.target.value)}
-                className={`w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm outline-none focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px] ${form.country ? "text-foreground" : "text-muted-foreground"}`}
+                className={`w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm outline-hidden focus:border-foreground transition-colors appearance-none cursor-pointer text-[16px] ${form.country ? "text-foreground" : "text-muted-foreground"}`}
               >
                 <option value="" disabled>— Select country —</option>
                 {COUNTRIES.map((c) => (
@@ -253,7 +253,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
                 type="text"
                 value={form.city}
                 onChange={(e) => update("city", e.target.value)}
-                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px]"
+                className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-hidden focus:border-foreground transition-colors text-[16px]"
               />
             </div>
           </div>
@@ -299,7 +299,7 @@ const QuoteRequestDialog = ({ open, onOpenChange, productName, designerName }: Q
               onChange={(e) => update("message", e.target.value)}
               placeholder="Please specify dimensions & finish required if non standard."
               rows={3}
-              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-muted-foreground placeholder:text-muted-foreground/60 outline-none focus:border-foreground transition-colors resize-y text-[16px]"
+              className="w-full mt-1 pb-2 border-b border-border bg-transparent font-body text-sm text-muted-foreground placeholder:text-muted-foreground/60 outline-hidden focus:border-foreground transition-colors resize-y text-[16px]"
             />
           </div>
 

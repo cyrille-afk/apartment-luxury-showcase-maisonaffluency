@@ -5,7 +5,7 @@ import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Ensure image URLs are absolute so the AI gateway can fetch them */
@@ -189,7 +189,7 @@ const CategoryFilterBar = ({
       <select
         value={category}
         onChange={(e) => { onCategoryChange(e.target.value); onSubcategoryChange(""); }}
-        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
       >
         <option value="">All Categories</option>
         {CATEGORY_ORDER.map((c) => (
@@ -200,7 +200,7 @@ const CategoryFilterBar = ({
         <select
           value={subcategory}
           onChange={(e) => onSubcategoryChange(e.target.value)}
-          className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+          className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
         >
           <option value="">All {category}</option>
           {subcategories.map((s) => (
@@ -211,7 +211,7 @@ const CategoryFilterBar = ({
       <select
         value={brand}
         onChange={(e) => onBrandChange(e.target.value)}
-        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+        className="flex-1 min-w-[100px] border border-border rounded-md px-2 py-1.5 font-body text-xs bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
       >
         <option value="">All Brands</option>
         {brands.map((b) => (
@@ -1491,7 +1491,7 @@ const TradeAxonometric = () => {
                         placeholder="Search platform products…"
                         value={compositeProductSearch}
                         onChange={(e) => setCompositeProductSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                        className="w-full pl-9 pr-4 py-2 border border-border rounded-md font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                       />
                     </div>
                     <CategoryFilterBar
@@ -1858,7 +1858,7 @@ const TradeAxonometric = () => {
                           placeholder="Search products…"
                           value={aiProductSearch}
                           onChange={(e) => setAiProductSearch(e.target.value)}
-                          className="w-full pl-7 pr-3 py-1.5 border border-border rounded-md font-body text-[11px] bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                          className="w-full pl-7 pr-3 py-1.5 border border-border rounded-md font-body text-[11px] bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20"
                         />
                       </div>
                       <CategoryFilterBar
@@ -1986,7 +1986,7 @@ const TradeAxonometric = () => {
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAiPrompt(); } }}
                       placeholder={aiTextureUrl ? '"Apply to the back wall" or "the wall behind the sofa"' : aiAttachedProduct ? '"Replace the sofa with this product"' : '"Change the sofa to dark blue velvet"'}
                       disabled={aiSending}
-                      className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
+                      className="flex-1 border border-border rounded-md px-3 py-2 font-body text-xs bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground/20 disabled:opacity-50"
                     />
                     <Button size="sm" onClick={sendAiPrompt} disabled={aiSending || !aiPrompt.trim()}>
                       {aiSending ? <DotCircleLoader size="sm" className="w-3.5 h-3.5" /> : <Wand2 className="w-3.5 h-3.5" />}
