@@ -28,7 +28,8 @@ try {
 } catch {
   // .env not present in some environments — fall back to process.env
 }
-const DIST = path.join(ROOT, "dist");
+// TanStack Start serves static files from dist/client; fall back to dist for older layouts.
+const DIST = fs.existsSync(path.join(ROOT, "dist", "client")) ? path.join(ROOT, "dist", "client") : path.join(ROOT, "dist");
 // Single global production origin. Every <loc> in the tree is built from this
 // exact prefix — never a relative path, never a staging/preview host, never www.
 const BASE_URL = "https://www.maisonaffluency.com";
