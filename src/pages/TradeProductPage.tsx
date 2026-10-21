@@ -19,7 +19,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { formatProductSubtitleLine } from "@/lib/subtitleDisplay";
 import {
-  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass,
+  Heart, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, Minus, Plus, Pin, Award, Compass, X,
   Maximize2 as FsIcon,
   ChevronLeft,
   ChevronRight,
@@ -2256,8 +2256,9 @@ const TradeProductPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setViewer3dOpen(false); setViewer3dKey((k) => k + 1); setWorkspaceAsset(visibleImageIndices ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? 0)) : (galleryActiveIndex ?? 0)); }}
-                className="absolute left-3 bottom-12 z-10 rounded-full border border-border/40 bg-background/80 px-3 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-foreground/80 backdrop-blur-md hover:text-foreground"
+                className="absolute left-3 top-3 z-10 flex h-9 items-center gap-1.5 rounded-full border border-border/40 bg-background/80 px-3 font-body text-[10px] uppercase tracking-[0.14em] text-foreground/80 backdrop-blur-md hover:text-foreground"
               >
+                <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Exit 3D
               </button>
             )}
