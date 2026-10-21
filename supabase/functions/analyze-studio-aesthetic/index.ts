@@ -6,7 +6,8 @@
 // Invoked by `trade-program-signup` (service role) on step-3 completion, or by
 // an admin from the Trade Applications queue (re-run).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getMetaToken } from "../_shared/metaToken.ts";
+import { checkInstagram, getMetaToken } from "../_shared/metaToken.ts";
+import { instagramRetrievalFailure } from "../_shared/instagramRetrievalFailure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { requireAdmin } from "../_shared/auth.ts";
 import { modelFor } from "../_shared/aiModels.ts";
@@ -323,7 +324,7 @@ serve(async (req) => {
   const { text, images, notes, source, screenshots = [] } = await gather(account.website_or_ig, account.email);
   const sourceUrl = source ?? initialUrl ?? "";
   run.found = images.length;
-  run.reader = notes.filter((n) => /blocked|could not retrieve|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
+  run.reader = notes.filter((n) => /^Instagram /i.test(n) || /blocked|could not retrieve|unreachable|not configured|error|unavailable|429|malformed|empty capture/i.test(n));
   run.rl += notes.filter((n) => /\(429\)/.test(n)).length;
   const priorImages = Array.isArray(dna?.image_urls)
     ? dna.image_urls.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("https://"))
@@ -333,7 +334,8 @@ serve(async (req) => {
   // alone: keep prior images and manual tags, mark it retryable.
   if (!text && images.length === 0 && screenshots.length === 0) {
     if (resolveStudioSource(account.website_or_ig).instagramHandle) {
-      const error = "Instagram not checked automatically — our Instagram connection needs reconnecting (see Automatic Instagram checks above). The studio is not marked down for this.";
+      const connection = await checkInstagram(await getMetaToken());
+      const { message: error } = instagramRetrievalFailure(connection, notes);
       await supabase.from("studio_aesthetic_dna").update({ status: "failed", error }).eq("trade_account_id", id);
       const update = unverifiedPortfolioUpdate(Boolean(dna?.analyzed_at));
       if (Object.keys(update).length) await supabase.from("trade_accounts").update(update).eq("id", id);
