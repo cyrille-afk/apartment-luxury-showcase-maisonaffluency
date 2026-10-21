@@ -51,7 +51,11 @@ function checkImage(src: string): Promise<string | null> {
   if (!imageCache.has(src)) {
     imageCache.set(src, (async () => {
       if (!/^https:\/\//.test(src)) return `image not absolute https: ${src}`;
-      const r = await fetch(src, { headers: { "user-agent": UA } });
+      let r = await fetch(src, { headers: { "user-agent": UA } });
+      for (let tries = 0; r.status === 429 && tries < 3; tries++) {
+        await new Promise((ok) => setTimeout(ok, 2000 * (tries + 1)));
+        r = await fetch(src, { headers: { "user-agent": UA } });
+      }
       if (!r.ok) return `image HTTP ${r.status}`;
       const type = r.headers.get("content-type") || "";
       if (!/image\/(jpeg|png|webp)/.test(type)) return `image content-type ${type}`;
