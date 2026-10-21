@@ -46,25 +46,7 @@ const ApartmentTour = () => {
     <>
       <Helmet>
         <title>A Private Apartment Tour — Maison Affluency Singapore</title>
-        <meta property="og:title" content="A Private Apartment Tour — Maison Affluency" />
-        <meta property="og:description" content="A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency — collectible furniture, artisan craft, skyline views." />
-        <meta property="og:url" content={CANONICAL_URL} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:type" content="video.other" />
-        <meta property="og:video" content={VIDEO_URL} />
-        <meta property="og:video:type" content="video/mp4" />
-        <meta property="og:video:width" content="1920" />
-        <meta property="og:video:height" content="1080" />
-        <meta property="og:site_name" content="Maison Affluency" />
         <meta name="description" content="Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views." />
-        <meta name="twitter:card" content="player" />
-        <meta name="twitter:site" content="@maisonaffluency" />
-        <meta name="twitter:title" content="A Private Apartment Tour — Maison Affluency" />
-        <meta name="twitter:description" content="An exclusive cinematic tour of a bespoke Singapore apartment." />
-        <meta name="twitter:image" content={OG_IMAGE} />
-        <meta name="twitter:player" content={VIDEO_URL} />
-        <meta name="twitter:player:width" content="1920" />
-        <meta name="twitter:player:height" content="1080" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
