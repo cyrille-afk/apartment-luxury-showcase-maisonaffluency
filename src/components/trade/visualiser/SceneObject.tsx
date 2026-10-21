@@ -12,6 +12,7 @@ import { BOND_STREET_BASE_FINISH, isBondStreetStool } from "@/lib/visualiserProd
 import { classifyMeshPart, humanizePartName, meshPartMaterial, type FinishPart } from "@/lib/visualiserFinishTargets";
 import { meshKey, registerModelMeshes, usePartOverrides, type ModelMesh, type PartOverrides } from "@/lib/visualiserPartMapping";
 import { applyModelOrientation, fitUprightModel, type ModelOrientation } from "@/lib/modelOrientation";
+import { clampToRoom, type RoomBounds } from "@/lib/activeProjectLayout";
 import { snapCoordinate, resolveDragPosition, DEFAULT_FOOTPRINT_RADIUS, type FootprintObstacle } from "@/lib/visualiserPlacement";
 import { applyMatteTextile, applyPolishedMarble, textileNormalPixels, toPbrMaterial, withFallbackTextureCoordinates, withSmoothAssetNormals } from "@/lib/showroomRendering";
 import { isCurvedFurniturePart, loadSubdivisionEngine, subdivideCurvedGeometry } from "@/lib/visualiserSubdivision";
@@ -68,6 +69,8 @@ type Props = {
   snapToGrid?: boolean;
   /** Other pieces' footprints; dragged positions are pushed out of these. */
   obstacles?: FootprintObstacle[];
+  /** Room walls: drags stay inside these bounds (centre origin). */
+  roomLimits?: RoomBounds;
   /** This piece's own footprint radius in metres (defaults to a generic estimate). */
   selfRadius?: number;
   /** When false the piece is display-only: no drag, no gizmos. Defaults to true. */
@@ -511,13 +514,15 @@ const ImageBody = ({ url, name, locked, showLabels = true, instanceId }: { url: 
 
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius }: Props) => {
+const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChange, isEditable = true, scaleVector, label, showLabels = true, onTextureParts, snapToGrid = false, obstacles, selfRadius, roomLimits }: Props) => {
   // Refs so the window-level drag handlers always read the latest obstacles
   // without changing dragMove's identity mid-drag (listener removal depends on it).
   const obstaclesRef = useRef<FootprintObstacle[]>(obstacles ?? []);
   obstaclesRef.current = obstacles ?? [];
   const selfRadiusRef = useRef(selfRadius ?? DEFAULT_FOOTPRINT_RADIUS);
   selfRadiusRef.current = selfRadius ?? DEFAULT_FOOTPRINT_RADIUS;
+  const roomLimitsRef = useRef<RoomBounds | undefined>(roomLimits);
+  roomLimitsRef.current = roomLimits;
   const groupRef = useRef<THREE.Group | null>(null);
   const [groupNode, setGroupNode] = useState<THREE.Group | null>(null);
   const { raycaster, gl, camera } = useThree();
@@ -574,6 +579,7 @@ const SceneObject = ({ object, selected, onSelect, onTransform, onDragStateChang
     }
     // Collision-aware: never let the piece settle inside another footprint.
     [x, z] = resolveDragPosition(x, z, selfRadiusRef.current, obstaclesRef.current);
+    if (roomLimitsRef.current) [x, z] = clampToRoom(x, z, roomLimitsRef.current, selfRadiusRef.current);
     // Floor lock: X/Z translation only, y stays on its depth layer.
     group.position.set(x, floorYRef.current, z);
   }, [gl, raycaster, camera, snapToGrid]);
