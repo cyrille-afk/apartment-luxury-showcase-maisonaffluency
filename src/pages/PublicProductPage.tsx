@@ -3307,42 +3307,15 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
                       <span className="mt-2 w-8 md:w-10 h-px bg-foreground/20" aria-hidden="true" />
                     </h2>
                   </div>
-                  {brandSummary && (() => {
-                    const PREVIEW_LEN = 240;
-                    const needsToggle = brandSummary.length > PREVIEW_LEN;
-                    let preview = brandSummary;
-                    if (needsToggle) {
-                      const slice = brandSummary.slice(0, PREVIEW_LEN);
-                      // End the preview at the last complete sentence so dangling
-                      // fragments like "Guided by the…" are hidden below Read more.
-                      const sentenceMatch = slice.match(/.*[.!?](?=\s|$)/);
-                      const lastSentenceEnd = sentenceMatch ? sentenceMatch[0].length : -1;
-                      const lastSpace = slice.lastIndexOf(" ");
-                      const cutIndex = lastSentenceEnd > 0 ? lastSentenceEnd : lastSpace > 0 ? lastSpace : PREVIEW_LEN;
-                      preview = slice.slice(0, cutIndex).trim() + "…";
-                    }
-                    const shown = bioExpanded || !needsToggle ? brandSummary : preview;
-                    return (
-                      <div>
-                        <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
-                          {renderParagraph(shown)}
-                        </p>
-                        {needsToggle && (
-                          <button
-                            type="button"
-                            onClick={() => setBioExpanded((v) => !v)}
-                            className="mt-2 inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.15em] text-foreground hover:text-primary transition-colors"
-                          >
-                            {bioExpanded ? "Read less" : "Read more"}
-                            <ChevronDown
-                              size={12}
-                              className={cn("transition-transform duration-200", bioExpanded && "rotate-180")}
-                            />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  {brandSummary && (
+                    // Desktop: the full summary fits the carousel card height, so
+                    // render it in full — no Read more toggle (mobile keeps one).
+                    <div>
+                      <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                        {renderParagraph(brandSummary)}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
