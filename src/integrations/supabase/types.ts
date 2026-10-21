@@ -10645,6 +10645,8 @@ export type Database = {
           id: string
           is_default: boolean
           material_roles: Json
+          original_upload_filenames: string[] | null
+          original_upload_format: string | null
           product_id: string
           updated_at: string
           variant_label: string
@@ -10657,6 +10659,8 @@ export type Database = {
           id?: string
           is_default?: boolean
           material_roles?: Json
+          original_upload_filenames?: string[] | null
+          original_upload_format?: string | null
           product_id: string
           updated_at?: string
           variant_label: string
@@ -10669,6 +10673,8 @@ export type Database = {
           id?: string
           is_default?: boolean
           material_roles?: Json
+          original_upload_filenames?: string[] | null
+          original_upload_format?: string | null
           product_id?: string
           updated_at?: string
           variant_label?: string
