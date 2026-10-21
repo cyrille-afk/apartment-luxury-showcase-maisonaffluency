@@ -11,6 +11,7 @@
  * The sitemap points to canonical URLs on https://www.maisonaffluency.com.
  */
 import { writeFile, mkdir, readFile } from "node:fs/promises";
+import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 

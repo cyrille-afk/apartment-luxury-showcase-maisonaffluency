@@ -1,4 +1,4 @@
-import { Link, useLocation, type NavLinkProps } from "@/lib/router-compat";
+import { NavLink as CompatNavLink, type NavLinkProps } from "@/lib/router-compat";
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +9,15 @@ interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
 }
 
 const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
-  ({ className, activeClassName, pendingClassName: _pendingClassName, to, ...props }, ref) => {
-    const { pathname } = useLocation();
-    const target = to.split(/[?#]/)[0] ?? to;
-    const isActive = pathname === target || (target !== "/" && pathname.startsWith(`${target}/`));
-    return <Link ref={ref} to={to} className={cn(className, isActive && activeClassName)} {...props} />;
-  },
+  ({ className, activeClassName, pendingClassName, ...props }, ref) => (
+    <CompatNavLink
+      ref={ref}
+      className={({ isActive, isPending }) =>
+        cn(className, isActive && activeClassName, isPending && pendingClassName)
+      }
+      {...props}
+    />
+  ),
 );
 
 NavLink.displayName = "NavLink";
