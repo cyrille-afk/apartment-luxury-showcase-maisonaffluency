@@ -1495,6 +1495,14 @@ export function AIConcierge({
   // right of it instead of centring it on the viewport.
   const docked = navInset > 0;
 
+  // Docked right-drawer mode: on desktop (xl+) the concierge docks as a
+  // full-height utility panel below the global header instead of floating,
+  // and the page canvas is pushed left via the --felix-dock-w CSS variable.
+  const DOCK_W = 420;
+  const DOCK_TOP = 64; // matches the md:h-16 global trade header
+  const dockedMode = !embedded && !modalMode && !fullscreen && !tabletViewport;
+  const dockHidden = dockedMode && (dockCollapsed || minimized);
+
   // Brief exit-animation gate: when the welcome modal is dismissed we keep
   // the backdrop + panel mounted for ~280ms so they can fade/scale out
   // smoothly before unmounting.
