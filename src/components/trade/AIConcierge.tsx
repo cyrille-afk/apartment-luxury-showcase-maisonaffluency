@@ -4255,7 +4255,7 @@ export function AIConcierge({
               onClick={closeWelcomeModal}
             />
           )}
-          {!embedded && !modalMode && !minimized && (
+          {!embedded && !modalMode && !minimized && !dockedMode && (
             <div
               className="fixed inset-0 z-[1] backdrop-blur-sm bg-foreground/10 print:hidden animate-fade-in pointer-events-none"
               aria-hidden="true"
