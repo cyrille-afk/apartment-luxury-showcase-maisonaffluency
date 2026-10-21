@@ -79,14 +79,14 @@ export default function LayoutPlanCanvas({
     event.preventDefault();
     event.stopPropagation();
     dragRef.current = { instanceId, moved: false, column };
-    const move = (id: string, x: number, y: number) => (column ? onMoveColumn?.(id, x, y) : onMove(id, x, y));
+    const moveTo = (id: string, x: number, y: number) => (column ? onMoveColumn?.(id, x, y) : onMove(id, x, y));
     const onPointerMove = (move: PointerEvent) => {
       const drag = dragRef.current;
       if (!drag) return;
       const point = clientToRoom(move.clientX, move.clientY);
       if (!point) return;
       drag.moved = true;
-      move(drag.instanceId, point[0], point[1]);
+      moveTo(drag.instanceId, point[0], point[1]);
     };
     const onPointerUp = (up: PointerEvent) => {
       const drag = dragRef.current;
@@ -97,7 +97,7 @@ export default function LayoutPlanCanvas({
       else if (drag) {
         // Final settle so the release point is the stored coordinate.
         const point = clientToRoom(up.clientX, up.clientY);
-        if (point) move(drag.instanceId, point[0], point[1]);
+        if (point) moveTo(drag.instanceId, point[0], point[1]);
       }
     };
     window.addEventListener("pointermove", onPointerMove);
