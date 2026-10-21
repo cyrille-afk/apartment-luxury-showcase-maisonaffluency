@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tradeRequestNotification } from './tradeRequestNotification';
+import { tradeRequestNotification } from '../../supabase/functions/_shared/tradeRequestNotification';
 
 describe('stored trade request notices', () => {
   it('retains Grégoire’s exact custom request', () => {
