@@ -1561,6 +1561,17 @@ export function AIConcierge({
     try { sessionStorage.setItem("concierge:minimized", minimized ? "1" : "0"); } catch {}
   }, [minimized]);
   useEffect(() => {
+    try { sessionStorage.setItem("concierge:dock-collapsed", dockCollapsed ? "1" : "0"); } catch {}
+  }, [dockCollapsed]);
+  // Push the page canvas left while the docked drawer is visible.
+  useEffect(() => {
+    if (embedded) return;
+    const root = document.documentElement;
+    if (dockedMode && open && !dockHidden) root.style.setProperty("--felix-dock-w", `${DOCK_W}px`);
+    else root.style.removeProperty("--felix-dock-w");
+    return () => root.style.removeProperty("--felix-dock-w");
+  }, [embedded, dockedMode, open, dockHidden, DOCK_W]);
+  useEffect(() => {
     try {
       // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so
       // moodboard / reference images stay visible in the transcript after a
