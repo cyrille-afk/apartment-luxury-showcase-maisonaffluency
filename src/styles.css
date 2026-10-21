@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @config "../tailwind.legacy.config.ts";
 
+/* The v3 `short` raw screen (max-height: 780px), re-expressed as a v4 variant. */
+@custom-variant short (@media (max-height: 780px));
+
 /* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
 @layer base {
   *, ::after, ::before, ::backdrop, ::file-selector-button { border-color: hsl(var(--border)); }

@@ -20,7 +20,6 @@ export default {
         // `short` raw screen below breaks variant sorting — use these instead.
         xs: "360px",
         xsp: "390px",
-        short: { raw: "(max-height: 780px)" },
       },
       colors: {
         border: "hsl(var(--border))",
