@@ -4310,14 +4310,14 @@ export function AIConcierge({
           )}
         >
           <div
-            onPointerDown={embedded ? undefined : onDragStart}
-            onPointerMove={embedded ? undefined : onDragMove}
-            onPointerUp={embedded ? undefined : onDragEnd}
-            onPointerCancel={embedded ? undefined : onDragEnd}
-            onDoubleClick={embedded ? undefined : () => setMinimized((m) => !m)}
+            onPointerDown={embedded || dockedMode ? undefined : onDragStart}
+            onPointerMove={embedded || dockedMode ? undefined : onDragMove}
+            onPointerUp={embedded || dockedMode ? undefined : onDragEnd}
+            onPointerCancel={embedded || dockedMode ? undefined : onDragEnd}
+            onDoubleClick={embedded ? undefined : dockedMode ? () => setDockCollapsed(true) : () => setMinimized((m) => !m)}
             className={cn(
               "flex flex-col gap-1.5 px-4 py-3 border-b select-none shrink-0",
-              !embedded && "cursor-grab active:cursor-grabbing touch-none",
+              !embedded && !dockedMode && "cursor-grab active:cursor-grabbing touch-none",
               modalMode
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
