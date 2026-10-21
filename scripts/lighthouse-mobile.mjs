@@ -25,7 +25,7 @@ import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as wait } from "node:timers/promises";
 
-const BASE = process.env.PW_BASE_URL?.replace(/\/$/, "") || "http://localhost:4173";
+const BASE = process.env.PW_BASE_URL?.replace(/\/$/, "") || "http://127.0.0.1:4173";
 const ROUTES = (process.env.ROUTES || "/").split(",").map((s) => s.trim()).filter(Boolean);
 const AUDIT_TIMEOUT_MS = Number(process.env.LH_AUDIT_TIMEOUT_MS || 240_000);
 const RUNS = Math.max(1, Number(process.env.LH_RUNS || 3));
@@ -111,9 +111,9 @@ async function startPreviewIfNeeded() {
   });
   preview.unref();
   // Wait for preview to be reachable.
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 180; i++) {
     try {
-      const r = await fetch(BASE);
+      const r = await fetch(BASE, { signal: AbortSignal.timeout(30_000) });
       if (r.ok) { log("✓ Preview reachable"); return; }
     } catch {}
     await wait(1000);
