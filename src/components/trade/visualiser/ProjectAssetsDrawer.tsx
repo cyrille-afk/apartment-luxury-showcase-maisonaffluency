@@ -14,8 +14,11 @@ export const PROJECT_ASSET_DRAG_TYPE = "application/x-ma-project-asset";
  */
 export default function ProjectAssetsDrawer({
   onPlace,
+  anchorClassName = "left-3 top-24 sm:left-6",
 }: {
   onPlace: (item: ProjectInventoryItem) => void;
+  /** Positioning classes for the floating drawer within its relative parent. */
+  anchorClassName?: string;
 }) {
   const { projectInventory, removeFromInventory } = useProjectInventory();
   const [open, setOpen] = useState(true);
@@ -27,7 +30,7 @@ export default function ProjectAssetsDrawer({
         size="sm"
         onClick={() => setOpen(true)}
         aria-label="Open project assets"
-        className="absolute left-3 top-24 z-30 gap-1.5 bg-background/95 backdrop-blur-md sm:left-6"
+        className={cn("absolute z-30 gap-1.5 bg-background/95 backdrop-blur-md", anchorClassName)}
       >
         <PackageOpen className="h-4 w-4" />
         Project Assets
@@ -43,7 +46,7 @@ export default function ProjectAssetsDrawer({
   return (
     <aside
       aria-label="Project Assets"
-      className="absolute left-3 top-24 z-30 flex max-h-[calc(100%-12rem)] w-72 max-w-[80vw] flex-col rounded-sm border border-border bg-background/95 shadow-sm backdrop-blur-md sm:left-6"
+      className={cn("absolute z-30 flex max-h-[calc(100%-2rem)] w-72 max-w-[80vw] flex-col rounded-sm border border-border bg-background/95 shadow-sm backdrop-blur-md", anchorClassName)}
     >
       <header className="flex items-center justify-between border-b border-border px-3 py-2">
         <h2 className="font-body text-xs font-semibold uppercase tracking-widest text-foreground">

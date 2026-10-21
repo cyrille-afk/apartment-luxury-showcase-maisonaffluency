@@ -20,6 +20,7 @@ import { clearLocalExr } from "@/lib/localEnvironmentExr";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
 import { layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
+import { createPlacedObject } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
@@ -665,14 +666,7 @@ const TradeVisualiser = () => {
       return;
     }
     const next: PlacedObject = {
-      instanceId: `${product.id}-${Date.now()}`,
-      id: product.id,
-      product_name: product.product_name,
-      brand_name: product.brand_name,
-      image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
-      dimensions: product.dimensions,
-      glb_url: product.glb_url,
-      position: pickFootprintSlot(
+      ...createPlacedObject(product, pickFootprintSlot(
         objects.map((o) => ({ position: o.position, radius: footprintRadius(parseDimensionString(o.dimensions), o.scale) })),
         footprintRadius(parseDimensionString(product.dimensions)),
         spacing,
@@ -686,12 +680,9 @@ const TradeVisualiser = () => {
           streak.focus = focus;
           return [focus[0] + streak.count * SPAWN_STAGGER_X, focus[1]] as [number, number];
         })(),
-      ),
-      rotation: [0, 0, 0],
-      scale: 1,
+      )),
       material: isBondStreetStool(product.id) || !armedMaterialRef.current ? null : activeMaterial,
       baseMaterial: isBondStreetStool(product.id) ? BOND_STREET_BASE_FINISH : null,
-      upholsteryMaterial: null,
     };
     setObjects((current) => [...current, next]);
     setSelectedId(next.instanceId);
