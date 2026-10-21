@@ -1569,7 +1569,7 @@ export function AIConcierge({
     const root = document.documentElement;
     if (dockedMode && open && !dockHidden) root.style.setProperty("--felix-dock-w", `${DOCK_W}px`);
     else root.style.removeProperty("--felix-dock-w");
-    return () => root.style.removeProperty("--felix-dock-w");
+    return () => { root.style.removeProperty("--felix-dock-w"); };
   }, [embedded, dockedMode, open, dockHidden, DOCK_W]);
   useEffect(() => {
     try {
