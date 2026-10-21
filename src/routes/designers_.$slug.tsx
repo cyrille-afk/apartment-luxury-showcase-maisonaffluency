@@ -35,7 +35,6 @@ export const Route = createFileRoute("/designers_/$slug")({
         { name: "twitter:description", content: seo.description },
         { name: "twitter:image", content: seo.image },
       ],
-      links: [{ rel: "canonical", href: seo.url }],
     };
   },
   component: () => (
