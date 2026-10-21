@@ -439,7 +439,7 @@ const ShowroomGridView = ({
               description: findDescription(item.product_name) || meta?.description || null,
               designer_name: meta?.brand || item.designer_name,
               reedition_by: meta?.reedition_by || null,
-              product_image_url: meta?.image_url || item.product_image_url || undefined,
+              product_image_url: meta?.image_url || item.product_image_url || null,
               hover_image_url: hoverImageLookup.get(key) || hoverImageLookup.get(normalizeProductName(item.product_name)) || undefined,
               category: meta?.category || inferCategory(item.product_name),
               subcategory: meta?.subcategory || inferSubcategory(meta?.category || inferCategory(item.product_name), undefined, item.product_name),

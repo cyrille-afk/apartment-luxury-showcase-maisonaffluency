@@ -3286,7 +3286,7 @@ export function AIConcierge({
           .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
           .map((t) => t.content || "")
           .join(" \n ");
-        const prefilled = composeBriefPrefill(scale, city, country, priorFurnitureText, text);
+        const prefilled = composeBriefPrefill(scale, city ?? "", country ?? "", priorFurnitureText, text);
         briefProjectLocationRef.current = city || null;
 
         // Keep Felix's thinking/reveal pacing, then remain in the narrative
