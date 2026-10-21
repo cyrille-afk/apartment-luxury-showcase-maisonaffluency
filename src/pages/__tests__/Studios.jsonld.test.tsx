@@ -71,16 +71,17 @@ const renderStudios = async () => {
       </MemoryRouter>
     </HelmetProvider>
   );
-  // Wait for supabase fetch + Helmet to flush into document.head
+  // React 19 keeps non-async JSON-LD scripts at their render location.
+  // Inspect the whole document, including both head and body.
   await waitFor(() => {
-    const scripts = document.head.querySelectorAll('script[type="application/ld+json"]');
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
     expect(scripts.length).toBeGreaterThan(0);
   });
   return result;
 };
 
 const collectJsonLd = (): any[] => {
-  const scripts = document.head.querySelectorAll('script[type="application/ld+json"]');
+  const scripts = document.querySelectorAll('script[type="application/ld+json"]');
   return Array.from(scripts).map((s) => JSON.parse(s.textContent || "{}"));
 };
 
