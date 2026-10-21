@@ -236,9 +236,9 @@ const TradeAtelierProfile = () => {
       _product_name: product.product_name,
       _brand_name: product.brand_name,
       _category: product.category || "",
-      _image_url: product.image_url || null,
-      _dimensions: product.dimensions || null,
-      _materials: product.materials || null,
+      _image_url: product.image_url || undefined,
+      _dimensions: product.dimensions || undefined,
+      _materials: product.materials || undefined,
       _quantity: 1,
     });
 

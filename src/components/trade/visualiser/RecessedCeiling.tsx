@@ -5,12 +5,12 @@ import { CEILING, recessedCeilingGeometry, safeCeilingDimensions } from "@/lib/r
 import { clampCeilingHeight, clampCeilingOpening, clampCeilingThickness, type CeilingSettings } from "@/lib/visualiserCeilingSettings";
 
 class CeilingErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Recessed ceiling disabled after a geometry error", error, info);
   }
-  render() { return this.state.failed ? null : this.props.children; }
+  override render() { return this.state.failed ? null : this.props.children; }
 }
 
 /** Area lights approximate ceiling bounce; emissive strips alone cannot light WebGL geometry. */

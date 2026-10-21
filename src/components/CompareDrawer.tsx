@@ -88,9 +88,9 @@ const CompareDrawer = () => {
           _product_name: item.pick.title,
           _brand_name: item.designerName,
           _category: item.pick.category || "",
-          _image_url: item.pick.image || null,
-          _dimensions: item.pick.dimensions || null,
-          _materials: item.pick.materials || null,
+          _image_url: item.pick.image || undefined,
+          _dimensions: item.pick.dimensions || undefined,
+          _materials: item.pick.materials || undefined,
           _quantity: 1,
         });
         if (!error) added++;
@@ -248,9 +248,9 @@ const CompareDrawer = () => {
                                   _product_name: item.pick.title,
                                   _brand_name: item.designerName,
                                   _category: item.pick.category || "",
-                                  _image_url: item.pick.image || null,
-                                  _dimensions: item.pick.dimensions || null,
-                                  _materials: item.pick.materials || null,
+                                  _image_url: item.pick.image || undefined,
+                                  _dimensions: item.pick.dimensions || undefined,
+                                  _materials: item.pick.materials || undefined,
                                   _quantity: 1,
                                 });
                                 if (error) throw error;

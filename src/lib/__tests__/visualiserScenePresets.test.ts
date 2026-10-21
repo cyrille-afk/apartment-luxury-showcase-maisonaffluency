@@ -25,7 +25,9 @@ describe("scene presets", () => {
   });
   it("delete removes only that preset", () => {
     saveScenePreset("A", { objects: [obj] });
-    const [b] = saveScenePreset("B", { objects: [obj] });
+    const saved = saveScenePreset("B", { objects: [obj] });
+    expect(saved).not.toBeNull();
+    const [b] = saved!;
     expect(deleteScenePreset(b.id).map((p) => p.name)).toEqual(["A"]);
   });
   it("restores the chosen floor and plaster wall with a furniture preset", () => {

@@ -207,7 +207,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
 
 
   // ── Edition & PDF lookup from curator picks (static + DB) ──
-  const [dbPicks, setDbPicks] = useState<{ title: string; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
+  const [dbPicks, setDbPicks] = useState<{ title: string | null; edition: string | null; pdf_url: string | null; variant_image_map?: unknown; size_variants?: unknown }[]>([]);
 
   useEffect(() => {
     const fetchDbPicks = async () => {
@@ -225,7 +225,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const pickFinishLookup = useMemo(() => {
     const m = new Map<string, { map: unknown; variants: any[] }>();
     for (const p of dbPicks) {
-      if (p.variant_image_map && Array.isArray(p.size_variants)) m.set(normalizeName(p.title), { map: p.variant_image_map, variants: p.size_variants as any[] });
+      if (p.variant_image_map && Array.isArray(p.size_variants)) m.set(normalizeName(p.title!), { map: p.variant_image_map, variants: p.size_variants as any[] });
     }
     return m;
   }, [dbPicks]);
@@ -253,7 +253,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     }
     // DB data (overrides static)
     for (const p of dbPicks) {
-      const key = normalizeName(p.title);
+      const key = normalizeName(p.title!);
       if (p.edition) editions.set(key, formatEditionLabel(p) || p.edition);
       if (p.pdf_url) pdfs.set(key, p.pdf_url);
     }
