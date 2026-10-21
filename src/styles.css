@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Scan only app source, matching the v3 content globs (e2e/scripts text must not generate classes). */
+@import "tailwindcss" source("../src");
 @config "../tailwind.legacy.config.ts";
 
 /* The v3 `short` raw screen (max-height: 780px), re-expressed as a v4 variant. */
