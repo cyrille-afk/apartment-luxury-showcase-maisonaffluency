@@ -71,6 +71,21 @@ const VisualiserInspector = ({
         {formatDimensions(resolveDimensions(selected)) ?? DIMENSIONS_PLACEHOLDER}
       </p>
 
+      {nearestClearance && (
+        <p
+          data-testid="nearest-clearance"
+          className={cn(
+            microLabel,
+            "mt-2",
+            nearestClearance.level === "comfortable" && "text-success",
+            nearestClearance.level === "tight" && "text-warning",
+            nearestClearance.level === "blocked" && "text-destructive",
+          )}
+        >
+          Clearance · {formatGap(nearestClearance.distance)} to {nearestClearance.targetName}
+        </p>
+      )}
+
       <label className={cn(microLabel, "mt-5 block text-muted-foreground")}>
         Scale · {Math.round(selected.scale * 100)}%
       </label>
