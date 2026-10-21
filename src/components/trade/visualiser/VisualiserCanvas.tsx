@@ -53,7 +53,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady, onUploadedActive }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void; onUploadedActive?: (active: boolean) => void }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady, onUploadedActive, photoMatched = false }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void; onUploadedActive?: (active: boolean) => void; photoMatched?: boolean }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const [uploadedActive, setUploadedActive] = useState(false);
   const invalidate = useThree((s) => s.invalidate);
@@ -138,14 +138,14 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
       <Environment
         key={map.uuid}
         map={map}
-        background={presentation.background}
+        background={!photoMatched && presentation.background}
         environmentIntensity={environmentIntensity}
         backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
         backgroundBlurriness={presentation.blur}
         environmentRotation={rotation}
         backgroundRotation={rotation}
       />
-      {uploadedActive && <UploadedEnvironmentBackdrop map={map} />}
+      {uploadedActive && !photoMatched && <UploadedEnvironmentBackdrop map={map} />}
     </>
   );
   return (
@@ -506,7 +506,7 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
     {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && (!hasBackdrop || showUploadedEnvironment)} lightIntensity={lighting.lightScale} onReady={environmentLoaded} onUploadedActive={setUploadedEnvironment} />
+    <StudioEnvironment photoMatched={Boolean(photoCalibration)} preferred={environmentSource} pathTrace={pathTrace && (!hasBackdrop || showUploadedEnvironment)} lightIntensity={lighting.lightScale} onReady={environmentLoaded} onUploadedActive={setUploadedEnvironment} />
 
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
