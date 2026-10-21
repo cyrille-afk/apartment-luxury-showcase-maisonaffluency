@@ -2676,20 +2676,20 @@ const TradeProductPage: React.FC = () => {
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onTopFinishSwatchChange={setSelectedTopSwatch}
                   onSwatchImagesChange={(indices, meta) => {
-                    if (!indices || indices.length === 0) {
-                      if (meta?.committed) {
-                        setSelectedSwatchGalleryIndices(null);
-                        setSelectedSwatchGalleryName(null);
-                      }
-                      return;
-                    }
                     if (meta?.committed) {
-                      setSelectedSwatchGalleryIndices(indices);
+                      setSelectedSwatchGalleryIndices(indices?.length ? indices : null);
                       setSelectedSwatchGalleryName(meta.swatchName || null);
                     }
-                    // image_indices are 1-based; gallery is 0-based.
-                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
-                    setGalleryJumpNonce((n) => n + 1);
+                    // Hover writes only the preview pool (main viewport);
+                    // clicks write the permanent pool that Felix snapshots.
+                    const next = resolveSwatchImageEvent(indices, meta);
+                    setHoveredPreviewIndex(next.hoveredPreviewIndex);
+                    if (next.permanentIndex !== undefined) {
+                      setGalleryActiveIndex(next.permanentIndex);
+                      setGalleryJumpNonce((n) => n + 1);
+                    } else if (next.hoveredPreviewIndex !== null) {
+                      setGalleryJumpNonce((n) => n + 1);
+                    }
                   }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) { setSelectedBaseDisplay(null); return; }
