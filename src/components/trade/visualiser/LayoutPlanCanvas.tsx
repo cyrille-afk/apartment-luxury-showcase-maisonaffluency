@@ -3,6 +3,13 @@ import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { RoomBounds } from "@/lib/activeProjectLayout";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade/visualiser/ProjectAssetsDrawer";
+import {
+  footprintOf,
+  formatGap,
+  pieceClearances,
+  wallClearances,
+  type ClearanceLevel,
+} from "@/lib/layoutGuides";
 import { cn } from "@/lib/utils";
 
 const FALLBACK_FOOTPRINT_M = 0.6;
