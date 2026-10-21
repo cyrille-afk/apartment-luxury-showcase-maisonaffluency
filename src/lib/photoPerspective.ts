@@ -33,7 +33,7 @@ export function photoFloorPoint(point: PhotoPoint, calibration: PhotoCalibration
     const p = inverse(floorHomography(calibration.corners, bounds)).mmul(Matrix.columnVector([...point, 1])).to1DArray();
     if (Math.abs(p[2]) < 1e-8) return null;
     const x = p[0] / p[2], z = p[1] / p[2];
-    return Math.abs(x) <= bounds.width / 2 && Math.abs(z) <= bounds.depth / 2 ? [x, z] : null;
+    return Math.abs(x) <= bounds.width / 2 + 1e-7 && Math.abs(z) <= bounds.depth / 2 + 1e-7 ? [Math.max(-bounds.width / 2, Math.min(bounds.width / 2, x)), Math.max(-bounds.depth / 2, Math.min(bounds.depth / 2, z))] : null;
   } catch { return null; }
 }
 

@@ -688,6 +688,10 @@ const TradeVisualiser = () => {
   const spawnStreakRef = useRef<{ at: number; count: number; focus: [number, number] }>({ at: 0, count: 0, focus: [0, 0] });
   const { projectInventory } = useProjectInventory();
   const addObject = (product: PlaceableProduct, at?: [number, number]) => {
+    if (photoMode && !photoCalibration?.locked) {
+      toast.error("Lock the ground plane before placing furniture.");
+      return;
+    }
     if (objects.length >= MAX_OBJECTS) {
       toast.error(`This composition can hold up to ${MAX_OBJECTS} objects.`);
       return;
