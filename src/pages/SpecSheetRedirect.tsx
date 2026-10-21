@@ -218,7 +218,7 @@ export default function SpecSheetRedirect() {
                 <div className="aspect-[4/3] overflow-hidden bg-muted">
                   <img
                     src={pick.image_url}
-                    alt={pick.title}
+                    alt={pick.title ?? undefined}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                     loading="lazy"
                   />
