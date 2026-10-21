@@ -47,7 +47,8 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { ParentHouseOverview } from "@/components/ParentHouseOverview";
-import { toOgImage } from "@/lib/ogImage";
+import DesignerProfileSeo from "@/components/seo/DesignerProfileSeo";
+import { getDesignerOpenGraph } from "@/lib/designerOpenGraph";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -1297,9 +1298,10 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
     <>
       {(() => {
         const canonical = absoluteUrl(location.pathname);
-        const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
         const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner, designer.slug, designer.specialty);
         const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner, slug: designer.slug });
+        const socialDesigner = { slug: designer.slug, name, description: desc, heroImage };
+        const ogImg = getDesignerOpenGraph(socialDesigner).image;
         const personLd = {
           "@context": "https://schema.org",
           "@type": isParentBrand ? "Organization" : "Person",
@@ -1319,27 +1321,17 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
           ],
         };
         return (
+          <>
           <Helmet key={location.pathname}>
             <title>{seoTitle}</title>
             <meta name="description" content={desc} />
             <meta name="robots" content="index, follow" />
             <link rel="canonical" href={canonical} />
-            <meta property="og:type" content="profile" />
-            <meta property="og:site_name" content="Maison Affluency" />
-            <meta property="og:title" content={seoTitle} />
-            <meta property="og:description" content={desc} />
-            <meta property="og:url" content={canonical} />
-            <meta property="og:image" content={ogImg} />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content={displayName(name)} />
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={seoTitle} />
-            <meta name="twitter:description" content={desc} />
-            <meta name="twitter:image" content={ogImg} />
             <script type="application/ld+json">{JSON.stringify(personLd)}</script>
             <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
           </Helmet>
+          <DesignerProfileSeo designer={socialDesigner} />
+          </>
         );
       })()}
 
