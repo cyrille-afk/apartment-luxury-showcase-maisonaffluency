@@ -20,6 +20,7 @@ import { clearLocalExr } from "@/lib/localEnvironmentExr";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
 import { layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
+import { createPlacedObject } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
 import { Link, useSearchParams } from "react-router-dom";
