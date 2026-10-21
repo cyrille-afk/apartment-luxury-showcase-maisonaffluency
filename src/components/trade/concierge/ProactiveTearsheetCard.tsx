@@ -23,6 +23,7 @@ export interface ProactiveTearsheetData {
   imageUrl?: string | null;
   /** Photo snapshot taken when the item was locked; never the live/hovered image. */
   savedImageField?: string | null;
+  lockedAt?: number;
   fabricLabel?: string | null;
   baseLabel?: string | null;
   topLabel?: string | null;

@@ -1318,7 +1318,7 @@ const TradeProductPage: React.FC = () => {
         setDrawerOpen(!felixSelection);
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-          window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: felixSelection }));
+          window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
         toast({
           title: "Added to quote",
