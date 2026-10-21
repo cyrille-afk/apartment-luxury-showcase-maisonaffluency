@@ -47,6 +47,7 @@ import ProductFullscreenGallery from "@/components/trade/ProductFullscreenGaller
 import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 import { parseDimensionString } from "@/lib/productDimensions";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
+import { useProjectInventory } from "@/contexts/ProjectInventoryContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
@@ -943,6 +944,7 @@ const TradeProductPage: React.FC = () => {
 
 
   const felixSelectionRef = useRef<ProactiveTearsheetData | null>(null);
+  const { addToInventory } = useProjectInventory();
 
   const handleAddToQuote = useCallback(async () => {
     if (!user || !data) return;
@@ -1278,6 +1280,24 @@ const TradeProductPage: React.FC = () => {
           }
         }
         setAdded(true);
+        // Mirror the piece into the global project inventory so the Spatial
+        // Visualiser's Project Assets drawer can place it into the room.
+        addToInventory({
+          id: String(tradeProductId || (product as any)?.id || product.title),
+          productName: product.title,
+          brandName: designer.name,
+          imageUrl: resolvedImageUrl,
+          glbUrl: data.glbUrl || null,
+          dimensions: selectedDualSize || product.dimensions || null,
+          variantLabel,
+          finishes: [
+            selectedBaseDisplay || selectedBase,
+            selectedTopDisplay || selectedTop,
+            selectedSingleMaterial,
+            selectedWoodPrice?.name,
+            selectedFabric?.name,
+          ].filter(Boolean).map((s) => String(s)),
+        });
         setDrawerRefreshKey((k) => k + 1);
         setDrawerOpen(!felixSelection);
         if (felixSelection) {
@@ -1293,7 +1313,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, addToInventory, tradeProductId, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Preselect Base/Top/Size (dual-axis) or Material/Size (single-axis) from
   // URL query params — used when the concierge 3D drawer deep-links here so

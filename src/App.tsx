@@ -16,6 +16,7 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CheckoutFormProvider } from "@/contexts/CheckoutFormContext";
 import { TradeCopilotProvider } from "@/contexts/TradeCopilotContext";
 import { VisualiserMaterialProvider } from "@/contexts/VisualiserMaterialContext";
+import { ProjectInventoryProvider } from "@/contexts/ProjectInventoryContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import ClientCurrencyDetection from "@/components/ClientCurrencyDetection";
 import GoogleOAuthReturnRecovery from "@/components/GoogleOAuthReturnRecovery";

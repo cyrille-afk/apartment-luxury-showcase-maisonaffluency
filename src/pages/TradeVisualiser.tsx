@@ -57,6 +57,8 @@ import { VisualiserSelectionProvider } from "@/components/trade/visualiser/Visua
 import VisualiserInspector from "@/components/trade/visualiser/VisualiserInspector";
 import ProjectSnapshots from "@/components/trade/visualiser/ProjectSnapshots";
 import CatalogDrawer from "@/components/trade/visualiser/CatalogDrawer";
+import ProjectAssetsDrawer, { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade/visualiser/ProjectAssetsDrawer";
+import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 import "@/components/trade/visualiser/visualiserToolbar.css";
 import { lazyImportWithRetry } from "@/lib/lazyWithRetry";
 
