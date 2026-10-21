@@ -4797,7 +4797,7 @@ export function AIConcierge({
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={() => setMinimized((m) => !m)}
+                onClick={() => (dockedMode ? setDockCollapsed(true) : setMinimized((m) => !m))}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
                 title={minimized ? "Expand" : "Collapse"}
