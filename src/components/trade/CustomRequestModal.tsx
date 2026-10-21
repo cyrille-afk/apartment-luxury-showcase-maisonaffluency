@@ -50,7 +50,7 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("trade_custom_requests").insert({
+    const { data: inserted, error } = await supabase.from("trade_custom_requests").insert({
       user_id: user.id,
       product_id: product.id || null,
       product_name: product.product_name,
@@ -64,14 +64,20 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
       budget_notes: budgetNotes || null,
       notes: notes || null,
       status: "new",
-    } as any);
-    setSubmitting(false);
+    } as any).select("id").single();
     if (error) {
+      setSubmitting(false);
       toast({ title: "Submission failed", description: error.message, variant: "destructive" });
       return;
     }
+    const { data: notification, error: notificationError } = await supabase.functions.invoke("notify-sample-request", {
+      body: { requestId: inserted?.id, kind: "custom" },
+    });
+    setSubmitting(false);
     setSubmitted(true);
-    toast({ title: "Custom request sent", description: "Our concierge team will follow up within one business day." });
+    toast(notificationError || notification?.success !== true
+      ? { title: "Custom request saved", description: "The email notification is delayed. Your request remains in Custom Requests." }
+      : { title: "Custom request sent", description: "Your request has been saved and the concierge notification queued." });
   };
 
   return (

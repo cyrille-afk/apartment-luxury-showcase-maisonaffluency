@@ -254,12 +254,13 @@ export function ProjectSpecDrawer({
             >
               <FileDown className="h-3.5 w-3.5" /> Download White-Label Tear Sheet (PDF)
             </Link>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent("ma:request-samples", { detail: { productId: item.product_id } }))}
+            <Link
+              to={`/trade/samples?product=${encodeURIComponent(item.name)}&brand=${encodeURIComponent(item.designer)}&productId=${encodeURIComponent(item.product_id)}${item.image_url ? `&image=${encodeURIComponent(item.image_url)}` : ""}`}
+              onClick={onClose}
               className="inline-flex items-center gap-2 self-start font-body text-[10px] uppercase tracking-[0.15em] text-foreground underline underline-offset-4 hover:no-underline"
             >
               <Package className="h-3.5 w-3.5" /> Request Material Samples
-            </button>
+            </Link>
           </div>
         </div>
       </aside>

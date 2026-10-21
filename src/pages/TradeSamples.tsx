@@ -164,20 +164,25 @@ const TradeSamples = () => {
       tearsheet_url: tearsheetUrl,
     } as any).select("id").single();
 
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast.error("Failed to submit request");
       return;
     }
-    // Fire-and-forget admin notification
+    // Await delivery acknowledgement before clearing the saved form.
     if (inserted?.id) {
-      supabase.functions.invoke("notify-sample-request", {
+      const { data: notification, error: notificationError } = await supabase.functions.invoke("notify-sample-request", {
         body: { requestId: inserted.id },
-      }).catch((e) => console.error("notify-sample-request failed", e));
+      });
+      if (notificationError || notification?.success !== true) {
+        toast.warning("Sample request saved. The email notification is delayed; your request remains in Sample Requests.");
+      } else {
+        toast.success("Sample request submitted");
+      }
     }
-    toast.success("Sample request submitted");
     resetForm();
     setShowForm(false);
+    setSubmitting(false);
   };
 
   const activeRequests = requests.filter(r => !["returned", "cancelled"].includes(r.status));
