@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
+import { formatGap, type ClearanceLevel } from "@/lib/layoutGuides";
 import { useVisualiserSelection } from "./VisualiserSelectionContext";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
