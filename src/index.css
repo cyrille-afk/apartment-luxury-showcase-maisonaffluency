@@ -1177,3 +1177,10 @@ body.designer-directory-open nav[data-site-header] {
 .trade-portal-shell { -webkit-user-select: none; user-select: none; }
 .trade-portal-shell img { -webkit-user-drag: none; user-drag: none; }
 .trade-portal-shell input, .trade-portal-shell textarea, .trade-portal-shell [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+
+/* While the Felix mobile sheet is open, page-level floating controls must not
+   cover the composer toolbar (helpers + send). */
+html[data-felix-sheet-open] .mobile-product-commerce-dock,
+html[data-felix-sheet-open] .gallery-details-floating-nav {
+  display: none;
+}

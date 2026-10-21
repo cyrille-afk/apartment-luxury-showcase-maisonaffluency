@@ -1571,6 +1571,15 @@ export function AIConcierge({
     else root.style.removeProperty("--felix-dock-w");
     return () => { root.style.removeProperty("--felix-dock-w"); };
   }, [embedded, dockedMode, open, dockHidden, DOCK_W]);
+  // While the mobile sheet is open, hide page-level floating controls (sticky
+  // order bar, quick-actions bubble) so they never cover the composer toolbar.
+  useEffect(() => {
+    if (embedded) return;
+    const root = document.documentElement;
+    if (!dockedMode && open && !minimized) root.dataset.felixSheetOpen = "1";
+    else delete root.dataset.felixSheetOpen;
+    return () => { delete root.dataset.felixSheetOpen; };
+  }, [embedded, dockedMode, open, minimized]);
   useEffect(() => {
     try {
       // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so
@@ -6411,12 +6420,12 @@ export function AIConcierge({
                   disabled={streaming}
                 />
               )}
-              <div className="flex items-center gap-1 px-2 pb-2 pt-1">
+              <div className="flex items-center gap-1.5 sm:gap-1 px-2 pb-2 pt-1">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                  className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  className="h-11 w-11 sm:h-8 sm:w-8 shrink-0 rounded-full p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
                   aria-label="Attach room plan, image or PDF"
                   title="Attach a room plan, photo or PDF"
                 >
@@ -6426,7 +6435,7 @@ export function AIConcierge({
                   type="button"
                   onClick={() => moodInputRef.current?.click()}
                   disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                  className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  className="h-11 w-11 sm:h-8 sm:w-8 shrink-0 rounded-full p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
                   aria-label="Attach mood board images to Block 3"
                   title="Attach mood board (images bound to Block 3)"
                 >
@@ -6439,7 +6448,7 @@ export function AIConcierge({
                       openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
                     }}
                     disabled={streaming}
-                    className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                    className="h-11 w-11 sm:h-8 sm:w-8 shrink-0 rounded-full p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
                     aria-label="Open Architectural Brief Builder"
                     title="Open Architectural Brief Builder"
                   >
@@ -6450,7 +6459,7 @@ export function AIConcierge({
                   type="button"
                   onClick={() => setShowBriefPreview((v) => !v)}
                   disabled={!input.trim()}
-                  className={`h-8 w-8 shrink-0 rounded-full p-2 disabled:opacity-40 transition-colors ${
+                  className={`h-11 w-11 sm:h-8 sm:w-8 shrink-0 rounded-full p-2.5 sm:p-2 disabled:opacity-40 transition-colors ${
                     showBriefPreview
                       ? "bg-accent/10 text-accent"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -6477,7 +6486,7 @@ export function AIConcierge({
                     streaming ||
                     briefSubmitting
                   }
-                  className="ml-auto h-9 w-9 shrink-0 rounded-full bg-foreground text-background p-2.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
+                  className="ml-auto h-11 w-11 sm:h-9 sm:w-9 shrink-0 rounded-full bg-foreground text-background p-3 sm:p-2.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
                   aria-label={briefBuilderOpen ? "Submit brief" : "Send"}
                   title={
                     briefBuilderOpen && briefValidation.valid
