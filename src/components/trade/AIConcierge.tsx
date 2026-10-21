@@ -4322,7 +4322,7 @@ export function AIConcierge({
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
             )}
-            title="Drag to move · double-click to collapse"
+            title={dockedMode ? "Double-click to collapse" : "Drag to move · double-click to collapse"}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
