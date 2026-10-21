@@ -31,6 +31,8 @@ import { getLocalExr, LOCAL_EXR_EVENT } from "@/lib/localEnvironmentExr";
 import { uploadedEnvironmentPresentation } from "./uploadedEnvironmentPresentation";
 import RoomSurfaces from "./RoomSurfaces";
 import ArchitecturalFeatureWall from "./ArchitecturalFeatureWall";
+import ProjectArchitecture from "./ProjectArchitecture";
+import { columnObstacles, type PlanColumn } from "@/lib/activeProjectLayout";
 import ArchitecturalDownlights from "./ArchitecturalDownlights";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
@@ -224,6 +226,8 @@ interface VisualiserCanvasProps {
   photoCalibration?: PhotoCalibration | null;
   workspaceCamera?: ReturnType<typeof layoutCamera>;
   roomBounds?: RoomBounds;
+  /** Active-project plan compiled into the room: blueprint floor, walls at bounds, columns. */
+  projectArchitecture?: { floorPlanUrl: string | null; columns: PlanColumn[] } | null;
   onInitialReady?: () => void;
   isEditable?: boolean;
   objects: PlacedObject[];
@@ -343,6 +347,7 @@ const VisualiserCanvas = ({
   photoCalibration,
   workspaceCamera,
   roomBounds,
+  projectArchitecture,
   onInitialReady,
   isEditable = true,
   objects,
@@ -444,7 +449,7 @@ const VisualiserCanvas = ({
   >
     {onInitialReady && <InitialRoomReveal ready={roomReady && objectsReady && environmentReady} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} onReady={onInitialReady} />}
     <RenderOnDemand
-      signature={`photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`plan:${JSON.stringify(projectArchitecture ?? null)}:${JSON.stringify(roomBounds ?? null)}|photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -471,7 +476,7 @@ const VisualiserCanvas = ({
       maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
-    {roomBounds && !photoCalibration && <group name="Active project bounds">{[
+    {roomBounds && !photoCalibration && !projectArchitecture && <group name="Active project bounds">{[
       { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [0, 0.01, roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [-roomBounds.width / 2, 0.01, 0], size: [0.025, 0.01, roomBounds.depth] },
@@ -511,8 +516,9 @@ const VisualiserCanvas = ({
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
       {/* Both renderers retain the designed architecture; only room photos suppress it. */}
-      {!hasBackdrop && <ArchitecturalFeatureWall finish={featureWallFinish} />}
-      <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />
+      {projectArchitecture && roomBounds && !photoCalibration && <ProjectArchitecture bounds={roomBounds} floorPlanUrl={projectArchitecture.floorPlanUrl} columns={projectArchitecture.columns} />}
+      {!hasBackdrop && !projectArchitecture && <ArchitecturalFeatureWall finish={featureWallFinish} />}
+      {!projectArchitecture && <RoomSurfaces floor={hasBackdrop ? "none" : floorFinish} rearWall={hasBackdrop ? false : showRearWall} objects={objects} glare={floorGlare} wallHeight={wallHeight} ceilingHeight={ceilingHeight} ceilingThickness={ceilingThickness} ceilingOpening={ceilingOpening} wallColor={wallColor} wallFinish={wallFinish} wallCustomHex={wallCustomHex} wallFinishIntensity={wallFinishIntensity} rugColor={rugColor} rugBorderColor={rugBorderColor} rugBorderThicknessMm={rugBorderThicknessMm} rugBorderTwistMm={rugBorderTwistMm} rugBorderRoughness={rugBorderRoughness} rugWeave={rugWeave} rugPile={rugPile} rugLayout={rugLayout} showRug={showRug && !hasBackdrop} />}
       <InitialAssetsCommitted onReady={setRoomReady} />
     </Suspense>
     {!pathTrace && !hasBackdrop && floorFinish === "none" && (
@@ -584,7 +590,9 @@ const VisualiserCanvas = ({
             .map((other) => ({
               position: other.position,
               radius: footprintRadius(parseDimensionString(other.dimensions), other.scale),
-            }))}
+            }))
+            .concat(projectArchitecture ? columnObstacles(projectArchitecture.columns) : [])}
+          roomLimits={projectArchitecture && roomBounds ? roomBounds : undefined}
         />
       ))}
       <InitialAssetsCommitted onReady={setObjectsReady} />

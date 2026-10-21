@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { Map, Layers, Armchair, Eye, Image, Ruler, Upload } from "lucide-react";
+import { Map, Layers, Armchair, Eye, Image, Ruler, Upload, Square, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ import { ActiveProjectProvider, useActiveProject } from "@/contexts/ActiveProjec
 import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
+import { clampToRoom, DEFAULT_COLUMN_SIZE_M, patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
 import { createPlacedObject, inventoryItemToPlaceable, MAX_PLACED_OBJECTS } from "@/lib/placedObjectFactory";
 import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
@@ -30,6 +30,7 @@ function WorkspacePanels() {
   const [imageVisited, setImageVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
   const [showGuides, setShowGuides] = useState(true);
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   useEffect(() => {
     setPlanSelectedId(current => current && !project?.objects.some(object => object.instanceId === current) ? null : current);
   }, [project?.objects]);
@@ -91,7 +92,7 @@ function WorkspacePanels() {
     </div>
     <section id="panel-plan" role="tabpanel" aria-labelledby="workspace-plan" hidden={view !== "plan"} className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", view !== "plan" && "hidden")}>
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-4 px-4 pt-4 sm:px-6"><h1 className="font-display text-2xl">2D Layout Plan</h1><SourceUpload folder="axonometric-sources" label="Upload floor plan" onSourceReady={project.setFloorPlanUrl} /></div>
-      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open Axonometric Studio</Button><Button variant="ghost" size="sm" aria-pressed={showGuides} onClick={() => setShowGuides(value => !value)}><Ruler className="h-4 w-4" />Guides</Button>{gapChip}</div>
+      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open Axonometric Studio</Button><Button variant="ghost" size="sm" aria-pressed={showGuides} onClick={() => setShowGuides(value => !value)}><Ruler className="h-4 w-4" />Guides</Button><Button variant="ghost" size="sm" onClick={() => { const id = `col-${Date.now().toString(36)}`; project.setColumns(current => [...current, { id, x: 0, y: 0, size: DEFAULT_COLUMN_SIZE_M }]); setSelectedColumnId(id); }}><Square className="h-4 w-4" />Add column</Button>{selectedColumnId && state.columns.some(column => column.id === selectedColumnId) && <Button variant="ghost" size="sm" onClick={() => { project.setColumns(current => current.filter(column => column.id !== selectedColumnId)); setSelectedColumnId(null); }}><Trash2 className="h-4 w-4" />Remove column</Button>}{gapChip}</div>
       <div className="relative min-h-0 flex-1 border-t border-border">
         <LayoutPlanCanvas
           objects={project.objects}
@@ -99,7 +100,11 @@ function WorkspacePanels() {
           floorPlanUrl={state.floorPlanUrl}
           selectedId={planSelectedId}
           onSelect={setPlanSelectedId}
-          onMove={(instanceId, x, y) => project.setObjects(current => patchLayoutItem(current, instanceId, { x, y }))}
+          onMove={(instanceId, x, y) => project.setObjects(current => patchLayoutItem(current, instanceId, { x, y }, state.bounds))}
+          columns={state.columns}
+          selectedColumnId={selectedColumnId}
+          onSelectColumn={(id) => { setSelectedColumnId(id); setPlanSelectedId(null); }}
+          onMoveColumn={(id, x, y) => project.setColumns(current => current.map(column => { if (column.id !== id) return column; const [cx, cy] = clampToRoom(x, y, state.bounds, column.size / 2); return { ...column, x: cx, y: cy }; }))}
           onDropAssetKey={handlePlanDrop}
           showGuides={showGuides}
         />

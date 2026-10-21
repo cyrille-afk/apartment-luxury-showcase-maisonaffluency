@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type Dispatch, type SetStateAction, type ReactNode } from "react";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
-import { DEFAULT_LAYOUT_BOUNDS, layoutItems, type ActiveProjectState, type RoomBounds, type WorkspaceView } from "@/lib/activeProjectLayout";
+import { DEFAULT_LAYOUT_BOUNDS, layoutItems, type ActiveProjectState, type PlanColumn, type RoomBounds, type WorkspaceView } from "@/lib/activeProjectLayout";
 
 type ProjectContext = {
   state: ActiveProjectState; objects: PlacedObject[]; setObjects: Dispatch<SetStateAction<PlacedObject[]>>;
   view: WorkspaceView; setView: Dispatch<SetStateAction<WorkspaceView>>;
-  setFloorPlanUrl: Dispatch<SetStateAction<string | null>>; setBounds: Dispatch<SetStateAction<RoomBounds>>;
+  setFloorPlanUrl: Dispatch<SetStateAction<string | null>>; setBounds: Dispatch<SetStateAction<RoomBounds>>; setColumns: Dispatch<SetStateAction<PlanColumn[]>>;
   hasSavedLayout: boolean; sandboxStorageKey: string;
 };
 const Context = createContext<ProjectContext | null>(null);
@@ -25,10 +25,11 @@ export function ActiveProjectProvider({ children, projectId, accountId, initialV
   const [objects, setObjects] = useState<PlacedObject[]>(initial.objects);
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(initial.floorPlanUrl || null);
   const [bounds, setBounds] = useState<RoomBounds>(initial.bounds || DEFAULT_LAYOUT_BOUNDS);
+  const [columns, setColumns] = useState<PlanColumn[]>(Array.isArray(initial.columns) ? initial.columns : []);
   const [view, setView] = useState<WorkspaceView>(initialView);
   useEffect(() => {
-    try { sessionStorage.setItem(key, JSON.stringify({ objects, floorPlanUrl, bounds })); } catch { /* Full storage does not clear the room. */ }
-  }, [key, objects, floorPlanUrl, bounds]);
-  const state: ActiveProjectState = { projectId, floorPlanUrl, placedItems: layoutItems(objects), bounds, cameraPerspective: view === "sandbox" ? "eye-level" : "isometric" };
-  return <Context.Provider value={{ state, objects, setObjects, view, setView, setFloorPlanUrl, setBounds, hasSavedLayout: initial.hasSavedLayout === true, sandboxStorageKey }}>{children}</Context.Provider>;
+    try { sessionStorage.setItem(key, JSON.stringify({ objects, floorPlanUrl, bounds, columns })); } catch { /* Full storage does not clear the room. */ }
+  }, [key, objects, floorPlanUrl, bounds, columns]);
+  const state: ActiveProjectState = { projectId, floorPlanUrl, placedItems: layoutItems(objects), bounds, columns, cameraPerspective: view === "sandbox" ? "eye-level" : "isometric" };
+  return <Context.Provider value={{ state, objects, setObjects, view, setView, setFloorPlanUrl, setBounds, setColumns, hasSavedLayout: initial.hasSavedLayout === true, sandboxStorageKey }}>{children}</Context.Provider>;
 }
