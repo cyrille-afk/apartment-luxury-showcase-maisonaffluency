@@ -30,7 +30,7 @@ export function createPlacedObject(
     id: product.id,
     product_name: product.product_name,
     brand_name: product.brand_name,
-    image_url: product.image_url ? optimizeImageUrl(product.imageUrl ?? product.image_url, CUTOUT_TRANSFORMS) : null,
+    image_url: product.image_url ? optimizeImageUrl(product.image_url, CUTOUT_TRANSFORMS) : null,
     dimensions: product.dimensions,
     glb_url: product.glb_url,
     position,
