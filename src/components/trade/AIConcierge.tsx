@@ -4227,8 +4227,23 @@ export function AIConcierge({
         />
       )}
 
+      {/* Docked-mode re-open handle: slim tab on the right viewport edge. */}
+      {!embedded && dockedMode && open && dockHidden && (
+        <button
+          onClick={() => { setDockCollapsed(false); setMinimized(false); }}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[10000] flex flex-col items-center gap-2 rounded-l-lg border border-r-0 border-border bg-background px-1.5 py-4 shadow-lg hover:bg-muted transition-colors print:hidden"
+          aria-label={`Open ${name} panel`}
+          title={`Open ${name}`}
+        >
+          <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-display text-[9px] uppercase tracking-[0.2em] text-muted-foreground [writing-mode:vertical-rl]">
+            {name}
+          </span>
+        </button>
+      )}
+
       {/* Chat panel */}
-      {open && (
+      {open && !dockHidden && (
         <>
           {!embedded && modalMode && (
             <div
