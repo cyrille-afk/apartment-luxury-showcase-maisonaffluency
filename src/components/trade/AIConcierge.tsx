@@ -4266,6 +4266,8 @@ export function AIConcierge({
           style={
             embedded
               ? undefined
+              : dockedMode && !minimized
+              ? { top: DOCK_TOP, right: 0, bottom: 0, left: "auto", width: DOCK_W, transform: "none", maxWidth: "none" }
               : tabletViewport && !minimized
               ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
               : (modalMode || fullscreen)
