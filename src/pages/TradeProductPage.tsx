@@ -2279,6 +2279,14 @@ const TradeProductPage: React.FC = () => {
             ) : photoIdx !== null && visibleImages[photoIdx] ? (
               <img src={visibleImages[photoIdx]} alt={`${product.title} — photo ${photoIdx + 1}`} className="h-full w-full object-contain" />
             ) : null}
+            {/* Fractional counter, lower-left — matches the public gallery. The 3D slide counts as 1. */}
+            {(visibleImages.length + (r3d ? 1 : 0)) > 1 && (
+              <div className="pointer-events-none absolute bottom-4 left-4 z-20">
+                <span data-testid="gallery-counter" className="inline-block rounded-full bg-background/70 px-2.5 py-1 font-body text-[11px] font-light tracking-widest text-muted-foreground tabular-nums backdrop-blur-sm">
+                  {asset === "3d" ? 1 : (photoIdx ?? 0) + 1 + (r3d ? 1 : 0)} / {visibleImages.length + (r3d ? 1 : 0)}
+                </span>
+              </div>
+            )}
             {hoverCfg && (
               <div role="status" aria-live="polite" className="pointer-events-none absolute bottom-12 left-1/2 z-20 max-w-[85%] -translate-x-1/2 truncate rounded-full border border-border/60 bg-background/90 px-3.5 py-1.5 font-body text-[11px] tracking-[0.04em] text-foreground shadow-sm backdrop-blur-md motion-safe:animate-fade-in">
                 Previewing {hoverCfg.label}
