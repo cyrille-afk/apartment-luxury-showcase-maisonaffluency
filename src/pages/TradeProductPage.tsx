@@ -3170,8 +3170,10 @@ const TradeProductPage: React.FC = () => {
 
             {/* ===== Primary action block — boxed panel identical to the
                 designer-side trade sheet (lead time, price, quantity, CTAs,
-                utility links), followed by the trade-only secondary stack. */}
-            <div className="flex flex-col gap-2.5">
+                utility links), followed by the trade-only secondary stack.
+                Pinned to the viewport bottom while the finish drawer scrolls
+                so the order CTA is always reachable. */}
+            <div className="flex flex-col gap-2.5 lg:sticky lg:bottom-0 lg:z-20 lg:-mx-1 lg:border-t lg:border-border/60 lg:bg-background lg:px-1 lg:pb-4 lg:pt-3 lg:shadow-[0_-16px_28px_-20px_hsl(var(--foreground)/0.35)]">
               <div className="flex flex-col gap-3 rounded-none border border-border/60 bg-muted/30 p-5 md:p-6">
                 {product.lead_time && (
                   <p className="font-body text-[11px] uppercase tracking-widest text-neutral-500">
