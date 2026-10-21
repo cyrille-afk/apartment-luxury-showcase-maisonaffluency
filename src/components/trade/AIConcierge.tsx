@@ -6347,7 +6347,9 @@ export function AIConcierge({
             </div>
 
 
-            <div className={cn("flex flex-wrap lg:flex-nowrap items-end gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
+            {/* Unified composer: one bordered field block — tall textarea on top,
+                contextual helpers docked lower-left, send arrow lower-right. */}
+            <div className={cn("flex flex-col rounded-xl border border-border bg-muted/50 transition-shadow focus-within:ring-1 focus-within:ring-accent", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -6365,60 +6367,9 @@ export function AIConcierge({
                 className="hidden"
                 onChange={(e) => handleMoodBoardPicked(e.target.files)}
               />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
-                aria-label="Attach room plan, image or PDF"
-                title="Attach a room plan, photo or PDF"
-              >
-                <Paperclip className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => moodInputRef.current?.click()}
-                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
-                aria-label="Attach mood board images to Block 3"
-                title="Attach mood board (images bound to Block 3)"
-              >
-                <Palette className="h-4 w-4" />
-              </button>
-              {!briefBuilderOpen && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
-                  }}
-                  disabled={streaming}
-                  className="order-2 h-11 w-11 shrink-0 rounded-none border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl"
-                  aria-label="Open Architectural Brief Builder"
-                  title="Open Architectural Brief Builder"
-                >
-                  <LayoutList className="h-4 w-4" />
-                </button>
-              )}
-
-
-              <button
-                type="button"
-                onClick={() => setShowBriefPreview((v) => !v)}
-                disabled={!input.trim()}
-                className={`order-2 h-11 w-11 shrink-0 rounded-none border p-2 disabled:opacity-40 transition-colors lg:order-none lg:h-auto lg:w-auto lg:rounded-xl ${
-                  showBriefPreview
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-                aria-label={showBriefPreview ? "Hide brief preview" : "Preview brief"}
-                aria-pressed={showBriefPreview}
-                title={showBriefPreview ? "Hide brief preview" : "Preview formatted brief before sending"}
-              >
-                <Eye className="h-4 w-4" />
-              </button>
               {briefBuilderOpen ? (
                 <div
-                  className={`order-1 basis-full flex items-center gap-2 rounded-none border border-dashed px-3 py-2 font-body text-xs italic lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl ${
+                  className={`m-2 flex items-center gap-2 rounded-lg border border-dashed px-3 py-2 font-body text-xs italic ${
                     briefValidation.valid
                       ? "border-accent/50 bg-accent/5 text-muted-foreground"
                       : "border-amber-500/40 bg-amber-500/[0.04] text-amber-700 dark:text-amber-400"
@@ -6449,48 +6400,96 @@ export function AIConcierge({
                   </button>
                 </div>
               ) : (
-
                 <textarea
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={composerPlaceholder}
-                  rows={1}
-                  className="order-1 min-h-11 basis-full resize-none rounded-none border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent lg:order-none lg:basis-auto lg:flex-1 lg:rounded-xl"
+                  rows={3}
+                  className="min-h-[96px] w-full resize-none bg-transparent px-3.5 pt-3 pb-1 font-body text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none"
                   disabled={streaming}
                 />
               )}
-
-              <button
-                onClick={() => {
-                  // Validation interceptor: with the builder open and required
-                  // fields missing, block the send and scroll/glow to the gap
-                  // instead of silently swallowing the click.
-                  if (briefBuilderOpen && !briefValidation.valid) {
-                    briefBuilderRef.current?.focusFirstMissing();
-                    return;
+              <div className="flex items-center gap-1 px-2 pb-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                  className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  aria-label="Attach room plan, image or PDF"
+                  title="Attach a room plan, photo or PDF"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moodInputRef.current?.click()}
+                  disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                  className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  aria-label="Attach mood board images to Block 3"
+                  title="Attach mood board (images bound to Block 3)"
+                >
+                  <Palette className="h-4 w-4" />
+                </button>
+                {!briefBuilderOpen && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
+                    }}
+                    disabled={streaming}
+                    className="h-8 w-8 shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                    aria-label="Open Architectural Brief Builder"
+                    title="Open Architectural Brief Builder"
+                  >
+                    <LayoutList className="h-4 w-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowBriefPreview((v) => !v)}
+                  disabled={!input.trim()}
+                  className={`h-8 w-8 shrink-0 rounded-full p-2 disabled:opacity-40 transition-colors ${
+                    showBriefPreview
+                      ? "bg-accent/10 text-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                  aria-label={showBriefPreview ? "Hide brief preview" : "Preview brief"}
+                  aria-pressed={showBriefPreview}
+                  title={showBriefPreview ? "Hide brief preview" : "Preview formatted brief before sending"}
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    // Validation interceptor: with the builder open and required
+                    // fields missing, block the send and scroll/glow to the gap
+                    // instead of silently swallowing the click.
+                    if (briefBuilderOpen && !briefValidation.valid) {
+                      briefBuilderRef.current?.focusFirstMissing();
+                      return;
+                    }
+                    send();
+                  }}
+                  disabled={
+                    (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
+                    streaming ||
+                    briefSubmitting
                   }
-                  send();
-                }}
-                disabled={
-                  (!(briefBuilderOpen ? briefDraft : input).trim() && attachments.length === 0) ||
-                  streaming ||
-                  briefSubmitting
-                }
-                className="order-2 ml-auto h-11 w-11 shrink-0 rounded-none bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity lg:order-none lg:ml-0 lg:h-auto lg:w-auto lg:rounded-xl"
-                aria-label={briefBuilderOpen ? "Submit brief" : "Send"}
-                title={
-                  briefBuilderOpen && briefValidation.valid
-                    ? "Submit brief"
-                    : briefBuilderOpen && !briefValidation.valid
-                      ? "Complete required brief fields before sending"
-                      : "Send"
-                }
-              >
-                <Send className="h-4 w-4" />
-              </button>
-
+                  className="ml-auto h-9 w-9 shrink-0 rounded-full bg-foreground text-background p-2.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
+                  aria-label={briefBuilderOpen ? "Submit brief" : "Send"}
+                  title={
+                    briefBuilderOpen && briefValidation.valid
+                      ? "Submit brief"
+                      : briefBuilderOpen && !briefValidation.valid
+                        ? "Complete required brief fields before sending"
+                        : "Send"
+                  }
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               {copy.footer}
