@@ -174,10 +174,13 @@ export default function GalleryDetailsFloatingNav({
   const floatingControl = (
     <div
       className={cn(
-        "fixed right-4 z-[10000] print:hidden transition-all duration-300 ease-in-out",
+        "fixed z-[10000] print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
+        // Shift left when the Felix docked drawer is open so the bubble never
+        // overlaps the drawer's composer (send button sits lower-right there).
+        right: "calc(1rem + var(--felix-dock-w, 0px))",
         ...(dockActive
           ? {
               top: "auto",
