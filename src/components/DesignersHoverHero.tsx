@@ -127,6 +127,10 @@ function gridImageLqip(src: string | null | undefined): string | undefined {
  * image_url so we avoid broken external hotlinks on large cards.
  */
 function pickGridImage(d: { slug?: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+  // Directory card only: preserve Simon's portrait on his profile and elsewhere.
+  if (d.slug === "simon-cabrol") {
+    return "https://res.cloudinary.com/dif1oamtj/image/upload/v1792541873/04ba47fb-2d73-47f3-b018-6d1cc825c355_kknavc.jpg";
+  }
   if (d.slug && MOBILE_BG_OVERRIDES[d.slug]) return MOBILE_BG_OVERRIDES[d.slug];
   if (isCloudinaryUpload(d.first_pick_image_url)) return d.first_pick_image_url!;
   if (d.first_pick_image_url) return d.first_pick_image_url;
