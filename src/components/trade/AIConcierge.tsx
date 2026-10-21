@@ -4291,8 +4291,20 @@ export function AIConcierge({
                 )
               : "bg-background border-border animate-fade-in"),
             !embedded && !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            !embedded && !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            !embedded && (minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]")))
+            !embedded && !modalMode && !fullscreen && !pos && !dockedMode && "bottom-20 md:bottom-6 right-4",
+            !embedded && dockedMode && !minimized && "rounded-none border-0 border-l border-border shadow-[-16px_0_48px_-24px_hsl(var(--foreground)/0.35)] animate-in slide-in-from-right duration-300",
+            !embedded && !dockedMode && (minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]")))
+          )}
+          {/* Collapse handle straddling the drawer's left edge (docked mode). */}
+          {dockedMode && !minimized && (
+            <button
+              onClick={() => setDockCollapsed(true)}
+              className="absolute -left-7 top-1/2 -translate-y-1/2 z-10 flex h-16 w-7 items-center justify-center rounded-l-lg border border-r-0 border-border bg-background shadow-md hover:bg-muted transition-colors"
+              aria-label={`Collapse ${name} panel`}
+              title={`Collapse ${name}`}
+            >
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
           )}
         >
           <div
