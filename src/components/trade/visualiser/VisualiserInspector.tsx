@@ -25,11 +25,14 @@ const VisualiserInspector = ({
   onRemove,
   onScale,
   onRestore,
+  nearestClearance,
   children,
 }: {
   onRemove: (instanceId: string) => void;
   onScale: (instanceId: string, scale: number) => void;
   onRestore?: (instanceId: string) => void;
+  /** Nearest gap from the selected piece to another piece or wall. */
+  nearestClearance?: { distance: number; level: ClearanceLevel; targetName: string } | null;
   children?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
