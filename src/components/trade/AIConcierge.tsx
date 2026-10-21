@@ -4302,7 +4302,7 @@ export function AIConcierge({
                   "bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
-              : "bg-background border-border animate-fade-in"),
+              : cn("bg-background border-border", !dockedMode && "animate-fade-in")),
             !embedded && !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !embedded && !modalMode && !fullscreen && !pos && !dockedMode && "bottom-20 md:bottom-6 right-4",
             !embedded && dockedMode && !minimized && "rounded-none border-0 border-l border-border shadow-[-16px_0_48px_-24px_hsl(var(--foreground)/0.35)] animate-in slide-in-from-right duration-300",
