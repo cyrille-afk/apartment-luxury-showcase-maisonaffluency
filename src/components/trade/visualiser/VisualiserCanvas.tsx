@@ -559,7 +559,7 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {!showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!photoCalibration && !showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
     </mesh>}
