@@ -27,7 +27,7 @@ permissions:
 jobs:
   smoke:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       # Missing credentials must FAIL, never silently skip.
       SMOKE_STRICT: "1"
