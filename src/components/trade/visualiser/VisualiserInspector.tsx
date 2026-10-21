@@ -26,6 +26,7 @@ const VisualiserInspector = ({
   onScale,
   onRestore,
   nearestClearance,
+  sidebarActions,
   children,
 }: {
   onRemove: (instanceId: string) => void;
@@ -34,12 +35,14 @@ const VisualiserInspector = ({
   /** Nearest gap from the selected piece to another piece or wall. */
   nearestClearance?: { distance: number; level: ClearanceLevel; targetName: string } | null;
   children?: ReactNode;
+  sidebarActions?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
 
   if (!selected) {
     return (
       <aside aria-label="Object inspector" data-testid="visualiser-inspector" className={panelClass}>
+        {sidebarActions && <div className="mb-4">{sidebarActions}</div>}
         <p className={cn(microLabel, "text-muted-foreground")}>Inspector</p>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
           Select an object on the canvas to view its details.
@@ -54,6 +57,7 @@ const VisualiserInspector = ({
       data-testid="visualiser-inspector"
       className={cn(panelClass, "max-h-[calc(100%-14rem)] overflow-y-auto")}
     >
+      {sidebarActions && <div className="mb-4">{sidebarActions}</div>}
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className={cn(microLabel, "text-muted-foreground")}>{selected.brand_name}</p>

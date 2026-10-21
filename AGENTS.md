@@ -34,7 +34,7 @@
 - Product dimension detection accepts complete dotted-axis decimal-comma editor labels without inventing units; base-only fixed sizes fall back to the stored variant label, and selected text finish controls retain the editor's finish-axis caption — prevents imported specifications disappearing across Studio and Presentation.
 - Visualiser ceiling settings use a lightweight shared contract for page, presets and lazy-loaded geometry; emitters follow the opening and frame height so saved settings render consistently.
 - Product pages and lightboxes reuse PicturedFinishesStrip with the displayed photo index; multi-material mappings stay visible when pictured together — prevents missing photo legends.
-- Sandbox default photo is a presentation-only canvas layer replaced by custom backdrop state, not furniture changes — preserves compositions and imports.
+- Sandbox photos preserve compositions; calibrated imports share persisted floor homography, fixed photo framing and an invertible camera with transparent contact shadows (details in visualiser/AGENTS.md) — keeps placement and drag rays aligned.
 - Stripe delivery monitoring extends the existing watchdog and reconciles provider failures with local receipts; unverified bodies never establish mode — catches pre-handler failures without duplicate schedules.
 - Named project snapshots are immutable owner-private cloud records with full scene, floor plan and bounds; validated, confirmed restores preserve historical finishes and project isolation.
 - Snapshot comparison loads two project-scoped immutable records without changing the live scene; footprints use saved dimensions/transforms and finish differences use per-instance materials, with restore delegated to the existing confirmation.

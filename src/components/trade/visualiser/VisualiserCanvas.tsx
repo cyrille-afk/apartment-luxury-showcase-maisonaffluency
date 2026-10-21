@@ -35,6 +35,8 @@ import ArchitecturalDownlights from "./ArchitecturalDownlights";
 import type { FeatureWallFinish } from "@/lib/visualiserFeatureWall";
 import { backdropStageColor, type RoomFloorFinish, type RoomWallColor, type RoomWallFinish } from "@/lib/visualiserRoomSurfaces";
 import type { RoomBounds, layoutCamera } from "@/lib/activeProjectLayout";
+import PhotoMatchedCamera from "./PhotoMatchedCamera";
+import type { PhotoCalibration } from "@/lib/photoPerspective";
 
 export type VisualiserEnvironmentSource = EnvironmentSourcePref | "local";
 export type VisualiserEnvironmentStatus = { source: VisualiserEnvironmentSource; exr?: "missing" | "unreadable" };
@@ -51,7 +53,7 @@ export function reportEnvironmentStatus(status: VisualiserEnvironmentStatus) {
  * networks. `preferred` lets the toolbar switch between the studio's empty-room
  * EXR and the built-in studio HDRI without remounting the canvas.
  */
-const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady, onUploadedActive }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void; onUploadedActive?: (active: boolean) => void }) => {
+const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, onReady, onUploadedActive, photoMatched = false }: { preferred: VisualiserEnvironmentSource; pathTrace?: boolean; lightIntensity?: number; onReady?: () => void; onUploadedActive?: (active: boolean) => void; photoMatched?: boolean }) => {
   const [map, setMap] = useState<THREE.DataTexture | null>(null);
   const [uploadedActive, setUploadedActive] = useState(false);
   const invalidate = useThree((s) => s.invalidate);
@@ -136,14 +138,14 @@ const StudioEnvironment = ({ preferred, pathTrace = false, lightIntensity = 1, o
       <Environment
         key={map.uuid}
         map={map}
-        background={presentation.background}
+        background={!photoMatched && presentation.background}
         environmentIntensity={environmentIntensity}
         backgroundIntensity={uploadedActive ? 1 : pathTrace ? environmentIntensity : 1}
         backgroundBlurriness={presentation.blur}
         environmentRotation={rotation}
         backgroundRotation={rotation}
       />
-      {uploadedActive && <UploadedEnvironmentBackdrop map={map} />}
+      {uploadedActive && !photoMatched && <UploadedEnvironmentBackdrop map={map} />}
     </>
   );
   return (
@@ -219,6 +221,7 @@ const SceneLoader = () => (
 );
 
 interface VisualiserCanvasProps {
+  photoCalibration?: PhotoCalibration | null;
   workspaceCamera?: ReturnType<typeof layoutCamera>;
   roomBounds?: RoomBounds;
   onInitialReady?: () => void;
@@ -337,6 +340,7 @@ const ShowroomEffects = ({ target, range, strength = 1, depthOfField, hasBackdro
  * Visualiser route actually mounts.
  */
 const VisualiserCanvas = ({
+  photoCalibration,
   workspaceCamera,
   roomBounds,
   onInitialReady,
@@ -401,11 +405,11 @@ const VisualiserCanvas = ({
     window.addEventListener(LOCAL_EXR_EVENT, check);
     return () => { live = false; window.removeEventListener(LOCAL_EXR_EVENT, check); };
   }, []);
-  const showUploadedEnvironment = uploadedEnvironment && environmentSource === "empty-room-exr";
+  const showUploadedEnvironment = !photoCalibration && uploadedEnvironment && environmentSource === "empty-room-exr";
   const showLuxuryBackdrop = defaultLuxuryBackdrop && !hasCustomBackdrop && !showUploadedEnvironment && localExrState === "absent";
   const hasBackdrop = hasCustomBackdrop || showLuxuryBackdrop || showUploadedEnvironment;
   // Uploaded interiors share the room-photo stage: fixed grounded camera, no pan.
-  const photoStage = showLuxuryBackdrop || showUploadedEnvironment;
+  const photoStage = Boolean(photoCalibration) || showLuxuryBackdrop || showUploadedEnvironment;
   const center: [number, number, number] = objects.length ? objects.reduce<[number, number, number]>((sum, object) => [sum[0] + object.position[0] / objects.length, sum[1] + object.position[1] / objects.length, sum[2] + object.position[2] / objects.length], [0, 0, 0]) : [0, 0, 0];
   const lighting = advancedSceneLighting(advancedRendering, pathTraceQuality?.lightIntensity ?? 1);
   const dofTarget = useRef(new THREE.Vector3(0, 0.5, 0));
@@ -440,7 +444,7 @@ const VisualiserCanvas = ({
   >
     {onInitialReady && <InitialRoomReveal ready={roomReady && objectsReady && environmentReady} modelCount={objects.filter((object) => Boolean(object.glb_url)).length} onReady={onInitialReady} />}
     <RenderOnDemand
-      signature={`lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
+      signature={`photo:${JSON.stringify(photoCalibration)}|lighting:${JSON.stringify(advancedRendering)}:${lighting.lightScale}|environment:${environmentSource}|${floorFinish}|${showRearWall}|${wallHeight}|${ceilingHeight}|${ceilingThickness}|${ceilingOpening}|${floorGlare}|${wallColor}|${wallCustomHex ?? ""}|${wallFinish}|${wallFinishIntensity}|${featureWallFinish}|${rugColor}|${rugBorderColor}|${rugBorderThicknessMm}|${rugBorderTwistMm}|${rugBorderRoughness}|${rugWeave}|${rugPile}|${JSON.stringify(rugLayout)}|${showRug ? "rug" : "no-rug"}|${backdropColor ?? ""}|${backdropBrightness}|${selectedId ?? ""}|${hasBackdrop}|${orbitEnabled}|${showGrid}|${showLabels}|${depthOfField}|${dofStrength}|${dofFocusSelected}|${objects
         .map(
           (o) =>
             `${o.instanceId}:${o.position?.join(",")}:${o.rotation?.join(",")}:${o.scale}:${o.modelOrientation?.join(",")}` +
@@ -452,9 +456,10 @@ const VisualiserCanvas = ({
     <SelectedPieceFocus selectedId={selectedId} enabled={depthOfField && dofFocusSelected} target={dofTarget.current} objects={objects} range={dofRange} />
     {/* A level, dollied-back camera preserves parallel architectural verticals. */}
     <PerspectiveCamera makeDefault fov={workspaceCamera?.fov ?? SHOWROOM.cameraFov} position={workspaceCamera?.position ?? (photoStage ? LUXURY_BACKDROP.cameraPosition : SHOWROOM.cameraPosition)} up={[0, 1, 0]} near={0.1} far={200} onUpdate={(camera) => { if (workspaceCamera) camera.lookAt(...workspaceCamera.target); else if (photoStage) camera.lookAt(...LUXURY_BACKDROP.cameraTarget); }} />
+    {photoCalibration && roomBounds && <PhotoMatchedCamera calibration={photoCalibration} bounds={roomBounds} />}
     <OrbitControls
       makeDefault
-      enabled={orbitEnabled}
+      enabled={orbitEnabled && !photoCalibration}
       enablePan={!photoStage}
       screenSpacePanning
       enableDamping={false}
@@ -466,7 +471,7 @@ const VisualiserCanvas = ({
       maxAzimuthAngle={photoStage ? LUXURY_BACKDROP.maxAzimuthAngle : Infinity}
       target={workspaceCamera?.target ?? (photoStage ? LUXURY_BACKDROP.cameraTarget : SHOWROOM.cameraTarget)}
     />
-    {roomBounds && <group name="Active project bounds">{[
+    {roomBounds && !photoCalibration && <group name="Active project bounds">{[
       { position: [0, 0.01, -roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [0, 0.01, roomBounds.depth / 2], size: [roomBounds.width, 0.01, 0.025] },
       { position: [-roomBounds.width / 2, 0.01, 0], size: [0.025, 0.01, roomBounds.depth] },
@@ -501,7 +506,7 @@ const VisualiserCanvas = ({
     {/* Local IBL: metals need reflections or they render solid black. Toolbar-switchable HDRI. */}
     {/* Photoreal: no solid grey void — escaping rays must hit the emissive HDRI. */}
     {!hasBackdrop && !pathTrace && <color attach="background" args={[backdropStageColor(backdropColor, backdropBrightness)]} />}
-    <StudioEnvironment preferred={environmentSource} pathTrace={pathTrace && (!hasBackdrop || showUploadedEnvironment)} lightIntensity={lighting.lightScale} onReady={environmentLoaded} onUploadedActive={setUploadedEnvironment} />
+    <StudioEnvironment photoMatched={Boolean(photoCalibration)} preferred={environmentSource} pathTrace={pathTrace && (!hasBackdrop || showUploadedEnvironment)} lightIntensity={lighting.lightScale} onReady={environmentLoaded} onUploadedActive={setUploadedEnvironment} />
 
     <Suspense fallback={null}>
       {showLuxuryBackdrop && <LuxuryBackdrop />}
@@ -538,7 +543,7 @@ const VisualiserCanvas = ({
     )}
     {/* Faint floor grid at Y = 0 — the design-canvas ground reference. Hideable for room-photo backdrops. */}
     {!pathTrace && (showLuxuryBackdrop || showUploadedEnvironment) && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
-    {showGrid && !showLuxuryBackdrop && !showUploadedEnvironment && (
+    {showGrid && !hasCustomBackdrop && !showLuxuryBackdrop && !showUploadedEnvironment && (
       <Grid
         position={[0, 0.001, 0]}
         infiniteGrid
@@ -554,10 +559,11 @@ const VisualiserCanvas = ({
       />
     )}
     {/* Invisible shadow-catcher floor: lets the backdrop's own flooring read through the shadows. */}
-    {!showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+    {!photoCalibration && !showLuxuryBackdrop && !showUploadedEnvironment && (hasBackdrop || floorFinish === "none") && <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[80, 80]} />
       <shadowMaterial transparent opacity={0.28} />
     </mesh>}
+    {photoCalibration && <ContactShadows position={[center[0], 0.002, center[2]]} opacity={LUXURY_BACKDROP.contactOpacity} blur={LUXURY_BACKDROP.contactBlur} scale={LUXURY_BACKDROP.contactScale} far={1.5} resolution={1024} depthWrite={false} />}
 
     <Suspense fallback={<SceneLoader />}>
       {objects.map((object) => (
@@ -600,7 +606,7 @@ const VisualiserCanvas = ({
           .join("|")}`}
       />
     )}
-    {!pathTrace && <ShowroomEffects
+    {!pathTrace && !photoCalibration && <ShowroomEffects
         depthOfField={depthOfField}
         hasBackdrop={hasBackdrop}
         strength={dofStrength}
