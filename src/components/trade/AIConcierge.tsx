@@ -1571,6 +1571,15 @@ export function AIConcierge({
     else root.style.removeProperty("--felix-dock-w");
     return () => { root.style.removeProperty("--felix-dock-w"); };
   }, [embedded, dockedMode, open, dockHidden, DOCK_W]);
+  // While the mobile sheet is open, hide page-level floating controls (sticky
+  // order bar, quick-actions bubble) so they never cover the composer toolbar.
+  useEffect(() => {
+    if (embedded) return;
+    const root = document.documentElement;
+    if (!dockedMode && open && !minimized) root.dataset.felixSheetOpen = "1";
+    else delete root.dataset.felixSheetOpen;
+    return () => { delete root.dataset.felixSheetOpen; };
+  }, [embedded, dockedMode, open, minimized]);
   useEffect(() => {
     try {
       // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so

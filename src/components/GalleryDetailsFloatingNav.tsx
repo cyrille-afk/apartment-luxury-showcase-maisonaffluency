@@ -174,7 +174,7 @@ export default function GalleryDetailsFloatingNav({
   const floatingControl = (
     <div
       className={cn(
-        "fixed z-[10000] print:hidden transition-all duration-300 ease-in-out",
+        "gallery-details-floating-nav fixed z-[10000] print:hidden transition-all duration-300 ease-in-out",
         className
       )}
       style={{
