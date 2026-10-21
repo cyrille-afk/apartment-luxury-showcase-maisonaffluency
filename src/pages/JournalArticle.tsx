@@ -6,6 +6,7 @@ import { ArrowLeft, X } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { motion, AnimatePresence } from "framer-motion";
 import React from "react";
+import type { Components } from "react-markdown";
 import JournalMarkdown from "@/components/journal/JournalMarkdown";
 
 
@@ -333,7 +334,7 @@ const JournalArticlePage = () => {
                         hr: ({ node, ...props }) => <hr className="my-10 border-border" {...props} />,
                         ul: ({ node, ...props }) => <ul className="my-6 list-disc pl-6 space-y-2" {...props} />,
                         ol: ({ node, ...props }) => <ol className="my-6 list-decimal pl-6 space-y-2" {...props} />,
-                      }}
+                      } satisfies Components}
                     />
                   );
                 }

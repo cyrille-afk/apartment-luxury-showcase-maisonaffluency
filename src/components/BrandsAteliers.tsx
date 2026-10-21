@@ -1885,7 +1885,7 @@ interface ParentBrandConfig {
   /** Label for the founder pill on sub-designer cards */
   pillLabel: string;
   /** Featured designer name used in share text */
-  highlightDesigner?: string;
+  highlightDesigner?: string | null;
 }
 
 const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
@@ -2075,7 +2075,7 @@ type ConsolidatedBrand = {
   name: string;
   origin: string;
   description: string;
-  instagram: string;
+  instagram?: string;
   categories: string[];
   featuredItems: Array<{ featured?: string; galleryIndex?: number; category: string }>;
   photoCredit?: string;
@@ -2554,7 +2554,7 @@ function EcartAccordion({ onOpenPicks }: { onOpenPicks: (name: string) => void }
 
 // ─── Main component ──────────────────────────────────────────────────────────
 const BrandsAteliers = () => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();

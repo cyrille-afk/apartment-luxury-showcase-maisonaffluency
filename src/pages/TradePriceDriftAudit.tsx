@@ -183,7 +183,7 @@ export default function TradePriceDriftAudit() {
   const resyncPick = async (pickId: string, pickPrice: number | null, pickCurrency: string | null) => {
     const { error } = await supabase
       .from("designer_curator_picks")
-      .update({ trade_price_cents: pickPrice, currency: pickCurrency })
+      .update({ trade_price_cents: pickPrice, currency: pickCurrency ?? undefined })
       .eq("id", pickId);
     if (error) throw error;
   };

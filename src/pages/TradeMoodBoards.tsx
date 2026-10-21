@@ -272,7 +272,7 @@ export default function TradeMoodBoards() {
       // Legacy fallback: any remaining title|brand collision (pre-source_pick_id
       // rows) — prefer the trade entry since that's what tools join through.
       const seen = new Set<string>();
-      const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string; category: string; source: "trade" | "curator" }> = [];
+      const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string | null; category: string; source: "trade" | "curator" }> = [];
       for (const item of [...tradeItems, ...curatorItems]) {
         const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
         if (seen.has(key)) continue;

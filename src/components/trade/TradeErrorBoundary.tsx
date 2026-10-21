@@ -11,17 +11,17 @@ interface State {
 }
 
 class TradeErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("Trade portal error:", error, info.componentStack);
   }
 
-  render() {
+  override render() {
     if (!this.state.hasError) return this.props.children;
 
     return (

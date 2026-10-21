@@ -17,9 +17,9 @@ const toSlug = (s: string) =>
     .replace(/^-|-$/g, "");
 
 interface PickWithBrand {
-  title: string;
+  title: string | null;
   pdf_url: string;
-  image_url: string;
+  image_url: string | null;
   materials: string | null;
   dimensions: string | null;
   brand: string;
@@ -53,7 +53,7 @@ export default function SpecSheetRedirect() {
 
       if (!rawPicks?.length) { setMode("not-found"); return; }
 
-      const designerIds = [...new Set(rawPicks.map(p => p.designer_id))];
+      const designerIds = [...new Set(rawPicks.map(p => p.designer_id).filter((id): id is string => id !== null))];
       const { data: designers } = await supabase
         .from("designers")
         .select("id, name, slug")
@@ -86,12 +86,12 @@ export default function SpecSheetRedirect() {
 
       // Check if slug matches a specific product
       for (const pick of rawPicks) {
-        const designer = designerMap.get(pick.designer_id);
+        const designer = designerMap.get(pick.designer_id ?? "");
         if (!designer) continue;
         const candidate = toSlug(`${designer.name}-${pick.title}`);
         if (candidate === slug) {
           navigate(
-            `/trade/spec-sheet?brand=${encodeURIComponent(designer.name)}&product=${encodeURIComponent(pick.title)}`,
+            `/trade/spec-sheet?brand=${encodeURIComponent(designer.name)}&product=${encodeURIComponent(String(pick.title))}`,
             { replace: true }
           );
           return;
@@ -211,7 +211,7 @@ export default function SpecSheetRedirect() {
           {picks.map((pick) => (
             <Link
               key={pick.productSlug}
-              to={`/trade/spec-sheet?brand=${encodeURIComponent(pick.brand)}&product=${encodeURIComponent(pick.title)}`}
+              to={`/trade/spec-sheet?brand=${encodeURIComponent(pick.brand)}&product=${encodeURIComponent(String(pick.title))}`}
               className="group block rounded-xl border border-border bg-card hover:shadow-md transition-shadow overflow-hidden"
             >
               {pick.image_url && (

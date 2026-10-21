@@ -248,7 +248,7 @@ export default function RoomSearch() {
           // We created it — remove it (matches the Helmet-only default state).
           el.remove();
         } else {
-          el.setAttribute("content", original);
+          el.setAttribute("content", original!);
         }
       }
       // og:image / twitter:image: restore the static sitewide share image.

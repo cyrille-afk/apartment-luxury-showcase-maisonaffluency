@@ -401,9 +401,9 @@ function singularizeSub(s: string): string {
   }) : rawFiltered, [rawFiltered, roomSlug, showAll, roomFacets]);
 
   // Avoid eager tonal-analysis downloads for hundreds of off-batch photos.
-  const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image), { cachedOnly: true });
+  const itemTones = useImageTones(facetFiltered.map((i) => i.pick.image).filter((image): image is string => image !== undefined), { cachedOnly: true });
   const filtered = useMemo(
-    () => curateGrid(facetFiltered, (i) => i.designerId, (i) => itemTones[i.pick.image]),
+    () => curateGrid(facetFiltered, (i) => i.designerId, (i) => i.pick.image === undefined ? undefined : itemTones[i.pick.image]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [facetFiltered, itemTones, Object.keys(itemTones).length],
   );
@@ -582,7 +582,7 @@ function singularizeSub(s: string): string {
             >
               <div className="relative w-full aspect-square overflow-hidden bg-[hsl(var(--product-canvas))]">
                 <CatalogCardImages
-                  primary={item.pick.image}
+                  primary={item.pick.image!}
                   alternate={item.pick.hoverImage}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
                   sizes={`(max-width: 768px) 50vw, ${roomSlug ? '27vw' : gridCols === 4 ? '25vw' : '33vw'}`}

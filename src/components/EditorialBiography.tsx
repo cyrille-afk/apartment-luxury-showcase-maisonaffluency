@@ -979,7 +979,7 @@ export default function EditorialBiography({
     }
 
     // Mobile image hoisting disabled — keep identical order on all viewports
-    const earlyMobileImage = null;
+    const earlyMobileImage = null as Extract<Block, { type: "image" }> | null;
 
     if (leadingText.length > 0) {
       if (debugMediaOrder) debugEvents.push(`Leading text block (${leadingText.length} paragraph${leadingText.length > 1 ? "s" : ""})`);

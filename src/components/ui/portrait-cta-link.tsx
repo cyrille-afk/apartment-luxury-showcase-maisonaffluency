@@ -27,7 +27,7 @@ export function PortraitCtaLink({
   className,
 }: PortraitCtaLinkProps) {
   const [pressed, setPressed] = useState(false);
-  const actionTimer = useRef<number>();
+  const actionTimer = useRef<number | undefined>(undefined);
   const Arrow = reversed ? ArrowLeft : ArrowRight;
 
   useEffect(() => {

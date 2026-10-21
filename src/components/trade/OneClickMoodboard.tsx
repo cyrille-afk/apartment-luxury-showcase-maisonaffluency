@@ -69,7 +69,7 @@ export function useMoodboardSourcing() {
     setCapturing(true);
     setCaptureError("");
     const value = email.trim().toLowerCase();
-    const { error: rpcError } = await supabase.rpc("moodboard_capture_lead", { _email: value, _reference: submitted?.value ?? null });
+    const { error: rpcError } = await supabase.rpc("moodboard_capture_lead", { _email: value, _reference: submitted?.value ?? undefined });
     setCapturing(false);
     if (rpcError) { setCaptureError("We couldn't record your request. Please try again."); return; }
     window.location.href = `/trade-program?email=${encodeURIComponent(value)}&source=moodboard`;
@@ -168,7 +168,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
       </div>
       <div className={`mt-3 gap-2 border-t border-moodboard-ink/10 pt-3 text-xs ${embedded ? "flex flex-col" : "flex items-center justify-between"}`}>
         <span className="shrink-0 text-moodboard-ink/50">{locked ? "Sourcing ID" : `ID ${sourcingId(pick.id ?? pick.title)}`}</span>
-        <span className={`${embedded ? "leading-snug" : "truncate"} font-medium text-moodboard-teal`}>{locked ? "Locked" : embedded ? "Price upon Request" : formatPublicRrpForDestination(rrpMap[pick.id], destination.currency) ?? "Price upon Request"}</span>
+        <span className={`${embedded ? "leading-snug" : "truncate"} font-medium text-moodboard-teal`}>{locked ? "Locked" : embedded ? "Price upon Request" : formatPublicRrpForDestination(rrpMap[pick.id ?? "undefined"], destination.currency) ?? "Price upon Request"}</span>
       </div>
     </div>
   );

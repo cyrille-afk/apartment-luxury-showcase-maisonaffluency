@@ -1585,7 +1585,7 @@ function drawHkdLandedBlock(doc: jsPDF, args: QuotePdfArgs, M: number, y: number
   const h = args.hkdLanded!;
   const fmtH = (cents: number) =>
     new Intl.NumberFormat("en-HK", { style: "currency", currency: "HKD", maximumFractionDigits: 0 }).format((cents || 0) / 100);
-  const fmtE = (cents: number) =>
+  const fmtE = (cents: number | undefined) =>
     new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format((cents || 0) / 100);
 
   const blockW = 280;

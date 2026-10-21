@@ -20,7 +20,7 @@ class ScrapeErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="border border-destructive/30 rounded-md p-3 bg-destructive/5">

@@ -1604,6 +1604,7 @@ const DesignersHoverHero = () => {
         };
       }
     }
+    return undefined;
   }, [searchOpen, groupedResults.length, isDesktopViewport]);
 
   // Desktop dropdown defaults to the first available letter when it opens so

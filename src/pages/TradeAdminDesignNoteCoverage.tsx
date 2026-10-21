@@ -79,7 +79,7 @@ export default function TradeAdminDesignNoteCoverage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["design-note-coverage"], enabled,
-    queryFn: async () => {
+    queryFn: async (): Promise<Row[]> => {
       const [notes, drafts, picks] = await Promise.all([
         db.from("product_design_notes").select("pick_id, form, function, texture, colour, sources"),
         db.from("design_note_research_drafts").select("pick_id, review_status, sources"),

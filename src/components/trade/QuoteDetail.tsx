@@ -324,7 +324,7 @@ const resolveQuoteLineImageFromPick = (item: QuoteItemWithProduct, pick: any): s
     }
   });
 
-  return best?.url ?? null;
+  return (best as { url: string; score: number } | null)?.url ?? null;
 };
 
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
@@ -3618,7 +3618,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               {matched.map((s, si) => (
                                 <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
                                   <img
-                                    src={s.image_url}
+                                    src={s.image_url ?? undefined}
                                     alt={s.name}
                                     className="h-6 w-6 rounded-full object-cover border border-border/60"
                                     loading="lazy"
@@ -4466,7 +4466,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 {matched.map((s, si) => (
                                   <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
                                     <img
-                                      src={s.image_url}
+                                      src={s.image_url ?? undefined}
                                       alt={s.name}
                                       className="h-6 w-6 rounded-full object-cover border border-border/60"
                                       loading="lazy"
