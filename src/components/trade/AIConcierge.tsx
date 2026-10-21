@@ -6,7 +6,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder, loadBriefDraftText, validateBriefDraft, type BriefBuilderHandle } from "@/components/trade/concierge/BriefBuilder";
 import { ART_DECO_DISCOVERY_REPLY, evaluateFelixOnboardingGate, isHighLevelVisionStatement, hasRealBriefValue, type FelixBriefFacts } from "@/lib/felixOnboardingGate";
@@ -799,6 +799,11 @@ export function AIConcierge({
   const [minimized, setMinimized] = useState(() => {
     try { return sessionStorage.getItem("concierge:minimized") === "1"; } catch { return false; }
   });
+  // Docked right-drawer collapse (desktop xl+ only): hides the panel entirely
+  // and leaves a slim re-open handle on the right viewport edge.
+  const [dockCollapsed, setDockCollapsed] = useState(() => {
+    try { return sessionStorage.getItem("concierge:dock-collapsed") === "1"; } catch { return false; }
+  });
   // Set when the designer explicitly closes the panel. Proactive/ambient
   // nudges must never re-open Felix after that — only an explicit user
   // action (header button, "Ask Felix", quick actions) may re-open it.
@@ -1490,6 +1495,14 @@ export function AIConcierge({
   // right of it instead of centring it on the viewport.
   const docked = navInset > 0;
 
+  // Docked right-drawer mode: on desktop (xl+) the concierge docks as a
+  // full-height utility panel below the global header instead of floating,
+  // and the page canvas is pushed left via the --felix-dock-w CSS variable.
+  const DOCK_W = 420;
+  const DOCK_TOP = 64; // matches the md:h-16 global trade header
+  const dockedMode = !embedded && !modalMode && !fullscreen && !tabletViewport;
+  const dockHidden = dockedMode && (dockCollapsed || minimized);
+
   // Brief exit-animation gate: when the welcome modal is dismissed we keep
   // the backdrop + panel mounted for ~280ms so they can fade/scale out
   // smoothly before unmounting.
@@ -1547,6 +1560,17 @@ export function AIConcierge({
   useEffect(() => {
     try { sessionStorage.setItem("concierge:minimized", minimized ? "1" : "0"); } catch {}
   }, [minimized]);
+  useEffect(() => {
+    try { sessionStorage.setItem("concierge:dock-collapsed", dockCollapsed ? "1" : "0"); } catch {}
+  }, [dockCollapsed]);
+  // Push the page canvas left while the docked drawer is visible.
+  useEffect(() => {
+    if (embedded) return;
+    const root = document.documentElement;
+    if (dockedMode && open && !dockHidden) root.style.setProperty("--felix-dock-w", `${DOCK_W}px`);
+    else root.style.removeProperty("--felix-dock-w");
+    return () => { root.style.removeProperty("--felix-dock-w"); };
+  }, [embedded, dockedMode, open, dockHidden, DOCK_W]);
   useEffect(() => {
     try {
       // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so
@@ -4203,8 +4227,36 @@ export function AIConcierge({
         />
       )}
 
+      {/* Docked-mode collapse handle: straddles the drawer's left edge. */}
+      {!embedded && dockedMode && open && !dockHidden && (
+        <button
+          onClick={() => setDockCollapsed(true)}
+          style={{ right: DOCK_W }}
+          className="fixed top-1/2 -translate-y-1/2 -translate-x-1/2 z-[10000] flex h-16 w-7 items-center justify-center rounded-l-lg border border-r-0 border-border bg-background shadow-md hover:bg-muted transition-colors print:hidden"
+          aria-label={`Collapse ${name} panel`}
+          title={`Collapse ${name}`}
+        >
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      )}
+
+      {/* Docked-mode re-open handle: slim tab on the right viewport edge. */}
+      {!embedded && dockedMode && open && dockHidden && (
+        <button
+          onClick={() => { setDockCollapsed(false); setMinimized(false); }}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[10000] flex flex-col items-center gap-2 rounded-l-lg border border-r-0 border-border bg-background px-1.5 py-4 shadow-lg hover:bg-muted transition-colors print:hidden"
+          aria-label={`Open ${name} panel`}
+          title={`Open ${name}`}
+        >
+          <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-display text-[9px] uppercase tracking-[0.2em] text-muted-foreground [writing-mode:vertical-rl]">
+            {name}
+          </span>
+        </button>
+      )}
+
       {/* Chat panel */}
-      {open && (
+      {open && !dockHidden && (
         <>
           {!embedded && modalMode && (
             <div
@@ -4216,7 +4268,7 @@ export function AIConcierge({
               onClick={closeWelcomeModal}
             />
           )}
-          {!embedded && !modalMode && !minimized && (
+          {!embedded && !modalMode && !minimized && !dockedMode && (
             <div
               className="fixed inset-0 z-[1] backdrop-blur-sm bg-foreground/10 print:hidden animate-fade-in pointer-events-none"
               aria-hidden="true"
@@ -4227,6 +4279,8 @@ export function AIConcierge({
           style={
             embedded
               ? undefined
+              : dockedMode && !minimized
+              ? { top: DOCK_TOP, right: 0, bottom: 0, left: "auto", width: DOCK_W, transform: "none", maxWidth: "none" }
               : tabletViewport && !minimized
               ? { inset: 0, width: "100%", height: "100dvh", maxWidth: "none", maxHeight: "none", transform: "none" }
               : (modalMode || fullscreen)
@@ -4248,26 +4302,27 @@ export function AIConcierge({
                   "bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
-              : "bg-background border-border animate-fade-in"),
+              : cn("bg-background border-border", !dockedMode && "animate-fade-in")),
             !embedded && !modalMode && fullscreen && !docked && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-            !embedded && !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            !embedded && (minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]")))
+            !embedded && !modalMode && !fullscreen && !pos && !dockedMode && "bottom-20 md:bottom-6 right-4",
+            !embedded && dockedMode && !minimized && "rounded-none border-0 border-l border-border shadow-[-16px_0_48px_-24px_hsl(var(--foreground)/0.35)] animate-in slide-in-from-right duration-300",
+            !embedded && !dockedMode && (minimized ? "h-auto max-xl:!inset-auto max-xl:!right-4 max-xl:!bottom-4 max-xl:!h-auto max-xl:!w-[min(560px,calc(100vw-2rem))] max-xl:!rounded-2xl" : ((fullscreen || modalMode) ? "h-[calc(100dvh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100dvh-4rem)]" : "h-[560px] max-h-[calc(100dvh-6rem)]")))
           )}
         >
           <div
-            onPointerDown={embedded ? undefined : onDragStart}
-            onPointerMove={embedded ? undefined : onDragMove}
-            onPointerUp={embedded ? undefined : onDragEnd}
-            onPointerCancel={embedded ? undefined : onDragEnd}
-            onDoubleClick={embedded ? undefined : () => setMinimized((m) => !m)}
+            onPointerDown={embedded || dockedMode ? undefined : onDragStart}
+            onPointerMove={embedded || dockedMode ? undefined : onDragMove}
+            onPointerUp={embedded || dockedMode ? undefined : onDragEnd}
+            onPointerCancel={embedded || dockedMode ? undefined : onDragEnd}
+            onDoubleClick={embedded ? undefined : dockedMode ? () => setDockCollapsed(true) : () => setMinimized((m) => !m)}
             className={cn(
               "flex flex-col gap-1.5 px-4 py-3 border-b select-none shrink-0",
-              !embedded && "cursor-grab active:cursor-grabbing touch-none",
+              !embedded && !dockedMode && "cursor-grab active:cursor-grabbing touch-none",
               modalMode
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
             )}
-            title="Drag to move · double-click to collapse"
+            title={dockedMode ? "Double-click to collapse" : "Drag to move · double-click to collapse"}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -4742,7 +4797,7 @@ export function AIConcierge({
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={() => setMinimized((m) => !m)}
+                onClick={() => (dockedMode ? setDockCollapsed(true) : setMinimized((m) => !m))}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
                 title={minimized ? "Expand" : "Collapse"}

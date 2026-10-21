@@ -525,7 +525,7 @@ const TradeLayout = () => {
            </motion.div>}
          </AnimatePresence>
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 transition-[padding-right] duration-300 ease-out xl:pr-[var(--felix-dock-w,0px)]">
           <header className={`trade-editorial-header min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
