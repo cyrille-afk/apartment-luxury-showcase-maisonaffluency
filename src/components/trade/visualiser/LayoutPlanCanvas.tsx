@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
 import type { RoomBounds } from "@/lib/activeProjectLayout";
 import { resolveDimensions } from "@/lib/productDimensions";
@@ -55,7 +55,7 @@ export default function LayoutPlanCanvas({
     [bounds.width, bounds.depth],
   );
 
-  const startPointerDrag = (event: React.PointerEvent, instanceId: string) => {
+  const startPointerDrag = (event: ReactPointerEvent, instanceId: string) => {
     if (event.button !== 0) return;
     event.preventDefault();
     dragRef.current = { instanceId, moved: false };
@@ -83,7 +83,7 @@ export default function LayoutPlanCanvas({
     window.addEventListener("pointerup", onPointerUp);
   };
 
-  const gridLines: React.ReactNode[] = [];
+  const gridLines: ReactNode[] = [];
   for (let x = Math.ceil(-bounds.width / 2); x <= bounds.width / 2; x += GRID_STEP_M) {
     gridLines.push(
       <line key={`v${x}`} x1={x} y1={-bounds.depth / 2} x2={x} y2={bounds.depth / 2} className="stroke-border" strokeWidth={0.02} />,
