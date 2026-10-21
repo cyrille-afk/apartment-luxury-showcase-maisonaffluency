@@ -37,8 +37,22 @@ interface AuthGateDialogProps {
 
 /**
  * Modal that prompts unauthenticated users to create an account or sign in
- * before accessing gated features (e.g. tear sheet downloads).
+  * before accessing gated features (e.g. tear sheet downloads).
  */
+function describeSignUpError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("pwned") || m.includes("leaked") || m.includes("known to be weak") || m.includes("compromised")) {
+    return "This password has appeared in a known data leak, so it can't be used. Please choose a different, unique password.";
+  }
+  if (m.includes("weak") || m.includes("password should") || m.includes("characters")) {
+    return `Password too weak: ${message} Use at least 8 characters mixing letters, numbers and a symbol.`;
+  }
+  if (m.includes("already registered") || m.includes("already exists")) {
+    return "An account with this email already exists. Please log in instead.";
+  }
+  return message;
+}
+
 export default function AuthGateDialog({ open, onClose, action = "download this document", initialMode = "prompt" }: AuthGateDialogProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,6 +65,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => { if (open) setMode(initialMode); }, [open, initialMode]);
 
@@ -82,6 +97,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     setLoading(true);
     const domain = email.split("@")[1]?.trim().toLowerCase() || "";
     const isPersonalDomain = PERSONAL_EMAIL_DOMAINS.has(domain);
@@ -108,7 +124,7 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
     });
     setLoading(false);
     if (error) {
-      toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
+      setFormError(describeSignUpError(error.message));
       return;
     }
     // Send welcome email (fire-and-forget)
@@ -278,9 +294,17 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               <div className="grid grid-cols-2 gap-4">
                 <input type="email" placeholder="Email address *" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
                   className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
-                <input type="password" placeholder="Create password *" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password"
+                <input type="password" placeholder="Create password *" value={password} onChange={(e) => { setPassword(e.target.value); setFormError(null); }} required minLength={8} autoComplete="new-password"
                   className="w-full pb-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground text-[16px]" />
               </div>
+              <p className="font-body text-xs text-muted-foreground">
+                Password: at least 8 characters, mixing letters, numbers and a symbol. Common or previously leaked passwords are rejected.
+              </p>
+              {formError && (
+                <p role="alert" className="font-body text-sm text-destructive border border-destructive/40 bg-destructive/5 px-3 py-2">
+                  {formError}
+                </p>
+              )}
 
               {/* Newsletter checkbox */}
               <label className="flex items-center gap-2.5 cursor-pointer">
