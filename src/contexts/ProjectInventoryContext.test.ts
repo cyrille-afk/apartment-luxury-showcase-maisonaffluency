@@ -3,7 +3,7 @@ import { upsertInventory, type ProjectInventoryItem } from "./ProjectInventoryCo
 import { createPlacedObject, inventoryItemToPlaceable } from "@/lib/placedObjectFactory";
 import { layoutItems, patchLayoutItem } from "@/lib/activeProjectLayout";
 
-const armchair: Omit<ProjectInventoryItem, "addedAt"> = {
+const armchair: Omit<ProjectInventoryItem, "addedAt" | "instanceId"> = {
   id: "armchair-id", productName: "Frenchmen Street Armchair", productType: "Frenchmen Street Armchair",
   brandName: "Sebastian Herkner", imageUrl: null, glbUrl: "https://assets.example/armchair.glb",
   dimensions: "W 62 × D 59 × H 80 cm", variantLabel: "Fabric Cat. Opera · Zero 005",
@@ -30,11 +30,24 @@ describe("exact workspace entity binding", () => {
     expect(placed.upholsteryMaterial?.name).toBe("Zero 005");
     expect(placed.upholsteryMaterial?.image_url).toBe("https://assets.example/zero-005.jpg");
   });
-  it("refreshes a re-added selection instead of retaining a stale product snapshot", () => {
-    const previous = { ...armchair, productName: "Frenchmen Street Side Chair", selectedUpholstery: null, addedAt: 1 };
-    const result = upsertInventory([previous], armchair);
-    expect(result).toHaveLength(1);
-    expect(result[0].productName).toBe("Frenchmen Street Armchair");
-    expect(result[0].selectedUpholstery).toBe("Zero 005");
+  it("appends a unique deep-cloned instance per add, so the same product can rest twice with distinct finishes", () => {
+    const first = upsertInventory([], { ...armchair, selectedUpholstery: "Safire-2 0007" });
+    const second = upsertInventory(first, { ...armchair, selectedUpholstery: "Opera Delft" });
+    expect(second).toHaveLength(2);
+    expect(second[0].instanceId).toBeTruthy();
+    expect(second[1].instanceId).toBeTruthy();
+    expect(second[0].instanceId).not.toBe(second[1].instanceId);
+    expect(second[0].selectedUpholstery).toBe("Safire-2 0007");
+    expect(second[1].selectedUpholstery).toBe("Opera Delft");
+  });
+  it("disconnects the stored instance from later mutations of the source selection object", () => {
+    const source = { ...armchair, finishes: ["Zero 005"], upholsteryMaterial: { ...armchair.upholsteryMaterial! } };
+    const [stored] = upsertInventory([], source);
+    source.finishes.push("MUTATED");
+    source.selectedUpholstery = "MUTATED";
+    source.upholsteryMaterial!.name = "MUTATED";
+    expect(stored.finishes).toEqual(["Zero 005"]);
+    expect(stored.selectedUpholstery).toBe("Zero 005");
+    expect(stored.upholsteryMaterial?.name).toBe("Zero 005");
   });
 });

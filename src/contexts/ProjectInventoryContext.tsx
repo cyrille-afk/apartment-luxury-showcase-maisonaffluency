@@ -11,6 +11,10 @@ import type { VisualiserMaterial } from "./VisualiserMaterialContext";
  */
 
 export interface ProjectInventoryItem {
+  /** Unique id for THIS configured instance — every "Add to Co-Pilot
+   *  Workspace" click mints one, so the same product can appear multiple
+   *  times with different finishes/dimensions. */
+  instanceId: string;
   /** Product id (trade product or curator pick id). */
   id: string;
   productName: string;
@@ -34,8 +38,8 @@ export interface ProjectInventoryItem {
 
 interface ProjectInventoryContextValue {
   projectInventory: ProjectInventoryItem[];
-  addToInventory: (item: Omit<ProjectInventoryItem, "addedAt">) => void;
-  removeFromInventory: (id: string, variantLabel: string | null) => void;
+  addToInventory: (item: Omit<ProjectInventoryItem, "addedAt" | "instanceId">) => void;
+  removeFromInventory: (instanceId: string) => void;
   clearInventory: () => void;
 }
 
@@ -43,12 +47,34 @@ const ProjectInventoryContext = createContext<ProjectInventoryContextValue | und
 
 const STORAGE_KEY = "ma:project-inventory-v1";
 
-export function upsertInventory(current: ProjectInventoryItem[], item: Omit<ProjectInventoryItem, "addedAt">): ProjectInventoryItem[] {
+function newInstanceId(): string {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  } catch {
+    /* fall through to the manual id */
+  }
+  return `inv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Every add appends a NEW deep-cloned instance with its own instanceId.
+ * The snapshot is fully detached from the live product-page selection, so
+ * later changes to the page (fabric, size, image) never mutate items that
+ * already rest in the workspace drawer, and the same product can appear
+ * multiple times with distinct configurations.
+ */
+export function upsertInventory(current: ProjectInventoryItem[], item: Omit<ProjectInventoryItem, "addedAt" | "instanceId">): ProjectInventoryItem[] {
   const productName = item.productName.trim();
-  const snapshot = { ...item, productName, productType: productName, finishes: [...item.finishes], addedAt: Date.now() };
-  const index = current.findIndex(entry => entry.id === item.id && entry.variantLabel === item.variantLabel);
-  if (index < 0) return [...current, snapshot];
-  return current.map((entry, i) => i === index ? { ...snapshot, addedAt: entry.addedAt } : entry);
+  const snapshot: ProjectInventoryItem = {
+    ...item,
+    instanceId: newInstanceId(),
+    productName,
+    productType: productName,
+    finishes: [...item.finishes],
+    upholsteryMaterial: item.upholsteryMaterial ? { ...item.upholsteryMaterial } : null,
+    addedAt: Date.now(),
+  };
+  return [...current, snapshot];
 }
 
 function loadInitial(): ProjectInventoryItem[] {
@@ -57,7 +83,14 @@ function loadInitial(): ProjectInventoryItem[] {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item.id === "string") : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item) => item && typeof item.id === "string")
+      .map((item) => ({
+        ...item,
+        // Legacy entries saved before instanceId existed get one on load.
+        instanceId: typeof item.instanceId === "string" && item.instanceId ? item.instanceId : newInstanceId(),
+      }));
   } catch {
     return [];
   }
@@ -74,14 +107,12 @@ export function ProjectInventoryProvider({ children }: { children: ReactNode }) 
     }
   }, [projectInventory]);
 
-  const addToInventory = (item: Omit<ProjectInventoryItem, "addedAt">) => {
+  const addToInventory = (item: Omit<ProjectInventoryItem, "addedAt" | "instanceId">) => {
     setProjectInventory((current) => upsertInventory(current, item));
   };
 
-  const removeFromInventory = (id: string, variantLabel: string | null) => {
-    setProjectInventory((current) =>
-      current.filter((entry) => !(entry.id === id && entry.variantLabel === variantLabel)),
-    );
+  const removeFromInventory = (instanceId: string) => {
+    setProjectInventory((current) => current.filter((entry) => entry.instanceId !== instanceId));
   };
 
   const clearInventory = () => setProjectInventory([]);
