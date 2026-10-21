@@ -697,6 +697,22 @@ const TradeVisualiser = () => {
     setSelectedId(next.instanceId);
   };
 
+  // Places a Project Assets drawer item (added via "Add to Co-Pilot Workspace"
+  // on a product page) into the room through the same placement pipeline as
+  // the catalogue drawer.
+  const placeInventoryAsset = (item: ProjectInventoryItem) => {
+    addObject({
+      id: item.id,
+      product_name: item.productName,
+      brand_name: item.brandName,
+      image_url: item.imageUrl,
+      category: "",
+      dimensions: item.dimensions,
+      glb_url: item.glbUrl,
+      source_pick_id: null,
+    });
+  };
+
   const transformObject = useCallback((
     instanceId: string,
     position: [number, number, number],
