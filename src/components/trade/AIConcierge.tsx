@@ -799,6 +799,11 @@ export function AIConcierge({
   const [minimized, setMinimized] = useState(() => {
     try { return sessionStorage.getItem("concierge:minimized") === "1"; } catch { return false; }
   });
+  // Docked right-drawer collapse (desktop xl+ only): hides the panel entirely
+  // and leaves a slim re-open handle on the right viewport edge.
+  const [dockCollapsed, setDockCollapsed] = useState(() => {
+    try { return sessionStorage.getItem("concierge:dock-collapsed") === "1"; } catch { return false; }
+  });
   // Set when the designer explicitly closes the panel. Proactive/ambient
   // nudges must never re-open Felix after that — only an explicit user
   // action (header button, "Ask Felix", quick actions) may re-open it.
