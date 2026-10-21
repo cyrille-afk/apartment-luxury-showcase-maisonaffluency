@@ -4227,6 +4227,19 @@ export function AIConcierge({
         />
       )}
 
+      {/* Docked-mode collapse handle: straddles the drawer's left edge. */}
+      {!embedded && dockedMode && open && !dockHidden && (
+        <button
+          onClick={() => setDockCollapsed(true)}
+          style={{ right: DOCK_W }}
+          className="fixed top-1/2 -translate-y-1/2 -translate-x-1/2 z-[10000] flex h-16 w-7 items-center justify-center rounded-l-lg border border-r-0 border-border bg-background shadow-md hover:bg-muted transition-colors print:hidden"
+          aria-label={`Collapse ${name} panel`}
+          title={`Collapse ${name}`}
+        >
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      )}
+
       {/* Docked-mode re-open handle: slim tab on the right viewport edge. */}
       {!embedded && dockedMode && open && dockHidden && (
         <button
