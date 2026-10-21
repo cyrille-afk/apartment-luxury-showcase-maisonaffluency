@@ -2256,7 +2256,7 @@ const TradeProductPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setViewer3dOpen(false); setViewer3dKey((k) => k + 1); setWorkspaceAsset(visibleImageIndices ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? 0)) : (galleryActiveIndex ?? 0)); }}
-                className="absolute left-3 top-3 z-10 flex h-9 items-center gap-1.5 rounded-full border border-border/40 bg-background/80 px-3 font-body text-[10px] uppercase tracking-[0.14em] text-foreground/80 backdrop-blur-md hover:text-foreground"
+                className="absolute left-3 top-14 z-10 flex h-9 items-center gap-1.5 rounded-full border border-border/40 bg-background/80 px-3 font-body text-[10px] uppercase tracking-[0.14em] text-foreground/80 backdrop-blur-md hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Exit 3D
