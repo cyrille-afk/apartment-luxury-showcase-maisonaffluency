@@ -65,15 +65,16 @@ export default function CustomRequestModal({ open, onClose, product }: Props) {
       notes: notes || null,
       status: "new",
     } as any).select("id").single();
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast({ title: "Submission failed", description: error.message, variant: "destructive" });
       return;
     }
-    setSubmitted(true);
     const { data: notification, error: notificationError } = await supabase.functions.invoke("notify-sample-request", {
       body: { requestId: inserted?.id, kind: "custom" },
     });
+    setSubmitting(false);
+    setSubmitted(true);
     toast(notificationError || notification?.success !== true
       ? { title: "Custom request saved", description: "The email notification is delayed. Your request remains in Custom Requests." }
       : { title: "Custom request sent", description: "Your request has been saved and the concierge notification queued." });
