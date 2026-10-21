@@ -104,6 +104,7 @@ import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activePro
 import { addToCart } from "@/lib/cart";
 import NotFound from "@/pages/NotFound";
 import ProductCommerceCta from "@/components/product/ProductCommerceCta";
+import { resolveSwatchImageEvent } from "@/lib/swatchPreviewState";
 
 
 const specIcon = (symbol: string, className = "") => (
@@ -704,6 +705,9 @@ const TradeProductPage: React.FC = () => {
   const [viewer3dOpen, setViewer3dOpen] = useState(false);
   const [viewer3dKey, setViewer3dKey] = useState(0);
   const [hoverPreviewIdx, setHoverPreviewIdx] = useState<number | null>(null);
+  // Swatch-grid hover pool: main viewport only, cleared on mouse leave.
+  // Never read by Felix, the inventory or the locked sidebar card.
+  const [hoveredPreviewIndex, setHoveredPreviewIndex] = useState<number | null>(null);
   const [fsStart, setFsStart] = useState<number | null>(null);
   const masterRef = useRef<HTMLDivElement | null>(null);
   const [masterHeight, setMasterHeight] = useState<number | null>(null);
@@ -1314,7 +1318,7 @@ const TradeProductPage: React.FC = () => {
         setDrawerOpen(!felixSelection);
         if (felixSelection) {
           window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
-          window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: felixSelection }));
+          window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail: { ...structuredClone(felixSelection), lockedAt: Date.now() } }));
         }
         toast({
           title: "Added to quote",
@@ -1576,9 +1580,13 @@ const TradeProductPage: React.FC = () => {
     : finishGroupingPending && images.length > 1
     ? images.slice(0, 1)
     : images;
+  // Main viewport shows the hover preview when present, else the permanent pick.
+  const viewportImageIndex = hoveredPreviewIndex ?? galleryActiveIndex;
   const visibleActiveIndex = visibleImageIndices
-    ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
-    : galleryActiveIndex;
+    ? Math.max(0, visibleImageIndices.indexOf(viewportImageIndex ?? visibleImageIndices[0]))
+    : viewportImageIndex;
+  const hoveredPreviewImage: string | null = hoveredPreviewIndex !== null ? images[hoveredPreviewIndex] ?? null : null;
+  const permanentlySelectedImage: string = images[galleryActiveIndex ?? 0] || product?.image_url || "";
 
 
 
@@ -2023,7 +2031,10 @@ const TradeProductPage: React.FC = () => {
     productId: product.id,
     productName: product.title,
     brandName: designerDisplay,
-    imageUrl: product.gallery_images?.[galleryActiveIndex] ?? product.image_url,
+    // Historical snapshot of the explicitly selected photo (lockedItem.savedImageField);
+    // hover previews never reach the locked Felix card.
+    imageUrl: permanentlySelectedImage || null,
+    savedImageField: permanentlySelectedImage || null,
     fabricLabel: selectedFabric?.name ?? null,
     baseLabel: selectedWoodPrice?.name ?? selectedBase ?? null,
     topLabel: selectedTopSwatch?.name ?? selectedTop ?? null,
@@ -2194,6 +2205,8 @@ const TradeProductPage: React.FC = () => {
     const r3d = resolve3d();
     const asset: "3d" | number = workspaceAsset === "3d" && !r3d ? 0 : workspaceAsset;
     const photoIdx = typeof asset === "number" ? Math.min(asset, Math.max(0, visibleImages.length - 1)) : null;
+    const hoverVisibleIdx = hoveredPreviewImage ? visibleImages.indexOf(hoveredPreviewImage) : -1;
+    const stagePhotoIdx = hoverVisibleIdx >= 0 && !(asset === "3d" && viewer3dOpen) ? hoverVisibleIdx : photoIdx;
     const realIdx = (i: number) => (visibleImageIndices ? (visibleImageIndices[i] ?? i) : i);
     const live3d = asset === "3d" && !!r3d && viewer3dOpen;
     // Configuration carried by a photo: pictured finishes + the mapped variant (size).
@@ -2261,7 +2274,7 @@ const TradeProductPage: React.FC = () => {
           </div>
           </div>
           <div className="relative flex aspect-[4/3] max-h-[calc(100vh-14rem)] min-w-0 flex-1 items-center justify-center overflow-hidden bg-muted/40">
-            {asset === "3d" && r3d ? (
+            {asset === "3d" && r3d && (viewer3dOpen || hoverVisibleIdx < 0) ? (
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
                   key={viewer3dKey}
@@ -2276,8 +2289,8 @@ const TradeProductPage: React.FC = () => {
                   onOpenedChange={setViewer3dOpen}
                 />
               </div>
-            ) : photoIdx !== null && visibleImages[photoIdx] ? (
-              <img src={visibleImages[photoIdx]} alt={`${product.title} — photo ${photoIdx + 1}`} className="h-full w-full object-contain" />
+            ) : stagePhotoIdx !== null && visibleImages[stagePhotoIdx] ? (
+              <img src={visibleImages[stagePhotoIdx]} alt={`${product.title} — photo ${stagePhotoIdx + 1}`} className="h-full w-full object-contain" />
             ) : null}
             {/* Fractional counter, lower-left — matches the public gallery. The 3D slide counts as 1. */}
             {(visibleImages.length + (r3d ? 1 : 0)) > 1 && (
@@ -2676,20 +2689,20 @@ const TradeProductPage: React.FC = () => {
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onTopFinishSwatchChange={setSelectedTopSwatch}
                   onSwatchImagesChange={(indices, meta) => {
-                    if (!indices || indices.length === 0) {
-                      if (meta?.committed) {
-                        setSelectedSwatchGalleryIndices(null);
-                        setSelectedSwatchGalleryName(null);
-                      }
-                      return;
-                    }
                     if (meta?.committed) {
-                      setSelectedSwatchGalleryIndices(indices);
+                      setSelectedSwatchGalleryIndices(indices?.length ? indices : null);
                       setSelectedSwatchGalleryName(meta.swatchName || null);
                     }
-                    // image_indices are 1-based; gallery is 0-based.
-                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
-                    setGalleryJumpNonce((n) => n + 1);
+                    // Hover writes only the preview pool (main viewport);
+                    // clicks write the permanent pool that Felix snapshots.
+                    const next = resolveSwatchImageEvent(indices, meta);
+                    setHoveredPreviewIndex(next.hoveredPreviewIndex);
+                    if (next.permanentIndex !== undefined) {
+                      setGalleryActiveIndex(next.permanentIndex);
+                      setGalleryJumpNonce((n) => n + 1);
+                    } else if (next.hoveredPreviewIndex !== null) {
+                      setGalleryJumpNonce((n) => n + 1);
+                    }
                   }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) { setSelectedBaseDisplay(null); return; }

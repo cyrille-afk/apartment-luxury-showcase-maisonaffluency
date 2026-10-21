@@ -21,6 +21,9 @@ export interface ProactiveTearsheetData {
   brandName?: string | null;
   sku?: string | null;
   imageUrl?: string | null;
+  /** Photo snapshot taken when the item was locked; never the live/hovered image. */
+  savedImageField?: string | null;
+  lockedAt?: number;
   fabricLabel?: string | null;
   baseLabel?: string | null;
   topLabel?: string | null;
@@ -60,9 +63,9 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
     <div className="w-full rounded-lg border border-border bg-background/80 overflow-hidden">
       {/* Horizontal 2-column card: square 3D preview left, identity + finishes right */}
       <div className="flex items-start gap-3 p-3 border-b border-border/60">
-        {data.imageUrl && (
+        {(data.savedImageField ?? data.imageUrl) && (
           <img
-            src={data.imageUrl}
+            src={(data.savedImageField ?? data.imageUrl)!}
             alt=""
             className="h-24 w-24 aspect-square rounded object-cover shrink-0 border border-border/50"
             loading="lazy"
