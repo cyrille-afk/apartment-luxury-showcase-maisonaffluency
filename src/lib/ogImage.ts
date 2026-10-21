@@ -18,7 +18,7 @@ export function toOgImage(url: string | null | undefined): string {
     // Third-party photos are often multi-MB or rate-limit crawlers: serve them
     // through Cloudinary fetch so WhatsApp gets a cached 1200×630 JPEG < 300KB.
     if (!/^https:\/\//i.test(url)) return url;
-    return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1200,h_630,c_fill,q_auto:good,f_jpg/${url}`;
+    return `https://res.cloudinary.com/dif1oamtj/image/fetch/w_1200,h_630,c_fill,q_auto:good,f_jpg/${url.includes("?") ? encodeURIComponent(url) : url}`;
   }
   // Replace any existing transform segment immediately after /upload/
   if (/\/upload\/[^/]*[wch]_\d+/.test(url)) {
