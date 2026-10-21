@@ -19,7 +19,8 @@ import { LocalExrButton } from "@/components/trade/visualiser/LocalExrButton";
 import { clearLocalExr } from "@/lib/localEnvironmentExr";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveProject } from "@/contexts/ActiveProjectContext";
-import { layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
+import { DEFAULT_LAYOUT_BOUNDS, layoutCamera, patchLayoutItem } from "@/lib/activeProjectLayout";
+import { formatGap, nearestClearance } from "@/lib/layoutGuides";
 import { createPlacedObject } from "@/lib/placedObjectFactory";
 import ProjectLayoutOverview from "@/components/trade/visualiser/ProjectLayoutOverview";
 import { Helmet } from "react-helmet-async";
@@ -605,6 +606,9 @@ const TradeVisualiser = () => {
 
 
   const selected = objects.find((object) => object.instanceId === selectedId) ?? null;
+  const selectedClearance = selected
+    ? nearestClearance(objects, activeProject?.state.bounds ?? DEFAULT_LAYOUT_BOUNDS, selected.instanceId)
+    : null;
 
   // Load the finishes linked to the selected product so the swatch grid shows
   // that piece's own finishes instead of the global library.
@@ -1045,7 +1049,7 @@ const TradeVisualiser = () => {
       </div>
 
       {/* Inspector sidebar — reads the shared selection context */}
-      <VisualiserInspector onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject}>
+      <VisualiserInspector onRemove={removeObject} onScale={scaleObject} onRestore={restoreObject} nearestClearance={selectedClearance}>
         {selected && (<>
           {activeProject?.view === "axonometric" && <div className="mt-3 grid grid-cols-2 gap-2">{(["x", "y", "rotation"] as const).map(axis => <label key={axis} className="text-xs text-muted-foreground">{axis === "rotation" ? "Rotation (°)" : `${axis === "x" ? "X" : "Y"} (m)`}<input aria-label={`Layout ${axis}`} type="number" step={axis === "rotation" ? 5 : 0.1} disabled={selected.positionLocked} value={axis === "rotation" ? Math.round(selected.rotation[1] * 180 / Math.PI) : selected.position[axis === "x" ? 0 : 2]} className="mt-1 w-full rounded-sm border border-border bg-background px-2 py-1 text-foreground" onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value)) setObjects(current => patchLayoutItem(current, selected.instanceId, { [axis]: axis === "rotation" ? value * Math.PI / 180 : value })); }} /></label>)}</div>}
           <Button variant="ghost" size="sm" onClick={togglePositionLock} aria-pressed={Boolean(selected.positionLocked)} aria-label="Lock object position" className="mt-3 h-8 gap-2 px-0 text-[10px] uppercase text-muted-foreground">

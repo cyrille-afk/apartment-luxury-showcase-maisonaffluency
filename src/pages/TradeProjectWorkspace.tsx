@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { Map, Layers, Armchair, Eye, Image, Upload } from "lucide-react";
+import { Map, Layers, Armchair, Eye, Image, Ruler, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
 import { createPlacedObject, MAX_PLACED_OBJECTS, type PlaceableProduct } from "@/lib/placedObjectFactory";
+import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
@@ -37,10 +38,25 @@ function WorkspacePanels() {
   const [imageStudio, setImageStudio] = useState(false);
   const [imageVisited, setImageVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
+  const [showGuides, setShowGuides] = useState(true);
   useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); }, [project?.view]);
   if (!project) return null;
   const { view, setView, state } = project;
+  const gap = tightestGap(project.objects, state.bounds);
+  const gapChip = gap && project.objects.length > 0 && (
+    <span
+      data-testid="tightest-gap"
+      className={cn(
+        "text-xs",
+        gap.level === "comfortable" && "text-success",
+        gap.level === "tight" && "text-warning",
+        gap.level === "blocked" && "text-destructive",
+      )}
+    >
+      Tightest gap {formatGap(gap.distance)}
+    </span>
+  );
 
   // Single spawn path for the 2D plan: drop coordinates (or a free slot for
   // click-to-place) become the piece's layout (x, y) instantly, and the shared
@@ -81,7 +97,7 @@ function WorkspacePanels() {
     </div>
     <section id="panel-plan" role="tabpanel" aria-labelledby="workspace-plan" hidden={view !== "plan"} className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", view !== "plan" && "hidden")}>
       <div className="flex shrink-0 flex-wrap items-end justify-between gap-4 px-4 pt-4 sm:px-6"><h1 className="font-display text-2xl">2D Layout Plan</h1><SourceUpload folder="axonometric-sources" label="Upload floor plan" onSourceReady={project.setFloorPlanUrl} /></div>
-      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open Axonometric Studio</Button></div>
+      <div className="flex shrink-0 flex-wrap items-end gap-4 px-4 py-4 sm:px-6">{(["width", "depth", "height"] as const).map(axis => <div key={axis} className="w-28 space-y-1"><Label htmlFor={`room-${axis}`} className="capitalize">{axis} (m)</Label><Input id={`room-${axis}`} type="number" min="2" max="100" step="0.1" value={state.bounds[axis]} onChange={event => { const value = Number(event.target.value); if (Number.isFinite(value) && value >= 2 && value <= 100) project.setBounds(current => ({ ...current, [axis]: value })); }} /></div>)}<Button variant="outline" onClick={() => setView("axonometric")}><Layers className="h-4 w-4" />Open Axonometric Studio</Button><Button variant="ghost" size="sm" aria-pressed={showGuides} onClick={() => setShowGuides(value => !value)}><Ruler className="h-4 w-4" />Guides</Button>{gapChip}</div>
       <div className="relative min-h-0 flex-1 border-t border-border">
         <LayoutPlanCanvas
           objects={project.objects}
@@ -91,6 +107,7 @@ function WorkspacePanels() {
           onSelect={setPlanSelectedId}
           onMove={(instanceId, x, y) => project.setObjects(current => patchLayoutItem(current, instanceId, { x, y }))}
           onDropAssetKey={handlePlanDrop}
+          showGuides={showGuides}
         />
         <ProjectAssetsDrawer anchorClassName="left-3 top-3 sm:left-4" onPlace={(item) => placeInventoryItem(item)} />
         {!state.floorPlanUrl && project.objects.length === 0 && (
@@ -99,7 +116,7 @@ function WorkspacePanels() {
       </div>
     </section>
     <div id={`panel-${view === "sandbox" ? "sandbox" : "axonometric"}`} role="tabpanel" aria-labelledby={`workspace-${view === "sandbox" ? "sandbox" : "axonometric"}`} hidden={view === "plan"} className={cn("flex min-h-0 flex-1 flex-col", view === "plan" && "hidden")}>
-      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span><div className="flex gap-2">{isAdmin && <Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button>}<Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
+      {view === "axonometric" && <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2"><span className="text-xs text-muted-foreground">{state.placedItems.length} placed pieces · {state.bounds.width} × {state.bounds.depth} m</span>{gapChip}<div className="flex gap-2">{isAdmin && <Button variant="ghost" size="sm" aria-pressed={imageStudio} onClick={() => setImageStudio(value => !value)}><Image className="h-4 w-4" />Image Studio</Button>}<Button size="sm" onClick={() => { setImageStudio(false); setView("sandbox"); }}><Eye className="h-4 w-4" />Step Inside Room</Button></div></div>}
       <div className={cn("min-h-0 flex-1", imageStudio && view === "axonometric" && "hidden")}><Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Opening workspace…</div>}>{visited && <Sandbox />}</Suspense></div>
       <div className={cn("min-h-0 flex-1 overflow-auto", (!imageStudio || view !== "axonometric") && "hidden")}><Suspense fallback={<div className="p-6">Opening Image Studio…</div>}>{imageVisited && <Axonometric />}</Suspense></div>
     </div>

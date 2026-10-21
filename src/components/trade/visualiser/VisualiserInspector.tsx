@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DIMENSIONS_PLACEHOLDER, formatDimensions, resolveDimensions } from "@/lib/productDimensions";
+import { formatGap, type ClearanceLevel } from "@/lib/layoutGuides";
 import { useVisualiserSelection } from "./VisualiserSelectionContext";
 
 const microLabel = "text-[10px] uppercase tracking-[0.15em]";
@@ -24,11 +25,14 @@ const VisualiserInspector = ({
   onRemove,
   onScale,
   onRestore,
+  nearestClearance,
   children,
 }: {
   onRemove: (instanceId: string) => void;
   onScale: (instanceId: string, scale: number) => void;
   onRestore?: (instanceId: string) => void;
+  /** Nearest gap from the selected piece to another piece or wall. */
+  nearestClearance?: { distance: number; level: ClearanceLevel; targetName: string } | null;
   children?: ReactNode;
 }) => {
   const { selected } = useVisualiserSelection();
@@ -66,6 +70,21 @@ const VisualiserInspector = ({
       <p className={cn(microLabel, "mt-3 text-muted-foreground")}>
         {formatDimensions(resolveDimensions(selected)) ?? DIMENSIONS_PLACEHOLDER}
       </p>
+
+      {nearestClearance && (
+        <p
+          data-testid="nearest-clearance"
+          className={cn(
+            microLabel,
+            "mt-2",
+            nearestClearance.level === "comfortable" && "text-success",
+            nearestClearance.level === "tight" && "text-warning",
+            nearestClearance.level === "blocked" && "text-destructive",
+          )}
+        >
+          Clearance · {formatGap(nearestClearance.distance)} to {nearestClearance.targetName}
+        </p>
+      )}
 
       <label className={cn(microLabel, "mt-5 block text-muted-foreground")}>
         Scale · {Math.round(selected.scale * 100)}%
