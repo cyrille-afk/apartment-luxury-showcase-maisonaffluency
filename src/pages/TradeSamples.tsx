@@ -164,12 +164,12 @@ const TradeSamples = () => {
       tearsheet_url: tearsheetUrl,
     } as any).select("id").single();
 
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast.error("Failed to submit request");
       return;
     }
-    // The database also dispatches this notice, so closing the tab cannot lose it.
+    // Await delivery acknowledgement before clearing the saved form.
     if (inserted?.id) {
       const { data: notification, error: notificationError } = await supabase.functions.invoke("notify-sample-request", {
         body: { requestId: inserted.id },
@@ -182,6 +182,7 @@ const TradeSamples = () => {
     }
     resetForm();
     setShowForm(false);
+    setSubmitting(false);
   };
 
   const activeRequests = requests.filter(r => !["returned", "cancelled"].includes(r.status));

@@ -5,7 +5,7 @@
 - Approved-account activation resends reuse the branded review drawer with one fresh idempotency key per opened resend, retained on retries; never change approval to resend.
 - Felix advances before gallery load; greeting tracks tour state. Share regional tiers; eligibility stays EUR-ledger based.
 <!-- LOVABLE:BEGIN -->
-- Stored sample/custom requests dispatch owner notices on insert and via the authorized notification service; notifications derive content from the stored row, retain event-specific keys, and use the common sender and staff-copy pipeline — avoids dead buttons, tab-close loss and bypassed suppression/unsubscribe handling.
+- Sample/custom forms await the authorized notification service after saving; notifications derive content from the stored row, retain event-specific keys, and use the common sender and staff-copy pipeline — avoids dead buttons and bypassed suppression/unsubscribe handling. Durable database dispatch is not configured.
 - Designer profile social metadata uses DesignerProfileSeo/getDesignerOpenGraph; non-JS messaging previews require matching static designer bridges, and absolute share assets come from checked JPEG pointers — avoids client-only previews and divergent images.
 - Workspace snapshots bind identity/finishes via inventoryItemToPlaceable and createPlacedObject; removal purges shared objects by inventory provenance — prevents substitutions, lost swatches and orphan plan/3D geometry.
 - Single and bulk 3D uploads capture primary source format and filenames before conversion and persist them on variant insert/replacement; historical NULL provenance stays unknown — a stored GLB extension cannot establish its source format.
