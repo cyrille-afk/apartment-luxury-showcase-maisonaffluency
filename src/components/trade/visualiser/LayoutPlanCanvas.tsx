@@ -39,6 +39,8 @@ export default function LayoutPlanCanvas({
   onSelect: (instanceId: string | null) => void;
   onMove: (instanceId: string, x: number, y: number) => void;
   onDropAssetKey: (key: string, x: number, y: number) => void;
+  /** Dimension guides on the selected piece plus clearance indicators. */
+  showGuides?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ instanceId: string; moved: boolean } | null>(null);
