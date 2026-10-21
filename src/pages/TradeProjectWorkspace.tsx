@@ -38,10 +38,25 @@ function WorkspacePanels() {
   const [imageStudio, setImageStudio] = useState(false);
   const [imageVisited, setImageVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
+  const [showGuides, setShowGuides] = useState(true);
   useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); }, [project?.view]);
   if (!project) return null;
   const { view, setView, state } = project;
+  const gap = tightestGap(project.objects, state.bounds);
+  const gapChip = gap && project.objects.length > 0 && (
+    <span
+      data-testid="tightest-gap"
+      className={cn(
+        "text-xs",
+        gap.level === "comfortable" && "text-success",
+        gap.level === "tight" && "text-warning",
+        gap.level === "blocked" && "text-destructive",
+      )}
+    >
+      Tightest gap {formatGap(gap.distance)}
+    </span>
+  );
 
   // Single spawn path for the 2D plan: drop coordinates (or a free slot for
   // click-to-place) become the piece's layout (x, y) instantly, and the shared
