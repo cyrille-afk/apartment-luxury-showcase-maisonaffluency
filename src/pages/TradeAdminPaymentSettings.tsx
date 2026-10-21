@@ -75,7 +75,8 @@ export default function TradeAdminPaymentSettings() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
-  const { data: status, isLoading, refetch } = usePaymentMode(isAdmin);
+  const { data: paymentStatus, isLoading, refetch } = usePaymentMode(isAdmin);
+  const status = paymentStatus as (PaymentModeStatus & Partial<Record<TestFieldKey, string | null>>) | null | undefined;
 
   const [values, setValues] = useState<CredentialDraft>(() => ({ ...credentialDraft }));
   const [revealed, setRevealed] = useState<Record<FieldKey, boolean>>({

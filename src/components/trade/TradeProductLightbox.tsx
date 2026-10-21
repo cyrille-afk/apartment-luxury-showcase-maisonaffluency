@@ -274,8 +274,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
       subtitle: product.subtitle,
       image: product.image_url || "",
       hoverImage: product.hover_image_url,
-      materials: product.materials,
-      dimensions: product.dimensions,
+      materials: product.materials ?? undefined,
+      dimensions: product.dimensions ?? undefined,
       category: product.category,
       subcategory: product.subcategory,
     },
@@ -411,8 +411,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   brand_name: product.brand_name,
                   category: product.category,
                   image_url: product.image_url,
-                  dimensions: product.dimensions,
-                  materials: product.materials,
+                  dimensions: product.dimensions ?? undefined,
+                  materials: product.materials ?? undefined,
                 }}
                 align="start"
                 side="top"
@@ -709,8 +709,8 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     brand_name: product.brand_name,
                     category: product.category,
                     image_url: product.image_url,
-                    dimensions: product.dimensions,
-                    materials: product.materials,
+                    dimensions: product.dimensions ?? undefined,
+                    materials: product.materials ?? undefined,
                   }}
                   align="start"
                   side="top"

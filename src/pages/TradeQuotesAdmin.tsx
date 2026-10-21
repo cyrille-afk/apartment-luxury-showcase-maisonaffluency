@@ -422,7 +422,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         if (catalogCents != null) {
           resolvedPrices[item.id] = {
             cents: catalogCents,
-            currency: item.trade_products.currency || "SGD",
+            currency: item.trade_products?.currency || "SGD",
             match: "exact",
           };
         } else {

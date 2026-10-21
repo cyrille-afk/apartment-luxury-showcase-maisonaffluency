@@ -426,6 +426,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (!lightboxOpen && document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
+    return undefined;
   }, [lightboxOpen]);
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -900,6 +901,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       document.body.style.overflow = 'hidden';
       return () => { document.body.style.overflow = ''; };
     }
+    return undefined;
   }, [lightboxOpen]);
 
   // Ensure swipe is never blocked by stale zoom state on mobile

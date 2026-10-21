@@ -25,7 +25,7 @@ export interface PairingConfigurationStart { selection: PairingSelection; visual
 export default function PairingConfigurationSheet({ piece, onClose, onExplore, onAdded, preview = false, initial }: { piece: PairingProduct; onClose: () => void; onExplore: () => void; onAdded?: (piece: PairingProduct) => void; preview?: boolean; initial?: PairingConfigurationStart }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  useMobileSwipeDismiss({ containerRef: panelRef, enabled: isMobile, onDismiss: onClose });
+  useMobileSwipeDismiss({ containerRef: panelRef as React.RefObject<HTMLDivElement>, enabled: isMobile, onDismiss: onClose });
   const { data: detail, isPending: detailPending, isError } = useCuratorPickDetail(piece.id);
   const { data: price, isPending: pricePending } = usePublicRrp(piece.id);
   const { data: swatches = [], isPending: swatchesPending, isError: swatchesError } = useQuery({
@@ -42,7 +42,7 @@ export default function PairingConfigurationSheet({ piece, onClose, onExplore, o
   const custom = piece.finishOptions || [];
   const [customId, setCustomId] = useState(initial?.customId || (custom.length === 1 ? custom[0].id : ""));
   const [material, setMaterial] = useState(initial?.material || "");
-  const [visualChoices, setVisualChoices] = useState<Partial<Record<keyof PairingSelection, string>>>(initial?.visual || {});
+  const [visualChoices, setVisualChoices] = useState<Partial<PairingSelection>>(initial?.visual || {});
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const rows: PairingVariant[] = detail?.size_variants || price?.rrp_size_variants || [];
   const selection = useMemo(() => Object.fromEntries(pairingAxes.map((axis) => {

@@ -321,7 +321,7 @@ export default function TradeAdminFabrics() {
   }, [fabrics]);
 
   const linkByPickId = useMemo(() => {
-    const m = new Map<string, ProductFabric>();
+    const m = new Map<string | null, ProductFabric>();
     if (!linkingId) return m;
     links.filter((l) => l.fabric_id === linkingId).forEach((l) => m.set(l.pick_id, l));
     return m;

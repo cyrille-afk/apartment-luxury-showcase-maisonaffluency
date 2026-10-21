@@ -15,22 +15,22 @@ const isEdgeFailure = (reason: unknown) => {
 
 /** Keeps a failed React tree recoverable without interrupting healthy pages for background failures. */
 export default class AppRecoveryBoundary extends Component<Props, State> {
-  state: State = { failed: false };
+  override state: State = { failed: false };
   private pendingCheck: number | null = null;
 
   static getDerivedStateFromError(): State {
     return { failed: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[app] unable to render page:", error, info.componentStack);
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     window.addEventListener("unhandledrejection", this.onUnhandledRejection);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     window.removeEventListener("unhandledrejection", this.onUnhandledRejection);
     if (this.pendingCheck !== null) window.clearTimeout(this.pendingCheck);
   }
@@ -47,7 +47,7 @@ export default class AppRecoveryBoundary extends Component<Props, State> {
     }, 1500);
   };
 
-  render() {
+  override render() {
     if (!this.state.failed) return this.props.children;
 
     return (
