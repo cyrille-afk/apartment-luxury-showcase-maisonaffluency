@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import type { PlacedObject } from "@/components/trade/visualiser/SceneObject";
-import type { RoomBounds } from "@/lib/activeProjectLayout";
+import type { PlanColumn, RoomBounds } from "@/lib/activeProjectLayout";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { PROJECT_ASSET_DRAG_TYPE } from "@/components/trade/visualiser/ProjectAssetsDrawer";
 import {
@@ -32,6 +32,10 @@ export default function LayoutPlanCanvas({
   onMove,
   onDropAssetKey,
   showGuides = true,
+  columns = [],
+  selectedColumnId = null,
+  onSelectColumn,
+  onMoveColumn,
 }: {
   objects: PlacedObject[];
   bounds: RoomBounds;
@@ -42,9 +46,14 @@ export default function LayoutPlanCanvas({
   onDropAssetKey: (key: string, x: number, y: number) => void;
   /** Dimension guides on the selected piece plus clearance indicators. */
   showGuides?: boolean;
+  /** Structural columns, drawn and dragged in the same room-metre space. */
+  columns?: PlanColumn[];
+  selectedColumnId?: string | null;
+  onSelectColumn?: (id: string | null) => void;
+  onMoveColumn?: (id: string, x: number, y: number) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ instanceId: string; moved: boolean } | null>(null);
+  const dragRef = useRef<{ instanceId: string; moved: boolean; column?: boolean } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   const clientToRoom = useCallback(
@@ -65,28 +74,30 @@ export default function LayoutPlanCanvas({
     [bounds.width, bounds.depth],
   );
 
-  const startPointerDrag = (event: ReactPointerEvent, instanceId: string) => {
+  const startPointerDrag = (event: ReactPointerEvent, instanceId: string, column = false) => {
     if (event.button !== 0) return;
     event.preventDefault();
-    dragRef.current = { instanceId, moved: false };
+    event.stopPropagation();
+    dragRef.current = { instanceId, moved: false, column };
+    const move = (id: string, x: number, y: number) => (column ? onMoveColumn?.(id, x, y) : onMove(id, x, y));
     const onPointerMove = (move: PointerEvent) => {
       const drag = dragRef.current;
       if (!drag) return;
       const point = clientToRoom(move.clientX, move.clientY);
       if (!point) return;
       drag.moved = true;
-      onMove(drag.instanceId, point[0], point[1]);
+      move(drag.instanceId, point[0], point[1]);
     };
     const onPointerUp = (up: PointerEvent) => {
       const drag = dragRef.current;
       dragRef.current = null;
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      if (drag && !drag.moved) onSelect(drag.instanceId);
+      if (drag && !drag.moved) { if (drag.column) onSelectColumn?.(drag.instanceId); else onSelect(drag.instanceId); }
       else if (drag) {
         // Final settle so the release point is the stored coordinate.
         const point = clientToRoom(up.clientX, up.clientY);
-        if (point) onMove(drag.instanceId, point[0], point[1]);
+        if (point) move(drag.instanceId, point[0], point[1]);
       }
     };
     window.addEventListener("pointermove", onPointerMove);
@@ -160,6 +171,20 @@ export default function LayoutPlanCanvas({
           />
         )}
         {gridLines}
+        {columns.map((column) => (
+          <rect
+            key={column.id}
+            data-testid="plan-column"
+            aria-label="Structural column"
+            x={column.x - column.size / 2}
+            y={column.y - column.size / 2}
+            width={column.size}
+            height={column.size}
+            className={cn("cursor-grab fill-foreground/70", column.id === selectedColumnId ? "stroke-primary" : "stroke-foreground")}
+            strokeWidth={column.id === selectedColumnId ? 0.06 : 0.02}
+            onPointerDown={(event) => startPointerDrag(event, column.id, true)}
+          />
+        ))}
         {objects.map((object) => {
           const dims = resolveDimensions(object);
           const scale = object.scale || 1;
