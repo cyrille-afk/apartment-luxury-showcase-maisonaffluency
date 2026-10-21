@@ -217,6 +217,76 @@ export default function LayoutPlanCanvas({
             </g>
           );
         })}
+        {showGuides && selectedId && (() => {
+          const selected = objects.find((o) => o.instanceId === selectedId);
+          if (!selected) return null;
+          const fp = footprintOf(selected);
+          const deg = (fp.rot * 180) / Math.PI;
+          const wCm = Math.round(fp.hw * 200);
+          const dCm = Math.round(fp.hd * 200);
+          const guideOffset = 0.28;
+          const tick = 0.08;
+          const levelStroke: Record<ClearanceLevel, string> = {
+            comfortable: "stroke-success",
+            tight: "stroke-warning",
+            blocked: "stroke-destructive",
+          };
+          const levelFill: Record<ClearanceLevel, string> = {
+            comfortable: "fill-success",
+            tight: "fill-warning",
+            blocked: "fill-destructive",
+          };
+          const spans = [
+            ...pieceClearances(objects, selectedId).map((s) => ({ ...s, key: `p-${s.otherId}` })),
+            ...wallClearances(fp, bounds).map((s) => ({ ...s, key: `w-${s.side}` })),
+          ];
+          return (
+            <g className="pointer-events-none">
+              {/* Dimension guides: architectural extension lines + ticks, in cm. */}
+              <g transform={`translate(${fp.cx} ${fp.cy}) rotate(${deg})`} className="stroke-foreground/70">
+                <line x1={-fp.hw} y1={-fp.hd} x2={-fp.hw} y2={-fp.hd - guideOffset} strokeWidth={0.015} />
+                <line x1={fp.hw} y1={-fp.hd} x2={fp.hw} y2={-fp.hd - guideOffset} strokeWidth={0.015} />
+                <line x1={-fp.hw} y1={-fp.hd - guideOffset} x2={fp.hw} y2={-fp.hd - guideOffset} strokeWidth={0.02} />
+                <line x1={-fp.hw} y1={-fp.hd - guideOffset - tick} x2={-fp.hw} y2={-fp.hd - guideOffset + tick} strokeWidth={0.02} />
+                <line x1={fp.hw} y1={-fp.hd - guideOffset - tick} x2={fp.hw} y2={-fp.hd - guideOffset + tick} strokeWidth={0.02} />
+                <line x1={fp.hw} y1={-fp.hd} x2={fp.hw + guideOffset} y2={-fp.hd} strokeWidth={0.015} />
+                <line x1={fp.hw} y1={fp.hd} x2={fp.hw + guideOffset} y2={fp.hd} strokeWidth={0.015} />
+                <line x1={fp.hw + guideOffset} y1={-fp.hd} x2={fp.hw + guideOffset} y2={fp.hd} strokeWidth={0.02} />
+                <line x1={fp.hw + guideOffset - tick} y1={-fp.hd} x2={fp.hw + guideOffset + tick} y2={-fp.hd} strokeWidth={0.02} />
+                <line x1={fp.hw + guideOffset - tick} y1={fp.hd} x2={fp.hw + guideOffset + tick} y2={fp.hd} strokeWidth={0.02} />
+                <text y={-fp.hd - guideOffset - 0.08} textAnchor="middle" fontSize={0.14} className="fill-foreground" transform={`rotate(${-deg})`}>
+                  {`${wCm} cm`}
+                </text>
+                <text x={fp.hw + guideOffset + 0.08} textAnchor="middle" fontSize={0.14} className="fill-foreground" transform={`rotate(${90 - deg} ${fp.hw + guideOffset + 0.08} 0)`}>
+                  {`${dCm} cm`}
+                </text>
+              </g>
+              {/* Clearance indicators: dashed span across each gap, colour-coded. */}
+              {spans.map((span) => {
+                const midX = (span.from[0] + span.to[0]) / 2;
+                const midY = (span.from[1] + span.to[1]) / 2;
+                return (
+                  <g key={span.key}>
+                    <line
+                      x1={span.from[0]}
+                      y1={span.from[1]}
+                      x2={span.to[0]}
+                      y2={span.to[1]}
+                      className={levelStroke[span.level]}
+                      strokeWidth={0.025}
+                      strokeDasharray="0.09 0.06"
+                    />
+                    <circle cx={span.from[0]} cy={span.from[1]} r={0.045} className={levelFill[span.level]} />
+                    <circle cx={span.to[0]} cy={span.to[1]} r={0.045} className={levelFill[span.level]} />
+                    <text x={midX} y={midY - 0.07} textAnchor="middle" fontSize={0.13} className={levelFill[span.level]}>
+                      {formatGap(span.distance)}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })()}
         {objects.length === 0 && !floorPlanUrl && (
           <text textAnchor="middle" y={0} fontSize={0.28} className="fill-muted-foreground">
             Drag pieces here from Project Assets
