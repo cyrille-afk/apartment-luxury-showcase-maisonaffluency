@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Records a trade-portal click from an email link carrying ?ma_ref=. Fire-and-forget, once per page load. */
-export function recordEmailPortalClick(search: string = window.location.search) {
+export function recordEmailPortalClick(search?: string) {
+  if (search === undefined) {
+    if (typeof window === "undefined") return;
+    search = window.location.search;
+  }
   const ref = new URLSearchParams(search).get("ma_ref");
   if (!ref || !UUID.test(ref)) return;
   const key = `ma-portal-click-${ref}`;

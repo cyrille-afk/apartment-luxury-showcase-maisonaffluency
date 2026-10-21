@@ -37,7 +37,7 @@ const TradeLogin = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
-  useState(() => recordEmailPortalClick());
+  useEffect(() => { recordEmailPortalClick(); }, []);
 
   // Destination to return to after sign-in — e.g. the OAuth consent screen
   // the member was sent here from (ChatGPT extension approval). Only
