@@ -90,3 +90,4 @@
 - Trade shell overrides scope to `.trade-portal-shell:not([data-presentation])` so Presentation Mode keeps public styling.
 - Read subdirectory AGENTS.md rules before editing, including src/lib and src/pages.
 - gallery_hotspots RLS: blocked names via `_hotspot_blocked_designer_names()` once per query (per-row scans were slow).
+- Designer link previews are guarded by `scripts/verify-designer-og.ts` in `.github/workflows/designer-og-check.yml` (push, PR, nightly) — keep the script and toOgImage in sync when changing designer head tags.
