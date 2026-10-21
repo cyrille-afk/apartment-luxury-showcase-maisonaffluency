@@ -6,6 +6,8 @@ export const GLB_MAX_MB = 50;
 export interface PreparedGlb {
   file: File;
   ext: "glb" | "gltf";
+  originalFormat: "glb" | "gltf" | "obj" | "3ds";
+  originalFilenames: string[];
   /** Set when the source needed in-browser conversion (3ds/obj). */
   convertedFrom?: string;
 }
@@ -22,12 +24,13 @@ export async function prepareGlbFile(files: File[]): Promise<PreparedGlb> {
     const f = files[0];
     const n = f.name.toLowerCase();
     if (n.endsWith(".glb") || n.endsWith(".gltf")) {
-      return { file: f, ext: n.endsWith(".gltf") ? "gltf" : "glb" };
+      const ext = n.endsWith(".gltf") ? "gltf" : "glb";
+      return { file: f, ext, originalFormat: ext, originalFilenames: [f.name] };
     }
     if (n.endsWith(".3ds")) {
       const outName = f.name.replace(/\.3ds$/i, "") + ".glb";
       const file = await convert3dsToGlb(f, outName);
-      return { file, ext: "glb", convertedFrom: f.name };
+      return { file, ext: "glb", convertedFrom: f.name, originalFormat: "3ds", originalFilenames: [f.name] };
     }
   }
 
@@ -35,7 +38,7 @@ export async function prepareGlbFile(files: File[]): Promise<PreparedGlb> {
   if (bundle) {
     const outName = bundle.objFile.name.replace(/\.obj$/i, "") + ".glb";
     const file = await convertObjBundleToGlb(bundle, outName);
-    return { file, ext: "glb", convertedFrom: bundle.objFile.name };
+    return { file, ext: "glb", convertedFrom: bundle.objFile.name, originalFormat: "obj", originalFilenames: files.map(f => f.name) };
   }
 
   throw new Error("Please upload a .glb/.gltf, a .3ds, or an .obj (+ .mtl + textures).");
@@ -87,11 +90,15 @@ export async function uploadGlbForProduct({
     (v) => v.variant_label.toLowerCase() === label.toLowerCase(),
   );
   const shouldBeDefault = existingVariants.length === 0 || (existing?.is_default ?? false);
+  const metadata = {
+    original_upload_format: prepared.originalFormat,
+    original_upload_filenames: prepared.originalFilenames,
+  };
 
   if (existing) {
     const { error } = await supabase
       .from("trade_product_glb_variants")
-      .update({ glb_url: publicUrl, file_size_bytes: file.size })
+      .update({ glb_url: publicUrl, file_size_bytes: file.size, ...metadata })
       .eq("id", existing.id);
     if (error) throw error;
   } else {
@@ -101,6 +108,7 @@ export async function uploadGlbForProduct({
       glb_url: publicUrl,
       file_size_bytes: file.size,
       is_default: shouldBeDefault,
+      ...metadata,
     });
     if (error) throw error;
   }

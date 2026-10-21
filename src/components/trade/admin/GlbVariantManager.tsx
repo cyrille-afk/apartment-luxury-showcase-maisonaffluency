@@ -18,6 +18,8 @@ interface GlbVariantRow {
   glb_url: string;
   is_default: boolean;
   file_size_bytes: number | null;
+  original_upload_format: string | null;
+  original_upload_filenames: string[] | null;
   updated_at?: string | null;
   material_roles?: Record<string, MaterialRole> | null;
 }
@@ -87,7 +89,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     // 1) existing GLB variants
     const { data: vrows, error: vErr } = await supabase
       .from("trade_product_glb_variants")
-      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at, material_roles")
+      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at, material_roles, original_upload_format, original_upload_filenames")
       .eq("product_id", productId)
       .order("is_default", { ascending: false })
       .order("variant_label", { ascending: true });
@@ -342,6 +344,14 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
                       </span>
                     )}
                   </div>
+                  {v && (
+                    <div className="font-body text-[11px] text-muted-foreground mt-1 break-words">
+                      <div>Source: {v.original_upload_format ? `.${v.original_upload_format.toUpperCase()}` : "Unknown (not recorded)"} · Current: {/\.gltf(?:\?|$)/i.test(v.glb_url) ? ".GLTF" : ".GLB"}</div>
+                      {v.original_upload_filenames?.length ? (
+                        <div className="mt-0.5">{v.original_upload_filenames.join(" · ")}</div>
+                      ) : null}
+                    </div>
+                  )}
                   {v && (
                     <div className="font-body text-[10px] text-muted-foreground truncate">
                       {v.file_size_bytes
