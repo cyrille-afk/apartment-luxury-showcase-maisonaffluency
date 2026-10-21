@@ -4383,7 +4383,7 @@ export function AIConcierge({
                   );
                 })()}
               </div>
-              <div className="flex items-center gap-1 shrink-0 relative">
+              <div className="flex items-center gap-1.5 shrink-0 relative self-start pt-0.5">
               {!embedded && surface === "trade" && user?.id && (
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
@@ -6308,16 +6308,16 @@ export function AIConcierge({
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("grid grid-cols-1 sm:grid-cols-3 items-stretch justify-start gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
+            <div className={cn("flex flex-col items-stretch gap-2", (fullscreen || briefBuilderOpen) && "shrink-0")}>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => moodInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
+                className="h-11 w-full justify-center rounded-none border-border/70 bg-background/60 px-4 font-body text-xs uppercase tracking-wider hover:bg-muted/40"
                 aria-label="Upload mood board"
                 title="Upload a mood board image to Block 3"
-              >
+               >
                 Upload Moodboard
               </Button>
               <Button
@@ -6327,7 +6327,7 @@ export function AIConcierge({
                   openBriefBuilder(briefDraft || SPEC_BRIEF_TEMPLATE);
                 }}
                 disabled={streaming}
-                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
+                 className="h-11 w-full justify-center rounded-none border-border/70 bg-background/60 px-4 font-body text-xs uppercase tracking-wider hover:bg-muted/40"
                 aria-label="Request custom quote"
                 title="Open the Architectural Brief Builder for a custom quote"
               >
@@ -6337,8 +6337,8 @@ export function AIConcierge({
                 type="button"
                 variant="outline"
                 onClick={() => send("What are the current lead times for your pieces?")}
-                disabled={streaming}
-                className="h-11 lg:h-10 w-full justify-start rounded-none px-4 font-body text-xs uppercase tracking-wider"
+                 disabled={streaming}
+                className="h-11 w-full justify-center rounded-none border-border/70 bg-background/60 px-4 font-body text-xs uppercase tracking-wider hover:bg-muted/40"
                 aria-label="Check lead times"
                 title={`Ask ${name} about current lead times`}
               >
