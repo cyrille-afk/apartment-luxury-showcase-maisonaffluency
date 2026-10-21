@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { Map, Layers, Armchair, Eye, Image, Upload } from "lucide-react";
+import { Map, Layers, Armchair, Eye, Image, Ruler, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { patchLayoutItem, type WorkspaceView } from "@/lib/activeProjectLayout";
 import { createPlacedObject, MAX_PLACED_OBJECTS, type PlaceableProduct } from "@/lib/placedObjectFactory";
+import { formatGap, tightestGap } from "@/lib/layoutGuides";
 import { resolveDimensions } from "@/lib/productDimensions";
 import { DEFAULT_SLOT_SPACING, footprintRadius, pickFootprintSlot } from "@/lib/visualiserPlacement";
 const Sandbox = lazy(() => import("./TradeVisualiser"));
