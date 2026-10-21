@@ -10,6 +10,7 @@ const CUTOUT_TRANSFORMS = "f_png,q_100,w_1200,dpr_auto,c_limit,e_make_transparen
 /** Minimal product shape needed to place a piece in the room. */
 export type PlaceableProduct = {
   id: string;
+  inventoryInstanceId?: string;
   product_name: string;
   brand_name: string;
   image_url: string | null;
@@ -26,6 +27,7 @@ export type PlaceableProduct = {
 /** Transfer the frozen page selection, never re-resolve a similar catalogue piece. */
 export function inventoryItemToPlaceable(item: ProjectInventoryItem): PlaceableProduct {
   return {
+    inventoryInstanceId: item.instanceId,
     id: item.id, product_name: item.productName, productType: item.productName,
     brand_name: item.brandName, image_url: item.imageUrl,
     dimensions: item.dimensions, glb_url: item.glbUrl,
@@ -47,6 +49,7 @@ export function createPlacedObject(
 ): PlacedObject {
   return {
     instanceId: `${product.id}-${Date.now()}`,
+    inventoryInstanceId: product.inventoryInstanceId,
     id: product.id,
     product_name: product.product_name,
     productType: product.product_name,
@@ -65,4 +68,19 @@ export function createPlacedObject(
     baseMaterial: null,
     upholsteryMaterial: product.upholsteryMaterial ? { ...product.upholsteryMaterial } : null,
   };
+}
+
+/** Legacy placements lacked provenance; match their complete saved configuration, never just the product. */
+export function removeInventoryPlacements(objects: PlacedObject[], item: ProjectInventoryItem): PlacedObject[] {
+  return objects.filter(object => {
+    if (object.inventoryInstanceId) return object.inventoryInstanceId !== item.instanceId;
+    const sameLegacyConfiguration = object.id === item.id
+      && object.product_name === item.productName
+      && object.dimensions === item.dimensions
+      && (object.variantLabel ?? null) === item.variantLabel
+      && (object.selectedUpholstery ?? null) === (item.selectedUpholstery ?? null)
+      && (object.selectedFrameFinish ?? null) === (item.selectedFrameFinish ?? null)
+      && JSON.stringify(object.finishes ?? []) === JSON.stringify(item.finishes);
+    return !sameLegacyConfiguration;
+  });
 }

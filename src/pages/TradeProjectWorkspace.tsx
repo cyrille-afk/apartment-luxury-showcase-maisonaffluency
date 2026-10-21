@@ -30,6 +30,9 @@ function WorkspacePanels() {
   const [imageVisited, setImageVisited] = useState(false);
   const [planSelectedId, setPlanSelectedId] = useState<string | null>(null);
   const [showGuides, setShowGuides] = useState(true);
+  useEffect(() => {
+    setPlanSelectedId(current => current && !project?.objects.some(object => object.instanceId === current) ? null : current);
+  }, [project?.objects]);
   useEffect(() => { if (imageStudio) setImageVisited(true); }, [imageStudio]);
   useEffect(() => { if (project?.view !== "plan") setVisited(true); }, [project?.view]);
   if (!project) return null;

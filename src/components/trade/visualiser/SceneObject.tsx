@@ -22,6 +22,8 @@ import { addWoodRoughness, deepenArmchairWeave, disposeMicroSurfaceMaps } from "
 
 export type PlacedObject = {
   instanceId: string;
+  /** Configured Project Assets entry that spawned this placement. */
+  inventoryInstanceId?: string;
   /** Bumped by "Restore piece" to remount the mesh and rebuild its materials. */
   restoreKey?: number;
   id: string;

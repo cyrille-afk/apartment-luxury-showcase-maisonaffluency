@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Box, ChevronLeft, GripVertical, PackageOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectInventory, type ProjectInventoryItem } from "@/contexts/ProjectInventoryContext";
+import { useActiveProject } from "@/contexts/ActiveProjectContext";
+import { removeInventoryPlacements } from "@/lib/placedObjectFactory";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +23,13 @@ export default function ProjectAssetsDrawer({
   anchorClassName?: string;
 }) {
   const { projectInventory, removeFromInventory } = useProjectInventory();
+  const project = useActiveProject();
   const [open, setOpen] = useState(true);
+
+  const removeAsset = (item: ProjectInventoryItem) => {
+    project?.setObjects(current => removeInventoryPlacements(current, item));
+    removeFromInventory(item.instanceId);
+  };
 
   if (!open) {
     return (
@@ -133,7 +141,7 @@ export default function ProjectAssetsDrawer({
                       variant="ghost"
                       size="icon"
                       type="button"
-                      onClick={() => removeFromInventory(item.instanceId)}
+                      onClick={() => removeAsset(item)}
                       aria-label={`Remove ${item.productName} from project assets`}
                       className="flex h-6 w-8 items-center justify-center text-muted-foreground/60 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                     >

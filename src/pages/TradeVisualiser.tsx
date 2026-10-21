@@ -258,6 +258,9 @@ const TradeVisualiser = () => {
   const objects = activeProject?.objects ?? localObjects;
   const setObjects = activeProject?.setObjects ?? setLocalObjects;
   const [selectedId, setSelectedId] = useState<string | null>(initial.selectedId ?? null);
+  useEffect(() => {
+    setSelectedId(current => current && !objects.some(object => object.instanceId === current) ? null : current);
+  }, [objects]);
   const [trayOpen, setTrayOpen] = useState(false);
   const [backdrop, setBackdrop] = useState<string | null>(initial.backdrop);
   const [backdropDataUrl, setBackdropDataUrl] = useState<string | null>(initial.backdropDataUrl);
