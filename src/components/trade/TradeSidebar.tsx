@@ -1,7 +1,7 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useState, useEffect, useCallback } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
-import { useAIGuideName } from "@/hooks/useAIGuideName";
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderKanban,
   DollarSign, ClipboardList, Package, FileText, Settings, Wrench, MessageSquare, UserCircle, Wand2, Image, Users, Inbox, Sparkles,
   TrendingDown, Lock, Wallet, Activity, ShieldCheck, Target, BarChart3, ChevronDown, ChevronRight, FolderOpen, Clapperboard,

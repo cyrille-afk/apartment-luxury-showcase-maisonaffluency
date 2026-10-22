@@ -1,7 +1,7 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { Fragment, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@/lib/router-compat";
 import {
-import { useAIGuideName } from "@/hooks/useAIGuideName";
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderKanban, MapPin,
   FileText, Settings, Shield, Wrench, UserCircle, Image, Users, Inbox, Sparkles,
