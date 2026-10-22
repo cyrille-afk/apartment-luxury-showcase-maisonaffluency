@@ -41,6 +41,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StagingRouteImport } from './routes/staging'
 import { Route as StudiosRouteImport } from './routes/studios'
@@ -79,6 +80,7 @@ import { Route as PreviewSplatRouteImport } from './routes/preview_.$'
 import { Route as ProductIdRouteImport } from './routes/product_.$id'
 import { Route as ProductsCategoryCategorySlugRouteImport } from './routes/products-category_.$categorySlug'
 import { Route as ProductsProductSlugRouteImport } from './routes/products_.$productSlug'
+import { Route as SettingsStudioRouteImport } from './routes/settings.studio'
 import { Route as ShopSplatRouteImport } from './routes/shop_.$'
 import { Route as ShortlistTokenRouteImport } from './routes/shortlist_.$token'
 import { Route as SpecSheetsSlugRouteImport } from './routes/spec-sheets_.$slug'
@@ -417,6 +419,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -607,6 +614,11 @@ const ProductsProductSlugRoute = ProductsProductSlugRouteImport.update({
   id: '/products_/$productSlug',
   path: '/products/$productSlug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsStudioRoute = SettingsStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const ShopSplatRoute = ShopSplatRouteImport.update({
   id: '/shop_/$',
@@ -1563,6 +1575,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
   '/studios': typeof StudiosRoute
@@ -1601,6 +1614,7 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
+  '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
   '/spec-sheets/$slug': typeof SpecSheetsSlugRoute
@@ -1812,6 +1826,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
   '/studios': typeof StudiosRoute
@@ -1849,6 +1864,7 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/products-category/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products/$productSlug': typeof ProductsProductSlugRoute
+  '/settings/studio': typeof SettingsStudioRoute
   '/shop/$': typeof ShopSplatRoute
   '/shortlist/$token': typeof ShortlistTokenRoute
   '/spec-sheets/$slug': typeof SpecSheetsSlugRoute
@@ -2061,6 +2077,7 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/shop': typeof ShopRoute
   '/staging': typeof StagingRoute
   '/studios': typeof StudiosRoute
@@ -2099,6 +2116,7 @@ export interface FileRoutesById {
   '/product_/$id': typeof ProductIdRoute
   '/products-category_/$categorySlug': typeof ProductsCategoryCategorySlugRoute
   '/products_/$productSlug': typeof ProductsProductSlugRoute
+  '/settings/studio': typeof SettingsStudioRoute
   '/shop_/$': typeof ShopSplatRoute
   '/shortlist_/$token': typeof ShortlistTokenRoute
   '/spec-sheets_/$slug': typeof SpecSheetsSlugRoute
@@ -2312,6 +2330,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reset-password'
     | '/search'
+    | '/settings'
     | '/shop'
     | '/staging'
     | '/studios'
@@ -2350,6 +2369,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
+    | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
     | '/spec-sheets/$slug'
@@ -2561,6 +2581,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reset-password'
     | '/search'
+    | '/settings'
     | '/shop'
     | '/staging'
     | '/studios'
@@ -2598,6 +2619,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/products-category/$categorySlug'
     | '/products/$productSlug'
+    | '/settings/studio'
     | '/shop/$'
     | '/shortlist/$token'
     | '/spec-sheets/$slug'
@@ -2809,6 +2831,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reset-password'
     | '/search'
+    | '/settings'
     | '/shop'
     | '/staging'
     | '/studios'
@@ -2847,6 +2870,7 @@ export interface FileRouteTypes {
     | '/product_/$id'
     | '/products-category_/$categorySlug'
     | '/products_/$productSlug'
+    | '/settings/studio'
     | '/shop_/$'
     | '/shortlist_/$token'
     | '/spec-sheets_/$slug'
@@ -3059,6 +3083,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   ShopRoute: typeof ShopRoute
   StagingRoute: typeof StagingRoute
   StudiosRoute: typeof StudiosRoute
@@ -3354,6 +3379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
@@ -3619,6 +3651,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/products/$productSlug'
       preLoaderRoute: typeof ProductsProductSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/settings/studio': {
+      id: '/settings/studio'
+      path: '/studio'
+      fullPath: '/settings/studio'
+      preLoaderRoute: typeof SettingsStudioRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/shop_/$': {
       id: '/shop_/$'
@@ -4862,6 +4901,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SettingsRouteChildren {
+  SettingsStudioRoute: typeof SettingsStudioRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsStudioRoute: SettingsStudioRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 interface TradeRouteChildren {
   TradeAdminRoute: typeof TradeAdminRoute
   TradeAdminDashboardRoute: typeof TradeAdminDashboardRoute
@@ -5200,6 +5251,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   ShopRoute: ShopRoute,
   StagingRoute: StagingRoute,
   StudiosRoute: StudiosRoute,

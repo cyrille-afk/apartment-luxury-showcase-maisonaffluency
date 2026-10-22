@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, ReactNode, use
 // The Supabase SDK is imported on demand: pulling it in statically put ~100 KB
 // of JS into the entry bundle and lengthened the first main-thread task.
 const getSupabase = async () => (await import("@/integrations/supabase/client")).supabase;
+import { studioSetupComplete } from "@/lib/studioSetup";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 
@@ -31,6 +32,10 @@ interface StudioContextValue {
   currentStudio: StudioMembership | null;
   setCurrentStudioId: (id: string | null) => void;
   refresh: () => Promise<void>;
+  isStudioSetupComplete: boolean;
+  studioSetupLoading: boolean;
+  projectFolderCount: number;
+  refreshStudioSetup: () => Promise<void>;
   /** Convenience role helpers based on current studio */
   isOwner: boolean;
   isAdmin: boolean;
@@ -46,9 +51,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [studios, setStudios] = useState<StudioMembership[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentStudioId, setCurrentStudioIdState] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null
-  );
+  const [studioReadFailed, setStudioReadFailed] = useState(false);
+  const [currentStudioId, setCurrentStudioIdState] = useState<string | null>(null);
+  useEffect(() => { try { setCurrentStudioIdState(localStorage.getItem(STORAGE_KEY)); } catch {} }, []);
+  const [projectState, setProjectState] = useState<{ studioId: string; count: number } | null>(null);
 
   const fetchStudios = useCallback(async (showLoading = true) => {
     if (!user) {
@@ -64,10 +70,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user.id);
 
     if (error || !data) {
-      setStudios([]);
+      setStudioReadFailed(true);
       if (showLoading) setLoading(false);
       return;
     }
+    setStudioReadFailed(false);
     const memberships: StudioMembership[] = data
       .filter((r: any) => r.studio)
       .map((r: any) => ({ ...r.studio, role: r.role as StudioRole }));
@@ -113,6 +120,22 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [studios, currentStudioId]
   );
 
+  const refreshStudioSetup = useCallback(async () => {
+    if (!currentStudio || !user) return;
+    const supabase = await getSupabase();
+    const { count, error } = await supabase.from("projects").select("id", { count: "exact", head: true })
+      .or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
+    if (!error) setProjectState({ studioId: currentStudio.id, count: count ?? 0 });
+  }, [currentStudio?.id, user?.id]);
+  useEffect(() => {
+    void refreshStudioSetup();
+    const changed = () => { void refreshStudioSetup(); };
+    window.addEventListener("trade-projects:changed", changed);
+    return () => window.removeEventListener("trade-projects:changed", changed);
+  }, [refreshStudioSetup]);
+  useRealtimeTables("projects", () => { void refreshStudioSetup(); }, !!user);
+  useRealtimeTables("studios", () => { void fetchStudios(false); }, !!user);
+  const projectFolderCount = projectState?.studioId === currentStudio?.id ? projectState?.count ?? 0 : 0;
   const role = currentStudio?.role;
   const value: StudioContextValue = {
     loading,
@@ -120,6 +143,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     currentStudio,
     setCurrentStudioId,
     refresh: () => fetchStudios(false),
+    refreshStudioSetup, projectFolderCount,
+    studioSetupLoading: loading || studioReadFailed || (!!currentStudio && projectState?.studioId !== currentStudio.id),
+    isStudioSetupComplete: studioSetupComplete(currentStudio, projectFolderCount),
     isOwner: role === "owner",
     isAdmin: role === "owner" || role === "admin",
     canEdit: role === "owner" || role === "admin" || role === "editor",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation } from "@/lib/router-compat";
+import { useLocation, useNavigate } from "@/lib/router-compat";
 import { Sparkles, Loader2, AlertCircle, Upload, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveName, DEFAULT_NAME, sanitizeName } from "@/components/trade/conciergeGreeting";
+
+import { STUDIO_SETUP_PATH } from "@/lib/studioSetup";
 
 const STORAGE_KEY = "ma:copilot-onboarded";
 const OVERLAY_ID = "trade-copilot-onboarding";
@@ -23,19 +25,20 @@ function useOnboardingOpen() {
   useEffect(() => {
     if (loading) return;
     const p = pathname.replace(/\/+$/, "");
-    const inWorkspace = p === "/trade" || (p.startsWith("/trade/") && !p.startsWith("/trade/admin"));
+    const inWorkspace = p === STUDIO_SETUP_PATH || p === "/trade" || (p.startsWith("/trade/") && !p.startsWith("/trade/admin"));
     const completed = profile?.has_seen_trade_intro === true || localStorage.getItem(STORAGE_KEY) === "1";
     setOpen(prev => prev || (isTradeUser && inWorkspace && !completed));
   }, [profile?.has_seen_trade_intro, loading, isTradeUser, pathname]);
   const markDone = useCallback(() => {
     setOpen(false);
     try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
-    window.dispatchEvent(new Event("felix-tour:start"));
+
   }, []);
   return { open, markDone };
 }
 
 export default function TradeCopilotOnboarding() {
+  const navigate = useNavigate();
   const { profile, user, refreshRoles } = useAuth();
   const { currentStudio, loading: studioLoading, refresh, setCurrentStudioId } = useStudio();
   const { open, markDone } = useOnboardingOpen();
@@ -111,6 +114,7 @@ export default function TradeCopilotOnboarding() {
       await Promise.all([refresh(), refreshRoles()]);
       window.dispatchEvent(new Event("trade-projects:changed"));
       markDone();
+      navigate(STUDIO_SETUP_PATH, { replace: true });
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Setup could not be saved. Please try again.");
     } finally { saving.current = false; setBusy(false); }
