@@ -10,12 +10,12 @@ Deno.test("bank transfer rejects missing destination", async () => {
   await assertRejects(() => resolveBankTransferTax({ country: "", currency: "gbp", buyerType: "private", buyerTaxId: "", goodsCents: 10000, shippingCents: 0 }));
 });
 Deno.test("bank transfer never zero-rates an unverified business tax ID", async () => {
-  const result = await resolveBankTransferTax({ country: "GB", currency: "gbp", buyerType: "business", buyerTaxId: "GB123456789", goodsCents: 10000, shippingCents: 1000 }, async () => ({ valid: false, source: "unavailable" }));
+  const result = await resolveBankTransferTax({ country: "GB", currency: "gbp", buyerType: "business", buyerTaxId: "GB123456789", goodsCents: 10000, shippingCents: 1000 }, async () => ({ valid: false, source: "unavailable", taxId: "GB123456789" }));
   assertEquals(result.taxCents, 2200);
   assertEquals(result.clearanceFeeCents, 0); // £100 is below the existing £135 clearance threshold.
 });
 Deno.test("bank transfer uses verified business treatment", async () => {
-  const result = await resolveBankTransferTax({ country: "GB", currency: "gbp", buyerType: "business", buyerTaxId: "GB123456789", goodsCents: 10000, shippingCents: 1000 }, async () => ({ valid: true, source: "aggregator" }));
+  const result = await resolveBankTransferTax({ country: "GB", currency: "gbp", buyerType: "business", buyerTaxId: "GB123456789", goodsCents: 10000, shippingCents: 1000 }, async () => ({ valid: true, source: "aggregator", taxId: "GB123456789" }));
   assertEquals(result.taxCents, 0);
   assertEquals(result.treatment, "reverse_charge");
 });
