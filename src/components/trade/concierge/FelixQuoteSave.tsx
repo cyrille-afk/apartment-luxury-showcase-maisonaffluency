@@ -1,3 +1,4 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useRef, useState } from "react";
 import { Save, FolderOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
   onSaved?: (cards: ProactiveTearsheetData[]) => void;
   onRestore?: (cards: ProactiveTearsheetData[]) => void;
 }) {
+  const guideName = useAIGuideName();
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const [busy, setBusy] = useState(false);
@@ -42,7 +44,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
       const { error } = await saveQuote("save_felix_quote", { p_id: quoteId, p_studio_id: currentStudio?.id ?? null, p_project_id: projectId ?? null, p_cards: prepared as unknown as Json });
       if (error) throw error;
       onSaved?.(prepared); pending.current = null;
-      toast.success("Felix quote saved");
+      toast.success(`${guideName} quote saved`);
     } catch { toast.error("Could not save quote. Please retry."); }
     finally { setBusy(false); }
   };
@@ -54,11 +56,11 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
     setSaved(data || []); setOpen(true);
   };
   return <div data-trade-sensitive className="flex flex-wrap gap-2 px-3 py-2">
-    {cards && <Button size="sm" variant="outline" disabled={busy || !cards.length} onClick={save} aria-label="Save Felix quote">{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}<span className="ml-2">Save Quote</span></Button>}
-    {onRestore && <Button size="sm" variant="ghost" disabled={busy} onClick={load} aria-label="Open saved Felix quotes"><FolderOpen className="h-3.5 w-3.5" /><span className="ml-2">Saved Quotes</span></Button>}
+    {cards && <Button size="sm" variant="outline" disabled={busy || !cards.length} onClick={save} aria-label={`Save ${guideName} quote`}>{busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}<span className="ml-2">Save Quote</span></Button>}
+    {onRestore && <Button size="sm" variant="ghost" disabled={busy} onClick={load} aria-label={`Open saved ${guideName} quotes`}><FolderOpen className="h-3.5 w-3.5" /><span className="ml-2">Saved Quotes</span></Button>}
     <Sheet open={open} onOpenChange={setOpen}><SheetContent side="left" className="z-[10030] overflow-y-auto" aria-describedby={undefined}>
-      <h2 className="font-display text-lg mb-6">Saved Felix Quotes</h2>
-      {!saved.length && <p className="text-muted-foreground text-sm">No saved Felix drafts.</p>}
+      <h2 className="font-display text-lg mb-6">Saved {guideName} Quotes</h2>
+      {!saved.length && <p className="text-muted-foreground text-sm">No saved {guideName} drafts.</p>}
       {saved.map(quote => {
         const lines = Array.isArray(quote.felix_snapshot) ? quote.felix_snapshot as ProactiveTearsheetData[] : [];
         return <Button key={quote.id} variant="ghost" className="w-full h-auto py-4 justify-start border-b border-border rounded-none text-left whitespace-normal" onClick={() => { pending.current = null; onRestore?.(lines); setOpen(false); }}>

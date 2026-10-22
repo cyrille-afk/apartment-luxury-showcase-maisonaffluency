@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { startFelixTour } from "@/components/trade/FelixTour";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 const TOUR_SEEN_KEY = "felix_dashboard_tour_seen_v1";
 const DISMISS_KEY = "felix_whitelabel_banner_dismissed_v1";
 
 /** Shown only to users who finished the walkthrough before the white-label steps existed. */
 export function WhiteLabelTourBanner() {
+  const guideName = useAIGuideName();
   const [visible, setVisible] = useState(() => {
     try {
       const seen = Number(localStorage.getItem(TOUR_SEEN_KEY) || 0);
@@ -26,7 +28,7 @@ export function WhiteLabelTourBanner() {
         onClick={() => { dismiss(); startFelixTour(); }}
         className="flex-1 text-left font-body text-sm text-foreground hover:underline"
       >
-        <span className="font-semibold">New Enterprise Feature:</span> White-label your client presentations. Click here to restart the Felix walkthrough and set up your studio branding.
+        <span className="font-semibold">New Enterprise Feature:</span> White-label your client presentations. Click here to restart the {guideName} walkthrough and set up your studio branding.
       </button>
       <button type="button" onClick={dismiss} aria-label="Dismiss" className="text-muted-foreground hover:text-foreground">
         <X className="h-4 w-4" />

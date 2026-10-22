@@ -1,10 +1,11 @@
 import { useEffect, type ReactNode } from "react";
 import { useBlocker } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useLocation, useNavigate, Navigate } from "@/lib/router-compat";
 import { isStudioSettingsPath, STUDIO_SETUP_PATH } from "@/lib/studioSetup";
 export function remindStudioSetup() {
-  toast("Felix", { id: "studio-setup-reminder", description: "Let’s finish your studio identity here before exploring your workspace." });
+  toast(loadName() || DEFAULT_NAME, { id: "studio-setup-reminder", description: "Let’s finish your studio identity here before exploring your workspace." });
 }
 export function StudioSetupNavigationGate({ locked, ready, children }: { locked: boolean; ready: boolean; children: ReactNode }) {
   const location = useLocation();

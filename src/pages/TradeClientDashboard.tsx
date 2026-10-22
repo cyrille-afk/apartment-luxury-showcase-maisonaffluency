@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 /**
  * Fully isolated Trade client portal.
@@ -505,6 +506,7 @@ function DirectChat({ name }: { name: string }) {
 /* ---------------------------------- Page ----------------------------------- */
 
 export default function TradeClientDashboard() {
+  const guideName = useAIGuideName();
   const [nickname, setNickname] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<Tab>("scanner");
@@ -531,7 +533,7 @@ export default function TradeClientDashboard() {
     }
   };
 
-  const displayName = nickname ?? "Felix";
+  const displayName = nickname ?? guideName;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "scanner", label: "Moodboard Scanner" },

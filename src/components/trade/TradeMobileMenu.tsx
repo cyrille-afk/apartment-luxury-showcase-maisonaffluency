@@ -1,3 +1,4 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { Fragment, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@/lib/router-compat";
 import {
@@ -37,6 +38,7 @@ interface TradeMobileMenuProps {
 }
 
 export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
+  const guideName = useAIGuideName();
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, isTradeUser, applicationStatus, signOut, profile } = useAuth();
@@ -103,7 +105,7 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
               >
                 <span className="flex items-center gap-3">
                   <item.icon className="h-4 w-4 shrink-0" />
-                  {item.title}
+                  {item.title.replace(/\bFelix\b/g, guideName)}
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>

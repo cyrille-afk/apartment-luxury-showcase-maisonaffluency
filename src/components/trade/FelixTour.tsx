@@ -804,7 +804,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       type="button"
       onClick={() => setIsPaused(false)}
       className="fixed bottom-6 right-6 z-[132] inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-foreground shadow-lg hover:bg-muted print:hidden"
-      aria-label="Resume Felix tour"
+      aria-label={`Resume ${guideName} tour`}
     >
       <Play className="h-3 w-3" /> Resume tour
     </button>,

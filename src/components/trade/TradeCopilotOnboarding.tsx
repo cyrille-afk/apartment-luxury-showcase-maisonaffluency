@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveName, DEFAULT_NAME, sanitizeName } from "@/components/trade/conciergeGreeting";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 import { STUDIO_SETUP_PATH } from "@/lib/studioSetup";
 
@@ -38,6 +39,7 @@ function useOnboardingOpen() {
 }
 
 export default function TradeCopilotOnboarding() {
+  const guideName = useAIGuideName();
   const navigate = useNavigate();
   const { profile, user, refreshRoles } = useAuth();
   const { currentStudio, loading: studioLoading, refresh, setCurrentStudioId, isStudioSetupComplete, studioSetupLoading } = useStudio();
@@ -147,7 +149,7 @@ export default function TradeCopilotOnboarding() {
     <div className="fixed inset-0 z-[140] flex items-center justify-center bg-background/70 backdrop-blur-lg px-6 py-6" role="dialog" aria-modal="true" aria-labelledby="onboarding-confirmation-title">
       <div className="w-full max-w-md max-h-full overflow-y-auto text-center">
         <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent"><Check className="h-6 w-6" /></div>
-        <p className="mb-4 font-body text-[10px] uppercase text-accent">Maison Affluency · Felix</p>
+        <p className="mb-4 font-body text-[10px] uppercase text-accent">Maison Affluency · {guideName}</p>
         <h2 id="onboarding-confirmation-title" className="mb-5 font-display text-3xl text-foreground">Your studio is taking shape.</h2>
         <p className="mb-6 font-body text-sm text-muted-foreground">Your first project folder has been created.</p>
         <div className="mb-6 flex items-center gap-3 border-y border-border py-5 text-left"><FolderOpen className="h-6 w-6 shrink-0 text-accent" /><span className="break-words font-display text-xl text-foreground">{confirmation.name}</span></div>

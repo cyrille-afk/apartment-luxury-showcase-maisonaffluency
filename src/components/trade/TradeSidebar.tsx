@@ -1,3 +1,4 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useState, useEffect, useCallback } from "react";
 import { useRealtimeTables } from "@/contexts/RealtimeMultiplexerContext";
 import {
@@ -49,6 +50,7 @@ const projectItems: NavItem[] = [
 ];
 
 export function TradeSidebar() {
+  const guideName = useAIGuideName();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
@@ -223,7 +225,7 @@ export function TradeSidebar() {
                       activeClassName="text-foreground font-medium border-foreground"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span>{item.title.replace(/\bFelix\b/g, guideName)}</span>}
                       {item.url === "/trade/beta-feedboard" && (
                         <span className="relative ml-auto flex h-2 w-2" aria-hidden>
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500/60" />
@@ -282,7 +284,7 @@ export function TradeSidebar() {
                         </span>
                         {!collapsed && (
                           <span className="flex items-center gap-2">
-                            <span>{item.title}</span>
+                            <span>{item.title.replace(/\bFelix\b/g, guideName)}</span>
                             {showUpgrades && (
                               <span
                                 aria-label={`${clientUpgradeCount} client${clientUpgradeCount > 1 ? "s" : ""} eligible for a tier upgrade`}

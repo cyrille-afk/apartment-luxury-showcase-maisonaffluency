@@ -1,6 +1,7 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useRef, useState } from "react";
 import { toast as felixToast } from "sonner";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { hasRealStudioName, studioSetupComplete } from "@/lib/studioSetup";
 import { useSearchParams } from "@/lib/router-compat";
 import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
@@ -286,7 +287,7 @@ export default function TradeStudioSettings() {
     if (error || !saved) { toast({ title: "Branding could not be saved", description: error?.message, variant: "destructive" }); return; }
     await Promise.all([refreshStudios(), refreshStudioSetup()]);
     if (!isStudioSetupComplete && studioSetupComplete(branding, projectFolderCount || (savedSetupProject.current ? 1 : 0))) {
-      felixToast.success("Your branded trade studio is officially unlocked!", { description: "Felix", duration: 6000 });
+      felixToast.success("Your branded trade studio is officially unlocked!", { description: loadName() || DEFAULT_NAME, duration: 6000 });
     } else toast({ title: "Studio branding saved" });
   };
 
