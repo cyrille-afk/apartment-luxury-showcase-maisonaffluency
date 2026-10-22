@@ -2523,7 +2523,7 @@ const TradeProductPage: React.FC = () => {
               if (!resolvedGlbUrl) return null;
               const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
-                <details className="mt-6 group rounded-[2px] bg-muted border-l-2 border-l-accent">
+                <details open={viewer3dOpen} onToggle={(event) => setViewer3dOpen(event.currentTarget.open)} className="mt-6 group rounded-[2px] bg-muted border-l-2 border-l-accent">
                   <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-border/60">
                     <div className="flex items-center gap-2">
                       <Box size={14} className="text-accent" />
@@ -2541,6 +2541,7 @@ const TradeProductPage: React.FC = () => {
                   </summary>
                   <div className="p-3">
                     <Product3DViewer
+                      autoOpen={viewer3dOpen}
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
