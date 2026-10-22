@@ -2684,7 +2684,6 @@ const TradeProductPage: React.FC = () => {
                     let nextBase = selectedBase;
                     if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selectedDualSize))) {
                       setSelectedBase(null);
-                      setSelectedWoodPrice(null);
                       setSelectedBaseDisplay(null);
                       nextBase = null;
                     }
@@ -2736,7 +2735,6 @@ const TradeProductPage: React.FC = () => {
                     let nextTop = selectedTop;
                     if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selectedDualSize))) {
                       setSelectedTop(null);
-                      setSelectedTopSwatch(null);
                       setSelectedTopDisplay(null);
                       nextTop = null;
                     }
