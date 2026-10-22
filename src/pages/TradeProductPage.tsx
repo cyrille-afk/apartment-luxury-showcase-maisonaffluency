@@ -2292,6 +2292,7 @@ const TradeProductPage: React.FC = () => {
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
                   key={viewer3dKey}
+                  autoOpen={viewer3dOpen}
                   url={r3d.url}
                   alt={`${product.title} — 3D model${r3d.label ? ` (${r3d.label})` : ""}`}
                   poster={product.image_url}

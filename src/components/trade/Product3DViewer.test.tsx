@@ -18,6 +18,12 @@ function material(name: string, textureName: string, factor: number[]) {
 }
 
 describe("live product 3D materials", () => {
+  it("opens an existing viewport when a combination requests a preview", async () => {
+    const { container, rerender } = render(<Product3DViewer url="/table.glb" alt="Table" />);
+    expect(container.querySelector("model-viewer")).toBeNull();
+    rerender(<Product3DViewer url="/table.glb" alt="Table" autoOpen />);
+    await waitFor(() => expect(container.querySelector("model-viewer")).not.toBeNull());
+  });
   it("swaps Black Pepper Oak and stone independently on the same loaded model, then restores originals", async () => {
     const base = material("opaque-base", "wood_oak.jpg", [0.2, 0.1, 0.05, 1]);
     const top = material("opaque-top", "stone_marble.jpg", [0.8, 0.8, 0.8, 1]);
