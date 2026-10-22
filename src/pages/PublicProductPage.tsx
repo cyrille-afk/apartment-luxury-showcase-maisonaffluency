@@ -2436,7 +2436,6 @@ const PublicProductPageContent: React.FC<{ presentation?: boolean }> = ({ presen
         };
         return (
           <Helmet key={location.pathname}>
-            <link rel="canonical" href={canonical} />
             <meta name="robots" content="index, follow" />
             <title>{pageTitle} — Maison Affluency</title>
             <meta name="description" content={desc} />

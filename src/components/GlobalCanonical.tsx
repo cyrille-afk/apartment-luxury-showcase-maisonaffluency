@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "@/lib/router-compat";
 import { Helmet } from "react-helmet-async";
 import { BASE_URL, absoluteUrl } from "@/config/site";
@@ -25,61 +25,23 @@ export function useSelfCanonical(): string {
  *
  * Every route always publishes a canonical URL pointing to the production
  * apex domain plus the current pathname, regardless of which host (preview,
- * staging, localhost) is serving the page. A runtime guard ensures only one
- * canonical link exists in <head> and removes any duplicates that might be
- * introduced by nested Helmet calls.
+ * staging, localhost) is serving the page. React owns this single canonical;
+ * never detach head nodes imperatively, including while routes suspend.
  */
 export function GlobalCanonical() {
   const { pathname } = useLocation();
   const canonical = buildCanonicalUrl(pathname);
+  const [isNotFound, setIsNotFound] = useState(false);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const enforce = () => {
-      const links = Array.from(
-        document.querySelectorAll<HTMLLinkElement>('link[rel="canonical"]')
-      );
-
-      // 404 surfaces must not publish a canonical for a dead URL.
-      if (document.documentElement.dataset.routeStatus === "404" || pathname.startsWith("/shared/")) {
-        links.forEach((l) => l.remove());
-        return;
-      }
-
-      if (links.length === 0) {
-        const link = document.createElement("link");
-        link.rel = "canonical";
-        link.href = canonical;
-        document.head.appendChild(link);
-        return;
-      }
-
-      // Keep the first canonical and rewrite it to production only if needed.
-      if (links[0].getAttribute("href") !== canonical) {
-        links[0].setAttribute("href", canonical);
-      }
-      // Remove any duplicates introduced by nested Helmet calls.
-      if (links.length > 1) {
-        links.slice(1).forEach((l) => l.remove());
-      }
-    };
-
-    enforce();
-
-    const observer = new MutationObserver(enforce);
-    observer.observe(document.head, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-    });
-
+    const syncStatus = () => setIsNotFound(document.documentElement.dataset.routeStatus === "404");
+    syncStatus();
+    const observer = new MutationObserver(syncStatus);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-route-status"] });
     return () => observer.disconnect();
-  }, [canonical, pathname]);
-
-  const isNotFound =
-    typeof document !== "undefined" &&
-    document.documentElement.dataset.routeStatus === "404";
+  }, [pathname]);
 
   // Private shared boards (noindex, may be white-labelled) publish no canonical.
   if (isNotFound || pathname.startsWith("/shared/")) return null;

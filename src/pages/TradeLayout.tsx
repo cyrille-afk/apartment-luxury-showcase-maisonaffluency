@@ -591,8 +591,8 @@ const TradeLayout = () => {
         </div>
       </div>
       <TradeSecurityLayer />
-      <FelixTour />
       <Suspense fallback={null}>
+         <FelixTour />
          <div data-trade-sensitive><CompareFab /><CompareDrawer /><AIConcierge /><ActivationWelcome /><QuickTour /><BriefWizard /><TradeCopilotOnboarding /></div>
         <BackToTopButton />
       </Suspense>
