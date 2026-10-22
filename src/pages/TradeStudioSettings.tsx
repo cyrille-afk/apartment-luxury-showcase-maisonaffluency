@@ -1,5 +1,7 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useRef, useState } from "react";
+import { toast as felixToast } from "sonner";
+import { hasRealStudioName, studioSetupComplete } from "@/lib/studioSetup";
 import { useSearchParams } from "@/lib/router-compat";
 import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
 import { copyTextToClipboard } from "@/lib/clipboard";
@@ -70,7 +72,7 @@ function CoverPreview({ theme, typeface, logoUrl, studioName }: { theme: CoverTh
 
 export default function TradeStudioSettings() {
   const { user } = useAuth();
-  const { currentStudio, refresh: refreshStudios, isAdmin, isOwner } = useStudio();
+  const { currentStudio, refresh: refreshStudios, isAdmin, isOwner, isStudioSetupComplete, projectFolderCount, refreshStudioSetup } = useStudio();
   const { toast } = useToast();
   const [params, setParams] = useSearchParams();
 
@@ -97,6 +99,9 @@ export default function TradeStudioSettings() {
   const [savingBrand, setSavingBrand] = useState(false);
   const [coverTheme, setCoverTheme] = useState<CoverTheme>(DEFAULT_COVER_THEME);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [firstProjectName, setFirstProjectName] = useState("");
+  const savedSetupProject = useRef<string | null>(null);
+  useEffect(() => { savedSetupProject.current = null; setFirstProjectName(""); }, [currentStudio?.id]);
   const uploadLogo = async (file: File) => {
     if (!currentStudio) return;
     if (!/^image\/(png|jpeg)$/.test(file.type) || file.size > 2 * 1024 * 1024) { toast({ title: "Use a PNG or JPEG logo under 2 MB", variant: "destructive" }); return; }
@@ -247,40 +252,42 @@ export default function TradeStudioSettings() {
     fetchData();
   };
 
-  const handleSaveName = async () => {
-    if (!currentStudio || !studioName.trim()) return;
-    const { error } = await supabase
-      .from("studios")
-      .update({ name: studioName.trim() })
-      .eq("id", currentStudio.id);
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "Studio updated" });
-    refreshStudios();
-  };
+  const handleSaveName = async () => { await handleSaveBrand(); };
 
   const handleSaveBrand = async () => {
-    if (!currentStudio || !isAdmin) return;
+    if (!currentStudio || !isAdmin || savingBrand || uploadingLogo) return;
+    if (!isStudioSetupComplete && (!hasRealStudioName(studioName) || !displayName.trim() || !logoUrl.trim() || (projectFolderCount === 0 && !firstProjectName.trim() && !savedSetupProject.current))) {
+      toast({ title: "Finish your studio identity", description: "Add your studio name, display name, logo and first project folder before saving.", variant: "destructive" });
+      return;
+    }
     const value = Number(markup);
     if (!Number.isFinite(value) || value < 0 || value > 1000 || (logoUrl.trim() && !/^https:\/\//i.test(logoUrl.trim()))) {
       toast({ title: "Enter a markup between 0 and 1000% and an HTTPS logo URL", variant: "destructive" });
       return;
     }
     setSavingBrand(true);
-    const { error } = await supabase.from("studios").update({
+    if (projectFolderCount === 0 && !savedSetupProject.current && user && firstProjectName.trim()) {
+      const { data, error } = await supabase.from("projects").insert({ name: firstProjectName.trim(), studio_id: currentStudio.id, user_id: user.id, client_name: "", location: "" }).select("id").single();
+      if (error || !data) { setSavingBrand(false); toast({ title: "Project folder could not be saved", variant: "destructive" }); return; }
+      savedSetupProject.current = data.id;
+      window.dispatchEvent(new Event("trade-projects:changed"));
+    }
+    const branding = {
+      name: studioName.trim(),
       display_name: displayName.trim() || null,
       logo_url: logoUrl.trim() || null,
       primary_brand_font: brandFont,
       default_project_markup_percentage: value,
       pdf_locale: pdfLocale,
       pdf_cover_theme: coverTheme,
-    }).eq("id", currentStudio.id);
+    };
+    const { data: saved, error } = await supabase.from("studios").update(branding).eq("id", currentStudio.id).select("id").single();
     setSavingBrand(false);
-    if (error) { toast({ title: "Branding could not be saved", description: error.message, variant: "destructive" }); return; }
-    await refreshStudios();
-    toast({ title: "Studio branding saved" });
+    if (error || !saved) { toast({ title: "Branding could not be saved", description: error?.message, variant: "destructive" }); return; }
+    await Promise.all([refreshStudios(), refreshStudioSetup()]);
+    if (!isStudioSetupComplete && studioSetupComplete(branding, projectFolderCount || (savedSetupProject.current ? 1 : 0))) {
+      felixToast.success("Your branded trade studio is officially unlocked!", { description: "Felix", duration: 6000 });
+    } else toast({ title: "Studio branding saved" });
   };
 
   const handleCreateStudio = async () => {
@@ -354,8 +361,8 @@ export default function TradeStudioSettings() {
                 onChange={(e) => setStudioName(e.target.value)}
                 disabled={!isAdmin}
               />
-              <Button onClick={handleSaveName} disabled={!isAdmin || studioName === currentStudio.name}>
-                Save
+              <Button onClick={handleSaveName} disabled={!isAdmin || savingBrand || uploadingLogo}>
+                {savingBrand ? "Saving…" : "Save"}
               </Button>
             </div>
           </div>
@@ -391,7 +398,8 @@ export default function TradeStudioSettings() {
             </Select>
             <p className="mt-1 text-xs text-muted-foreground">All PDF currency values retain two decimal places.</p>
           </div>
-          {isAdmin && <Button onClick={handleSaveBrand} disabled={savingBrand}>{savingBrand ? "Saving…" : "Save branding"}</Button>}
+          {!isStudioSetupComplete && projectFolderCount === 0 && <div><Label htmlFor="setup-first-project">Name your first project folder</Label><Input id="setup-first-project" value={firstProjectName} onChange={e => setFirstProjectName(e.target.value)} disabled={!isAdmin || savingBrand} /></div>}
+          {isAdmin && <Button onClick={handleSaveBrand} disabled={savingBrand || uploadingLogo}>{savingBrand ? "Saving…" : "Save branding"}</Button>}
         </CardContent>
       </Card>
 
