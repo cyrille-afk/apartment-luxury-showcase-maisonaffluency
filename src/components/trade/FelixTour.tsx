@@ -94,7 +94,7 @@ const FELIX_STEPS: FelixStep[] = [
     id: "client-safe-presentations",
     title: "Client-Safe Presentations",
     target: "header-client-view",
-    route: "/trade",
+    route: "/trade/the-collection",
     dialogue:
       "The Client View switch in the top bar transforms your entire workspace into a client-facing presentation mode. Every internal figure — trade pricing, tier discounts, supplier identities, and studio margins — is masked instantly, so you can present live on a shared screen with complete confidence.",
   },
