@@ -6,7 +6,7 @@ export function hasDimensionMeasurement(text: string): boolean {
   const metric = new RegExp(`${measurement.source}(?:cm|mm|m)\\b`, "i");
   // "in" is a unit only at a measurement boundary. A following prose word
   // or count ("woven in 2026 in Italy", "2 in 1") makes it a preposition.
-  const inches = new RegExp(`${measurement.source}in(?:ches?)?\\b(?=\\s*(?:$|[|/;,()×″”]|[-–—]|[xX]\\s*\\d|(?:W|D|H|L|SH|AH|AR)\\b\\s*\\d|(?:wide|high|deep|long|diameter)\\b))`, "i");
+  const inches = new RegExp(`${measurement.source}in(?:ches?)?\\b(?=\\s*(?:$|[|/;,()×″”]|\\s[-–—]\\s|[xX]\\s*\\d|(?:W|D|H|L|SH|AH|AR)\\b\\s*\\d|(?:wide|high|deep|long|diameter)\\b))`, "i");
   return metric.test(text) || inches.test(text);
 }
 
