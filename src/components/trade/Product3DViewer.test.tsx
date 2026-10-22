@@ -54,14 +54,14 @@ describe("live product 3D materials", () => {
     const viewer = container.querySelector("model-viewer") as TestModelViewer;
     const model = { materials: [base] };
     await act(async () => { viewer.model = model; viewer.dispatchEvent(new Event("load")); });
-    let finishTexture: ((texture: unknown) => void) | undefined;
+    let finishTexture: ((texture: { name: string; source: { uri: string } }) => void) | undefined;
     viewer.createTexture = vi.fn(() => new Promise((resolve) => { finishTexture = resolve; }));
     rerender(<Product3DViewer url="/table.glb" alt="Table" autoOpen baseTextureUrl="Black Pepper Oak" />);
     await waitFor(() => expect(viewer.createTexture).toHaveBeenCalledWith("Black Pepper Oak"));
     expect(container.querySelector("model-viewer")).toBe(viewer);
     expect(viewer.model).toBe(model);
     expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("wood.jpg");
-    await act(async () => { finishTexture?.({ name: "Black Pepper Oak" }); });
+    await act(async () => { finishTexture?.({ name: "Black Pepper Oak", source: { uri: "Black Pepper Oak" } }); });
     await waitFor(() => expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("Black Pepper Oak"));
     expect(container.querySelector("model-viewer")).toBe(viewer);
     expect(viewer.model).toBe(model);

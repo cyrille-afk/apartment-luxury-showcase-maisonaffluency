@@ -16,6 +16,11 @@ async function materialMaps(page: Page) {
   });
 }
 
+async function openFinishPicker(page: Page, axis: "Base" | "Top") {
+  const picker = page.getByRole("button", { name: new RegExp(`^Select Your ${axis}`) });
+  if (await picker.getAttribute("aria-expanded") !== "true") await picker.click();
+}
+
 async function expectActive(page: Page) {
   await expect(page.getByRole("button", { name: "Exit 3D", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Show 3D model", exact: true })).toHaveAttribute("aria-pressed", "true");
@@ -57,13 +62,13 @@ test.describe("active product 3D finish interactions", () => {
   test("base and top selectors remain clickable and swap live maps without resetting 3D", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
-    await page.getByRole("button", { name: /^Select Your Base/ }).click();
+    await openFinishPicker(page, "Base");
     const base = page.getByRole("button", { name: "Select Black Pepper Oak", exact: true });
     await expect(base).toBeEnabled();
     const baseUrl = await base.locator("img").first().getAttribute("src");
     expect(baseUrl).toBeTruthy();
     await base.click();
-    await page.getByRole("button", { name: /^Select Your Top/ }).click();
+    await openFinishPicker(page, "Top");
     const top = page.getByRole("button", { name: "Select Nero Marquina Marble", exact: true });
     await expect(top).toBeEnabled();
     const topUrl = await top.locator("img").first().getAttribute("src");
@@ -73,7 +78,7 @@ test.describe("active product 3D finish interactions", () => {
     await expect.poll(() => materialMaps(page)).toEqual(expect.arrayContaining([baseUrl, topUrl]));
     const before = await materialMaps(page);
     await expectActive(page);
-    await page.getByRole("button", { name: /^Select Your Top/ }).click();
+    await openFinishPicker(page, "Top");
     const nextTop = page.getByRole("button", { name: "Select Pall Stone", exact: true });
     await expect(nextTop).toBeEnabled();
     const nextTopUrl = await nextTop.locator("img").first().getAttribute("src");
