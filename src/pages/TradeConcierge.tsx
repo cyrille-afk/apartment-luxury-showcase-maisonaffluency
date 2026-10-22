@@ -14,6 +14,7 @@ import { useProjects } from "@/hooks/useProjects";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { FlashSkeleton, FrontierSkeleton } from "@/components/CuratorialGuideRouter";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 const AIConcierge = lazy(() =>
   import("@/components/trade/AIConcierge").then((m) => ({ default: m.AIConcierge })),
@@ -68,6 +69,7 @@ function extractWorkspacePreview(timeline: unknown): PreviewData {
 }
 
 export default function TradeConcierge() {
+  const guideName = useAIGuideName();
   const { threadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -348,7 +350,7 @@ export default function TradeConcierge() {
         <aside className="space-y-5 lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)] lg:overflow-y-auto">
           <section className="relative overflow-hidden rounded-sm border border-border/60 bg-muted/40 p-6">
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/0 via-accent/70 to-accent/0" />
-            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Trade Concierge · Powered by Felix</p>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Trade Concierge · Powered by {guideName}</p>
             <h1 className="mt-3 font-display text-3xl italic leading-tight text-foreground">
               {greeting()}{firstName ? `, ${firstName}` : ""}.
             </h1>
@@ -545,7 +547,7 @@ export default function TradeConcierge() {
                                       <li key={i} className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                                         <span className={cn("mr-1.5 text-[9px] uppercase tracking-[0.14em]",
                                           turn.role === "user" ? "text-foreground" : "text-accent")}>
-                                          {turn.role === "user" ? "You" : "Felix"}
+                                          {turn.role === "user" ? "You" : guideName}
                                         </span>
                                         {turn.text}
                                       </li>

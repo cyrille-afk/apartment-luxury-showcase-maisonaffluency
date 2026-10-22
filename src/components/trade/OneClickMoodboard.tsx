@@ -9,6 +9,7 @@ import { Link } from "@/lib/router-compat";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { trackFelixEvent } from "@/lib/felixEvents";
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 
 function sourcingId(id: string) {
   let hash = 0;
@@ -151,6 +152,7 @@ export function MoodboardControls({ mb, embedded = false }: { mb: MoodboardSourc
 
 /* ─── Output display: skeletons, the edit header, product grid, lock banner ─── */
 export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourcing; embedded?: boolean }) {
+  const guideName = useAIGuideName();
   const { submitted, generating, matches, suggestions, chooseSuggestion, isLoading, isError, rrpMap, destination, unlocked, email, setEmail, capturing, captureError, captureLead } = mb;
 
   // Gate-passing pieces are "verified"; the sourcing engine backfills the rest
@@ -270,7 +272,7 @@ export function MoodboardResults({ mb, embedded = false }: { mb: MoodboardSourci
                 <div className="absolute inset-0 bg-moodboard-cream/35 backdrop-blur-sm" aria-hidden="true" />
                 <div className="relative z-10 mx-auto max-w-md border-t-2 border-moodboard-teal bg-card p-5 shadow-elegant">
                   <LockKeyhole className="mb-3 size-5 text-moodboard-teal" aria-hidden="true" />
-                  <h4 className="font-display text-lg leading-snug text-moodboard-ink">Unlock Felix's Complete Automated Sourcing Engine.</h4>
+                  <h4 className="font-display text-lg leading-snug text-moodboard-ink">Unlock {guideName}'s Complete Automated Sourcing Engine.</h4>
                   <p className="mt-2 text-xs leading-relaxed text-moodboard-ink/70">Finish your Trade Program registration below to run unlimited image visual searches, calculate project margins instantly, and download white-label PDF client presentations.</p>
                   <Button type="button" onClick={() => document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-4 w-full rounded-none bg-moodboard-teal text-moodboard-teal-foreground hover:bg-moodboard-teal/90">Continue registration <ArrowRight aria-hidden="true" className="ml-2 size-4" /></Button>
                   <p className="mt-3 text-xs text-moodboard-ink/50">Access follows trade verification. Already verified? <Link to="/trade/login" className="text-moodboard-teal underline-offset-2 hover:underline">Sign in</Link></p>

@@ -4621,7 +4621,7 @@ export function AIConcierge({
                   factsEditorOpen ? "text-accent" : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-label="Review project details"
-                title="Review project details Felix has picked up"
+                title={`Review project details ${name} has picked up`}
               >
                 <ListChecks className="h-3.5 w-3.5" />
               </button>
@@ -4845,7 +4845,7 @@ export function AIConcierge({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <p className={cn("font-body text-[10px] uppercase tracking-[0.14em]", modalMode ? "text-cream/70" : "text-muted-foreground")}>
-                  Project details Felix is working from — correct anything and save
+                  Project details {name} is working from — correct anything and save
                 </p>
                 {([
                   { key: "projectProfile" as const, label: "Project profile", placeholder: "e.g. Good Class Bungalow, Sentosa" },
@@ -4902,7 +4902,7 @@ export function AIConcierge({
               <div
                 className="w-full overflow-hidden pl-6 pr-1"
                 role="list"
-                aria-label="Felix workflow progress"
+                aria-label={`${name} workflow progress`}
               >
                 <div className="flex w-full items-center" title={`Current workflow stage: ${pipelineSteps[pipelineActiveStep - 1]}`}>
                   {pipelineSteps.map((label, index) => {
@@ -5771,7 +5771,7 @@ export function AIConcierge({
                     onDismiss={() => resolveAt("dismissed")}
                   />
                   {isLastQuoteCard && totals.length > 0 && (
-                    <div data-trade-sensitive className="border-t border-border px-3 py-2 font-body text-xs space-y-1" aria-label="Felix quote total" aria-live="polite">
+                    <div data-trade-sensitive className="border-t border-border px-3 py-2 font-body text-xs space-y-1" aria-label={`${name} quote total`} aria-live="polite">
                       {totals.map((total) => <div key={total.currency} className="flex justify-between gap-3"><span className="text-muted-foreground">{total.incomplete ? "Priced subtotal" : "Quote total"}{totals.length > 1 ? ` (${total.currency})` : ""}</span><span className="text-foreground tabular-nums">{formatFelixMoney(total.cents, total.currency)}</span></div>)}
                       {(totals.some((total) => total.incomplete) || quoteCards.some((entry) => entry.kind === "proactive_tearsheet" && !entry.data.priceCurrency)) && <p className="text-muted-foreground text-[10px]">Additional pieces: Price upon Request</p>}
                     </div>
@@ -6034,7 +6034,7 @@ export function AIConcierge({
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
                   {embedded ? (
-                    <Shimmer className="font-body text-xs">Felix is synchronizing your studio brief...</Shimmer>
+                    <Shimmer className="font-body text-xs">{name} is synchronizing your studio brief...</Shimmer>
                   ) : (
                     <DotCircleLoader size="sm" className="text-muted-foreground" />
                   )}
@@ -6508,7 +6508,7 @@ export function AIConcierge({
             const config: Record<NextStepKind, { title: string; blurb: string; fields: { key: string; label: string; placeholder: string; type?: "textarea" }[]; basePrompt: string; displayLabel: string; useVisualContext?: boolean }> = {
               source: {
                 title: "Source Similar Pieces",
-                blurb: "Refine the retrieval brief before Felix drafts the tearsheet.",
+                blurb: `Refine the retrieval brief before ${name} drafts the tearsheet.`,
                 displayLabel: "Source Similar Pieces",
                 useVisualContext: true,
                 basePrompt: "Source similar pieces — propose a harmonised mixed-room tearsheet from the Maison Affluency Curation based on the uploaded moodboard's atmosphere, palette, materials, and forms. Do not restrict the edit to one product typology unless I explicitly ask for that typology.",
@@ -6516,12 +6516,12 @@ export function AIConcierge({
                   { key: "typology", label: "Focus typology (optional)", placeholder: "e.g. seating, lighting, case goods — leave blank for mixed room" },
                   { key: "palette", label: "Palette / material accents", placeholder: "e.g. warm oak, patinated brass, ivory bouclé" },
                   { key: "budget", label: "Budget cap per piece (optional)", placeholder: "e.g. up to €12,000" },
-                  { key: "notes", label: "Additional brief", placeholder: "Anything else Felix should weigh (mood, era, must-avoid)…", type: "textarea" },
+                  { key: "notes", label: "Additional brief", placeholder: `Anything else ${name} should weigh (mood, era, must-avoid)…`, type: "textarea" },
                 ],
               },
               quote: {
                 title: "Generate Custom Quote",
-                blurb: "Give Felix the specifics for the bespoke specification sheet.",
+                blurb: `Give ${name} the specifics for the bespoke specification sheet.`,
                 displayLabel: "Generate Custom Quote",
                 basePrompt: "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
                 fields: [
@@ -6534,7 +6534,7 @@ export function AIConcierge({
               },
               match: {
                 title: "Match Finishes",
-                blurb: "Anchor the shortlist to the reference you want Felix to harmonise with.",
+                blurb: `Anchor the shortlist to the reference you want ${name} to harmonise with.`,
                 displayLabel: "Match Finishes",
                 basePrompt: "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
                 fields: [

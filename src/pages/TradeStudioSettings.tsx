@@ -286,7 +286,7 @@ export default function TradeStudioSettings() {
     if (error || !saved) { toast({ title: "Branding could not be saved", description: error?.message, variant: "destructive" }); return; }
     await Promise.all([refreshStudios(), refreshStudioSetup()]);
     if (!isStudioSetupComplete && studioSetupComplete(branding, projectFolderCount || (savedSetupProject.current ? 1 : 0))) {
-      felixToast.success("Your branded trade studio is officially unlocked!", { description: "Felix", duration: 6000 });
+      felixToast.success("Your branded trade studio is officially unlocked!", { description: loadName() || DEFAULT_NAME, duration: 6000 });
     } else toast({ title: "Studio branding saved" });
   };
 
