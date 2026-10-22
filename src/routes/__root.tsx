@@ -1,4 +1,4 @@
-import { useEffect, Suspense, type ReactNode } from "react";
+import { useEffect, useState, Suspense, type ReactNode } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -8,6 +8,7 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 
@@ -106,7 +107,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "color-scheme", content: "light" },
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/favicon.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
@@ -154,10 +154,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: RootErrorComponent,
 });
 
+// On the homepage the first screen is painted by the inline static hero, so
+// the site-wide stylesheet loads without blocking that paint; #root stays
+// hidden until it arrives. Every other page keeps a normal blocking stylesheet.
+const HOME_CSS_SWAP =
+  "(function(){var l=document.getElementById('app-css');if(!l)return;function d(){l.media='all';document.documentElement.classList.add('app-css')}if(l.sheet)d();else l.addEventListener('load',d)})();";
+
 function RootShell({ children }: { children: ReactNode }) {
+  const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link
+          id="app-css"
+          rel="stylesheet"
+          href={appCss}
+          media={isHome && !hydrated ? "print" : undefined}
+          suppressHydrationWarning
+        />
+        {isHome && (
+          <>
+            <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}"}</style>
+            <script dangerouslySetInnerHTML={{ __html: HOME_CSS_SWAP }} />
+            <noscript>
+              <link rel="stylesheet" href={appCss} />
+            </noscript>
+          </>
+        )}
         <HeadContent />
       </head>
       <body suppressHydrationWarning>
