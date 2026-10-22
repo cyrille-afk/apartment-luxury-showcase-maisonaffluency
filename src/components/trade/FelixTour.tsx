@@ -11,6 +11,7 @@ import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolumeLocale";
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
+import { Button } from "@/components/ui/button";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -264,9 +265,8 @@ const FELIX_STEPS: FelixStep[] = [
 const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", "white-label", "invite"]);
 
 /**
- * Tour pages are lazy routes; React Router keeps the old page (and the old
- * location) until a chunk loads, so an unwarmed route stalls the next step.
- * Same specifiers as App.tsx so Vite resolves to the identical module.
+ * Warm the same lazy page modules as the shared shell so navigation can
+ * discover each real feature without waiting for an unrelated page chunk.
  */
 const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeDashboard"),
@@ -276,6 +276,8 @@ const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeTools"),
   () => import("@/pages/TradeSettings"),
   () => import("@/pages/TradeConcierge"),
+  () => import("@/pages/TradeCustomRequests"),
+  () => import("@/pages/TradeExtensionSync"),
    () => import("@/pages/TradeBoardBuilder"),
    () => import("@/pages/BetaFeedboard"),
  ];
