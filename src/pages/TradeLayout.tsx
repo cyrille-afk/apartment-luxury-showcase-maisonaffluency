@@ -558,7 +558,9 @@ const TradeLayout = () => {
               {/* The display-mode toggle only affects product, collection and
                   designer-gallery routes — hide it elsewhere so it can't be a
                   no-op that silently hides the sidebar. */}
-              {(productRoute || collectionRoute || designerRoute) && (
+              {/* While Client View is on it hides the sidebar on every route,
+                  so the switch must stay reachable to bring it back. */}
+              {(productRoute || collectionRoute || designerRoute || clientSafe) && (
                 <div className="shrink-0" data-felix-target="header-client-view">
                   <ProductDisplayToggle />
                 </div>
