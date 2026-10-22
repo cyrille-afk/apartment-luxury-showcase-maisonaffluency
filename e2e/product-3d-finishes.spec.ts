@@ -6,6 +6,8 @@ const storageKey = process.env.LOVABLE_BROWSER_SUPABASE_STORAGE_KEY;
 const email = env("E2E_ADMIN_EMAIL");
 const password = env("E2E_ADMIN_PASSWORD");
 const productPath = "/trade/products/sebastian-herkner-man-of-parts/praia-da-granja-coffee-table";
+// Never capture session restoration in trace/video artifacts.
+test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
 
 async function materialMaps(page: Page) {
   return page.locator("model-viewer").evaluate((element) => {
@@ -29,13 +31,8 @@ async function expectActive(page: Page) {
 test.describe("active product 3D finish interactions", () => {
   test.skip(!(sessionJson && storageKey) && !(email && password), "Requires a managed session or E2E_ADMIN_EMAIL/E2E_ADMIN_PASSWORD.");
   test.setTimeout(180_000);
-  // Session restoration must never be captured in trace/video artifacts.
-  test.use({ viewport: { width: 1946, height: 1181 }, trace: "off", video: "off" });
-
-  test.beforeEach(async ({ page, context }) => {
+  test.beforeEach(async ({ page }) => {
     if (sessionJson && storageKey) {
-      const cookies = JSON.parse(process.env.LOVABLE_BROWSER_SUPABASE_COOKIES_JSON || "[]");
-      if (cookies.length) await context.addCookies(cookies.map((cookie: Record<string, unknown>) => ({ ...cookie, url: "http://localhost:8080" })));
       await page.goto("/");
       await page.evaluate(([key, value]) => localStorage.setItem(key, value), [storageKey, sessionJson]);
     } else if (email && password) {
@@ -47,7 +44,7 @@ test.describe("active product 3D finish interactions", () => {
     await page.waitForFunction(() => {
       const viewer = document.querySelector("model-viewer") as (HTMLElement & { loaded?: boolean; model?: { materials: unknown[] } }) | null;
       return viewer?.loaded && Boolean(viewer.model?.materials.length);
-    }, { timeout: 90_000 });
+    }, undefined, { timeout: 90_000 });
     await page.getByRole("button", { name: "Lock", exact: true }).click();
     await page.evaluate(() => {
       const state = window as unknown as { regressionViewer: Element | null; regressionModel: unknown };
