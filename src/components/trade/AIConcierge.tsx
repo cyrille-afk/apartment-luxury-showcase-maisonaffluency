@@ -6034,7 +6034,7 @@ export function AIConcierge({
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-md px-3.5 py-2.5">
                   {embedded ? (
-                    <Shimmer className="font-body text-xs">{name} is synchronizing your studio brief...</Shimmer>
+                    <Shimmer className="font-body text-xs">{`${name} is synchronizing your studio brief...`}</Shimmer>
                   ) : (
                     <DotCircleLoader size="sm" className="text-muted-foreground" />
                   )}
