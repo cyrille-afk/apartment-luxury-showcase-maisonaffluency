@@ -43,6 +43,7 @@ import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButt
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import ProductFinishCombinations from "@/components/trade/ProductFinishCombinations";
 import ProductFullscreenGallery from "@/components/trade/ProductFullscreenGallery";
 import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -2604,6 +2605,21 @@ const TradeProductPage: React.FC = () => {
             {/* Finish selection — mobile: directly under the photography */}
 
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
+              {!isOolMinibar && isDualAxis && !baseAxisIsDim && !topAxisIsDim && resolve3d() && (
+                <ProductFinishCombinations pickId={product.id} variants={variantsList} size={selectedDualSize}
+                  base={selectedBase} top={selectedTop}
+                  onSelect={(combination) => {
+                    setSelectedBase(combination.base);
+                    setSelectedTop(combination.top);
+                    setSelectedWoodPrice(null);
+                    setSelectedFabric(null);
+                    setSelectedTopSwatch({ name: combination.top, image_url: combination.topTextureUrl });
+                    setPicturedFinishImgs({ base: combination.baseTextureUrl, top: combination.topTextureUrl });
+                    setWorkspaceAsset("3d");
+                    setViewer3dOpen(true);
+                    handleMaterialChange(combination.base, { base: combination.base, top: combination.top, size: selectedDualSize });
+                  }} />
+              )}
               <FinishSelector
                   pickId={product.id}
                   photoLedFinishes
