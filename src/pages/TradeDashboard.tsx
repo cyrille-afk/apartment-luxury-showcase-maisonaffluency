@@ -467,7 +467,7 @@ const TradeDashboard = () => {
                 <button
                   type="button"
                   data-felix-hotspot
-                  aria-label="Enter the Interactive Galleries"
+                  aria-label="Enter The Collection"
                   className="absolute inset-0 z-10 hidden items-center justify-center cursor-pointer"
                 >
                   <span className="relative flex items-center justify-center transition-transform duration-500 ease-out group-hover/radar:scale-110">

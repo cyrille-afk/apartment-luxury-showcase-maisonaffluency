@@ -67,7 +67,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "dashboard-showroom",
     route: "/trade",
     dialogue:
-      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces. Click the Curated Showroom card to enter the Interactive Galleries and see your pricing in context.",
+      "Explore pieces in real residential settings through the Curated Showroom. Your Silver Tier gives you a {silverPct} trade discount on eligible pieces. Click the Curated Showroom card to enter The Collection and see your pricing in context.",
   },
   {
     id: "quotes",
@@ -75,7 +75,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In the Interactive Galleries, explore each room and open a product tag to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
+      "In The Collection, explore each room of the Interactive Gallery and open a product tag, or browse Designers & Ateliers and open any designer’s product pages, to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
   },
   {
     id: "projects",
@@ -968,7 +968,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
                 ))}
               </div>
               <p className="mt-3 font-body text-[10px] italic leading-relaxed text-muted-foreground">
-                Prices shown across The Collection and the interactive galleries calculate automatically based on your active {fmtPct(tiers.silver.discount_pct)} discount level.
+                Prices shown across The Collection — the Interactive Gallery and Designers & Ateliers — calculate automatically based on your active {fmtPct(tiers.silver.discount_pct)} discount level.
               </p>
             </div>
           )}
