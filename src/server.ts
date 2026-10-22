@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { legacyRedirectTarget } from "./lib/legacyRedirects";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -46,6 +47,11 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+    const legacyTarget = legacyRedirectTarget(url.pathname);
+    if (legacyTarget && (request.method === "GET" || request.method === "HEAD")) {
+      return Response.redirect(new URL(legacyTarget, url.origin).toString(), 301);
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
