@@ -332,6 +332,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [position, setPosition] = useState<{ step: number; path: string; rect: Rect } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
+  const [targetUnavailable, setTargetUnavailable] = useState(false);
+  const [targetRetry, setTargetRetry] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const transitionTimer = useRef<number | null>(null);
   const manualStartRef = useRef(false);
@@ -414,6 +416,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useLayoutEffect(() => {
     if (!open) return;
     setSettled(false);
+    setTargetUnavailable(false);
     setStepDone(false);
     const current = FELIX_STEPS[currentStep];
     const routeReady = stepRoute === "board"
@@ -425,6 +428,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
+    let preparedAt = 0;
     let missingSince = 0;
     let fallback = false;
     let watched: Element[] = [];
@@ -455,6 +459,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         ? previous : { w: window.innerWidth, h: window.innerHeight });
     };
     const tick = (now: number) => {
+      if (routeReady && current.prepare && now - preparedAt >= 1000) {
+        preparedAt = now;
+        current.prepare();
+      }
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
@@ -507,7 +515,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           ? previous : { step: currentStep, path: location.pathname, rect: r });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
-        fallback = r.width === 2 && r.height === 2 && !next;
+        fallback = r.width === 0 && r.height === 0 && !next;
+        setTargetUnavailable(fallback);
         if (!ready) {
           setStepDone(current.id === "collection" ? false : current.done ? current.done() : true);
           ready = true;
@@ -519,11 +528,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
-        // Target hidden (e.g. sidebar items on phones): after a grace period,
-        // anchor the card to the viewport centre so the step stays usable.
+        // Never invent a spotlight for a missing feature. Offer explicit
+        // retry/skip while retaining discovery if the real control loads later.
         if (!missingSince) missingSince = now;
-        if (!ready && routeReady && current.id !== "margin-protection" && now - missingSince >= 1500) {
-          commit({ top: window.innerHeight / 2 - 1, left: window.innerWidth / 2 - 1, width: 2, height: 2 });
+        if (!ready && now - missingSince >= 8000) {
+          commit({ top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 });
+          setStepDone(false);
           frame = requestAnimationFrame(tick);
           return;
         }
@@ -567,7 +577,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
-  }, [open, currentStep, location.pathname, stepRoute, stepTarget]);
+  }, [open, currentStep, location.pathname, stepRoute, stepTarget, targetRetry]);
 
   useLayoutEffect(() => {
     if (open) document.documentElement.dataset.felixTourStep = step.id;
@@ -769,7 +779,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     }
   }
 
-  const ring = rect && !isPaused && (
+  const ring = rect && !targetUnavailable && !isPaused && (
     <div
       aria-hidden="true"
       data-felix-spotlight
@@ -897,6 +907,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           </div>
 
           {/* Dialogue */}
+          {targetUnavailable && (
+            <div role="status" className="mt-4 space-y-3 border border-border bg-muted px-4 py-3">
+              <p className="font-body text-sm">This feature is not available here yet. Retry, or skip this step without changing your workspace.</p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" onClick={() => setTargetRetry((value) => value + 1)}>Retry</Button>
+                <Button variant="outline" size="sm" onClick={() => isLast ? close(true) : changeStep(1)}>Skip step</Button>
+              </div>
+            </div>
+          )}
           <div
             key={currentStep}
             className={cn(
@@ -1000,7 +1019,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           )}
 
 
-           {!stepDone && !isPaused && (
+           {!stepDone && !isPaused && !targetUnavailable && (
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
                {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
                <p className="font-body text-sm font-semibold leading-snug">
