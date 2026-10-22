@@ -9,6 +9,13 @@ export function remindStudioSetup() {
 export function StudioSetupNavigationGate({ locked, ready, children }: { locked: boolean; ready: boolean; children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (!ready || !locked || !isStudioSettingsPath(location.pathname)) return;
+    if (new URLSearchParams(location.search.replace(/^\?+/, "")).get("studioSetup") === "required") {
+      remindStudioSetup();
+      navigate(STUDIO_SETUP_PATH, { replace: true });
+    }
+  }, [ready, locked, location.pathname, location.search, navigate]);
   useBlocker({ enableBeforeUnload: false, shouldBlockFn: ({ next }) => {
     if (!locked || !isStudioSettingsPath(location.pathname) || isStudioSettingsPath(next.pathname)) return false;
     remindStudioSetup(); return true;
