@@ -75,7 +75,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "collection-gallery",
     route: "/trade/the-collection",
     dialogue:
-      "In The Collection, explore each room of the Interactive Gallery and open a product tag, or browse Designers & Ateliers and open any designer’s product pages, to see its pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
+      "In The Collection, explore each room of the Interactive Gallery and open a product tag, or browse Designers & Ateliers and open any designer’s product pages, to see your pricing. Your Silver Tier's {silverPct} trade discount is reflected in eligible product pricing, so you can plan your project margins with clarity. Keep building your cumulative project volume toward the {goldVolume} Gold Tier threshold.",
   },
   {
     id: "projects",
