@@ -12,6 +12,12 @@ describe("dimension conversion with a shared trailing unit", () => {
     ["W 100 cm (SH 45 cm)", "W 39.4 in (SH 17.7 in)"],
     ["W 100 cm (2 Seater)", "W 39.4 in (2 Seater)"],
     ["608W × 545D × 940H mm | 23.9W × 21.5D × 37H in", "23.9W × 21.5D × 37.0H in"],
+    ["230x350cm", "90.6x137.8 in"],
+    ["056M W 240 × D 95 × H 75.5 cm", "056M W 94.5 × D 37.4 × H 29.7 in"],
+    ["177L — W 300 × D 124 × H 74.5 cm", "177L — W 118.1 × D 48.8 × H 29.3 in"],
+    ["Cloud 19 (Ø 77 cm)", "Cloud 19 (Ø 30.3 in)"],
+    ["Medium — Ø 26 × H 20 cm (~7 kg)", "Medium — Ø 10.2 × H 7.9 in (~7 kg)"],
+    ["Seat Height: 41 cm", "Seat Height: 16.1 in"],
   ])("converts only the actual measurements in %s", (metric, imperial) => {
     expect(toImperialLine(metric)).toBe(imperial);
   });
