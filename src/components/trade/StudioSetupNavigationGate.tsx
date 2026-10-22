@@ -11,7 +11,7 @@ export function StudioSetupNavigationGate({ locked, ready, children }: { locked:
   const navigate = useNavigate();
   useEffect(() => {
     if (!ready || !locked || !isStudioSettingsPath(location.pathname)) return;
-    if (new URLSearchParams(location.search).get("studioSetup") === "required") {
+    if (new URLSearchParams(location.search.replace(/^\?+/, "")).get("studioSetup") === "required") {
       remindStudioSetup();
       navigate(STUDIO_SETUP_PATH, { replace: true });
     }
