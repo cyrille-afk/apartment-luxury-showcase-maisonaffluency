@@ -101,8 +101,8 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "margin-protection",
     title: "Absolute Margin Protection",
-    target: "client-view-collection-heading",
-    route: "/trade/the-collection",
+    target: "client-view-product-price",
+    route: "/trade/products/sebastian-herkner-man-of-parts/praia-da-granja-coffee-table",
     dialogue:
       "With Client View active, your {silverPct} Silver Tier pricing stays safely hidden behind standard retail pricing. Your clients see only elegant, final figures — never your trade discount, never your margin. Toggle back to Trade view the moment the presentation ends.",
   },
@@ -446,11 +446,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
-      // Step 7 stays attached to a validated heading in the workspace, never
-      // to a disappearing trade price or a viewport-center fallback.
+      // Demonstrate the actual retail price, never a heading or hidden net price.
       const targets = current.id === "margin-protection"
         ? elements.filter((el) => {
-            if (el.tagName !== "H1" || !el.closest("main.trade-editorial-main")) return false;
+            if (document.documentElement.dataset.clientView !== "active" || el.closest("[data-trade-sensitive]")) return false;
             stepTargetRef.current = el;
             return true;
           })
@@ -476,11 +475,11 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       const live = targets.filter((el) => el === stepTargetRef.current || current.id !== "margin-protection")
         .filter((el) => el.isConnected && ((el as HTMLElement).offsetParent !== null || getComputedStyle(el).position === "fixed") && getComputedStyle(el).visibility !== "hidden");
       // Gallery imagery may restore its previous scroll position after mount.
-      // Keep the Step 7 heading within the viewport instead of spotlighting
+      // Keep the Step 7 client price within the viewport instead of spotlighting
       // a valid but offscreen bounding box.
       if (current.id === "margin-protection" && live.length) {
-        const heading = live[0].getBoundingClientRect();
-        if (heading.bottom < 72 || heading.top > window.innerHeight - 72) {
+        const price = live[0].getBoundingClientRect();
+        if (price.bottom < 72 || price.top > window.innerHeight - 72) {
           live[0].scrollIntoView({ block: "center", behavior: "instant" });
         }
       }
@@ -530,7 +529,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         if (!last || !sameRect(last, next)) { last = next; commit(next); }
       } else if (current.id === "margin-protection") {
         // Client View may reflow in the same paint: commit the validated
-        // heading immediately instead of waiting for the stability timer.
+        // client price immediately instead of waiting for the stability timer.
         last = next;
         commit(next);
       } else if (!last || !sameRect(last, next)) {
