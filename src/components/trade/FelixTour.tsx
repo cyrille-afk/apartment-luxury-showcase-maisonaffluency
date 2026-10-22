@@ -650,9 +650,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       setCurrentStep(6);
       return;
     }
-    // Leaving the Client View demo: restore Trade view so later steps
-    // (sidebar nav, project switcher) have visible targets again.
-    if (step.id === "margin-protection") setClientSafeMode(false);
+    // Commit the next step before its entry effect restores Studio Mode.
+    // Swapping the product layout can suspend and cancel a delayed advance.
+    if (step.id === "margin-protection") {
+      setCurrentStep(7);
+      return;
+    }
     changeStep(1);
   };
   const back = () => {
