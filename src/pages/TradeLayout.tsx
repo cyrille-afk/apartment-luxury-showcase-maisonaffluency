@@ -27,7 +27,6 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { useStudio } from "@/hooks/useStudio";
 import { StudioBrand } from "@/components/trade/StudioBrand";
 import { StudioSetupNavigationGate } from "@/components/trade/StudioSetupNavigationGate";
-import SeedOnboardingProject from "@/components/trade/SeedOnboardingProject";
 
 
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
@@ -514,7 +513,6 @@ const TradeLayout = () => {
 
   return (
     <SidebarProvider>
-      <SeedOnboardingProject />
        <div
          className={`trade-portal-shell flex w-full bg-background ${fullBleed ? "h-screen overflow-hidden" : "min-h-screen"}`}
         data-price-view={showTradePrice ? "trade" : "client"}
