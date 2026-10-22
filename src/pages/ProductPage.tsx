@@ -102,7 +102,6 @@ const ProductPage = () => {
           <title>Loading product — Maison Affluency</title>
           <meta name="description" content="Curated collectible design at Maison Affluency Singapore." />
           <meta name="robots" content="index, follow" />
-          <link rel="canonical" href={earlyCanonical} />
         </Helmet>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <DotCircleLoader size="md" />

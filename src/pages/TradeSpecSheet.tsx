@@ -183,7 +183,6 @@ export default function TradeSpecSheet() {
         <title>{pageTitle} | Maison Affluency</title>
         <meta name="description" content={pageDescription} />
         <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href={canonicalUrl} />
       </Helmet>
       <SpecSheetWorkspace
         brand={brand}

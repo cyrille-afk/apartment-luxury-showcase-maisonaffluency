@@ -1170,7 +1170,6 @@ const PublicDesignerProfile = ({ presentation = false }: { presentation?: boolea
             <title>{seoTitle}</title>
             <meta name="description" content={desc} />
             <meta name="robots" content="index, follow" />
-            <link rel="canonical" href={canonical} />
             <script type="application/ld+json">{JSON.stringify(personLd)}</script>
             <script type="application/ld+json">{JSON.stringify(crumbsLd)}</script>
           </Helmet>
