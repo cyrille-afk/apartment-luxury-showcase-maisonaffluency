@@ -105,7 +105,7 @@ export default function BetaFeedboard() {
         </p>
       </header>
 
-      <div className="flex flex-col gap-6 md:flex-row">
+      <div data-felix-target="feedback-board" className="flex flex-col gap-6 md:flex-row">
         {LANES.map((lane) => {
           const items = entries.filter((e) => e.lane === lane.key);
           return (

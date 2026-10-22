@@ -350,6 +350,7 @@ const TradeSettings = () => {
       {/* Studio & team */}
       <a
         href="/trade/settings/studio"
+        data-felix-target="settings-studio-team"
         className="mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
       >
         <div className="h-9 w-9 rounded-full bg-foreground/10 flex items-center justify-center">

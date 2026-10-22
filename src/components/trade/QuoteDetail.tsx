@@ -2771,12 +2771,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     <div className="max-w-4xl">
       {/* Back + Project + Print — hidden in print */}
       <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 print:hidden">
-        <button onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
+        <button data-felix-target="quote-back" onClick={onBack} className="inline-flex items-center gap-1.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">All Quotes</span>
           <span className="sm:hidden">Back</span>
         </button>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div data-felix-target="quote-document-actions" className="flex items-center gap-2 flex-wrap justify-end">
           {(isDraft || isSuperAdmin) && (
             <ProjectPicker
               value={projectId}

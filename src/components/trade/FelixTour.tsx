@@ -11,6 +11,7 @@ import { setClientSafeMode, useClientSafeMode } from "@/lib/clientSafeMode";
 import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolumeLocale";
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
+import { Button } from "@/components/ui/button";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -40,6 +41,8 @@ type FelixStep = {
   done?: () => boolean;
   /** Runs on enter / each re-measure (e.g. auto-expand a panel). */
   onEnter?: () => void;
+  /** Reveal an existing feature without creating or saving any records. */
+  prepare?: () => void;
   pulse?: boolean;
   /** Clicking the highlighted element finishes the tour. */
   clickFinishes?: boolean;
@@ -77,7 +80,7 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "projects",
     title: "Client Project Folders",
-    target: "nav-projects",
+    target: "projects-workspace",
     route: "/trade/projects",
     dialogue:
       "Every engagement lives in its own isolated workspace. Your pre-loaded {projectTitle} folder, for instance, showcases how we map your collections, layouts, quotes, and client documentation. Use Projects & Interventions to structure each client engagement end to end.",
@@ -109,18 +112,28 @@ const FELIX_STEPS: FelixStep[] = [
   {
     id: "quote-generation",
     title: "Professional Quote Generation",
-    target: "nav-quotes",
+    target: "quotes-create",
     route: "/trade/quotes",
+    prepare: () => {
+      if (!document.querySelector('[data-felix-target="quotes-create"]')) {
+        document.querySelector<HTMLButtonElement>('[data-felix-target="quote-back"]')?.click();
+      }
+    },
     dialogue:
       "This is your Quotes & Proformas workspace. The automated document compiler turns any product selection into a polished, client-ready quotation in moments — line items, finishes, lead times, and your tier pricing assembled for you. Create a new proforma specification whenever a project is ready to formalize.",
   },
   {
     id: "direct-client-billing",
     title: "Direct Client Billing",
-    target: "quotes-ledger-panel",
+    target: "quote-document-actions",
     route: "/trade/quotes",
+    prepare: () => {
+      if (!document.querySelector('[data-felix-target="quote-document-actions"]')) {
+        document.querySelector<HTMLElement>('[data-felix-quote-review="available"]')?.click();
+      }
+    },
     dialogue:
-      "Every proforma can be exported exactly as your client should see it: a retail-facing document with elegant final figures, or a trade-facing invoice showing your studio's pricing. You choose the presentation per document — your margins stay protected either way. And every confirmed quote accumulates toward the {goldVolume} threshold, moving you closer to your {goldPct} Gold Tier discount.",
+      "These are the document controls for an existing quotation. Use **Preview PDF** to review the branded document before sharing, **Download PDF** to save it, or **Export Excel** for your procurement schedule. Review the quotation's client pricing and billing settings before sending it to your client.",
   },
   {
     id: "tools",
@@ -128,15 +141,15 @@ const FELIX_STEPS: FelixStep[] = [
     target: "tools-grid",
     route: "/trade/tools",
     dialogue:
-      "Welcome to your studio utility deck. Here you can utilize our tailored sourcing tools, search Materials Libraries, create presentation moodboards, or request physical fabric samples.",
+      "The **Discover** tools bring together the Gallery, Designers & Ateliers, Resources, and Material Library. Browse the catalogue, explore makers, find available supplier documents, and review finish samples from these cards.",
   },
   {
     id: "settings",
     title: "Account & Team Configurations",
-    target: "nav-settings",
+    target: "settings-studio-team",
     route: "/trade/settings",
     dialogue:
-      "Configure your trade preferences, update your design practice details, manage team seats, and view your progressive tier thresholds here.",
+      "Open **Studio & team** to update your client-facing studio identity, manage teammates, and assign their roles. Your personal account details and tier progress remain on this Account Settings page.",
   },
   {
     id: "portfolio-management",
@@ -144,23 +157,23 @@ const FELIX_STEPS: FelixStep[] = [
     target: "header-project-switcher",
     route: "/trade",
     dialogue:
-      "This switcher in the top bar scopes your entire workspace to a single client project. Select a project and every collection, quote, board, and document you see is filtered to that engagement alone — each client's pipeline stays fully isolated from the rest of your studio portfolio. Switch back to **All projects** whenever you want the complete view.",
+      "This switcher sets your active project context for supported workspace tools, including your Quotes & Proformas list. Choose an engagement to focus your work, or return to **All projects** for the complete view. Project access permissions remain separate from this filter.",
   },
   {
     id: "bespoke-commissions",
     title: "Bespoke & Custom Commissions",
-    target: "nav-custom-requests",
-    route: "/trade/projects",
+    target: "custom-requests-inbox",
+    route: "/trade/custom-requests",
     dialogue:
-      "When a project calls for something beyond the catalogue, submit a bespoke specification through Projects & Interventions. Describe the piece, dimensions, materials, and finish references, and our atelier network will scope feasibility, pricing, and lead time — custom commissions are tracked alongside your standard procurement in the same project workspace.",
+      "Your **Custom Requests** workspace tracks bespoke specifications and atelier replies. To start a request, open the relevant product and choose **Request Customisation**, then describe the dimensions, materials, and finish references you need. Return here to follow its progress.",
   },
   {
     id: "felix-chat",
     title: "Your Personal Concierge",
-    target: "nav-concierge",
+    target: "concierge-workspace",
     route: "/trade/concierge",
     dialogue:
-      "Whenever you need bespoke project curation or styling advice, look to the sidebar. Open the Trade Concierge to brief me, co-curate custom schemes, or source rare artisan pieces alongside me.",
+      "This is your **Trade Concierge** workspace. Brief me here on your project, ask for finish or specification guidance, and co-curate a scheme from our catalogue. Your past curations remain available alongside the conversation.",
   },
   {
     id: "client-view",
@@ -169,7 +182,7 @@ const FELIX_STEPS: FelixStep[] = [
     route: "board",
     done: () => switchOn('[aria-label="Toggle client editorial presentation"]'),
     dialogue:
-      "Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Let's look at how we tailor this board for your high-net-worth presentations. Click **Client View** to hide internal trade calculations.",
+      "Exceptional sourcing is only the first step; bringing your client along on the journey is where projects come to life. Switch on **Client Editorial Presentation** to show this board without the internal trade calculations.",
   },
   {
     id: "branding-panel",
@@ -182,7 +195,7 @@ const FELIX_STEPS: FelixStep[] = [
       if (d && !d.open) d.open = true;
     },
     dialogue:
-      "Maison Affluency acts as your secret operating system. Open the **Client Portal Branding** dashboard to control what your external clients and contractors experience.",
+      "The **Client Portal Branding** panel is open for you. Configure the studio name and logo your clients will see, and review the client-facing preview before sharing your board.",
   },
   {
     id: "white-label",
@@ -204,31 +217,31 @@ const FELIX_STEPS: FelixStep[] = [
     target: "invite-collaborator",
     route: "board",
     dialogue:
-      "Your custom branded workspace is ready. Click **Invite Collaborator** to send a secure, 30-day interactive portal link to your client or external contractors. When they drop feedback or swap 3D fabric finishes, their choices sync live to your master ledger.",
+      "Open **Invite Collaborator** to enter your client's or contractor's email and choose their role. Review the invitation before sending it, or copy its secure portal link. Client feedback and finish requests appear on your board for review; opening this control does not send an invitation.",
   },
   {
     id: "technical-assets",
     title: "Technical Design Assets",
-    target: "nav-tools",
+    target: "tools-resources",
     route: "/trade/tools",
     dialogue:
-      "Every piece in the catalogue carries its full technical dossier. From the Tools grid you can reach CAD blocks and BIM-ready 3D models for direct import into your drawings, download specification sheets and finish matrices, and request physical material samples — everything your technical team needs to specify with confidence.",
+      "Open **Resources** for available atelier and designer catalogues, price lists, and technical sheets. Individual product pages also carry their available specification and CAD/3D downloads. Asset availability varies by piece; use the Material Library and Sample Requests tools for finish research and physical samples.",
   },
   {
     id: "priority-concierge",
     title: "Priority Concierge Access",
-    target: "nav-concierge",
-    route: "/trade",
+    target: "concierge-workspace",
+    route: "/trade/concierge",
     dialogue:
-      "You are never sourcing alone. I am available in the sidebar on every page through the Trade Concierge — brief me on any project and I will co-curate schemes, source rare artisan pieces, and assemble specification schedules with your {silverPct} Silver Tier pricing applied. And behind me stands our human operations team: for logistics, customs, and white-glove delivery, a real specialist is always one message away. Welcome aboard.",
+      "Return to this **Trade Concierge** conversation whenever your project needs a fresh shortlist or specification guidance. Brief me on the room, finishes, and budget so we can work from the catalogue together. The Trade Concierge link in your workspace brings you back here.",
   },
   {
     id: "ai-extension-sync",
     title: "ACTIVATE YOUR AI DESIGN CO-PILOT",
-    target: "sidebar-ai-sync",
+    target: "extension-setup",
     route: "/trade/extension-sync",
     dialogue:
-      "One final capability: the AI Extension Sync connects your workspace directly to ChatGPT. Your AI design co-pilot can discover your synced project folders, stage catalogue pieces straight into an active workflow, and run live top-down budget mathematics — target client ceilings, tier discounts, and net sourcing budgets — without leaving the conversation. Activate it from the sidebar whenever you are ready.",
+      "This is the **ChatGPT Extension Integration** setup page. Download the plugin package here, review your synced active project folders below, and follow the connection setup before staging catalogue pieces into a project. Opening this page alone does not activate the connection.",
   },
   {
     id: "pwa-install",
@@ -236,15 +249,15 @@ const FELIX_STEPS: FelixStep[] = [
     target: "pwa-banner",
     route: "/trade",
     dialogue:
-      "To complete your multi-device workspace, scan this QR code with your phone — or tap Install Applicable App on mobile — to add the Maison Affluency Mobile Studio Concierge to your home screen. Your projects, pricing and staged pieces follow you to every site visit.",
+      "Scan this QR code with your phone, or tap **Install Applicable App** to open the installation prompt or instructions supported by your browser. Add your Mobile Studio Concierge to your home screen and sign in to continue working with your projects on site.",
   },
   {
     id: "beta-feedboard",
     title: "FOUND A BUG OR HAVE AN IDEA?",
-    target: "sidebar-beta-feedboard",
+    target: "feedback-board",
     route: "/trade/beta-feedboard",
     dialogue:
-      "Log structural alignment errors, pricing calculation feedback, or custom layout requests right here. Your hardware device viewports, operating systems, and user signatures are tracked automatically to make debugging seamless.",
+      "Use **Log an entry** in the appropriate feedback lane to report a bug, suggest a refinement, or share a co-pilot idea. Add your observations and an optional screenshot. Your account, submission time, viewport, browser, and operating system are recorded with the entry.",
   },
 ];
 
@@ -252,9 +265,8 @@ const FELIX_STEPS: FelixStep[] = [
 const CLIENT_VIEW_PASSTHROUGH_STEPS = new Set(["client-view", "branding-panel", "white-label", "invite"]);
 
 /**
- * Tour pages are lazy routes; React Router keeps the old page (and the old
- * location) until a chunk loads, so an unwarmed route stalls the next step.
- * Same specifiers as App.tsx so Vite resolves to the identical module.
+ * Warm the same lazy page modules as the shared shell so navigation can
+ * discover each real feature without waiting for an unrelated page chunk.
  */
 const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeDashboard"),
@@ -264,6 +276,8 @@ const TOUR_ROUTE_CHUNKS = [
   () => import("@/pages/TradeTools"),
   () => import("@/pages/TradeSettings"),
   () => import("@/pages/TradeConcierge"),
+  () => import("@/pages/TradeCustomRequests"),
+  () => import("@/pages/TradeExtensionSync"),
    () => import("@/pages/TradeBoardBuilder"),
    () => import("@/pages/BetaFeedboard"),
  ];
@@ -320,6 +334,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const [position, setPosition] = useState<{ step: number; path: string; rect: Rect } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const [settled, setSettled] = useState(false);
+  const [targetUnavailable, setTargetUnavailable] = useState(false);
+  const [targetRetry, setTargetRetry] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const transitionTimer = useRef<number | null>(null);
   const manualStartRef = useRef(false);
@@ -402,6 +418,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   useLayoutEffect(() => {
     if (!open) return;
     setSettled(false);
+    setTargetUnavailable(false);
     setStepDone(false);
     const current = FELIX_STEPS[currentStep];
     const routeReady = stepRoute === "board"
@@ -413,6 +430,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     let ready = false;
     let didEnter = false;
     let didScroll = false;
+    let preparedAt = 0;
     let missingSince = 0;
     let fallback = false;
     let watched: Element[] = [];
@@ -443,6 +461,10 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
         ? previous : { w: window.innerWidth, h: window.innerHeight });
     };
     const tick = (now: number) => {
+      if (routeReady && current.prepare && now - preparedAt >= 1000) {
+        preparedAt = now;
+        current.prepare();
+      }
       const elements = routeReady
         ? Array.from(document.querySelectorAll(`[data-felix-target="${stepTarget}"]`))
         : [];
@@ -495,7 +517,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           ? previous : { step: currentStep, path: location.pathname, rect: r });
         setViewport((previous) => previous.w === window.innerWidth && previous.h === window.innerHeight
           ? previous : { w: window.innerWidth, h: window.innerHeight });
-        fallback = r.width === 2 && r.height === 2 && !next;
+        fallback = r.width === 0 && r.height === 0 && !next;
+        setTargetUnavailable(fallback);
         if (!ready) {
           setStepDone(current.id === "collection" ? false : current.done ? current.done() : true);
           ready = true;
@@ -507,11 +530,12 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       if (!next || next.width < 1 || next.height < 1) {
         last = null;
         stableSince = 0;
-        // Target hidden (e.g. sidebar items on phones): after a grace period,
-        // anchor the card to the viewport centre so the step stays usable.
+        // Never invent a spotlight for a missing feature. Offer explicit
+        // retry/skip while retaining discovery if the real control loads later.
         if (!missingSince) missingSince = now;
-        if (!ready && routeReady && current.id !== "margin-protection" && now - missingSince >= 1500) {
-          commit({ top: window.innerHeight / 2 - 1, left: window.innerWidth / 2 - 1, width: 2, height: 2 });
+        if (!ready && now - missingSince >= 8000) {
+          commit({ top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 });
+          setStepDone(false);
           frame = requestAnimationFrame(tick);
           return;
         }
@@ -555,7 +579,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
       window.removeEventListener("resize", onChange);
       window.removeEventListener("scroll", onChange, true);
     };
-  }, [open, currentStep, location.pathname, stepRoute, stepTarget]);
+  }, [open, currentStep, location.pathname, stepRoute, stepTarget, targetRetry]);
 
   useLayoutEffect(() => {
     if (open) document.documentElement.dataset.felixTourStep = step.id;
@@ -757,7 +781,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     }
   }
 
-  const ring = rect && !isPaused && (
+  const ring = rect && !targetUnavailable && !isPaused && (
     <div
       aria-hidden="true"
       data-felix-spotlight
@@ -885,6 +909,15 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           </div>
 
           {/* Dialogue */}
+          {targetUnavailable && (
+            <div role="status" className="mt-4 space-y-3 border border-border bg-muted px-4 py-3">
+              <p className="font-body text-sm">This feature is not available here yet. Retry, or skip this step without changing your workspace.</p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" onClick={() => setTargetRetry((value) => value + 1)}>Retry</Button>
+                <Button variant="outline" size="sm" onClick={() => isLast ? close(true) : changeStep(1)}>Skip step</Button>
+              </div>
+            </div>
+          )}
           <div
             key={currentStep}
             className={cn(
@@ -988,7 +1021,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
           )}
 
 
-           {!stepDone && !isPaused && (
+           {!stepDone && !isPaused && !targetUnavailable && (
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
                {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
                <p className="font-body text-sm font-semibold leading-snug">

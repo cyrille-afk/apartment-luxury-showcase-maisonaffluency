@@ -142,7 +142,7 @@ export default function TradeExtensionSync() {
           {syncNotice}
         </div>
       )}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div data-felix-target="extension-setup" className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
             ChatGPT Extension Integration

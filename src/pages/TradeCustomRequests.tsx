@@ -171,7 +171,7 @@ export default function TradeCustomRequests() {
     <>
       <Helmet><title>Custom Requests — Trade Portal</title></Helmet>
       <div className="max-w-5xl space-y-6">
-        <div className="flex items-start justify-between gap-4">
+        <div data-felix-target="custom-requests-inbox" className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <Wand2 className="h-4 w-4 text-foreground" />
