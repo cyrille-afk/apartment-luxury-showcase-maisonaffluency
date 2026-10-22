@@ -51,6 +51,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [studios, setStudios] = useState<StudioMembership[]>([]);
   const [loading, setLoading] = useState(true);
+  const [studioReadFailed, setStudioReadFailed] = useState(false);
   const [currentStudioId, setCurrentStudioIdState] = useState<string | null>(null);
   useEffect(() => { try { setCurrentStudioIdState(localStorage.getItem(STORAGE_KEY)); } catch {} }, []);
   const [projectState, setProjectState] = useState<{ studioId: string; count: number } | null>(null);
@@ -69,10 +70,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user.id);
 
     if (error || !data) {
-      setStudios([]);
+      setStudioReadFailed(true);
       if (showLoading) setLoading(false);
       return;
     }
+    setStudioReadFailed(false);
     const memberships: StudioMembership[] = data
       .filter((r: any) => r.studio)
       .map((r: any) => ({ ...r.studio, role: r.role as StudioRole }));
@@ -142,7 +144,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setCurrentStudioId,
     refresh: () => fetchStudios(false),
     refreshStudioSetup, projectFolderCount,
-    studioSetupLoading: loading || (!!currentStudio && projectState?.studioId !== currentStudio.id),
+    studioSetupLoading: loading || studioReadFailed || (!!currentStudio && projectState?.studioId !== currentStudio.id),
     isStudioSetupComplete: studioSetupComplete(currentStudio, projectFolderCount),
     isOwner: role === "owner",
     isAdmin: role === "owner" || role === "admin",

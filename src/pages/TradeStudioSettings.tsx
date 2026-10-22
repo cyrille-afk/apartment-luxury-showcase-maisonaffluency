@@ -124,7 +124,7 @@ export default function TradeStudioSettings() {
       setPdfLocale(normalizePdfLocale(currentStudio.pdf_locale));
       setCoverTheme(normalizeCoverTheme((currentStudio as { pdf_cover_theme?: unknown }).pdf_cover_theme));
     }
-  }, [currentStudio?.id]);
+  }, [currentStudio?.id, currentStudio?.name, currentStudio?.display_name, currentStudio?.logo_url, currentStudio?.primary_brand_font, currentStudio?.default_project_markup_percentage, currentStudio?.pdf_locale, JSON.stringify(currentStudio?.pdf_cover_theme)]);
 
   const fetchData = async () => {
     if (!currentStudio) return;
