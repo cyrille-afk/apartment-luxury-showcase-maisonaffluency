@@ -1,4 +1,4 @@
-import { useEffect, Suspense, type ReactNode } from "react";
+import { useEffect, useState, Suspense, type ReactNode } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -162,20 +162,26 @@ const HOME_CSS_SWAP =
 
 function RootShell({ children }: { children: ReactNode }) {
   const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {isHome ? (
+        <link
+          id="app-css"
+          rel="stylesheet"
+          href={appCss}
+          media={isHome && !hydrated ? "print" : undefined}
+          suppressHydrationWarning
+        />
+        {isHome && (
           <>
-            <style>{"html:not(.app-css) #root{visibility:hidden}"}</style>
-            <link id="app-css" rel="stylesheet" href={appCss} media="print" suppressHydrationWarning />
+            <style>{"html.home-fouc:not(.app-css) #root{visibility:hidden}"}</style>
             <script dangerouslySetInnerHTML={{ __html: HOME_CSS_SWAP }} />
             <noscript>
               <link rel="stylesheet" href={appCss} />
             </noscript>
           </>
-        ) : (
-          <link id="app-css" rel="stylesheet" href={appCss} />
         )}
         <HeadContent />
       </head>
