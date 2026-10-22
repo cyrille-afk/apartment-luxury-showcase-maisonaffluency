@@ -8,6 +8,10 @@ describe("measurement detection in shared specification text", () => {
     "Finished in bronze — hand-polished in the atelier",
     "Available in 3 finishes",
     "Fabric woven in 100% wool",
+    "Collection 2026 in natural oak",
+    "Made in 2026 in Italy — finished in bronze",
+    "2 in 1 finish options",
+    "Available in 12 in-stock finishes",
   ])("keeps ordinary materials prose out of dimension formatting: %s", (text) => {
     expect(hasDimensionMeasurement(text)).toBe(false);
   });
@@ -18,6 +22,9 @@ describe("measurement detection in shared specification text", () => {
     "230x350cm",
     "400 (cable) cm",
     "3 × 4 m",
+    "W 24.4 × D 23.2 × H 31.5 inches",
+    "24 in wide",
+    "24 in / SH 18 in",
   ])("recognizes actual measurements: %s", (text) => {
     expect(hasDimensionMeasurement(text)).toBe(true);
   });
