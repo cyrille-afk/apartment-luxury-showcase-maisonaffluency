@@ -28,6 +28,10 @@ const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
 );
 
+const LightboxSpec = (props: React.ComponentProps<typeof ExpandableSpec>) => (
+  <ExpandableSpec {...props} inlineHeights={false} />
+);
+
 export interface TradeProductLightboxItem {
   id: string;
   product_name: string;
