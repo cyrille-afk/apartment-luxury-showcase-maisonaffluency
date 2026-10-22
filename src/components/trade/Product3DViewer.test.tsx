@@ -1,4 +1,4 @@
-import { act, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Product3DViewer from "./Product3DViewer";
 
@@ -18,6 +18,55 @@ function material(name: string, textureName: string, factor: number[]) {
 }
 
 describe("live product 3D materials", () => {
+  it("keeps a manually opened, camera-locked viewport active through independent base and top updates", async () => {
+    const base = material("base", "wood.jpg", [0.2, 0.1, 0.05, 1]);
+    const top = material("top", "stone.jpg", [0.8, 0.8, 0.8, 1]);
+    const onOpenedChange = vi.fn();
+    const props = { url: "/table.glb", alt: "Table", onOpenedChange };
+    const { container, rerender } = render(<Product3DViewer {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Load interactive 3D model" }));
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    expect(viewer).not.toBeNull();
+    const model = { materials: [base, top] };
+    await act(async () => { viewer.model = model; viewer.dispatchEvent(new Event("load")); });
+    fireEvent.click(screen.getByRole("button", { name: "Lock" }));
+    onOpenedChange.mockClear();
+
+    rerender(<Product3DViewer {...props} baseTextureUrl="Black Pepper Oak" />);
+    await waitFor(() => expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("Black Pepper Oak"));
+    expect(top.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("stone.jpg");
+    rerender(<Product3DViewer {...props} baseTextureUrl="Black Pepper Oak" topTextureUrl="Pall Stone" />);
+    await waitFor(() => expect(top.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("Pall Stone"));
+
+    expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("Black Pepper Oak");
+    expect(container.querySelector("model-viewer")).toBe(viewer);
+    expect(viewer.model).toBe(model);
+    expect(viewer.getAttribute("src")).toBe("/table.glb");
+    expect(screen.getByRole("button", { name: "Locked" })).toHaveAttribute("aria-pressed", "true");
+    expect(viewer.hasAttribute("camera-controls")).toBe(false);
+    expect(screen.queryByRole("button", { name: "Load interactive 3D model" })).toBeNull();
+    expect(onOpenedChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps the loaded viewport active while a new texture is still pending", async () => {
+    const base = material("base", "wood.jpg", [0.2, 0.1, 0.05, 1]);
+    const { container, rerender } = render(<Product3DViewer url="/table.glb" alt="Table" autoOpen />);
+    const viewer = container.querySelector("model-viewer") as TestModelViewer;
+    const model = { materials: [base] };
+    await act(async () => { viewer.model = model; viewer.dispatchEvent(new Event("load")); });
+    let finishTexture: ((texture: { name: string; source: { uri: string } }) => void) | undefined;
+    viewer.createTexture = vi.fn(() => new Promise((resolve) => { finishTexture = resolve; }));
+    rerender(<Product3DViewer url="/table.glb" alt="Table" autoOpen baseTextureUrl="Black Pepper Oak" />);
+    await waitFor(() => expect(viewer.createTexture).toHaveBeenCalledWith("Black Pepper Oak"));
+    expect(container.querySelector("model-viewer")).toBe(viewer);
+    expect(viewer.model).toBe(model);
+    expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("wood.jpg");
+    await act(async () => { finishTexture?.({ name: "Black Pepper Oak", source: { uri: "Black Pepper Oak" } }); });
+    await waitFor(() => expect(base.pbrMetallicRoughness.baseColorTexture.texture.name).toBe("Black Pepper Oak"));
+    expect(container.querySelector("model-viewer")).toBe(viewer);
+    expect(viewer.model).toBe(model);
+  });
+
   it("opens an existing viewport when a combination requests a preview", async () => {
     const { container, rerender } = render(<Product3DViewer url="/table.glb" alt="Table" />);
     expect(container.querySelector("model-viewer")).toBeNull();
