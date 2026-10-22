@@ -1,21 +1,12 @@
-import { StrictMode, startTransition } from "react";
-import { hydrateRoot } from "react-dom/client";
-import { StartClient } from "@tanstack/react-start/client";
+// Tiny browser entry: the app's code is fetched only after the first screen
+// has painted, so the inline static hero (homepage) and server-rendered HTML
+// appear without waiting for ~350 KB of start-up JavaScript.
+const start = () => {
+  void import("./app/hydrateClient").then((m) => m.hydrateClient());
+};
 
-const hydrate = () =>
-  startTransition(() => {
-    hydrateRoot(
-      document,
-      <StrictMode>
-        <StartClient />
-      </StrictMode>,
-    );
-  });
-
-// Homepage: let the browser paint the inline static hero before hydration
-// takes over the main thread. Other pages hydrate immediately as before.
 if (window.location.pathname === "/") {
-  requestAnimationFrame(() => setTimeout(hydrate, 0));
+  requestAnimationFrame(() => setTimeout(start, 0));
 } else {
-  hydrate();
+  start();
 }
