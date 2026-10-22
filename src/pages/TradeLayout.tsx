@@ -26,6 +26,7 @@ import { GlobalProjectSwitcher } from "@/components/trade/GlobalProjectSwitcher"
 import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 import { useStudio } from "@/hooks/useStudio";
 import { StudioBrand } from "@/components/trade/StudioBrand";
+import { StudioSetupNavigationGate } from "@/components/trade/StudioSetupNavigationGate";
 import SeedOnboardingProject from "@/components/trade/SeedOnboardingProject";
 
 
@@ -347,7 +348,8 @@ const TradeLayout = () => {
     return () => window.clearTimeout(t);
   }, [showInitialLoader]);
   const { showTradePrice } = useTradePriceMode();
-  const { currentStudio } = useStudio();
+  const { currentStudio, isStudioSetupComplete, studioSetupLoading } = useStudio();
+  const studioLocked = rolesLoaded && isTradeUser && !isStudioSetupComplete;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [submittedCount, setSubmittedCount] = useState(0);
   const location = useLocation();
@@ -521,7 +523,7 @@ const TradeLayout = () => {
         {/* Sidebar — desktop only */}
          <AnimatePresence initial={false}>
            {!presentation && <motion.div key="product-workspace-sidebar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.25 }} className="hidden md:block">
-             <div data-trade-sidebar data-trade-sensitive><TradeSidebar /></div>
+             <div data-trade-sidebar data-trade-sensitive className={studioLocked ? "opacity-50" : undefined}><TradeSidebar /></div>
            </motion.div>}
          </AnimatePresence>
 
@@ -529,7 +531,7 @@ const TradeLayout = () => {
           <header className={`trade-editorial-header min-h-14 h-auto flex-wrap gap-y-2 pb-2 md:h-16 md:flex-nowrap md:pb-0 flex items-center border-b border-border px-3 md:px-8 bg-background sticky top-0 z-10 print:hidden pt-[env(safe-area-inset-top)]`}>
             {/* Mobile: burger left */}
             <div className="flex items-center gap-2 md:flex-1">
-               <div data-trade-sensitive><TradeMobileMenu
+               <div data-trade-sensitive className={studioLocked ? "opacity-50" : undefined}><TradeMobileMenu
                 open={mobileMenuOpen}
                 onOpenChange={setMobileMenuOpen}
                 submittedCount={submittedCount}
@@ -578,13 +580,13 @@ const TradeLayout = () => {
                   <DotCircleLoader size="sm" className="text-muted-foreground" />
                 </div>
               }>
-                <Outlet />
+                <StudioSetupNavigationGate locked={studioLocked} ready={!isTradeUser || (rolesLoaded && !studioSetupLoading)}><Outlet /></StudioSetupNavigationGate>
               </Suspense>
             </ToolsBreadcrumbProvider>
           </main>
 
           <Suspense fallback={null}>
-             <div data-trade-sensitive><TradeBottomNav /></div>
+             <div data-trade-sensitive className={studioLocked ? "opacity-50" : undefined}><TradeBottomNav /></div>
           </Suspense>
         </div>
       </div>
