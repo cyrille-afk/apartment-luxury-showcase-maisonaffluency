@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { canReadOrder } from "../_shared/orderAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,26 +21,21 @@ serve(async (req) => {
 
   try {
     let sessionId = "";
-    let emailProof = "";
 
     if (req.method === "GET") {
       const url = new URL(req.url);
       sessionId = url.searchParams.get("session_id")?.trim() ?? "";
-      emailProof = url.searchParams.get("email")?.trim().toLowerCase() ?? "";
     } else {
       const body = await req.json().catch(() => ({}));
       sessionId = typeof body?.session_id === "string" ? body.session_id.trim() : "";
-      emailProof = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
     }
 
     if (!SESSION_ID_PATTERN.test(sessionId)) {
       return json({ error: "Invalid session identifier." }, 400);
     }
 
-    // The session id alone is no longer enough: require a signed-in caller
-    // whose email matches the order, or a guest who also supplies the order
-    // email address as proof of ownership.
-    let callerEmail: string | null = null;
+    // Email input is not ownership proof. Require a verified signed-in identity.
+    let callerId: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       const supabaseAnon = createClient(
@@ -50,18 +46,24 @@ serve(async (req) => {
         authHeader.replace("Bearer ", ""),
       );
       const claims = claimsData?.claims as Record<string, unknown> | undefined;
-      if (typeof claims?.email === "string") callerEmail = claims.email.toLowerCase();
+      if (typeof claims?.sub === "string" && typeof claims?.email === "string") {
+        callerId = claims.sub;
+      }
     }
+
+    if (!callerId) return json({ error: "Please sign in with the verified email used for this order." }, 403);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } },
     );
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(callerId);
+    if (authError || !authUser.user?.email_confirmed_at) return json({ error: "Please sign in with the verified email used for this order." }, 403);
 
     const { data, error } = await supabaseAdmin
       .from("orders")
-      .select("product_name, selected_finish, customer_email, transaction_id, amount_total, currency, status, created_at")
+      .select("user_id, product_name, selected_finish, customer_email, transaction_id, amount_total, currency, status, created_at")
       .eq("transaction_id", sessionId)
       .maybeSingle();
 
@@ -74,19 +76,17 @@ serve(async (req) => {
       return json({ error: "Order not found." }, 404);
     }
 
-    const orderEmail = String(data.customer_email ?? "").toLowerCase();
-    const authorized =
-      (callerEmail && callerEmail === orderEmail) ||
-      (emailProof && emailProof === orderEmail);
+    const authorized = canReadOrder(authUser.user, data);
     if (!authorized) {
-      return json({ error: "Please sign in with the email used for this order, or provide it to view the order." }, 403);
+      return json({ error: "Please sign in with the verified email used for this order." }, 403);
     }
 
     // Mask the email: the session id alone shouldn't reveal full contact details.
     const masked = data.customer_email
       ? String(data.customer_email).replace(/^(.)(.*)(@.*)$/, (_m, a, b, c) => a + "*".repeat(Math.min(6, Math.max(1, b.length))) + c)
       : null;
-    return json({ order: { ...data, customer_email: masked } });
+    const { user_id: _owner, ...details } = data;
+    return json({ order: { ...details, customer_email: masked } });
   } catch (err) {
     console.error("[get-order-by-session] error", err);
     return json({ error: "Unable to retrieve order." }, 500);

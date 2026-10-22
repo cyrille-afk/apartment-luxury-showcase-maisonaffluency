@@ -29,6 +29,9 @@ serve(async (req) => {
     const { data: isAdmin } = userId
       ? await supabase.rpc("has_role", { _user_id: userId, _role: "admin" })
       : { data: false };
+    // Only the authorized team may manually override tax; buyer input must
+    // return through the server-calculated creation path.
+    if (!isAdmin) return json({ error: "Administrator access required." }, 403);
 
     const body = await req.json().catch(() => ({}));
     // Buyers still on checkout may update their own order by presenting the

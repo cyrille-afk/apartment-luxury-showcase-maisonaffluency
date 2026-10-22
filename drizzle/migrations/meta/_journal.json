@@ -1527,6 +1527,27 @@
       "when": 1792549981821,
       "tag": "0217_record_3d_original_upload_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 218,
+      "version": "7",
+      "when": 1792646108926,
+      "tag": "0218_require_verified_studio_invitation_acceptance",
+      "breakpoints": true
+    },
+    {
+      "idx": 219,
+      "version": "7",
+      "when": 1792646304697,
+      "tag": "0219_studio_invite_rpc_only_redemption",
+      "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1792646485722,
+      "tag": "0220_order_reads_require_verified_ownership",
+      "breakpoints": true
     }
   ]
 }

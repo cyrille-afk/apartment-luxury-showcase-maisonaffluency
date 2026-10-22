@@ -232,6 +232,8 @@ export default function StripeBankTransferPanel({
   items,
   currency,
   email,
+  shippingCountry,
+  buyerType,
   shippingConfirmed,
   shippingCents,
   shippingQuoteRef,
@@ -246,6 +248,8 @@ export default function StripeBankTransferPanel({
   items: WireItem[];
   currency: string;
   email: string;
+  shippingCountry: string;
+  buyerType: "private" | "business";
   shippingConfirmed?: boolean;
   shippingCents?: number;
   shippingQuoteRef?: string | null;
@@ -265,29 +269,12 @@ export default function StripeBankTransferPanel({
   const [retry, setRetry] = useState(0);
   const recoveryRef = useRef<HTMLDivElement>(null);
   const savedRef = useRef<TransferConfirmation | null>(null);
-  // VAT number / tax treatment can change after instructions are issued:
-  // keep the saved order's tax, discount and total in step with checkout.
-  const totalsKey = totals ? `${totals.taxCents}:${totals.taxLabel ?? ""}:${totals.discountCents}:${totals.totalCents}` : "";
-  useEffect(() => {
-    const prev = savedRef.current;
-    if (!prev || !totals) return;
-    if (prev.taxCents === totals.taxCents && prev.taxLabel === totals.taxLabel && prev.discountCents === totals.discountCents && prev.totalCents === totals.totalCents) return;
-    savedRef.current = { ...prev, taxCents: totals.taxCents, taxLabel: totals.taxLabel, discountCents: totals.discountCents, totalCents: totals.totalCents, issuedAt: prev.issuedAt };
-    saveTransferConfirmation(savedRef.current);
-    // Keep the order record and the amount Stripe expects in step too.
-    if (prev.paymentIntentId && prev.taxCents !== totals.taxCents) {
-      void supabase.functions.invoke("update-instant-transfer-tax", {
-        body: { orderRef: prev.reference, intentId: prev.paymentIntentId, taxCents: totals.taxCents, taxLabel: totals.taxLabel ?? null, buyerTaxId: totals.buyerTaxId ?? null },
-      }).then(({ error }) => { if (error) console.warn("instant transfer tax sync failed", error); });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalsKey]);
   useEffect(() => { if (failure) recoveryRef.current?.scrollIntoView({ block: "center" }); }, [failure]);
 
   const hasEmail = email.includes("@");
   // Include every configured line and freight field: a confirmed reprice must
   // regenerate routing with the new amount, not reuse an old account response.
-  const key = JSON.stringify({ currency, email: hasEmail ? email : "", items, shippingConfirmed, shippingCents, shippingQuoteRef });
+  const key = JSON.stringify({ currency, email: hasEmail ? email : "", items, shippingConfirmed, shippingCents, shippingQuoteRef, shippingCountry, buyerType, buyerTaxId: totals?.buyerTaxId });
 
   useEffect(() => {
     if (!hasEmail || !items.length) return;
@@ -303,6 +290,8 @@ export default function StripeBankTransferPanel({
           body: {
             email,
             currency,
+            shippingCountry,
+            buyerType,
             items,
             shippingConfirmed: !!shippingConfirmed,
             shippingCents: shippingCents ?? 0,
@@ -341,8 +330,8 @@ export default function StripeBankTransferPanel({
             savedRef.current = {
               reference: ref, issuedAt: new Date().toISOString(), method: "instant", currency,
               lines: items.map((i, n) => ({ title: i.title, designer: i.designer, finishLabel: i.selectedFinish, quantity: i.quantity, unitCents: lineCents[n] })),
-              deliveryCents: shippingCents ?? 0, taxCents: totals?.taxCents ?? 0, taxLabel: totals?.taxLabel, discountCents: totals?.discountCents ?? 0,
-              totalCents: totals ? totals.totalCents : goods + (shippingCents ?? 0),
+              deliveryCents: (shippingCents ?? 0) + ((data as any)?.clearanceFeeCents ?? 0), taxCents: (data as any)?.taxCents ?? 0, taxLabel: (data as any)?.taxLabel, discountCents: totals?.discountCents ?? 0,
+              totalCents: (data as any)?.amount ?? goods + (shippingCents ?? 0),
               rails: list.map(a => ({ label: RAIL_LABEL[a.type] || a.type, rows: addressRows(a).map(r => ({ label: r.label, value: r.value })) })),
               hostedUrl: (data as any)?.hostedInstructionsUrl ?? null,
               paymentIntentId: (data as any)?.paymentIntentId ?? null,

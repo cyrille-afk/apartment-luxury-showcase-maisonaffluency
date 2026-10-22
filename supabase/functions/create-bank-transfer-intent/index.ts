@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveAccountDiscount } from "../_shared/accountDiscount.ts";
 import { verifyCatalogLines } from "../_shared/catalogPricing.ts";
 import { resolveConfirmedShipping } from "../_shared/confirmedShipping.ts";
+import { resolveBankTransferTax } from "../_shared/bankTransferTax.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,15 +147,23 @@ serve(async (req) => {
     });
     if (!shipRes.ok) return json({ error: shipRes.error }, 400);
     const shippingCents = shipRes.cents;
-    // Tax is computed by checkout; it is bounded here and the team can correct it
-    // later from the Order Ledger (update-instant-transfer-tax), which also
-    // re-amounts this PaymentIntent.
-    const rawTax = Math.round(Number(body?.taxCents) || 0);
-    const taxCents = Math.max(0, Math.min(rawTax, Math.round((goodsAmount + shippingCents) * 0.3)));
-    const taxLabel = typeof body?.taxLabel === "string" ? body.taxLabel.trim().slice(0, 80) : null;
+    let shippingCountry = typeof body?.shippingCountry === "string" ? body.shippingCountry.trim().toUpperCase() : "";
+    if (shipRes.quoteId) {
+      const { data: quote, error } = await supabaseAdmin.from("shipping_quotes").select("dest_country").eq("id", shipRes.quoteId).maybeSingle();
+      if (error || !quote?.dest_country) return json({ error: "Shipping quote destination unavailable." }, 400);
+      shippingCountry = String(quote.dest_country).trim().toUpperCase();
+    }
+    if (!/^[A-Z]{2}$/.test(shippingCountry)) return json({ error: "A delivery destination country is required." }, 400);
+    const treatment = await resolveBankTransferTax({ country: shippingCountry, currency, buyerType: body?.buyerType, buyerTaxId: body?.buyerTaxId, goodsCents: goodsAmount, shippingCents });
+    const taxCents = treatment.taxCents;
+    const taxLabel = treatment.label;
+    // Stop before payment creation if the checkout showed a tampered/stale tax.
+    if (body?.taxCents !== undefined && Number(body.taxCents) !== taxCents) {
+      return json({ error: "Your tax calculation has changed. Please refresh checkout.", taxCents, taxLabel, clearanceFeeCents: treatment.clearanceFeeCents }, 409);
+    }
     const orderRef = typeof body?.orderReference === "string" && /^[A-Za-z0-9-]{4,40}$/.test(body.orderReference)
       ? body.orderReference : null;
-    const amount = goodsAmount + shippingCents + taxCents;
+    const amount = goodsAmount + shippingCents + taxCents + treatment.clearanceFeeCents;
     if (amount < 100) return json({ error: "Price out of range." }, 400);
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -194,6 +203,9 @@ serve(async (req) => {
           discount_label: discountLabel ?? "",
           shipping_cents: String(shippingCents),
           tax_cents: String(taxCents),
+          clearance_fee_cents: String(treatment.clearanceFeeCents),
+          tax_treatment: treatment.treatment,
+          shipping_country: shippingCountry,
           order_ref: orderRef ?? "",
         },
       });
@@ -213,9 +225,11 @@ serve(async (req) => {
         status: "awaiting_payment", currency, subtotal_cents: goodsAmount, discount_cents: 0,
         discount_pct: Math.round(discountPct * 100), discount_label: discountLabel ?? null,
         shipping_cents: shippingCents, tax_cents: taxCents, tax_label: taxLabel,
-        buyer_tax_id: typeof body?.buyerTaxId === "string" ? body.buyerTaxId.trim().slice(0, 40) || null : null,
-        tax_treatment: typeof body?.taxTreatment === "string" ? body.taxTreatment.slice(0, 40) : null,
-        tax_rate: Number.isFinite(Number(body?.taxRate)) ? Number(body.taxRate) : null,
+        buyer_tax_id: treatment.buyerTaxId,
+        tax_treatment: treatment.treatment,
+        tax_rate: treatment.rate,
+        buyer_tax_country: shippingCountry,
+        clearance_fee_cents: treatment.clearanceFeeCents,
         total_cents: amount, stripe_session_id: intent.id,
       };
       const { data: existing } = await supabaseAdmin.from("shop_orders")
@@ -238,6 +252,7 @@ serve(async (req) => {
       amountRemaining: instructions.amount_remaining ?? amount,
       discountPct,
       discountLabel,
+      taxCents, taxLabel, clearanceFeeCents: treatment.clearanceFeeCents,
     });
   } catch (err) {
     console.error("[create-bank-transfer-intent] error", err);

@@ -32,7 +32,13 @@ export type Lead = {
   executive_emails: string[] | null;
   campaign_status: string;
   portal_key_sent_at: string | null;
+  outbound_recipients?: string[] | null;
 };
+
+export function leadAllowsSender(lead: Lead, sender: string): boolean {
+  return Boolean(sender) && [lead.business_email, ...(lead.executive_emails ?? []), ...(lead.outbound_recipients ?? [])]
+    .some((email) => normalizeEmail(email) === sender);
+}
 
 export type SendOutcome = {
   queued: unknown[];
@@ -158,7 +164,7 @@ export function createInboundHandler(deps: InboundDeps) {
     const data = event.data ?? {};
     const providerEventId = String(headers.id ?? data.email_id ?? "");
     const emailId = String(data.email_id ?? "");
-    const fromEmail = baseEmail(data.from);
+    const fromEmail = normalizeEmail(data.from);
     const toList = Array.isArray(data.to) ? data.to.map(String) : [String(data.to ?? "")];
     const subject = String(data.subject ?? "").slice(0, 300);
     const threadMessageId = String(data.message_id ?? "").slice(0, 300);
@@ -203,27 +209,27 @@ export function createInboundHandler(deps: InboundDeps) {
         const { data: byTag } = await supabase
           .from("acquisition_leads")
           .select(
-            "id, studio_name, founder_name, business_email, executive_emails, campaign_status, portal_key_sent_at",
+            "id, studio_name, founder_name, business_email, executive_emails, campaign_status, portal_key_sent_at, outbound_recipients",
           )
           .eq("id", tag)
           .maybeSingle();
-        if (byTag) lead = byTag as Lead;
+        if (byTag && leadAllowsSender(byTag as Lead, fromEmail)) lead = byTag as Lead;
         break;
       }
     }
 
     // 2. Otherwise the sender address, against real outbound recipients.
     if (!lead && fromEmail) {
-      const { data: candidates } = await supabase
-        .from("acquisition_leads")
-        .select(
-          "id, studio_name, founder_name, business_email, executive_emails, campaign_status, portal_key_sent_at, outbound_recipients",
-        )
-        .or(
-          `business_email.ilike.${fromEmail},executive_emails.cs.{"${fromEmail}"},outbound_recipients.cs.{"${fromEmail}"}`,
-        )
-        .limit(5);
-      const rows = (candidates ?? []) as Lead[];
+      // Separate parameterized filters, never interpolate email into filter syntax.
+      const select = "id, studio_name, founder_name, business_email, executive_emails, campaign_status, portal_key_sent_at, outbound_recipients";
+      const lookups = await Promise.all([
+        supabase.from("acquisition_leads").select(select).eq("business_email", fromEmail).limit(5),
+        supabase.from("acquisition_leads").select(select).contains("executive_emails", [fromEmail]).limit(5),
+        supabase.from("acquisition_leads").select(select).contains("outbound_recipients", [fromEmail]).limit(5),
+      ]);
+      if (lookups.some((result) => result.error)) return finish({ action: "lookup_failed" }, { matched: false, reason: "lookup_failed" });
+      const rows = [...new Map(lookups.flatMap((result) => (result.data ?? []) as Lead[])
+        .filter((candidate) => leadAllowsSender(candidate, fromEmail)).map((candidate) => [candidate.id, candidate])).values()];
       if (rows.length === 1) lead = rows[0];
       else if (rows.length > 1) {
         return finish(
@@ -321,7 +327,7 @@ export function createInboundHandler(deps: InboundDeps) {
     const testActive = testCfg?.enabled === true &&
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(testCfg?.redirect_email ?? ""));
     if (testActive) {
-      recipient = String(testCfg!.redirect_email);
+      recipient = String(testCfg?.redirect_email);
       keySubject = `[TEST-MODE] ${keySubject}`;
     }
 

@@ -1,0 +1,4 @@
+CREATE OR REPLACE FUNCTION public.verified_order_email() RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT lower(email) FROM auth.users WHERE id=auth.uid() AND email_confirmed_at IS NOT NULL $$;
+REVOKE ALL ON FUNCTION public.verified_order_email() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.verified_order_email() TO authenticated,service_role;
+ALTER POLICY "Users can view their own orders" ON public.orders TO authenticated USING (public.verified_order_email() IS NOT NULL AND (user_id=auth.uid() OR (user_id IS NULL AND lower(customer_email)=public.verified_order_email())));
