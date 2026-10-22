@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "@/lib/router-compat";
-import { Sparkles, Loader2, AlertCircle, Upload, ArrowLeft, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, Upload, ArrowLeft, ArrowRight, Check, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -40,8 +40,27 @@ function useOnboardingOpen() {
 export default function TradeCopilotOnboarding() {
   const navigate = useNavigate();
   const { profile, user, refreshRoles } = useAuth();
-  const { currentStudio, loading: studioLoading, refresh, setCurrentStudioId } = useStudio();
+  const { currentStudio, loading: studioLoading, refresh, setCurrentStudioId, isStudioSetupComplete, studioSetupLoading } = useStudio();
   const { open, markDone } = useOnboardingOpen();
+  const [confirmation, setConfirmation] = useState<{ id: string; name: string } | null>(null);
+  const [finishingStudio, setFinishingStudio] = useState(false);
+  const confirmationKey = user ? `ma:onboarding-project:${user.id}` : null;
+
+  useEffect(() => {
+    if (!confirmationKey) return;
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(confirmationKey) || "null");
+      if (stored && typeof stored.id === "string" && typeof stored.name === "string") {
+        setConfirmation(stored);
+        setFinishingStudio(stored.finishingStudio === true);
+      }
+    } catch {}
+  }, [confirmationKey]);
+
+  const dismissConfirmation = () => {
+    if (confirmationKey) sessionStorage.removeItem(confirmationKey);
+    setConfirmation(null);
+  };
   const [step, setStep] = useState(1);
   const [nickname, setNickname] = useState("");
   const [studioName, setStudioName] = useState("");
@@ -113,6 +132,10 @@ export default function TradeCopilotOnboarding() {
       setCurrentStudioId(studioId);
       await Promise.all([refresh(), refreshRoles()]);
       window.dispatchEvent(new Event("trade-projects:changed"));
+      const createdProject = { id: project.id, name: fields.name };
+      if (confirmationKey) sessionStorage.setItem(confirmationKey, JSON.stringify(createdProject));
+      setConfirmation(createdProject);
+      setFinishingStudio(false);
       markDone();
       navigate(STUDIO_SETUP_PATH, { replace: true });
     } catch (error) {
@@ -120,6 +143,29 @@ export default function TradeCopilotOnboarding() {
     } finally { saving.current = false; setBusy(false); }
   };
 
+  if (confirmation && (!finishingStudio || (!studioSetupLoading && isStudioSetupComplete))) return (
+    <div className="fixed inset-0 z-[140] flex items-center justify-center bg-background/70 backdrop-blur-lg px-6 py-6" role="dialog" aria-modal="true" aria-labelledby="onboarding-confirmation-title">
+      <div className="w-full max-w-md max-h-full overflow-y-auto text-center">
+        <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent"><Check className="h-6 w-6" /></div>
+        <p className="mb-4 font-body text-[10px] uppercase text-accent">Maison Affluency · Felix</p>
+        <h2 id="onboarding-confirmation-title" className="mb-5 font-display text-3xl text-foreground">Your studio is taking shape.</h2>
+        <p className="mb-6 font-body text-sm text-muted-foreground">Your first project folder has been created.</p>
+        <div className="mb-6 flex items-center gap-3 border-y border-border py-5 text-left"><FolderOpen className="h-6 w-6 shrink-0 text-accent" /><span className="break-words font-display text-xl text-foreground">{confirmation.name}</span></div>
+        <div className="space-y-3">
+          <Button className="w-full" disabled={studioSetupLoading || !isStudioSetupComplete} onClick={() => { const projectId = confirmation.id; dismissConfirmation(); navigate(`/trade/projects/${encodeURIComponent(projectId)}`); }}><FolderOpen className="mr-2 h-4 w-4" />Open project folder<ArrowRight className="ml-2 h-4 w-4" /></Button>
+          {!isStudioSetupComplete && <p className="font-body text-xs text-muted-foreground">Save your studio identity to unlock your project.</p>}
+          <Button className="w-full" variant="outline" onClick={() => {
+            if (isStudioSetupComplete) dismissConfirmation();
+            else {
+              setFinishingStudio(true);
+              if (confirmationKey) sessionStorage.setItem(confirmationKey, JSON.stringify({ ...confirmation, finishingStudio: true }));
+            }
+            navigate(STUDIO_SETUP_PATH, { replace: true });
+          }}>{isStudioSetupComplete ? "Stay in Studio Settings" : "Complete Studio Setup"}</Button>
+        </div>
+      </div>
+    </div>
+  );
   if (!open) return null;
   const titles = ["Welcome to the Maison, " + displayName + ".", "Your tier progress", "Set up your studio", "Your first project folder"];
   return (
