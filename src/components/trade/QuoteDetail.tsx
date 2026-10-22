@@ -2776,7 +2776,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           <span className="hidden sm:inline">All Quotes</span>
           <span className="sm:hidden">Back</span>
         </button>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div data-felix-target="quote-document-actions" className="flex items-center gap-2 flex-wrap justify-end">
           {(isDraft || isSuperAdmin) && (
             <ProjectPicker
               value={projectId}

@@ -388,6 +388,7 @@ const TradeQuotes = () => {
           </div>
           <button
             data-tour-target="brief"
+            data-felix-target="quotes-create"
             onClick={handleCreateQuote}
             disabled={creating}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-sans text-[11px] uppercase tracking-[0.15em] rounded-none hover:bg-primary/90 transition-colors disabled:opacity-50 shrink-0"
@@ -460,6 +461,7 @@ const TradeQuotes = () => {
             return (
               <div
                 key={quote.id}
+                data-felix-quote-review={!isDrawerQuote(quote.id) && quote.item_count > 0 ? "available" : undefined}
                 role="button"
                 tabIndex={0}
                 onClick={() => {

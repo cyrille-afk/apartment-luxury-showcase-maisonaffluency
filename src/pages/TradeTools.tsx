@@ -237,7 +237,7 @@ export default function TradeTools() {
           key={cat.label}
           id={`tools-${categorySlug(cat.label)}`}
           className="scroll-mt-24"
-          data-felix-target={catIndex === 0 ? "tools-grid" : undefined}
+          data-felix-target={cat.label === "Discover" ? "tools-grid" : undefined}
           data-tour-target={
             cat.label === "Specification" ? "tools"
               : cat.label === "Procurement" ? "procurement"
@@ -253,6 +253,7 @@ export default function TradeTools() {
               return (
                 <div
                   key={tool.url}
+                  data-felix-target={tool.url === "/trade/documents" ? "tools-resources" : undefined}
                   className="group relative flex items-start gap-3 p-4 rounded-xl border border-border bg-background hover:bg-muted/50 hover:border-foreground/20 transition-all"
                 >
                   <button

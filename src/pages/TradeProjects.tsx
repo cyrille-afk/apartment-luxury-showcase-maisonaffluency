@@ -132,7 +132,7 @@ export default function TradeProjects() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-start justify-between mb-8 gap-4">
+      <div data-felix-target="projects-workspace" className="flex items-start justify-between mb-8 gap-4">
         <div>
           <h1 className="font-display text-2xl md:text-3xl text-foreground mb-1">Projects</h1>
           <p className="font-body text-sm text-muted-foreground">
