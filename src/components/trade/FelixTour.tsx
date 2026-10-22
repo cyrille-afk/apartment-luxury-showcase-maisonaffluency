@@ -12,7 +12,6 @@ import { useTierVolumeLocale, type TierVolumeModel } from "@/hooks/useTierVolume
 import { useStudio } from "@/hooks/useStudio";
 import { onboardingProjectForMarket } from "@/lib/onboardingProject";
 import { Button } from "@/components/ui/button";
-import { useRouterState } from "@tanstack/react-router";
 
 /** Format a tier discount fraction (0.15) as "15%". */
 const fmtPct = (fraction: number) => {
@@ -328,7 +327,6 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
   const projectTitle = onboardingProjectForMarket(tierVolume.market).name;
   const navigate = useNavigate();
   const location = useLocation();
-  const resolvedPath = useRouterState({ select: (state) => state.resolvedLocation?.pathname });
   const [stepDone, setStepDone] = useState(true);
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -365,14 +363,8 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (!open) return;
     const id = FELIX_STEPS[currentStep]?.id;
     if (id === "margin-protection") setClientSafeMode(true);
-    else if (!CLIENT_VIEW_PASSTHROUGH_STEPS.has(id)) {
-      // Keep the retained product client-safe until the destination commits.
-      // Restoring its Studio layout during navigation can suspend the old
-      // Outlet and strand the router before the next tour target mounts.
-      if (location.pathname !== resolvedPath || (id === "quote-generation" && resolvedPath !== "/trade/quotes")) return;
-      setClientSafeMode(false);
-    }
-  }, [open, currentStep, location.pathname, resolvedPath]);
+    else if (!CLIENT_VIEW_PASSTHROUGH_STEPS.has(id)) setClientSafeMode(false);
+  }, [open, currentStep]);
 
   // A direct click on the header switch advances Step 6 just like Next.
   // Only react to the off→on edge: Back can still revisit Step 6.
