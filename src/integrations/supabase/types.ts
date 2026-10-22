@@ -13473,6 +13473,7 @@ export type Database = {
         Returns: boolean
       }
       validate_portal_session: { Args: { _token: string }; Returns: Json }
+      verified_order_email: { Args: never; Returns: string }
       webhook_events_has_work: { Args: never; Returns: boolean }
       webhook_queue_dispatch: { Args: never; Returns: undefined }
       webhook_queue_status: { Args: never; Returns: Json }

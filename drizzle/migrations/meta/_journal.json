@@ -1541,6 +1541,13 @@
       "when": 1792646304697,
       "tag": "0219_studio_invite_rpc_only_redemption",
       "breakpoints": true
+    },
+    {
+      "idx": 220,
+      "version": "7",
+      "when": 1792646485722,
+      "tag": "0220_order_reads_require_verified_ownership",
+      "breakpoints": true
     }
   ]
 }

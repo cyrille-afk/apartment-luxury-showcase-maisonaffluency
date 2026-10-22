@@ -157,6 +157,10 @@ serve(async (req) => {
     const treatment = await resolveBankTransferTax({ country: shippingCountry, currency, buyerType: body?.buyerType, buyerTaxId: body?.buyerTaxId, goodsCents: goodsAmount, shippingCents });
     const taxCents = treatment.taxCents;
     const taxLabel = treatment.label;
+    // Stop before payment creation if the checkout showed a tampered/stale tax.
+    if (body?.taxCents !== undefined && Number(body.taxCents) !== taxCents) {
+      return json({ error: "Your tax calculation has changed. Please refresh checkout.", taxCents, taxLabel, clearanceFeeCents: treatment.clearanceFeeCents }, 409);
+    }
     const orderRef = typeof body?.orderReference === "string" && /^[A-Za-z0-9-]{4,40}$/.test(body.orderReference)
       ? body.orderReference : null;
     const amount = goodsAmount + shippingCents + taxCents + treatment.clearanceFeeCents;
