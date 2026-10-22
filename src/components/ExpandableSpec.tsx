@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import DimensionText from "@/components/product/DimensionText";
+import DimensionText, { hasDimensionMeasurement } from "@/components/product/DimensionText";
 
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -104,7 +104,7 @@ export default function ExpandableSpec({
   // A stacked inch line belongs to its preceding metric option, not a new size.
   lines = lines.reduce<string[]>((options, line) => {
     const previous = options[options.length - 1];
-    if (/\bin\b/i.test(line) && !/\bcm\b/i.test(line) && previous && /\bcm\b/i.test(previous) && !previous.includes(" | ")) {
+    if (hasDimensionMeasurement(line) && /\bin\b/i.test(line) && !/\bcm\b/i.test(line) && previous && hasDimensionMeasurement(previous) && /\bcm\b/i.test(previous) && !previous.includes(" | ")) {
       options[options.length - 1] = `${previous} | ${line}`;
     } else options.push(line);
     return options;

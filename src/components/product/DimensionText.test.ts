@@ -1,6 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { splitDimensionHeights } from "./DimensionText";
+import { hasDimensionMeasurement, splitDimensionHeights } from "./DimensionText";
 import { withImperialPerLine } from "@/lib/formatDimensions";
+
+describe("measurement detection in shared specification text", () => {
+  it.each([
+    "Frame upholstered in bouclé, legs in solid oak",
+    "Finished in bronze — hand-polished in the atelier",
+    "Available in 3 finishes",
+    "Fabric woven in 100% wool",
+  ])("keeps ordinary materials prose out of dimension formatting: %s", (text) => {
+    expect(hasDimensionMeasurement(text)).toBe(false);
+  });
+  it.each([
+    "W 62 × D 59 × H 80 cm — SH 46 cm / AH 65 cm",
+    "W 24.4 × D 23.2 × H 31.5 in",
+    "608W × 545D × 940H mm",
+    "230x350cm",
+    "400 (cable) cm",
+    "3 × 4 m",
+  ])("recognizes actual measurements: %s", (text) => {
+    expect(hasDimensionMeasurement(text)).toBe(true);
+  });
+});
 
 describe("auxiliary dimension grouping", () => {
   it("groups seat and arm heights below the main centimetre dimensions", () => {

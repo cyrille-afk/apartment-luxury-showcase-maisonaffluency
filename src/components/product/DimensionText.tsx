@@ -1,5 +1,10 @@
 import { splitDimensionQualifier, toImperialLine } from "@/lib/formatDimensions";
 
+/** Units must belong to a numeric measurement, not ordinary prose such as "in oak". */
+export function hasDimensionMeasurement(text: string): boolean {
+  return /\d(?:[.,]\d+)?\s*(?:[WDLH]\.?\s*)?(?:\([^)]*\)\s*)?(?:cm|mm|m|in(?:ches?)?)\b/i.test(text);
+}
+
 /** Preserve each measurement row and keep auxiliary chair heights together. */
 export function splitDimensionHeights(text: string): { main: string; heights: string } {
   const match = text.match(/\s*(?:\/|;|·|,|[-–—])\s*(?=(?:SH|AH|AR|Seat\s+Height|Arm\s+Height)\b)/i);
@@ -8,7 +13,7 @@ export function splitDimensionHeights(text: string): { main: string; heights: st
 }
 
 export default function DimensionText({ text, inlineHeights = false }: { text: string; inlineHeights?: boolean }) {
-  if (!/\b(?:cm|mm|in)\b/i.test(text)) return <>{text}</>;
+  if (!hasDimensionMeasurement(text)) return <>{text}</>;
   const { dim, qual } = splitDimensionQualifier(text);
   const [metric, suppliedImperial] = dim.split(/\s*\|\s*/);
   const imperial = suppliedImperial || toImperialLine(metric);
