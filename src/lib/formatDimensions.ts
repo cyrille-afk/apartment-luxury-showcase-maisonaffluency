@@ -128,7 +128,7 @@ export const toImperialLine = (line: string): string | null => {
           const end = offset + value.length;
           const before = source.slice(0, offset);
           const after = source.slice(end);
-          if (/^[a-zA-Z]+/.test(after) && !/^(?:cm\b|mm\b|m\b|[WDLHP](?:\s|[×x]|$))/.test(after)) return value;
+          if (/^[a-zA-Z]+/.test(after) && !/^(?:cm\b|mm\b|m\b|[xX](?=\d)|[WDLHP](?:\s|[×x]|$))/.test(after)) return value;
           if (/^[WDLHP]\b/.test(after) && /^\s*[-–—]/.test(after.slice(1))) return value;
           // Product codes (ARA20), counts, weights and lead times are not
           // lengths. Axis suffixes such as 608W remain valid measurements.
