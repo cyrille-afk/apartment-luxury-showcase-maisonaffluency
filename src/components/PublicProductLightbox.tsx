@@ -475,7 +475,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         .slice(0, 8)
         .map((x) => x.p);
     }
-    const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url);
+    const candidates = allPicks.filter((p) => p.id !== product.id && p.image_url && !p.restricted_gallery_pin && p.brand_name === product.brand_name);
     // Vary selection per product using a simple hash offset
     const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
     const offset = hash % Math.max(candidates.length, 1);
@@ -484,7 +484,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       picked.push(candidates[(offset + i) % candidates.length]);
     }
     return picked;
-  }, [product?.id, allPicks, categoryDiscovery]);
+  }, [product?.id, product?.brand_name, product?.restricted_gallery_pin, allPicks, categoryDiscovery]);
 
   if (!product) return null;
 

@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
+import { isPublicGalleryMaker, publicGalleryPicks } from "@/lib/publicGalleryCatalog";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { fetchPublicMicMacPins, mergeGalleryPins } from "@/lib/publicGalleryHotspots";
 
@@ -485,7 +486,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     enabled: manifestEnabled,
   });
 
-  const picksRaw = manifest?.picks;
+  const picksRaw = useMemo(() => publicGalleryPicks(manifest), [manifest]);
   const designersBasic = manifest?.designers;
 
   const dbCuratorPicks = useMemo<PublicLightboxItem[]>(() => {
@@ -525,7 +526,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   const allCuratorPicks = useMemo((): PublicLightboxItem[] => {
     const staticPicks = getAllTradeProducts()
-      .filter(p => p.image_url)
+      .filter(p => p.image_url && isPublicGalleryMaker(p.brand_name, manifest))
       .map(p => ({
         id: p.id,
         title: p.product_name,
@@ -556,7 +557,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     for (const pick of dbCuratorPicks) byKey.set(`${slugify(pick.brand_name)}::${slugify(pick.title)}`, pick);
 
     return [...byKey.values()];
-  }, [dbCuratorPicks]);
+  }, [dbCuratorPicks, manifest]);
 
   const resolveHotspotPick = useCallback((productName: string, designerName: string, mappedPickId?: string | null): PublicLightboxItem | null => {
     // Manual override — admin-picked exact catalog item wins over fuzzy matching.
@@ -645,6 +646,11 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     const best = resolveHotspotPick(productName, designerName, mappedPickId);
     if (best) {
       setHotspotLightboxProduct(best);
+      return;
+    }
+    const photoPick = mappedPickId ? manifest?.picks.find((pick) => pick.id === mappedPickId) : null;
+    if (photoPick && designerName) {
+      setHotspotLightboxProduct({ ...photoPick, image_url: photoPick.image_url || "", brand_name: designerName, is_catalog_item: false, restricted_gallery_pin: true });
       return;
     }
 
