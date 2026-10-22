@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import EditorialGalleryLandingHint from "@/components/product/EditorialGalleryLandingHint";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
+import { isPublicGalleryMaker, publicGalleryPicks } from "@/lib/publicGalleryCatalog";
 import { queryKeys } from "@/lib/queryKeys";
 import { getAllTradeProducts } from "@/lib/tradeProducts";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
@@ -439,7 +440,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
 
   const allPicks = useMemo<PublicLightboxItem[]>(() => {
     const designerMap = new Map((manifest?.designers || []).map((designer: any) => [designer.id, designer]));
-    const databasePicks = (manifest?.picks || []).map((pick: any) => {
+    const databasePicks = publicGalleryPicks(manifest).map((pick: any) => {
       const designer = designerMap.get(pick.designer_id) as any;
       return {
         id: pick.id,
@@ -468,7 +469,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
         variant_image_map: pick.variant_image_map || null,
       } satisfies PublicLightboxItem;
     });
-    const staticPicks: PublicLightboxItem[] = getAllTradeProducts().filter((pick) => pick.image_url).map((pick) => ({
+    const staticPicks: PublicLightboxItem[] = getAllTradeProducts().filter((pick) => pick.image_url && isPublicGalleryMaker(pick.brand_name, manifest)).map((pick) => ({
       id: pick.id,
       title: pick.product_name,
       subtitle: pick.subtitle || null,
@@ -517,6 +518,16 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
     const preferredId = FEATURED_HOTSPOT_PICK_IDS[`${hotspot.image_identifier}:${hotspot.product_name}`];
     const preferred = preferredId ? allPicks.find((pick) => pick.id === preferredId) : null;
     const exact = hotspot.mapped_pick_id ? allPicks.find((pick) => pick.id === hotspot.mapped_pick_id) : null;
+    // A photo pin may credit a restricted maker, but never joins the public
+    // recommendation pool or acquires a generic Maison Affluency identity.
+    const photoPick = hotspot.mapped_pick_id ? manifest?.picks.find((pick) => pick.id === hotspot.mapped_pick_id) : null;
+    if (!preferred && !exact && photoPick && hotspot.designer_name) return {
+      ...photoPick,
+      image_url: photoPick.image_url || hotspot.product_image_url || "",
+      brand_name: hotspot.designer_name,
+      is_catalog_item: false,
+      restricted_gallery_pin: true,
+    };
     const productName = normalize(hotspot.product_name);
     const designerName = normalize(hotspot.designer_name || "");
     const fuzzy = allPicks.find((pick) => {
@@ -536,7 +547,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
       is_catalog_item: false,
     } : null;
     return preferred || exact || fuzzy || fallback;
-  }, [allPicks]);
+  }, [allPicks, manifest]);
 
   const openHotspot = useCallback((hotspot: Hotspot) => {
     // Dock state transitions only run at desktop scale; touch devices take the
@@ -653,7 +664,7 @@ export default function InteractiveGalleryLookbook({ initialView = "tour", disco
   // Only Shop By Room replaces portrait side columns with a hotspot-driven dock,
   // and only at desktop scale (lg+); tablets/phones keep the plain gallery layout.
   const portraitDock = !!discoveryRoom && !expandedScene && isDesktopViewport; void activeSceneIsPortrait;
-  const publicPickIds = new Set((manifest?.picks || []).map((pick) => pick.id));
+  const publicPickIds = new Set(publicGalleryPicks(manifest).map((pick) => pick.id));
   const alternativesFor = (hotspot: Parameters<typeof resolveHotspotProduct>[0]) => {
     const product = resolveHotspotProduct(hotspot);
     const ownProduct = product && !product.restricted_gallery_pin ? product : null;
