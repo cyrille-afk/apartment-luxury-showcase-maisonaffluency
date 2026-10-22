@@ -18,6 +18,12 @@ describe("dimension conversion with a shared trailing unit", () => {
     ["Cloud 19 (Ø 77 cm)", "Cloud 19 (Ø 30.3 in)"],
     ["Medium — Ø 26 × H 20 cm (~7 kg)", "Medium — Ø 10.2 × H 7.9 in (~7 kg)"],
     ["Seat Height: 41 cm", "Seat Height: 16.1 in"],
+    ["Size 1 — Ø 7.5 × H 5.5 cm", "Size 1 — Ø 3.0 × H 2.2 in"],
+    ["Low table 120 Ø 120 x H 41 cm", "Low table 120 Ø 47.2 x H 16.1 in"],
+    ["Angle 70° W 100 x D 98 x H 75 cm", "Angle 70° W 39.4 x D 38.6 x H 29.5 in"],
+    ["20 H × 75 W × 61 L cm", "7.9 H × 29.5 W × 24.0 L in"],
+    ["Side Table Ø 40x H 56 cm", "Side Table Ø 15.7x H 22.0 in"],
+    ["COM: 2.6 m | 2.8 yd · COL: 3.6 m² | 38.8 sq ft", "COM: 2.8 yd · COL: 38.8 sq ft"],
   ])("converts only the actual measurements in %s", (metric, imperial) => {
     expect(toImperialLine(metric)).toBe(imperial);
   });

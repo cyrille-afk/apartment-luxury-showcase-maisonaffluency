@@ -94,6 +94,14 @@ const stripVariantPrefix = (part: string): string => {
 
 export const toImperialLine = (line: string): string | null => {
   if (!CM_RE.test(line)) return null;
+  // Fabric consumption is not a furniture length. Preserve supplier-provided
+  // yards/square feet rather than converting square metres to linear inches.
+  if (/^\s*(?:COM|COL):/i.test(line)) {
+    return line.split(/\s+[·•]\s+/).map(part => {
+      const match = part.match(/^\s*(COM|COL):.*?\|\s*(.+)$/i);
+      return match ? `${match[1]}: ${match[2].trim()}` : part;
+    }).join(" · ");
+  }
   const qualified = splitDimensionQualifier(line);
   if (qualified.qual) {
     const imperial = toImperialLine(qualified.dim);
@@ -128,12 +136,13 @@ export const toImperialLine = (line: string): string | null => {
           const end = offset + value.length;
           const before = source.slice(0, offset);
           const after = source.slice(end);
-          if (/^[a-zA-Z]+/.test(after) && !/^(?:cm\b|mm\b|m\b|[xX](?=\d)|[WDLHP](?:\s|[×x]|$))/.test(after)) return value;
+          if (/^[a-zA-Z]+/.test(after) && !/^(?:cm\b|mm\b|m\b|[xX](?=\d|\s)|[WDLHP](?:\s|[×x]|$))/.test(after)) return value;
           if (/^[WDLHP]\b/.test(after) && /^\s*[-–—]/.test(after.slice(1))) return value;
+          if (/^\s*°/.test(after) || /\bSize\s*$/i.test(before) || /^\s*[Ø⌀]/.test(after)) return value;
           // Product codes (ARA20), counts, weights and lead times are not
           // lengths. Axis suffixes such as 608W remain valid measurements.
           if (/[a-z]\d*$/i.test(before) && !/(?:\b(?:W|D|H|L|P|SH|AH|AR|Ht|Dia|Diam|Diameter))\.?$/i.test(before) && !/\d[xX]$/.test(before)) return value;
-          if (/^\s*(?:kg|g|lb|lbs|weeks?|days?|seaters?|lights?|lengths?|V|HZ|W\b)/i.test(after) && !/^W\s*[×x]/i.test(after)) return value;
+          if (/^\s*(?:kg|g|lb|lbs|weeks?|days?|seaters?|lights?|lengths?|V|HZ|W\b)/i.test(after) && !/^\s*W\s*[×x]/i.test(after)) return value;
           const unit = units.find((u) => (u.index ?? 0) >= end);
           if (!unit) return value;
           const between = source.slice(end, unit.index);
