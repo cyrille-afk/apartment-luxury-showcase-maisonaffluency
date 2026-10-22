@@ -990,7 +990,7 @@ export function FelixTour({ autoStart = true }: { autoStart?: boolean }) {
 
            {!stepDone && !isPaused && (
              <div role="status" className="mt-3 flex items-center gap-3 rounded-md bg-primary px-4 py-3 text-primary-foreground">
-               {step.id === "collection" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
+               {step.id === "collection" || step.id === "client-view" ? <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" /> : <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />}
                <p className="font-body text-sm font-semibold leading-snug">
                  {step.id === "collection" ? "Click on the Curated Showroom card to continue." : step.id === "white-label" ? "Turn on ‘Use studio branding only’ below to unlock Next." : step.id === "client-view" ? "Switch to Client View to unlock Next." : "Use the highlighted control to continue."}
                </p>
