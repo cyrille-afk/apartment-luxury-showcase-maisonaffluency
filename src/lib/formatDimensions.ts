@@ -17,6 +17,8 @@
  */
 
 const DIM_UNIT_RE = /\b(?:cm|mm|in|inches?|")\b/i;
+// Axis-labelled measurements may share a unit at the end of the whole row.
+const DIM_AXIS_RE = /(?:\b(?:W|D|H|L|SH|AH|AR|Dia)\.?\s*|[Ø⌀]\s*)\d/i;
 
 /**
  * If the line reads "<qualifier> - <dimensions>" (or ":" / en/em-dash separators)
@@ -32,7 +34,7 @@ const reorderQualifierBeforeDims = (line: string): string => {
   if (!m) return t;
   const left = m[1].trim();
   const right = m[2].trim();
-  const leftHasDim = DIM_UNIT_RE.test(left);
+  const leftHasDim = DIM_UNIT_RE.test(left) || DIM_AXIS_RE.test(left);
   const rightHasDim = DIM_UNIT_RE.test(right);
   if (leftHasDim || !rightHasDim) return t;
   return `${right} — ${left}`;
@@ -46,7 +48,7 @@ export const splitDimensionQualifier = (line: string): { dim: string; qual: stri
   const qual = line.slice(idx + 3);
   // The trailing chunk is only treated as a qualifier when it contains NO
   // dimension unit (otherwise " — " is just prose inside the dims themselves).
-  if (DIM_UNIT_RE.test(qual)) return { dim: line, qual: "" };
+  if (DIM_UNIT_RE.test(qual) || DIM_AXIS_RE.test(qual)) return { dim: line, qual: "" };
   return { dim, qual };
 };
 
@@ -107,14 +109,15 @@ export const toImperialLine = (line: string): string | null => {
       const parens: string[] = [];
       const masked = part.replace(/\([^)]*\)/g, (m) => {
         parens.push(m);
-        return `\u0000${parens.length - 1}\u0000`;
+        // Use digit-free tokens: numeric placeholders themselves get converted.
+        return `\u0000${"p".repeat(parens.length)}\u0000`;
       });
       let stripped = stripVariantPrefix(masked)
         .replace(CM_RE_G, "")
         .replace(/\d+(?:[.,]\d+)?/g, cmToInches)
         .replace(/\s+/g, " ")
         .trim();
-      stripped = stripped.replace(/\u0000(\d+)\u0000/g, (_, i) => ` ${parens[Number(i)]}`).replace(/\s+/g, " ").trim();
+      stripped = stripped.replace(/\u0000(p+)\u0000/g, (_, token: string) => ` ${parens[token.length - 1]}`).replace(/\s+/g, " ").trim();
       if (!stripped) return stripped;
       // Place the inch unit before any trailing parenthetical label.
       const tail = stripped.match(/\s*(\([^)]*\)\s*)+$/);
