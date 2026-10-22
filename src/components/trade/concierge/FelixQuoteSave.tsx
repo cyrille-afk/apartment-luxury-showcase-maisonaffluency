@@ -1,3 +1,4 @@
+import { useAIGuideName } from "@/hooks/useAIGuideName";
 import { useRef, useState } from "react";
 import { Save, FolderOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export function FelixQuoteSave({ cards, projectId, onSaved, onRestore }: {
   onSaved?: (cards: ProactiveTearsheetData[]) => void;
   onRestore?: (cards: ProactiveTearsheetData[]) => void;
 }) {
+  const guideName = useAIGuideName();
   const { user } = useAuth();
   const { currentStudio, canEdit } = useStudio();
   const [busy, setBusy] = useState(false);

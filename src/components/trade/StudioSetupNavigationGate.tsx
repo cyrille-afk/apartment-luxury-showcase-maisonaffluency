@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useBlocker } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { useLocation, useNavigate, Navigate } from "@/lib/router-compat";
 import { isStudioSettingsPath, STUDIO_SETUP_PATH } from "@/lib/studioSetup";
 export function remindStudioSetup() {

@@ -244,11 +244,11 @@ export const greetingForContext = (
   );
   if (meta) {
     text = text
-      .replace(/{concierge_name}/g, meta.conciergeName || loadName() || DEFAULT_NAME)
+      .replace(/{concierge_name}/g, meta.conciergeName || "Felix")
       .replace(/{trade_tier}/g, meta.tradeTier || "Trade")
       .replace(/{tier_discount_text}/g, meta.tierDiscountText || "trade");
   }
-  return text;
+  return text.replace(/{concierge_name}/g, "Felix");
 };
 
 export const DEFAULT_GREETING = greetingForContext("Discover", "/trade", DEFAULT_TONE, DEFAULT_LANG);

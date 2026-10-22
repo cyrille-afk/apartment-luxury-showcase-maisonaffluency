@@ -1,6 +1,7 @@
 import { contrastRatio, DEFAULT_COVER_THEME, normalizeCoverTheme, type CoverTheme } from "@/lib/pdfCoverTheme";
 import { useEffect, useRef, useState } from "react";
 import { toast as felixToast } from "sonner";
+import { loadName, DEFAULT_NAME } from "@/components/trade/conciergeGreeting";
 import { hasRealStudioName, studioSetupComplete } from "@/lib/studioSetup";
 import { useSearchParams } from "@/lib/router-compat";
 import { Building2, Copy, Mail, Trash2, UserPlus, Users, Plus } from "lucide-react";
