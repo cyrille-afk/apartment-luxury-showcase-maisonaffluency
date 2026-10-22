@@ -3,6 +3,19 @@ import { formatDimensionsMultiline, splitDimensionQualifier, toImperialLine, wit
 
 describe("dimension conversion with a shared trailing unit", () => {
   it.each([
+    ["Ø 400 x H 580 mm", "Ø 15.7 x H 22.8 in"],
+    ["W 100 cm / D 500 mm", "W 39.4 / D 19.7 in"],
+    ["3 × 4 m", "118.1 × 157.5 in"],
+    ["2 Seater W 100 cm", "2 Seater W 39.4 in"],
+    ["ENZ26 W 65.9 × D 40.6 × H 50.7 cm", "ENZ26 W 25.9 × D 16.0 × H 20.0 in"],
+    ["D. 21 × H. 38 cm / 8 kg", "D. 8.3 × H. 15.0 in / 8 kg"],
+    ["W 100 cm (SH 45 cm)", "W 39.4 in (SH 17.7 in)"],
+    ["W 100 cm (2 Seater)", "W 39.4 in (2 Seater)"],
+    ["608W × 545D × 940H mm | 23.9W × 21.5D × 37H in", "23.9W × 21.5D × 37.0H in"],
+  ])("converts only the actual measurements in %s", (metric, imperial) => {
+    expect(toImperialLine(metric)).toBe(imperial);
+  });
+  it.each([
     [100, 24, 10, "39.4", "9.4", "3.9"],
     [150, 25, 11, "59.1", "9.8", "4.3"],
     [200, 25, 11, "78.7", "9.8", "4.3"],
