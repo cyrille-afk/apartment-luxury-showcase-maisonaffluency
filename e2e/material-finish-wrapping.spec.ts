@@ -41,15 +41,17 @@ async function exerciseFinishPicker(page: Page) {
   await expectReadable(page.getByRole("option", { name: MATERIAL, exact: true }), page);
   const finish = page.getByRole("option", { name: FINISH, exact: true });
   await expectReadable(finish, page);
-  await finish.click();
+  await finish.focus();
+  await finish.press("Enter");
   await expect(picker).toContainText(FINISH);
   await expectReadable(picker.locator("span").first(), page);
   await picker.focus();
   await picker.press("Enter");
-  await page.getByRole("button", { name: "Clear selection", exact: true }).click();
+  await page.getByRole("button", { name: "Clear selection", exact: true }).press("Enter");
   await picker.focus();
   await picker.press("Enter");
-  await page.getByRole("option", { name: MATERIAL, exact: true }).click();
+  await page.getByRole("option", { name: MATERIAL, exact: true }).focus();
+  await page.getByRole("option", { name: MATERIAL, exact: true }).press("Enter");
   await expect(picker).toContainText(MATERIAL);
   await expectReadable(picker.locator("span").first(), page);
 }
@@ -66,7 +68,7 @@ for (const viewport of [
       await page.unrouteAll({ behavior: "ignoreErrors" });
     });
 
-    test("public product page wraps options and selected finishes", async ({ page }) => {
+    test("public product page wraps options and selected finishes", async ({ page }, testInfo) => {
       await page.route("**/rest/v1/designer_curator_picks_public?**", async route => {
         const response = await route.fetch();
         const payload = await response.json();
@@ -81,10 +83,10 @@ for (const viewport of [
       await page.goto(productPath);
       await expect(page.locator(".product-page-root")).toBeVisible({ timeout: 60_000 });
       await exerciseFinishPicker(page);
-      await page.locator('[data-wrap-test-picker="true"]').screenshot({ path: `/tmp/browser/material-responsive-${viewport.width}-product.png` });
+      await page.locator('[data-wrap-test-picker="true"]').screenshot({ path: testInfo.outputPath("selected-product-finish.png") });
     });
 
-    test("trade lightbox wraps descriptive materials and selectable finishes", async ({ page }) => {
+    test("trade lightbox wraps descriptive materials and selectable finishes", async ({ page }, testInfo) => {
       test.skip(!session || !storageKey, "Requires a managed approved trade session.");
       if (!session || !storageKey) return;
       await page.route("**/rest/v1/trade_favorites?**", async route => {
@@ -113,7 +115,7 @@ for (const viewport of [
       await page.getByText("Wrapping Regression Lamp", { exact: true }).first().click();
       await expectReadable(page.getByText(DESCRIPTION, { exact: true }), page);
       await exerciseFinishPicker(page);
-      await page.getByText(DESCRIPTION, { exact: true }).screenshot({ path: `/tmp/browser/material-responsive-${viewport.width}-lightbox.png` });
+      await page.getByText(DESCRIPTION, { exact: true }).screenshot({ path: testInfo.outputPath("lightbox-materials.png") });
       await page.getByRole("button", { name: "Close", exact: true }).filter({ visible: true }).click();
       await expect(page.getByText(DESCRIPTION, { exact: true })).toBeHidden();
     });
