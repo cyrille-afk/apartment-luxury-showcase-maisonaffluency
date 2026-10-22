@@ -662,7 +662,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     if (linkUrl) {
       window.location.href = linkUrl;
     }
-  }, [resolveHotspotPick, navigate]);
+  }, [resolveHotspotPick, navigate, manifest]);
 
   /** Trade mode: hotspot CTA navigates straight to the full product page. */
   const handleHotspotViewFullProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
