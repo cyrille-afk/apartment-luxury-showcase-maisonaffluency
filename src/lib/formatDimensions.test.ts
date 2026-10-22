@@ -10,7 +10,7 @@ describe("dimension conversion with a shared trailing unit", () => {
   ])("converts the No. 1 Pendant's %s cm size and 400 cm cable", (w, d, h, wi, di, hi) => {
     const metric = `W ${w} x D ${d} x H ${h} - 400 (cable)  cm`;
     expect(formatDimensionsMultiline(metric)).toBe(metric);
-    expect(withImperialPerLine(metric)).toBe(`${metric} | W ${wi} x D ${di} x H ${hi} - 157.5 (cable) in`);
+    expect(withImperialPerLine(metric)).toBe(`${metric} | W ${wi} x D ${di} x H ${hi} - 157.5 in (cable)`);
   });
 
   it("keeps parenthetical counts unchanged while converting dimensions", () => {
