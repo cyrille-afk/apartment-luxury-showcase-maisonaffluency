@@ -83,7 +83,7 @@ const FELIX_STEPS: FelixStep[] = [
     target: "projects-workspace",
     route: "/trade/projects",
     dialogue:
-      "Every engagement lives in its own isolated workspace. Your pre-loaded {projectTitle} folder, for instance, showcases how we map your collections, layouts, quotes, and client documentation. Use Projects & Interventions to structure each client engagement end to end.",
+      "Every engagement lives in its own isolated workspace. Each folder you create maps its collections, layouts, quotes and client documentation together. Use Projects & Interventions to structure each client engagement end to end.",
   },
   {
     id: "tier-tracking",
