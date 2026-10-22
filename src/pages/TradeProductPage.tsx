@@ -669,6 +669,7 @@ const TradeProductPage: React.FC = () => {
   // material/finish dropdown is changed (state-backed so behaviour matches the
   // public side exactly).
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  const finishDrivenGalleryRef = useRef(false);
   // Active image index is part of the shared container state.
   useEffect(() => {
     productConfig?.setActiveImageIndex(galleryActiveIndex ?? 0);
@@ -1424,6 +1425,10 @@ const TradeProductPage: React.FC = () => {
   // now showing. No-op when the active image isn't tied to any variant
   // (e.g. an editorial photo) or when the dropdowns already match.
   useEffect(() => {
+    if (finishDrivenGalleryRef.current) {
+      finishDrivenGalleryRef.current = false;
+      return;
+    }
     // On load (no gallery navigation yet) sync from the photo actually shown
     // (index 0) so the price matches the pictured finishes — but never
     // override a finish the user has already picked.
@@ -1602,6 +1607,8 @@ const TradeProductPage: React.FC = () => {
     label: string | null,
     opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
+    finishDrivenGalleryRef.current = true;
+    setHoverPreviewIdx(null);
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
       !label &&
@@ -2235,6 +2242,12 @@ const TradeProductPage: React.FC = () => {
     const lockPhoto = (i: number) => {
       // Locks the photo's configuration: the existing reverse sync snaps the
       // Base/Top/size dropdowns to the variant mapped to this photo.
+      finishDrivenGalleryRef.current = false;
+      const { fin } = configForPhoto(i);
+      setSelectedWoodPrice(null);
+      setSelectedTopSwatch(fin.topName ? { name: fin.topName, image_url: fin.top } : null);
+      setSelectedFabric(null);
+      setPicturedFinishImgs({ base: fin.base, top: fin.top });
       setGalleryActiveIndex(realIdx(i));
       setHoverPreviewIdx(null);
     };
@@ -2603,8 +2616,8 @@ const TradeProductPage: React.FC = () => {
                   axisBaseLabel={product.base_axis_label ? getBasePlaceholder({ base_axis_label: product.base_axis_label }) : null}
                   baseAxisOptions={isDualAxis && !baseAxisIsDim ? baseOptions : undefined}
                   topAxisOptions={isDualAxis && !topAxisIsDim ? topOptions : undefined}
-                  disabledBaseOptions={isDualAxis && selectedTop ? baseOptions.filter((b) => !variantsList.some((v: any) => matchesDual(v, b, selectedTop, selectedDualSize))) : undefined}
-                  disabledTopOptions={isDualAxis && selectedBase ? topOptions.filter((t) => !variantsList.some((v: any) => matchesDual(v, selectedBase, t, selectedDualSize))) : undefined}
+                  disabledBaseOptions={viewer3dOpen ? [] : disabledBaseIdx.map((i) => baseOptions[i])}
+                  disabledTopOptions={viewer3dOpen ? [] : disabledTopIdx.map((i) => topOptions[i])}
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
@@ -2698,6 +2711,8 @@ const TradeProductPage: React.FC = () => {
                     const next = resolveSwatchImageEvent(indices, meta);
                     setHoveredPreviewIndex(next.hoveredPreviewIndex);
                     if (next.permanentIndex !== undefined) {
+                      finishDrivenGalleryRef.current = true;
+                      setHoverPreviewIdx(null);
                       setGalleryActiveIndex(next.permanentIndex);
                       setGalleryJumpNonce((n) => n + 1);
                     } else if (next.hoveredPreviewIndex !== null) {
@@ -2851,7 +2866,7 @@ const TradeProductPage: React.FC = () => {
                         }
                         handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
                       }}
-                      disabledIndices={disabledBaseIdx}
+                      disabledIndices={viewer3dOpen ? [] : disabledBaseIdx}
                       helperText={
                         disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
                           ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
@@ -2889,7 +2904,7 @@ const TradeProductPage: React.FC = () => {
                       }
                       handleMaterialChange(v, { base: nextBase, top: v, size: nextSize });
                     }}
-                    disabledIndices={disabledTopIdx}
+                    disabledIndices={viewer3dOpen && !topAxisIsDim ? [] : disabledTopIdx}
                     helperText={
                       disabledTopIdx.length > 0 && (selectedBase || selectedDualSize)
                         ? `Some ${(getTopPlaceholder(product) || "top").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`

@@ -63,7 +63,7 @@ interface Props {
   /**
    * Optional fabric/finish texture URL. When set, its image is applied as the
    * baseColorTexture of every PBR material in the loaded GLB. Passing null or
-   * undefined restores the model's original materials (by re-issuing `src`).
+   * undefined restores the model's original materials in place.
    */
   fabricTextureUrl?: string | null;
   /**
@@ -207,6 +207,8 @@ const Product3DViewer: React.FC<Props> = ({
     createTexture?: (url: string) => Promise<any>;
   } | null>(null);
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
+  const originalFactorsRef = useRef<Map<any, any>>(new Map());
+  const originalIdentifiersRef = useRef<Map<any, string[]>>(new Map());
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
   const [autoTagged, setAutoTagged] = useState(false);
@@ -275,10 +277,16 @@ const Product3DViewer: React.FC<Props> = ({
       // when the material's own name is opaque (e.g. "Material.001").
       if (!originalTexturesRef.current) {
         const cache = new Map<any, any>();
+        originalFactorsRef.current.clear();
+        originalIdentifiersRef.current.clear();
         for (const m of materials) {
           try {
             const tex = m?.pbrMetallicRoughness?.baseColorTexture?.texture ?? null;
             cache.set(m, tex);
+            originalFactorsRef.current.set(m, [...(m.pbrMetallicRoughness.baseColorFactor || [1, 1, 1, 1])]);
+            originalIdentifiersRef.current.set(m, [m.name, tex?.name, tex?.source?.name, tex?.source?.uri, tex?.source?.bufferView?.name]
+              .filter((value): value is string => typeof value === "string")
+              .map((value) => value.toLowerCase()));
           } catch { /* noop */ }
         }
         originalTexturesRef.current = cache;
@@ -289,6 +297,8 @@ const Product3DViewer: React.FC<Props> = ({
       // URI/name on the baseColorTexture (glTF often keeps original file
       // names like "wood_oak.jpg" or "Fabric_Base.png").
       const identifiersFor = (m: any): string[] => {
+        const original = originalIdentifiersRef.current.get(m);
+        if (original) return original;
         const out: string[] = [];
         try { if (m?.name) out.push(String(m.name)); } catch { /* noop */ }
         try {
@@ -331,7 +341,7 @@ const Product3DViewer: React.FC<Props> = ({
       // exactly two untagged materials and no keyword hits.
       const luminanceRole = (m: any): "fabric" | "base" | null => {
         try {
-          const f = m?.pbrMetallicRoughness?.baseColorFactor;
+          const f = originalFactorsRef.current.get(m);
           if (!Array.isArray(f) || f.length < 3) return null;
           const [r, g, b] = f;
           const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -386,13 +396,18 @@ const Product3DViewer: React.FC<Props> = ({
 
       const restoreOne = (m: any) => {
 
-        const original = originalTexturesRef.current!.get(m) ?? null;
-        try { m.pbrMetallicRoughness.baseColorTexture.setTexture(original); } catch { /* noop */ }
+        if (cancelled || mv.model !== model) return;
+        const original = originalTexturesRef.current?.get(m) ?? null;
+        try {
+          m.pbrMetallicRoughness.baseColorTexture.setTexture(original);
+          m.pbrMetallicRoughness.setBaseColorFactor?.(originalFactorsRef.current.get(m) || [1, 1, 1, 1]);
+        } catch { /* noop */ }
       };
 
       const applyOne = async (targets: any[], textureUrl: string) => {
-        const texture = await mv.createTexture!(textureUrl);
-        if (cancelled || !texture) return;
+        if (!targets.length || !mv.createTexture || cancelled) return;
+        const texture = await mv.createTexture(textureUrl);
+        if (cancelled || mv.model !== model || !texture) return;
         for (const m of targets) {
           try {
             m.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
