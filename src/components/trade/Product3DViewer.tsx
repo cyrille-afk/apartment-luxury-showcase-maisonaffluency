@@ -198,6 +198,7 @@ const Product3DViewer: React.FC<Props> = ({
   const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
   const [opened, setOpened] = useState(autoOpen);
+  useEffect(() => { if (autoOpen) setOpened(true); }, [autoOpen]);
   useEffect(() => { onOpenedChange?.(opened); }, [opened, onOpenedChange]);
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),

@@ -43,6 +43,7 @@ import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButt
 import { buildTradeCoverSheetPdf } from "@/lib/tradeCoverSheetPdf";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import ProductFinishCombinations from "@/components/trade/ProductFinishCombinations";
 import ProductFullscreenGallery from "@/components/trade/ProductFullscreenGallery";
 import { picturedFinishesForImage } from "@/lib/picturedFinishes";
 import { parseDimensionString } from "@/lib/productDimensions";
@@ -2291,6 +2292,7 @@ const TradeProductPage: React.FC = () => {
               <div className="aspect-square h-full max-h-full max-w-full">
                 <Product3DViewer
                   key={viewer3dKey}
+                  autoOpen={viewer3dOpen}
                   url={r3d.url}
                   alt={`${product.title} — 3D model${r3d.label ? ` (${r3d.label})` : ""}`}
                   poster={product.image_url}
@@ -2521,7 +2523,7 @@ const TradeProductPage: React.FC = () => {
               if (!resolvedGlbUrl) return null;
               const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
-                <details className="mt-6 group rounded-[2px] bg-muted border-l-2 border-l-accent">
+                <details open={viewer3dOpen} onToggle={(event) => setViewer3dOpen(event.currentTarget.open)} className="mt-6 group rounded-[2px] bg-muted border-l-2 border-l-accent">
                   <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-border/60">
                     <div className="flex items-center gap-2">
                       <Box size={14} className="text-accent" />
@@ -2539,6 +2541,7 @@ const TradeProductPage: React.FC = () => {
                   </summary>
                   <div className="p-3">
                     <Product3DViewer
+                      autoOpen={viewer3dOpen}
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
@@ -2604,6 +2607,21 @@ const TradeProductPage: React.FC = () => {
             {/* Finish selection — mobile: directly under the photography */}
 
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
+              {!isOolMinibar && isDualAxis && !baseAxisIsDim && !topAxisIsDim && resolve3d() && (
+                <ProductFinishCombinations pickId={product.id} variants={variantsList} size={selectedDualSize}
+                  base={selectedBase} top={selectedTop}
+                  onSelect={(combination) => {
+                    setSelectedBase(combination.base);
+                    setSelectedTop(combination.top);
+                    setSelectedWoodPrice(null);
+                    setSelectedFabric(null);
+                    setSelectedTopSwatch({ name: combination.top, image_url: combination.topTextureUrl });
+                    setPicturedFinishImgs({ base: combination.baseTextureUrl, top: combination.topTextureUrl });
+                    setWorkspaceAsset("3d");
+                    setViewer3dOpen(true);
+                    handleMaterialChange(combination.base, { base: combination.base, top: combination.top, size: selectedDualSize });
+                  }} />
+              )}
               <FinishSelector
                   pickId={product.id}
                   photoLedFinishes
