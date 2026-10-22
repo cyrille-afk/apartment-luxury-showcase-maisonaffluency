@@ -75,14 +75,8 @@ export const formatDimensionsMultiline = (raw: string | null | undefined): strin
 };
 
 
-const cmToInches = (value: string): string => {
-  const n = Number(value.replace(",", "."));
-  if (!Number.isFinite(n)) return value;
-  return `${(n / 2.54).toFixed(1)}`;
-};
-
-const CM_RE = /(?:\b|\d)cm\b/i;
-const CM_RE_G = /\s*cm\b/gi;
+const CM_RE = /(?:\b|\d)(?:[cC][mM]|[mM][mM]|m)\b/;
+const LENGTH_UNIT_RE = /(?<![a-zA-Z])(?:[cC][mM]|[mM][mM]|m)\b/g;
 
 const stripVariantPrefix = (part: string): string => {
   const cmIdx = part.search(CM_RE);
@@ -100,25 +94,74 @@ const stripVariantPrefix = (part: string): string => {
 
 export const toImperialLine = (line: string): string | null => {
   if (!CM_RE.test(line)) return null;
-  const converted = line
+  // Fabric consumption is not a furniture length. Preserve supplier-provided
+  // yards/square feet rather than converting square metres to linear inches.
+  if (/^\s*(?:COM|COL):/i.test(line)) {
+    return line.split(/\s+[·•]\s+/).map(part => {
+      const match = part.match(/^\s*(COM|COL):.*?\|\s*(.+)$/i);
+      return match ? `${match[1]}: ${match[2].trim()}` : part;
+    }).join(" · ");
+  }
+  const qualified = splitDimensionQualifier(line);
+  if (qualified.qual) {
+    const imperial = toImperialLine(qualified.dim);
+    return imperial ? `${imperial} — ${qualified.qual}` : null;
+  }
+  // Existing supplier inch lines are not metric input. Regenerate from the
+  // recorded metric measurements instead of converting both sets of numbers.
+  const metricOnly = line.replace(/\s*\|\s*[^|\n]*(?:\bin\b|\binches\b|″|”)[^|\n]*/gi, "");
+  const converted = metricOnly
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!CM_RE.test(part)) return part;
-      // Preserve parenthetical suffixes verbatim (e.g. "(2 Seater)") — their
-      // digits are labels, not dimensions, and must not be cm→in converted.
       const parens: string[] = [];
+      let parentMeasurements = 0;
       const masked = part.replace(/\([^)]*\)/g, (m) => {
-        parens.push(m);
-        // Use digit-free tokens: numeric placeholders themselves get converted.
+        // Convert actual measurements inside parentheses, but never counts,
+        // weights or already-supplied inch equivalents.
+        if (/\b(?:in|inches)\b|″|”/.test(m) && !CM_RE.test(m)) return "";
+        const nested = CM_RE.test(m) ? toImperialLine(m.slice(1, -1)) : null;
+        if (nested) parentMeasurements++;
+        parens.push(nested ? `(${nested})` : m);
         return `\u0000${"p".repeat(parens.length)}\u0000`;
       });
-      let stripped = stripVariantPrefix(masked)
-        .replace(CM_RE_G, "")
-        .replace(/\d+(?:[.,]\d+)?/g, cmToInches)
+      // Only strip a label before the first measurement, not later axis
+      // captions (e.g. "Seat Height:") or another size's label.
+      const source = masked.replace(/^([^:|]+):\s*/, (whole, prefix: string) =>
+        DIM_AXIS_RE.test(prefix) || CM_RE.test(prefix) || /(?:Seat|Arm)\s+Height$/i.test(prefix) ? whole : "");
+      const units = Array.from(source.matchAll(LENGTH_UNIT_RE));
+      let count = 0;
+      let stripped = source
+        .replace(/\d+(?:[.,]\d+)?/g, (value, offset: number) => {
+          const end = offset + value.length;
+          const before = source.slice(0, offset);
+          const after = source.slice(end);
+          if (/^[a-zA-Z]+/.test(after) && !/^(?:cm\b|mm\b|m\b|[xX](?=\d|\s)|[WDLHP](?:\s|[×x]|$))/.test(after)) return value;
+          if (/^[WDLHP]\b/.test(after) && /^\s*[-–—]/.test(after.slice(1))) return value;
+          if (/^\s*°/.test(after) || /\bSize\s*$/i.test(before) || /^\s*[Ø⌀]/.test(after)) return value;
+          // Product codes (ARA20), counts, weights and lead times are not
+          // lengths. Axis suffixes such as 608W remain valid measurements.
+          if (/[a-z]\d*$/i.test(before) && !/(?:\b(?:W|D|H|L|P|SH|AH|AR|Ht|Dia|Diam|Diameter))\.?$/i.test(before) && !/\d[xX]$/.test(before)) return value;
+          if (/^\s*(?:kg|g|lb|lbs|weeks?|days?|seaters?|lights?|lengths?|V|HZ|W\b)/i.test(after) && !/^\s*W\s*[×x]/i.test(after)) return value;
+          const unit = units.find((u) => (u.index ?? 0) >= end);
+          if (!unit) return value;
+          const between = source.slice(end, unit.index);
+          if (/\b(?:kg|weeks?|days?|seaters?|lights?|lengths?|COM|COL)\b/i.test(between)) return value;
+          // A leading numbered label is preserved ("Concept 1:").
+          if (/^\s*:/.test(after)) return value;
+          const divisor = unit[0].toLowerCase() === "mm" ? 25.4 : unit[0].toLowerCase() === "m" ? 0.0254 : 2.54;
+          count++;
+          return (Number(value.replace(",", ".")) / divisor).toFixed(1);
+        })
+        .replace(/\s*(?<![a-zA-Z])(?:[cC][mM]|[mM][mM]|m)\b/g, "")
         .replace(/\s+/g, " ")
         .trim();
       stripped = stripped.replace(/\u0000(p+)\u0000/g, (_, token: string) => ` ${parens[token.length - 1]}`).replace(/\s+/g, " ").trim();
-      if (!stripped) return stripped;
+      if (!stripped || (!count && !parentMeasurements)) return part;
+      if (!count) return stripped;
+      // Keep weights and other supplier annotations outside the inch unit.
+      const annotation = stripped.match(/\s+([–—-]|\/)\s+((?:W:\s*)?\d+(?:[.,]\d+)?\s*kg\b.*)$/i);
+      if (annotation) return `${stripped.slice(0, annotation.index).trim()} in ${annotation[1]} ${annotation[2]}`;
       // Place the inch unit before any trailing parenthetical label.
       const tail = stripped.match(/\s*(\([^)]*\)\s*)+$/);
       if (tail) {

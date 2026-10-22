@@ -3,6 +3,31 @@ import { formatDimensionsMultiline, splitDimensionQualifier, toImperialLine, wit
 
 describe("dimension conversion with a shared trailing unit", () => {
   it.each([
+    ["Ø 400 x H 580 mm", "Ø 15.7 x H 22.8 in"],
+    ["W 100 cm / D 500 mm", "W 39.4 / D 19.7 in"],
+    ["3 × 4 m", "118.1 × 157.5 in"],
+    ["2 Seater W 100 cm", "2 Seater W 39.4 in"],
+    ["ENZ26 W 65.9 × D 40.6 × H 50.7 cm", "ENZ26 W 25.9 × D 16.0 × H 20.0 in"],
+    ["D. 21 × H. 38 cm / 8 kg", "D. 8.3 × H. 15.0 in / 8 kg"],
+    ["W 100 cm (SH 45 cm)", "W 39.4 in (SH 17.7 in)"],
+    ["W 100 cm (2 Seater)", "W 39.4 in (2 Seater)"],
+    ["608W × 545D × 940H mm | 23.9W × 21.5D × 37H in", "23.9W × 21.5D × 37.0H in"],
+    ["230x350cm", "90.6x137.8 in"],
+    ["056M W 240 × D 95 × H 75.5 cm", "056M W 94.5 × D 37.4 × H 29.7 in"],
+    ["177L — W 300 × D 124 × H 74.5 cm", "177L — W 118.1 × D 48.8 × H 29.3 in"],
+    ["Cloud 19 (Ø 77 cm)", "Cloud 19 (Ø 30.3 in)"],
+    ["Medium — Ø 26 × H 20 cm (~7 kg)", "Medium — Ø 10.2 × H 7.9 in (~7 kg)"],
+    ["Seat Height: 41 cm", "Seat Height: 16.1 in"],
+    ["Size 1 — Ø 7.5 × H 5.5 cm", "Size 1 — Ø 3.0 × H 2.2 in"],
+    ["Low table 120 Ø 120 x H 41 cm", "Low table 120 Ø 47.2 x H 16.1 in"],
+    ["Angle 70° W 100 x D 98 x H 75 cm", "Angle 70° W 39.4 x D 38.6 x H 29.5 in"],
+    ["20 H × 75 W × 61 L cm", "7.9 H × 29.5 W × 24.0 L in"],
+    ["Side Table Ø 40x H 56 cm", "Side Table Ø 15.7x H 22.0 in"],
+    ["COM: 2.6 m | 2.8 yd · COL: 3.6 m² | 38.8 sq ft", "COM: 2.8 yd · COL: 38.8 sq ft"],
+  ])("converts only the actual measurements in %s", (metric, imperial) => {
+    expect(toImperialLine(metric)).toBe(imperial);
+  });
+  it.each([
     [100, 24, 10, "39.4", "9.4", "3.9"],
     [150, 25, 11, "59.1", "9.8", "4.3"],
     [200, 25, 11, "78.7", "9.8", "4.3"],

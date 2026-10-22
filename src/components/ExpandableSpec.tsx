@@ -18,6 +18,8 @@ interface ExpandableSpecProps {
   secondaryText?: string | null;
   /** Override default emphasis (dimensions get foreground/medium; others muted). */
   emphasized?: boolean;
+  /** Product pages keep heights inline; lightboxes stack them. */
+  inlineHeights?: boolean;
   /**
    * When provided AND there are multiple options, renders a real <Select>
    * with this placeholder (e.g. "Select your material choice").
@@ -83,6 +85,7 @@ export default function ExpandableSpec({
   text,
   secondaryText,
   emphasized = false,
+  inlineHeights = true,
   placeholder,
   autoSplit = false,
   autoDetectedHint = false,
@@ -174,7 +177,7 @@ export default function ExpandableSpec({
         <div className="flex-1 min-w-0">
           {diameterHint}
           <p className={textClasses}>
-            <DimensionText text={display} inlineHeights />
+            <DimensionText text={display} inlineHeights={inlineHeights} />
             {secondaryText && (
               <span className="block text-xs mt-0.5 text-muted-foreground/70">
                 {secondaryText}
@@ -315,7 +318,7 @@ export default function ExpandableSpec({
                   isSelected ? "text-foreground font-medium" : "text-muted-foreground"
                 )}
               >
-                <DimensionText text={line} inlineHeights />
+                <DimensionText text={line} inlineHeights={inlineHeights} />
               </button>
             </li>
           );
@@ -348,7 +351,7 @@ export default function ExpandableSpec({
         >
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
             {diameterHint}
-            {hasSelection ? <DimensionText text={`${selectedValueLabel ? `${selectedValueLabel}: ` : ""}${lines[selectedIdx ?? 0]}`} inlineHeights /> : placeholder}
+            {hasSelection ? <DimensionText text={`${selectedValueLabel ? `${selectedValueLabel}: ` : ""}${lines[selectedIdx ?? 0]}`} inlineHeights={inlineHeights} /> : placeholder}
           </span>
 
           <ChevronRight
@@ -422,7 +425,7 @@ export default function ExpandableSpec({
     <div className={cn(rowClasses, "items-start")}>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         {lines.map((line, i) => (
-          <p key={i} className={textClasses}><DimensionText text={line} inlineHeights /></p>
+          <p key={i} className={textClasses}><DimensionText text={line} inlineHeights={inlineHeights} /></p>
         ))}
         {secondaryText && (
           <p className="text-xs mt-0.5 text-muted-foreground/70">{secondaryText}</p>

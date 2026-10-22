@@ -17,7 +17,7 @@ import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantIm
 import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type ComponentProps } from "react";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SpecGlyph from "@/components/product/SpecGlyph";
@@ -26,6 +26,10 @@ import PicturedFinishesStrip from "@/components/product/PicturedFinishesStrip";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
+);
+
+const LightboxSpec = (props: ComponentProps<typeof ExpandableSpec>) => (
+  <ExpandableSpec {...props} inlineHeights={false} />
 );
 
 export interface TradeProductLightboxItem {
@@ -492,7 +496,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               {axes.hasVariants && axes.isDualAxis ? (
                 <>
                   {hasDualSize && (
-                    <ExpandableSpec
+                    <LightboxSpec
                       icon={specIcon("📐")}
                       text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
                       placeholder="Select Your Size"
@@ -511,7 +515,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       disabledIndices={disabledDualSizeIdx}
                     />
                   )}
-                  <ExpandableSpec
+                  <LightboxSpec
                     icon={specIcon(((axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label)) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
@@ -543,7 +547,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     }}
                     disabledIndices={disabledBaseIdx}
                   />
-                  <ExpandableSpec
+                  <LightboxSpec
                     icon={specIcon(((axes.topOptions.length > 0 && axes.topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label)) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
@@ -577,7 +581,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                 </>
               ) : axes.hasVariants && axes.isBaseOnly ? (
-                <ExpandableSpec
+                <LightboxSpec
                   icon={specIcon("⬗")}
                   text={withImperialPerLine(axes.baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
@@ -587,7 +591,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 />
               ) : axes.hasVariants && axes.hasSingleAxisSplit ? (
                 <>
-                  <ExpandableSpec
+                  <LightboxSpec
                     icon={specIcon("📐")}
                     text={withImperialPerLine(axes.singleSizeOptions.join("\n"))}
                     placeholder="Select Your Size"
@@ -595,7 +599,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     value={singleSplitSizeIdx}
                     onChange={(idx) => setSingleSplitSizeIdx(idx < 0 ? null : idx)}
                   />
-                  <ExpandableSpec
+                  <LightboxSpec
                     icon={specIcon("⬗")}
                     text={axes.singleMaterialOptions.join("\n")}
                     placeholder="Select your finish"
@@ -605,7 +609,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   />
                 </>
               ) : axes.hasVariants ? (
-                <ExpandableSpec
+                <LightboxSpec
                   icon={specIcon("📐")}
                   text={withImperialPerLine((product.size_variants || []).map(v => v.label || "").filter(Boolean).join("\n"))}
                   placeholder={getMaterialPlaceholder(product)}
@@ -616,7 +620,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
               ) : (
                 <>
                   {product.dimensions && looksLikeDimension(product.dimensions) && (
-                    <ExpandableSpec
+                    <LightboxSpec
                       icon={specIcon("📐")}
                       text={withImperialPerLine(product.dimensions)}
                       emphasized
@@ -624,7 +628,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     />
                   )}
                   {product.materials && (
-                    <ExpandableSpec
+                    <LightboxSpec
                       icon={specIcon("⬗")}
                       text={product.materials}
                       placeholder="Select your finish"
@@ -634,7 +638,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                 </>
               )}
               {product.materials_description?.trim() && (
-                <ExpandableSpec
+                <LightboxSpec
                   icon={specIcon("⬗")}
                   text={product.materials_description.trim()}
                   emphasized
