@@ -566,7 +566,7 @@ export default function TradeConcierge() {
         </aside>
 
         {/* Right — unified workspace: entry hero → Felix workspace, or a saved curation thread */}
-        <section data-felix-target="concierge-workspace" className="relative flex h-[calc(100dvh-8rem)] min-h-[520px] flex-col overflow-hidden rounded-sm border border-border/60 bg-background">
+        <section data-felix-target={workspace && !threadId ? "concierge-workspace" : undefined} className="relative flex h-[calc(100dvh-8rem)] min-h-[520px] flex-col overflow-hidden rounded-sm border border-border/60 bg-background">
           {workspace && !threadId ? (
             <Suspense fallback={
               <div className="flex h-full items-center justify-center">
@@ -615,7 +615,7 @@ export default function TradeConcierge() {
                 )}
               </div>
 
-              <form onSubmit={onSubmit} className="sticky bottom-0 border-t border-border/60 bg-background/95 px-4 py-4 backdrop-blur md:px-8">
+              <form data-felix-target="concierge-workspace" onSubmit={onSubmit} className="sticky bottom-0 border-t border-border/60 bg-background/95 px-4 py-4 backdrop-blur md:px-8">
                 <div className="mx-auto max-w-3xl space-y-2">
                   <div className="relative">
                     <Textarea
