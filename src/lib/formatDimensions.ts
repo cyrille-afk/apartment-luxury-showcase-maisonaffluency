@@ -97,8 +97,7 @@ export const toImperialLine = (line: string): string | null => {
   // Existing supplier inch lines are not metric input. Regenerate from the
   // recorded metric measurements instead of converting both sets of numbers.
   const metricOnly = line.replace(/\s*\|\s*[^|\n]*(?:\bin\b|\binches\b|″|”)[^|\n]*/gi, "");
-  const converted = line
-    .replace(line, metricOnly)
+  const converted = metricOnly
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!CM_RE.test(part)) return part;
@@ -110,7 +109,10 @@ export const toImperialLine = (line: string): string | null => {
         parens.push(CM_RE.test(m) ? `(${toImperialLine(m.slice(1, -1)) ?? m.slice(1, -1)})` : m);
         return `\u0000${"p".repeat(parens.length)}\u0000`;
       });
-      const source = stripVariantPrefix(masked);
+      // Only strip a label before the first measurement, not later axis
+      // captions (e.g. "Seat Height:") or another size's label.
+      const source = masked.replace(/^([^:|]+):\s*/, (whole, prefix: string) =>
+        DIM_AXIS_RE.test(prefix) || CM_RE.test(prefix) ? whole : "");
       const units = Array.from(source.matchAll(LENGTH_UNIT_RE));
       let count = 0;
       let stripped = source
