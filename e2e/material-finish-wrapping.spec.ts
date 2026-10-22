@@ -41,8 +41,11 @@ async function exerciseFinishPicker(page: Page) {
   await expectReadable(page.getByRole("option", { name: MATERIAL, exact: true }), page);
   const finish = page.getByRole("option", { name: FINISH, exact: true });
   await expectReadable(finish, page);
-  await finish.focus();
-  await finish.press("Enter");
+  if ((page.viewportSize()?.width ?? 1280) < 768) await finish.click();
+  else {
+    await page.getByRole("listbox").press("End");
+    await page.getByRole("listbox").press("Enter");
+  }
   await expect(picker).toContainText(FINISH);
   await expectReadable(picker.locator("span").first(), page);
   await picker.focus();
@@ -50,8 +53,12 @@ async function exerciseFinishPicker(page: Page) {
   await page.getByRole("button", { name: "Clear selection", exact: true }).press("Enter");
   await picker.focus();
   await picker.press("Enter");
-  await page.getByRole("option", { name: MATERIAL, exact: true }).focus();
-  await page.getByRole("option", { name: MATERIAL, exact: true }).press("Enter");
+  if ((page.viewportSize()?.width ?? 1280) < 768) {
+    await page.getByRole("option", { name: MATERIAL, exact: true }).click();
+  } else {
+    await page.getByRole("listbox").press("Home");
+    await page.getByRole("listbox").press("Enter");
+  }
   await expect(picker).toContainText(MATERIAL);
   await expectReadable(picker.locator("span").first(), page);
 }
