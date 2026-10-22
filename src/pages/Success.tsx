@@ -53,7 +53,7 @@ export default function Success() {
   const [adhoc, setAdhoc] = useState<AdhocPayment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Guests must prove the order email before details are shown.
+  // Only a verified sign-in proves mailbox ownership.
   const [needsEmail, setNeedsEmail] = useState(false);
 
   // supabase-js gives a generic message for non-2xx edge function responses;
@@ -67,8 +67,6 @@ export default function Success() {
     }
     return fnError?.message || "Unable to load order details.";
   }
-  const [emailInput, setEmailInput] = useState("");
-  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -79,7 +77,7 @@ export default function Success() {
 
     let cancelled = false;
 
-    async function fetchOrder(emailProof?: string) {
+    async function fetchOrder() {
       // 1) Reconcile ad-hoc Sales Funnel payments directly with Stripe so the
       //    pipeline card flips immediately — no waiting on webhook delivery.
       try {
@@ -101,7 +99,7 @@ export default function Success() {
       // 2) Standard shop order lookup.
       try {
         const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
-          body: { session_id: sessionId, ...(emailProof ? { email: emailProof } : {}) },
+          body: { session_id: sessionId },
         });
 
         if (cancelled) return;
@@ -219,48 +217,14 @@ export default function Success() {
             ) : needsEmail ? (
               <div className="rounded-none border border-foreground/10 bg-background p-6 md:p-8 text-center">
                 <p className="font-body text-sm text-muted-foreground">
-                  For your privacy, please confirm the email address used at checkout to view this order.
+                  For your privacy, sign in with the verified email address used at checkout to view this order.
                 </p>
                 {error ? (
                   <p className="mt-3 font-body text-sm text-destructive">{error}</p>
                 ) : null}
-                <form
-                  className="mt-5 flex flex-col sm:flex-row gap-3 justify-center"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const email = emailInput.trim().toLowerCase();
-                    if (!email || !sessionId) return;
-                    setVerifying(true);
-                    setError(null);
-                    try {
-                      const { data, error: fnError } = await supabase.functions.invoke("get-order-by-session", {
-                        body: { session_id: sessionId, email },
-                      });
-                      if (fnError) throw new Error(await edgeFnMessage(fnError));
-                      if ((data as any)?.error) throw new Error((data as any).error);
-                      if (!(data as any)?.order) throw new Error("Order details could not be loaded.");
-                      setOrder((data as any).order as OrderDetails);
-                      setNeedsEmail(false);
-                    } catch {
-                      // Keep the form visible so the guest can try again.
-                      setError("That email doesn't match this order. Please try the address used at checkout.");
-                    } finally {
-                      setVerifying(false);
-                    }
-                  }}
-                >
-                  <input
-                    type="email"
-                    required
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="Email used at checkout"
-                    className="h-11 px-4 border border-foreground/15 bg-background font-body text-sm w-full sm:w-72"
-                  />
-                  <Button type="submit" disabled={verifying} className="h-11">
-                    {verifying ? "Checking…" : "View Order"}
-                  </Button>
-                </form>
+                <Button asChild className="mt-5 h-11">
+                  <Link to={`/trade/login?next=${encodeURIComponent(`/success?session_id=${sessionId ?? ""}`)}`}>Sign In to View Order</Link>
+                </Button>
               </div>
             ) : error || !order ? (
               <div className="text-center py-10">

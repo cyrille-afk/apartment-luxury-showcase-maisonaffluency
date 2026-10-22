@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getStripe } from "../_shared/stripeClient.ts";
+import { canReadOrder } from "../_shared/orderAccess.ts";
 
 const INTERNAL_RECIPIENTS = ["cyrille@maisonaffluency.com", "gregoire@maisonaffluency.com"];
 
@@ -87,11 +88,20 @@ serve(async (req) => {
     if (!SESSION_ID_PATTERN.test(sessionId)) {
       return json({ error: "Invalid session identifier." }, 400);
     }
+    const auth = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+    const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer /, "");
+    const { data: claims } = await auth.auth.getClaims(token);
+    const callerId = claims?.claims?.sub;
+    if (!callerId) return json({ error: "Please sign in to view this payment." }, 403);
+    const admin = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false } });
+    const { data: caller, error: authError } = await admin.auth.admin.getUserById(callerId);
+    if (authError || !caller.user?.email_confirmed_at) return json({ error: "Please verify your email first." }, 403);
 
     const mode = sessionId.startsWith("cs_test_") ? "test" : "auto";
     const { stripe } = await getStripe(mode);
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (!canReadOrder(caller.user, { customer_email: session.customer_details?.email ?? session.customer_email })) return json({ error: "Payment access denied." }, 403);
     const paid = session.payment_status === "paid";
 
     const meta = (session.metadata ?? {}) as Record<string, string>;
@@ -112,11 +122,6 @@ serve(async (req) => {
 
     if (!paid) return json(result);
 
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } },
-    );
 
     if (cardId) {
       const { data: row } = await admin

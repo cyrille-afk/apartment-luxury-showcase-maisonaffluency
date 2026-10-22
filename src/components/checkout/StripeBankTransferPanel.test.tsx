@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: mocks.invoke } } }));
 const pairing = { ruleId: 'rule', optionId: 'ivory-brass' };
 const items = [{ pickId: 'console', title: 'Console', price: 8700, quantity: 2, selectedFinish: 'Ivory / Brass', pairing }];
-const props = { items, email: 'buyer@example.com', currency: 'GBP', fallback: <div>Static account fallback</div>, recoveryLines: [{ pickId: 'console', unitCents: 870000, pairing, currency: 'GBP', finishLabel: 'Ivory / Brass', productPath: '/console' }] };
+const props = { items, email: 'buyer@example.com', currency: 'GBP', shippingCountry: 'GB', buyerType: 'business' as const, fallback: <div>Static account fallback</div>, recoveryLines: [{ pickId: 'console', unitCents: 870000, pairing, currency: 'GBP', finishLabel: 'Ivory / Brass', productPath: '/console' }] };
 const failure = (recovery: unknown) => ({ data: null, error: { context: new Response(JSON.stringify({ error: 'Price has changed', recovery }), { status: 409 }) } });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 describe('instant transfer price recovery', () => {
@@ -38,7 +38,7 @@ describe('instant transfer price recovery', () => {
 });describe('saved instant transfer confirmation', () => {
   it('includes VAT in the saved total when tax applies', async () => {
     localStorage.clear();
-    mocks.invoke.mockResolvedValue({ data: { financialAddresses: [{ type: 'sort_code', sort_code: { sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'ref' }, error: null });
+    mocks.invoke.mockResolvedValue({ data: { financialAddresses: [{ type: 'sort_code', sort_code: { sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'ref', taxCents: 348000, taxLabel: 'UK VAT 20%', amount: 2088000 }, error: null });
     render(<StripeBankTransferPanel {...props} orderReference="TRADE-ORDER-#10001" totals={{ taxCents: 348000, taxLabel: 'UK VAT 20%', discountCents: 0, totalCents: 2088000 }} />);
     await screen.findByText('TEST-ONLY');
     const { getTransferConfirmation } = await import('@/lib/checkout/transferConfirmations');
@@ -49,17 +49,19 @@ describe('instant transfer price recovery', () => {
   });
 });
 describe('saved instant transfer tax updates', () => {
-  it('updates the saved order when a VAT number zero-rates tax after issue, without re-issuing', async () => {
+  it('recalculates on the server when the buyer tax ID changes, never accepting a forged local zero', async () => {
     localStorage.clear();
-    mocks.invoke.mockResolvedValue({ data: { financialAddresses: [{ type: 'sort_code', sort_code: { sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'ref' }, error: null });
+    mocks.invoke.mockResolvedValue({ data: { financialAddresses: [{ type: 'sort_code', sort_code: { sort_code: '00-00-00', account_number: 'TEST-ONLY' } }], reference: 'ref', taxCents: 348000, taxLabel: 'UK VAT 20%', amount: 2088000 }, error: null });
     const ref = 'TRADE-ORDER-#10002';
     const view = render(<StripeBankTransferPanel {...props} orderReference={ref} totals={{ taxCents: 348000, taxLabel: 'UK VAT 20%', discountCents: 0, totalCents: 2088000 }} />);
     await screen.findByText('TEST-ONLY');
-    view.rerender(<StripeBankTransferPanel {...props} orderReference={ref} totals={{ taxCents: 0, taxLabel: 'Reverse charge', discountCents: 0, totalCents: 1740000 }} />);
+    view.rerender(<StripeBankTransferPanel {...props} orderReference={ref} totals={{ taxCents: 0, taxLabel: 'Reverse charge', discountCents: 0, totalCents: 1740000, buyerTaxId: 'GB123456789' }} />);
     const { getTransferConfirmation } = await import('@/lib/checkout/transferConfirmations');
-    await vi.waitFor(() => expect(getTransferConfirmation(ref)?.totalCents).toBe(1740000));
-    expect(getTransferConfirmation(ref)?.taxCents).toBe(0);
-    expect(getTransferConfirmation(ref)?.taxLabel).toBe('Reverse charge');
-    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(mocks.invoke).toHaveBeenCalledTimes(2));
+    expect(getTransferConfirmation(ref)?.totalCents).toBe(2088000);
+    expect(getTransferConfirmation(ref)?.taxCents).toBe(348000);
+    expect(mocks.invoke.mock.calls[1][0]).toBe('create-bank-transfer-intent');
+    expect(mocks.invoke.mock.calls[1][1].body.shippingCountry).toBe('GB');
+    expect(mocks.invoke.mock.calls[1][1].body.buyerTaxId).toBe('GB123456789');
   });
 });

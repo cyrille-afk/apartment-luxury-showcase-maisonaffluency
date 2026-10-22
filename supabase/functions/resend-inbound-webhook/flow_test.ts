@@ -17,6 +17,7 @@ function fakeClient(seedLead: Row) {
   const db = {
     acquisition_leads: [{ ...seedLead }] as Row[],
     acquisition_inbound_events: [] as Row[],
+    acquisition_test_mode: [] as Row[],
   };
   const calls = { rpc: [] as string[], claimResult: true as boolean };
 
@@ -65,6 +66,10 @@ function fakeClient(seedLead: Row) {
           (r.outbound_recipients as string[] | undefined)?.includes(email) ||
           (r.executive_emails as string[] | undefined)?.includes(email)
         );
+        return api;
+      },
+      contains(column: string, values: string[]) {
+        rows = db[table].filter((r) => values.every((v) => (r[column] as string[] | undefined)?.includes(v)));
         return api;
       },
       limit() {
@@ -266,4 +271,18 @@ Deno.test("an unknown sender never touches a studio record", async () => {
   assertEquals(await res.json(), { matched: false, reason: "no_match" });
   assertEquals(client.db.acquisition_leads[0].campaign_status, "outbound_sent");
   assertEquals(sent.length, 0);
+});
+
+Deno.test("filter injection and a known reply tag cannot redirect a private key", async () => {
+  for (const from of ['attacker@example.com,business_email.ilike.*', 'stranger@example.com']) {
+    const client = fakeClient(seedLead());
+    const { handler, sent } = buildHandler(client, "Yes please");
+    const body = JSON.stringify({ type: "email.received", data: {
+      from, to: [`reply+${LEAD_ID}@maisonaffluency.com`], text: "Yes please",
+    } });
+    const res = await handler(await signedRequest(body));
+    assertEquals((await res.json()).matched, false);
+    assertEquals(sent.length, 0);
+    assertEquals(client.calls.rpc.length, 0);
+  }
 });

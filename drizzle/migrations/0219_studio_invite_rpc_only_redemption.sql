@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Invitees can join studios via valid invite" ON public.studio_members;
+COMMENT ON FUNCTION public.has_valid_studio_invite(uuid,uuid,public.studio_role) IS 'Verified caller-scoped invitation check; membership redemption must use accept_studio_invite to consume and row-lock the invite.';

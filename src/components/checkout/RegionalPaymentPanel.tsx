@@ -332,6 +332,8 @@ export default function RegionalPaymentPanel(props: RegionalPaymentPanelProps) {
           recoveryLines={props.recoveryLines}
           currency="gbp"
           email={buyer.email}
+          shippingCountry={treatment.countryIso ?? ""}
+          buyerType={buyerType}
           items={lines.map((l) => ({
             pickId: l.pickId ?? null,
             pairing: l.pairing ?? null,
