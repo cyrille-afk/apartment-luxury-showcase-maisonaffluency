@@ -14,16 +14,25 @@
   background-color: hsl(var(--felix-bronze)) !important;
   border: 1px solid hsl(var(--felix-bronze-edge) / 0.55) !important;
   color: hsl(var(--felix-on-bronze)) !important;
+  /* Hover keeps the exact bronze (darkening it would drop text contrast) and
+     signals with a deeper edge and a soft lift instead. */
   &:hover {
-    background-color: hsl(var(--felix-bronze-deep)) !important;
-    border-color: hsl(var(--felix-bronze-edge) / 0.9) !important;
+    background-color: hsl(var(--felix-bronze)) !important;
+    border-color: hsl(var(--felix-on-bronze) / 0.6) !important;
     color: hsl(var(--felix-on-bronze)) !important;
+    box-shadow: 0 2px 10px -4px hsl(var(--felix-on-bronze) / 0.45);
+  }
+  &:focus-visible {
+    outline: 2px solid hsl(var(--felix-on-bronze));
+    outline-offset: 2px;
   }
 }
 
 /* The quiet bronze mark that flags a Felix feature in navigation. */
+/* Text uses a deep bronze ink for AA contrast on cream; the dot keeps the exact bronze. */
 @utility felix-mark {
-  color: hsl(var(--felix-bronze));
+  color: hsl(var(--felix-mark-text));
+  & .felix-mark-dot { background-color: hsl(var(--felix-bronze)); }
 }
 
 /* Tailwind v3 compatibility: v4 defaults borders to currentColor. */
@@ -244,7 +253,9 @@ All colors MUST be HSL.
     --felix-bronze: var(--gold);
     --felix-bronze-deep: 34 52% 43%;
     --felix-bronze-edge: var(--gold-bright);
-    --felix-on-bronze: 40 30% 96%;
+    /* Deep espresso ink: ~7:1 on the bronze (ivory only reached ~2.6:1). */
+    --felix-on-bronze: 30 45% 9%;
+    --felix-mark-text: 32 60% 26%;
     
     /* Shadows */
     --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
