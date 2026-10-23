@@ -59,7 +59,7 @@ export function SignOutConfirmDialog({
             Your studio, project folders, quotes and saved pieces stay exactly as they are. You can sign back in at any time.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-col sm:space-x-0">
+        <AlertDialogFooter className="mt-4 flex flex-col-reverse gap-2">
           <AlertDialogAction
             onClick={onConfirm}
             className="h-12 w-full justify-center rounded-none border border-destructive/40 bg-destructive/10 font-body text-[12px] font-semibold uppercase tracking-[0.15em] text-destructive hover:bg-destructive/15 hover:text-destructive"
