@@ -1,7 +1,7 @@
 import { ensureSampleBoard } from "@/lib/sampleBoard";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
-import { ArrowLeft, ArrowRight, Check, Pause, Play, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, PanelLeft, Pause, Play, Sparkles, X } from "lucide-react";
 import { useLocation, useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -1054,6 +1054,17 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
                .replace(/\{name\}/g, guideName)
                .replace(/\{projectTitle\}/g, projectTitle))}</p>
           </div>
+
+          {/* Sidebar context: where this feature lives in the navigation tree */}
+          {FELIX_STEP_SIDEBAR[step.id] && (
+            <p data-felix-sidebar-ref className="mt-3 flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              <PanelLeft className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+              <span>
+                Find it later in your sidebar:{" "}
+                <span className="text-foreground">{FELIX_STEP_SIDEBAR[step.id].label}</span>
+              </span>
+            </p>
+          )}
 
           {/* Trade tier structure — Step 1 only */}
           {step.id === "welcome" && (
