@@ -204,7 +204,13 @@ export function TradeSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.end}
-                      data-tour-sidebar-anchor={item.url === "/trade/the-collection" ? "collection" : undefined}
+                      data-tour-sidebar-anchor={
+                        item.url === "/trade/the-collection"
+                          ? "collection"
+                          : item.url === "/trade/quotes"
+                            ? "quotes"
+                            : undefined
+                      }
                       data-felix-target={
                         item.url === "/trade/the-collection"
                           ? "nav-collection"
