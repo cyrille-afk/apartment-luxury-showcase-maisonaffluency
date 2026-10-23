@@ -757,6 +757,10 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
     transitionTimer.current = null;
     setOpen(false);
+    // A finished tour lands the member back on the Trade User Dashboard —
+    // the last step (Beta Feedboard) is the only step that leaves them on
+    // another page, so completion always returns them home.
+    if (completed && location.pathname !== "/trade") navigate("/trade", { replace: true });
     setIsPaused(false);
     setTransitioning(false);
     // Closing is an explicit skip; neither a completed nor skipped first tour
