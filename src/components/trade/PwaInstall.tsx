@@ -77,6 +77,7 @@ export function SidebarPwaBadge({ collapsed }: { collapsed: boolean }) {
         </p>
       </PopoverContent>
     </Popover>
+    </>
   );
 }
 
