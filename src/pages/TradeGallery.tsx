@@ -907,8 +907,11 @@ const StudioGallery = () => {
                       <Package className="h-6 w-6 text-muted-foreground/30" />
                     </div>
                   )}
-                  <ProductCardDescriptionOverlay description={product.description} />
-                   <div className="absolute top-2 left-2 z-10">
+                   <ProductCardDescriptionOverlay description={product.description} />
+                   {creditsDesigner(product, "Emma Donnersberg") && product.edition && (
+                     <p data-testid="gallery-collab-label" className="pointer-events-none absolute left-3 top-3 z-10 max-w-[70%] rounded-sm bg-background/85 px-2 py-1 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))] antialiased backdrop-blur-sm">{product.edition}</p>
+                   )}
+                   <div className={cn("absolute left-2 z-10", creditsDesigner(product, "Emma Donnersberg") && product.edition ? "top-11" : "top-2")}>
                      <TradeFavoriteFolderPicker
                        productId={product.id}
                        meta={{
@@ -997,9 +1000,6 @@ const StudioGallery = () => {
                      {product.product_name}
                    </h3>
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
-                    {creditsDesigner(product, "Emma Donnersberg") && (
-                     <p className="mt-1.5 inline-flex w-fit rounded-sm border border-border bg-muted/50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))]">{product.edition}</p>
-                   )}
                    {isAdmin && !product.hidden_in_trade && (
                      <div className="mt-auto flex flex-col items-start gap-1.5 pt-3">
                        <InlinePriceEditor
@@ -1038,11 +1038,11 @@ const StudioGallery = () => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProductSheet(product)}>
+                   {creditsDesigner(product, "Emma Donnersberg") && product.edition && (
+                     <p className="mb-1 inline-flex w-fit rounded-sm bg-muted/60 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))]">{product.edition}</p>
+                   )}
                    <h3 className="font-display text-sm text-foreground truncate hover:text-primary transition-colors">{product.product_name}</h3>
                    {product.hidden_in_trade && <p className="font-body text-xs text-muted-foreground" data-trade-sensitive>Public listing · Hidden in Trade</p>}
-                   {creditsDesigner(product, "Emma Donnersberg") && (
-                     <p className="mt-1 inline-flex w-fit rounded-sm border border-border bg-muted/50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--edition-foreground))]">{product.edition}</p>
-                   )}
                 </div>
                 {product.hidden_in_trade ? <span className="font-body text-xs text-muted-foreground">Price upon Request</span> : isAdmin ? (
                   <div className="shrink-0 flex flex-col items-end gap-1.5">
