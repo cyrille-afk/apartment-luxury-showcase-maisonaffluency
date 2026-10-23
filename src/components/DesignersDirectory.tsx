@@ -1564,10 +1564,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   // Category/subcategory filter state — initialize from URL params if present
   const [selectedCategory, setSelectedCategoryRaw] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
     const params = new URLSearchParams(window.location.search);
     return params.get("category") || null;
   });
   const [selectedSubcategory, setSelectedSubcategoryRaw] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
     const params = new URLSearchParams(window.location.search);
     return params.get("subcategory") || null;
   });
@@ -1595,6 +1597,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const [favIds, setFavIds] = useState<Set<string>>(() => {
     try {
+      if (typeof window === "undefined") return new Set();
       const raw = localStorage.getItem("public_favorites");
       return new Set(raw ? JSON.parse(raw) : []);
     } catch { return new Set(); }
