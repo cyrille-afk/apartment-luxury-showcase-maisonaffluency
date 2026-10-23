@@ -364,6 +364,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   }, [open, reducedMotion]);
   const [position, setPosition] = useState<{ step: number; path: string; rect: Rect; anchor: Rect | null } | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
+  const [measuredCardHeight, setMeasuredCardHeight] = useState(0);
   const [settled, setSettled] = useState(false);
   const [targetUnavailable, setTargetUnavailable] = useState(false);
   const [targetRetry, setTargetRetry] = useState(0);
@@ -781,6 +782,15 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // Move focus into the tooltip whenever the step changes so keyboard and
   // screen-reader users land on the new content.
   const cardRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!open || !card) return;
+    const measureCard = () => setMeasuredCardHeight(card.getBoundingClientRect().height);
+    measureCard();
+    const observer = new ResizeObserver(measureCard);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [open, currentStep, settled, isPaused]);
   useEffect(() => {
     if (!open || isPaused) return;
     if (settled && !transitioning) cardRef.current?.focus({ preventScroll: true });
@@ -794,7 +804,7 @@ function DesktopFelixTour({ autoStart = true }: { autoStart?: boolean }) {
   // Card placement: right of the target, else left, below, or above.
   const cardW = Math.min(step.id === "welcome" ? 410 : 380, viewport.w - 32);
   // Step 1 carries the tier breakdown and needs a taller placement box.
-  const cardH = step.id === "welcome" ? 545 : 320;
+  const cardH = measuredCardHeight || (step.id === "welcome" ? 545 : 380);
   const clampX = (x: number) => Math.min(Math.max(x, 16), Math.max(viewport.w - cardW - 16, 16));
   const clampY = (y: number) => Math.min(Math.max(y, 16), Math.max(viewport.h - cardH - 16, 16));
   let cardLeft = 0;
